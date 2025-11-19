@@ -1,0 +1,35 @@
+{
+  "script_list": {
+    "Devanagari": 1,
+    "Telugu": 2,
+    "Tamil": 3,
+    "Tamil-Extended": 4,
+    "Bengali": 5,
+    "Kannada": 6,
+    "Gujarati": 7,
+    "Malayalam": 8,
+    "Odia": 9,
+    "Sinhala": 10,
+    "Normal": 11,
+    "Romanized": 12,
+    "Gurumukhi": 13,
+    "Assamese": 14
+  },
+  "lang_list": {
+    "English": 1,
+    "Sanskrit": 2,
+    "Hindi": 3,
+    "Telugu": 4,
+    "Tamil": 5,
+    "Bengali": 6,
+    "Kannada": 7,
+    "Gujarati": 8,
+    "Malayalam": 9,
+    "Odia": 10,
+    "Sinhala": 11,
+    "Marathi": 12,
+    "Nepali": 13,
+    "Punjabi": 14,
+    "Assamese": 15
+  }
+}
