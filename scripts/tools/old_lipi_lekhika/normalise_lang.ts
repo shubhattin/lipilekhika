@@ -1,31 +1,31 @@
 const langs = [
-  'Normal',
-  'Assamese',
-  'Bengali',
-  'Brahmi',
-  'Granth',
-  'Gujarati',
-  'Hindi',
-  'Kannada',
-  'Konkani',
-  'Malayalam',
-  'Marathi',
-  'Modi',
-  'Nepali',
-  'Odia',
-  'Punjabi',
-  'Purna-Devanagari',
-  'Romanized',
-  'Sanskrit',
-  'Sharada',
-  'Siddham',
-  'Sinhala',
-  'Tamil-Extended',
-  'Tamil',
-  'Telugu',
-  'Urdu',
-  'Kashmiri',
-  'Sindhi'
+  "Normal",
+  "Assamese",
+  "Bengali",
+  "Brahmi",
+  "Granth",
+  "Gujarati",
+  "Hindi",
+  "Kannada",
+  "Konkani",
+  "Malayalam",
+  "Marathi",
+  "Modi",
+  "Nepali",
+  "Odia",
+  "Punjabi",
+  "Purna-Devanagari",
+  "Romanized",
+  "Sanskrit",
+  "Sharada",
+  "Siddham",
+  "Sinhala",
+  "Tamil-Extended",
+  "Tamil",
+  "Telugu",
+  "Urdu",
+  "Kashmiri",
+  "Sindhi",
 ];
 const alts = {
   en: 0,
@@ -60,9 +60,9 @@ const alts = {
   pn: 14,
   Gurumukhi: 14,
   guru: 14,
-  'pu-de': 15,
-  'pu-dev': 15,
-  'pur-dev': 15,
+  "pu-de": 15,
+  "pu-dev": 15,
+  "pur-dev": 15,
   Romanised: 16,
   ro: 16,
   rom: 16,
@@ -76,20 +76,21 @@ const alts = {
   sid: 19,
   si: 20,
   sin: 20,
-  'ta-ex': 21,
-  'tam-ex': 21,
+  "ta-ex": 21,
+  "tam-ex": 21,
   ta: 22,
   tam: 22,
   te: 23,
   tel: 23,
-  ur: 24
+  ur: 24,
 };
 
 export const normalize = (ln: string) => {
   // function to normalize the names of scripts
-  let a = ln.trim().split('-');
-  for (let x = 0; x < a.length; x++) a[x] = a[x].charAt(0).toUpperCase() + a[x].substring(1);
-  let ln1 = a.join('-');
+  let a = ln.trim().split("-");
+  for (let x = 0; x < a.length; x++)
+    a[x] = a[x].charAt(0).toUpperCase() + a[x].substring(1);
+  let ln1 = a.join("-");
   if (langs.includes(ln1)) return ln1;
   else if (ln in alts) return langs[alts[ln as keyof typeof alts]];
   else return false;

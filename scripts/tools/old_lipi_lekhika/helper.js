@@ -1,39 +1,39 @@
 export class lipi_helper {
   constructor() {
     this.akSharAH = {
-      Normal: {}
+      Normal: {},
     };
     this.k = null;
-    this.alph = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'];
+    this.alph = ["ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"];
     this.lang_in = (x) => x in this.akSharAH;
     this.langs = [
-      'Normal',
-      'Assamese',
-      'Bengali',
-      'Brahmi',
-      'Granth',
-      'Gujarati',
-      'Hindi',
-      'Kannada',
-      'Konkani',
-      'Malayalam',
-      'Marathi',
-      'Modi',
-      'Nepali',
-      'Odia',
-      'Punjabi',
-      'Purna-Devanagari',
-      'Romanized',
-      'Sanskrit',
-      'Sharada',
-      'Siddham',
-      'Sinhala',
-      'Tamil-Extended',
-      'Tamil',
-      'Telugu',
-      'Urdu',
-      'Kashmiri',
-      'Sindhi'
+      "Normal",
+      "Assamese",
+      "Bengali",
+      "Brahmi",
+      "Granth",
+      "Gujarati",
+      "Hindi",
+      "Kannada",
+      "Konkani",
+      "Malayalam",
+      "Marathi",
+      "Modi",
+      "Nepali",
+      "Odia",
+      "Punjabi",
+      "Purna-Devanagari",
+      "Romanized",
+      "Sanskrit",
+      "Sharada",
+      "Siddham",
+      "Sinhala",
+      "Tamil-Extended",
+      "Tamil",
+      "Telugu",
+      "Urdu",
+      "Kashmiri",
+      "Sindhi",
     ];
     this.alts = {
       en: 0,
@@ -68,9 +68,9 @@ export class lipi_helper {
       pn: 14,
       Gurumukhi: 14,
       guru: 14,
-      'pu-de': 15,
-      'pu-dev': 15,
-      'pur-dev': 15,
+      "pu-de": 15,
+      "pu-dev": 15,
+      "pur-dev": 15,
       Romanised: 16,
       ro: 16,
       rom: 16,
@@ -84,33 +84,41 @@ export class lipi_helper {
       sid: 19,
       si: 20,
       sin: 20,
-      'ta-ex': 21,
-      'tam-ex': 21,
+      "ta-ex": 21,
+      "tam-ex": 21,
       ta: 22,
       tam: 22,
       te: 23,
       tel: 23,
-      ur: 24
+      ur: 24,
     };
 
     this.pUrNasarve = this.alph[0] + this.alph[1] + "01234567890'$.#?";
   }
   normalize(ln) {
     // function to normalize the names of scripts
-    let a = ln.trim().split('-');
-    for (let x = 0; x < a.length; x++) a[x] = a[x].charAt(0).toUpperCase() + a[x].substring(1);
-    let ln1 = a.join('-');
+    let a = ln.trim().split("-");
+    for (let x = 0; x < a.length; x++)
+      a[x] = a[x].charAt(0).toUpperCase() + a[x].substring(1);
+    let ln1 = a.join("-");
     if (this.in(this.langs, ln1)) return ln1;
     else if (ln in this.alts) return this.langs[this.alts[ln]];
     else return false;
   }
-  async load_lang(lang, callback = null, block = false, norm = true, base_folder_path = './src') {
+  async load_lang(
+    lang,
+    callback = null,
+    block = false,
+    norm = true,
+    base_folder_path = "./src"
+  ) {
     if (norm) lang = this.normalize(lang);
     // for the current scenario the lang files dont pose a problem in 1mb size limit of
     // edge fucntions so ignore the loading it it fow now
     if (!(lang in this.akSharAH)) {
       // this part should be used fot vitest and svelte
-      const data = (await import('./resources/dattAMsh/' + lang + '.json')).default[0];
+      const data = (await import("./resources/dattAMsh/" + lang + ".json"))
+        .default[0];
       if (callback) callback();
       this.akSharAH[lang] = data;
     } else if (callback != null) callback();
@@ -144,12 +152,12 @@ export class lipi_helper {
     return a.getTime() / 1000;
   }
   replace_all(str, replaceWhat, replaceTo) {
-    replaceWhat = replaceWhat.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    var re = new RegExp(replaceWhat, 'g');
+    replaceWhat = replaceWhat.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    var re = new RegExp(replaceWhat, "g");
     return str.replace(re, replaceTo);
   }
   last(s, l = -1) {
-    if (s == null || s == undefined) return '';
+    if (s == null || s == undefined) return "";
     let r = s[s.length + l];
     return r;
   }
@@ -166,7 +174,8 @@ export class lipi_helper {
     else if (to < 0) return val.substring(from, val.length + to);
   }
   format(val, l) {
-    for (let x = 0; x < l.length; x++) val = this.replace_all(val, `{${x}}`, l[x]);
+    for (let x = 0; x < l.length; x++)
+      val = this.replace_all(val, `{${x}}`, l[x]);
     return val;
   }
 }

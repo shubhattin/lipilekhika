@@ -1,5 +1,5 @@
-import { normalize } from './normalise_lang';
-import * as lekhika_lib from './lekhika_core';
+import { normalize } from "./normalise_lang";
+import * as lekhika_lib from "./lekhika_core";
 
 export const normalize_lang_code = (lang: string) => {
   return normalize(lang);
