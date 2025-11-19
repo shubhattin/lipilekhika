@@ -1,13 +1,11 @@
 {
   "scripts": {
-    "format": "prettier --write .",
     "gen:test-data": " cd scripts && bun gen-test-data.ts"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^24.10.1",
     "chalk": "^5.6.2",
-    "prettier": "^3.6.2",
     "zod": "^4.1.12"
   }
 }
