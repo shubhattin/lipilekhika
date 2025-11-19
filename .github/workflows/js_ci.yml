@@ -1,0 +1,33 @@
+name: JS Package CI
+
+on:
+  - push
+
+jobs:
+  type_build_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: oven-sh/setup-bun@v2
+      - run: |
+          cd packages/js
+          bun install
+          bun run check
+          bun run build
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: oven-sh/setup-bun@v2
+      - run: |
+          cd packages/js
+          bun install
+          bun test

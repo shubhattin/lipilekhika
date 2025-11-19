@@ -79,14 +79,15 @@ const ACRONYMS_MAP: Record<acronym_type, script_list_type> = {
 } as const;
 
 function capitalizeFirstAndAfterDash(str: string): string {
-  return str.replace(/(^|-)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
+  // Lowercase the string first, then capitalize first and after dash
+  return str.toLowerCase().replace(/(^|-)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
 }
 
 export const getNormalizedScriptName = (
-  name: acronym_type | script_and_lang_list_type
+  name: acronym_type | script_and_lang_list_type | string
 ): script_list_type | null => {
   const capitalizedName = capitalizeFirstAndAfterDash(name);
-  if (SCRIPT_LIST.includes(capitalizedName)) return name as script_list_type;
+  if (SCRIPT_LIST.includes(capitalizedName)) return capitalizedName as script_list_type;
   if (LANG_LIST.includes(capitalizedName))
     return LANG_SCRIPT_MAP[capitalizedName as lang_list_type];
   if (name.toLocaleLowerCase() in ACRONYMS_MAP)
