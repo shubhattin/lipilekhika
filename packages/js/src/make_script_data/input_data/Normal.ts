@@ -5,7 +5,7 @@ const Normal: InputOtherScriptType = {
   script_name: 'Normal',
   script_id: script_list_obj['Normal'],
   script_type: 'other',
-  manual_krama_key_map: {}
+  manual_krama_text_map: {}
   //   list: []
 };
 

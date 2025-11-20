@@ -4,14 +4,14 @@ type CommonScriptData = {
   /** Stores the key of the current script along with the reference to the index in `list` for info about the key
    * `string` is the actual key, number(nullable) is the index of the key in the compiled `list`
    */
-  krama_key_map: [string, number | null][];
+  krama_text_map: [string, number | null][];
   /** To be used for binary search on the `krama_key_map` */
-  krama_key_map_index: number[];
+  krama_text_map_index: number[];
   /** `string` used for search. Usable for Duplication Remova, Fallback Behaviour
    * and for `other` scripts type. Like Normal */
-  key_to_krama_map: [string, { next?: string | null; kram_index?: number[] | null }][];
+  text_to_krama_map: [string, { next?: string | null; kram_index?: number[] | null }][];
   /** To be used for binary search on the `key_to_krama_map` */
-  key_to_krama_map_index: number[];
+  text_to_krama_map_index: number[];
 };
 
 export type OutputBrahmicScriptData = Pick<

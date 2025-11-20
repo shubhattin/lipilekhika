@@ -3,12 +3,12 @@ import type { script_list_type } from '../utils/lang_list';
 
 /*
  * These types are not the final types to be used by conversion engine.
- * These are defined for organzing the script data
+ * These are defined for organizing the script data
  * For actual application use it will compiled into a more direct and efficient usable format
  */
 
 export type CommonListTypeAttributes = {
-  key: string;
+  text: string;
   /** In the post processing step the keys for which it is not mapped shall be left empty.
    * It can map to multiple krama keys
    * Each key should have at least one key krama. Scan for this too in the compilation step.
@@ -37,10 +37,11 @@ export type InputBrahmicScriptType = {
    */
   schwa_property: boolean;
   /**
-   * This Has a lower precendence that the auto generated/compiled krama key map from the `list` items. So it will be overwritten by them.
+   * This has a lower precedence than the auto generated/compiled krama key map from the `list` items. So it will be overwritten by them.
    * Moreover the keys here will not be checked to exist in `list`. This allows direct keymaps and can be useful for scripts like Normal, Romanized
+   * Intermediate steps will be auto generated. Eg. for Normala ख : kh will add both k (next h) and kh in the
    */
-  manual_krama_key_map?: {
+  manual_krama_text_map?: {
     [key in KramaKeysType]?: string;
   };
   /** One important need of this list is to just contain information about the keys.
@@ -52,7 +53,7 @@ export type InputBrahmicScriptType = {
       | {
           type: 'svara';
           mAtrA: string;
-          mAtrA_key_krama: KramaKeysType[];
+          mAtrA_text_krama: KramaKeysType[];
           mAtrA_duplicates?: string[];
           mAtrA_fallback?: KramaKeysType[];
         }
@@ -70,7 +71,7 @@ export type InputOtherScriptType = {
   script_name: script_list_type;
   script_id: number;
   script_type: 'other';
-  manual_krama_key_map: {
+  manual_krama_text_map: {
     [key in KramaKeysType]?: string;
   };
   /** This might not be needed here usually as most of the work would be done using the `manual_krama_key_map` */
