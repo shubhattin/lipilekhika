@@ -41,7 +41,7 @@ export type InputBrahmicScriptType = {
    * Moreover the keys here will not be checked to exist in `list`. This allows direct keymaps and can be useful for scripts like Normal, Romanized
    */
   manual_krama_key_map?: {
-    [key in KramaKeysType]: string;
+    [key in KramaKeysType]?: string;
   };
   /** One important need of this list is to just contain information about the keys.
    * The keys for which it does not contain information can be considered as type `anya`.
@@ -71,7 +71,7 @@ export type InputOtherScriptType = {
   script_id: number;
   script_type: 'other';
   manual_krama_key_map: {
-    [key in KramaKeysType]: string;
+    [key in KramaKeysType]?: string;
   };
   /** This might not be needed here usually as most of the work would be done using the `manual_krama_key_map` */
   list?: (CommonListTypeAttributes & {
