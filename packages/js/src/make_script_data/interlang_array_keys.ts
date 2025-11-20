@@ -1,4 +1,6 @@
-const keys = [
+import { createSearchIndex } from '../utils/binary_search/binary_search';
+
+export const KramaKeysArray = [
   'ॐ',
   'अ',
   'ॳ',
@@ -114,9 +116,11 @@ const keys = [
   '९'
 ] as const;
 
+export const KramaKeysIndexB = createSearchIndex(KramaKeysArray);
+
 /**
  * Krama(क्रम) is the array in which most of the keys used in scripts are present
  * It is an array which contains and describes common elements of different scripts allowing fast and efficient lookup
  * and transliteration of different scripts
  */
-export type KramaKeysType = (typeof keys)[number];
+export type KramaKeysType = (typeof KramaKeysArray)[number];

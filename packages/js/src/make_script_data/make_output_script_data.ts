@@ -1,9 +1,11 @@
 // Run this form the root of the js project
 import * as fs from 'node:fs';
 import path from 'node:path';
+// import { argv } from 'node:process';
 import type { InputScriptInfoType } from './input_script_data_schema';
 import type { OutputScriptData } from './output_script_data_schema';
 
+// const IS_DEV_MODE = argv[2] === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
 
 async function main() {

@@ -1,4 +1,4 @@
-import type { KramaKeysType } from '../interlang_array_keys';
+import type { KramaKeysType } from './interlang_array_keys';
 import type { script_list_type } from '../utils/lang_list';
 
 /*
