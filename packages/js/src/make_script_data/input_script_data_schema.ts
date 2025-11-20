@@ -13,7 +13,7 @@ export type CommonListTypeAttributes = {
    * It can map to multiple krama keys
    * Each key should have at least one key krama. Scan for this too in the compilation step.
    */
-  key_krama: KramaKeysType[];
+  text_krama: KramaKeysType[];
   /** This contains duplicates of the key, for eg:- some nuqta symbols and mAtrAs.
    * In the processing/compiling step it should be verified are a key of this list, display and throw the error
    */

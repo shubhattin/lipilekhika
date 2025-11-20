@@ -3,6 +3,7 @@ import { createSearchIndex } from '../utils/binary_search/binary_search';
 export const KramaKeysArray = [
   'ॐ',
   'अ',
+  '', // mAtrA for अ
   'ॳ',
   'ऺ',
   'आ',

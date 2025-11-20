@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputOtherScriptType } from '../input_script_data_schema';
 
-const Normal: InputOtherScriptType = {
+const Normal = {
   script_name: 'Normal',
   script_id: script_list_obj['Normal'],
   script_type: 'other',
@@ -14,15 +14,15 @@ const Normal: InputOtherScriptType = {
   list: [
     {
       text: 'C',
-      key_krama: ['च'],
+      text_krama: ['च'],
       duplicates: ['ch']
     },
     {
       text: 'Ch',
-      key_krama: ['छ'],
+      text_krama: ['छ'],
       duplicates: ['chh']
     }
   ]
-};
+} satisfies InputOtherScriptType;
 
 export default Normal;

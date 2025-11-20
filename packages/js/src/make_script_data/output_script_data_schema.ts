@@ -20,8 +20,8 @@ export type OutputBrahmicScriptData = Pick<
 > &
   CommonScriptData & {
     list: {
-      /** Index of the the corresponding entry in `krama_key_map` */
-      krama_ref: number;
+      /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
+      krama_ref: number[];
       type: InputBrahmicScriptType['list'][number]['type'];
       /** Only defined for type `svara` */
       mAtrA_krama_ref?: number[];
@@ -34,8 +34,8 @@ export type OutputOtherScriptData = Pick<
 > &
   CommonScriptData & {
     list: {
-      /** Index of the the corresponding entry in `krama_key_map` */
-      krama_ref: number;
+      /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
+      krama_ref: number[];
       type?: NonNullable<InputOtherScriptType['list']>[number]['type'];
     }[];
   };

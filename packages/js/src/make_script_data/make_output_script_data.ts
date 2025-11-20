@@ -1,14 +1,14 @@
 // Run this form the root of the js project
 import * as fs from 'node:fs';
 import path from 'node:path';
-// import { argv } from 'node:process';
+import { argv } from 'node:process';
 import type { InputScriptInfoType } from './input_script_data_schema';
 import type { OutputScriptData } from './output_script_data_schema';
 import { KramaKeysArray, KramaKeysIndexB, type KramaKeysType } from './interlang_array_keys';
-import { binarySearchWithIndex } from '../utils/binary_search/binary_search';
+import { binarySearchWithIndex, createSearchIndex } from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
 
-// const IS_DEV_MODE = argv[2] === '--dev';
+const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
 
 async function main() {
@@ -30,6 +30,7 @@ async function main() {
         script_name: input_script_data.script_name,
         script_id: input_script_data.script_id,
         halant: input_script_data.halant,
+        nuqta: input_script_data.nuqta ?? undefined,
         schwa_property: input_script_data.schwa_property,
         list: [],
         krama_text_map: [],
@@ -54,22 +55,26 @@ async function main() {
 
     // prefill the text_to_krama_map with the manual_krama_text_map
     // as it has a lower precedence
-    const keys_text_to_krama_map: string[] = [];
-    for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
-      const value = input_script_data.manual_krama_text_map?.[krama_key as KramaKeysType];
-      const krama_key_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key);
-      if (value === undefined || value === null || krama_key_index === -1) continue;
+
+    function add_to_text_to_krama_map(text: string, val: number[]) {
       // step by step create entries for the text mapping
-      for (let i = 0; i < value.length; i++) {
-        const text_char = value.substring(0, i + 1); // from start to the current index
-        const next_char = value[i + 1] as string | undefined;
+      for (let i = 0; i < text.length; i++) {
+        const text_char = text.substring(0, i + 1); // from start to the current index
+        const next_char = text[i + 1] as string | undefined;
         const existing_entry_index = keys_text_to_krama_map.indexOf(text_char);
         if (existing_entry_index !== -1 && next_char) {
+          const current_next = res.text_to_krama_map[existing_entry_index][1].next;
           res.text_to_krama_map[existing_entry_index][1].next =
-            (res.text_to_krama_map[existing_entry_index][1].next ?? '') + next_char;
+            current_next !== null && current_next !== undefined
+              ? current_next.indexOf(next_char) === -1
+                ? // if the next char is not in the current next, then add it to the current next
+                  // else ignore it
+                  current_next + next_char
+                : current_next
+              : next_char;
           // mapping the krama index
-          if (i === value.length - 1)
-            res.text_to_krama_map[existing_entry_index][1].kram_index = [krama_key_index];
+          if (i === text.length - 1)
+            res.text_to_krama_map[existing_entry_index][1].kram_index = val;
           continue;
         }
         keys_text_to_krama_map.push(text_char);
@@ -78,22 +83,111 @@ async function main() {
           { ...(next_char ? { next: next_char } : {}), kram_index: null }
         ]);
         // mapping the krama index
-        if (i === value.length - 1)
-          res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = [
-            krama_key_index
-          ];
+        if (i === text.length - 1)
+          res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = val;
       }
     }
 
-    // start scanning the list to fill krama_key_map and key_to_krama_map
-    for (const item of input_script_data.list ?? []) {
-      item.text;
-      // if (item.type === 'svara') {
-      //   res.krama_key_map[KramaKeysIndexB.get(item.key)] = [item.key, null];
-      // } else {
-      //   res.key_to_krama_map[item.key] = [item.key, { next: null, kram_index: null }];
-      // }
+    const keys_text_to_krama_map: string[] = [];
+    for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
+      const value = input_script_data.manual_krama_text_map?.[krama_key as KramaKeysType];
+      const krama_key_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key);
+      if (value === undefined || value === null || krama_key_index === -1) continue;
+      res.krama_text_map[krama_key_index] = [value, null];
+      // step by step create entries for the text mapping
+      add_to_text_to_krama_map(value, [krama_key_index]);
     }
+
+    // start scanning the list to fill krama_key_map and key_to_krama_map
+    const keys_krama_text_map: string[] = [];
+    for (const item of input_script_data.list ?? []) {
+      // Brahmic Scripts Referencing back Portion
+      const krama_key_list = item.text_krama;
+      const krama_key_list_index_list = krama_key_list.map((krama_key) =>
+        binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key)
+      );
+      const key_to_reference_back_list =
+        item.type === 'svara' || item.type === 'vyanjana' ? keys_krama_text_map.length : null;
+      if (
+        res.script_type === 'brahmic' &&
+        key_to_reference_back_list !== null &&
+        item.type !== undefined
+      ) {
+        keys_krama_text_map.push(item.text);
+        krama_key_list_index_list.forEach((krama_key_index) => {
+          // link entries in the krama map to the list
+          if (krama_key_index !== -1) {
+            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list];
+          }
+        });
+        res.list.push({
+          krama_ref: krama_key_list_index_list,
+          type: item.type,
+          // @ts-ignore
+          ...(IS_DEV_MODE ? { text: item.text } : {})
+        });
+        if (item.type === 'svara') {
+          // handling svara references
+          const mAtrA_krama_ref_index_list = item.mAtrA_text_krama.map((mAtrA_text_krama) =>
+            binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, mAtrA_text_krama, {
+              accessor: (arr, i) => arr[i]
+            })
+          );
+          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
+          // @ts-ignore
+          res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
+          mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
+            if (mAtrA_krama_ref_index !== -1) {
+              res.krama_text_map[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
+            }
+          });
+        }
+      }
+
+      // add check duplicate portion
+      // if there are multiple key_krama or mAtrA_key_krama references for duplicate
+      // which is rare and should not occur but if it does, then it just
+      // refers to the first key_krama or mAtrA_key_krama as all of those will be the same
+      if (item.duplicates) {
+        for (const duplicate_text of item.duplicates) {
+          const krama_key_index = binarySearchWithIndex(
+            KramaKeysArray,
+            KramaKeysIndexB,
+            item.text_krama[0]
+          );
+          if (krama_key_index !== -1) {
+            add_to_text_to_krama_map(duplicate_text, [krama_key_index]);
+          }
+        }
+        if (item.type === 'svara' && item.mAtrA_duplicates) {
+          for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
+            const krama_key_index = binarySearchWithIndex(
+              KramaKeysArray,
+              KramaKeysIndexB,
+              item.mAtrA_text_krama[0]
+            );
+            if (krama_key_index !== -1) {
+              add_to_text_to_krama_map(mAtrA_duplicate_text, [krama_key_index]);
+            }
+          }
+        }
+      }
+
+      // add fallback portion
+      if (item.fallback) {
+        const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
+          binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, fallback_key)
+        );
+        add_to_text_to_krama_map(item.text, fallback_key_kram_index_list);
+      }
+    }
+
+    res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
+      accessor: (arr, i) => arr[i][0]
+    });
+    res.text_to_krama_map_index = createSearchIndex(res.text_to_krama_map, {
+      accessor: (arr, i) => arr[i][0]
+    });
 
     fs.writeFileSync(
       path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`),
