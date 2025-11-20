@@ -1,19 +1,32 @@
+type Accessor<T, K> = (arr: readonly T[], i: number) => K;
+type CompareFn<K> = (a: K, b: K) => number;
+
+interface SearchIndexOptions<T, K> {
+  accessor?: Accessor<T, K>;
+  compareFn?: CompareFn<K>;
+}
+
 /**
  * Creates a sorted index for binary search on an unsorted array.
- * The index contains the original array indices, sorted by their values.
- *
- * @param arr - The original unsorted array
- * @returns Array of indices, sorted by the values they point to
  */
-export function createSearchIndex<T>(arr: readonly T[]): number[] {
-  // Create array of indices [0, 1, 2, ..., n-1]
+export function createSearchIndex<T, K = T>(
+  arr: readonly T[],
+  options?: SearchIndexOptions<T, K>
+): number[] {
+  const { accessor, compareFn } = options ?? {};
+  const get = accessor ?? ((arr, i) => arr[i] as unknown as K);
+
   const indices = Array.from({ length: arr.length }, (_, i) => i);
 
-  // Sort indices based on the values they point to
   indices.sort((a, b) => {
-    const valA = arr[a];
-    const valB = arr[b];
+    const valA = get(arr, a);
+    const valB = get(arr, b);
 
+    if (compareFn) {
+      return compareFn(valA, valB);
+    }
+
+    // Default comparison for primitives
     if (valA < valB) return -1;
     if (valA > valB) return 1;
     return 0;
@@ -24,35 +37,35 @@ export function createSearchIndex<T>(arr: readonly T[]): number[] {
 
 /**
  * Performs binary search using a pre-built index.
- *
- * @param arr - The original unsorted array
- * @param index - The sorted index created by createSearchIndex
- * @param target - The value to search for
- * @returns The index in the original array, or -1 if not found
  */
-export function binarySearchWithIndex<T>(
+export function binarySearchWithIndex<T, K = T>(
   arr: readonly T[],
   index: readonly number[],
-  target: T
+  target: K,
+  options?: SearchIndexOptions<T, K>
 ): number {
+  const { accessor, compareFn } = options ?? {};
+  const get = accessor ?? ((arr, i) => arr[i] as unknown as K);
+
   let left = 0;
   let right = index.length - 1;
 
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
     const originalIdx = index[mid];
-    const value = arr[originalIdx];
+    const value = get(arr, originalIdx);
 
-    if (value === target) {
-      return originalIdx; // Return original array index
-    }
-
-    if (target < value) {
-      right = mid - 1;
+    let cmp: number;
+    if (compareFn) {
+      cmp = compareFn(target, value);
     } else {
-      left = mid + 1;
+      cmp = target < value ? -1 : target > value ? 1 : 0;
     }
+
+    if (cmp === 0) return originalIdx;
+    if (cmp < 0) right = mid - 1;
+    else left = mid + 1;
   }
 
-  return -1; // Not found
+  return -1;
 }

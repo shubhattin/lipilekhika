@@ -7,7 +7,7 @@ const Gujarati: InputBrahmicScriptType = {
   script_type: 'brahmic',
   halant: '્',
   nuqta: '઼',
-  //  No schwa property for Gujarati Language
+  // Schwa deletion is a proprty of Gujarati
   schwa_property: true,
   list: []
   // manual_krama_key_map: {}

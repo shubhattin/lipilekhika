@@ -14,7 +14,7 @@ export type CommonListTypeAttributes = {
    * Each key should have at least one key krama. Scan for this too in the compilation step.
    */
   key_krama: KramaKeysType[];
-  /** This contains duplicates of the key, for eg:- some nuqta sysmbols and mAtrAs.
+  /** This contains duplicates of the key, for eg:- some nuqta symbols and mAtrAs.
    * In the processing/compiling step it should be verified are a key of this list, display and throw the error
    */
   duplicates?: string[];
@@ -75,7 +75,7 @@ export type InputOtherScriptType = {
   };
   /** This might not be needed here usually as most of the work would be done using the `manual_krama_key_map` */
   list?: (CommonListTypeAttributes & {
-    /** `type` is kind of redundant here as other scritps dont have a concept of svara and vyanjana */
+    /** `type` is kind of redundant here as other scripts dont have a concept of svara and vyanjana */
     type?: 'anya';
   })[];
 };

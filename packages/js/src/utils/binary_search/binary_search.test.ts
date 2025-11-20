@@ -268,4 +268,20 @@ describe('binarySearchWithIndex', () => {
       expect(binarySearchWithIndex(arr, index, 5)).toBe(0);
     });
   });
+
+  describe('Custom Array Type', () => {
+    it('should handle custom array type', () => {
+      const arr = [
+        ['z', { next: 'b' }],
+        ['c', { next: 'c' }],
+        ['a', { next: null }]
+      ];
+      const index = createSearchIndex(arr, { accessor: (arr, i) => arr[i][0] });
+
+      expect(binarySearchWithIndex(arr, index, 'a', { accessor: (arr, i) => arr[i][0] })).toBe(2);
+      expect(binarySearchWithIndex(arr, index, 'c', { accessor: (arr, i) => arr[i][0] })).toBe(1);
+      expect(binarySearchWithIndex(arr, index, 'j', { accessor: (arr, i) => arr[i][0] })).toBe(-1);
+      expect(binarySearchWithIndex(arr, index, 'z', { accessor: (arr, i) => arr[i][0] })).toBe(0);
+    });
+  });
 });
