@@ -5,8 +5,24 @@ const Normal: InputOtherScriptType = {
   script_name: 'Normal',
   script_id: script_list_obj['Normal'],
   script_type: 'other',
-  manual_krama_text_map: {}
-  //   list: []
+  manual_krama_text_map: {
+    क: 'k',
+    ख: 'kh',
+    च: 'C',
+    छ: 'Ch'
+  },
+  list: [
+    {
+      text: 'C',
+      key_krama: ['च'],
+      duplicates: ['ch']
+    },
+    {
+      text: 'Ch',
+      key_krama: ['छ'],
+      duplicates: ['chh']
+    }
+  ]
 };
 
 export default Normal;
