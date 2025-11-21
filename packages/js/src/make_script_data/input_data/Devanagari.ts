@@ -23,6 +23,12 @@ const Devanagari = {
       mAtrA: 'े',
       mAtrA_text_krama: ['e-mAtrA', 'E-mAtrA'],
       text_krama: ['e-svara', 'E-svara']
+    },
+    {
+      text: 'क़',
+      type: 'vyanjana',
+      text_krama: ['kz'],
+      duplicates: ['क़'] // hidden nuqta
     }
   ]
   // manual_krama_key_map: {}

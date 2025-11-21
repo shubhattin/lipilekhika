@@ -95,7 +95,7 @@ async function main() {
           res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = val;
       }
     }
-
+    // Part 1: Prefill the krama_text_map using the manual_krama_text_map
     const keys_text_to_krama_map: string[] = [];
     for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
       const value = input_script_data.manual_krama_text_map?.[krama_key as KramaKeysType];
@@ -110,9 +110,9 @@ async function main() {
       add_to_text_to_krama_map(value, [krama_key_index]);
     }
 
-    // start scanning the list to fill krama_key_map and key_to_krama_map
     const keys_krama_text_map: string[] = [];
     for (const item of input_script_data.list ?? []) {
+      // Part start scanning the list to fill krama_key_map and key_to_krama_map
       // Brahmic Scripts Referencing back Portion
       const krama_key_list = item.text_krama;
       const krama_key_list_index_list = krama_key_list.map((krama_key) =>
@@ -167,6 +167,7 @@ async function main() {
         }
       }
 
+      // Part 3: Duplicate Resolution
       // add check duplicate portion
       // if there are multiple key_krama or mAtrA_key_krama references for duplicate
       // which is rare and should not occur but if it does, then it just
@@ -196,6 +197,7 @@ async function main() {
         }
       }
 
+      // Part 4: Fallback Resolution
       // add fallback portion
       if (item.fallback) {
         const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
@@ -206,6 +208,18 @@ async function main() {
           )
         );
         add_to_text_to_krama_map(item.text, fallback_key_kram_index_list);
+      }
+    }
+
+    // Part 5: Optmizing the text_to_krama_map
+    // Scan for cases where the key exists in krama_text_map but it is not mapped in index
+    // This will speed up things in the production as it does not has to scan again in the krama_text_map list
+    for (const text_krama_item of res.text_to_krama_map) {
+      const text = text_krama_item[0];
+      const text_krama_ref = text_krama_item[1].kram_index;
+      const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
+      if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
+        text_krama_item[1].kram_index = [text_index];
       }
     }
 
