@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { sortArray, binarySearch } from './binary_search';
 import { createSearchIndex, binarySearchWithIndex } from './binary_search';
 
 describe('createSearchIndex', () => {
@@ -283,5 +284,113 @@ describe('binarySearchWithIndex', () => {
       expect(binarySearchWithIndex(arr, index, 'j', { accessor: (arr, i) => arr[i][0] })).toBe(-1);
       expect(binarySearchWithIndex(arr, index, 'z', { accessor: (arr, i) => arr[i][0] })).toBe(0);
     });
+  });
+});
+
+describe('sort', () => {
+  it('should sort a number array', () => {
+    const arr = [5, 2, 8, 1, 9, 3];
+    expect(sortArray(arr)).toEqual([1, 2, 3, 5, 8, 9]);
+  });
+
+  it('should sort a string array', () => {
+    const arr = ['banana', 'apple', 'carrot', 'berry'];
+    expect(sortArray(arr)).toEqual(['apple', 'banana', 'berry', 'carrot']);
+  });
+
+  it('should handle empty array', () => {
+    expect(sortArray([])).toEqual([]);
+  });
+
+  it('should handle single element array', () => {
+    expect(sortArray([42])).toEqual([42]);
+  });
+
+  it('should handle array with duplicate values', () => {
+    const arr = [3, 1, 3, 2, 1];
+    expect(sortArray(arr)).toEqual([1, 1, 2, 3, 3]);
+  });
+
+  it('should handle array of objects with accessor', () => {
+    const arr = [{ score: 2 }, { score: 1 }, { score: 3 }];
+    expect(sortArray(arr, { accessor: (arr, i) => arr[i].score })).toEqual([
+      { score: 1 },
+      { score: 2 },
+      { score: 3 }
+    ]);
+  });
+
+  it('should sort with custom comparator', () => {
+    const arr = [1, 2, 3, 4];
+    expect(sortArray(arr, { compareFn: (a, b) => b - a })).toEqual([4, 3, 2, 1]);
+  });
+
+  it('should sort array of objects by string property using accessor', () => {
+    const arr = [{ name: 'banana' }, { name: 'apple' }, { name: 'carrot' }];
+    expect(sortArray(arr, { accessor: (arr, i) => arr[i].name })).toEqual([
+      { name: 'apple' },
+      { name: 'banana' },
+      { name: 'carrot' }
+    ]);
+  });
+});
+
+describe('binarySearch', () => {
+  it('should find target in sorted number array', () => {
+    const arr = [1, 2, 3, 4, 5];
+    expect(binarySearch(arr, 3)).toBe(2);
+    expect(binarySearch(arr, 1)).toBe(0);
+    expect(binarySearch(arr, 5)).toBe(4);
+  });
+
+  it('should return -1 for missing element in sorted number array', () => {
+    const arr = [1, 2, 3, 4, 5];
+    expect(binarySearch(arr, 0)).toBe(-1);
+    expect(binarySearch(arr, 6)).toBe(-1);
+  });
+
+  it('should work with custom accessor', () => {
+    const arr = [{ v: 1 }, { v: 3 }, { v: 7 }];
+    expect(binarySearch(arr, 3, { accessor: (arr, i) => arr[i].v })).toBe(1);
+    expect(binarySearch(arr, 4, { accessor: (arr, i) => arr[i].v })).toBe(-1);
+  });
+
+  it('should work with custom compareFn (descending search)', () => {
+    const arr = [5, 4, 3, 2, 1];
+    expect(binarySearch(arr, 2, { compareFn: (a, b) => b - a })).toBe(3);
+    expect(binarySearch(arr, 6, { compareFn: (a, b) => b - a })).toBe(-1);
+  });
+
+  it('should handle sorted string arrays', () => {
+    const arr = ['apple', 'banana', 'carrot'];
+    expect(binarySearch(arr, 'banana')).toBe(1);
+    expect(binarySearch(arr, 'zzz')).toBe(-1);
+  });
+
+  it('should handle single element array', () => {
+    expect(binarySearch([42], 42)).toBe(0);
+    expect(binarySearch([42], 24)).toBe(-1);
+  });
+
+  it('should handle empty array', () => {
+    expect(binarySearch([], 42)).toBe(-1);
+  });
+
+  it('should handle duplicate elements (returns any, not guaranteed which)', () => {
+    const arr = [1, 2, 2, 2, 3];
+    const foundIdx = binarySearch(arr, 2);
+    expect([1, 2, 3]).toContain(foundIdx);
+    expect(arr[foundIdx]).toBe(2);
+  });
+
+  it('should work with objects and both accessor and compareFn', () => {
+    // Sort descending by value
+    const arr = [{ v: 3 }, { v: 2 }, { v: 1 }];
+    expect(
+      binarySearch(arr, 2, {
+        accessor: (arr, i) => arr[i].v,
+        compareFn: (a, b) => b - a
+      })
+    ).toBe(1);
   });
 });

@@ -15,7 +15,7 @@ export type CommonListTypeAttributes = {
    */
   text_krama: KramaKeysType[];
   /** This contains duplicates of the key, for eg:- some nuqta symbols and mAtrAs.
-   * In the processing/compiling step it should be verified are a key of this list, display and throw the error
+   * In the processing/compiling step it should be verified as a key of this list, display and throw the error
    */
   duplicates?: string[];
   /** In case if no entry is found for the key in krama even after de-duplication resolution
@@ -39,7 +39,7 @@ export type InputBrahmicScriptType = {
   /**
    * This has a lower precedence than the auto generated/compiled krama key map from the `list` items. So it will be overwritten by them.
    * Moreover the keys here will not be checked to exist in `list`. This allows direct keymaps and can be useful for scripts like Normal, Romanized
-   * Intermediate steps will be auto generated. Eg. for Normala ख : kh will add both k (next h) and kh in the
+   * Intermediate steps will be auto generated. Eg. for Normal ख : kh will add both k (next h) and kh in the
    */
   manual_krama_text_map?: {
     [key in KramaKeysType]?: string;
@@ -74,9 +74,9 @@ export type InputOtherScriptType = {
   manual_krama_text_map: {
     [key in KramaKeysType]?: string;
   };
-  /** This might not be needed here usually as most of the work would be done using the `manual_krama_key_map` */
+  /** This might not be needed here usually as most of the work would be done using the `manual_krama_text_map` */
   list?: (CommonListTypeAttributes & {
-    /** `type` is kind of redundant here as other scripts dont have a concept of svara and vyanjana */
+    /** `type` is kind of redundant here as other scripts don't have a concept of svara and vyanjana */
     type?: 'anya';
   })[];
 };

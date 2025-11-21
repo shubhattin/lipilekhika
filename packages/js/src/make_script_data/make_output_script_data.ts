@@ -1,11 +1,15 @@
-// Run this form the root of the js project
+// Run this form the root of the js project using `vite-node`
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { argv } from 'node:process';
 import type { InputScriptInfoType } from './input_script_data_schema';
 import type { OutputScriptData } from './output_script_data_schema';
 import { KramaKeysArray, KramaKeysIndexB, type KramaKeysType } from './interlang_array_keys';
-import { binarySearchWithIndex, createSearchIndex } from '../utils/binary_search/binary_search';
+import {
+  binarySearchWithIndex,
+  createSearchIndex,
+  sortArray
+} from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
@@ -35,8 +39,7 @@ async function main() {
         list: [],
         krama_text_map: [],
         krama_text_map_index: [],
-        text_to_krama_map: [],
-        text_to_krama_map_index: []
+        text_to_krama_map: []
       };
     } else {
       res = {
@@ -46,8 +49,7 @@ async function main() {
         list: [],
         krama_text_map: [],
         krama_text_map_index: [],
-        text_to_krama_map: [],
-        text_to_krama_map_index: []
+        text_to_krama_map: []
       };
     }
     // initialize krama key map as an empty starting array
@@ -106,6 +108,7 @@ async function main() {
       const krama_key_list_index_list = krama_key_list.map((krama_key) =>
         binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key)
       );
+      // only reference back only if svara or vyanjana as else not needed
       const key_to_reference_back_list =
         item.type === 'svara' || item.type === 'vyanjana' ? keys_krama_text_map.length : null;
       if (
@@ -134,8 +137,9 @@ async function main() {
             })
           );
           res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
-          // @ts-ignore
-          res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
+          if (IS_DEV_MODE)
+            // @ts-ignore
+            res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
               res.krama_text_map[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
@@ -185,7 +189,7 @@ async function main() {
     res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
       accessor: (arr, i) => arr[i][0]
     });
-    res.text_to_krama_map_index = createSearchIndex(res.text_to_krama_map, {
+    res.text_to_krama_map = sortArray(res.text_to_krama_map, {
       accessor: (arr, i) => arr[i][0]
     });
 
@@ -201,5 +205,5 @@ main()
     console.log(chalk.green('✔  Script data generated successfully'));
   })
   .catch((err) => {
-    console.error(chalk.red('✖ Error generating script data'), err);
+    console.error(chalk.red('✖  Error generating script data'), err);
   });

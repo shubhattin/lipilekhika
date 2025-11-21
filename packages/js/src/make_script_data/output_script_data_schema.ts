@@ -8,10 +8,9 @@ type CommonScriptData = {
   /** To be used for binary search on the `krama_key_map` */
   krama_text_map_index: number[];
   /** `string` used for search. Usable for Duplication Remova, Fallback Behaviour
-   * and for `other` scripts type. Like Normal */
+   * and for `other` scripts type. Like Normal
+   * This will be a sorted array, so binary search can be directly used in it */
   text_to_krama_map: [string, { next?: string | null; kram_index?: number[] | null }][];
-  /** To be used for binary search on the `key_to_krama_map` */
-  text_to_krama_map_index: number[];
 };
 
 export type OutputBrahmicScriptData = Pick<
