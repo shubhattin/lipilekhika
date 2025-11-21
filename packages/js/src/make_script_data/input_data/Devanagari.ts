@@ -14,15 +14,15 @@ const Devanagari = {
       text: 'अ',
       type: 'svara',
       mAtrA: '',
-      mAtrA_text_krama: [''],
-      text_krama: ['अ']
+      mAtrA_text_krama: ['a-mAtrA'],
+      text_krama: ['a-svara']
     },
     {
       text: 'ए',
       type: 'svara',
       mAtrA: 'े',
-      mAtrA_text_krama: ['ॆ', 'े'],
-      text_krama: ['ऎ', 'ए']
+      mAtrA_text_krama: ['e-mAtrA', 'E-mAtrA'],
+      text_krama: ['e-svara', 'E-svara']
     }
   ]
   // manual_krama_key_map: {}

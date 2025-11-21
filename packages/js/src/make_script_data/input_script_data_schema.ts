@@ -1,4 +1,4 @@
-import type { KramaKeysType } from './interlang_array_keys';
+import type { KramaKeysExtendedType } from './krama_array_keys';
 import type { script_list_type } from '../utils/lang_list';
 
 /*
@@ -13,7 +13,7 @@ export type CommonListTypeAttributes = {
    * It can map to multiple krama keys
    * Each key should have at least one key krama. Scan for this too in the compilation step.
    */
-  text_krama: KramaKeysType[];
+  text_krama: KramaKeysExtendedType[];
   /** This contains duplicates of the key, for eg:- some nuqta symbols and mAtrAs.
    * In the processing/compiling step it should be verified as a key of this list, display and throw the error
    */
@@ -21,7 +21,7 @@ export type CommonListTypeAttributes = {
   /** In case if no entry is found for the key in krama even after de-duplication resolution
    * then fallback array will be used. Like for malayalam .100 it can be .1+.0+.0
    */
-  fallback?: KramaKeysType[];
+  fallback?: KramaKeysExtendedType[];
 };
 
 export type InputBrahmicScriptType = {
@@ -42,7 +42,7 @@ export type InputBrahmicScriptType = {
    * Intermediate steps will be auto generated. Eg. for Normal ख : kh will add both k (next h) and kh in the
    */
   manual_krama_text_map?: {
-    [key in KramaKeysType]?: string;
+    [key in KramaKeysExtendedType]?: string;
   };
   /** One important need of this list is to just contain information about the keys.
    * The keys for which it does not contain information can be considered as type `anya`.
@@ -53,9 +53,9 @@ export type InputBrahmicScriptType = {
       | {
           type: 'svara';
           mAtrA: string;
-          mAtrA_text_krama: KramaKeysType[];
+          mAtrA_text_krama: KramaKeysExtendedType[];
           mAtrA_duplicates?: string[];
-          mAtrA_fallback?: KramaKeysType[];
+          mAtrA_fallback?: KramaKeysExtendedType[];
         }
       | { type: 'vyanjana' | 'anya' }
     ))[];
@@ -72,7 +72,7 @@ export type InputOtherScriptType = {
   script_id: number;
   script_type: 'other';
   manual_krama_text_map: {
-    [key in KramaKeysType]?: string;
+    [key in KramaKeysExtendedType]?: string;
   };
   /** This might not be needed here usually as most of the work would be done using the `manual_krama_text_map` */
   list?: (CommonListTypeAttributes & {
