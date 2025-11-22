@@ -118,7 +118,9 @@ const KramaKeysMap = {
   '६': '6',
   '७': '7',
   '८': '8',
-  '९': '9'
+  '९': '9',
+  '।': 'virama',
+  '॥': 'double_virama'
 } as const;
 
 export const KramaKeysArray = Object.keys(KramaKeysMap) as (keyof typeof KramaKeysMap)[];

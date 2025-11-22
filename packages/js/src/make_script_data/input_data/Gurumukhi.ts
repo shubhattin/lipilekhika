@@ -1,32 +1,34 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Gujarati = {
+const Gurumukhi = {
   script_type: 'brahmic',
-  script_name: 'Gujarati',
-  script_id: script_list_obj['Gujarati'],
-  halant: '્',
-  nuqta: '઼',
+  script_name: 'Gurumukhi',
+  script_id: script_list_obj['Gurumukhi'],
+  halant: '੍',
+  nuqta: '਼',
   schwa_property: false,
   manual_krama_text_map: {
-    '0': '০',
-    '1': '૧',
-    '2': '૨',
-    '3': '૩',
-    '4': '૪',
-    '5': '૫',
-    '6': '૬',
-    '7': '૭',
-    '8': '૮',
-    '9': '૯',
-    AUM: 'ૐ',
-    anusvAra: 'ં',
-    anunAnAsika: 'ઁ',
-    visarga: 'ઃ',
+    '0': '੦',
+    '1': '੧',
+    '2': '੨',
+    '3': '੩',
+    '4': '੪',
+    '5': '੫',
+    '6': '੬',
+    '7': '੭',
+    '8': '੮',
+    '9': '੯',
+    AUM: 'ੴ',
+    anusvAra: 'ਂ',
+    anunAnAsika: 'ਁ',
+    'R-svara': 'ਰਿ',
+    'RR-svara': 'ਰੀ',
+    visarga: 'ਃ',
     saMkShepachihna: '॰',
     avagraha: 'ઽ',
-    halant: '્',
-    nuqta: '઼',
+    halant: '੍',
+    nuqta: '਼',
     anudAttA: '॒',
     'udAtta-1': '॑',
     'udAtta-2': '᳚',
@@ -37,355 +39,349 @@ const Gujarati = {
   list: [
     // Svara
     {
-      text: 'અ',
+      text: 'ਅ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],
       mAtrA_text_krama: ['a-mAtrA', 'a1-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'આ',
-      mAtrA: 'ા',
+      text: 'ਆ',
+      mAtrA: 'ਾ',
       text_krama: ['A-svara', 'A1-svara'],
       mAtrA_text_krama: ['A-mAtrA', 'A1-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઇ',
-      mAtrA: 'િ',
+      text: 'ਇ',
+      mAtrA: 'ਿ',
       text_krama: ['i-svara'],
       mAtrA_text_krama: ['i-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઈ',
-      mAtrA: 'ી',
+      text: 'ਈ',
+      mAtrA: 'ੀ',
       text_krama: ['I-svara'],
       mAtrA_text_krama: ['I-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઉ',
-      mAtrA: 'ુ',
+      text: 'ਉ',
+      mAtrA: 'ੁ',
       text_krama: ['u-svara', 'u1-svara'],
       mAtrA_text_krama: ['u-mAtrA', 'u1-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઊ',
-      mAtrA: 'ૂ',
+      text: 'ਊ',
+      mAtrA: 'ੂ',
       text_krama: ['U-svara', 'U1-svara'],
       mAtrA_text_krama: ['U-mAtrA', 'U1-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઋ',
-      mAtrA: 'ૃ',
-      text_krama: ['R-svara'],
-      mAtrA_text_krama: ['R-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'ૠ',
-      mAtrA: 'ૄ',
-      text_krama: ['RR-svara'],
-      mAtrA_text_krama: ['RR-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'ઌ',
-      mAtrA: 'ૢ',
-      text_krama: ['LR-svara'],
-      mAtrA_text_krama: ['LR-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'ૡ',
-      mAtrA: 'ૣ',
-      text_krama: ['LRR-svara'],
-      mAtrA_text_krama: ['LRR-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'ઍ',
-      mAtrA: 'ૅ',
-      text_krama: ['aiI-svara'],
-      mAtrA_text_krama: ['aiI-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'એ',
-      mAtrA: 'ે',
+      text: 'ਏ',
+      mAtrA: 'ੇ',
       text_krama: ['E-svara', 'e-svara'],
       mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઐ',
-      mAtrA: 'ૈ',
-      text_krama: ['ai-svara'],
-      mAtrA_text_krama: ['ai-mAtrA'],
+      text: 'ਐ',
+      mAtrA: 'ੈ',
+      text_krama: ['ai-svara', 'aiI-svara'],
+      mAtrA_text_krama: ['ai-mAtrA', 'aiI-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઑ',
-      mAtrA: 'ૉ',
-      text_krama: ['auU-svara'],
-      mAtrA_text_krama: ['auU-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: 'ઓ',
-      mAtrA: 'ો',
+      text: 'ਓ',
+      mAtrA: 'ੋ',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
       type: 'svara'
     },
     {
-      text: 'ઔ',
-      mAtrA: 'ૌ',
-      text_krama: ['au-svara'],
-      mAtrA_text_krama: ['au-mAtrA'],
+      text: 'ਔ',
+      mAtrA: 'ੌ',
+      text_krama: ['au-svara', 'auU-svara'],
+      mAtrA_text_krama: ['au-mAtrA', 'auU-mAtrA'],
       type: 'svara'
     },
-
-    // Vyanjana
     {
-      text: 'ક',
+      text: 'ਰਿ',
+      text_krama: ['R-svara', 'R-mAtrA'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ਰੀ',
+      text_krama: ['RR-svara', 'RR-mAtrA'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ਲ੍ਰਿ',
+      text_krama: ['LR-svara', 'LR-mAtrA'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ਲ੍ਰੀ',
+      text_krama: ['LRR-svara', 'LRR-mAtrA'],
+      type: 'vyanjana'
+    },
+
+    // vyanjana
+    {
+      text: 'ਕ',
       text_krama: ['k'],
       type: 'vyanjana'
     },
     {
-      text: 'ક઼',
+      text: 'ਕ਼',
       text_krama: ['kz'],
       type: 'vyanjana'
     },
     {
-      text: 'ખ',
+      text: 'ਖ',
       text_krama: ['kh'],
       type: 'vyanjana'
     },
     {
-      text: 'ખ઼',
+      text: 'ਖ਼',
       text_krama: ['khz'],
+      duplicates: ['ਖ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'ગ',
+      text: 'ਗ',
       text_krama: ['g', 'g1'],
       type: 'vyanjana'
     },
     {
-      text: 'ગ઼',
+      text: 'ਗ਼',
       text_krama: ['gz'],
+      duplicates: ['ਗ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'ઘ',
+      text: 'ਘ',
       text_krama: ['gh'],
       type: 'vyanjana'
     },
     {
-      text: 'ઙ',
+      text: 'ਙ',
       text_krama: ['G'],
       type: 'vyanjana'
     },
     {
-      text: 'ચ',
+      text: 'ਚ',
       text_krama: ['C'],
       type: 'vyanjana'
     },
     {
-      text: 'ચ઼',
+      text: 'ਚ਼',
       text_krama: ['Cz'],
       type: 'vyanjana'
     },
     {
-      text: 'છ',
+      text: 'ਛ',
       text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {
-      text: 'છ઼',
+      text: 'ਛ਼',
       text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {
-      text: 'જ',
+      text: 'ਜ',
       text_krama: ['j', 'j1'],
       type: 'vyanjana'
     },
     {
-      text: 'જ઼',
+      text: 'ਜ਼',
       text_krama: ['jz'],
+      duplicates: ['ਜ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'ઝ',
+      text: 'ਝ',
       text_krama: ['jh'],
       type: 'vyanjana'
     },
     {
-      text: 'ઞ',
+      text: 'ਞ',
       text_krama: ['J'],
       type: 'vyanjana'
     },
     {
-      text: 'ટ',
+      text: 'ਟ',
       text_krama: ['T'],
       type: 'vyanjana'
     },
     {
-      text: 'ઠ',
+      text: 'ਠ',
       text_krama: ['Th'],
       type: 'vyanjana'
     },
     {
-      text: 'ડ',
-      text_krama: ['D'],
+      text: 'ਡ',
+      text_krama: ['D', 'D1'],
       type: 'vyanjana'
     },
     {
-      text: 'ડ઼',
-      text_krama: ['Dz', 'D1'],
+      text: 'ੜ',
+      text_krama: ['Dz'],
+      duplicates: ['ਡ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'ઢ',
+      text: 'ਢ',
       text_krama: ['Dh'],
       type: 'vyanjana'
     },
     {
-      text: 'ઢ઼',
+      text: 'ੜ੍ਹ',
       text_krama: ['Dhz'],
+      duplicates: ['ਢ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'ણ',
+      text: 'ਣ',
       text_krama: ['N'],
       type: 'vyanjana'
     },
     {
-      text: 'ત',
+      text: 'ਤ',
       text_krama: ['t'],
       type: 'vyanjana'
     },
     {
-      text: 'થ',
+      text: 'ਥ',
       text_krama: ['th'],
       type: 'vyanjana'
     },
     {
-      text: 'દ',
+      text: 'ਦ',
       text_krama: ['d'],
       type: 'vyanjana'
     },
     {
-      text: 'ધ',
+      text: 'ਧ',
       text_krama: ['dh'],
       type: 'vyanjana'
     },
     {
-      text: 'ન',
+      text: 'ਨ',
       text_krama: ['n'],
       type: 'vyanjana'
     },
     {
-      text: 'ન઼',
+      text: 'ਨ਼',
       text_krama: ['nz'],
       type: 'vyanjana'
     },
     {
-      text: 'પ',
+      text: 'ਪ',
       text_krama: ['p'],
       type: 'vyanjana'
     },
     {
-      text: 'ફ',
+      text: 'ਫ',
       text_krama: ['ph'],
       type: 'vyanjana'
     },
     {
-      text: 'ફ઼',
+      text: 'ਫ਼',
       text_krama: ['phz'],
+      duplicates: ['ਫ਼'],
       type: 'vyanjana'
     },
     {
-      text: 'બ',
+      text: 'ਬ',
       text_krama: ['b', 'b1'],
       type: 'vyanjana'
     },
     {
-      text: 'ભ',
+      text: 'ਭ',
       text_krama: ['bh'],
       type: 'vyanjana'
     },
     {
-      text: 'મ',
+      text: 'ਮ',
       text_krama: ['m'],
       type: 'vyanjana'
     },
     {
-      text: 'ય',
+      text: 'ਯ',
       text_krama: ['y'],
       type: 'vyanjana'
     },
     {
-      text: 'ય઼',
+      text: 'ਯ਼',
       text_krama: ['yz'],
       type: 'vyanjana'
     },
     {
-      text: 'ર',
+      text: 'ਰ',
       text_krama: ['r'],
       type: 'vyanjana'
     },
     {
-      text: 'ર઼',
+      text: 'ਰ਼',
       text_krama: ['rz'],
       type: 'vyanjana'
     },
     {
-      text: 'લ',
+      text: 'ਲ',
       text_krama: ['l'],
       type: 'vyanjana'
     },
     {
-      text: 'ળ',
-      text_krama: ['L'],
+      text: 'ਲ਼',
+      text_krama: ['L', 'Lz'],
       type: 'vyanjana'
     },
     {
-      text: 'ળ઼',
-      text_krama: ['Lz'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'વ',
+      text: 'ਵ',
       text_krama: ['v'],
       type: 'vyanjana'
     },
     {
-      text: 'શ',
-      text_krama: ['sh'],
+      text: 'ਸ਼',
+      text_krama: ['sh', 'Sh'],
       type: 'vyanjana'
     },
     {
-      text: 'ષ',
-      text_krama: ['Sh'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'સ',
+      text: 'ਸ',
       text_krama: ['s'],
       type: 'vyanjana'
     },
     {
-      text: 'હ',
+      text: 'ਹ',
       text_krama: ['h'],
       type: 'vyanjana'
     }
+    // {
+    //   text: 'ੰ',
+    //   text_krama: [],
+    //   type: 'anya'
+    // },
+    // {
+    //   text: 'ੱ',
+    //   text_krama: [],
+    //   type: 'anya'
+    // },
+    // {
+    //   text: 'ੲ',
+    //   text_krama: [],
+    //   type: 'vyanjana'
+    // },
+    // {
+    //   text: 'ੳ',
+    //   text_krama: [],
+    //   type: 'vyanjana'
+    // }
   ]
 } satisfies InputBrahmicScriptType;
 
-export default Gujarati;
+export default Gurumukhi;
