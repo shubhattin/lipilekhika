@@ -236,6 +236,12 @@ async function main() {
       }
     }
 
+    // In Dev mode add the original krama key at the third index for easy comparision and verification
+    if (IS_DEV_MODE)
+      for (let i = 0; i < KramaKeysArray.length; i++) {
+        res.krama_text_map[i].push(KramaKeysArray[i]);
+      }
+
     res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
       accessor: (arr, i) => arr[i][0]
     });
