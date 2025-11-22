@@ -7,7 +7,7 @@ const Devanagari = {
   script_type: 'brahmic',
   halant: '्',
   nuqta: '़',
-  //  No schwa property for Devanagari(Sanskrit)
+  // No schwa property for Devanagari(Sanskrit)
   schwa_property: false,
   list: [
     {
