@@ -10,7 +10,23 @@ type CommonScriptData = {
   /** `string` used for search. Usable for Duplication Remova, Fallback Behaviour
    * and for `other` scripts type. Like Normal
    * This will be a sorted array, so binary search can be directly used in it */
-  text_to_krama_map: [string, { next?: string | null; kram_index?: number[] | null }][];
+  text_to_krama_map: [
+    string,
+    {
+      next?: string | null;
+      kram_index?: number | null;
+      fallback_info?: {
+        /** The array allows a multiple krama keys to be combined together to form a fallback
+         * Like .100 = .1+.0+.0
+         */
+        krama_combination: number[];
+        /** This will be useful to get info related to the fallback if they happen to be a svara or a vyanjana
+         * eg. The Malayalam .n,.N, etc
+         */
+        list_ref?: number;
+      } | null;
+    }
+  ][];
 };
 
 export type OutputBrahmicScriptData = Pick<

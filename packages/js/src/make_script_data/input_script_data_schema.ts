@@ -20,6 +20,7 @@ export type CommonListTypeAttributes = {
   duplicates?: string[];
   /** In case if no entry is found for the key in krama even after de-duplication resolution
    * then fallback array will be used. Like for malayalam .100 it can be .1+.0+.0
+   * If the fallback array is not provided, then the key_krama should be empty and will also be ignored
    */
   fallback?: KramaKeysExtendedType[];
 };

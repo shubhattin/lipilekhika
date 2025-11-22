@@ -1,4 +1,4 @@
-// Run this form the root of the js project using `vite-node`
+// Run this from the root of the js project using `vite-node`
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { argv } from 'node:process';
@@ -64,7 +64,13 @@ async function main() {
     // prefill the text_to_krama_map with the manual_krama_text_map
     // as it has a lower precedence
 
-    function add_to_text_to_krama_map(text: string, val: number[]) {
+    type fallback_info_type = NonNullable<
+      Extract<
+        OutputScriptData,
+        { script_type: 'brahmic' }
+      >['text_to_krama_map'][number][1]['fallback_info']
+    >;
+    function add_to_text_to_krama_map(text: string, val: number | fallback_info_type) {
       // step by step create entries for the text mapping
       for (let i = 0; i < text.length; i++) {
         const text_char = text.substring(0, i + 1); // from start to the current index
@@ -82,23 +88,24 @@ async function main() {
               : next_char;
           // mapping the krama index
           if (i === text.length - 1)
-            res.text_to_krama_map[existing_entry_index][1].kram_index = val;
+            if (typeof val === 'number')
+              res.text_to_krama_map[existing_entry_index][1].kram_index = val;
+            else res.text_to_krama_map[existing_entry_index][1].fallback_info = val;
           continue;
         }
         keys_text_to_krama_map.push(text_char);
-        res.text_to_krama_map.push([
-          text_char,
-          { ...(next_char ? { next: next_char } : {}), kram_index: null }
-        ]);
+        res.text_to_krama_map.push([text_char, { ...(next_char ? { next: next_char } : {}) }]);
         // mapping the krama index
         if (i === text.length - 1)
-          res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = val;
+          if (typeof val === 'number')
+            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = val;
+          else res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].fallback_info = val;
       }
     }
     // Part 1: Prefill the krama_text_map using the manual_krama_text_map
     const keys_text_to_krama_map: string[] = [];
     for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
-      const value = input_script_data.manual_krama_text_map?.[krama_key as KramaKeysType];
+      const value = input_script_data.manual_krama_text_map![krama_key as KramaKeysType];
       const krama_key_index = binarySearchWithIndex(
         KramaKeysArray,
         KramaKeysIndexB,
@@ -107,41 +114,42 @@ async function main() {
       if (value === undefined || value === null || krama_key_index === -1) continue;
       res.krama_text_map[krama_key_index] = [value, null];
       // step by step create entries for the text mapping
-      add_to_text_to_krama_map(value, [krama_key_index]);
+      add_to_text_to_krama_map(value, krama_key_index);
     }
 
     const keys_krama_text_map: string[] = [];
     for (const item of input_script_data.list ?? []) {
-      // Part start scanning the list to fill krama_key_map and key_to_krama_map
+      // Part 2: Start scanning the list to fill krama_key_map and key_to_krama_map
       // Brahmic Scripts Referencing back Portion
-      const krama_key_list = item.text_krama;
-      const krama_key_list_index_list = krama_key_list.map((krama_key) =>
-        binarySearchWithIndex(
-          KramaKeysArray,
-          KramaKeysIndexB,
-          resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
-        )
-      );
-      // only reference back only if svara or vyanjana as else not needed
+      // only reference back only if svara or vyanjana (even if a fallback type) as else not needed
       const key_to_reference_back_list =
         item.type === 'svara' || item.type === 'vyanjana' ? keys_krama_text_map.length : null;
       if (
         res.script_type === 'brahmic' &&
         key_to_reference_back_list !== null &&
+        key_to_reference_back_list !== undefined &&
         item.type !== undefined
       ) {
+        const krama_key_list = item.text_krama;
+        const krama_key_list_index_list = krama_key_list.map((krama_key) =>
+          binarySearchWithIndex(
+            KramaKeysArray,
+            KramaKeysIndexB,
+            resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
+          )
+        );
         keys_krama_text_map.push(item.text);
-        krama_key_list_index_list.forEach((krama_key_index) => {
-          // link entries in the krama map to the list
-          if (krama_key_index !== -1) {
-            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list];
-          }
-        });
         res.list.push({
           krama_ref: krama_key_list_index_list,
           type: item.type,
           // @ts-ignore
           ...(IS_DEV_MODE ? { text: item.text } : {})
+        });
+        krama_key_list_index_list.forEach((krama_key_index) => {
+          // link entries in the krama map to the list
+          if (krama_key_index !== -1) {
+            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list];
+          }
         });
         if (item.type === 'svara') {
           // handling svara references
@@ -180,7 +188,7 @@ async function main() {
             resolveKramaKeysExtendedType(item.text_krama[0] as KramaKeysExtendedType)
           );
           if (krama_key_index !== -1) {
-            add_to_text_to_krama_map(duplicate_text, [krama_key_index]);
+            add_to_text_to_krama_map(duplicate_text, krama_key_index);
           }
         }
         if (item.type === 'svara' && item.mAtrA_duplicates) {
@@ -191,7 +199,7 @@ async function main() {
               resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
             );
             if (krama_key_index !== -1) {
-              add_to_text_to_krama_map(mAtrA_duplicate_text, [krama_key_index]);
+              add_to_text_to_krama_map(mAtrA_duplicate_text, krama_key_index);
             }
           }
         }
@@ -207,7 +215,12 @@ async function main() {
             resolveKramaKeysExtendedType(fallback_key as KramaKeysExtendedType)
           )
         );
-        add_to_text_to_krama_map(item.text, fallback_key_kram_index_list);
+        add_to_text_to_krama_map(item.text, {
+          krama_combination: fallback_key_kram_index_list,
+          ...(key_to_reference_back_list !== null && key_to_reference_back_list !== undefined
+            ? { list_ref: key_to_reference_back_list }
+            : {})
+        });
       }
     }
 
@@ -219,7 +232,7 @@ async function main() {
       const text_krama_ref = text_krama_item[1].kram_index;
       const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
       if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
-        text_krama_item[1].kram_index = [text_index];
+        text_krama_item[1].kram_index = text_index;
       }
     }
 
