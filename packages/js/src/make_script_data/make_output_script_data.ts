@@ -207,7 +207,7 @@ async function main() {
 
       // Part 4: Fallback Resolution
       // add fallback portion
-      if (item.fallback) {
+      if (item.fallback && item.text_krama.length === 0) {
         const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
           binarySearchWithIndex(
             KramaKeysArray,
