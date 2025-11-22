@@ -177,7 +177,7 @@ const Devanagari = {
     },
     {
       text: 'ग़',
-      text_krama: [],
+      text_krama: ['gz'],
       type: 'vyanjana'
     },
     {

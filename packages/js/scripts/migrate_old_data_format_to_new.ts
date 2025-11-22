@@ -10,7 +10,7 @@ import {
 } from '../src/make_script_data/krama_array_keys';
 import { SCRIPT_LIST, script_list_obj } from '../src/utils/lang_list';
 import { script_list_type } from '../src/utils/lang_list';
-import { binarySearchWithIndex } from '../src/utils/binary_search/binary_search';
+import { binarySearchWithIndex, sortArray } from '../src/utils/binary_search/binary_search';
 import { execSync } from 'child_process';
 
 const DEVANAGARI_KRAMA = [
@@ -186,14 +186,17 @@ function get_script_data(lang: script_list_type, data: any) {
         const code = value[0];
         const krama_key = get_krama_key_from_antar_key(data['kram'].indexOf(code));
         if (krama_key !== null) {
-          out.manual_krama_text_map![krama_key] = code;
+          if (!(code in out.manual_krama_text_map!)) out.manual_krama_text_map![krama_key] = code;
         } else {
           // shall be removed after inspection
-          out.list.push({
-            text: code,
-            type: 'anya',
-            text_krama: []
-          });
+          const index = out.list.findIndex((item) => item.text === code);
+          // if already present dont add as the code is being repeated
+          if (index === -1)
+            out.list.push({
+              text: code,
+              text_krama: [],
+              type: 'anya'
+            });
         }
       } else if (value.at(-1) === 0) {
         // svara
@@ -202,25 +205,38 @@ function get_script_data(lang: script_list_type, data: any) {
         const krama_key = get_krama_key_from_antar_key(data['kram'].indexOf(code));
         const krama_mAtrA_key = get_krama_key_from_antar_key(data['kram'].indexOf(mAtrA));
 
-        out.list.push({
-          text: code,
-          type: 'svara',
-          text_krama: krama_key !== null ? [krama_key] : [],
-          mAtrA: mAtrA,
-          mAtrA_text_krama: krama_mAtrA_key !== null ? [krama_mAtrA_key] : []
-        });
+        const index = out.list.findIndex((item) => item.text === code);
+        if (index === -1)
+          out.list.push({
+            text: code,
+            mAtrA: mAtrA,
+            text_krama: krama_key !== null ? [krama_key] : [],
+            mAtrA_text_krama: krama_mAtrA_key !== null ? [krama_mAtrA_key] : [],
+            type: 'svara'
+          });
       } else if (value.at(-1) === 1) {
         // vyanjana
         const code = value[0];
         const krama_key = get_krama_key_from_antar_key(data['kram'].indexOf(code));
-        out.list.push({
-          text: code,
-          type: 'vyanjana',
-          text_krama: krama_key !== null ? [krama_key] : []
-        });
+
+        const index = out.list.findIndex((item) => item.text === code);
+        if (index === -1)
+          out.list.push({
+            text: code,
+            text_krama: krama_key !== null ? [krama_key] : [],
+            type: 'vyanjana'
+          });
       }
     }
   }
+
+  // sort `list` and `manual_krama_text_map`
+  out.list = sortArray(out.list, {
+    accessor: (arr, i) => arr[i].text
+  });
+  out.manual_krama_text_map = Object.fromEntries(
+    sortArray(Object.entries(out.manual_krama_text_map!), { accessor: (arr, i) => arr[1] })
+  );
   return out;
 }
 

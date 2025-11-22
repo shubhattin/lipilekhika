@@ -33,8 +33,8 @@ export function cleanUpWhitespace(input: string, replace_multiple_white_spaces =
   return input;
 }
 
-export function get_randon_number(start: number, end: number) {
-  return Math.floor(Math.random() * (end - start + 1) + start);
+export function get_random_number(start: number, end: number) {
+  return Math.floor(Math.random() * (end - start + 1)) + start;
 }
 
 /**
@@ -88,7 +88,3 @@ export function deepCopy<T>(value: T): T {
   // Fallback: other object types (class instances, functions, etc.)
   return value;
 }
-
-export const get_rand_num = (a: number, b: number) => {
-  return Math.trunc(Math.random() * (b - a + 1)) + a;
-};
