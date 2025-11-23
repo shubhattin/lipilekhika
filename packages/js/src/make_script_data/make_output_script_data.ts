@@ -90,7 +90,7 @@ async function main() {
           // mapping the krama index
           if (i === text.length - 1)
             if (typeof val === 'number')
-              res.text_to_krama_map[existing_entry_index][1].kram_index = val;
+              res.text_to_krama_map[existing_entry_index][1].krama_index = val;
             else res.text_to_krama_map[existing_entry_index][1].fallback_info = val;
           continue;
         }
@@ -99,7 +99,7 @@ async function main() {
         // mapping the krama index
         if (i === text.length - 1)
           if (typeof val === 'number')
-            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].kram_index = val;
+            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].krama_index = val;
           else res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].fallback_info = val;
       }
     }
@@ -230,10 +230,10 @@ async function main() {
     // This will speed up things in the production as it does not has to scan again in the krama_text_map list
     for (const text_krama_item of res.text_to_krama_map) {
       const text = text_krama_item[0];
-      const text_krama_ref = text_krama_item[1].kram_index;
+      const text_krama_ref = text_krama_item[1].krama_index;
       const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
       if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
-        text_krama_item[1].kram_index = text_index;
+        text_krama_item[1].krama_index = text_index;
       }
     }
 

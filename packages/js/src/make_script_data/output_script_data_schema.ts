@@ -14,7 +14,7 @@ type CommonScriptData = {
     string,
     {
       next?: string | null;
-      kram_index?: number | null;
+      krama_index?: number | null;
       fallback_info?: {
         /** The array allows a multiple krama keys to be combined together to form a fallback
          * Like .100 = .1+.0+.0
