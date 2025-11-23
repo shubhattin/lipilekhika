@@ -20,7 +20,7 @@ const Sinhala = {
     '9': '෯',
     AUM: 'ॐ',
     anusvAra: 'ං',
-    anunAnAsika: 'ઁ',
+    anunAnAsika: 'ඁ',
     visarga: 'ඃ',
     saMkShepachihna: '॰',
     avagraha: 'ಽ',
