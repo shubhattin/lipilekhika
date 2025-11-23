@@ -18,6 +18,7 @@ import {
 } from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
+import { execSync } from 'child_process';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
@@ -294,6 +295,11 @@ async function main() {
 main()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
+    try {
+      execSync('npx prettier --write ./src/script_data');
+    } catch (e) {
+      console.error(chalk.red('✖  Error formatting script data'), e);
+    }
   })
   .catch((err) => {
     console.error(chalk.red('✖  Error generating script data'), err);

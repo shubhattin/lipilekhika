@@ -6,5 +6,4 @@ dist
 pnpm-lock.yaml
 bun.lock
 
-src/script_data
 tmp
