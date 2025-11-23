@@ -9,7 +9,7 @@ const Gujarati = {
   nuqta: '઼',
   schwa_property: true,
   manual_krama_text_map: {
-    '0': '০',
+    '0': '૦',
     '1': '૧',
     '2': '૨',
     '3': '૩',

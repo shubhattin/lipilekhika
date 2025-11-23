@@ -159,7 +159,7 @@ const Sinhala = {
       mAtrA: 'ෞ',
       text_krama: ['au-svara'],
       mAtrA_text_krama: ['au-mAtrA'],
-      duplicates: ['ෞ'],
+      mAtrA_duplicates: ['ෞ'],
       type: 'svara'
     },
 

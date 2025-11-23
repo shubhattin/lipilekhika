@@ -50,11 +50,6 @@ const Odia = {
       type: 'svara'
     },
     {
-      text: 'ଆଊ',
-      text_krama: [],
-      type: 'anya'
-    },
-    {
       text: 'ଇ',
       mAtrA: 'ି',
       text_krama: ['i-svara'],

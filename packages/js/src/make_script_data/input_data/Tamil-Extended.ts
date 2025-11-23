@@ -136,12 +136,12 @@ const Tamil_Extended = {
     },
     {
       text: 'ல்ரி²',
-      text_krama: ['LR-svara', 'LR-svara'],
+      text_krama: ['LR-svara', 'LR-mAtrA'],
       type: 'vyanjana'
     },
     {
       text: 'ல்ரீ²',
-      text_krama: ['LRR-svara', 'LRR-svara'],
+      text_krama: ['LR-svara', 'LRR-mAtrA'],
       type: 'vyanjana'
     },
 

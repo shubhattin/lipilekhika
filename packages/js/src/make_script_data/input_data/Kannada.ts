@@ -23,7 +23,7 @@ const Kannada = {
     anusvAra: 'ಂ',
     anunAnAsika: 'ಁ',
     visarga: 'ಃ',
-    nuqta: '़',
+    nuqta: '಼',
     saMkShepachihna: '॰',
     avagraha: 'ಽ',
     halant: '್',

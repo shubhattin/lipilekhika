@@ -20,7 +20,6 @@ const Granth = {
     '8': '௮',
     '9': '௯',
     AUM: '𑍐',
-    anusvAra: '𑌀',
     anunAnAsika: '𑌁',
     visarga: '𑌃',
     saMkShepachihna: '𑙃',
@@ -35,7 +34,12 @@ const Granth = {
     double_virama: '॥'
   },
   list: [
-    // Extra Number Symbols
+    {
+      text: '𑌂',
+      text_krama: ['anusvAra'],
+      duplicates: ['𑌀'],
+      type: 'anya'
+    },
     {
       text: '௰',
       text_krama: [],

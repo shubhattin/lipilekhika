@@ -136,7 +136,7 @@ const Sharada = {
     {
       text: '𑆍',
       mAtrA: '𑆼',
-      text_krama: ['E-svara', 'e-mAtrA'],
+      text_krama: ['E-svara', 'e-svara'],
       mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
       type: 'svara'
     },

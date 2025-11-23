@@ -40,48 +40,60 @@ export function get_random_number(start: number, end: number) {
 /**
  * Deeply clones a value of type T.
  * - Primitives are returned as-is.
- * - Arrays and plain objects are recursively cloned.
+ * - Arrays and plain objects (including null prototypes) are recursively cloned.
  * - Date, Map, Set are specially handled.
+ * - Cyclic structures are supported via a WeakMap cache.
  * - Other objects (e.g. functions, class instances) are returned by reference.
  */
-export function deepCopy<T>(value: T): T {
+export function deepCopy<T>(value: T, visited: WeakMap<object, unknown> = new WeakMap()): T {
   // Primitives (and functions) are returned directly
   if (value === null || typeof value !== 'object') {
     return value;
   }
+  const cached = visited.get(value as object);
+  if (cached !== undefined) {
+    return cached as T;
+  }
   // Date
   if (value instanceof Date) {
-    return new Date(value.getTime()) as any;
+    const dateCopy = new Date(value.getTime()) as unknown;
+    visited.set(value, dateCopy);
+    return dateCopy as T;
   }
   // Array
   if (Array.isArray(value)) {
     const arrCopy = [] as unknown[];
+    visited.set(value, arrCopy);
     for (const item of value) {
-      arrCopy.push(deepCopy(item));
+      arrCopy.push(deepCopy(item, visited));
     }
-    return arrCopy as any;
+    return arrCopy as unknown as T;
   }
   // Map
   if (value instanceof Map) {
     const mapCopy = new Map();
+    visited.set(value, mapCopy);
     for (const [k, v] of value.entries()) {
-      mapCopy.set(deepCopy(k), deepCopy(v));
+      mapCopy.set(deepCopy(k, visited), deepCopy(v, visited));
     }
-    return mapCopy as any;
+    return mapCopy as unknown as T;
   }
   // Set
   if (value instanceof Set) {
     const setCopy = new Set();
+    visited.set(value, setCopy);
     for (const v of value.values()) {
-      setCopy.add(deepCopy(v));
+      setCopy.add(deepCopy(v, visited));
     }
-    return setCopy as any;
+    return setCopy as unknown as T;
   }
   // Plain Object
-  if (Object.getPrototypeOf(value) === Object.prototype) {
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype === Object.prototype || prototype === null) {
     const objCopy: Record<string, unknown> = {};
+    visited.set(value, objCopy);
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      objCopy[k] = deepCopy(v);
+      objCopy[k] = deepCopy(v, visited);
     }
     return objCopy as T;
   }
