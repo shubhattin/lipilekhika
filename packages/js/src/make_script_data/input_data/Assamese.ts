@@ -2,7 +2,7 @@ import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 import Bengali from './Bengali';
 
-const Assamese = JSON.parse(JSON.stringify(Bengali)) satisfies InputBrahmicScriptType;
+const Assamese = JSON.parse(JSON.stringify(Bengali)) as InputBrahmicScriptType;
 
 Assamese.script_name = 'Assamese';
 Assamese.script_id = script_list_obj['Assamese'];

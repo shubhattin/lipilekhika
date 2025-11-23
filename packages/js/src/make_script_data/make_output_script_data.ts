@@ -118,6 +118,27 @@ async function main() {
       add_to_text_to_krama_map(value, krama_key_index);
     }
 
+    // Scan for multiple same text attributes in the list
+    if (input_script_data.list && input_script_data.list.length > 0) {
+      const duplicateIndexMap = new Map<string, number[]>();
+      input_script_data.list.forEach((item, index) => {
+        if (!item.text) return;
+        const indexes = duplicateIndexMap.get(item.text) ?? [];
+        indexes.push(index);
+        duplicateIndexMap.set(item.text, indexes);
+      });
+      for (const [text, indexes] of duplicateIndexMap.entries()) {
+        if (indexes.length > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Duplicate list entries for script "${input_script_data.script_name}" found at indices [${indexes.join(
+                ', '
+              )}] with text "${text}"`
+            )
+          );
+        }
+      }
+    }
     const keys_krama_text_map: string[] = [];
     for (const item of input_script_data.list ?? []) {
       // Part 2: Start scanning the list to fill krama_key_map and key_to_krama_map
