@@ -7,7 +7,7 @@ const Odia = {
   script_id: script_list_obj['Odia'],
   halant: '୍',
   nuqta: '଼',
-  schwa_property: false,
+  schwa_property: true,
   manual_krama_text_map: {
     '0': '୦',
     '1': '୧',

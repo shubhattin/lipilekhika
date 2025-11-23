@@ -7,7 +7,7 @@ const Gurumukhi = {
   script_id: script_list_obj['Gurumukhi'],
   halant: '੍',
   nuqta: '਼',
-  schwa_property: false,
+  schwa_property: true,
   manual_krama_text_map: {
     '0': '੦',
     '1': '੧',
