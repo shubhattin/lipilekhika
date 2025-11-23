@@ -23,7 +23,7 @@ const Tamil_Extended = {
     anunAnAsika: 'ம்³',
     visarga: 'ஃ',
     saMkShepachihna: '॰',
-    avagraha: 'ಽ',
+    avagraha: 'ऽ',
     halant: '்',
     anudAttA: '॒',
     'udAtta-1': '॑',
@@ -141,7 +141,7 @@ const Tamil_Extended = {
     },
     {
       text: 'ல்ரீ²',
-      text_krama: ['LR-svara', 'LRR-mAtrA'],
+      text_krama: ['LRR-svara', 'LRR-mAtrA'],
       type: 'vyanjana'
     },
 

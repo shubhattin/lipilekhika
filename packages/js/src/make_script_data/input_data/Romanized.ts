@@ -49,7 +49,7 @@ const Romanized = {
     'ॄ': 'r̥̄',
     ऌ: 'l̥',
     'ॢ': 'l̥',
-    ॡ: 'l̥',
+    ॡ: 'l̥̄',
     'ॣ': 'l̥̄',
     'ं': 'ṁ',
     'ँ': 'm̐',
@@ -227,7 +227,7 @@ const Romanized = {
     },
     {
       text: 'ṭ',
-      text_krama: ['T', 'T'],
+      text_krama: ['T'],
       duplicates: ['Ṭ']
     },
     {
@@ -248,7 +248,7 @@ const Romanized = {
     {
       text: 'ḍh',
       text_krama: ['Dh'],
-      duplicates: ['Ḍ']
+      duplicates: ['Ḍh']
     },
     {
       text: 'ṛh',
@@ -271,7 +271,7 @@ const Romanized = {
       duplicates: ['Ḷ']
     },
     {
-      text: 'ḹ',
+      text: 'ḻ',
       text_krama: ['Lz'],
       duplicates: ['Ḻ']
     },

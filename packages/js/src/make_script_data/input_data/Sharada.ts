@@ -23,7 +23,7 @@ const Sharada = {
     anusvAra: '𑆁',
     anunAnAsika: '𑆀',
     visarga: '𑆂',
-    saMkShepachihna: '𑇆',
+    saMkShepachihna: '॰',
     avagraha: '𑇁',
     halant: '𑇀',
     nuqta: '𑇊',
@@ -32,7 +32,7 @@ const Sharada = {
     'udAtta-2': '↑↑',
     'udAtta-3': '↑↑↑',
     virama: '𑇅',
-    double_virama: '॥'
+    double_virama: '𑇆'
   },
   list: [
     {
