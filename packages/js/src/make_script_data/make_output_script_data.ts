@@ -18,6 +18,7 @@ import {
 } from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
+import { execSync } from 'child_process';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
@@ -118,6 +119,27 @@ async function main() {
       add_to_text_to_krama_map(value, krama_key_index);
     }
 
+    // Scan for multiple same text attributes in the list
+    if (input_script_data.list && input_script_data.list.length > 0) {
+      const duplicateIndexMap = new Map<string, number[]>();
+      input_script_data.list.forEach((item, index) => {
+        if (!item.text) return;
+        const indexes = duplicateIndexMap.get(item.text) ?? [];
+        indexes.push(index);
+        duplicateIndexMap.set(item.text, indexes);
+      });
+      for (const [text, indexes] of duplicateIndexMap.entries()) {
+        if (indexes.length > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Duplicate list entries for script "${input_script_data.script_name}" found at indices [${indexes.join(
+                ', '
+              )}] with text "${text}"`
+            )
+          );
+        }
+      }
+    }
     const keys_krama_text_map: string[] = [];
     for (const item of input_script_data.list ?? []) {
       // Part 2: Start scanning the list to fill krama_key_map and key_to_krama_map
@@ -273,6 +295,11 @@ async function main() {
 main()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
+    try {
+      execSync('npx prettier --write ./src/script_data');
+    } catch (e) {
+      console.error(chalk.red('✖  Error formatting script data'), e);
+    }
   })
   .catch((err) => {
     console.error(chalk.red('✖  Error generating script data'), err);
