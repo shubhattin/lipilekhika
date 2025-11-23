@@ -1,10 +1,10 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Devanagari = {
+const Purna_Devanagari = {
   script_type: 'brahmic',
-  script_name: 'Devanagari',
-  script_id: script_list_obj['Devanagari'],
+  script_name: 'Purna-Devanagari',
+  script_id: script_list_obj['Purna-Devanagari'],
   halant: '्',
   nuqta: '़',
   schwa_property: false,
@@ -39,15 +39,29 @@ const Devanagari = {
     {
       text: 'अ',
       mAtrA: '',
-      text_krama: ['a-svara', 'a1-svara'],
-      mAtrA_text_krama: ['a-mAtrA', 'a1-mAtrA'],
+      text_krama: ['a-svara'],
+      mAtrA_text_krama: ['a-mAtrA'],
       type: 'svara'
     },
     {
       text: 'आ',
       mAtrA: 'ा',
-      text_krama: ['A-svara', 'A1-svara'],
-      mAtrA_text_krama: ['A-mAtrA', 'A1-mAtrA'],
+      text_krama: ['A-svara'],
+      mAtrA_text_krama: ['A-mAtrA'],
+      type: 'svara'
+    },
+    {
+      text: 'ॳ',
+      mAtrA: 'ऺ',
+      text_krama: ['a1-svara'],
+      mAtrA_text_krama: ['a1-mAtrA'],
+      type: 'svara'
+    },
+    {
+      text: 'ॴ',
+      mAtrA: 'ऻ',
+      text_krama: ['A1-svara'],
+      mAtrA_text_krama: ['A1-mAtrA'],
       type: 'svara'
     },
     {
@@ -67,15 +81,29 @@ const Devanagari = {
     {
       text: 'उ',
       mAtrA: 'ु',
-      text_krama: ['u-svara', 'u1-svara'],
-      mAtrA_text_krama: ['u-mAtrA', 'u1-mAtrA'],
+      text_krama: ['u-svara'],
+      mAtrA_text_krama: ['u-mAtrA'],
       type: 'svara'
     },
     {
       text: 'ऊ',
       mAtrA: 'ू',
-      text_krama: ['U-svara', 'U1-svara'],
-      mAtrA_text_krama: ['U-mAtrA', 'U1-mAtrA'],
+      text_krama: ['U-svara'],
+      mAtrA_text_krama: ['U-mAtrA'],
+      type: 'svara'
+    },
+    {
+      text: 'ॶ',
+      mAtrA: 'ॖ',
+      text_krama: ['u1-svara'],
+      mAtrA_text_krama: ['u1-mAtrA'],
+      type: 'svara'
+    },
+    {
+      text: 'ॷ',
+      mAtrA: 'ॗ',
+      text_krama: ['U1-svara'],
+      mAtrA_text_krama: ['U1-mAtrA'],
       type: 'svara'
     },
     {
@@ -114,10 +142,17 @@ const Devanagari = {
       type: 'svara'
     },
     {
+      text: 'ऎ',
+      mAtrA: 'ॆ',
+      text_krama: ['e-svara'],
+      mAtrA_text_krama: ['e-mAtrA'],
+      type: 'svara'
+    },
+    {
       text: 'ए',
       mAtrA: 'े',
-      text_krama: ['E-svara', 'e-svara'],
-      mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
+      text_krama: ['E-svara'],
+      mAtrA_text_krama: ['E-mAtrA'],
       type: 'svara'
     },
     {
@@ -135,10 +170,17 @@ const Devanagari = {
       type: 'svara'
     },
     {
+      text: 'ऒ',
+      mAtrA: 'ॊ',
+      text_krama: ['o-svara'],
+      mAtrA_text_krama: ['o-mAtrA'],
+      type: 'svara'
+    },
+    {
       text: 'ओ',
       mAtrA: 'ो',
-      text_krama: ['O-svara', 'o-svara'],
-      mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
+      text_krama: ['O-svara'],
+      mAtrA_text_krama: ['O-mAtrA'],
       type: 'svara'
     },
     {
@@ -158,11 +200,7 @@ const Devanagari = {
     {
       text: 'क़',
       text_krama: ['kz'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'ख़',
-      text_krama: ['khz'],
+      duplicates: ['क़'],
       type: 'vyanjana'
     },
     {
@@ -171,13 +209,25 @@ const Devanagari = {
       type: 'vyanjana'
     },
     {
+      text: 'ख़',
+      text_krama: ['khz'],
+      duplicates: ['ख़'],
+      type: 'vyanjana'
+    },
+    {
       text: 'ग',
-      text_krama: ['g', 'g1'],
+      text_krama: ['g'],
       type: 'vyanjana'
     },
     {
       text: 'ग़',
       text_krama: ['gz'],
+      duplicates: ['ग़'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ॻ',
+      text_krama: ['g1'],
       type: 'vyanjana'
     },
     {
@@ -212,13 +262,18 @@ const Devanagari = {
     },
     {
       text: 'ज',
-      text_krama: ['j', 'j1'],
+      text_krama: ['j'],
       type: 'vyanjana'
     },
     {
       text: 'ज़',
       text_krama: ['jz'],
       duplicates: ['ज़'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ॼ',
+      text_krama: ['j1'],
       type: 'vyanjana'
     },
     {
@@ -243,13 +298,18 @@ const Devanagari = {
     },
     {
       text: 'ड',
-      text_krama: ['D', 'D1'],
+      text_krama: ['D'],
       type: 'vyanjana'
     },
     {
       text: 'ड़',
       text_krama: ['Dz'],
       duplicates: ['ड़'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ॾ',
+      text_krama: ['D1'],
       type: 'vyanjana'
     },
     {
@@ -317,7 +377,12 @@ const Devanagari = {
     },
     {
       text: 'ब',
-      text_krama: ['b', 'b1'],
+      text_krama: ['b'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ॿ',
+      text_krama: ['b1'],
       type: 'vyanjana'
     },
     {
@@ -393,7 +458,14 @@ const Devanagari = {
       text_krama: ['h'],
       type: 'vyanjana'
     }
+    // {
+    //   text: 'ॵ',
+    //   mAtrA: 'ॏ',
+    //   text_krama: [],
+    //   mAtrA_text_krama: [],
+    //   type: 'svara'
+    // },
   ]
 } satisfies InputBrahmicScriptType;
 
-export default Devanagari;
+export default Purna_Devanagari;

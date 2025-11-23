@@ -22,7 +22,9 @@ export const get_lang_from_id = (id: number) => {
 };
 
 export type script_and_lang_list_type = script_list_type | lang_list_type;
-export const ALL_LANG_SCRIPT_LIST = Array.from(new Set([...LANG_LIST, ...SCRIPT_LIST])) as script_and_lang_list_type[];
+export const ALL_LANG_SCRIPT_LIST = Array.from(
+  new Set([...LANG_LIST, ...SCRIPT_LIST])
+) as script_and_lang_list_type[];
 
 export { lang_list as lang_list_obj, script_list as script_list_obj };
 

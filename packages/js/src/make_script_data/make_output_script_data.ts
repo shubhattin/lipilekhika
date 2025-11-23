@@ -207,7 +207,7 @@ async function main() {
 
       // Part 4: Fallback Resolution
       // add fallback portion
-      if (item.fallback) {
+      if (item.fallback && item.text_krama.length === 0) {
         const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
           binarySearchWithIndex(
             KramaKeysArray,
@@ -235,6 +235,12 @@ async function main() {
         text_krama_item[1].kram_index = text_index;
       }
     }
+
+    // In Dev mode add the original krama key at the third index for easy comparision and verification
+    if (IS_DEV_MODE)
+      for (let i = 0; i < KramaKeysArray.length; i++) {
+        res.krama_text_map[i].push(KramaKeysArray[i]);
+      }
 
     res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
       accessor: (arr, i) => arr[i][0]

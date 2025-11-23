@@ -13,7 +13,13 @@
     "Normal": 11,
     "Romanized": 12,
     "Gurumukhi": 13,
-    "Assamese": 14
+    "Assamese": 14,
+    "Purna-Devanagari": 15,
+    "Brahmi": 16,
+    "Granth": 17,
+    "Modi": 18,
+    "Sharada": 20,
+    "Siddham": 21
   },
   "lang_list": {
     "English": 1,
