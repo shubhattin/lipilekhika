@@ -17,6 +17,7 @@ import {
   sortArray
 } from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
+import { toUnicodeEscapes } from '../tools/kry';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
@@ -237,10 +238,25 @@ async function main() {
     }
 
     // In Dev mode add the original krama key at the third index for easy comparision and verification
-    if (IS_DEV_MODE)
+    // and also add unicode escaped strings for better debugging (hopefully)
+    if (IS_DEV_MODE) {
+      for (let i = 0; i < res.text_to_krama_map.length; i++) {
+        // @ts-ignore
+        res.text_to_krama_map[i][1].uni = toUnicodeEscapes(res.text_to_krama_map[i][0]);
+      }
+      for (let i = 0; i < res.list.length; i++) {
+        // @ts-ignore
+        res.list[i].text_uni = toUnicodeEscapes(res.list[i].text);
+        if (res.list[i].type === 'svara') {
+          // @ts-ignore
+          res.list[i].mAtrA_uni = toUnicodeEscapes(res.list[i].mAtrA);
+        }
+      }
       for (let i = 0; i < KramaKeysArray.length; i++) {
         res.krama_text_map[i].push(KramaKeysArray[i]);
+        res.krama_text_map[i].push(toUnicodeEscapes(res.krama_text_map[i][0]));
       }
+    }
 
     res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
       accessor: (arr, i) => arr[i][0]
@@ -249,10 +265,8 @@ async function main() {
       accessor: (arr, i) => arr[i][0]
     });
 
-    fs.writeFileSync(
-      path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`),
-      JSON.stringify(res, null, 2)
-    );
+    const jsonOutput = JSON.stringify(res, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
+    fs.writeFileSync(path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`), jsonOutput);
   }
 }
 

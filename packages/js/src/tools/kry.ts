@@ -100,3 +100,21 @@ export function deepCopy<T>(value: T, visited: WeakMap<object, unknown> = new We
   // Fallback: other object types (class instances, functions, etc.)
   return value;
 }
+
+export function toUnicodeEscapes(input: string): string {
+  let result = '';
+  for (const char of input) {
+    const code = char.codePointAt(0)!;
+    const prefix = '\\u'; // produces actual \u in the output
+
+    if (code <= 0xffff) {
+      result += prefix + code.toString(16).padStart(4, '0');
+    } else {
+      const high = Math.floor((code - 0x10000) / 0x400) + 0xd800;
+      const low = ((code - 0x10000) % 0x400) + 0xdc00;
+      result += prefix + high.toString(16).padStart(4, '0');
+      result += prefix + low.toString(16).padStart(4, '0');
+    }
+  }
+  return result;
+}
