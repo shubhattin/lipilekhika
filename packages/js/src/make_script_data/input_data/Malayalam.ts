@@ -176,12 +176,12 @@ const Malayalam = {
     },
     {
       text: 'ച',
-      text_krama: ['C', 'Cz'],
+      text_krama: ['C'],
       type: 'vyanjana'
     },
     {
       text: 'ഛ',
-      text_krama: ['Ch', 'Chz'],
+      text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {

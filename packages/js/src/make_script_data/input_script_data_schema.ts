@@ -23,6 +23,12 @@ export type CommonListTypeAttributes = {
    * If the fallback array is not provided, then the key_krama should be empty and will also be ignored
    */
   fallback?: KramaKeysExtendedType[];
+  /** Prevent Auto Matching
+   * Useful for Cases where we dont want to use the text referenced in the key to be used for transliteration from that script to another script
+   * Like when changing from Tamil to Devanagari , kirupA it should be kirupA and not kRpA.
+   * So we can prevent the list item "text": iru, krama R) from being used to reduce itself from that form during transliteration
+   */
+  prevent_auto_matching?: boolean;
 };
 
 export type InputBrahmicScriptType = {

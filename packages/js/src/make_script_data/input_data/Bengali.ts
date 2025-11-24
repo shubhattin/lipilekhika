@@ -184,18 +184,8 @@ const Bengali = {
       type: 'vyanjana'
     },
     {
-      text: 'চ়',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'ছ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'ছ়',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

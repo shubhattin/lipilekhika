@@ -14,17 +14,18 @@ type CommonScriptData = {
     string,
     {
       next?: string | null;
-      krama_index?: number | null;
-      fallback_info?: {
-        /** The array allows a multiple krama keys to be combined together to form a fallback
-         * Like .100 = .1+.0+.0
-         */
-        krama_combination: number[];
-        /** This will be useful to get info related to the fallback if they happen to be a svara or a vyanjana
-         * eg. The Malayalam .n,.N, etc
-         */
-        list_ref?: number;
-      } | null;
+      /** Multiple krama index references are useful to some intermediate states. For eg:- Normal A -> A, AU -> A, U and AUM -> AUM
+       * This will be useful only when there are more than two transition states. As double transition state outputs dont need multiple krama references.
+       * For eg -> The Bengali kz (actually k + nukta) will be a two step mapping, k -> k (next :nukta,... ) and k+nukta->kz krama reference in the main transliteration array
+       * There is also an option to prevent this auto behaviour. Like for tamil we dont iru in tamil to map to R in krama key so we manually disable it
+       * This can also be used to define the fallback combination. The array allows a multiple krama keys to be combined together to form a fallback
+       * Like .100 = .1+.0+.0
+       */
+      krama?: number[] | null;
+      /** This will be useful to get info related to the fallback if they happen to be a svara or a vyanjana
+       * eg. The Malayalam .n,.N, etc
+       */
+      fallback_list_ref?: number | null;
     }
   ][];
 };

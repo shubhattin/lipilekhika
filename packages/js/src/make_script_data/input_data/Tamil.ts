@@ -123,26 +123,30 @@ const Tamil = {
     {
       text: 'ல்ரி',
       text_krama: ['LR-svara', 'LR-mAtrA'],
-      type: 'vyanjana'
+      type: 'vyanjana',
+      prevent_auto_matching: true
     },
     {
       text: 'ல்ரீ',
       text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      type: 'vyanjana'
+      type: 'vyanjana',
+      prevent_auto_matching: true
     },
     {
       text: 'ரு',
       mAtrA: 'ிரு',
       text_krama: ['R-svara'],
       mAtrA_text_krama: ['R-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ரூ',
       mAtrA: 'ிரூ',
       text_krama: ['RR-svara'],
       mAtrA_text_krama: ['RR-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
 
     // Vyanjana
@@ -158,12 +162,12 @@ const Tamil = {
     },
     {
       text: 'ச',
-      text_krama: ['C', 'Cz', 'Ch', 'Chz', 'jh'],
+      text_krama: ['C', 'Ch'],
       type: 'vyanjana'
     },
     {
       text: 'ஜ',
-      text_krama: ['j', 'jz', 'j1'],
+      text_krama: ['j', 'jz', 'j1', 'jh'],
       type: 'vyanjana'
     },
     {

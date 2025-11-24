@@ -223,18 +223,8 @@ const Sharada = {
       type: 'vyanjana'
     },
     {
-      text: '𑆖𑇊',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: '𑆗',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: '𑆗𑇊',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {
