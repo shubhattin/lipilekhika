@@ -66,13 +66,11 @@ async function main() {
     // prefill the text_to_krama_map with the manual_krama_text_map
     // as it has a lower precedence
 
-    type fallback_info_type = NonNullable<
-      Extract<
-        OutputScriptData,
-        { script_type: 'brahmic' }
-      >['text_to_krama_map'][number][1]['fallback_info']
-    >;
-    function add_to_text_to_krama_map(text: string, val: number | fallback_info_type) {
+    function add_to_text_to_krama_map(
+      text: string,
+      val: number[],
+      fallback_list_ref?: number | null
+    ) {
       // step by step create entries for the text mapping
       for (let i = 0; i < text.length; i++) {
         const text_char = text.substring(0, i + 1); // from start to the current index
@@ -89,19 +87,22 @@ async function main() {
                 : current_next
               : next_char;
           // mapping the krama index
-          if (i === text.length - 1)
-            if (typeof val === 'number')
-              res.text_to_krama_map[existing_entry_index][1].krama_index = val;
-            else res.text_to_krama_map[existing_entry_index][1].fallback_info = val;
+          if (i === text.length - 1) {
+            res.text_to_krama_map[existing_entry_index][1].krama = val;
+            if (fallback_list_ref !== undefined && fallback_list_ref !== null)
+              res.text_to_krama_map[existing_entry_index][1].fallback_list_ref = fallback_list_ref;
+          }
           continue;
         }
         keys_text_to_krama_map.push(text_char);
         res.text_to_krama_map.push([text_char, { ...(next_char ? { next: next_char } : {}) }]);
         // mapping the krama index
-        if (i === text.length - 1)
-          if (typeof val === 'number')
-            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].krama_index = val;
-          else res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].fallback_info = val;
+        if (i === text.length - 1) {
+          res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].krama = val;
+          if (fallback_list_ref !== undefined && fallback_list_ref !== null)
+            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].fallback_list_ref =
+              fallback_list_ref;
+        }
       }
     }
     // Part 1: Prefill the krama_text_map using the manual_krama_text_map
@@ -116,7 +117,7 @@ async function main() {
       if (value === undefined || value === null || krama_key_index === -1) continue;
       res.krama_text_map[krama_key_index] = [value, null];
       // step by step create entries for the text mapping
-      add_to_text_to_krama_map(value, krama_key_index);
+      add_to_text_to_krama_map(value, [krama_key_index]);
     }
 
     // Scan for multiple same text attributes in the list
@@ -211,7 +212,7 @@ async function main() {
             resolveKramaKeysExtendedType(item.text_krama[0] as KramaKeysExtendedType)
           );
           if (krama_key_index !== -1) {
-            add_to_text_to_krama_map(duplicate_text, krama_key_index);
+            add_to_text_to_krama_map(duplicate_text, [krama_key_index]);
           }
         }
         if (item.type === 'svara' && item.mAtrA_duplicates) {
@@ -222,7 +223,7 @@ async function main() {
               resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
             );
             if (krama_key_index !== -1) {
-              add_to_text_to_krama_map(mAtrA_duplicate_text, krama_key_index);
+              add_to_text_to_krama_map(mAtrA_duplicate_text, [krama_key_index]);
             }
           }
         }
@@ -238,12 +239,11 @@ async function main() {
             resolveKramaKeysExtendedType(fallback_key as KramaKeysExtendedType)
           )
         );
-        add_to_text_to_krama_map(item.text, {
-          krama_combination: fallback_key_kram_index_list,
-          ...(key_to_reference_back_list !== null && key_to_reference_back_list !== undefined
-            ? { list_ref: key_to_reference_back_list }
-            : {})
-        });
+        add_to_text_to_krama_map(
+          item.text,
+          fallback_key_kram_index_list,
+          key_to_reference_back_list
+        );
       }
     }
 
@@ -252,10 +252,10 @@ async function main() {
     // This will speed up things in the production as it does not has to scan again in the krama_text_map list
     for (const text_krama_item of res.text_to_krama_map) {
       const text = text_krama_item[0];
-      const text_krama_ref = text_krama_item[1].krama_index;
+      const text_krama_ref = text_krama_item[1].krama;
       const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
       if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
-        text_krama_item[1].krama_index = text_index;
+        text_krama_item[1].krama = [text_index];
       }
     }
 

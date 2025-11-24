@@ -125,24 +125,28 @@ const Tamil_Extended = {
       mAtrA: 'ிரு²',
       text_krama: ['R-svara'],
       mAtrA_text_krama: ['R-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ரூ²',
       mAtrA: 'ிரூ²',
       text_krama: ['RR-svara'],
       mAtrA_text_krama: ['RR-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ல்ரி²',
       text_krama: ['LR-svara', 'LR-mAtrA'],
-      type: 'vyanjana'
+      type: 'vyanjana',
+      prevent_auto_matching: true
     },
     {
       text: 'ல்ரீ²',
       text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      type: 'vyanjana'
+      type: 'vyanjana',
+      prevent_auto_matching: true
     },
 
     // Vyanjana
