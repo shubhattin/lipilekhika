@@ -273,6 +273,7 @@ async function main() {
     }
 
     // Part 5: Optmizing the text_to_krama_map
+
     // Scan for cases where the key exists in krama_text_map but it is not mapped in index
     // This will speed up things in the production as it does not has to scan again in the krama_text_map list
     for (const text_krama_item of res.text_to_krama_map) {
@@ -283,6 +284,24 @@ async function main() {
         text_krama_item[1].krama = [text_index];
       }
     }
+    // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
+    // then we can safely remove it as it directly looked up in the krama array
+    const index_to_remove: number[] = [];
+    for (let i = 0; i < res.text_to_krama_map.length; i++) {
+      const text_krama_item = res.text_to_krama_map[i];
+      const text = text_krama_item[0];
+      const text_krama_ref = text_krama_item[1].krama;
+      if (
+        text.length === 1 &&
+        text_krama_ref !== null &&
+        text_krama_ref !== undefined &&
+        text_krama_ref.length >= 1 &&
+        text_krama_item[1].next === null
+      ) {
+        index_to_remove.push(i);
+      }
+    }
+    res.text_to_krama_map = res.text_to_krama_map.filter((_, i) => !index_to_remove.includes(i));
 
     // In Dev mode add the original krama key at the third index for easy comparision and verification
     // and also add unicode escaped strings for better debugging (hopefully)
@@ -302,6 +321,7 @@ async function main() {
       for (let i = 0; i < KramaKeysArray.length; i++) {
         res.krama_text_map[i].push(KramaKeysArray[i]);
         res.krama_text_map[i].push(toUnicodeEscapes(res.krama_text_map[i][0]));
+        res.krama_text_map[i].push(i);
       }
     }
 
