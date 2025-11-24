@@ -75,17 +75,20 @@ async function main() {
       for (let i = 0; i < text.length; i++) {
         const text_char = text.substring(0, i + 1); // from start to the current index
         const next_char = text[i + 1] as string | undefined;
-        const existing_entry_index = keys_text_to_krama_map.indexOf(text_char);
-        if (existing_entry_index !== -1 && next_char) {
+        const existing_entry_index = res.text_to_krama_map.findIndex(
+          (item) => item[0] === text_char
+        );
+        if (existing_entry_index !== -1) {
           const current_next = res.text_to_krama_map[existing_entry_index][1].next;
-          res.text_to_krama_map[existing_entry_index][1].next =
-            current_next !== null && current_next !== undefined
-              ? current_next.indexOf(next_char) === -1
-                ? // if the next char is not in the current next, then add it to the current next
-                  // else ignore it
-                  current_next + next_char
-                : current_next
-              : next_char;
+          if (next_char)
+            res.text_to_krama_map[existing_entry_index][1].next =
+              current_next !== null && current_next !== undefined
+                ? current_next.indexOf(next_char) === -1
+                  ? // if the next char is not in the current next, then add it to the current next
+                    // else ignore it
+                    current_next + next_char
+                  : current_next
+                : next_char;
           // mapping the krama index
           if (i === text.length - 1) {
             res.text_to_krama_map[existing_entry_index][1].krama = val;
@@ -94,19 +97,17 @@ async function main() {
           }
           continue;
         }
-        keys_text_to_krama_map.push(text_char);
         res.text_to_krama_map.push([text_char, { ...(next_char ? { next: next_char } : {}) }]);
         // mapping the krama index
         if (i === text.length - 1) {
-          res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].krama = val;
+          res.text_to_krama_map[res.text_to_krama_map.length - 1][1].krama = val;
           if (fallback_list_ref !== undefined && fallback_list_ref !== null)
-            res.text_to_krama_map[keys_text_to_krama_map.length - 1][1].fallback_list_ref =
+            res.text_to_krama_map[res.text_to_krama_map.length - 1][1].fallback_list_ref =
               fallback_list_ref;
         }
       }
     }
     // Part 1: Prefill the krama_text_map using the manual_krama_text_map
-    const keys_text_to_krama_map: string[] = [];
     for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
       const value = input_script_data.manual_krama_text_map![krama_key as KramaKeysType];
       const krama_key_index = binarySearchWithIndex(
@@ -141,13 +142,12 @@ async function main() {
         }
       }
     }
-    const keys_krama_text_map: string[] = [];
     for (const item of input_script_data.list ?? []) {
       // Part 2: Start scanning the list to fill krama_key_map and key_to_krama_map
       // Brahmic Scripts Referencing back Portion
       // only reference back only if svara or vyanjana (even if a fallback type) as else not needed
       const key_to_reference_back_list =
-        item.type === 'svara' || item.type === 'vyanjana' ? keys_krama_text_map.length : null;
+        item.type === 'svara' || item.type === 'vyanjana' ? res.list.length : null;
       if (
         res.script_type === 'brahmic' &&
         key_to_reference_back_list !== null &&
@@ -162,7 +162,6 @@ async function main() {
             resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
           )
         );
-        keys_krama_text_map.push(item.text);
         res.list.push({
           krama_ref: krama_key_list_index_list,
           type: item.type,
@@ -244,6 +243,32 @@ async function main() {
           fallback_key_kram_index_list,
           key_to_reference_back_list
         );
+      }
+    }
+
+    // Scan the krama_text_map for keys which are two characters
+    // for (const text_krama_item of res.krama_text_map) {
+    for (let i = 0; i < res.krama_text_map.length; i++) {
+      const text_krama_item = res.krama_text_map[i];
+      const text = text_krama_item[0];
+      // search for the list item using the text key
+      const list_item = input_script_data.list?.find((item) => item.text === text);
+      if (
+        text.length > 1 &&
+        // if the list item exists and prevent_auto_matching is not true, then skip
+        !(list_item?.prevent_auto_matching === true)
+        // expression reduced using boolean algebra
+      ) {
+        // interate from start to before the final chactacter of the text
+        for (let j = 0; j < text.length - 1; j++) {
+          const text_char = text.substring(0, j + 1);
+          const krama_key_references = text_char
+            .split('')
+            .map((char) => res.krama_text_map.findIndex((item) => item[0] === char));
+          add_to_text_to_krama_map(text_char, krama_key_references);
+        }
+        // final character addition
+        add_to_text_to_krama_map(text, [i]);
       }
     }
 

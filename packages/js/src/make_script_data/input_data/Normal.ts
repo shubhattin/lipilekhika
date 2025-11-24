@@ -110,10 +110,10 @@ const Normal = {
     श: 'sh',
     ष: 'Sh',
     // 4 vedic accent symbols
-    '॒': 'anudAttA',
-    '॑': 'udAtta-1',
-    '᳚': 'udAtta-2',
-    '᳛': 'udAtta-3',
+    anudAttA: '↓',
+    'udAtta-1': '↑',
+    'udAtta-2': '↑↑',
+    'udAtta-3': '↑↑↑',
     '०': '0',
     '१': '1',
     '२': '2',
@@ -124,8 +124,8 @@ const Normal = {
     '७': '7',
     '८': '8',
     '९': '9',
-    '।': 'virama',
-    '॥': 'double_virama'
+    '।': '.',
+    '॥': '..'
   },
   list: [
     {
