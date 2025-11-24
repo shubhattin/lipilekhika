@@ -196,18 +196,8 @@ const Gujarati = {
       type: 'vyanjana'
     },
     {
-      text: 'ચ઼',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'છ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'છ઼',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

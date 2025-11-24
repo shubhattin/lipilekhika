@@ -160,12 +160,12 @@ const Modi = {
     },
     {
       text: '𑘓',
-      text_krama: ['C', 'Cz'],
+      text_krama: ['C'],
       type: 'vyanjana'
     },
     {
       text: '𑘔',
-      text_krama: ['Ch', 'Chz'],
+      text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {

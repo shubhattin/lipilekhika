@@ -196,18 +196,8 @@ const Devanagari = {
       type: 'vyanjana'
     },
     {
-      text: 'च़',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'छ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'छ़',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

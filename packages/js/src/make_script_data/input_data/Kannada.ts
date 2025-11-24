@@ -200,18 +200,8 @@ const Kannada = {
       type: 'vyanjana'
     },
     {
-      text: 'ಚ಼',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'ಛ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'ಛ಼',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

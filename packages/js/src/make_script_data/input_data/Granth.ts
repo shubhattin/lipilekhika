@@ -207,18 +207,8 @@ const Granth = {
       type: 'vyanjana'
     },
     {
-      text: '𑌚𑌼',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: '𑌛',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: '𑌛𑌼',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

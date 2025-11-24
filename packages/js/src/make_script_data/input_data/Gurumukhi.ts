@@ -176,18 +176,8 @@ const Gurumukhi = {
       type: 'vyanjana'
     },
     {
-      text: 'ਚ਼',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'ਛ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'ਛ਼',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

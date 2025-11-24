@@ -185,18 +185,8 @@ const Siddham = {
       type: 'vyanjana'
     },
     {
-      text: '𑖓𑗀',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: '𑖔',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: '𑖔𑗀',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {

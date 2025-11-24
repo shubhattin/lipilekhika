@@ -174,12 +174,12 @@ const Telugu = {
     },
     {
       text: 'చ',
-      text_krama: ['C', 'Cz'],
+      text_krama: ['C'],
       type: 'vyanjana'
     },
     {
       text: 'ఛ',
-      text_krama: ['Ch', 'Chz'],
+      text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {

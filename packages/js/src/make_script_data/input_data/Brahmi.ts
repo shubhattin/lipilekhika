@@ -162,12 +162,12 @@ const Brahmi = {
     },
     {
       text: '𑀘',
-      text_krama: ['C', 'Cz'],
+      text_krama: ['C'],
       type: 'vyanjana'
     },
     {
       text: '𑀙',
-      text_krama: ['Ch', 'Chz'],
+      text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {

@@ -162,12 +162,12 @@ const Tamil = {
     },
     {
       text: 'ச',
-      text_krama: ['C', 'Cz', 'Ch', 'Chz', 'jh'],
+      text_krama: ['C', 'Ch'],
       type: 'vyanjana'
     },
     {
       text: 'ஜ',
-      text_krama: ['j', 'jz', 'j1'],
+      text_krama: ['j', 'jz', 'j1', 'jh'],
       type: 'vyanjana'
     },
     {

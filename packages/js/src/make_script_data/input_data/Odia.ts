@@ -186,18 +186,8 @@ const Odia = {
       type: 'vyanjana'
     },
     {
-      text: 'ଚ଼',
-      text_krama: ['Cz'],
-      type: 'vyanjana'
-    },
-    {
       text: 'ଛ',
       text_krama: ['Ch'],
-      type: 'vyanjana'
-    },
-    {
-      text: 'ଛ଼',
-      text_krama: ['Chz'],
       type: 'vyanjana'
     },
     {
