@@ -314,7 +314,7 @@ async function main() {
         text_krama_ref !== null &&
         text_krama_ref !== undefined &&
         text_krama_ref.length >= 1 &&
-        text_krama_item[1].next === null
+        (text_krama_item[1].next === null || text_krama_item[1].next === undefined)
       ) {
         index_to_remove.push(i);
       }
