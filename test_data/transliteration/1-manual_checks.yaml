@@ -15,8 +15,20 @@
   to: Bengali
   input: श़ो क़ा ड़ा
   output: শ়ো ক়া ড়া
-- index: 2
+- index: 3
   from: Devanagari
   to: Telugu
   input: श़ो क़ा ड़ा
   output: శో కా డా
+
+# Short/Long E & O
+- index: 4
+  from: Purna-Devanagari
+  to: Telugu
+  input: कॆशं केशं
+  output: కెశం కేశం
+- index: 5
+  from: Devanagari
+  to: Telugu
+  input: कॆशं केशं
+  output: కేశం కేశం

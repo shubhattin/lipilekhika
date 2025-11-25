@@ -51,6 +51,7 @@ const devangari_other_brahmic_scripts = async () => {
     "Sinhala",
     "Tamil",
     "Telugu",
+    "Purna-Devanagari",
   ] satisfies script_list_type[];
 
   const NOT_REVERSIBLE_SCRIPTS = [

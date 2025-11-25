@@ -41,6 +41,8 @@ const Devanagari = {
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],
       mAtrA_text_krama: ['a-mAtrA', 'a1-mAtrA'],
+      duplicates: ['ॳ'],
+      mAtrA_duplicates: ['ऺ'],
       type: 'svara'
     },
     {
@@ -48,6 +50,8 @@ const Devanagari = {
       mAtrA: 'ा',
       text_krama: ['A-svara', 'A1-svara'],
       mAtrA_text_krama: ['A-mAtrA', 'A1-mAtrA'],
+      duplicates: ['ॴ'],
+      mAtrA_duplicates: ['ऻ'],
       type: 'svara'
     },
     {
@@ -69,6 +73,8 @@ const Devanagari = {
       mAtrA: 'ु',
       text_krama: ['u-svara', 'u1-svara'],
       mAtrA_text_krama: ['u-mAtrA', 'u1-mAtrA'],
+      duplicates: ['ॶ'],
+      mAtrA_duplicates: ['ॖ'],
       type: 'svara'
     },
     {
@@ -76,6 +82,8 @@ const Devanagari = {
       mAtrA: 'ू',
       text_krama: ['U-svara', 'U1-svara'],
       mAtrA_text_krama: ['U-mAtrA', 'U1-mAtrA'],
+      duplicates: ['ॷ'],
+      mAtrA_duplicates: ['ॗ'],
       type: 'svara'
     },
     {
@@ -118,6 +126,8 @@ const Devanagari = {
       mAtrA: 'े',
       text_krama: ['E-svara', 'e-svara'],
       mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
+      duplicates: ['ऎ'],
+      mAtrA_duplicates: ['ॆ'],
       type: 'svara'
     },
     {
@@ -139,6 +149,8 @@ const Devanagari = {
       mAtrA: 'ो',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
+      duplicates: ['ऒ'],
+      mAtrA_duplicates: ['ॊ'],
       type: 'svara'
     },
     {
@@ -173,6 +185,7 @@ const Devanagari = {
     {
       text: 'ग',
       text_krama: ['g', 'g1'],
+      duplicates: ['ॻ'],
       type: 'vyanjana'
     },
     {
@@ -203,6 +216,7 @@ const Devanagari = {
     {
       text: 'ज',
       text_krama: ['j', 'j1'],
+      duplicates: ['ॼ'],
       type: 'vyanjana'
     },
     {
@@ -234,6 +248,7 @@ const Devanagari = {
     {
       text: 'ड',
       text_krama: ['D', 'D1'],
+      duplicates: ['ॾ'],
       type: 'vyanjana'
     },
     {
@@ -308,6 +323,7 @@ const Devanagari = {
     {
       text: 'ब',
       text_krama: ['b', 'b1'],
+      duplicates: ['ॿ'],
       type: 'vyanjana'
     },
     {
