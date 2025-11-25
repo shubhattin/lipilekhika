@@ -61,7 +61,7 @@ async function main() {
       };
     }
     // initialize krama key map as an empty starting array
-    res.krama_text_map = Array.from({ length: KramaKeysArray.length }, () => ['', null]);
+    res.krama_text_map = Array.from({ length: KramaKeysArray.length }, () => ['', null, null]);
 
     // prefill the text_to_krama_map with the manual_krama_text_map
     // as it has a lower precedence
@@ -116,7 +116,7 @@ async function main() {
         resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
       );
       if (value === undefined || value === null || krama_key_index === -1) continue;
-      res.krama_text_map[krama_key_index] = [value, null];
+      res.krama_text_map[krama_key_index] = [value, null, null];
       // step by step create entries for the text mapping
       add_to_text_to_krama_map(value, [krama_key_index]);
     }
@@ -171,7 +171,7 @@ async function main() {
         krama_key_list_index_list.forEach((krama_key_index) => {
           // link entries in the krama map to the list
           if (krama_key_index !== -1) {
-            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list];
+            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list, null];
           }
         });
         if (item.type === 'svara') {
@@ -192,7 +192,11 @@ async function main() {
             res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
-              res.krama_text_map[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
+              res.krama_text_map[mAtrA_krama_ref_index] = [
+                item.mAtrA,
+                key_to_reference_back_list,
+                null
+              ];
             }
           });
         }
@@ -269,6 +273,19 @@ async function main() {
         }
         // final character addition
         add_to_text_to_krama_map(text, [i]);
+      }
+    }
+
+    // Resolving same keys pointing to multiple items in krama_text_map
+    // we scan before the current index and link to the first occurence if found
+    for (let i = 0; i < res.krama_text_map.length; i++) {
+      const text_krama_item = res.krama_text_map[i];
+      for (let j = 0; j < i; j++) {
+        const text_krama_item_j = res.krama_text_map[j];
+        if (text_krama_item[0] === text_krama_item_j[0]) {
+          text_krama_item[2] = j; // link to the first occurence
+          break;
+        }
       }
     }
 

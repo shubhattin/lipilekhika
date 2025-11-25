@@ -1,5 +1,14 @@
 import { binarySearchWithIndex, createSearchIndex } from '../utils/binary_search/binary_search';
 
+/**
+ * These Krama keys are written in an order where the keys which comes first shall takes precendence if in the krama_text_map two have the same key
+ * then the one that comes first shall be chosen
+ * For eg. kau (from Bengali)
+ * the "au" can land both on au and auU because of tne nature of the binary search algorithm
+ * so to componsate that we chose the first one in case of multiple possible mappings
+ *
+ * So Be careful with similar mAtrAs, different forms of the same vyanajana (like with nuqta and other forms)
+ */
 const KramaKeysMap = {
   ॐ: 'AUM',
   अ: 'a-svara',

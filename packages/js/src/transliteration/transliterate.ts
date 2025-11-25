@@ -31,7 +31,13 @@ export const transliterate_text = async (
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_text = text_to_krama_item[1].krama
-          .map((krama_index) => to_script_data.krama_text_map[krama_index][0])
+          .map((krama_index) =>
+            get_krama_index_text_value(
+              from_script_data.krama_text_map,
+              to_script_data.krama_text_map,
+              krama_index
+            )
+          )
           .join('');
         result_str += result_text;
         continue;
@@ -55,7 +61,11 @@ export const transliterate_text = async (
       result_str += char_to_search;
       continue;
     }
-    result_str += to_script_data.krama_text_map[index][0];
+    result_str += get_krama_index_text_value(
+      from_script_data.krama_text_map,
+      to_script_data.krama_text_map,
+      index
+    );
   }
 
   return result_str;
@@ -95,3 +105,18 @@ function search_in_text_to_krama_map(
   }
   return text_to_krama_item;
 }
+
+/**
+ * this fucntion is to overcome the issue of same keys pointing to multiple items in the krama_text_map in binary search
+ */
+const get_krama_index_text_value = (
+  from_krama_text_map: OutputScriptData['krama_text_map'],
+  to_krama_text_map: OutputScriptData['krama_text_map'],
+  index: number
+) => {
+  const item = from_krama_text_map[index];
+  if (item[2] !== null) {
+    return to_krama_text_map[item[2]][0];
+  }
+  return to_krama_text_map[index][0];
+};
