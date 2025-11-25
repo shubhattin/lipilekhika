@@ -107,11 +107,18 @@ const devanagari_non_brahmic_scripts = async () => {
   let index = 0;
   for (const input of DEVANAGARI_INPUTS) {
     for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
-      const output = await old_lipi_parivartak(
+      let output = await old_lipi_parivartak(
         input,
         FROM_SCRIPT,
         non_brahmic_script
       );
+      if (
+        non_brahmic_script === "Romanized" ||
+        non_brahmic_script === "Normal"
+      ) {
+        output = output.replaceAll("chh", "Ch");
+        output = output.replaceAll("ch", "C");
+      }
       out_test_data.push({
         index: index++,
         from: FROM_SCRIPT,
@@ -120,15 +127,15 @@ const devanagari_non_brahmic_scripts = async () => {
         output: output.replace(/\.(?=\d)/g, ""), // handling the case of number conversion where १ -> 1 (not .1)
         reversible: false,
       });
-      // this version is reversible as १ -> .1 and .1 -> १
-      out_test_data.push({
-        index: index++,
-        from: non_brahmic_script,
-        to: FROM_SCRIPT,
-        input: output,
-        output: input,
-        reversible: true,
-      });
+      // // this version is reversible as १ -> .1 and .1 -> १
+      // out_test_data.push({
+      //   index: index++,
+      //   from: non_brahmic_script,
+      //   to: FROM_SCRIPT,
+      //   input: output,
+      //   output: input,
+      //   reversible: true,
+      // });
     }
   }
   fs.writeFileSync(

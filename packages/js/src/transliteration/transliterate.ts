@@ -1,4 +1,7 @@
-import type { OutputScriptData } from '../make_script_data/output_script_data_schema';
+import type {
+  OutputScriptData,
+  OutputBrahmicScriptData
+} from '../make_script_data/output_script_data_schema';
 import { binarySearch, binarySearchWithIndex } from '../utils/binary_search/binary_search';
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
@@ -14,11 +17,81 @@ export const transliterate_text = async (
   let result_str = '';
 
   let text_index = 0;
+
+  const MAX_CONTEXT_LENGTH = 5;
+  /** It stores the previous attribute types of the brahmic scripts
+   * Use only when converted Brahmic -> Other or Other -> Brahmic
+   * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
+   * and the characters match text of the brahmic script
+   */
+  let prev_context_arr: [
+    string,
+    OutputBrahmicScriptData['list'][number]['type'] | null | undefined
+  ][] = [];
+  const PREV_CONTEXT_IN_USE =
+    (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
+    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
+
+  function prev_context_cleanup_func(item: (typeof prev_context_arr)[number]) {
+    // custom cleanup logic/cases
+    const brahmic_nuqta =
+      from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
+        ? from_script_data?.nuqta
+        : from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic'
+          ? to_script_data?.nuqta
+          : null;
+    if (
+      // vyanjana, nuqta, svara
+      ((prev_context_arr.length >= 3 &&
+        prev_context_arr.at(-3)?.[1] === 'vyanjana' &&
+        prev_context_arr.at(-2)?.[0] === brahmic_nuqta &&
+        prev_context_arr.at(-1)?.[1] === 'svara') ||
+        // or vyanjana, svara
+        (prev_context_arr.length >= 2 &&
+          prev_context_arr.at(-2)?.[1] === 'vyanjana' &&
+          prev_context_arr.at(-1)?.[1] === 'svara')) &&
+      // to anya or null
+      (!item || item[1] === 'anya')
+    ) {
+      prev_context_arr = [];
+    }
+    // custom logic when converting from brahmic to other
+    if (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') {
+      const brahmic_halant = from_script_data.halant;
+      if (
+        item[0] !== brahmic_halant &&
+        item[0] !== brahmic_nuqta &&
+        // ^ two special cases to ignore
+        // vyanjana or vyanjana, nuqta
+        ((prev_context_arr.length >= 1 && prev_context_arr.at(-1)?.[1] === 'vyanjana') ||
+          (prev_context_arr.length >= 2 &&
+            prev_context_arr.at(-2)?.[1] === 'vyanjana' &&
+            prev_context_arr.at(-1)?.[0] === brahmic_nuqta)) &&
+        // to anya or null
+        ((item[1] !== 'svara' && item[0] !== brahmic_halant) ||
+          item[1] === 'anya' ||
+          item[1] === null ||
+          item[1] === undefined)
+        // ^ as halant also a null 'type'
+      ) {
+        result_str += 'a';
+        // this is 'a' is true for Romanized and Normal (could be different for others if added in future)
+      }
+    }
+
+    // addition and shifting
+    prev_context_arr.push(item);
+    if (prev_context_arr.length > MAX_CONTEXT_LENGTH || item[0] === ' ') {
+      prev_context_arr.shift();
+    }
+  }
+
   for (; text_index < text.length; ) {
     if (text[text_index] === ' ') {
       // ignore blank spaces
-      result_str += ' ';
       text_index++;
+      if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([' ', null]);
+      result_str += ' ';
       continue;
     }
 
@@ -39,6 +112,45 @@ export const transliterate_text = async (
             )
           )
           .join('');
+        if (PREV_CONTEXT_IN_USE) {
+          if (from_script_data.script_type === 'brahmic') {
+            prev_context_cleanup_func([
+              text_to_krama_item[0],
+              (() => {
+                if (
+                  text_to_krama_item[1].fallback_list_ref !== undefined &&
+                  text_to_krama_item[1].fallback_list_ref !== null
+                ) {
+                  return from_script_data.list[text_to_krama_item[1].fallback_list_ref]?.type;
+                }
+                // if otherwise then follow the the first kram ref
+                // This condition very well may change in the future so be careful
+                return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
+                  ? from_script_data.list[
+                      from_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
+                    ]?.type
+                  : null;
+              })()
+            ]);
+          } else if (to_script_data.script_type === 'brahmic') {
+            prev_context_cleanup_func([
+              text_to_krama_item[0],
+              (() => {
+                if (
+                  text_to_krama_item[1].fallback_list_ref !== undefined &&
+                  text_to_krama_item[1].fallback_list_ref !== null
+                ) {
+                  return to_script_data.list[text_to_krama_item[1].fallback_list_ref]?.type;
+                }
+                return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
+                  ? to_script_data.list[
+                      to_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
+                    ]?.type
+                  : null;
+              })()
+            ]);
+          }
+        }
         result_str += result_text;
         continue;
       }
@@ -59,7 +171,25 @@ export const transliterate_text = async (
     if (index === -1) {
       // text not matched so ignore and return as it is
       result_str += char_to_search;
+      if (PREV_CONTEXT_IN_USE) {
+        prev_context_cleanup_func([char_to_search, null]);
+        prev_context_arr = [];
+        // clear the array as an unedentifed character found
+      }
       continue;
+    }
+    if (PREV_CONTEXT_IN_USE) {
+      if (from_script_data.script_type === 'brahmic') {
+        prev_context_cleanup_func([
+          char_to_search,
+          from_script_data.list[from_script_data.krama_text_map[index][1] ?? -1]?.type
+        ]);
+      } else if (to_script_data.script_type === 'brahmic') {
+        prev_context_cleanup_func([
+          char_to_search,
+          to_script_data.list[to_script_data.krama_text_map[index][1] ?? -1]?.type
+        ]);
+      }
     }
     result_str += get_krama_index_text_value(
       from_script_data.krama_text_map,
@@ -67,6 +197,8 @@ export const transliterate_text = async (
       index
     );
   }
+  if (PREV_CONTEXT_IN_USE && from_script_data.script_type === 'brahmic')
+    prev_context_cleanup_func([text[text_index], null]);
 
   return result_str;
 };

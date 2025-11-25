@@ -170,11 +170,13 @@ const Devanagari = {
     {
       text: 'क़',
       text_krama: ['kz'],
+      duplicates: ['क़'],
       type: 'vyanjana'
     },
     {
       text: 'ख़',
       text_krama: ['khz'],
+      duplicates: ['ख़'],
       type: 'vyanjana'
     },
     {
@@ -191,6 +193,7 @@ const Devanagari = {
     {
       text: 'ग़',
       text_krama: ['gz'],
+      duplicates: ['ग़'],
       type: 'vyanjana'
     },
     {

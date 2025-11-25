@@ -6,7 +6,7 @@ const Romanized = {
   script_id: script_list_obj['Romanized'],
   script_type: 'other',
   manual_krama_text_map: {
-    ॐ: 'AUM',
+    ॐ: 'āūṁ',
     अ: 'a',
     '': 'a',
     ॳ: 'a',
@@ -56,7 +56,7 @@ const Romanized = {
     'ः': 'ḥ',
     ऽ: "''",
     '्': '',
-    '़': 'z',
+    '़': '',
     '॰': '.',
     क: 'k',
     क़: 'kz',

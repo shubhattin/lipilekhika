@@ -8,7 +8,7 @@ import type { script_list_type } from '../utils/lang_list';
 import { transliterate } from '../index';
 
 const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
-const TEST_FILES_TO_IGNORE = ['auto-devangari_non_brahmic_scripts.yaml'];
+const TEST_FILES_TO_IGNORE: string[] = [];
 
 type TestDataType = {
   index: number;
