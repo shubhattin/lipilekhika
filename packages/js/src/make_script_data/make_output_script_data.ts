@@ -251,12 +251,13 @@ async function main() {
     }
 
     // Scan the krama_text_map for keys which are two characters
-    // for (const text_krama_item of res.krama_text_map) {
     for (let i = 0; i < res.krama_text_map.length; i++) {
       const text_krama_item = res.krama_text_map[i];
       const text = text_krama_item[0];
       // search for the list item using the text key
-      const list_item = input_script_data.list?.find((item) => item.text === text);
+      const list_item = input_script_data.list?.find(
+        (item) => item.text === text || (item.type === 'svara' && item.mAtrA === text)
+      );
       if (
         text.length > 1 &&
         // if the list item exists and prevent_auto_matching is not true, then skip

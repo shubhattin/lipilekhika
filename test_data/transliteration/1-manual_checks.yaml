@@ -1,0 +1,22 @@
+# testing Tamil R mAtrA handling
+- index: 0
+  from: Devanagari
+  to: Tamil
+  input: क्रिपा कृपा
+  output: க்ரிபா கிருபா
+- index: 1
+  from: Tamil
+  to: Devanagari
+  input: க்ரிபா கிருபா
+  output: क्रिपा किरुपा
+## Nuqta Testing
+- index: 2
+  from: Devanagari
+  to: Bengali
+  input: श़ो क़ा ड़ा
+  output: শ়ো ক়া ড়া
+- index: 2
+  from: Devanagari
+  to: Telugu
+  input: श़ो क़ा ड़ा
+  output: శో కా డా

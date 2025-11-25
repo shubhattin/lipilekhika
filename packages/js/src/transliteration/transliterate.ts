@@ -86,7 +86,9 @@ function search_in_text_to_krama_map(
   chars_scanned: number = 0
 ): OutputScriptData['text_to_krama_map'][number] | null {
   const char_to_search = text.substring(text_index, text_index + chars_scanned + 1);
-  const char_index = binarySearch(from_script_data.krama_text_map, char_to_search);
+  const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
+    accessor: (arr, i) => arr[i][0]
+  });
   if (char_index === -1) {
     // if the character is not found, then retun null
     return null;
