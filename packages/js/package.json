@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "bun run make-script-data && vite build",
+    "build": "rm -rf dist && bun run make-script-data && vite build",
     "check": "tsc --noEmit",
     "test": "bun run make-script-data && vitest",
     "test:ui": "bun run make-script-data && vitest --ui",
