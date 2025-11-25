@@ -41,17 +41,23 @@ const devangari_other_brahmic_scripts = async () => {
   const OUT_FILE_NAME = "auto-devangari_other_brahmic_scripts";
   const FROM_SCRIPT = "Devanagari";
   const OTHER_BRAHMI_SCRIPTS = [
-    "Gujarati",
-    "Bengali",
     "Assamese",
-    "Odia",
-    "Telugu",
+    "Bengali",
+    "Gurumukhi",
+    "Gujarati",
     "Kannada",
+    "Odia",
     "Malayalam",
     "Sinhala",
+    "Tamil",
+    "Telugu",
   ] satisfies script_list_type[];
 
-  const NOT_REVERSIBLE_SCRIPTS = ["Bengali"] as script_list_type[];
+  const NOT_REVERSIBLE_SCRIPTS = [
+    "Bengali",
+    "Gurumukhi",
+    "Tamil",
+  ] as script_list_type[];
 
   const out_test_data: TestData[] = [];
 
