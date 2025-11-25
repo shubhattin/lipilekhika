@@ -72,7 +72,8 @@ export const transliterate_text = async (
 };
 
 /**
- * This is a recursive function that searches the text_to_krama_map for the given text and char_index else retuns null
+ * Recursively searches for the longest matching character sequence by probing krama_text_map
+ * and retrieving the corresponding entry from text_to_krama_map. Returns null i no match.
  * @param text The Original text to be transliterated
  * @param text_index current pointer location in the text
  * @param from_script_data script data of the from script
@@ -109,7 +110,7 @@ function search_in_text_to_krama_map(
 }
 
 /**
- * this fucntion is to overcome the issue of same keys pointing to multiple items in the krama_text_map in binary search
+ * this function is to overcome the issue of same keys pointing to multiple items in the krama_text_map in binary search
  */
 const get_krama_index_text_value = (
   from_krama_text_map: OutputScriptData['krama_text_map'],
