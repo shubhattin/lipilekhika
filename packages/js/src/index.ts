@@ -1,3 +1,4 @@
+import { transliterate_text } from './transliteration/transliterate';
 import { getScriptData } from './utils/get_script_data';
 import {
   getNormalizedScriptName,
@@ -29,5 +30,6 @@ export async function transliterate(text: string, from: ScriptLangType, to: Scri
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to}`);
   }
-  return text;
+  const result = await transliterate_text(text, normalized_from, normalized_to);
+  return result;
 }

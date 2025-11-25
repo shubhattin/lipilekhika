@@ -20,7 +20,8 @@
     "vite": "^7.2.2",
     "vite-node": "^5.2.0",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.12",
+    "yaml": "^2.8.1"
   },
   "dependencies": {
     "zod": "^4.1.12"
