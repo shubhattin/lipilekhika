@@ -13,17 +13,17 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@vitest/ui": "^4.0.12",
+    "@vitest/ui": "^4.0.13",
     "chalk": "^5.6.2",
     "prettier": "^3.6.2",
     "typescript": "~5.9.3",
-    "vite": "^7.2.2",
+    "vite": "^7.2.4",
     "vite-node": "^5.2.0",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.12",
+    "vitest": "^4.0.13",
     "yaml": "^2.8.1"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+    "zod": "^4.1.13"
   }
 }

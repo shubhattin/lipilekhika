@@ -29,6 +29,11 @@ const TEST_DATA_OUT_FOLDER = path.join(
   "transliteration"
 );
 
+// Ensure output directory exists
+if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
+  fs.mkdirSync(TEST_DATA_OUT_FOLDER, { recursive: true });
+}
+
 /**
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
@@ -46,6 +51,8 @@ const devangari_other_brahmic_scripts = async () => {
     "Sinhala",
   ] satisfies script_list_type[];
 
+  const NOT_REVERSIBLE_SCRIPTS = ["Bengali"] as script_list_type[];
+
   const out_test_data: TestData[] = [];
 
   let index = 0;
@@ -62,7 +69,7 @@ const devangari_other_brahmic_scripts = async () => {
         to: other_script,
         input: input,
         output: output,
-        reversible: true,
+        reversible: !NOT_REVERSIBLE_SCRIPTS.includes(other_script),
       };
       out_test_data.push(test_data);
     }
