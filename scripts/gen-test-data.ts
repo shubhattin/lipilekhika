@@ -22,11 +22,18 @@ const DEVANAGARI_INPUTS = [
   "इमं विवस्वते योगं प्रोक्तवानहमव्ययम् ।\nविवस्वान्मनवे प्राह मनुरिक्ष्वाकवेऽब्रवीत् ॥४-१॥",
 ];
 
+const TEST_DATA_OUT_FOLDER = path.join(
+  __dirname,
+  "..",
+  "test_data",
+  "transliteration"
+);
+
 /**
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
 const devangari_other_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "devangari_other_brahmic_scripts";
+  const OUT_FILE_NAME = "auto-devangari_other_brahmic_scripts";
   const FROM_SCRIPT = "Devanagari";
   const OTHER_BRAHMI_SCRIPTS = [
     "Gujarati",
@@ -61,7 +68,7 @@ const devangari_other_brahmic_scripts = async () => {
     }
   }
   fs.writeFileSync(
-    path.join(__dirname, "..", "test_data", OUT_FILE_NAME + ".yaml"),
+    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME + ".yaml"),
     // @ts-ignore
     Bun.YAML.stringify(out_test_data, null, 2)
   );
@@ -73,7 +80,7 @@ const devangari_other_brahmic_scripts = async () => {
  * Generates test Test Data for transliteration to and from Devangari to non-Brahmic scripts (Normal and Romanized)
  */
 const devanagari_non_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "devangari_non_brahmic_scripts";
+  const OUT_FILE_NAME = "auto-devangari_non_brahmic_scripts";
   const FROM_SCRIPT = "Devanagari";
   const NON_BRAHMI_SCRIPTS = [
     "Normal",
@@ -108,7 +115,7 @@ const devanagari_non_brahmic_scripts = async () => {
     }
   }
   fs.writeFileSync(
-    path.join(__dirname, "..", "test_data", OUT_FILE_NAME + ".yaml"),
+    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME + ".yaml"),
     // @ts-ignore
     Bun.YAML.stringify(out_test_data, null, 2)
   );
