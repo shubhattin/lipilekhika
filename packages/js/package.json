@@ -6,8 +6,8 @@
   "scripts": {
     "build": "rm -rf dist && bun run make-script-data && vite build",
     "check": "tsc --noEmit",
-    "test": "bun run make-script-data && vitest",
-    "test:ui": "bun run make-script-data && vitest --ui",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "format": "prettier --write .",
     "make-script-data": "vite-node src/make_script_data/make_output_script_data.ts"
   },
