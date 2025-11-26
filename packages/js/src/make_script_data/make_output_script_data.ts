@@ -322,6 +322,26 @@ async function main() {
     }
     res.text_to_krama_arr = res.text_to_krama_arr.filter((_, i) => !index_to_remove.includes(i));
 
+    // Scan for duplicate keys in the text_to_krama_arr and warn
+    if (res.text_to_krama_arr.length > 0) {
+      const textToKramaDuplicateMap = new Map<string, number[]>();
+      res.text_to_krama_arr.forEach((item, index) => {
+        const [text_key] = item;
+        const indexes = textToKramaDuplicateMap.get(text_key) ?? [];
+        indexes.push(index);
+        textToKramaDuplicateMap.set(text_key, indexes);
+      });
+      for (const [text_key, indexes] of textToKramaDuplicateMap.entries()) {
+        if (indexes.length > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Dup key "${text_key}" in "${input_script_data.script_name}" at [${indexes.join(', ')}]`
+            )
+          );
+        }
+      }
+    }
+
     // In Dev mode add the original krama key at the third index for easy comparision and verification
     // and also add unicode escaped strings for better debugging (hopefully)
     if (IS_DEV_MODE) {
