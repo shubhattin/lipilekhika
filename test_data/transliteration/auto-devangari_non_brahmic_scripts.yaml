@@ -58,3 +58,63 @@
   input: "इमं विवस्वते योगं प्रोक्तवानहमव्ययम् ।\nविवस्वान्मनवे प्राह मनुरिक्ष्वाकवेऽब्रवीत् ॥४-१॥"
   output: "imaṁ vivasvatē yōgaṁ prōktavānahamavyayam .\nvivasvānmanavē prāha manurikṣvākavē''bravīt ..4-1.."
   reversible: true
+- index: 10
+  from: Devanagari
+  to: Normal
+  input: "न जायते म्रियते वा कदाचिन्नायं भूत्वा भविता वा न भूयः ।\nअजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे ॥२-२०॥"
+  output: "na jAyatE mriyatE vA kadACinnAyaM bhUtvA bhavitA vA na bhUyaH .\najO nityaH shAshvatO''yaM purANO na hanyatE hanyamAnE sharIrE ..2-20.."
+  reversible: true
+- index: 11
+  from: Devanagari
+  to: Romanized
+  input: "न जायते म्रियते वा कदाचिन्नायं भूत्वा भविता वा न भूयः ।\nअजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे ॥२-२०॥"
+  output: "na jāyatē mriyatē vā kadāCinnāyaṁ bhūtvā bhavitā vā na bhūyaḥ .\najō nityaḥ śāśvatō''yaṁ purāṇō na hanyatē hanyamānē śarīrē ..2-20.."
+  reversible: true
+- index: 12
+  from: Devanagari
+  to: Normal
+  input: "कथं भीष्ममहं सङ्ख्ये द्रोणं च मधुसूदन ।\nइषुभिः प्रतियोत्स्यामि पूजार्हावरिसूदन ॥२-४॥"
+  output: "kathaM bhIShmamahaM saGkhyE drONaM Ca madhusUdana .\niShubhiH pratiyOtsyAmi pUjArhAvarisUdana ..2-4.."
+  reversible: true
+- index: 13
+  from: Devanagari
+  to: Romanized
+  input: "कथं भीष्ममहं सङ्ख्ये द्रोणं च मधुसूदन ।\nइषुभिः प्रतियोत्स्यामि पूजार्हावरिसूदन ॥२-४॥"
+  output: "kathaṁ bhīṣmamahaṁ saṅkhyē drōṇaṁ Ca madhusūdana .\niṣubhiḥ pratiyōtsyāmi pūjārhāvarisūdana ..2-4.."
+  reversible: true
+- index: 14
+  from: Devanagari
+  to: Normal
+  input: "कर्मेन्द्रियाणि संयम्य य आस्ते मनसा स्मरन् ।\nइन्द्रियार्थान्विमूढात्मा मिथ्याचारः स उच्यते ॥३-६॥"
+  output: "karmEndriyANi saMyamya ya AstE manasA smaran .\nindriyArthAnvimUDhAtmA mithyACAraH sa uCyatE ..3-6.."
+  reversible: true
+- index: 15
+  from: Devanagari
+  to: Romanized
+  input: "कर्मेन्द्रियाणि संयम्य य आस्ते मनसा स्मरन् ।\nइन्द्रियार्थान्विमूढात्मा मिथ्याचारः स उच्यते ॥३-६॥"
+  output: "karmēndriyāṇi saṁyamya ya āstē manasā smaran .\nindriyārthānvimūḍhātmā mithyāCāraḥ sa uCyatē ..3-6.."
+  reversible: true
+- index: 16
+  from: Devanagari
+  to: Normal
+  input: "नियतं कुरु कर्म त्वं कर्म ज्यायो ह्यकर्मणः ।\nशरीरयात्रापि च ते न प्रसिद्ध्येदकर्मणः ॥३-८॥"
+  output: "niyataM kuru karma tvaM karma jyAyO hyakarmaNaH .\nsharIrayAtrApi Ca tE na prasiddhyEdakarmaNaH ..3-8.."
+  reversible: true
+- index: 17
+  from: Devanagari
+  to: Romanized
+  input: "नियतं कुरु कर्म त्वं कर्म ज्यायो ह्यकर्मणः ।\nशरीरयात्रापि च ते न प्रसिद्ध्येदकर्मणः ॥३-८॥"
+  output: "niyataṁ kuru karma tvaṁ karma jyāyō hyakarmaṇaḥ .\nśarīrayātrāpi Ca tē na prasiddhyēdakarmaṇaḥ ..3-8.."
+  reversible: true
+- index: 18
+  from: Devanagari
+  to: Normal
+  input: "इष्टान्भोगान्हि वो देवा दास्यन्ते यज्ञभाविताः ।\nतैर्दत्तानप्रदायैभ्यो यो भुङ्क्ते स्तेन एव सः ॥३-१२॥"
+  output: "iShTAnbhOgAnhi vO dEvA dAsyantE yajYabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
+  reversible: true
+- index: 19
+  from: Devanagari
+  to: Romanized
+  input: "इष्टान्भोगान्हि वो देवा दास्यन्ते यज्ञभाविताः ।\nतैर्दत्तानप्रदायैभ्यो यो भुङ्क्ते स्तेन एव सः ॥३-१२॥"
+  output: "iṣṭānbhōgānhi vō dēvā dāsyantē yajñabhāvitāḥ .\ntairdattānapradāyaibhyō yō bhuṅktē stēna ēva saḥ ..3-12.."
+  reversible: true
