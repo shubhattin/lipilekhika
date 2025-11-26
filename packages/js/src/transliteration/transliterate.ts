@@ -25,51 +25,63 @@ export const transliterate_text = async (
    * and the characters match text of the brahmic script
    */
   let prev_context_arr: [
-    string,
-    OutputBrahmicScriptData['list'][number]['type'] | null | undefined
+    string | undefined,
+    OutputBrahmicScriptData['list'][number] | null | undefined
   ][] = [];
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
     (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
+  const BRAHMIC_NUQTA =
+    from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
+      ? from_script_data?.nuqta
+      : from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic'
+        ? to_script_data?.nuqta
+        : null;
+  const BRAHMIC_HALANT =
+    from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
+      ? from_script_data.halant
+      : from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic'
+        ? to_script_data.halant
+        : null;
 
   function prev_context_cleanup_func(item: (typeof prev_context_arr)[number]) {
+    /** Return flag to indicate if the result_str concat has to be done
+     * as it already is concatenated in this function
+     */
+    let result_str_concat_status = false;
+
     // custom cleanup logic/cases
-    const brahmic_nuqta =
-      from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
-        ? from_script_data?.nuqta
-        : from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic'
-          ? to_script_data?.nuqta
-          : null;
+
     if (
       // vyanjana, nuqta, svara
       ((prev_context_arr.length >= 3 &&
-        prev_context_arr.at(-3)?.[1] === 'vyanjana' &&
-        prev_context_arr.at(-2)?.[0] === brahmic_nuqta &&
-        prev_context_arr.at(-1)?.[1] === 'svara') ||
+        prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
+        prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
+        prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
         // or vyanjana, svara
         (prev_context_arr.length >= 2 &&
-          prev_context_arr.at(-2)?.[1] === 'vyanjana' &&
-          prev_context_arr.at(-1)?.[1] === 'svara')) &&
+          prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+          prev_context_arr.at(-1)?.[1]?.type === 'svara')) &&
       // to anya or null
-      (!item || item[1] === 'anya')
+      (!item || item[1]?.type === 'anya')
     ) {
       prev_context_arr = [];
     }
-    // custom logic when converting from brahmic to other
     if (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') {
+      // custom logic when converting from brahmic to other
       const brahmic_halant = from_script_data.halant;
       if (
         item[0] !== brahmic_halant &&
-        item[0] !== brahmic_nuqta &&
+        item[0] !== BRAHMIC_NUQTA &&
         // ^ two special cases to ignore
         // vyanjana or vyanjana, nuqta
-        ((prev_context_arr.length >= 1 && prev_context_arr.at(-1)?.[1] === 'vyanjana') ||
+        ((prev_context_arr.length >= 1 && prev_context_arr.at(-1)?.[1]?.type === 'vyanjana') ||
           (prev_context_arr.length >= 2 &&
-            prev_context_arr.at(-2)?.[1] === 'vyanjana' &&
-            prev_context_arr.at(-1)?.[0] === brahmic_nuqta)) &&
+            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+            prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
-        ((item[1] !== 'svara' && item[0] !== brahmic_halant) ||
-          item[1] === 'anya' ||
+        ((item[1]?.type !== 'svara' && item[0] !== brahmic_halant) ||
+          item[1]?.type === 'anya' ||
           item[1] === null ||
           item[1] === undefined)
         // ^ as halant also a null 'type'
@@ -77,20 +89,50 @@ export const transliterate_text = async (
         result_str += 'a';
         // this is 'a' is true for Romanized and Normal (could be different for others if added in future)
       }
+    } else if (
+      from_script_data.script_type === 'other' &&
+      to_script_data.script_type === 'brahmic'
+    ) {
+      // console.log(
+      //   [item[0], item[1]?.type],
+      //   prev_context_arr.map((item) => item[1]?.type),
+      //   result_str.split('')
+      // );
+      // custom logic when converting from other to brahmic
+      if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
+        // result_str += to_script_data.krama_text_map[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        // result_str += get_krama_index_text_value(
+        //   from_script_data.krama_text_map,
+        //   to_script_data.krama_text_map,
+        //   item[1]?.mAtrA_krama_ref?.[0] ?? -1
+        // );
+        result_str += to_script_data.krama_text_map[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        result_str_concat_status = true;
+      } else if (
+        prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' &&
+        !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'svara')
+      ) {
+        result_str += BRAHMIC_HALANT;
+      }
     }
 
     // addition and shifting
-    prev_context_arr.push(item);
-    if (prev_context_arr.length > MAX_CONTEXT_LENGTH || item[0] === ' ') {
+    if (item[0] !== undefined && item[0].length > 0) prev_context_arr.push(item);
+    if (prev_context_arr.length > MAX_CONTEXT_LENGTH) {
       prev_context_arr.shift();
     }
+
+    return result_str_concat_status;
   }
 
   for (; text_index < text.length; ) {
     if (text[text_index] === ' ') {
       // ignore blank spaces
       text_index++;
-      if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([' ', null]);
+      if (PREV_CONTEXT_IN_USE) {
+        prev_context_cleanup_func([' ', null]);
+        prev_context_arr = [];
+      }
       result_str += ' ';
       continue;
     }
@@ -104,54 +146,49 @@ export const transliterate_text = async (
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_text = text_to_krama_item[1].krama
-          .map((krama_index) =>
-            get_krama_index_text_value(
-              from_script_data.krama_text_map,
-              to_script_data.krama_text_map,
-              krama_index
-            )
-          )
+          .map((krama_index) => to_script_data.krama_text_map[krama_index][0])
           .join('');
+        let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
           if (from_script_data.script_type === 'brahmic') {
-            prev_context_cleanup_func([
+            result_concat_status = prev_context_cleanup_func([
               text_to_krama_item[0],
               (() => {
                 if (
                   text_to_krama_item[1].fallback_list_ref !== undefined &&
                   text_to_krama_item[1].fallback_list_ref !== null
                 ) {
-                  return from_script_data.list[text_to_krama_item[1].fallback_list_ref]?.type;
+                  return from_script_data.list[text_to_krama_item[1].fallback_list_ref];
                 }
                 // if otherwise then follow the the first kram ref
                 // This condition very well may change in the future so be careful
                 return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? from_script_data.list[
                       from_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
-                    ]?.type
+                    ]
                   : null;
               })()
             ]);
           } else if (to_script_data.script_type === 'brahmic') {
-            prev_context_cleanup_func([
+            result_concat_status = prev_context_cleanup_func([
               text_to_krama_item[0],
               (() => {
                 if (
                   text_to_krama_item[1].fallback_list_ref !== undefined &&
                   text_to_krama_item[1].fallback_list_ref !== null
                 ) {
-                  return to_script_data.list[text_to_krama_item[1].fallback_list_ref]?.type;
+                  return to_script_data.list[text_to_krama_item[1].fallback_list_ref];
                 }
                 return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? to_script_data.list[
                       to_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
-                    ]?.type
+                    ]
                   : null;
               })()
             ]);
           }
         }
-        result_str += result_text;
+        if (!result_concat_status) result_str += result_text;
         continue;
       }
     } else {
@@ -170,35 +207,33 @@ export const transliterate_text = async (
     );
     if (index === -1) {
       // text not matched so ignore and return as it is
-      result_str += char_to_search;
       if (PREV_CONTEXT_IN_USE) {
         prev_context_cleanup_func([char_to_search, null]);
         prev_context_arr = [];
         // clear the array as an unedentifed character found
       }
+      result_str += char_to_search;
       continue;
     }
+    let result_concat_status = false;
     if (PREV_CONTEXT_IN_USE) {
       if (from_script_data.script_type === 'brahmic') {
-        prev_context_cleanup_func([
+        result_concat_status = prev_context_cleanup_func([
           char_to_search,
-          from_script_data.list[from_script_data.krama_text_map[index][1] ?? -1]?.type
+          from_script_data.list[from_script_data.krama_text_map[index][1] ?? -1]
         ]);
       } else if (to_script_data.script_type === 'brahmic') {
-        prev_context_cleanup_func([
+        result_concat_status = prev_context_cleanup_func([
           char_to_search,
-          to_script_data.list[to_script_data.krama_text_map[index][1] ?? -1]?.type
+          to_script_data.list[to_script_data.krama_text_map[index][1] ?? -1]
         ]);
       }
     }
-    result_str += get_krama_index_text_value(
-      from_script_data.krama_text_map,
-      to_script_data.krama_text_map,
-      index
-    );
+    if (!result_concat_status) {
+      result_str += to_script_data.krama_text_map[index][0];
+    }
   }
-  if (PREV_CONTEXT_IN_USE && from_script_data.script_type === 'brahmic')
-    prev_context_cleanup_func([text[text_index], null]);
+  if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
 
   return result_str;
 };
@@ -240,18 +275,3 @@ function search_in_text_to_krama_map(
   }
   return text_to_krama_item;
 }
-
-/**
- * this function is to overcome the issue of same keys pointing to multiple items in the krama_text_map in binary search
- */
-const get_krama_index_text_value = (
-  from_krama_text_map: OutputScriptData['krama_text_map'],
-  to_krama_text_map: OutputScriptData['krama_text_map'],
-  index: number
-) => {
-  const item = from_krama_text_map[index];
-  if (item[2] !== null) {
-    return to_krama_text_map[item[2]][0];
-  }
-  return to_krama_text_map[index][0];
-};

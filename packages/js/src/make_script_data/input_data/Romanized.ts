@@ -57,7 +57,9 @@ const Romanized = {
     ऽ: "''",
     '्': '',
     '़': '',
-    '॰': '.',
+    // The dot here before is conflicting with the virAma dots
+    // so for now removed
+    '॰': '',
     क: 'k',
     क़: 'kz',
     ख: 'kh',

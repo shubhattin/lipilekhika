@@ -16,7 +16,7 @@ type TestDataType = {
   to: script_list_type;
   input: string;
   output: string;
-  reversible: boolean;
+  reversible?: boolean;
 };
 
 describe('Test Transliteration Function Modules', async () => {
@@ -53,6 +53,7 @@ describe('Test Transliteration Function Modules', async () => {
               `Reversed Transliteration failed:\n` +
               `  Input: "${result}"\n` +
               `  From: ${test_data_item.to}\n` +
+              `  Intermediate: "${result}"\n` +
               `  To: ${test_data_item.from}\n` +
               `  Expected: "${test_data_item.input}"\n` +
               `  Actual: "${result_reversed}"`;

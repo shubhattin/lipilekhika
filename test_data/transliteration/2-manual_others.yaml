@@ -1,8 +1,8 @@
 - index: 0
   from: Devanagari
   to: Normal
-  input: केष केद केद् क्लेशृक्द्ध्यानम् काऊं आऊ स् श़ो क़ा ड़ा ड़ा
-  output: kESha kEda kEd klEshRkddhyAnam kAUM AU s shO kzA DzA DzA
+  input: केष केद केद् क्लेशृक्द्ध्यानम् काऊं आऊ स् श़ो क़ा ड़ा ड़ा कोल1 कील+ इट्र९
+  output: kESha kEda kEd klEshRkddhyAnam kAUM AU s shO kzA DzA DzA kOla1 kIla+ iTra9
 - index: 1
   from: Tamil
   to: Normal

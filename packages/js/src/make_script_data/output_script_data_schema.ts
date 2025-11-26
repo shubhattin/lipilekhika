@@ -3,10 +3,8 @@ import type { InputBrahmicScriptType, InputOtherScriptType } from './input_scrip
 type CommonScriptData = {
   /** Stores the key of the current script along with the reference to the index in `list` for info about the key
    * `string` is the actual key, number(nullable) is the index of the key in the compiled `list`
-   * number(nullable) is the index to the first duplicate version of the current key, used for
-   * same key pointing to multiple items and we choose the first one
    */
-  krama_text_map: [string, number | null, number | null][];
+  krama_text_map: [string, number | null][];
   /** To be used for binary search on the `krama_key_map` */
   krama_text_map_index: number[];
   /** `string` used for search. Usable for Duplication Remova, Fallback Behaviour

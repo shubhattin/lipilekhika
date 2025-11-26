@@ -138,9 +138,8 @@ export const KramaKeysArray = Object.keys(KramaKeysMap) as (keyof typeof KramaKe
  */
 export type KramaKeysType = (typeof KramaKeysArray)[number];
 
-export const KramaLabelsArray = Object.values(
-  KramaKeysMap
-) as (typeof KramaKeysMap)[KramaKeysType][];
+export type KramaKeysLabelType = (typeof KramaKeysMap)[KramaKeysType];
+export const KramaLabelsArray = Object.values(KramaKeysMap) as KramaKeysLabelType[];
 
 export const KramaKeysIndexB = createSearchIndex(KramaKeysArray);
 export const KramaLabelsIndexB = createSearchIndex(KramaLabelsArray);
@@ -148,7 +147,7 @@ export const KramaLabelsIndexB = createSearchIndex(KramaLabelsArray);
 /** This type will be used as a convinient method to dscribe the krama key which we want to map to
  * This shall be ultimately converted to KramaKeysType
  */
-export type KramaKeysExtendedType = KramaKeysType | (typeof KramaLabelsArray)[number];
+export type KramaKeysExtendedType = KramaKeysType | KramaKeysLabelType;
 
 export const resolveKramaKeysExtendedType = (
   krama_key_ext: KramaKeysExtendedType

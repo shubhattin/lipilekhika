@@ -3,58 +3,58 @@
   to: Normal
   input: ॐ श्री परमात्मने नमः
   output: AUM shrI paramAtmanE namaH
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Romanized
   input: ॐ श्री परमात्मने नमः
   output: āūṁ śrī paramātmanē namaḥ
-  reversible: false
+  reversible: true
 - index: 2
   from: Devanagari
   to: Normal
   input: "ऋषीणां संनिधौ राजंस्तव पुत्रागमं प्रति ।\nकाश्यपस्य च पुत्रोऽस्ति विभाण्डक इति श्रुतः ॥१-९-३॥"
   output: "RShINAM saMnidhau rAjaMstava putrAgamaM prati .\nkAshyapasya Ca putrO''sti vibhANDaka iti shrutaH ..1-9-3.."
-  reversible: false
+  reversible: true
 - index: 3
   from: Devanagari
   to: Romanized
   input: "ऋषीणां संनिधौ राजंस्तव पुत्रागमं प्रति ।\nकाश्यपस्य च पुत्रोऽस्ति विभाण्डक इति श्रुतः ॥१-९-३॥"
   output: "r̥ṣīṇāṁ saṁnidhau rājaṁstava putrāgamaṁ prati .\nkāśyapasya Ca putrō''sti vibhāṇḍaka iti śrutaḥ ..1-9-3.."
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Normal
   input: "वक्ष्यन्ति ते महीपालं ब्राह्मणा वेदपारगाः ।\nविभाण्डकसुतं राजन् सर्वोपायैरिहानय ॥१-९-१२॥"
   output: "vakShyanti tE mahIpAlaM brAhmaNA vEdapAragAH .\nvibhANDakasutaM rAjan sarvOpAyairihAnaya ..1-9-12.."
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Romanized
   input: "वक्ष्यन्ति ते महीपालं ब्राह्मणा वेदपारगाः ।\nविभाण्डकसुतं राजन् सर्वोपायैरिहानय ॥१-९-१२॥"
   output: "vakṣyanti tē mahīpālaṁ brāhmaṇā vēdapāragāḥ .\nvibhāṇḍakasutaṁ rājan sarvōpāyairihānaya ..1-9-12.."
-  reversible: false
+  reversible: true
 - index: 6
   from: Devanagari
   to: Normal
   input: "तां ददर्श महातेजा मेनकां कुशिकात्मजः ।\nरूपेणाप्रतिमां तत्र विद्युतं जलदे यथा ॥१-६३-५॥"
   output: "tAM dadarsha mahAtEjA mEnakAM kushikAtmajaH .\nrUpENApratimAM tatra vidyutaM jaladE yathA ..1-63-5.."
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Romanized
   input: "तां ददर्श महातेजा मेनकां कुशिकात्मजः ।\nरूपेणाप्रतिमां तत्र विद्युतं जलदे यथा ॥१-६३-५॥"
   output: "tāṁ dadarśa mahātējā mēnakāṁ kuśikātmajaḥ .\nrūpēṇāpratimāṁ tatra vidyutaṁ jaladē yathā ..1-63-5.."
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Normal
   input: "इमं विवस्वते योगं प्रोक्तवानहमव्ययम् ।\nविवस्वान्मनवे प्राह मनुरिक्ष्वाकवेऽब्रवीत् ॥४-१॥"
   output: "imaM vivasvatE yOgaM prOktavAnahamavyayam .\nvivasvAnmanavE prAha manurikShvAkavE''bravIt ..4-1.."
-  reversible: false
+  reversible: true
 - index: 9
   from: Devanagari
   to: Romanized
   input: "इमं विवस्वते योगं प्रोक्तवानहमव्ययम् ।\nविवस्वान्मनवे प्राह मनुरिक्ष्वाकवेऽब्रवीत् ॥४-१॥"
   output: "imaṁ vivasvatē yōgaṁ prōktavānahamavyayam .\nvivasvānmanavē prāha manurikṣvākavē''bravīt ..4-1.."
-  reversible: false
+  reversible: true

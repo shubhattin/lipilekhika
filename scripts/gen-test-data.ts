@@ -12,7 +12,7 @@ type TestData = {
   to: script_list_type;
   input: string;
   output: string;
-  reversible: boolean;
+  reversible?: boolean;
 };
 
 const DEVANAGARI_INPUTS = [
@@ -125,7 +125,7 @@ const devanagari_non_brahmic_scripts = async () => {
         to: non_brahmic_script,
         input: input,
         output: output.replace(/\.(?=\d)/g, ""), // handling the case of number conversion where १ -> 1 (not .1)
-        reversible: false,
+        reversible: true,
       });
       // // this version is reversible as १ -> .1 and .1 -> १
       // out_test_data.push({
