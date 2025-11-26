@@ -199,7 +199,7 @@ export const transliterate_text = async (
     const char_to_search = text_to_krama_item === null ? char : text_to_krama_item[0];
     const index = binarySearchWithIndex(
       from_script_data.krama_text_map,
-      from_script_data.krama_text_map_index,
+      from_script_data.krama_text_arr_index,
       char_to_search,
       {
         accessor: (arr, i) => arr[i][0]
@@ -252,16 +252,16 @@ function search_in_text_to_krama_map(
   text_index: number,
   from_script_data: OutputScriptData,
   chars_scanned: number = 0
-): OutputScriptData['text_to_krama_map'][number] | null {
+): OutputScriptData['text_to_krama_arr'][number] | null {
   const char_to_search = text.substring(text_index, text_index + chars_scanned + 1);
-  const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
+  const char_index = binarySearch(from_script_data.text_to_krama_arr, char_to_search, {
     accessor: (arr, i) => arr[i][0]
   });
   if (char_index === -1) {
     // if the character is not found, then retun null
     return null;
   }
-  const text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+  const text_to_krama_item = from_script_data.text_to_krama_arr[char_index];
   // try to reach to the last possible character following the next using recursion
   if (text_to_krama_item[1].next && text_to_krama_item[1].next.length > 0) {
     const nth_next_character = text[text_index + chars_scanned + 1] as string | undefined;
