@@ -6,6 +6,11 @@ import { binarySearch, binarySearchWithIndex } from '../utils/binary_search/bina
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
+type prev_context_array_type = [
+  string | undefined,
+  OutputBrahmicScriptData['list'][number] | null | undefined
+][];
+
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
@@ -24,10 +29,7 @@ export const transliterate_text = async (
    * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
    * and the characters match text of the brahmic script
    */
-  let prev_context_arr: [
-    string | undefined,
-    OutputBrahmicScriptData['list'][number] | null | undefined
-  ][] = [];
+  let prev_context_arr: prev_context_array_type = [];
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
     (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
@@ -44,23 +46,25 @@ export const transliterate_text = async (
         ? to_script_data.halant
         : null;
 
+  /** Return flag to indicate if the result_str concat has to be done
+   * as it already is concatenated in this function
+   */
   function prev_context_cleanup_func(item: (typeof prev_context_arr)[number]) {
-    /** Return flag to indicate if the result_str concat has to be done
-     * as it already is concatenated in this function
-     */
     let result_str_concat_status = false;
 
     // custom cleanup logic/cases
-
+    // console.log(
+    //   [item[0], item[1]?.type],
+    //   prev_context_arr.map((item) => item[1]?.type),
+    //   result_str.split('')
+    // );
     if (
       // vyanjana, nuqta, svara
-      ((prev_context_arr.length >= 3 &&
-        prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
+      ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
         prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
         prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
         // or vyanjana, svara
-        (prev_context_arr.length >= 2 &&
-          prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+        (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
           prev_context_arr.at(-1)?.[1]?.type === 'svara')) &&
       // to anya or null
       (!item || item[1]?.type === 'anya')
@@ -75,9 +79,8 @@ export const transliterate_text = async (
         item[0] !== BRAHMIC_NUQTA &&
         // ^ two special cases to ignore
         // vyanjana or vyanjana, nuqta
-        ((prev_context_arr.length >= 1 && prev_context_arr.at(-1)?.[1]?.type === 'vyanjana') ||
-          (prev_context_arr.length >= 2 &&
-            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+        (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
+          (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
         ((item[1]?.type !== 'svara' && item[0] !== brahmic_halant) ||
@@ -93,20 +96,9 @@ export const transliterate_text = async (
       from_script_data.script_type === 'other' &&
       to_script_data.script_type === 'brahmic'
     ) {
-      // console.log(
-      //   [item[0], item[1]?.type],
-      //   prev_context_arr.map((item) => item[1]?.type),
-      //   result_str.split('')
-      // );
       // custom logic when converting from other to brahmic
       if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
-        // result_str += to_script_data.krama_text_map[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
-        // result_str += get_krama_index_text_value(
-        //   from_script_data.krama_text_map,
-        //   to_script_data.krama_text_map,
-        //   item[1]?.mAtrA_krama_ref?.[0] ?? -1
-        // );
-        result_str += to_script_data.krama_text_map[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        result_str += to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
         result_str_concat_status = true;
       } else if (
         prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' &&
@@ -140,13 +132,28 @@ export const transliterate_text = async (
     const char = text[text_index];
 
     // Step 1: Search for the character in the text_to_krama_map
-    const text_to_krama_item = search_in_text_to_krama_map(text, text_index, from_script_data);
+    const context_break_condition =
+      PREV_CONTEXT_IN_USE &&
+      // context breaker currently needed like this only for other to brahmic conversion
+      to_script_data.script_type === 'brahmic';
+    // ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
+    //   prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
+    //   prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
+    //   (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+    //     prev_context_arr.at(-1)?.[1]?.type === 'svara'));
+    const text_to_krama_item = search_in_text_to_krama_map(
+      text,
+      text_index,
+      from_script_data,
+      to_script_data,
+      context_break_condition
+    );
     if (text_to_krama_item !== null) {
       text_index += text_to_krama_item[0].length;
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_text = text_to_krama_item[1].krama
-          .map((krama_index) => to_script_data.krama_text_map[krama_index][0])
+          .map((krama_index) => to_script_data.krama_text_arr[krama_index][0])
           .join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
@@ -164,7 +171,7 @@ export const transliterate_text = async (
                 // This condition very well may change in the future so be careful
                 return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? from_script_data.list[
-                      from_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
+                      from_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
                     ]
                   : null;
               })()
@@ -181,7 +188,7 @@ export const transliterate_text = async (
                 }
                 return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? to_script_data.list[
-                      to_script_data.krama_text_map[text_to_krama_item[1].krama[0]][1] ?? -1
+                      to_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
                     ]
                   : null;
               })()
@@ -198,7 +205,7 @@ export const transliterate_text = async (
     // Step 2: Search for the character in the krama_text_map
     const char_to_search = text_to_krama_item === null ? char : text_to_krama_item[0];
     const index = binarySearchWithIndex(
-      from_script_data.krama_text_map,
+      from_script_data.krama_text_arr,
       from_script_data.krama_text_arr_index,
       char_to_search,
       {
@@ -210,7 +217,7 @@ export const transliterate_text = async (
       if (PREV_CONTEXT_IN_USE) {
         prev_context_cleanup_func([char_to_search, null]);
         prev_context_arr = [];
-        // clear the array as an unedentifed character found
+        // clear the array as an unidentified character found
       }
       result_str += char_to_search;
       continue;
@@ -220,17 +227,17 @@ export const transliterate_text = async (
       if (from_script_data.script_type === 'brahmic') {
         result_concat_status = prev_context_cleanup_func([
           char_to_search,
-          from_script_data.list[from_script_data.krama_text_map[index][1] ?? -1]
+          from_script_data.list[from_script_data.krama_text_arr[index][1] ?? -1]
         ]);
       } else if (to_script_data.script_type === 'brahmic') {
         result_concat_status = prev_context_cleanup_func([
           char_to_search,
-          to_script_data.list[to_script_data.krama_text_map[index][1] ?? -1]
+          to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]
         ]);
       }
     }
     if (!result_concat_status) {
-      result_str += to_script_data.krama_text_map[index][0];
+      result_str += to_script_data.krama_text_arr[index][0];
     }
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
@@ -240,37 +247,43 @@ export const transliterate_text = async (
 
 /**
  * Recursively searches for the longest matching character sequence by probing krama_text_map
- * and retrieving the corresponding entry from text_to_krama_map. Returns null i no match.
- * @param text The Original text to be transliterated
- * @param text_index current pointer location in the text
- * @param from_script_data script data of the from script
- * @param chars_scanned number of characters scanned so far (recursion counter)
+ * and retrieving the corresponding entry from text_to_krama_map. Returns null if no match.
  * @returns the krama index of the text if found else null
  */
 function search_in_text_to_krama_map(
   text: string,
   text_index: number,
   from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  context_break_condition_helper: boolean,
   chars_scanned: number = 0
-): OutputScriptData['text_to_krama_arr'][number] | null {
+): OutputScriptData['text_to_krama_map'][number] | null {
   const char_to_search = text.substring(text_index, text_index + chars_scanned + 1);
-  const char_index = binarySearch(from_script_data.text_to_krama_arr, char_to_search, {
+  const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
     accessor: (arr, i) => arr[i][0]
   });
   if (char_index === -1) {
     // if the character is not found, then retun null
     return null;
   }
-  const text_to_krama_item = from_script_data.text_to_krama_arr[char_index];
+  const text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+  let further_lookup_flag = true;
   // try to reach to the last possible character following the next using recursion
-  if (text_to_krama_item[1].next && text_to_krama_item[1].next.length > 0) {
+  if (further_lookup_flag && text_to_krama_item[1].next && text_to_krama_item[1].next.length > 0) {
     const nth_next_character = text[text_index + chars_scanned + 1] as string | undefined;
     if (
       nth_next_character !== undefined &&
       text_to_krama_item[1].next.indexOf(nth_next_character) !== -1
     ) {
       // we can return the result as we know that it exists as it is defined in `next` field
-      return search_in_text_to_krama_map(text, text_index, from_script_data, chars_scanned + 1);
+      return search_in_text_to_krama_map(
+        text,
+        text_index,
+        from_script_data,
+        to_script_data,
+        context_break_condition_helper,
+        chars_scanned + 1
+      );
     }
   }
   return text_to_krama_item;

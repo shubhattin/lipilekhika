@@ -8,8 +8,8 @@
   to: Normal
   input: க்ரிபா கிருபா
   output: kripA kirupA
-- index: 2
-  from: Normal
-  to: Devanagari
-  input: kAUM AUM
-  output: काऊं ॐ
+# - index: 2
+#   from: Normal
+#   to: Devanagari
+#   input: kAUM AUM
+#   output: काऊं ॐ
