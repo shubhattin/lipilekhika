@@ -83,9 +83,9 @@ function capitalizeFirstAndAfterDash(str: string): string {
   return str.toLowerCase().replace(/(^|-)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
 }
 
-export const getNormalizedScriptName = (
-  name: acronym_type | script_and_lang_list_type | string
-): script_list_type | null => {
+export type script_input_name_type = acronym_type | script_and_lang_list_type | string;
+
+export const getNormalizedScriptName = (name: script_input_name_type): script_list_type | null => {
   const capitalizedName = capitalizeFirstAndAfterDash(name);
   if (SCRIPT_LIST.includes(capitalizedName)) return capitalizedName as script_list_type;
   if (LANG_LIST.includes(capitalizedName))

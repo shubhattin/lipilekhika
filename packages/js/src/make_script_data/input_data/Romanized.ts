@@ -6,7 +6,7 @@ const Romanized = {
   script_id: script_list_obj['Romanized'],
   script_type: 'other',
   manual_krama_text_map: {
-    ॐ: 'AUM',
+    ॐ: 'āūṁ',
     अ: 'a',
     '': 'a',
     ॳ: 'a',
@@ -56,8 +56,10 @@ const Romanized = {
     'ः': 'ḥ',
     ऽ: "''",
     '्': '',
-    '़': 'z',
-    '॰': '.',
+    '़': '',
+    // The dot here before is conflicting with the virAma dots
+    // so for now removed
+    '॰': '',
     क: 'k',
     क़: 'kz',
     ख: 'kh',

@@ -1,0 +1,13 @@
+# Tasks
+
+## Current Issues
+
+- [ ] kAUM transliteration from other script type to brahmic script type (Context break condition in recursive function)
+- [ ] Test on cases where evaluates to multiple krama keys (fallback cases, eg. Tamil Numerals)
+- [ ] Fix Kannada Avagraha in Sinhala Data
+
+## Future Tasks
+
+- Expnand Test Data for more and better coverage
+- Add, Enable and Tets Tamil-Extended
+- Add other ancient scripts Besides Brahmi

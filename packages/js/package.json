@@ -4,25 +4,26 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "bun run make-script-data && vite build",
+    "build": "rm -rf dist && bun run make-script-data && vite build",
     "check": "tsc --noEmit",
-    "test": "bun run make-script-data && vitest",
-    "test:ui": "bun run make-script-data && vitest --ui",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "format": "prettier --write .",
     "make-script-data": "vite-node src/make_script_data/make_output_script_data.ts"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@vitest/ui": "^4.0.12",
+    "@vitest/ui": "^4.0.13",
     "chalk": "^5.6.2",
     "prettier": "^3.6.2",
     "typescript": "~5.9.3",
-    "vite": "^7.2.2",
+    "vite": "^7.2.4",
     "vite-node": "^5.2.0",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.13",
+    "yaml": "^2.8.1"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+    "zod": "^4.1.13"
   }
 }

@@ -46,8 +46,8 @@ async function main() {
         schwa_property: input_script_data.schwa_property,
         text_to_krama_map: [],
         list: [],
-        krama_text_map: [],
-        krama_text_map_index: []
+        krama_text_arr: [],
+        krama_text_arr_index: []
       };
     } else {
       res = {
@@ -56,12 +56,12 @@ async function main() {
         script_id: input_script_data.script_id,
         text_to_krama_map: [],
         list: [],
-        krama_text_map: [],
-        krama_text_map_index: []
+        krama_text_arr: [],
+        krama_text_arr_index: []
       };
     }
     // initialize krama key map as an empty starting array
-    res.krama_text_map = Array.from({ length: KramaKeysArray.length }, () => ['', null]);
+    res.krama_text_arr = Array.from({ length: KramaKeysArray.length }, () => ['', null]);
 
     // prefill the text_to_krama_map with the manual_krama_text_map
     // as it has a lower precedence
@@ -116,9 +116,11 @@ async function main() {
         resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
       );
       if (value === undefined || value === null || krama_key_index === -1) continue;
-      res.krama_text_map[krama_key_index] = [value, null];
-      // step by step create entries for the text mapping
-      add_to_text_to_krama_map(value, [krama_key_index]);
+      res.krama_text_arr[krama_key_index] = [value, null];
+      // skip if the value is already there (like due to repetition)
+      if (res.krama_text_arr.findIndex((item) => item[0] === value) === -1) {
+        add_to_text_to_krama_map(value, [krama_key_index]);
+      }
     }
 
     // Scan for multiple same text attributes in the list
@@ -171,7 +173,7 @@ async function main() {
         krama_key_list_index_list.forEach((krama_key_index) => {
           // link entries in the krama map to the list
           if (krama_key_index !== -1) {
-            res.krama_text_map[krama_key_index] = [item.text, key_to_reference_back_list];
+            res.krama_text_arr[krama_key_index] = [item.text, key_to_reference_back_list];
           }
         });
         if (item.type === 'svara') {
@@ -192,7 +194,7 @@ async function main() {
             res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
-              res.krama_text_map[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
+              res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
             }
           });
         }
@@ -246,13 +248,14 @@ async function main() {
       }
     }
 
-    // Scan the krama_text_map for keys which are two characters
-    // for (const text_krama_item of res.krama_text_map) {
-    for (let i = 0; i < res.krama_text_map.length; i++) {
-      const text_krama_item = res.krama_text_map[i];
+    // Scan the krama_text_map for keys which are two characters+
+    for (let i = 0; i < res.krama_text_arr.length; i++) {
+      const text_krama_item = res.krama_text_arr[i];
       const text = text_krama_item[0];
       // search for the list item using the text key
-      const list_item = input_script_data.list?.find((item) => item.text === text);
+      const list_item = input_script_data.list?.find(
+        (item) => item.text === text || (item.type === 'svara' && item.mAtrA === text)
+      );
       if (
         text.length > 1 &&
         // if the list item exists and prevent_auto_matching is not true, then skip
@@ -264,11 +267,27 @@ async function main() {
           const text_char = text.substring(0, j + 1);
           const krama_key_references = text_char
             .split('')
-            .map((char) => res.krama_text_map.findIndex((item) => item[0] === char));
+            .map((char) => res.krama_text_arr.findIndex((item) => item[0] === char));
+          // if the not text_char is not present then add
+
+          // check if the character has a single krama reference, then it means we dont have to assign krama reference for all individual characters
+          // like in Romanized : for r̥ is to R but when RR is messes up r̥
+          const existsing_text_map_item = res.text_to_krama_map.find(
+            (item) => item[0] === text_char
+          );
+          if (
+            existsing_text_map_item &&
+            existsing_text_map_item[1].krama &&
+            existsing_text_map_item[1].krama.length === 1 &&
+            krama_key_references.length > 1
+          ) {
+            continue;
+          }
           add_to_text_to_krama_map(text_char, krama_key_references);
         }
+        const existsing_text_map_item = res.text_to_krama_map.find((item) => item[0] === text);
         // final character addition
-        add_to_text_to_krama_map(text, [i]);
+        if (!existsing_text_map_item) add_to_text_to_krama_map(text, [i]);
       }
     }
 
@@ -303,6 +322,26 @@ async function main() {
     }
     res.text_to_krama_map = res.text_to_krama_map.filter((_, i) => !index_to_remove.includes(i));
 
+    // Scan for duplicate keys in the text_to_krama_arr and warn
+    if (res.text_to_krama_map.length > 0) {
+      const textToKramaDuplicateMap = new Map<string, number[]>();
+      res.text_to_krama_map.forEach((item, index) => {
+        const [text_key] = item;
+        const indexes = textToKramaDuplicateMap.get(text_key) ?? [];
+        indexes.push(index);
+        textToKramaDuplicateMap.set(text_key, indexes);
+      });
+      for (const [text_key, indexes] of textToKramaDuplicateMap.entries()) {
+        if (indexes.length > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Dup key "${text_key}" in "${input_script_data.script_name}" at [${indexes.join(', ')}]`
+            )
+          );
+        }
+      }
+    }
+
     // In Dev mode add the original krama key at the third index for easy comparision and verification
     // and also add unicode escaped strings for better debugging (hopefully)
     if (IS_DEV_MODE) {
@@ -319,13 +358,13 @@ async function main() {
         }
       }
       for (let i = 0; i < KramaKeysArray.length; i++) {
-        res.krama_text_map[i].push(KramaKeysArray[i]);
-        res.krama_text_map[i].push(toUnicodeEscapes(res.krama_text_map[i][0]));
-        res.krama_text_map[i].push(i);
+        res.krama_text_arr[i].push(KramaKeysArray[i]);
+        res.krama_text_arr[i].push(toUnicodeEscapes(res.krama_text_arr[i][0]));
+        res.krama_text_arr[i].push(i);
       }
     }
 
-    res.krama_text_map_index = createSearchIndex(res.krama_text_map, {
+    res.krama_text_arr_index = createSearchIndex(res.krama_text_arr, {
       accessor: (arr, i) => arr[i][0]
     });
     res.text_to_krama_map = sortArray(res.text_to_krama_map, {

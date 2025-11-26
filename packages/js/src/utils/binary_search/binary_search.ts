@@ -36,7 +36,7 @@ export function createSearchIndex<T, K = T>(
 }
 
 /**
- * Performs binary search using a pre-built index.
+ * Performs binary search(lower bound) using a pre-built index.
  */
 export function binarySearchWithIndex<T, K = T>(
   arr: readonly T[],
@@ -49,6 +49,7 @@ export function binarySearchWithIndex<T, K = T>(
 
   let left = 0;
   let right = index.length - 1;
+  let result = -1;
 
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
@@ -62,12 +63,17 @@ export function binarySearchWithIndex<T, K = T>(
       cmp = target < value ? -1 : target > value ? 1 : 0;
     }
 
-    if (cmp === 0) return originalIdx;
-    if (cmp < 0) right = mid - 1;
-    else left = mid + 1;
+    if (cmp === 0) {
+      result = originalIdx;
+      right = mid - 1;
+    } else if (cmp < 0) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
   }
 
-  return -1;
+  return result;
 }
 
 /**
@@ -99,7 +105,7 @@ export function sortArray<T, K = T>(arr: readonly T[], options?: SearchIndexOpti
 }
 
 /**
- * Performs binary search on a sorted array.
+ * Performs binary search(lower bound) on a sorted array.
  * Returns the index of the target element, or -1 if not found.
  */
 export function binarySearch<T, K = T>(
@@ -112,6 +118,7 @@ export function binarySearch<T, K = T>(
 
   let left = 0;
   let right = arr.length - 1;
+  let result = -1;
 
   while (left <= right) {
     const mid = Math.floor((left + right) / 2);
@@ -124,10 +131,15 @@ export function binarySearch<T, K = T>(
       cmp = target < value ? -1 : target > value ? 1 : 0;
     }
 
-    if (cmp === 0) return mid;
-    if (cmp < 0) right = mid - 1;
-    else left = mid + 1;
+    if (cmp === 0) {
+      result = mid;
+      right = mid - 1;
+    } else if (cmp < 0) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
   }
 
-  return -1;
+  return result;
 }

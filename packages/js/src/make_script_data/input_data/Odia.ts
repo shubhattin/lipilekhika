@@ -308,12 +308,12 @@ const Odia = {
       type: 'vyanjana'
     },
     {
-      text: 'ଯ',
+      text: 'ୟ',
       text_krama: ['y'],
       type: 'vyanjana'
     },
     {
-      text: 'ୟ',
+      text: 'ଯ',
       text_krama: ['yz'],
       type: 'vyanjana'
     },

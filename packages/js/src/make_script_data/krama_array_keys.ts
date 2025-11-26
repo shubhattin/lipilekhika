@@ -1,5 +1,14 @@
 import { binarySearchWithIndex, createSearchIndex } from '../utils/binary_search/binary_search';
 
+/**
+ * These Krama keys are written in an order where the keys which comes first shall take precedence if in the krama_text_map two have the same key
+ * then the one that comes first shall be chosen
+ * For eg. kau (from Bengali)
+ * the "au" can land both on au and auU because of tne nature of the binary search algorithm
+ * so to componsate that we chose the first one in case of multiple possible mappings
+ *
+ * So Be careful with similar mAtrAs, different forms of the same vyanajana (like with nuqta and other forms)
+ */
 const KramaKeysMap = {
   ॐ: 'AUM',
   अ: 'a-svara',
@@ -129,9 +138,8 @@ export const KramaKeysArray = Object.keys(KramaKeysMap) as (keyof typeof KramaKe
  */
 export type KramaKeysType = (typeof KramaKeysArray)[number];
 
-export const KramaLabelsArray = Object.values(
-  KramaKeysMap
-) as (typeof KramaKeysMap)[KramaKeysType][];
+export type KramaKeysLabelType = (typeof KramaKeysMap)[KramaKeysType];
+export const KramaLabelsArray = Object.values(KramaKeysMap) as KramaKeysLabelType[];
 
 export const KramaKeysIndexB = createSearchIndex(KramaKeysArray);
 export const KramaLabelsIndexB = createSearchIndex(KramaLabelsArray);
@@ -139,7 +147,7 @@ export const KramaLabelsIndexB = createSearchIndex(KramaLabelsArray);
 /** This type will be used as a convinient method to dscribe the krama key which we want to map to
  * This shall be ultimately converted to KramaKeysType
  */
-export type KramaKeysExtendedType = KramaKeysType | (typeof KramaLabelsArray)[number];
+export type KramaKeysExtendedType = KramaKeysType | KramaKeysLabelType;
 
 export const resolveKramaKeysExtendedType = (
   krama_key_ext: KramaKeysExtendedType
