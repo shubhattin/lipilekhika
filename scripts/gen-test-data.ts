@@ -15,13 +15,10 @@ type TestData = {
   reversible?: boolean;
 };
 
-const DEVANAGARI_INPUTS = [
-  "ॐ श्री परमात्मने नमः",
-  "ऋषीणां संनिधौ राजंस्तव पुत्रागमं प्रति ।\nकाश्यपस्य च पुत्रोऽस्ति विभाण्डक इति श्रुतः ॥१-९-३॥",
-  "वक्ष्यन्ति ते महीपालं ब्राह्मणा वेदपारगाः ।\nविभाण्डकसुतं राजन् सर्वोपायैरिहानय ॥१-९-१२॥",
-  "तां ददर्श महातेजा मेनकां कुशिकात्मजः ।\nरूपेणाप्रतिमां तत्र विद्युतं जलदे यथा ॥१-६३-५॥",
-  "इमं विवस्वते योगं प्रोक्तवानहमव्ययम् ।\nविवस्वान्मनवे प्राह मनुरिक्ष्वाकवेऽब्रवीत् ॥४-१॥",
-];
+const DEVANAGARI_INPUTS = fs
+  .readFileSync(path.join(__dirname, "devanagari-inputs.txt"), "utf-8")
+  .split("\n\n")
+  .map((line) => line.trim());
 
 const TEST_DATA_OUT_FOLDER = path.join(
   __dirname,
@@ -127,15 +124,6 @@ const devanagari_non_brahmic_scripts = async () => {
         output: output.replace(/\.(?=\d)/g, ""), // handling the case of number conversion where १ -> 1 (not .1)
         reversible: true,
       });
-      // // this version is reversible as १ -> .1 and .1 -> १
-      // out_test_data.push({
-      //   index: index++,
-      //   from: non_brahmic_script,
-      //   to: FROM_SCRIPT,
-      //   input: output,
-      //   output: input,
-      //   reversible: true,
-      // });
     }
   }
   fs.writeFileSync(
