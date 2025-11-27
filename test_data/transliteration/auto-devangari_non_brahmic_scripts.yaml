@@ -110,7 +110,7 @@
   from: Devanagari
   to: Normal
   input: "इष्टान्भोगान्हि वो देवा दास्यन्ते यज्ञभाविताः ।\nतैर्दत्तानप्रदायैभ्यो यो भुङ्क्ते स्तेन एव सः ॥३-१२॥"
-  output: "iShTAnbhOgAnhi vO dEvA dAsyantE yajYabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
+  output: "iShTAnbhOgAnhi vO dEvA dAsyantE yajJabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
   reversible: true
 - index: 19
   from: Devanagari
