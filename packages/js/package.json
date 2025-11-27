@@ -8,11 +8,13 @@
     "check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
+    "coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "make-script-data": "vite-node src/make_script_data/make_output_script_data.ts"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "@vitest/coverage-v8": "^4.0.14",
     "@vitest/ui": "^4.0.13",
     "chalk": "^5.6.2",
     "prettier": "^3.6.2",
@@ -22,8 +24,5 @@
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.13",
     "yaml": "^2.8.1"
-  },
-  "dependencies": {
-    "zod": "^4.1.13"
   }
 }
