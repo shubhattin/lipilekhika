@@ -11,6 +11,8 @@ type prev_context_array_type = [
   OutputBrahmicScriptData['list'][number] | null | undefined
 ][];
 
+const CHARS_TO_IGNORE = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
+
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
@@ -118,18 +120,17 @@ export const transliterate_text = async (
   }
 
   for (; text_index < text.length; ) {
-    if (text[text_index] === ' ') {
+    const char = text[text_index];
+    if (CHARS_TO_IGNORE.indexOf(char as (typeof CHARS_TO_IGNORE)[number]) !== -1) {
       // ignore blank spaces
       text_index++;
       if (PREV_CONTEXT_IN_USE) {
         prev_context_cleanup_func([' ', null]);
         prev_context_arr = [];
       }
-      result_str += ' ';
+      result_str += char;
       continue;
     }
-
-    const char = text[text_index];
 
     // Step 1: Search for the character in the text_to_krama_map
     // const context_break_condition =

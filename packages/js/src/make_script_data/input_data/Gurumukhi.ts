@@ -1,6 +1,8 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '੍';
+
 const Gurumukhi = {
   script_type: 'brahmic',
   script_name: 'Gurumukhi',
@@ -25,7 +27,7 @@ const Gurumukhi = {
     visarga: 'ਃ',
     saMkShepachihna: '॰',
     avagraha: 'ऽ',
-    halant: '੍',
+    halant: HALANT,
     nuqta: '਼',
     anudAttA: '॒',
     'udAtta-1': '॑',
@@ -108,23 +110,31 @@ const Gurumukhi = {
     },
     {
       text: 'ਰਿ',
-      text_krama: ['R-svara', 'R-mAtrA'],
-      type: 'vyanjana'
+      mAtrA: HALANT + 'ਰਿ',
+      text_krama: ['R-svara'],
+      mAtrA_text_krama: ['R-mAtrA'],
+      type: 'svara'
     },
     {
       text: 'ਰੀ',
-      text_krama: ['RR-svara', 'RR-mAtrA'],
-      type: 'vyanjana'
+      mAtrA: HALANT + 'ਰੀ',
+      text_krama: ['RR-svara'],
+      mAtrA_text_krama: ['RR-mAtrA'],
+      type: 'svara'
     },
     {
       text: 'ਲ੍ਰਿ',
-      text_krama: ['LR-svara', 'LR-mAtrA'],
-      type: 'vyanjana'
+      mAtrA: HALANT + 'ਲ੍ਰਿ',
+      text_krama: ['LR-svara'],
+      mAtrA_text_krama: ['LR-mAtrA'],
+      type: 'svara'
     },
     {
       text: 'ਲ੍ਰੀ',
-      text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      type: 'vyanjana'
+      mAtrA: HALANT + 'ਲ੍ਰੀ',
+      text_krama: ['LRR-svara'],
+      mAtrA_text_krama: ['LRR-mAtrA'],
+      type: 'svara'
     },
 
     // vyanjana
