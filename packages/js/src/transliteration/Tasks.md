@@ -8,7 +8,7 @@
 
 ## Future Tasks
 
-- Expnand Test Data for more and better coverage
+- Expand Test Data for more and better coverage
 - Add, Enable and Tets Tamil-Extended
 - Add other ancient scripts Besides Brahmi
 - Add and Test for Vedic Sanskrit Inputs
