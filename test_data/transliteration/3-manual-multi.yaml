@@ -1,0 +1,10 @@
+- index: 0
+  from: Malayalam
+  to: Devanagari
+  input: ൰ ൱ ൲
+  output: १० १०० १०००
+- index: 1
+  from: Tamil
+  to: Devanagari
+  input: ௰ ௱ ௲
+  output: १० १०० १०००
