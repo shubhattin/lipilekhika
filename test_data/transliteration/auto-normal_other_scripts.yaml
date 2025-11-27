@@ -244,3 +244,201 @@
   input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
   output: ".. iti śrīmatparamahaṁsaparivrājakāCāryasya\nśrīgōvindabhagavatpūjyapādaśiṣyasya\nśrīmaCChaṅkarabhagavataḥ kr̥tau saundaryalaharī samāptā .."
   reversible: true
+- index: 41
+  from: Normal
+  to: Romanized
+  input: "AUM namO nArAyaNAya\natha shrImannArAyaNIyam\nprathamam dashakam\nbhagavataH svarUpaM mAhAtmyaM Ca"
+  output: "āūṁ namō nārāyaṇāya\natha śrīmannārāyaṇīyam\nprathamam daśakam\nbhagavataḥ svarūpaṁ māhātmyaṁ Ca"
+  reversible: true
+- index: 42
+  from: Normal
+  to: Romanized
+  input: "sAndrAnandAvabOdhAtmakamanupamitaM kAladEshAvadhibhyAM\nnirmuktaM nityamuktaM nigamashatasahasrENa nirbhAsyamAnam .\naspaShTaM dRShTamAtrE punarurupuruShArthAtmakaM brahma tatvaM\ntattAvadbhAti sAkShAd gurupavanapurE hanta bhAgyaM janAnAm ...1.."
+  output: "sāndrānandāvabōdhātmakamanupamitaṁ kāladēśāvadhibhyāṁ\nnirmuktaṁ nityamuktaṁ nigamaśatasahasrēṇa nirbhāsyamānam .\naspaṣṭaṁ dr̥ṣṭamātrē punarurupuruṣārthātmakaṁ brahma tatvaṁ\ntattāvadbhāti sākṣād gurupavanapurē hanta bhāgyaṁ janānām ...1.."
+  reversible: true
+- index: 43
+  from: Normal
+  to: Romanized
+  input: "namrANAM sannidhattE satatamapi purastairanabhyarthitAna -\npyarthAn kAmAnajasraM vitarati paramAnandasAndrAM gatiM Ca .\nitthaM nishshEShalabhyO niravadhikaphala: pArijAtO harE tvaM\nkShudraM taM shakravATIdrumamabhilaShati vyarthamarthivrajO''yam ...8.."
+  output: "namrāṇāṁ sannidhattē satatamapi purastairanabhyarthitāna -\npyarthān kāmānajasraṁ vitarati paramānandasāndrāṁ gatiṁ Ca .\nitthaṁ niśśēṣalabhyō niravadhikaphala: pārijātō harē tvaṁ\nkṣudraṁ taṁ śakravāṭīdrumamabhilaṣati vyarthamarthivrajō''yam ...8.."
+  reversible: true
+- index: 44
+  from: Normal
+  to: Romanized
+  input: "aishvaryaM shaGkarAdIshvaraviniyamanaM vishvatEjOharANAM\ntEjassaMhAri vIryaM vimalamapi yashO nispRhaishCOpagItam .\naGgAsaGgA sadA shrIrakhilavidasi na kvApi tE saGgavArtA\ntadvAtAgAravAsin murahara bhagavaCChabdamukhyAshrayO''si ...1.0.."
+  output: "aiśvaryaṁ śaṅkarādīśvaraviniyamanaṁ viśvatējōharāṇāṁ\ntējassaṁhāri vīryaṁ vimalamapi yaśō nispr̥haiśCōpagītam .\naṅgāsaṅgā sadā śrīrakhilavidasi na kvāpi tē saṅgavārtā\ntadvātāgāravāsin murahara bhagavaCChabdamukhyāśrayō''si ...1.0.."
+  reversible: true
+- index: 45
+  from: Normal
+  to: Romanized
+  input: "avyaktaM tE svarUpaM duradhigamatamaM tattu shuddhaikasattvaM\nvyaktaM CApyEtadEva sphuTamamRtarasAmbhOdhikallOlatulyam .\nsarvOtkRShTAmabhIShTAM tadiha guNarasEnaiva CittaM harantIM\nmUrtiM tE saMshrayE''haM pavanapurapatE pAhi mAM kRShNa rOgAt ...1.0.."
+  output: "avyaktaṁ tē svarūpaṁ duradhigamatamaṁ tattu śuddhaikasattvaṁ\nvyaktaṁ Cāpyētadēva sphuṭamamr̥tarasāmbhōdhikallōlatulyam .\nsarvōtkr̥ṣṭāmabhīṣṭāṁ tadiha guṇarasēnaiva Cittaṁ harantīṁ\nmūrtiṁ tē saṁśrayē''haṁ pavanapurapatē pāhi māṁ kr̥ṣṇa rōgāt ...1.0.."
+  reversible: true
+- index: 46
+  from: Normal
+  to: Romanized
+  input: "EtAM vibhUtiM yOgaM Ca mama yO vEtti tattvataH .\nsO''vikampEna yOgEna yujyatE nAtra saMshayaH ...1.0-.7.."
+  output: "ētāṁ vibhūtiṁ yōgaṁ Ca mama yō vētti tattvataḥ .\nsō''vikampēna yōgēna yujyatē nātra saṁśayaḥ ...1.0-.7.."
+  reversible: true
+- index: 47
+  from: Normal
+  to: Romanized
+  input: "ahaM sarvasya prabhavO mattaH sarvaM pravartatE .\niti matvA bhajantE mAM budhA bhAvasamanvitAH ...1.0-.8.."
+  output: "ahaṁ sarvasya prabhavō mattaḥ sarvaṁ pravartatē .\niti matvā bhajantē māṁ budhā bhāvasamanvitāḥ ...1.0-.8.."
+  reversible: true
+- index: 48
+  from: Normal
+  to: Romanized
+  input: "maCCittA madgataprANA bOdhayantaH parasparam .\nkathayantashCa mAM nityaM tuShyanti Ca ramanti Ca ...1.0-.9.."
+  output: "maCCittā madgataprāṇā bōdhayantaḥ parasparam .\nkathayantaśCa māṁ nityaṁ tuṣyanti Ca ramanti Ca ...1.0-.9.."
+  reversible: true
+- index: 49
+  from: Normal
+  to: Romanized
+  input: "tEShAM satatayuktAnAM bhajatAM prItipUrvakam .\ndadAmi buddhiyOgaM taM yEna mAmupayAnti tE ...1.0-.1.0.."
+  output: "tēṣāṁ satatayuktānāṁ bhajatāṁ prītipūrvakam .\ndadāmi buddhiyōgaṁ taṁ yēna māmupayānti tē ...1.0-.1.0.."
+  reversible: true
+- index: 50
+  from: Normal
+  to: Romanized
+  input: "hanta tE kathayiShyAmi divyA hyAtmavibhUtayaH .\nprAdhAnyataH kurushrEShTha nAstyantO vistarasya mE ...1.0-.1.9.."
+  output: "hanta tē kathayiṣyāmi divyā hyātmavibhūtayaḥ .\nprādhānyataḥ kuruśrēṣṭha nāstyantō vistarasya mē ...1.0-.1.9.."
+  reversible: true
+- index: 51
+  from: Normal
+  to: Romanized
+  input: "ahamAtmA guDAkEsha sarvabhUtAshayasthitaH .\nahamAdishCa madhyaM Ca bhUtAnAmanta Eva Ca ...1.0-.2.0.."
+  output: "ahamātmā guḍākēśa sarvabhūtāśayasthitaḥ .\nahamādiśCa madhyaṁ Ca bhūtānāmanta ēva Ca ...1.0-.2.0.."
+  reversible: true
+- index: 52
+  from: Normal
+  to: Romanized
+  input: "AdityAnAmahaM viShNurjyOtiShAM raviraMshumAn .\nmarICirmarutAmasmi nakShatrANAmahaM shashI ...1.0-.2.1.."
+  output: "ādityānāmahaṁ viṣṇurjyōtiṣāṁ raviraṁśumān .\nmarīCirmarutāmasmi nakṣatrāṇāmahaṁ śaśī ...1.0-.2.1.."
+  reversible: true
+- index: 53
+  from: Normal
+  to: Romanized
+  input: "vEdAnAM sAmavEdO''smi dEvAnAmasmi vAsavaH .\nindriyANAM manashCAsmi bhUtAnAmasmi CEtanA ...1.0-.2.2.."
+  output: "vēdānāṁ sāmavēdō''smi dēvānāmasmi vāsavaḥ .\nindriyāṇāṁ manaśCāsmi bhūtānāmasmi Cētanā ...1.0-.2.2.."
+  reversible: true
+- index: 54
+  from: Normal
+  to: Romanized
+  input: "rudrANAM shaGkarashCAsmi vittEshO yakSharakShasAm .\nvasUnAM pAvakashCAsmi mEruH shikhariNAmaham ...1.0-.2.3.."
+  output: "rudrāṇāṁ śaṅkaraśCāsmi vittēśō yakṣarakṣasām .\nvasūnāṁ pāvakaśCāsmi mēruḥ śikhariṇāmaham ...1.0-.2.3.."
+  reversible: true
+- index: 55
+  from: Normal
+  to: Romanized
+  input: "purOdhasAM Ca mukhyaM mAM viddhi pArtha bRhaspatim .\nsEnAnInAmahaM skandaH sarasAmasmi sAgaraH ...1.0-.2.4.."
+  output: "purōdhasāṁ Ca mukhyaṁ māṁ viddhi pārtha br̥haspatim .\nsēnānīnāmahaṁ skandaḥ sarasāmasmi sāgaraḥ ...1.0-.2.4.."
+  reversible: true
+- index: 56
+  from: Normal
+  to: Romanized
+  input: "maharShINAM bhRgurahaM girAmasmyEkamakSharam .\nyajJAnAM japayajJO''smi sthAvarANAM himAlayaH ...1.0-.2.5.."
+  output: "maharṣīṇāṁ bhr̥gurahaṁ girāmasmyēkamakṣaram .\nyajñānāṁ japayajñō''smi sthāvarāṇāṁ himālayaḥ ...1.0-.2.5.."
+  reversible: true
+- index: 57
+  from: Normal
+  to: Romanized
+  input: "ashvatthaH sarvavRkShANAM dEvarShINAM Ca nAradaH .\ngandharvANAM CitrarathaH siddhAnAM kapilO muniH ...1.0-.2.6.."
+  output: "aśvatthaḥ sarvavr̥kṣāṇāṁ dēvarṣīṇāṁ Ca nāradaḥ .\ngandharvāṇāṁ Citrarathaḥ siddhānāṁ kapilō muniḥ ...1.0-.2.6.."
+  reversible: true
+- index: 58
+  from: Normal
+  to: Romanized
+  input: "uCCaiHshravasamashvAnAM viddhi mAmamRtOdbhavam .\nairAvataM gajEndrANAM narANAM Ca narAdhipam ...1.0-.2.7.."
+  output: "uCCaiḥśravasamaśvānāṁ viddhi māmamr̥tōdbhavam .\nairāvataṁ gajēndrāṇāṁ narāṇāṁ Ca narādhipam ...1.0-.2.7.."
+  reversible: true
+- index: 59
+  from: Normal
+  to: Romanized
+  input: "AyudhAnAmahaM vajraM dhEnUnAmasmi kAmadhuk .\nprajanashCAsmi kandarpaH sarpANAmasmi vAsukiH ...1.0-.2.8.."
+  output: "āyudhānāmahaṁ vajraṁ dhēnūnāmasmi kāmadhuk .\nprajanaśCāsmi kandarpaḥ sarpāṇāmasmi vāsukiḥ ...1.0-.2.8.."
+  reversible: true
+- index: 60
+  from: Normal
+  to: Romanized
+  input: "anantashCAsmi nAgAnAM varuNO yAdasAmaham .\npitRRNAmaryamA CAsmi yamaH saMyamatAmaham ...1.0-.2.9.."
+  output: "anantaśCāsmi nāgānāṁ varuṇō yādasāmaham .\npitr̥̄ṇāmaryamā Cāsmi yamaḥ saṁyamatāmaham ...1.0-.2.9.."
+  reversible: true
+- index: 61
+  from: Normal
+  to: Romanized
+  input: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM vainatEyashCa pakShiNAm ...1.0-.3.0.."
+  output: "prahlādaśCāsmi daityānāṁ kālaḥ kalayatāmaham .\nmr̥gāṇāṁ Ca mr̥gēndrō''haṁ vainatēyaśCa pakṣiṇām ...1.0-.3.0.."
+  reversible: true
+- index: 62
+  from: Normal
+  to: Romanized
+  input: "pavanaH pavatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnavI ...1.0-.3.1.."
+  output: "pavanaḥ pavatāmasmi rāmaḥ śastrabhr̥tāmaham .\njhaṣāṇāṁ makaraśCāsmi srōtasāmasmi jāhnavī ...1.0-.3.1.."
+  reversible: true
+- index: 63
+  from: Normal
+  to: Romanized
+  input: "sargANAmAdirantashCa madhyaM CaivAhamarjuna .\nadhyAtmavidyA vidyAnAM vAdaH pravadatAmaham ...1.0-.3.2.."
+  output: "sargāṇāmādirantaśCa madhyaṁ Caivāhamarjuna .\nadhyātmavidyā vidyānāṁ vādaḥ pravadatāmaham ...1.0-.3.2.."
+  reversible: true
+- index: 64
+  from: Normal
+  to: Romanized
+  input: "akSharANAmakArO''smi dvandvaH sAmAsikasya Ca .\nahamEvAkShayaH kAlO dhAtAhaM vishvatOmukhaH ...1.0-.3.3.."
+  output: "akṣarāṇāmakārō''smi dvandvaḥ sāmāsikasya Ca .\nahamēvākṣayaḥ kālō dhātāhaṁ viśvatōmukhaḥ ...1.0-.3.3.."
+  reversible: true
+- index: 65
+  from: Normal
+  to: Romanized
+  input: "mRtyuH sarvaharashCAhamudbhavashCa bhaviShyatAm .\nkIrtiH shrIrvAkCa nArINAM smRtirmEdhA dhRtiH kShamA ...1.0-.3.4.."
+  output: "mr̥tyuḥ sarvaharaśCāhamudbhavaśCa bhaviṣyatām .\nkīrtiḥ śrīrvākCa nārīṇāṁ smr̥tirmēdhā dhr̥tiḥ kṣamā ...1.0-.3.4.."
+  reversible: true
+- index: 66
+  from: Normal
+  to: Romanized
+  input: "bRhatsAma tathA sAmnAM gAyatrI ChandasAmaham .\nmAsAnAM mArgashIrShO''hamRtUnAM kusumAkaraH ...1.0-.3.5.."
+  output: "br̥hatsāma tathā sāmnāṁ gāyatrī Chandasāmaham .\nmāsānāṁ mārgaśīrṣō''hamr̥tūnāṁ kusumākaraḥ ...1.0-.3.5.."
+  reversible: true
+- index: 67
+  from: Normal
+  to: Romanized
+  input: "dyUtaM ChalayatAmasmi tEjastEjasvinAmaham .\njayO''smi vyavasAyO''smi sattvaM sattvavatAmaham ...1.0-.3.6.."
+  output: "dyūtaṁ Chalayatāmasmi tējastējasvināmaham .\njayō''smi vyavasāyō''smi sattvaṁ sattvavatāmaham ...1.0-.3.6.."
+  reversible: true
+- index: 68
+  from: Normal
+  to: Romanized
+  input: "vRShNInAM vAsudEvO''smi pANDavAnAM dhanaJjayaH .\nmunInAmapyahaM vyAsaH kavInAmushanA kaviH ...1.0-.3.7.."
+  output: "vr̥ṣṇīnāṁ vāsudēvō''smi pāṇḍavānāṁ dhanañjayaḥ .\nmunīnāmapyahaṁ vyāsaḥ kavīnāmuśanā kaviḥ ...1.0-.3.7.."
+  reversible: true
+- index: 69
+  from: Normal
+  to: Romanized
+  input: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaivAsmi guhyAnAM jJAnaM jJAnavatAmaham ...1.0-.3.8.."
+  output: "daṇḍō damayatāmasmi nītirasmi jigīṣatām .\nmaunaṁ Caivāsmi guhyānāṁ jñānaṁ jñānavatāmaham ...1.0-.3.8.."
+  reversible: true
+- index: 70
+  from: Normal
+  to: Romanized
+  input: "yaCCApi sarvabhUtAnAM bIjaM tadahamarjuna .\nna tadasti vinA yatsyAnmayA bhUtaM CarACaram ...1.0-.3.9.."
+  output: "yaCCāpi sarvabhūtānāṁ bījaṁ tadahamarjuna .\nna tadasti vinā yatsyānmayā bhūtaṁ CarāCaram ...1.0-.3.9.."
+  reversible: true
+- index: 71
+  from: Normal
+  to: Romanized
+  input: "nAntO''sti mama divyAnAM vibhUtInAM parantapa .\nESha tUddEshataH prOktO vibhUtErvistarO mayA ...1.0-.4.0.."
+  output: "nāntō''sti mama divyānāṁ vibhūtīnāṁ parantapa .\nēṣa tūddēśataḥ prōktō vibhūtērvistarō mayā ...1.0-.4.0.."
+  reversible: true
+- index: 72
+  from: Normal
+  to: Romanized
+  input: "yadyadvibhUtimatsattvaM shrImadUrjitamEva vA .\ntattadEvAvagaCCha tvaM mama tEjOM''shasambhavam ...1.0-.4.1.."
+  output: "yadyadvibhūtimatsattvaṁ śrīmadūrjitamēva vā .\ntattadēvāvagaCCha tvaṁ mama tējōṁ''śasambhavam ...1.0-.4.1.."
+  reversible: true
+- index: 73
+  from: Normal
+  to: Romanized
+  input: "athavA bahunaitEna kiM jJAtEna tavArjuna .\nviShTabhyAhamidaM kRtsnamEkAMshEna sthitO jagat ...1.0-.4.2.."
+  output: "athavā bahunaitēna kiṁ jñātēna tavārjuna .\nviṣṭabhyāhamidaṁ kr̥tsnamēkāṁśēna sthitō jagat ...1.0-.4.2.."
+  reversible: true

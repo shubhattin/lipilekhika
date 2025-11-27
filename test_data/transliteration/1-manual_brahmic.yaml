@@ -32,3 +32,32 @@
   to: Telugu
   input: कॆशं केशं
   output: కేశం కేశం
+- index: 6
+  from: Devanagari
+  to: Normal
+  # For this text the old algorithm is failing for some reason so testing it here
+  input: |
+    एवंदुर्लभ्यवस्तुन्यपि सुलभतया हस्तलब्धे यदन्यत् 
+    तन्वा वाचा धिया वा भजति बत जनः क्षुद्रतैव स्फुटेयम् ।
+    एते तावद्वयं तु स्थिरतरमनसा विश्वपीड़ापहत्यै
+    निश्शेषात्मानमेनं गुरुपवनपुराधीशमेवाश्रयामः ॥२॥
+  output: |
+    EvaMdurlabhyavastunyapi sulabhatayA hastalabdhE yadanyat 
+    tanvA vACA dhiyA vA bhajati bata janaH kShudrataiva sphuTEyam .
+    EtE tAvadvayaM tu sthirataramanasA vishvapIDzApahatyai
+    nishshEShAtmAnamEnaM gurupavanapurAdhIshamEvAshrayAmaH ..2..
+  reversible: true
+- index: 6
+  from: Devanagari
+  to: Telugu
+  input: |
+    एवंदुर्लभ्यवस्तुन्यपि सुलभतया हस्तलब्धे यदन्यत् 
+    तन्वा वाचा धिया वा भजति बत जनः क्षुद्रतैव स्फुटेयम् ।
+    एते तावद्वयं तु स्थिरतरमनसा विश्वपीड़ापहत्यै
+    निश्शेषात्मानमेनं गुरुपवनपुराधीशमेवाश्रयामः ॥२॥
+  output: |
+    ఏవందుర్లభ్యవస్తున్యపి సులభతయా హస్తలబ్ధే యదన్యత్ 
+    తన్వా వాచా ధియా వా భజతి బత జనః క్షుద్రతైవ స్ఫుటేయమ్ ।
+    ఏతే తావద్వయం తు స్థిరతరమనసా విశ్వపీడాపహత్యై
+    నిశ్శేషాత్మానమేనం గురుపవనపురాధీశమేవాశ్రయామః ॥౨॥
+  reversible: false

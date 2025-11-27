@@ -58,6 +58,7 @@ const devangari_other_brahmic_scripts = async () => {
     "Bengali",
     "Gurumukhi",
     "Tamil",
+    "Telugu", // as it lacks Dhz,Dz etc
   ] as script_list_type[];
 
   const out_test_data: TestData[] = [];
