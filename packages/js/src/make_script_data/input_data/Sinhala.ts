@@ -23,7 +23,8 @@ const Sinhala = {
     anunAnAsika: 'ඁ',
     visarga: 'ඃ',
     saMkShepachihna: '॰',
-    avagraha: 'ಽ',
+    avagraha: 'ऽ',
+    // Devanagari avagraha as not there in Sinhala
     halant: '්',
     anudAttA: '॒',
     'udAtta-1': '॑',
