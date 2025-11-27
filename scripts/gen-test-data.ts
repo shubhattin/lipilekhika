@@ -58,6 +58,7 @@ const devangari_other_brahmic_scripts = async () => {
     "Bengali",
     "Gurumukhi",
     "Tamil",
+    "Telugu", // as it lacks Dhz,Dz etc
   ] as script_list_type[];
 
   const out_test_data: TestData[] = [];
@@ -95,13 +96,16 @@ const devangari_other_brahmic_scripts = async () => {
  */
 const devanagari_non_brahmic_scripts = async () => {
   const OUT_FILE_NAME = "auto-devangari_non_brahmic_scripts";
+  const OUT_FILE_NAME1 = "auto-normal_other_scripts";
   const FROM_SCRIPT = "Devanagari";
   const NON_BRAHMI_SCRIPTS = [
     "Normal",
     "Romanized",
   ] satisfies script_list_type[];
   const out_test_data: TestData[] = [];
+  const out_test_data1: TestData[] = [];
   let index = 0;
+  let index1 = 0;
   for (const input of DEVANAGARI_INPUTS) {
     for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
       let output = await old_lipi_parivartak(
@@ -124,12 +128,35 @@ const devanagari_non_brahmic_scripts = async () => {
         output: output.replace(/\.(?=\d)/g, ""), // handling the case of number conversion where १ -> 1 (not .1)
         reversible: true,
       });
+      if (non_brahmic_script === "Normal") {
+        for (const other_script of NON_BRAHMI_SCRIPTS) {
+          if (other_script === "Normal") continue;
+          const output1 = await old_lipi_parivartak(
+            output,
+            non_brahmic_script,
+            other_script
+          );
+          out_test_data1.push({
+            index: index1++,
+            from: non_brahmic_script,
+            to: other_script,
+            input: output,
+            output: output1,
+            reversible: true,
+          });
+        }
+      }
     }
   }
   fs.writeFileSync(
     path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME + ".yaml"),
     // @ts-ignore
     Bun.YAML.stringify(out_test_data, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME1 + ".yaml"),
+    // @ts-ignore
+    Bun.YAML.stringify(out_test_data1, null, 2)
   );
   // Using a tick mark sign (✓) in the printed message
   console.log(chalk.green.bold(`✓  Devanagari ⇆ Non-Brahmic Scripts`));
