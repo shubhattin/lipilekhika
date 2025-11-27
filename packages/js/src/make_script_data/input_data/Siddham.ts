@@ -360,6 +360,6 @@ const Siddham = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Siddham;

@@ -366,6 +366,6 @@ const Sinhala = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Sinhala;

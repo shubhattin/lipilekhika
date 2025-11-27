@@ -357,6 +357,6 @@ const Bengali = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Bengali;

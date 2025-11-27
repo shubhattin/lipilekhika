@@ -380,6 +380,6 @@ const Gurumukhi = {
     //   type: 'vyanjana'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Gurumukhi;

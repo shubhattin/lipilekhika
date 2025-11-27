@@ -408,6 +408,6 @@ const Sharada = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Sharada;

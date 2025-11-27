@@ -376,6 +376,6 @@ const Gujarati = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Gujarati;

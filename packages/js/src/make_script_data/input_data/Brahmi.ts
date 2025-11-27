@@ -321,6 +321,6 @@ const Brahmi = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Brahmi;
