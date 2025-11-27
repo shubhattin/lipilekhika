@@ -15,6 +15,58 @@ type TestData = {
   reversible?: boolean;
 };
 
+const MAX_ARRAY_TEST_SIZE = 61;
+
+const chunkArray = <T>(items: T[], chunkSize: number): T[][] => {
+  if (chunkSize <= 0) {
+    throw new Error("chunkSize must be greater than 0");
+  }
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += chunkSize) {
+    chunks.push(items.slice(i, i + chunkSize));
+  }
+  return chunks;
+};
+
+const purgeTestDataFiles = (baseFileName: string) => {
+  if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
+    return;
+  }
+  const existingFiles = fs.readdirSync(TEST_DATA_OUT_FOLDER);
+  existingFiles
+    .filter(
+      (file) =>
+        file.startsWith(baseFileName) &&
+        path.extname(file).toLowerCase() === ".yaml"
+    )
+    .forEach((file) => {
+      fs.rmSync(path.join(TEST_DATA_OUT_FOLDER, file));
+    });
+};
+
+const writeTestDataFiles = <T extends { index: number }>(
+  items: T[],
+  baseFileName: string
+) => {
+  purgeTestDataFiles(baseFileName);
+  const chunks =
+    items.length === 0
+      ? ([[]] as T[][])
+      : chunkArray(items, MAX_ARRAY_TEST_SIZE);
+  chunks.forEach((chunk, idx) => {
+    const suffix = chunks.length > 1 ? `-${idx + 1}` : "";
+    const reindexedChunk = chunk.map((entry, chunkIndex) => ({
+      ...entry,
+      index: chunkIndex,
+    })) as T[];
+    fs.writeFileSync(
+      path.join(TEST_DATA_OUT_FOLDER, `${baseFileName}${suffix}.yaml`),
+      // @ts-ignore
+      Bun.YAML.stringify(reindexedChunk, null, 2)
+    );
+  });
+};
+
 const DEVANAGARI_INPUTS = fs
   .readFileSync(path.join(__dirname, "devanagari-inputs.txt"), "utf-8")
   .split("\n\n")
@@ -36,7 +88,7 @@ if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
 const devangari_other_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "auto-devangari_other_brahmic_scripts";
+  const OUT_FILE_NAME = "auto-dev-brahmic";
   const FROM_SCRIPT = "Devanagari";
   const OTHER_BRAHMI_SCRIPTS = [
     "Assamese",
@@ -82,11 +134,7 @@ const devangari_other_brahmic_scripts = async () => {
       out_test_data.push(test_data);
     }
   }
-  fs.writeFileSync(
-    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME + ".yaml"),
-    // @ts-ignore
-    Bun.YAML.stringify(out_test_data, null, 2)
-  );
+  writeTestDataFiles(out_test_data, OUT_FILE_NAME);
   // Using a tick mark sign (✓) in the printed message
   console.log(chalk.green.bold(`✓  Devanagari ⇆ Other Brahmic Scripts`));
 };
@@ -95,8 +143,8 @@ const devangari_other_brahmic_scripts = async () => {
  * Generates test Test Data for transliteration to and from Devangari to non-Brahmic scripts (Normal and Romanized)
  */
 const devanagari_non_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "auto-devangari_non_brahmic_scripts";
-  const OUT_FILE_NAME1 = "auto-normal_other_scripts";
+  const OUT_FILE_NAME = "auto-dev-other";
+  const OUT_FILE_NAME1 = "auto-noral-other";
   const FROM_SCRIPT = "Devanagari";
   const NON_BRAHMI_SCRIPTS = [
     "Normal",
@@ -148,16 +196,8 @@ const devanagari_non_brahmic_scripts = async () => {
       }
     }
   }
-  fs.writeFileSync(
-    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME + ".yaml"),
-    // @ts-ignore
-    Bun.YAML.stringify(out_test_data, null, 2)
-  );
-  fs.writeFileSync(
-    path.join(TEST_DATA_OUT_FOLDER, OUT_FILE_NAME1 + ".yaml"),
-    // @ts-ignore
-    Bun.YAML.stringify(out_test_data1, null, 2)
-  );
+  writeTestDataFiles(out_test_data, OUT_FILE_NAME);
+  writeTestDataFiles(out_test_data1, OUT_FILE_NAME1);
   // Using a tick mark sign (✓) in the printed message
   console.log(chalk.green.bold(`✓  Devanagari ⇆ Non-Brahmic Scripts`));
 };

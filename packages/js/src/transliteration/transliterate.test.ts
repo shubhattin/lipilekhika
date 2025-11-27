@@ -28,12 +28,12 @@ describe('Test Transliteration Function Modules', async () => {
     ) as TestDataType[];
     describe(file, async () => {
       for (const test_data_item of test_data) {
-        it(`Index ${test_data_item.index}`, async () => {
-          const result = await transliterate(
-            test_data_item.input,
-            test_data_item.from,
-            test_data_item.to
-          );
+        const result = await transliterate(
+          test_data_item.input,
+          test_data_item.from,
+          test_data_item.to
+        );
+        it(`Index ${test_data_item.index} ➡`, async () => {
           const errorMessage =
             `Transliteration failed:\n` +
             `  Input: "${test_data_item.input}"\n` +
@@ -42,8 +42,9 @@ describe('Test Transliteration Function Modules', async () => {
             `  Expected: "${test_data_item.output}"\n` +
             `  Actual: "${result}"`;
           expect(result, errorMessage).toBe(test_data_item.output);
-
-          if (test_data_item.reversible) {
+        });
+        if (test_data_item.reversible) {
+          it(`Index ${test_data_item.index} ⬅`, async () => {
             const result_reversed = await transliterate(
               result,
               test_data_item.to,
@@ -58,8 +59,8 @@ describe('Test Transliteration Function Modules', async () => {
               `  Expected: "${test_data_item.input}"\n` +
               `  Actual: "${result_reversed}"`;
             expect(result_reversed, errorMessage_reversed).toBe(test_data_item.input);
-          }
-        });
+          });
+        }
       }
     });
   }
