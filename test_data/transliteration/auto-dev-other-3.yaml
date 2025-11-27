@@ -1,0 +1,168 @@
+- index: 0
+  from: Devanagari
+  to: Normal
+  input: "प्रह्लादश्चास्मि दैत्यानां कालः कलयतामहम् ।\nमृगाणां च मृगेन्द्रोऽहं वैनतेयश्च पक्षिणाम् ॥१०-३०॥"
+  output: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM vainatEyashCa pakShiNAm ..10-30.."
+  reversible: true
+- index: 1
+  from: Devanagari
+  to: Romanized
+  input: "प्रह्लादश्चास्मि दैत्यानां कालः कलयतामहम् ।\nमृगाणां च मृगेन्द्रोऽहं वैनतेयश्च पक्षिणाम् ॥१०-३०॥"
+  output: "prahlādaśCāsmi daityānāṁ kālaḥ kalayatāmaham .\nmr̥gāṇāṁ Ca mr̥gēndrō''haṁ vainatēyaśCa pakṣiṇām ..10-30.."
+  reversible: true
+- index: 2
+  from: Devanagari
+  to: Normal
+  input: "पवनः पवतामस्मि रामः शस्त्रभृतामहम् ।\nझषाणां मकरश्चास्मि स्रोतसामस्मि जाह्नवी ॥१०-३१॥"
+  output: "pavanaH pavatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnavI ..10-31.."
+  reversible: true
+- index: 3
+  from: Devanagari
+  to: Romanized
+  input: "पवनः पवतामस्मि रामः शस्त्रभृतामहम् ।\nझषाणां मकरश्चास्मि स्रोतसामस्मि जाह्नवी ॥१०-३१॥"
+  output: "pavanaḥ pavatāmasmi rāmaḥ śastrabhr̥tāmaham .\njhaṣāṇāṁ makaraśCāsmi srōtasāmasmi jāhnavī ..10-31.."
+  reversible: true
+- index: 4
+  from: Devanagari
+  to: Normal
+  input: "सर्गाणामादिरन्तश्च मध्यं चैवाहमर्जुन ।\nअध्यात्मविद्या विद्यानां वादः प्रवदतामहम् ॥१०-३२॥"
+  output: "sargANAmAdirantashCa madhyaM CaivAhamarjuna .\nadhyAtmavidyA vidyAnAM vAdaH pravadatAmaham ..10-32.."
+  reversible: true
+- index: 5
+  from: Devanagari
+  to: Romanized
+  input: "सर्गाणामादिरन्तश्च मध्यं चैवाहमर्जुन ।\nअध्यात्मविद्या विद्यानां वादः प्रवदतामहम् ॥१०-३२॥"
+  output: "sargāṇāmādirantaśCa madhyaṁ Caivāhamarjuna .\nadhyātmavidyā vidyānāṁ vādaḥ pravadatāmaham ..10-32.."
+  reversible: true
+- index: 6
+  from: Devanagari
+  to: Normal
+  input: "अक्षराणामकारोऽस्मि द्वन्द्वः सामासिकस्य च ।\nअहमेवाक्षयः कालो धाताहं विश्वतोमुखः ॥१०-३३॥"
+  output: "akSharANAmakArO''smi dvandvaH sAmAsikasya Ca .\nahamEvAkShayaH kAlO dhAtAhaM vishvatOmukhaH ..10-33.."
+  reversible: true
+- index: 7
+  from: Devanagari
+  to: Romanized
+  input: "अक्षराणामकारोऽस्मि द्वन्द्वः सामासिकस्य च ।\nअहमेवाक्षयः कालो धाताहं विश्वतोमुखः ॥१०-३३॥"
+  output: "akṣarāṇāmakārō''smi dvandvaḥ sāmāsikasya Ca .\nahamēvākṣayaḥ kālō dhātāhaṁ viśvatōmukhaḥ ..10-33.."
+  reversible: true
+- index: 8
+  from: Devanagari
+  to: Normal
+  input: "मृत्युः सर्वहरश्चाहमुद्भवश्च भविष्यताम् ।\nकीर्तिः श्रीर्वाक्च नारीणां स्मृतिर्मेधा धृतिः क्षमा ॥१०-३४॥"
+  output: "mRtyuH sarvaharashCAhamudbhavashCa bhaviShyatAm .\nkIrtiH shrIrvAkCa nArINAM smRtirmEdhA dhRtiH kShamA ..10-34.."
+  reversible: true
+- index: 9
+  from: Devanagari
+  to: Romanized
+  input: "मृत्युः सर्वहरश्चाहमुद्भवश्च भविष्यताम् ।\nकीर्तिः श्रीर्वाक्च नारीणां स्मृतिर्मेधा धृतिः क्षमा ॥१०-३४॥"
+  output: "mr̥tyuḥ sarvaharaśCāhamudbhavaśCa bhaviṣyatām .\nkīrtiḥ śrīrvākCa nārīṇāṁ smr̥tirmēdhā dhr̥tiḥ kṣamā ..10-34.."
+  reversible: true
+- index: 10
+  from: Devanagari
+  to: Normal
+  input: "बृहत्साम तथा साम्नां गायत्री छन्दसामहम् ।\nमासानां मार्गशीर्षोऽहमृतूनां कुसुमाकरः ॥१०-३५॥"
+  output: "bRhatsAma tathA sAmnAM gAyatrI ChandasAmaham .\nmAsAnAM mArgashIrShO''hamRtUnAM kusumAkaraH ..10-35.."
+  reversible: true
+- index: 11
+  from: Devanagari
+  to: Romanized
+  input: "बृहत्साम तथा साम्नां गायत्री छन्दसामहम् ।\nमासानां मार्गशीर्षोऽहमृतूनां कुसुमाकरः ॥१०-३५॥"
+  output: "br̥hatsāma tathā sāmnāṁ gāyatrī Chandasāmaham .\nmāsānāṁ mārgaśīrṣō''hamr̥tūnāṁ kusumākaraḥ ..10-35.."
+  reversible: true
+- index: 12
+  from: Devanagari
+  to: Normal
+  input: "द्यूतं छलयतामस्मि तेजस्तेजस्विनामहम् ।\nजयोऽस्मि व्यवसायोऽस्मि सत्त्वं सत्त्ववतामहम् ॥१०-३६॥"
+  output: "dyUtaM ChalayatAmasmi tEjastEjasvinAmaham .\njayO''smi vyavasAyO''smi sattvaM sattvavatAmaham ..10-36.."
+  reversible: true
+- index: 13
+  from: Devanagari
+  to: Romanized
+  input: "द्यूतं छलयतामस्मि तेजस्तेजस्विनामहम् ।\nजयोऽस्मि व्यवसायोऽस्मि सत्त्वं सत्त्ववतामहम् ॥१०-३६॥"
+  output: "dyūtaṁ Chalayatāmasmi tējastējasvināmaham .\njayō''smi vyavasāyō''smi sattvaṁ sattvavatāmaham ..10-36.."
+  reversible: true
+- index: 14
+  from: Devanagari
+  to: Normal
+  input: "वृष्णीनां वासुदेवोऽस्मि पाण्डवानां धनञ्जयः ।\nमुनीनामप्यहं व्यासः कवीनामुशना कविः ॥१०-३७॥"
+  output: "vRShNInAM vAsudEvO''smi pANDavAnAM dhanaJjayaH .\nmunInAmapyahaM vyAsaH kavInAmushanA kaviH ..10-37.."
+  reversible: true
+- index: 15
+  from: Devanagari
+  to: Romanized
+  input: "वृष्णीनां वासुदेवोऽस्मि पाण्डवानां धनञ्जयः ।\nमुनीनामप्यहं व्यासः कवीनामुशना कविः ॥१०-३७॥"
+  output: "vr̥ṣṇīnāṁ vāsudēvō''smi pāṇḍavānāṁ dhanañjayaḥ .\nmunīnāmapyahaṁ vyāsaḥ kavīnāmuśanā kaviḥ ..10-37.."
+  reversible: true
+- index: 16
+  from: Devanagari
+  to: Normal
+  input: "दण्डो दमयतामस्मि नीतिरस्मि जिगीषताम् ।\nमौनं चैवास्मि गुह्यानां ज्ञानं ज्ञानवतामहम् ॥१०-३८॥"
+  output: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaivAsmi guhyAnAM jJAnaM jJAnavatAmaham ..10-38.."
+  reversible: true
+- index: 17
+  from: Devanagari
+  to: Romanized
+  input: "दण्डो दमयतामस्मि नीतिरस्मि जिगीषताम् ।\nमौनं चैवास्मि गुह्यानां ज्ञानं ज्ञानवतामहम् ॥१०-३८॥"
+  output: "daṇḍō damayatāmasmi nītirasmi jigīṣatām .\nmaunaṁ Caivāsmi guhyānāṁ jñānaṁ jñānavatāmaham ..10-38.."
+  reversible: true
+- index: 18
+  from: Devanagari
+  to: Normal
+  input: "यच्चापि सर्वभूतानां बीजं तदहमर्जुन ।\nन तदस्ति विना यत्स्यान्मया भूतं चराचरम् ॥१०-३९॥"
+  output: "yaCCApi sarvabhUtAnAM bIjaM tadahamarjuna .\nna tadasti vinA yatsyAnmayA bhUtaM CarACaram ..10-39.."
+  reversible: true
+- index: 19
+  from: Devanagari
+  to: Romanized
+  input: "यच्चापि सर्वभूतानां बीजं तदहमर्जुन ।\nन तदस्ति विना यत्स्यान्मया भूतं चराचरम् ॥१०-३९॥"
+  output: "yaCCāpi sarvabhūtānāṁ bījaṁ tadahamarjuna .\nna tadasti vinā yatsyānmayā bhūtaṁ CarāCaram ..10-39.."
+  reversible: true
+- index: 20
+  from: Devanagari
+  to: Normal
+  input: "नान्तोऽस्ति मम दिव्यानां विभूतीनां परन्तप ।\nएष तूद्देशतः प्रोक्तो विभूतेर्विस्तरो मया ॥१०-४०॥"
+  output: "nAntO''sti mama divyAnAM vibhUtInAM parantapa .\nESha tUddEshataH prOktO vibhUtErvistarO mayA ..10-40.."
+  reversible: true
+- index: 21
+  from: Devanagari
+  to: Romanized
+  input: "नान्तोऽस्ति मम दिव्यानां विभूतीनां परन्तप ।\nएष तूद्देशतः प्रोक्तो विभूतेर्विस्तरो मया ॥१०-४०॥"
+  output: "nāntō''sti mama divyānāṁ vibhūtīnāṁ parantapa .\nēṣa tūddēśataḥ prōktō vibhūtērvistarō mayā ..10-40.."
+  reversible: true
+- index: 22
+  from: Devanagari
+  to: Normal
+  input: "यद्यद्विभूतिमत्सत्त्वं श्रीमदूर्जितमेव वा ।\nतत्तदेवावगच्छ त्वं मम तेजोंऽशसम्भवम् ॥१०-४१॥"
+  output: "yadyadvibhUtimatsattvaM shrImadUrjitamEva vA .\ntattadEvAvagaCCha tvaM mama tEjOM''shasambhavam ..10-41.."
+  reversible: true
+- index: 23
+  from: Devanagari
+  to: Romanized
+  input: "यद्यद्विभूतिमत्सत्त्वं श्रीमदूर्जितमेव वा ।\nतत्तदेवावगच्छ त्वं मम तेजोंऽशसम्भवम् ॥१०-४१॥"
+  output: "yadyadvibhūtimatsattvaṁ śrīmadūrjitamēva vā .\ntattadēvāvagaCCha tvaṁ mama tējōṁ''śasambhavam ..10-41.."
+  reversible: true
+- index: 24
+  from: Devanagari
+  to: Normal
+  input: "अथवा बहुनैतेन किं ज्ञातेन तवार्जुन ।\nविष्टभ्याहमिदं कृत्स्नमेकांशेन स्थितो जगत् ॥१०-४२॥"
+  output: "athavA bahunaitEna kiM jJAtEna tavArjuna .\nviShTabhyAhamidaM kRtsnamEkAMshEna sthitO jagat ..10-42.."
+  reversible: true
+- index: 25
+  from: Devanagari
+  to: Romanized
+  input: "अथवा बहुनैतेन किं ज्ञातेन तवार्जुन ।\nविष्टभ्याहमिदं कृत्स्नमेकांशेन स्थितो जगत् ॥१०-४२॥"
+  output: "athavā bahunaitēna kiṁ jñātēna tavārjuna .\nviṣṭabhyāhamidaṁ kr̥tsnamēkāṁśēna sthitō jagat ..10-42.."
+  reversible: true
+- index: 26
+  from: Devanagari
+  to: Normal
+  input: "योगीन्द्राणां त्वदङ्गेष्वधिकसुमधुरं मुक्तिभाजां निवासो\nभक्तानां कामवर्षद्युतरुकिसलयं नाथ ते पादमूलम् ।\nनित्यं चित्तस्थितं मे पवनपुरपते कृष्ण कारुण्यसिन्धो\nहृत्वा निश्शेषतापान् प्रदिशतु परमानन्दसन्दोहलक्ष्मीम् ॥१०॥"
+  output: "yOgIndrANAM tvadaGgEShvadhikasumadhuraM muktibhAjAM nivAsO\nbhaktAnAM kAmavarShadyutarukisalayaM nAtha tE pAdamUlam .\nnityaM CittasthitaM mE pavanapurapatE kRShNa kAruNyasindhO\nhRtvA nishshEShatApAn pradishatu paramAnandasandOhalakShmIm ..10.."
+  reversible: true
+- index: 27
+  from: Devanagari
+  to: Romanized
+  input: "योगीन्द्राणां त्वदङ्गेष्वधिकसुमधुरं मुक्तिभाजां निवासो\nभक्तानां कामवर्षद्युतरुकिसलयं नाथ ते पादमूलम् ।\nनित्यं चित्तस्थितं मे पवनपुरपते कृष्ण कारुण्यसिन्धो\nहृत्वा निश्शेषतापान् प्रदिशतु परमानन्दसन्दोहलक्ष्मीम् ॥१०॥"
+  output: "yōgīndrāṇāṁ tvadaṅgēṣvadhikasumadhuraṁ muktibhājāṁ nivāsō\nbhaktānāṁ kāmavarṣadyutarukisalayaṁ nātha tē pādamūlam .\nnityaṁ Cittasthitaṁ mē pavanapurapatē kr̥ṣṇa kāruṇyasindhō\nhr̥tvā niśśēṣatāpān pradiśatu paramānandasandōhalakṣmīm ..10.."
+  reversible: true
