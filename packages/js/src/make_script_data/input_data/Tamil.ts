@@ -1,6 +1,8 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '்';
+
 const Tamil = {
   script_type: 'brahmic',
   script_name: 'Tamil',
@@ -19,12 +21,12 @@ const Tamil = {
     '8': '௮',
     '9': '௯',
     AUM: 'ௐ',
-    anusvAra: "ம்'",
-    anunAnAsika: 'ம்',
+    anusvAra: 'ம்',
+    anunAnAsika: "ம்'",
     visarga: 'ஃ',
     saMkShepachihna: '॰',
-    avagraha: "'",
-    halant: '்',
+    avagraha: 'ऽ',
+    halant: HALANT,
     anudAttA: '॒',
     'udAtta-1': '॑',
     'udAtta-2': '᳚',
@@ -122,14 +124,18 @@ const Tamil = {
     },
     {
       text: 'ல்ரி',
-      text_krama: ['LR-svara', 'LR-mAtrA'],
-      type: 'vyanjana',
+      mAtrA: HALANT + 'ல்ரி',
+      text_krama: ['LR-svara'],
+      mAtrA_text_krama: ['LR-mAtrA'],
+      type: 'svara',
       prevent_auto_matching: true
     },
     {
       text: 'ல்ரீ',
-      text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      type: 'vyanjana',
+      mAtrA: HALANT + 'ல்ரீ',
+      text_krama: ['LRR-svara'],
+      mAtrA_text_krama: ['LRR-mAtrA'],
+      type: 'svara',
       prevent_auto_matching: true
     },
     {
@@ -300,6 +306,6 @@ const Tamil = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Tamil;

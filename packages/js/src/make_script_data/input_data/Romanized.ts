@@ -286,6 +286,6 @@ const Romanized = {
       duplicates: ['Ṣ']
     }
   ]
-} satisfies InputOtherScriptType;
+} as InputOtherScriptType;
 
 export default Romanized;

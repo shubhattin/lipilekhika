@@ -328,6 +328,6 @@ const Telugu = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Telugu;

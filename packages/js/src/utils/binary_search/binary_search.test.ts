@@ -236,12 +236,68 @@ describe('binarySearchWithIndex', () => {
     });
   });
 
+  describe('Lower bound behavior with duplicates', () => {
+    it('should return lower bound index for duplicates in unsorted array', () => {
+      // Array: [3, 1, 3, 2, 1] -> sorted values: [1, 1, 2, 3, 3] -> sorted indices: [1, 4, 3, 0, 2]
+      const arr = [3, 1, 3, 2, 1];
+      const index = createSearchIndex(arr);
+
+      // For value 1: first in sorted order is at original index 1 (arr[1] = 1)
+      // The index array's first 1 is index[0] which should be 1 or 4 (both have value 1)
+      // Lower bound should return the first one encountered in sorted order
+      const foundIdx1 = binarySearchWithIndex(arr, index, 1);
+      expect(arr[foundIdx1]).toBe(1);
+      expect(foundIdx1).toBe(index[0]); // Should be the first 1 in sorted order
+
+      // For value 3: sorted order has two 3s
+      const foundIdx3 = binarySearchWithIndex(arr, index, 3);
+      expect(arr[foundIdx3]).toBe(3);
+      // Should return the first 3 in sorted order (which is at index[3] in the sorted index)
+      expect(foundIdx3).toBe(index[3]);
+    });
+
+    it('should return lower bound for array with all same values', () => {
+      const arr = [5, 5, 5, 5];
+      const index = createSearchIndex(arr);
+
+      const foundIdx = binarySearchWithIndex(arr, index, 5);
+      expect(foundIdx).toBe(index[0]); // Should return the first in sorted order
+    });
+
+    it('should return lower bound for consecutive duplicates', () => {
+      // Original: [7, 2, 2, 2, 9] - indices 1,2,3 all have value 2
+      const arr = [7, 2, 2, 2, 9];
+      const index = createSearchIndex(arr);
+
+      // Sorted: [2, 2, 2, 7, 9] -> index should be something like [1, 2, 3, 0, 4]
+      const foundIdx = binarySearchWithIndex(arr, index, 2);
+      expect(arr[foundIdx]).toBe(2);
+      expect(foundIdx).toBe(index[0]); // First 2 in sorted order
+    });
+
+    it('should return lower bound with custom accessor for duplicates', () => {
+      const arr = [
+        { key: 'c', val: 3 },
+        { key: 'a', val: 1 },
+        { key: 'a', val: 2 },
+        { key: 'b', val: 4 }
+      ];
+      const accessor = (arr: readonly { key: string; val: number }[], i: number) => arr[i].key;
+      const index = createSearchIndex(arr, { accessor });
+
+      // Two elements have key 'a' (indices 1 and 2)
+      const foundIdx = binarySearchWithIndex(arr, index, 'a', { accessor });
+      expect(arr[foundIdx].key).toBe('a');
+      expect(foundIdx).toBe(index[0]); // First 'a' in sorted order
+    });
+  });
+
   describe('Edge cases', () => {
     it('should handle array with duplicate values', () => {
       const arr = [3, 1, 3, 2, 1];
       const index = createSearchIndex(arr);
 
-      // Should find one of the duplicates
+      // Should find the duplicates
       const foundIdx = binarySearchWithIndex(arr, index, 3);
       expect(foundIdx).toBeGreaterThanOrEqual(0);
       expect(arr[foundIdx]).toBe(3);
@@ -376,11 +432,32 @@ describe('binarySearch', () => {
     expect(binarySearch([], 42)).toBe(-1);
   });
 
-  it('should handle duplicate elements (returns any, not guaranteed which)', () => {
-    const arr = [1, 2, 2, 2, 3];
-    const foundIdx = binarySearch(arr, 2);
-    expect([1, 2, 3]).toContain(foundIdx);
-    expect(arr[foundIdx]).toBe(2);
+  it('should return the first (lower bound) index for duplicate elements', () => {
+    // Test duplicates in the middle
+    const arr1 = [1, 2, 2, 2, 3];
+    expect(binarySearch(arr1, 2)).toBe(1); // First occurrence of 2
+
+    // Test duplicates at the start
+    const arr2 = [1, 1, 1, 2, 3];
+    expect(binarySearch(arr2, 1)).toBe(0); // First occurrence of 1
+
+    // Test duplicates at the end
+    const arr3 = [1, 2, 3, 3, 3];
+    expect(binarySearch(arr3, 3)).toBe(2); // First occurrence of 3
+
+    // Test all same elements
+    const arr4 = [5, 5, 5, 5, 5];
+    expect(binarySearch(arr4, 5)).toBe(0); // First occurrence
+
+    // Test two duplicates
+    const arr5 = [1, 2, 2, 3];
+    expect(binarySearch(arr5, 2)).toBe(1); // First occurrence of 2
+  });
+
+  it('should return lower bound with custom accessor for duplicates', () => {
+    const arr = [{ v: 1 }, { v: 2 }, { v: 2 }, { v: 2 }, { v: 3 }];
+    const idx = binarySearch(arr, 2, { accessor: (arr, i) => arr[i].v });
+    expect(idx).toBe(1); // First occurrence of v=2
   });
 
   it('should work with objects and both accessor and compareFn', () => {

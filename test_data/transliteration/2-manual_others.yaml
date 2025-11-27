@@ -11,5 +11,15 @@
 - index: 2
   from: Normal
   to: Devanagari
-  input: kAUM AUM AU kAU
-  output: काऊं ॐ आऊ काऊ
+  input: kAUM AUM AU kAU kzAUM shzO shzAUM shAUM shAU
+  output: काऊं ॐ आऊ काऊ क़ाऊं श्zओ श्zॐ शाऊं शाऊ
+- index: 3
+  from: Devanagari
+  to: Normal
+  input: काऊं ॐ आऊ काऊ क़ाऊं क़ाऊं श़ो
+  output: kAUM AUM AU kAU kzAUM kzAUM shO
+- index: 4
+  from: Normal
+  to: Tamil
+  input: kRpA kirupA RShi ruShi kzi kAUM kzAUM AUM
+  output: கிருபா கிருபா ருஷி ருஷி கி காஊம் காஊம் ௐ

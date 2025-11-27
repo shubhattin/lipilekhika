@@ -300,6 +300,6 @@ const Tamil_Extended = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Tamil_Extended;

@@ -328,12 +328,12 @@ const Bengali = {
     },
     {
       text: 'ল',
-      text_krama: ['l', 'L'],
+      text_krama: ['l'],
       type: 'vyanjana'
     },
     {
       text: 'ল়',
-      text_krama: ['Lz'],
+      text_krama: ['L', 'Lz'],
       type: 'vyanjana'
     },
     {
@@ -357,6 +357,6 @@ const Bengali = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Bengali;

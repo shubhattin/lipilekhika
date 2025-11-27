@@ -304,6 +304,6 @@ const Modi = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+} as InputBrahmicScriptType;
 
 export default Modi;
