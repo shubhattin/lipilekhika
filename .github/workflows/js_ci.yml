@@ -28,5 +28,5 @@ jobs:
           cd packages/js
           bun install
           bun run make-script-data
-          bun run test
+          bun test
           bun run coverage
