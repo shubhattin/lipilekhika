@@ -11,7 +11,8 @@ type prev_context_array_type = [
   OutputBrahmicScriptData['list'][number] | null | undefined
 ][];
 
-const CHARS_TO_IGNORE = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
+/** These Characters can be skipped/ignore while transliterating the input text */
+const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
 export const transliterate_text = async (
   text: string,
@@ -121,7 +122,7 @@ export const transliterate_text = async (
 
   for (; text_index < text.length; ) {
     const char = text[text_index];
-    if (CHARS_TO_IGNORE.indexOf(char as (typeof CHARS_TO_IGNORE)[number]) !== -1) {
+    if (CHARS_TO_SKIP.indexOf(char as (typeof CHARS_TO_SKIP)[number]) !== -1) {
       // ignore blank spaces
       text_index++;
       if (PREV_CONTEXT_IN_USE) {
