@@ -10,6 +10,22 @@ import { transliterate } from '../index';
 const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
 const TEST_FILES_TO_IGNORE: string[] = [];
 
+const listYamlFiles = (directory: string): string[] => {
+  const collected: string[] = [];
+  const entries = fs.readdirSync(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.resolve(directory, entry.name);
+    if (entry.isDirectory()) {
+      collected.push(...listYamlFiles(fullPath));
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith('.yaml')) {
+      collected.push(fullPath);
+    }
+  }
+  return collected;
+};
+
 type TestDataType = {
   index: number;
   from: script_list_type;
@@ -20,13 +36,15 @@ type TestDataType = {
 };
 
 describe('Test Transliteration Function Modules', async () => {
-  const file_list = fs.readdirSync(TEST_DATA_FOLDER);
-  for (const file of file_list) {
-    if (!file.endsWith('.yaml') || TEST_FILES_TO_IGNORE.includes(file)) continue;
-    const test_data = parse(
-      fs.readFileSync(path.resolve(TEST_DATA_FOLDER, file), 'utf8')
-    ) as TestDataType[];
-    describe(file, async () => {
+  const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
+  for (const filePath of yamlFiles) {
+    const relativePath = path.relative(TEST_DATA_FOLDER, filePath);
+    const fileName = path.basename(filePath);
+    if (TEST_FILES_TO_IGNORE.includes(relativePath) || TEST_FILES_TO_IGNORE.includes(fileName)) {
+      continue;
+    }
+    const test_data = parse(fs.readFileSync(filePath, 'utf8')) as TestDataType[];
+    describe(relativePath, async () => {
       for (const test_data_item of test_data) {
         const result = await transliterate(
           test_data_item.input,
