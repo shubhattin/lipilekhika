@@ -31,5 +31,5 @@ export async function transliterate(text: string, from: ScriptLangType, to: Scri
     throw new Error(`Invalid script name: ${to}`);
   }
   const result = await transliterate_text(text, normalized_from, normalized_to);
-  return result;
+  return result.output;
 }

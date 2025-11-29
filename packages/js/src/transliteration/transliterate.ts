@@ -169,6 +169,7 @@ export const transliterate_text = async (
         const potential_match = from_script_data.text_to_krama_map[char_index];
 
         // When in vyanjana context, track single-svara matches for potential retraction
+        // eg: for kAUM :- काऊं
         if (
           check_svara_retraction &&
           potential_match[1].krama &&
@@ -303,7 +304,11 @@ export const transliterate_text = async (
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
 
-  return result_str;
+  return {
+    output: result_str,
+    /** Can be used to manage context while using the typing feature */
+    context_length: prev_context_arr.length
+  };
 };
 
 /**
