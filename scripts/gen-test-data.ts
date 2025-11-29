@@ -174,7 +174,7 @@ const devanagari_non_brahmic_scripts = async () => {
         to: non_brahmic_script,
         input: input,
         output: output.replace(/\.(?=\d)/g, ""), // handling the case of number conversion where १ -> 1 (not .1)
-        reversible: true,
+        reversible: !input.includes("."), // if .(dot) then not reversible
       });
       if (non_brahmic_script === "Normal") {
         for (const other_script of NON_BRAHMI_SCRIPTS) {

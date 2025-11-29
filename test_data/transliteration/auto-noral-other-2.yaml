@@ -82,3 +82,63 @@
   input: "yOgIndrANAM tvadaGgEShvadhikasumadhuraM muktibhAjAM nivAsO\nbhaktAnAM kAmavarShadyutarukisalayaM nAtha tE pAdamUlam .\nnityaM CittasthitaM mE pavanapurapatE kRShNa kAruNyasindhO\nhRtvA nishshEShatApAn pradishatu paramAnandasandOhalakShmIm ...1.0.."
   output: "yōgīndrāṇāṁ tvadaṅgēṣvadhikasumadhuraṁ muktibhājāṁ nivāsō\nbhaktānāṁ kāmavarṣadyutarukisalayaṁ nātha tē pādamūlam .\nnityaṁ Cittasthitaṁ mē pavanapurapatē kr̥ṣṇa kāruṇyasindhō\nhr̥tvā niśśēṣatāpān pradiśatu paramānandasandōhalakṣmīm ...1.0.."
   reversible: true
+- index: 14
+  from: Normal
+  to: Romanized
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. .1..0.0.1..0.1"
+  output: "a↓gnimī↑ḷē pu↓rōhi↑taṁ ya↓jñasya↑ dē↓vamr̥↓tvija↑m .\nhōtā↑raṁ ratna↓dhāta↑mam .. .1..0.0.1..0.1"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Romanized
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. .1..0.0.1..0.6"
+  output: "yada↓ṅga dā↓śuṣē↓ tvamagnē↑ bha↓draṁ ka↑ri↓ṣyasi↑ .\ntavēttatsa↓tyama↑ṅgiraḥ .. .1..0.0.1..0.6"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Romanized
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. .1..0.0.3..0.1"
+  output: "aśvi↑nā↓ yajva↑rī↓riṣō↓ drava↑tpāṇī↓ śubha↑spatī .\npuru↑bhujā Cana↓syata↑m .. .1..0.0.3..0.1"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Romanized
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. .1.."
+  output: "nāsa↑dāsī↓nnō sadā↑sītta↓dānīṁ↓ nāsī↓drajō↓ nō vyō↑mā pa↓rō yat .\nkimāva↑rīvaḥ↓ kuha↓ kasya↓ śarma↓nnambhaḥ↓ kimā↑sī↓dgaha↑naṁ gabhī↓ram .. .1.."
+  reversible: true
+- index: 18
+  from: Normal
+  to: Romanized
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. .2.."
+  output: "na mr̥↓tyurā↑sīda↓mr̥taṁ↓ na tarhi↓ na rātryā↓ ahna↑ āsītprakē↓taḥ .\nānī↑davā↓taṁ sva↓dhayā↓ tadēkaṁ↓ tasmā↑ddhā↓nyanna pa↓raḥ kiṁ Ca↓nāsa↑ .. .2.."
+  reversible: true
+- index: 19
+  from: Normal
+  to: Romanized
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. .3.."
+  output: "tama↑ āsī↓ttama↑sā gū↓ḷhamagrē↑''prakē↓taṁ sa↑li↓laṁ sarva↑mā i↓dam .\ntu↓CChyēnā↓bhvapi↑hitaṁ↓ yadāsī↓ttapa↑sa↓stanma↑hi↓nājā↑ya↓taika↑m .. .3.."
+  reversible: true
+- index: 20
+  from: Normal
+  to: Romanized
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. .4.."
+  output: "kāma↓stadagrē↓ sama↑varta↓tādhi↓ mana↑sō↓ rētaḥ↑ pratha↓maṁ yadāsī↑t .\nsa↓tō bandhu↓masa↑ti↓ nira↑vindanhr̥↓di pra↓tīṣyā↑ ka↓vayō↑ manī↓ṣā .. .4.."
+  reversible: true
+- index: 21
+  from: Normal
+  to: Romanized
+  input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI.3du↓pari↑ svidAsI.3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. .5.."
+  output: "ti↓ra↓śCīnō↓ vita↑tō ra↓śmirē↑ṣāma↓dhaḥ svi↑dā↓sī.3du↓pari↑ svidāsī.3t .\nrē↓tō↓dhā ā↑sanmahi↓māna↑ āsansva↓dhā a↓vastā↓tpraya↑tiḥ pa↓rastā↑t .. .5.."
+  reversible: true
+- index: 22
+  from: Normal
+  to: Romanized
+  input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. .6.."
+  output: "kō a↓ddhā vē↑da↓ ka i↓ha pra vō↑Ca↓tkuta↓ ājā↑tā↓ kuta↑ i↓yaṁ visr̥↑ṣṭiḥ .\na↓rvāgdē↓vā a↓sya vi↓sarja↑nē↓nāthā↓ kō vē↑da↓ yata↑ āba↓bhūva↑ .. .6.."
+  reversible: true
+- index: 23
+  from: Normal
+  to: Romanized
+  input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. .7.."
+  output: "i↓yaṁ visr̥↑ṣṭi↓ryata↑ āba↓bhūva↓ yadi↑ vā da↓dhē yadi↑ vā↓ na .\nyō a↓syādhya↑kṣaḥ para↓mē vyō↑ma↓nsō a↓ṅga vē↑da↓ yadi↑ vā↓ na vēda↑ .. .7.."
+  reversible: true
