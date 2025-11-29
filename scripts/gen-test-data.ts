@@ -15,7 +15,7 @@ type TestData = {
   reversible?: boolean;
 };
 
-const MAX_ARRAY_TEST_SIZE = 61;
+const MAX_ARRAY_TEST_SIZE = 41;
 
 const chunkArray = <T>(items: T[], chunkSize: number): T[][] => {
   if (chunkSize <= 0) {
@@ -28,19 +28,22 @@ const chunkArray = <T>(items: T[], chunkSize: number): T[][] => {
   return chunks;
 };
 
-const purgeTestDataFiles = (baseFileName: string) => {
+const purgeTestDataFolders = (baseFileName: string) => {
   if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
     return;
   }
-  const existingFiles = fs.readdirSync(TEST_DATA_OUT_FOLDER);
-  existingFiles
+  const existingEntries = fs.readdirSync(TEST_DATA_OUT_FOLDER, {
+    withFileTypes: true,
+  });
+  existingEntries
     .filter(
-      (file) =>
-        file.startsWith(baseFileName) &&
-        path.extname(file).toLowerCase() === ".yaml"
+      (entry) => entry.isDirectory() && entry.name.startsWith(baseFileName)
     )
-    .forEach((file) => {
-      fs.rmSync(path.join(TEST_DATA_OUT_FOLDER, file));
+    .forEach((dir) => {
+      fs.rmSync(path.join(TEST_DATA_OUT_FOLDER, dir.name), {
+        recursive: true,
+        force: true,
+      });
     });
 };
 
@@ -48,7 +51,9 @@ const writeTestDataFiles = <T extends { index: number }>(
   items: T[],
   baseFileName: string
 ) => {
-  purgeTestDataFiles(baseFileName);
+  purgeTestDataFolders(baseFileName);
+  const baseOutputDir = path.join(TEST_DATA_OUT_FOLDER, baseFileName);
+  fs.mkdirSync(baseOutputDir, { recursive: true });
   const chunks =
     items.length === 0
       ? ([[]] as T[][])
@@ -59,8 +64,12 @@ const writeTestDataFiles = <T extends { index: number }>(
       ...entry,
       index: chunkIndex,
     })) as T[];
+    const outFilePath = path.join(
+      baseOutputDir,
+      `${baseFileName}${suffix}.yaml`
+    );
     fs.writeFileSync(
-      path.join(TEST_DATA_OUT_FOLDER, `${baseFileName}${suffix}.yaml`),
+      outFilePath,
       // @ts-ignore
       Bun.YAML.stringify(reindexedChunk, null, 2)
     );
