@@ -111,6 +111,7 @@ const sanskrit_other_brahmic_scripts = async () => {
     "Tamil",
     "Telugu",
     "Purna-Devanagari",
+    "Tamil-Extended",
     // Ancient Scripts
     "Brahmi",
   ] satisfies script_list_type[];
@@ -119,6 +120,7 @@ const sanskrit_other_brahmic_scripts = async () => {
     "Bengali",
     "Gurumukhi",
     "Tamil",
+    "Tamil-Extended",
     "Telugu", // as it lacks Dhz,Dz etc
   ] as script_list_type[];
 

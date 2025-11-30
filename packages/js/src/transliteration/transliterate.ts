@@ -36,8 +36,7 @@ export const transliterate_text = async (
   let prev_context_arr: prev_context_array_type = [];
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
-    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') ||
-    from_script_data.script_name === 'Tamil-Extended';
+    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
   const BRAHMIC_NUQTA =
     from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
       ? from_script_data?.nuqta
@@ -109,13 +108,40 @@ export const transliterate_text = async (
     ) {
       // custom logic when converting from other to brahmic
       if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
-        result_str += to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        const linked_mAtrA = to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        if (
+          to_script_data.script_name === 'Tamil-Extended' &&
+          TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+            result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+          ) !== -1
+        ) {
+          if (linked_mAtrA[0] === to_script_data.halant) {
+            result_str =
+              result_str.slice(0, -1) +
+              to_script_data.halant +
+              (result_str.at(-1) ?? '') +
+              linked_mAtrA.slice(1);
+          } else {
+            result_str = result_str.slice(0, -1) + linked_mAtrA + result_str.at(-1)!;
+          }
+        } else {
+          result_str += linked_mAtrA;
+        }
         result_str_concat_status = true;
       } else if (
         prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' &&
         !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'svara')
       ) {
-        result_str += BRAHMIC_HALANT;
+        if (
+          to_script_data.script_name === 'Tamil-Extended' &&
+          TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+            result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+          ) !== -1
+        ) {
+          result_str = result_str.slice(0, -1) + BRAHMIC_HALANT + result_str.at(-1)!;
+        } else {
+          result_str += BRAHMIC_HALANT;
+        }
       }
     }
 
@@ -138,9 +164,7 @@ export const transliterate_text = async (
     // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
     if (ignore_ta_ext_sup_num_text_index !== -1 && text_index >= ignore_ta_ext_sup_num_text_index) {
       ignore_ta_ext_sup_num_text_index = -1;
-      // prev_context_cleanup_func([undefined, null]);
       text_index++;
-      // prev_context_cleanup_func([char, null]);
       continue;
     }
     if (CHARS_TO_SKIP.indexOf(char as (typeof CHARS_TO_SKIP)[number]) !== -1) {
@@ -367,7 +391,29 @@ export const transliterate_text = async (
             ]);
           }
         }
-        if (!result_concat_status) result_str += result_text;
+        if (!result_concat_status) {
+          if (
+            to_script_data.script_type === 'brahmic' &&
+            to_script_data.script_name === 'Tamil-Extended' &&
+            (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'svara' ||
+              result_text === to_script_data.halant) &&
+            TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+              result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+            ) !== -1
+          ) {
+            if (result_text[0] === to_script_data.halant) {
+              result_str =
+                result_str.slice(0, -1) +
+                to_script_data.halant +
+                (result_str.at(-1) ?? '') +
+                result_text.slice(1);
+            } else {
+              result_str = result_str.slice(0, -1) + result_text + result_str.at(-1)!;
+            }
+          } else {
+            result_str += result_text;
+          }
+        }
         continue;
       }
     } else {
@@ -409,7 +455,29 @@ export const transliterate_text = async (
       }
     }
     if (!result_concat_status) {
-      result_str += to_script_data.krama_text_arr[index][0];
+      const to_add_text = to_script_data.krama_text_arr[index][0];
+      // In tamil Extended check if the current one is a halant or a svara(mAtrA)
+      if (
+        to_script_data.script_type === 'brahmic' &&
+        to_script_data.script_name === 'Tamil-Extended' &&
+        (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'svara' ||
+          to_add_text === to_script_data.halant) &&
+        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+          result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+        ) !== -1
+      ) {
+        if (to_add_text[0] === to_script_data.halant) {
+          result_str =
+            result_str.slice(0, -1) +
+            to_script_data.halant +
+            (result_str.at(-1) ?? '') +
+            to_add_text.slice(1);
+        } else {
+          result_str = result_str.slice(0, -1) + to_add_text + result_str.at(-1)!;
+        }
+      } else {
+        result_str += to_add_text;
+      }
     }
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
