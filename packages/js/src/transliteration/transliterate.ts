@@ -128,13 +128,17 @@ export const transliterate_text = async (
     return result_str_concat_status;
   }
 
-  /** A flag to indicate when to ignore the tamil extended numeral */
+  /** A flag to indicate when to ignore the tamil extended numeral
+   * Used when converting from tamil extended
+   */
   let ignore_ta_ext_sup_num_text_index = -1;
 
   for (; text_index < text.length; ) {
     const char = text[text_index];
-    if (ignore_ta_ext_sup_num_text_index >= text_index) {
+    // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
+    if (ignore_ta_ext_sup_num_text_index !== -1 && text_index >= ignore_ta_ext_sup_num_text_index) {
       ignore_ta_ext_sup_num_text_index = -1;
+      // prev_context_cleanup_func([undefined, null]);
       text_index++;
       // prev_context_cleanup_func([char, null]);
       continue;
@@ -176,30 +180,28 @@ export const transliterate_text = async (
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA));
 
       while (true) {
-        // if (
-        //   ignore_ta_ext_sup_num_text_index !== -1 &&
-        //   TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-        //     text[
-        //       text_index + chars_to_scan + 1
-        //     ] as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-        //   ) !== -1
-        // ) {
-        //   chars_to_scan++;
-        // }
+        const next_char = text[text_index + chars_to_scan + 1] as string | undefined;
+        if (
+          ignore_ta_ext_sup_num_text_index !== -1 &&
+          next_char &&
+          TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+            next_char as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+          ) !== -1
+        ) {
+          chars_to_scan++;
+        }
         const char_to_search =
           // usage example: க்⁴ரு² -> ghR
-          // ignore_ta_ext_sup_num_text_index !== -1
-          //   ? // in this we will ignore the current charcter and scan one ahead
-          //     text.substring(text_index, ignore_ta_ext_sup_num_text_index) +
-          //     text.substring(ignore_ta_ext_sup_num_text_index + 1, text_index + chars_to_scan + 1)
-          text.substring(text_index, text_index + chars_to_scan + 1);
-        // console.log(
-        //   ignore_ta_ext_sup_num_text_index !== -1,
-        //   char,
-        //   char_to_search.split(''),
-        //   ignore_ta_ext_sup_num_text_index,
-        //   text_index
-        // );
+          ignore_ta_ext_sup_num_text_index !== -1
+            ? // in this we will ignore the current charcter and scan one ahead
+              text.substring(text_index, ignore_ta_ext_sup_num_text_index) +
+              (text_index + chars_to_scan > ignore_ta_ext_sup_num_text_index
+                ? text.substring(
+                    ignore_ta_ext_sup_num_text_index + 1,
+                    text_index + chars_to_scan + 1
+                  )
+                : '')
+            : text.substring(text_index, text_index + chars_to_scan + 1);
         const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
           accessor: (arr, i) => arr[i][0]
         });
@@ -208,7 +210,6 @@ export const transliterate_text = async (
           break;
         }
         const potential_match = from_script_data.text_to_krama_map[char_index];
-        // if (ignore_ta_ext_sup_num_text_index !== -1) ignore_ta_ext_sup_num_text_index = -1;
 
         // When in vyanjana context, track single-svara matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -251,7 +252,7 @@ export const transliterate_text = async (
               | undefined;
             if (
               ignore_ta_ext_sup_num_text_index === -1 &&
-              n_1_th_next_character &&
+              n_1_th_next_character !== undefined &&
               TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
                 n_1_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
               ) !== -1 &&
@@ -271,7 +272,7 @@ export const transliterate_text = async (
               break;
             } else if (
               ignore_ta_ext_sup_num_text_index === -1 &&
-              n_2_th_next_character &&
+              n_2_th_next_character !== undefined &&
               TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
                 n_2_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
               ) !== -1 &&
@@ -304,16 +305,19 @@ export const transliterate_text = async (
       }
     }
     if (text_to_krama_item !== null) {
-      text_index +=
-        text_to_krama_item[0].length -
-        // condtional subtarct 1 when a superscript number is present in the current match
-        (ignore_ta_ext_sup_num_text_index !== -1 &&
+      // condtional subtarct 1 when a superscript number is present in the current match
+      const index_delete_length =
+        ignore_ta_ext_sup_num_text_index !== -1 &&
         text_to_krama_item[0].length > 1 &&
+        from_script_data.list[
+          from_script_data.krama_text_arr[text_to_krama_item[1].krama?.[0] ?? -1]?.[1] ?? -1
+        ]?.type === 'vyanjana' &&
         TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
           text_to_krama_item[0].at(-1) as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
         ) !== -1
           ? 1
-          : 0);
+          : 0;
+      text_index += text_to_krama_item[0].length - index_delete_length;
       // we have to componsate for the superscript number's length
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
@@ -332,11 +336,14 @@ export const transliterate_text = async (
                 ) {
                   return from_script_data.list[text_to_krama_item[1].fallback_list_ref];
                 }
-                // if otherwise then follow the the first kram ref
+                // if otherwise then follow the the last kram ref
+                // use last as that is prev which will be used to decide svara or vyanjana
                 // This condition very well may change in the future so be careful
                 return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? from_script_data.list[
-                      from_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
+                      from_script_data.krama_text_arr[
+                        text_to_krama_item[1].krama.at(-1) ?? -1
+                      ][1] ?? -1
                     ]
                   : null;
               })()
