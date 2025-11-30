@@ -110,7 +110,7 @@ export const transliterate_text = async (
       if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
         const linked_mAtrA = to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
         if (
-          to_script_data.script_name === 'Tamil-Extended' &&
+          to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
             result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
           ) !== -1
@@ -133,7 +133,7 @@ export const transliterate_text = async (
         !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'svara')
       ) {
         if (
-          to_script_data.script_name === 'Tamil-Extended' &&
+          to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
             result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
           ) !== -1
@@ -266,7 +266,7 @@ export const transliterate_text = async (
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
 
-          if (from_script_data.script_name === 'Tamil-Extended') {
+          if (from_script_name === 'Tamil-Extended') {
             const n_1_th_next_character = text[text_index + chars_to_scan + 2] as
               | string
               | undefined;
@@ -394,7 +394,7 @@ export const transliterate_text = async (
         if (!result_concat_status) {
           if (
             to_script_data.script_type === 'brahmic' &&
-            to_script_data.script_name === 'Tamil-Extended' &&
+            to_script_name === 'Tamil-Extended' &&
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'svara' ||
               result_text === to_script_data.halant) &&
             TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
@@ -459,7 +459,7 @@ export const transliterate_text = async (
       // In tamil Extended check if the current one is a halant or a svara(mAtrA)
       if (
         to_script_data.script_type === 'brahmic' &&
-        to_script_data.script_name === 'Tamil-Extended' &&
+        to_script_name === 'Tamil-Extended' &&
         (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'svara' ||
           to_add_text === to_script_data.halant) &&
         TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
