@@ -129,17 +129,12 @@ export const transliterate_text = async (
   }
 
   /** A flag to indicate when to ignore the tamil extended numeral */
-  let ignore_ta_ext_sup_num_flag = false;
+  let ignore_ta_ext_sup_num_text_index = -1;
 
   for (; text_index < text.length; ) {
     const char = text[text_index];
-    if (
-      ignore_ta_ext_sup_num_flag &&
-      TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-        char as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-      ) !== -1
-    ) {
-      ignore_ta_ext_sup_num_flag = false;
+    if (ignore_ta_ext_sup_num_text_index >= text_index) {
+      ignore_ta_ext_sup_num_text_index = -1;
       text_index++;
       // prev_context_cleanup_func([char, null]);
       continue;
@@ -181,7 +176,30 @@ export const transliterate_text = async (
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA));
 
       while (true) {
-        const char_to_search = text.substring(text_index, text_index + chars_to_scan + 1);
+        // if (
+        //   ignore_ta_ext_sup_num_text_index !== -1 &&
+        //   TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+        //     text[
+        //       text_index + chars_to_scan + 1
+        //     ] as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+        //   ) !== -1
+        // ) {
+        //   chars_to_scan++;
+        // }
+        const char_to_search =
+          // usage example: க்⁴ரு² -> ghR
+          // ignore_ta_ext_sup_num_text_index !== -1
+          //   ? // in this we will ignore the current charcter and scan one ahead
+          //     text.substring(text_index, ignore_ta_ext_sup_num_text_index) +
+          //     text.substring(ignore_ta_ext_sup_num_text_index + 1, text_index + chars_to_scan + 1)
+          text.substring(text_index, text_index + chars_to_scan + 1);
+        // console.log(
+        //   ignore_ta_ext_sup_num_text_index !== -1,
+        //   char,
+        //   char_to_search.split(''),
+        //   ignore_ta_ext_sup_num_text_index,
+        //   text_index
+        // );
         const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
           accessor: (arr, i) => arr[i][0]
         });
@@ -190,6 +208,7 @@ export const transliterate_text = async (
           break;
         }
         const potential_match = from_script_data.text_to_krama_map[char_index];
+        // if (ignore_ta_ext_sup_num_text_index !== -1) ignore_ta_ext_sup_num_text_index = -1;
 
         // When in vyanjana context, track single-svara matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -221,30 +240,58 @@ export const transliterate_text = async (
 
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
-          const n_1_th_next_character = text[text_index + chars_to_scan + 2] as string | undefined;
-          // console.log(nth_next_character);
+
+          if (from_script_data.script_name === 'Tamil-Extended') {
+            const n_1_th_next_character = text[text_index + chars_to_scan + 2] as
+              | string
+              | undefined;
+            // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+            const n_2_th_next_character = text[text_index + chars_to_scan + 3] as
+              | string
+              | undefined;
+            if (
+              ignore_ta_ext_sup_num_text_index === -1 &&
+              n_1_th_next_character &&
+              TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+                n_1_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+              ) !== -1 &&
+              potential_match[1].next.indexOf(n_1_th_next_character) !== -1
+            ) {
+              // the next character is also a superscript number and also is in the next list
+              // so we find a match (guranteed as in 'next') and map to it and break
+              const char_index = binarySearch(
+                from_script_data.text_to_krama_map,
+                char_to_search + n_1_th_next_character,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+              ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 2;
+              break;
+            } else if (
+              ignore_ta_ext_sup_num_text_index === -1 &&
+              n_2_th_next_character &&
+              TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+                n_2_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+              ) !== -1 &&
+              potential_match[1].next.indexOf(n_2_th_next_character) !== -1
+            ) {
+              // the next character is also a superscript number and also is in the next list
+              // so we find a match (guranteed as in 'next') and map to it and break
+              const char_index = binarySearch(
+                from_script_data.text_to_krama_map,
+                char_to_search + n_2_th_next_character,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+              ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 3;
+              break;
+            }
+          }
           if (
-            !ignore_ta_ext_sup_num_flag &&
-            from_script_data.script_name === 'Tamil-Extended' &&
-            n_1_th_next_character &&
-            TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-              n_1_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-            ) !== -1 &&
-            potential_match[1].next.indexOf(n_1_th_next_character) !== -1
-          ) {
-            // the next character is also a superscript number and also is in the next list
-            // so we find a match (guranteed as in 'next') and map to it and break
-            const char_index = binarySearch(
-              from_script_data.text_to_krama_map,
-              char_to_search + n_1_th_next_character,
-              {
-                accessor: (arr, i) => arr[i][0]
-              }
-            );
-            text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-            ignore_ta_ext_sup_num_flag = true;
-            break;
-          } else if (
             nth_next_character !== undefined &&
             potential_match[1].next.indexOf(nth_next_character) !== -1
           ) {
@@ -260,7 +307,7 @@ export const transliterate_text = async (
       text_index +=
         text_to_krama_item[0].length -
         // condtional subtarct 1 when a superscript number is present in the current match
-        (ignore_ta_ext_sup_num_flag &&
+        (ignore_ta_ext_sup_num_text_index !== -1 &&
         text_to_krama_item[0].length > 1 &&
         TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
           text_to_krama_item[0].at(-1) as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]

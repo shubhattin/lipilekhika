@@ -1,11 +1,12 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '்';
 const Tamil_Extended = {
   script_type: 'brahmic',
   script_name: 'Tamil-Extended',
   script_id: script_list_obj['Tamil-Extended'],
-  halant: '்',
+  halant: HALANT,
   schwa_property: false,
   manual_krama_text_map: {
     '0': '௦',
@@ -122,28 +123,28 @@ const Tamil_Extended = {
     },
     {
       text: 'ரு²',
-      mAtrA: 'ிரு²',
+      mAtrA: HALANT + 'ரு²',
       text_krama: ['R-svara'],
       mAtrA_text_krama: ['R-mAtrA'],
       type: 'svara'
     },
     {
       text: 'ரூ²',
-      mAtrA: 'ிரூ²',
+      mAtrA: HALANT + 'ரூ²',
       text_krama: ['RR-svara'],
       mAtrA_text_krama: ['RR-mAtrA'],
       type: 'svara'
     },
     {
       text: 'ல்ரி²',
-      mAtrA: '்ல்ரி²',
+      mAtrA: HALANT + 'ல்ரி²',
       text_krama: ['LR-svara'],
       mAtrA_text_krama: ['LR-mAtrA'],
       type: 'svara'
     },
     {
       text: 'ல்ரீ²',
-      mAtrA: '்ல்ரீ²',
+      mAtrA: HALANT + 'ல்ரீ²',
       text_krama: ['LRR-svara'],
       mAtrA_text_krama: ['LRR-mAtrA'],
       type: 'svara'
