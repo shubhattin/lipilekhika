@@ -63,7 +63,8 @@ export const transliterate_text = async (
     // );
     if (
       // vyanjana, nuqta, svara
-      ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
+      ((BRAHMIC_NUQTA &&
+        prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
         prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
         prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
         // or vyanjana, svara
@@ -83,7 +84,8 @@ export const transliterate_text = async (
         // ^ two special cases to ignore
         // vyanjana or vyanjana, nuqta
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
-          (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+          (BRAHMIC_NUQTA &&
+            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
         ((item[1]?.type !== 'svara' && item[0] !== brahmic_halant) ||
@@ -154,7 +156,8 @@ export const transliterate_text = async (
         PREV_CONTEXT_IN_USE &&
         to_script_data.script_type === 'brahmic' &&
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
-          (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+          (BRAHMIC_NUQTA &&
+            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA));
 
       while (true) {
@@ -169,6 +172,7 @@ export const transliterate_text = async (
         const potential_match = from_script_data.text_to_krama_map[char_index];
 
         // When in vyanjana context, track single-svara matches for potential retraction
+        // eg: for kAUM :- काऊं
         if (
           check_svara_retraction &&
           potential_match[1].krama &&
@@ -303,7 +307,11 @@ export const transliterate_text = async (
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
 
-  return result_str;
+  return {
+    output: result_str,
+    /** Can be used to manage context while using the typing feature */
+    context_length: prev_context_arr.length
+  };
 };
 
 /**

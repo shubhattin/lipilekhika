@@ -9,7 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: |
+      - name: Typescript and Build Check
+        run: |
           cd packages/js
           bun install
           bun run check
@@ -24,8 +25,9 @@ jobs:
         with:
           node-version: 20
       - uses: oven-sh/setup-bun@v2
-      - run: |
+      - name: Test and Coverage
+        run: |
           cd packages/js
           bun install
           bun run make-script-data
-          bun test --coverage
+          bun test --coverage --concurrent
