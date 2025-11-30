@@ -13,6 +13,7 @@ type prev_context_array_type = [
 
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
+const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
 
 export const transliterate_text = async (
   text: string,
@@ -35,7 +36,8 @@ export const transliterate_text = async (
   let prev_context_arr: prev_context_array_type = [];
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
-    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
+    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') ||
+    from_script_data.script_name === 'Tamil-Extended';
   const BRAHMIC_NUQTA =
     from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
       ? from_script_data?.nuqta
@@ -77,10 +79,14 @@ export const transliterate_text = async (
     }
     if (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') {
       // custom logic when converting from brahmic to other
-      const brahmic_halant = from_script_data.halant;
+      // console.log(
+      //   [item[0], item[1]?.type],
+      //   prev_context_arr.map((item) => item[1]?.type)
+      // );
       if (
-        item[0] !== brahmic_halant &&
-        item[0] !== BRAHMIC_NUQTA &&
+        item[0] !== BRAHMIC_HALANT! &&
+        // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
+        (!BRAHMIC_NUQTA || item[0] !== BRAHMIC_NUQTA) &&
         // ^ two special cases to ignore
         // vyanjana or vyanjana, nuqta
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
@@ -88,7 +94,7 @@ export const transliterate_text = async (
             prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
-        ((item[1]?.type !== 'svara' && item[0] !== brahmic_halant) ||
+        ((item[1]?.type !== 'svara' && item[0] !== BRAHMIC_HALANT!) ||
           item[1]?.type === 'anya' ||
           item[1] === null ||
           item[1] === undefined)
@@ -122,8 +128,22 @@ export const transliterate_text = async (
     return result_str_concat_status;
   }
 
+  /** A flag to indicate when to ignore the tamil extended numeral */
+  let ignore_ta_ext_sup_num_flag = false;
+
   for (; text_index < text.length; ) {
     const char = text[text_index];
+    if (
+      ignore_ta_ext_sup_num_flag &&
+      TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+        char as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+      ) !== -1
+    ) {
+      ignore_ta_ext_sup_num_flag = false;
+      text_index++;
+      // prev_context_cleanup_func([char, null]);
+      continue;
+    }
     if (CHARS_TO_SKIP.indexOf(char as (typeof CHARS_TO_SKIP)[number]) !== -1) {
       // ignore blank spaces
       text_index++;
@@ -201,7 +221,30 @@ export const transliterate_text = async (
 
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
+          const n_1_th_next_character = text[text_index + chars_to_scan + 2] as string | undefined;
+          // console.log(nth_next_character);
           if (
+            !ignore_ta_ext_sup_num_flag &&
+            from_script_data.script_name === 'Tamil-Extended' &&
+            n_1_th_next_character &&
+            TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+              n_1_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+            ) !== -1 &&
+            potential_match[1].next.indexOf(n_1_th_next_character) !== -1
+          ) {
+            // the next character is also a superscript number and also is in the next list
+            // so we find a match (guranteed as in 'next') and map to it and break
+            const char_index = binarySearch(
+              from_script_data.text_to_krama_map,
+              char_to_search + n_1_th_next_character,
+              {
+                accessor: (arr, i) => arr[i][0]
+              }
+            );
+            text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+            ignore_ta_ext_sup_num_flag = true;
+            break;
+          } else if (
             nth_next_character !== undefined &&
             potential_match[1].next.indexOf(nth_next_character) !== -1
           ) {
@@ -214,7 +257,17 @@ export const transliterate_text = async (
       }
     }
     if (text_to_krama_item !== null) {
-      text_index += text_to_krama_item[0].length;
+      text_index +=
+        text_to_krama_item[0].length -
+        // condtional subtarct 1 when a superscript number is present in the current match
+        (ignore_ta_ext_sup_num_flag &&
+        text_to_krama_item[0].length > 1 &&
+        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+          text_to_krama_item[0].at(-1) as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+        ) !== -1
+          ? 1
+          : 0);
+      // we have to componsate for the superscript number's length
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_text = text_to_krama_item[1].krama
