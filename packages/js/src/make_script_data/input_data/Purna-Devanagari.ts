@@ -456,6 +456,6 @@ const Purna_Devanagari = {
     //   type: 'svara'
     // },
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Purna_Devanagari;

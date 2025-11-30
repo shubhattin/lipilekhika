@@ -125,28 +125,28 @@ const Tamil_Extended = {
       mAtrA: 'ிரு²',
       text_krama: ['R-svara'],
       mAtrA_text_krama: ['R-mAtrA'],
-      type: 'svara',
-      prevent_auto_matching: true
+      type: 'svara'
     },
     {
       text: 'ரூ²',
       mAtrA: 'ிரூ²',
       text_krama: ['RR-svara'],
       mAtrA_text_krama: ['RR-mAtrA'],
-      type: 'svara',
-      prevent_auto_matching: true
+      type: 'svara'
     },
     {
       text: 'ல்ரி²',
-      text_krama: ['LR-svara', 'LR-mAtrA'],
-      type: 'vyanjana',
-      prevent_auto_matching: true
+      mAtrA: '்ல்ரி²',
+      text_krama: ['LR-svara'],
+      mAtrA_text_krama: ['LR-mAtrA'],
+      type: 'svara'
     },
     {
       text: 'ல்ரீ²',
-      text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      type: 'vyanjana',
-      prevent_auto_matching: true
+      mAtrA: '்ல்ரீ²',
+      text_krama: ['LRR-svara'],
+      mAtrA_text_krama: ['LRR-mAtrA'],
+      type: 'svara'
     },
 
     // Vyanjana
@@ -156,18 +156,43 @@ const Tamil_Extended = {
       type: 'vyanjana'
     },
     {
+      text: 'க²',
+      text_krama: ['kh', 'khz'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'க³',
+      text_krama: ['g', 'gz', 'g1'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'க⁴',
+      text_krama: ['gh'],
+      type: 'vyanjana'
+    },
+    {
       text: 'ங',
       text_krama: ['G'],
       type: 'vyanjana'
     },
     {
       text: 'ச',
-      text_krama: ['C', 'Ch'],
+      text_krama: ['C'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ச²',
+      text_krama: ['Ch'],
       type: 'vyanjana'
     },
     {
       text: 'ஜ',
-      text_krama: ['j', 'jz', 'j1', 'jh'],
+      text_krama: ['j', 'jz', 'j1'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ஜ²',
+      text_krama: ['jh'],
       type: 'vyanjana'
     },
     {
@@ -177,7 +202,22 @@ const Tamil_Extended = {
     },
     {
       text: 'ட',
-      text_krama: ['T', 'Th', 'D', 'Dz', 'D1', 'Dh', 'Dhz'],
+      text_krama: ['T'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ட²',
+      text_krama: ['Th'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ட³',
+      text_krama: ['D', 'Dz', 'D1'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ட⁴',
+      text_krama: ['Dh', 'Dhz'],
       type: 'vyanjana'
     },
     {
@@ -187,7 +227,22 @@ const Tamil_Extended = {
     },
     {
       text: 'த',
-      text_krama: ['t', 'th', 'd', 'dh'],
+      text_krama: ['t'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'த²',
+      text_krama: ['th'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'த³',
+      text_krama: ['d'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'த⁴',
+      text_krama: ['dh'],
       type: 'vyanjana'
     },
     {
@@ -202,7 +257,22 @@ const Tamil_Extended = {
     },
     {
       text: 'ப',
-      text_krama: ['p', 'ph', 'phz', 'b', 'b1', 'bh'],
+      text_krama: ['p'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ப²',
+      text_krama: ['ph', 'phz'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ப³',
+      text_krama: ['b', 'b1'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ப⁴',
+      text_krama: ['bh'],
       type: 'vyanjana'
     },
     {
@@ -300,6 +370,6 @@ const Tamil_Extended = {
     //   type: 'anya'
     // }
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Tamil_Extended;

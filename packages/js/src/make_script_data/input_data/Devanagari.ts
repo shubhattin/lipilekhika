@@ -403,6 +403,6 @@ const Devanagari = {
       type: 'vyanjana'
     }
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Devanagari;

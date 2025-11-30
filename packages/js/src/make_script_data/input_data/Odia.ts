@@ -379,6 +379,6 @@ const Odia = {
     //   type: 'vyanjana'
     // }
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Odia;

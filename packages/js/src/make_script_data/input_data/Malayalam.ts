@@ -370,6 +370,6 @@ const Malayalam = {
       type: 'anya'
     }
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Malayalam;
