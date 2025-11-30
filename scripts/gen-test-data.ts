@@ -77,7 +77,7 @@ const writeTestDataFiles = <T extends { index: number }>(
 };
 
 const DEVANAGARI_INPUTS = fs
-  .readFileSync(path.join(__dirname, "devanagari-inputs.txt"), "utf-8")
+  .readFileSync(path.join(__dirname, "sanskrit-inputs.txt"), "utf-8")
   .split("\n\n")
   .map((line) => line.trim());
 
@@ -97,7 +97,7 @@ if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
 const devangari_other_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "auto-dev-brahmic";
+  const OUT_FILE_NAME = "auto-san-brahmic";
   const FROM_SCRIPT = "Devanagari";
   const OTHER_BRAHMI_SCRIPTS = [
     "Assamese",
@@ -152,8 +152,8 @@ const devangari_other_brahmic_scripts = async () => {
  * Generates test Test Data for transliteration to and from Devangari to non-Brahmic scripts (Normal and Romanized)
  */
 const devanagari_non_brahmic_scripts = async () => {
-  const OUT_FILE_NAME = "auto-dev-other";
-  const OUT_FILE_NAME1 = "auto-noral-other";
+  const OUT_FILE_NAME = "auto-san-other";
+  const OUT_FILE_NAME1 = "auto-nor-other";
   const FROM_SCRIPT = "Devanagari";
   const NON_BRAHMI_SCRIPTS = [
     "Normal",

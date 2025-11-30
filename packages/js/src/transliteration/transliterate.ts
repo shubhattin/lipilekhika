@@ -63,7 +63,8 @@ export const transliterate_text = async (
     // );
     if (
       // vyanjana, nuqta, svara
-      ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
+      ((BRAHMIC_NUQTA &&
+        prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
         prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
         prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
         // or vyanjana, svara
@@ -83,7 +84,8 @@ export const transliterate_text = async (
         // ^ two special cases to ignore
         // vyanjana or vyanjana, nuqta
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
-          (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+          (BRAHMIC_NUQTA &&
+            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
         ((item[1]?.type !== 'svara' && item[0] !== brahmic_halant) ||
@@ -154,7 +156,8 @@ export const transliterate_text = async (
         PREV_CONTEXT_IN_USE &&
         to_script_data.script_type === 'brahmic' &&
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
-          (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
+          (BRAHMIC_NUQTA &&
+            prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA));
 
       while (true) {
