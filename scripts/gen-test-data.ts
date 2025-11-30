@@ -96,7 +96,7 @@ if (!fs.existsSync(TEST_DATA_OUT_FOLDER)) {
 /**
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
-const devangari_other_brahmic_scripts = async () => {
+const sanskrit_other_brahmic_scripts = async () => {
   const OUT_FILE_NAME = "auto-san-brahmic";
   const FROM_SCRIPT = "Devanagari";
   const OTHER_BRAHMI_SCRIPTS = [
@@ -151,7 +151,7 @@ const devangari_other_brahmic_scripts = async () => {
 /**
  * Generates test Test Data for transliteration to and from Devangari to non-Brahmic scripts (Normal and Romanized)
  */
-const devanagari_non_brahmic_scripts = async () => {
+const sanskrit_non_brahmic_scripts = async () => {
   const OUT_FILE_NAME = "auto-san-other";
   const OUT_FILE_NAME1 = "auto-nor-other";
   const FROM_SCRIPT = "Devanagari";
@@ -217,8 +217,8 @@ const devanagari_non_brahmic_scripts = async () => {
 async function main() {
   console.log(chalk.yellow.bold("Generating test data..."));
   await Promise.all([
-    devangari_other_brahmic_scripts(),
-    devanagari_non_brahmic_scripts(),
+    sanskrit_other_brahmic_scripts(),
+    sanskrit_non_brahmic_scripts(),
   ]);
 }
 
