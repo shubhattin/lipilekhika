@@ -266,6 +266,7 @@ export const transliterate_text = async (
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
 
+          console.log(2, potential_match[0], potential_match[1].next.split(''));
           if (from_script_name === 'Tamil-Extended' && from_script_data.script_type === 'brahmic') {
             const n_1_th_next_character = text[text_index + chars_to_scan + 2] as
               | string
@@ -365,6 +366,7 @@ export const transliterate_text = async (
               }
             }
           }
+          console.log(1, potential_match[0], potential_match[1].next.split(''));
           if (
             nth_next_character !== undefined &&
             potential_match[1].next.indexOf(nth_next_character) !== -1
