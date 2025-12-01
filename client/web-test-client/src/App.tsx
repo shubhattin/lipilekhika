@@ -1,4 +1,4 @@
-import {  createEffect, createMemo, createSignal, For } from 'solid-js';
+import { createEffect, createMemo, createSignal, For } from 'solid-js';
 import { transliterate, preloadScriptData } from '../../../packages/js/src/index';
 import { SCRIPT_LIST, type script_list_type } from '../../../packages/js/src/utils/lang_list';
 
