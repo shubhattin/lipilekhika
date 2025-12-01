@@ -266,7 +266,7 @@ export const transliterate_text = async (
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
 
-          if (from_script_name === 'Tamil-Extended') {
+          if (from_script_name === 'Tamil-Extended' && from_script_data.script_type === 'brahmic') {
             const n_1_th_next_character = text[text_index + chars_to_scan + 2] as
               | string
               | undefined;
@@ -291,9 +291,27 @@ export const transliterate_text = async (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-              ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 2;
-              break;
+              const nth_char_text_index = binarySearchWithIndex(
+                from_script_data.krama_text_arr,
+                from_script_data.krama_text_arr_index,
+                nth_next_character,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              if (char_index !== -1 && nth_char_text_index !== -1) {
+                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
+                if (
+                  nth_next_character === from_script_data.halant ||
+                  from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara'
+                  // we should actually be checking for the mAtrA text and match rather then checking
+                  // just the type but this shall also be fine as they are cases yet of a svara preceding it
+                ) {
+                  ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 2;
+                  break;
+                }
+              }
             } else if (
               ignore_ta_ext_sup_num_text_index === -1 &&
               n_2_th_next_character !== undefined &&
@@ -311,9 +329,40 @@ export const transliterate_text = async (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-              ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 3;
-              break;
+              const nth_char_text_index = binarySearchWithIndex(
+                from_script_data.krama_text_arr,
+                from_script_data.krama_text_arr_index,
+                nth_next_character,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              const n_1_th_char_text_index = binarySearchWithIndex(
+                from_script_data.krama_text_arr,
+                from_script_data.krama_text_arr_index,
+                n_1_th_next_character,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
+              const n_1_th_char_text_item = from_script_data.krama_text_arr[n_1_th_char_text_index];
+              // special case for some mAtrAs like gO = g + E + A
+              if (
+                char_index !== -1 &&
+                nth_char_text_index !== -1 &&
+                n_1_th_char_text_index !== -1
+              ) {
+                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                if (
+                  nth_next_character === from_script_data.halant ||
+                  (from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara' &&
+                    from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type === 'svara')
+                ) {
+                  ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 3;
+                  break;
+                }
+              }
             }
           }
           if (
