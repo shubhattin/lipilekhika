@@ -20,6 +20,7 @@ const Granth = {
     '8': '௮',
     '9': '௯',
     AUM: '𑍐',
+    anusvAra: '𑌀',
     anunAnAsika: '𑌁',
     visarga: '𑌃',
     saMkShepachihna: '𑙃',
@@ -35,9 +36,9 @@ const Granth = {
   },
   list: [
     {
-      text: '𑌂',
+      text: '𑌀',
       text_krama: ['anusvAra'],
-      duplicates: ['𑌀'],
+      duplicates: ['𑌂'],
       type: 'anya'
     },
     {

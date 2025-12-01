@@ -1,7 +1,5 @@
 # Tasks
 
-## Future Tasks
-
-- Add, Enable and Tets Tamil-Extended
 - Make sure of how Tamil Extended and Vedic Accents marks work together
-- Add other ancient scripts Besides Brahmi
+- Add Support for Reversed Script Transliteration for Granth, Modi, Sharada, Siddham
+- Add Conversion of all Scripts to Normal Scripts Test (Important)
