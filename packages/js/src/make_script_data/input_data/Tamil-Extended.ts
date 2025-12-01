@@ -20,6 +20,8 @@ const Tamil_Extended = {
     '8': '௮',
     '9': '௯',
     AUM: 'ॐ',
+    // favouring this anusvAra over ம்² as it collides with ம when a mAtrA follows and it matches ம்
+    // based on intermediates in the generated text_to_krama_map
     anusvAra: 'ஂ',
     anunAnAsika: 'ஂ²',
     visarga: 'ஃ',
