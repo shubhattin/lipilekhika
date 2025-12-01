@@ -396,7 +396,10 @@ export const transliterate_text = async (
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_text = text_to_krama_item[1].krama
-          .map((krama_index) => to_script_data.krama_text_arr[krama_index][0])
+          .map(
+            (krama_index) => to_script_data.krama_text_arr[krama_index]?.[0] ?? ''
+            // revert to the original character if the krama index is not found
+          )
           .join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
