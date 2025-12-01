@@ -137,6 +137,6 @@ const Normal = {
       duplicates: ['chh']
     }
   ]
-} as InputOtherScriptType;
+} satisfies InputOtherScriptType;
 
 export default Normal;

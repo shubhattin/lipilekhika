@@ -390,6 +390,6 @@ const Kannada = {
     //   type: 'anya'
     // },
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Kannada;

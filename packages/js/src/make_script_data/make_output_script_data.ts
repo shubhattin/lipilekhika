@@ -216,16 +216,16 @@ async function main() {
             add_to_text_to_krama_map(duplicate_text, [krama_key_index]);
           }
         }
-        if (item.type === 'svara' && item.mAtrA_duplicates) {
-          for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
-            const krama_key_index = binarySearchWithIndex(
-              KramaKeysArray,
-              KramaKeysIndexB,
-              resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
-            );
-            if (krama_key_index !== -1) {
-              add_to_text_to_krama_map(mAtrA_duplicate_text, [krama_key_index]);
-            }
+      }
+      if (item.type === 'svara' && item.mAtrA_duplicates) {
+        for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
+          const krama_key_index = binarySearchWithIndex(
+            KramaKeysArray,
+            KramaKeysIndexB,
+            resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
+          );
+          if (krama_key_index !== -1) {
+            add_to_text_to_krama_map(mAtrA_duplicate_text, [krama_key_index]);
           }
         }
       }

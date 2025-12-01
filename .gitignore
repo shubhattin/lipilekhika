@@ -2,6 +2,7 @@ node_modules
 
 **/a.ts
 **/a.js
+**/a.txt
 **/tmp/
 
 # Script Data Ignore (Built Output)

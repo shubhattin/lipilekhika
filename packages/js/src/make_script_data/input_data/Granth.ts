@@ -387,6 +387,6 @@ const Granth = {
       type: 'vyanjana'
     }
   ]
-} as InputBrahmicScriptType;
+} satisfies InputBrahmicScriptType;
 
 export default Granth;

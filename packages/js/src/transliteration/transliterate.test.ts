@@ -54,9 +54,9 @@ describe('Test Transliteration Function Modules', async () => {
         it(`Index ${test_data_item.index} ➡`, async () => {
           const errorMessage =
             `Transliteration failed:\n` +
-            `  Input: "${test_data_item.input}"\n` +
             `  From: ${test_data_item.from}\n` +
             `  To: ${test_data_item.to}\n` +
+            `  Input: "${test_data_item.input}"\n` +
             `  Expected: "${test_data_item.output}"\n` +
             `  Actual: "${result}"`;
           expect(result, errorMessage).toBe(test_data_item.output);
@@ -70,12 +70,11 @@ describe('Test Transliteration Function Modules', async () => {
             );
             const errorMessage_reversed =
               `Reversed Transliteration failed:\n` +
-              `  Input: "${result}"\n` +
               `  From: ${test_data_item.to}\n` +
-              `  Intermediate: "${result}"\n` +
               `  To: ${test_data_item.from}\n` +
-              `  Expected: "${test_data_item.input}"\n` +
-              `  Actual: "${result_reversed}"`;
+              `  Input: "${result}"\n` +
+              `  Original Input: "${test_data_item.input}"\n` +
+              `  Reversed Output: "${result_reversed}"`;
             expect(result_reversed, errorMessage_reversed).toBe(test_data_item.input);
           });
         }
