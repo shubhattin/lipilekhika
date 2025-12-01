@@ -108,7 +108,8 @@ export const transliterate_text = async (
     ) {
       // custom logic when converting from other to brahmic
       if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
-        const linked_mAtrA = to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1][0];
+        const linked_mAtrA =
+          to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '';
         if (
           to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
