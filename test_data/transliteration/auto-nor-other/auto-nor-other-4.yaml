@@ -1,0 +1,120 @@
+- index: 0
+  from: Normal
+  to: Romanized
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . .1.7"
+  output: "dhā↓tā pu↓rastā↓dyamu↑dāja↓hāra↑ . śa↓kraḥ pravi↓dvānpra↓diśa↓śCata↑sraḥ .\ntamē↓vaṁ vi↓dvāna↓mr̥ta↑ i↓ha bha↑vati . nānyaḥ panthā↓ aya↑nāya vidyatē . .1.7"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Romanized
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . .1.8"
+  output: "ya↓jñēna↑ ya↓jñama↑yajanta dē↓vāḥ . tāni↓ dharmā↑ṇi pratha↓mānyā↑san .\ntē ha↓ nākaṁ↑ mahi↓mānaḥ↑ saCantē . yatra↓ pūrvē↑ sā↓dhyāḥ santi↑ dē↓vāḥ . .1.8"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Romanized
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: .. atha śuklayajurvēdīya puruṣasūktaḥ..
+  reversible: true
+- index: 3
+  from: Normal
+  to: Romanized
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. .1.."
+  output: "hariḥ āūṁ sahasraśīrṣā puruṣaḥ sahasrākṣaḥ sahasrapāt .\nsa bhūmiꣳ sarvata spr̥tvā''tyatiṣṭhaddaśāṅgulam .. .1.."
+  reversible: true
+- index: 4
+  from: Normal
+  to: Romanized
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. .2.."
+  output: "puruṣa ēvēdaꣳ sarvaṁ yadbhūtaṁ yaCCa bhāvyam .\nutāmr̥tatvasyēśānō yadannēnātirōhati .. .2.."
+  reversible: true
+- index: 5
+  from: Normal
+  to: Romanized
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. .3.."
+  output: "ētāvānasya mahimātō jyāyām̐śCa pūruṣaḥ .\npādō''sya viśvā bhūtāni tripādasyāmr̥taṁ divi .. .3.."
+  reversible: true
+- index: 6
+  from: Normal
+  to: Romanized
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. .4.."
+  output: "tripādūrdhva udaitpuruṣaḥ pādō''syēhābhavat punaḥ .\ntatō viṣvaṅ vyakrāmatsāśanānaśanē abhi .. .4.."
+  reversible: true
+- index: 7
+  from: Normal
+  to: Romanized
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. .5.."
+  output: "tatō virāḍajāyata virājō adhi pūruṣaḥ .\nsa jātō atyariCyata paśCādbhūmimathō puraḥ .. .5.."
+  reversible: true
+- index: 8
+  from: Normal
+  to: Romanized
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. .6.."
+  output: "tasmādyajñāt sarvahutaḥ sambhr̥taṁ pr̥ṣadājyam .\npaśūm̐stām̐śCakrē vāyavyānāraṇyā grāmyāśCa yē .. .6.."
+  reversible: true
+- index: 9
+  from: Normal
+  to: Romanized
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. .7.."
+  output: "tasmādyajñāt sarvahutaḥ r̥Caḥ sāmāni jajñirē .\nChandāꣳsi jajñirē tasmādyajustasmādajāyata .. .7.."
+  reversible: true
+- index: 10
+  from: Normal
+  to: Romanized
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. .8.."
+  output: "tasmādaśvā ajāyanta yē kē Cōbhayādataḥ .\ngāvō ha jajñirē tasmāttasmājjātā ajāvayaḥ .. .8.."
+  reversible: true
+- index: 11
+  from: Normal
+  to: Romanized
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. .9.."
+  output: "taṁ yajñaṁ barhiṣi praukṣan puruṣaṁ jātamagrataḥ .\ntēna dēvā ayajanta sādhyā r̥ṣayaśCa yē .. .9.."
+  reversible: true
+- index: 12
+  from: Normal
+  to: Romanized
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. .1.0.."
+  output: "yatpuruṣaṁ vyadadhuḥ katidhā vyakalpayan .\nmukhaṁ kimasyāsīt kiṁ bāhū kimūrū pādā uCyētē .. .1.0.."
+  reversible: true
+- index: 13
+  from: Normal
+  to: Romanized
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. .1.1.."
+  output: "brāhmaṇō''sya mukhamāsīdbāhū rājanyaḥ kr̥taḥ .\nūrū tadasya yadvaiśyaḥ padbhyāꣳ śūdrō ajāyata .. .1.1.."
+  reversible: true
+- index: 14
+  from: Normal
+  to: Romanized
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. .1.2.."
+  output: "Candramā manasō jātaśCakṣōḥ sūryō ajāyata .\nśrōtrādvāyuśCa prāṇaśCa mukhādagnirajāyata .. .1.2.."
+  reversible: true
+- index: 15
+  from: Normal
+  to: Romanized
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. .1.3.."
+  output: "nābhyā āsīdantarikṣaꣳ śīrṣṇō dyauḥ samavartata .\npadbhyāṁ bhūmirdiśaḥ śrōtrāttathā lōkām̐''kalpayan .. .1.3.."
+  reversible: true
+- index: 16
+  from: Normal
+  to: Romanized
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. .1.4.."
+  output: "yatpuruṣēṇa haviṣā dēvā yajñamatanvata .\nvasantō''syāsīdājyaṁ grīṣma idhmaḥ śaraddhaviḥ .. .1.4.."
+  reversible: true
+- index: 17
+  from: Normal
+  to: Romanized
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. .1.5.."
+  output: "saptāsyāsan paridhayastriḥ sapta samidhaḥ kr̥tāḥ .\ndēvā yadyajñaṁ tanvānā abadhnan puruṣaṁ paśum .. .1.5.."
+  reversible: true
+- index: 18
+  from: Normal
+  to: Romanized
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. .1.6.."
+  output: "yajñēna yajñamayajanta dēvāstāni dharmāṇi prathamānyāsan .\ntē ha nākaṁ mahimānaḥ saCanta yatra pūrvē sādhyāḥ santi dēvāḥ .. .1.6.."
+  reversible: true
+- index: 19
+  from: Normal
+  to: Romanized
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: .. iti śuklayajurvēdīyapuruṣasūktaṁ sampūrṇam..
+  reversible: true

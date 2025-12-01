@@ -80,6 +80,11 @@ const DEVANAGARI_INPUTS = fs
   .readFileSync(path.join(__dirname, "sanskrit-inputs.txt"), "utf-8")
   .split("\n\n")
   .map((line) => line.trim());
+const VEDIC_INPUTS = fs
+  .readFileSync(path.join(__dirname, "vedic-inputs.txt"), "utf-8")
+  .split("\n\n")
+  .map((line) => line.trim());
+const COMBINED_INPUTS = [...DEVANAGARI_INPUTS, ...VEDIC_INPUTS];
 
 const TEST_DATA_OUT_FOLDER = path.join(
   __dirname,
@@ -126,7 +131,7 @@ const sanskrit_other_brahmic_scripts = async () => {
   const out_test_data: TestData[] = [];
 
   let index = 0;
-  for (const input of DEVANAGARI_INPUTS) {
+  for (const input of COMBINED_INPUTS) {
     for (const other_script of OTHER_BRAHMI_SCRIPTS) {
       const output = await old_lipi_parivartak(
         input,
@@ -164,7 +169,7 @@ const sanskrit_non_brahmic_scripts = async () => {
   const out_test_data1: TestData[] = [];
   let index = 0;
   let index1 = 0;
-  for (const input of DEVANAGARI_INPUTS) {
+  for (const input of COMBINED_INPUTS) {
     for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
       let output = await old_lipi_parivartak(
         input,

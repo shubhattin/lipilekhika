@@ -1,18 +1,246 @@
 - index: 0
   from: Normal
   to: Romanized
+  input: "sharIraM yadavApnOti yaCCApyutkrAmatIshvaraH .\ngRhItvaitAni saMyAti vAyurgandhAnivAshayAt ...1.5-.8.."
+  output: "śarīraṁ yadavāpnōti yaCCāpyutkrāmatīśvaraḥ .\ngr̥hītvaitāni saṁyāti vāyurgandhānivāśayāt ...1.5-.8.."
+  reversible: true
+- index: 1
+  from: Normal
+  to: Romanized
+  input: "shrOtraM CakShuH sparshanaM Ca rasanaM ghrANamEva Ca .\nadhiShThAya manashCAyaM viShayAnupasEvatE ...1.5-.9.."
+  output: "śrōtraṁ Cakṣuḥ sparśanaṁ Ca rasanaṁ ghrāṇamēva Ca .\nadhiṣṭhāya manaśCāyaṁ viṣayānupasēvatē ...1.5-.9.."
+  reversible: true
+- index: 2
+  from: Normal
+  to: Romanized
+  input: "utkrAmantaM sthitaM vApi bhuJjAnaM vA guNAnvitam .\nvimUDhA nAnupashyanti pashyanti jJAnaCakShuShaH ...1.5-.1.0.."
+  output: "utkrāmantaṁ sthitaṁ vāpi bhuñjānaṁ vā guṇānvitam .\nvimūḍhā nānupaśyanti paśyanti jñānaCakṣuṣaḥ ...1.5-.1.0.."
+  reversible: true
+- index: 3
+  from: Normal
+  to: Romanized
+  input: "yatantO yOginashCainaM pashyantyAtmanyavasthitam .\nyatantO''pyakRtAtmAnO nainaM pashyantyaCEtasaH ...1.5-.1.1.."
+  output: "yatantō yōginaśCainaṁ paśyantyātmanyavasthitam .\nyatantō''pyakr̥tātmānō nainaṁ paśyantyaCētasaḥ ...1.5-.1.1.."
+  reversible: true
+- index: 4
+  from: Normal
+  to: Romanized
+  input: "yadAdityagataM tEjO jagadbhAsayatE''khilam .\nyaCCandramasi yaCCAgnau tattEjO viddhi mAmakam ...1.5-.1.2.."
+  output: "yadādityagataṁ tējō jagadbhāsayatē''khilam .\nyaCCandramasi yaCCāgnau tattējō viddhi māmakam ...1.5-.1.2.."
+  reversible: true
+- index: 5
+  from: Normal
+  to: Romanized
+  input: "gAmAvishya Ca bhUtAni dhArayAmyahamOjasA .\npuShNAmi CauShadhIH sarvAH sOmO bhUtvA rasAtmakaH ...1.5-.1.3.."
+  output: "gāmāviśya Ca bhūtāni dhārayāmyahamōjasā .\npuṣṇāmi Cauṣadhīḥ sarvāḥ sōmō bhūtvā rasātmakaḥ ...1.5-.1.3.."
+  reversible: true
+- index: 6
+  from: Normal
+  to: Romanized
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. .1..0.0.1..0.1"
+  output: "a↓gnimī↑ḷē pu↓rōhi↑taṁ ya↓jñasya↑ dē↓vamr̥↓tvija↑m .\nhōtā↑raṁ ratna↓dhāta↑mam .. .1..0.0.1..0.1"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Romanized
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. .1..0.0.1..0.6"
+  output: "yada↓ṅga dā↓śuṣē↓ tvamagnē↑ bha↓draṁ ka↑ri↓ṣyasi↑ .\ntavēttatsa↓tyama↑ṅgiraḥ .. .1..0.0.1..0.6"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Romanized
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. .1..0.0.3..0.1"
+  output: "aśvi↑nā↓ yajva↑rī↓riṣō↓ drava↑tpāṇī↓ śubha↑spatī .\npuru↑bhujā Cana↓syata↑m .. .1..0.0.3..0.1"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Romanized
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. .1.."
+  output: "nāsa↑dāsī↓nnō sadā↑sītta↓dānīṁ↓ nāsī↓drajō↓ nō vyō↑mā pa↓rō yat .\nkimāva↑rīvaḥ↓ kuha↓ kasya↓ śarma↓nnambhaḥ↓ kimā↑sī↓dgaha↑naṁ gabhī↓ram .. .1.."
+  reversible: true
+- index: 10
+  from: Normal
+  to: Romanized
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. .2.."
+  output: "na mr̥↓tyurā↑sīda↓mr̥taṁ↓ na tarhi↓ na rātryā↓ ahna↑ āsītprakē↓taḥ .\nānī↑davā↓taṁ sva↓dhayā↓ tadēkaṁ↓ tasmā↑ddhā↓nyanna pa↓raḥ kiṁ Ca↓nāsa↑ .. .2.."
+  reversible: true
+- index: 11
+  from: Normal
+  to: Romanized
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. .3.."
+  output: "tama↑ āsī↓ttama↑sā gū↓ḷhamagrē↑''prakē↓taṁ sa↑li↓laṁ sarva↑mā i↓dam .\ntu↓CChyēnā↓bhvapi↑hitaṁ↓ yadāsī↓ttapa↑sa↓stanma↑hi↓nājā↑ya↓taika↑m .. .3.."
+  reversible: true
+- index: 12
+  from: Normal
+  to: Romanized
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. .4.."
+  output: "kāma↓stadagrē↓ sama↑varta↓tādhi↓ mana↑sō↓ rētaḥ↑ pratha↓maṁ yadāsī↑t .\nsa↓tō bandhu↓masa↑ti↓ nira↑vindanhr̥↓di pra↓tīṣyā↑ ka↓vayō↑ manī↓ṣā .. .4.."
+  reversible: true
+- index: 13
+  from: Normal
+  to: Romanized
   input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI.3du↓pari↑ svidAsI.3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. .5.."
   output: "ti↓ra↓śCīnō↓ vita↑tō ra↓śmirē↑ṣāma↓dhaḥ svi↑dā↓sī.3du↓pari↑ svidāsī.3t .\nrē↓tō↓dhā ā↑sanmahi↓māna↑ āsansva↓dhā a↓vastā↓tpraya↑tiḥ pa↓rastā↑t .. .5.."
   reversible: true
-- index: 1
+- index: 14
   from: Normal
   to: Romanized
   input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. .6.."
   output: "kō a↓ddhā vē↑da↓ ka i↓ha pra vō↑Ca↓tkuta↓ ājā↑tā↓ kuta↑ i↓yaṁ visr̥↑ṣṭiḥ .\na↓rvāgdē↓vā a↓sya vi↓sarja↑nē↓nāthā↓ kō vē↑da↓ yata↑ āba↓bhūva↑ .. .6.."
   reversible: true
-- index: 2
+- index: 15
   from: Normal
   to: Romanized
   input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. .7.."
   output: "i↓yaṁ visr̥↑ṣṭi↓ryata↑ āba↓bhūva↓ yadi↑ vā da↓dhē yadi↑ vā↓ na .\nyō a↓syādhya↑kṣaḥ para↓mē vyō↑ma↓nsō a↓ṅga vē↑da↓ yadi↑ vā↓ na vēda↑ .. .7.."
+  reversible: true
+- index: 16
+  from: Normal
+  to: Romanized
+  input: "RgvEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - svastyAtrEyaH, dEvatA - vishvE dEvAH, ChandaH - .1.1 niCRttriShTup,\n.1.2 triShTup, .1.3 paGktiH, .1.4, .1.5 anuShTup,\nsvaraH - .1.1, .1.2 dhaivataH, .1.3 paJCamaH, .1.4, .1.5 gAndhAraH"
+  output: "r̥gvēdasaṁhitāyāṁ pañCamaṁ maṇḍalam . ēkapñCāśaṁ sūktam .\nr̥ṣiḥ - svastyātrēyaḥ, dēvatā - viśvē dēvāḥ, Chandaḥ - .1.1 niCr̥ttriṣṭup,\n.1.2 triṣṭup, .1.3 paṅktiḥ, .1.4, .1.5 anuṣṭup,\nsvaraḥ - .1.1, .1.2 dhaivataḥ, .1.3 pañCamaḥ, .1.4, .1.5 gāndhāraḥ"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Romanized
+  input: "sva↓sti nO↑↑ mimItAma↓shvinA↓ bhagaH↑ sva↓sti dE↓vyadi↑tirana↓rvaNaH↑ .\nsva↓sti pU↓ShA asu↑rO dadhAtu naH sva↓sti dyAvA↑↑pRthi↓vI su↑CE↓tunA↑↑ .. .5..0.5.1..1.1"
+  output: "sva↓sti nō↑↑ mimītāma↓śvinā↓ bhagaḥ↑ sva↓sti dē↓vyadi↑tirana↓rvaṇaḥ↑ .\nsva↓sti pū↓ṣā asu↑rō dadhātu naḥ sva↓sti dyāvā↑↑pr̥thi↓vī su↑Cē↓tunā↑↑ .. .5..0.5.1..1.1"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Romanized
+  input: "sva↓stayE↑↑ vA↓yumupa↑ bravAmahai↓ sOmaM↑↑ sva↓sti bhuva↑nasya↓ yaspatiH↑ .\nbRha↓spatiM↓ sarva↑gaNaM sva↓stayE↑↑ sva↓staya↑ Adi↓tyAsO↑↑ bhavantu naH .. .5..0.5.1..1.2"
+  output: "sva↓stayē↑↑ vā↓yumupa↑ bravāmahai↓ sōmaṁ↑↑ sva↓sti bhuva↑nasya↓ yaspatiḥ↑ .\nbr̥ha↓spatiṁ↓ sarva↑gaṇaṁ sva↓stayē↑↑ sva↓staya↑ ādi↓tyāsō↑↑ bhavantu naḥ .. .5..0.5.1..1.2"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Romanized
+  input: "vishvE↑↑ dE↓vA nO↑↑ a↓dyA sva↓stayE↑↑ vaishvAna↓rO vasu↑ra↓gniH sva↓stayE↑↑ .\ndE↓vA a↑vantvR↓bhavaH↑ sva↓stayE↑↑ sva↓sti nO↑↑ ru↓draH pA↓tvaMha↑saH .. .5..0.5.1..1.3"
+  output: "viśvē↑↑ dē↓vā nō↑↑ a↓dyā sva↓stayē↑↑ vaiśvāna↓rō vasu↑ra↓gniḥ sva↓stayē↑↑ .\ndē↓vā a↑vantvr̥↓bhavaḥ↑ sva↓stayē↑↑ sva↓sti nō↑↑ ru↓draḥ pā↓tvaṁha↑saḥ .. .5..0.5.1..1.3"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Romanized
+  input: "sva↓sti mi↑trAvaruNA sva↓sti pa↑thyE rEvati .\nsva↓sti na↓ indra↑shCA↓gnishCa↑ sva↓sti nO↑↑ aditE kRdhi .. .5..0.5.1..1.4"
+  output: "sva↓sti mi↑trāvaruṇā sva↓sti pa↑thyē rēvati .\nsva↓sti na↓ indra↑śCā↓gniśCa↑ sva↓sti nō↑↑ aditē kr̥dhi .. .5..0.5.1..1.4"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Romanized
+  input: "sva↓sti panthA↓manu↑ CarEma sUryACandra↓masA↑↑viva .\npuna↓rdada↓tAghna↑tA jAna↓tA saM ga↑mEmahi .. .5..0.5.1..1.5"
+  output: "sva↓sti panthā↓manu↑ Carēma sūryāCandra↓masā↑↑viva .\npuna↓rdada↓tāghna↑tā jāna↓tā saṁ ga↑mēmahi .. .5..0.5.1..1.5"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Romanized
+  input: atha puruShasUktam ..
+  output: atha puruṣasūktam ..
+  reversible: true
+- index: 23
+  from: Normal
+  to: Romanized
+  input: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  output: "āūṁ taCChaṁ↓ yōrāvr̥↑ṇīmahē . gā↓tuṁ ya↓jñāya↑ . gā↓tuṁ ya↓jñapa↑tayē . daivī↑↑ sva↓stira↑stu naḥ .\nsva↓stirmānu↑ṣēbhyaḥ . ū↓rdhvaṁ ji↑gātu bhēṣa↓jam . śannō↑ astu dvi↓padē↑↑ . śaṁ Catu↑ṣpadē .\nāūṁ śāntiḥ↓ śāntiḥ↓ śāntiḥ↑ ."
+  reversible: true
+- index: 24
+  from: Normal
+  to: Romanized
+  input: hariH AUM .
+  output: hariḥ āūṁ .
+  reversible: true
+- index: 25
+  from: Normal
+  to: Romanized
+  input: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . .1"
+  output: "āūṁ sa↓hasra↑śīrṣā↓ puru↑ṣaḥ . sa↓ha↓srā↓kṣaḥ sa↓hasra↑pāt .\nsa bhūmiṁ↑ vi↓śvatō↑ vr̥↓tvā . atya↑tiṣṭhaddaśāṅgu↓lam . .1"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Romanized
+  input: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . .2"
+  output: "puru↑ṣa ē↓vēdaꣳ sarvam↑↑ . yadbhū↓taṁ yaCCa↓ bhavyam↑↑.\nu↓tāmr̥↑ta↓tvasyēśā↑naḥ . yadannē↑nāti↓rōha↑ti . .2"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Romanized
+  input: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . .3"
+  output: "ē↓tāvā↑nasya mahi↓mā . atō↓ jyāyāꣳ↑śCa↓ pūru↑ṣaḥ .\npādō↑↑''sya↓ viśvā↑ bhū↓tāni↑ . tri↓pāda↑syā↓mr̥taṁ↑ di↓vi . .3"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Romanized
+  input: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . .4"
+  output: "tri↓pādū↓rdhva udai↓tpuru↑ṣaḥ . pādō↑↑''syē↓hā''''bha↑vā↓tpunaḥ↑ .\ntatō↓ viśva↓ṅvya↑krāmat . sā↓śa↓nā↓na↓śa↓nē a↓bhi . .4"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Romanized
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . .5"
+  output: "tasmā↑↑dvi↓rāḍa↑jāyata . vi↓rājō↓ adhi↓ pūru↑ṣaḥ .\nsa jā↓tō atya↑riCyata . pa↓śCādbhūmi↓mathō↑ pu↓raḥ . .5"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Romanized
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . .6"
+  output: "yatpuru↑ṣēṇa ha↓viṣā↑↑ . dē↓vā ya↓jñamata↑nvata .\nva↓sa↓ntō a↑syāsī↓dājyam↑↑ . grī↓ṣma i↓dhmaḥ śa↓raddha↓viḥ . .6"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Romanized
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . .7"
+  output: "sa↓ptāsyā↑sanpari↓dhayaḥ↑ . triḥ sa↓pta sa↓midhaḥ↑ kr̥↓tāḥ .\ndē↓vā yadya↓jñaṁ ta↑nvā↓nāḥ . aba↑dhna↓npu↑ruṣaṁ pa↓śum . .7"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Romanized
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . .8"
+  output: "taṁ ya↓jñaṁ ba↓rhiṣi↓ praukṣan↑ . puru↑ṣaṁ jā↓tama↑gra↓taḥ .\ntēna↑ dē↓vā aya↑janta . sā↓dhyā r̥ṣa↑yaśCa↓ yē . .8"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Romanized
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . .9"
+  output: "tasmā↑↑dya↓jñātsa↑rva↓hutaḥ↑ . saṁbhr̥↑taṁ pr̥ṣadā↓jyam .\npa↓śūꣳstāꣳśCa↑krē vāya↓vyān↑ . ā↓ra↓ṇyāngrā↓myāśCa↓ yē . .9"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Romanized
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . .1.0"
+  output: "tasmā↑↑dya↓jñātsa↑rva↓hutaḥ↑ . r̥Caḥ↓ sāmā↑ni jajñirē .\nChandāꣳ↑si jajñirē↓ tasmā↑↑t . yaju↓stasmā↑dajāyata . .1.0"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Romanized
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . .1.1"
+  output: "tasmā↓daśvā↑ ajāyanta . yē kē Cō↑bha↓yāda↑taḥ .\ngāvō↑ ha jajñirē↓ tasmā↑↑t . tasmā↑↑jjā↓tā a↑jā↓vayaḥ↑ . .1.1"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Romanized
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . .1.2"
+  output: "yatpuru↑ṣaṁ↓ vya↑dadhuḥ . ka↓ti↓dhā vya↑kalpayan .\nmukhaṁ↓ kima↑sya↓ kau bā↓hū . kāvū↓rū pādā↑vuCyētē . .1.2"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Romanized
+  input: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . .1.3"
+  output: "brā↓hma↓ṇō↑↑''sya↓ mukha↑māsīt . bā↓hū rā↑ja↓nyaḥ↑ kr̥↓taḥ .\nū↓rū tada↑sya↓ yadvaiśyaḥ↑ . pa↓dbhyāꣳ śū↓drō a↑jāyata . .1.3"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Romanized
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . .1.4"
+  output: "Ca↓ndramā↓ mana↑sō jā↓taḥ . Cakṣōḥ↓ sūryō↑ ajāyata .\nmukhā↓dindra↑śCā↓gniśCa↑ .  prā↓ṇādvā↓yura↑jāyata . .1.4"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Romanized
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . .1.5"
+  output: "nābhyā↑ āsīda↓ntari↑kṣam . śī↓rṣṇō dyauḥ sama↑vartata .\npa↓dbhyāṁ bhūmi↓rdiśaḥ↓ śrōtrā↑↑t . tathā↑ lō↓kāꣳ a↑kalpayan . .1.5"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Romanized
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . .1.6"
+  output: "vēdā↓hamē↓taṁ puru↑ṣaṁ ma↓hāntam↑↑ . ā↓di↓tyava↑rṇaṁ↓ tama↑sastu↓ pā↓rē .\nsarvā↑ṇi rū↓pāṇi↑ vi↓Citya↓ dhīraḥ↑ . nāmā↑ni kr̥↓tvā''bhi↓vada↓n yadāstē↑↑ . .1.6"
   reversible: true
