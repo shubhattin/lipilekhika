@@ -15,6 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - name: Make Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
       - name: Build
         run: |
           cd client/web-test-client
