@@ -75,6 +75,7 @@ const Sharada = {
       mAtrA: '𑆳',
       text_krama: ['A-svara'],
       mAtrA_text_krama: ['A-mAtrA'],
+      mAtrA_duplicates: ['𑇋𑆳'],
       type: 'svara'
     },
     {
@@ -96,6 +97,7 @@ const Sharada = {
       mAtrA: '𑆶',
       text_krama: ['u-svara'],
       mAtrA_text_krama: ['u-mAtrA'],
+      mAtrA_duplicates: ['𑇋𑆶'],
       type: 'svara'
     },
     {
@@ -103,6 +105,7 @@ const Sharada = {
       mAtrA: '𑆷',
       text_krama: ['U-svara'],
       mAtrA_text_krama: ['U-mAtrA'],
+      mAtrA_duplicates: ['𑇋𑆷'],
       type: 'svara'
     },
     {
@@ -141,13 +144,6 @@ const Sharada = {
       type: 'svara'
     },
     {
-      text: '𑆍𑇌',
-      mAtrA: '𑆼𑇌',
-      text_krama: ['E-svara', 'e-svara'],
-      mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
-      type: 'svara'
-    },
-    {
       text: '𑆎',
       mAtrA: '𑆽',
       text_krama: ['ai-svara', 'aiI-svara'],
@@ -157,13 +153,6 @@ const Sharada = {
     {
       text: '𑆏',
       mAtrA: '𑆾',
-      text_krama: ['O-svara', 'o-svara'],
-      mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
-      type: 'svara'
-    },
-    {
-      text: '𑆏𑇌',
-      mAtrA: '𑆾𑇌',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
       type: 'svara'

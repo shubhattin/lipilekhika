@@ -29,8 +29,8 @@ const Modi = {
     'udAtta-1': '↑',
     'udAtta-2': '↑↑',
     'udAtta-3': '↑↑↑',
-    virama: '।',
-    double_virama: '॥'
+    virama: '𑙁',
+    double_virama: '𑙂'
   },
   list: [
     {
