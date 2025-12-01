@@ -26,8 +26,8 @@
   from: Devanagari
   to: Tamil-Extended
   input: ॥ सौंदर्य लहरी ॥
-  output: ॥ ஸௌம்²த³ர்ய லஹரீ ॥
-  reversible: false
+  output: ॥ ஸௌஂத³ர்ய லஹரீ ॥
+  reversible: true
 - index: 5
   from: Devanagari
   to: Brahmi
@@ -104,8 +104,8 @@
   from: Devanagari
   to: Tamil-Extended
   input: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
-  output: ॥ ப்ரத²மஃ பா⁴க³ஃ - ஆநம்²த³லஹரீ (௧-௪௧) ॥
-  reversible: false
+  output: ॥ ப்ரத²மஃ பா⁴க³ஃ - ஆநஂத³லஹரீ (௧-௪௧) ॥
+  reversible: true
 - index: 18
   from: Devanagari
   to: Brahmi
@@ -182,8 +182,8 @@
   from: Devanagari
   to: Tamil-Extended
   input: "भूमौ स्खलितपादानां भूमिरेवावलम्बनं ।\nत्वयि जातापराधानां त्वमेव शरणं शिवे ॥"
-  output: "பூ⁴மௌ ஸ்க²லிதபாதா³நாம்² பூ⁴மிரேவாவலம்ப³நம்² ।\nத்வயி ஜாதாபராதா⁴நாம்² த்வமேவ ஶரணம்² ஶிவே ॥"
-  reversible: false
+  output: "பூ⁴மௌ ஸ்க²லிதபாதா³நாஂ பூ⁴மிரேவாவலம்ப³நஂ ।\nத்வயி ஜாதாபராதா⁴நாஂ த்வமேவ ஶரணஂ ஶிவே ॥"
+  reversible: true
 - index: 31
   from: Devanagari
   to: Brahmi

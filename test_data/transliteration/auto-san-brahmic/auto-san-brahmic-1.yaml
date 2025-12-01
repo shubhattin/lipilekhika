@@ -69,7 +69,7 @@
   to: Tamil-Extended
   input: ॐ श्री परमात्मने नमः
   output: ॐ ஶ்ரீ பரமாத்மநே நமஃ
-  reversible: false
+  reversible: true
 - index: 12
   from: Devanagari
   to: Brahmi
@@ -146,8 +146,8 @@
   from: Devanagari
   to: Tamil-Extended
   input: "ऋषीणां संनिधौ राजंस्तव पुत्रागमं प्रति ।\nकाश्यपस्य च पुत्रोऽस्ति विभाण्डक इति श्रुतः ॥१-९-३॥"
-  output: "ரு²ஷீணாம்² ஸம்²நிதௌ⁴ ராஜம்²ஸ்தவ புத்ராக³மம்² ப்ரதி ।\nகாஶ்யபஸ்ய ச புத்ரோऽஸ்தி விபா⁴ண்ட³க இதி ஶ்ருதஃ ॥௧-௯-௩॥"
-  reversible: false
+  output: "ரு²ஷீணாஂ ஸஂநிதௌ⁴ ராஜஂஸ்தவ புத்ராக³மஂ ப்ரதி ।\nகாஶ்யபஸ்ய ச புத்ரோऽஸ்தி விபா⁴ண்ட³க இதி ஶ்ருதஃ ॥௧-௯-௩॥"
+  reversible: true
 - index: 25
   from: Devanagari
   to: Brahmi
@@ -224,8 +224,8 @@
   from: Devanagari
   to: Tamil-Extended
   input: "वक्ष्यन्ति ते महीपालं ब्राह्मणा वेदपारगाः ।\nविभाण्डकसुतं राजन् सर्वोपायैरिहानय ॥१-९-१२॥"
-  output: "வக்ஷ்யந்தி தே மஹீபாலம்² ப்³ராஹ்மணா வேத³பாரகா³ஃ ।\nவிபா⁴ண்ட³கஸுதம்² ராஜந் ஸர்வோபாயைரிஹாநய ॥௧-௯-௧௨॥"
-  reversible: false
+  output: "வக்ஷ்யந்தி தே மஹீபாலஂ ப்³ராஹ்மணா வேத³பாரகா³ஃ ।\nவிபா⁴ண்ட³கஸுதஂ ராஜந் ஸர்வோபாயைரிஹாநய ॥௧-௯-௧௨॥"
+  reversible: true
 - index: 38
   from: Devanagari
   to: Brahmi

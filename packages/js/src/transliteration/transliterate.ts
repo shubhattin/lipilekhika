@@ -266,7 +266,6 @@ export const transliterate_text = async (
         if (potential_match[1].next && potential_match[1].next.length > 0) {
           const nth_next_character = text[text_index + chars_to_scan + 1] as string | undefined;
 
-          console.log(2, potential_match[0], potential_match[1].next.split(''));
           if (from_script_name === 'Tamil-Extended' && from_script_data.script_type === 'brahmic') {
             const n_1_th_next_character = text[text_index + chars_to_scan + 2] as
               | string
@@ -346,19 +345,19 @@ export const transliterate_text = async (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
-              const n_1_th_char_text_item = from_script_data.krama_text_arr[n_1_th_char_text_index];
               // special case for some mAtrAs like gO = g + E + A
               if (
                 char_index !== -1 &&
                 nth_char_text_index !== -1 &&
                 n_1_th_char_text_index !== -1
               ) {
+                const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
+                const n_1_th_char_text_item =
+                  from_script_data.krama_text_arr[n_1_th_char_text_index];
                 text_to_krama_item = from_script_data.text_to_krama_map[char_index];
                 if (
-                  nth_next_character === from_script_data.halant ||
-                  (from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara' &&
-                    from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type === 'svara')
+                  from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara' &&
+                  from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type === 'svara'
                 ) {
                   ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 3;
                   break;
@@ -366,7 +365,6 @@ export const transliterate_text = async (
               }
             }
           }
-          console.log(1, potential_match[0], potential_match[1].next.split(''));
           if (
             nth_next_character !== undefined &&
             potential_match[1].next.indexOf(nth_next_character) !== -1
