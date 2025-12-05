@@ -39,7 +39,8 @@ export type InputBrahmicScriptType = {
   nuqta?: string;
   /**
    * An attribute for some ancient scripts which use 4 byte utf-8 representation.
-   * Like Brahmi, Grantha, Siddham, Sharada, Modi, etc.
+   * Instead of the usual 3 byte for most modern indian scripts.
+   * Examples(non-bmp scripts): Brahmi, Grantha, Siddham, Sharada, Modi, etc.
    *
    * BMP (Basic Bilingual Plane)
    */

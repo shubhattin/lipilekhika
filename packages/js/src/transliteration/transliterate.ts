@@ -161,16 +161,17 @@ export const transliterate_text = async (
   let ignore_ta_ext_sup_num_text_index = -1;
 
   for (; text_index < text.length; ) {
-    const char = text[text_index];
+    const codePoint = text.codePointAt(text_index);
+    const char = codePoint ? String.fromCodePoint(codePoint) : '';
     // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
     if (ignore_ta_ext_sup_num_text_index !== -1 && text_index >= ignore_ta_ext_sup_num_text_index) {
       ignore_ta_ext_sup_num_text_index = -1;
-      text_index++;
+      text_index += char.length;
       continue;
     }
     if (CHARS_TO_SKIP.indexOf(char as (typeof CHARS_TO_SKIP)[number]) !== -1) {
       // ignore blank spaces
-      text_index++;
+      text_index += char.length;
       if (PREV_CONTEXT_IN_USE) {
         prev_context_cleanup_func([' ', null]);
         prev_context_arr = [];
@@ -205,7 +206,8 @@ export const transliterate_text = async (
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA));
 
       while (true) {
-        const next_char = text[text_index + chars_to_scan + 1] as string | undefined;
+        const next_codePoint = text.codePointAt(text_index + chars_to_scan + 1);
+        const next_char = next_codePoint ? String.fromCodePoint(next_codePoint) : '';
         if (
           ignore_ta_ext_sup_num_text_index !== -1 &&
           next_char &&
@@ -213,7 +215,7 @@ export const transliterate_text = async (
             next_char as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
           ) !== -1
         ) {
-          chars_to_scan++;
+          chars_to_scan += next_char.length;
         }
         const char_to_search =
           // usage example: க்⁴ரு² -> ghR
@@ -370,7 +372,7 @@ export const transliterate_text = async (
             nth_next_character !== undefined &&
             potential_match[1].next.indexOf(nth_next_character) !== -1
           ) {
-            chars_to_scan += 1;
+            chars_to_scan += nth_next_character.length;
             continue;
           }
         }
@@ -470,7 +472,7 @@ export const transliterate_text = async (
         continue;
       }
     } else {
-      text_index++;
+      text_index += char.length;
     }
 
     // Step 2: Search for the character in the krama_text_map
