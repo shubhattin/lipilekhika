@@ -47,7 +47,8 @@ export type InputBrahmicScriptType = {
    * A sorted range array. Used to check if the incomming character has to be processed or can be ignored.
    * Main Ranges will be specified manually (Like for a Brahmic Script). And Ranges for Additional charcters used shall be added manually
    *
-   * This will help us more strictly specify what to process and what not to
+   * This will help us more strictly specify what to process and what not to.
+   * In future this will be a mandatory field and ?
    */
   ranges?: [[number, number][]];
   halant: string;

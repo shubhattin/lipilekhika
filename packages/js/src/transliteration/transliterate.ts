@@ -162,7 +162,7 @@ export const transliterate_text = async (
 
   for (; text_index < text.length; ) {
     const codePoint = text.codePointAt(text_index);
-    const char = codePoint ? String.fromCodePoint(codePoint) : '';
+    const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
     // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
     if (ignore_ta_ext_sup_num_text_index !== -1 && text_index >= ignore_ta_ext_sup_num_text_index) {
       ignore_ta_ext_sup_num_text_index = -1;
@@ -207,7 +207,7 @@ export const transliterate_text = async (
 
       while (true) {
         const next_codePoint = text.codePointAt(text_index + chars_to_scan + 1);
-        const next_char = next_codePoint ? String.fromCodePoint(next_codePoint) : '';
+        const next_char = next_codePoint !== undefined ? String.fromCodePoint(next_codePoint) : '';
         if (
           ignore_ta_ext_sup_num_text_index !== -1 &&
           next_char &&
