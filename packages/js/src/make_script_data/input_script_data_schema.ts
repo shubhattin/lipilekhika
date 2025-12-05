@@ -38,6 +38,13 @@ export type InputBrahmicScriptType = {
   halant: string;
   nuqta?: string;
   /**
+   * An attribute for some ancient scripts which use 4 byte utf-8 representation.
+   * Like Brahmi, Grantha, Siddham, Sharada, Modi, etc.
+   *
+   * BMP (Basic Bilingual Plane)
+   */
+  non_bmp_script?: boolean;
+  /**
    * Schwa deletion indicator for the script(or rather language in most cases).
    * This will be used for live typing and not for conversion.
    * It can be overriden later on provided as a argument in the typing tool

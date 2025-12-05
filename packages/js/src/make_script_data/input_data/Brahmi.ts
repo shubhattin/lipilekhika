@@ -5,6 +5,7 @@ const Brahmi = {
   script_type: 'brahmic',
   script_name: 'Brahmi',
   script_id: script_list_obj['Brahmi'],
+  non_bmp_script: true,
   halant: '𑁆',
   schwa_property: false,
   manual_krama_text_map: {
