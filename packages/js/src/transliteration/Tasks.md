@@ -8,6 +8,11 @@
 
 - Add Support for Reversed Script Transliteration for Granth, Modi, Sharada, Siddham
 - Eliminate the initial \ud804 and \ud805 from the generated data. Use the respective language methods to resolve the multi lenth non bmp characters.
+- ^ For this in the make script you will have to access the utf-16 code points with the new codepoint method in js.
+- **Consider Surrogate ranges**
+- *High surrogates*: 0xD800 - 0xDBFF (1,024 values)
+- *Low surrogates*: 0xDC00 - 0xDFFF (1,024 values)
+- A Low Surrogate must follow a high surrogate.
 
 ## Todo for Ranges
 
