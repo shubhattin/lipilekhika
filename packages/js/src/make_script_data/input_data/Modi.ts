@@ -5,6 +5,7 @@ const Modi = {
   script_type: 'brahmic',
   script_name: 'Modi',
   script_id: script_list_obj['Modi'],
+  non_bmp_script: true,
   halant: '𑘿',
   schwa_property: false,
   manual_krama_text_map: {

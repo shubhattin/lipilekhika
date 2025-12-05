@@ -5,6 +5,7 @@ const Sharada = {
   script_type: 'brahmic',
   script_name: 'Sharada',
   script_id: script_list_obj['Sharada'],
+  non_bmp_script: true,
   halant: '𑇀',
   nuqta: '𑇊',
   schwa_property: false,

@@ -5,6 +5,7 @@ const Granth = {
   script_type: 'brahmic',
   script_name: 'Granth',
   script_id: script_list_obj['Granth'],
+  non_bmp_script: true,
   halant: '𑍍',
   nuqta: '𑌼',
   schwa_property: false,
