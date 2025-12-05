@@ -8,3 +8,8 @@
 
 - Add Support for Reversed Script Transliteration for Granth, Modi, Sharada, Siddham
 - Eliminate the initial \ud804 and \ud805 from the generated data. Use the respective language methods to resolve the multi lenth non bmp characters.
+
+## Todo for Ranges
+
+- Add Ranges for Additional charcters used shall be added manually
+- Make changes to `make_output_script_data.ts` to scan the target script data and any extra required range manually

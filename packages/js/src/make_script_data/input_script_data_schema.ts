@@ -35,16 +35,23 @@ export type InputBrahmicScriptType = {
   script_name: script_list_type;
   script_id: number;
   script_type: 'brahmic';
-  halant: string;
-  nuqta?: string;
   /**
    * An attribute for some ancient scripts which use 4 byte utf-8 representation.
    * Instead of the usual 3 byte for most modern indian scripts.
    * Examples(non-bmp scripts): Brahmi, Grantha, Siddham, Sharada, Modi, etc.
    *
-   * BMP (Basic Bilingual Plane)
+   * BMP (Basic Multilingual Plane)
    */
   non_bmp_script?: boolean;
+  /**
+   * A sorted range array. Used to check if the incomming character has to be processed or can be ignored.
+   * Main Ranges will be specified manually (Like for a Brahmic Script). And Ranges for Additional charcters used shall be added manually
+   *
+   * This will help us more strictly specify what to process and what not to
+   */
+  ranges?: [[number, number][]];
+  halant: string;
+  nuqta?: string;
   /**
    * Schwa deletion indicator for the script(or rather language in most cases).
    * This will be used for live typing and not for conversion.
