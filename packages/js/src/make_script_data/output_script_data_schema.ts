@@ -13,7 +13,7 @@ type CommonScriptData = {
   text_to_krama_map: [
     text: string,
     {
-      next?: string | null;
+      next?: string[] | null;
       /** Multiple krama index references are useful to some intermediate states. For eg:- Normal A -> A, AU -> A, U and AUM -> AUM
        * This will be useful only when there are more than two transition states. As double transition state outputs dont need multiple krama references.
        * For eg -> The Bengali kz (actually k + nukta) will be a two step mapping, k -> k (next :nukta,... ) and k+nukta->kz krama reference in the main transliteration array

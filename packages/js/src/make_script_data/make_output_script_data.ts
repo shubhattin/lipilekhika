@@ -86,9 +86,9 @@ async function main() {
                 ? current_next.indexOf(next_char) === -1
                   ? // if the next char is not in the current next, then add it to the current next
                     // else ignore it
-                    current_next + next_char
+                    [...current_next, next_char]
                   : current_next
-                : next_char;
+                : [next_char];
           // mapping the krama index
           if (i === text.length - 1) {
             res.text_to_krama_map[existing_entry_index][1].krama = val;
@@ -97,7 +97,7 @@ async function main() {
           }
           continue;
         }
-        res.text_to_krama_map.push([text_char, { ...(next_char ? { next: next_char } : {}) }]);
+        res.text_to_krama_map.push([text_char, { ...(next_char ? { next: [next_char] } : {}) }]);
         // mapping the krama index
         if (i === text.length - 1) {
           res.text_to_krama_map[res.text_to_krama_map.length - 1][1].krama = val;
