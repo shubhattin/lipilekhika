@@ -19,12 +19,10 @@ import {
 import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
+import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
-
-const BMP_CODE_LAST_INDEX = 0xffff; // 65535
-const LEAD_SURROGATE_RANGE = [0xd800, 0xdbff];
 
 async function main() {
   // reset output folder
@@ -333,9 +331,9 @@ async function main() {
           text_krama_ref !== null &&
           text_krama_ref !== undefined &&
           text_krama_ref.length >= 1 &&
-          (text_krama_item[1]?.next === null ||
-            text_krama_item[1]?.next === undefined ||
-            text_krama_item[1]?.next?.length === 0))
+          (text_krama_item[1].next === null ||
+            text_krama_item[1].next === undefined ||
+            text_krama_item[1].next.length === 0))
       ) {
         index_to_remove.push(i);
       }
