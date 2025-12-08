@@ -1,10 +1,13 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '𑖿';
+
 const Siddham = {
   script_type: 'brahmic',
   script_name: 'Siddham',
   script_id: script_list_obj['Siddham'],
+  non_bmp_script: true,
   halant: '𑖿',
   nuqta: '𑗀',
   schwa_property: false,
@@ -26,7 +29,7 @@ const Siddham = {
     nuqta: '𑗀',
     saMkShepachihna: '॰',
     avagraha: 'ऽ',
-    halant: '𑖿',
+    halant: HALANT,
     anudAttA: '↓',
     'udAtta-1': '↑',
     'udAtta-2': '↑↑',
@@ -96,23 +99,28 @@ const Siddham = {
       mAtrA_text_krama: ['RR-mAtrA'],
       type: 'svara'
     },
-
     {
-      text: '𑖩𑖿𑖨𑖰',
-      text_krama: ['LR-mAtrA', 'LR-svara'],
-      type: 'vyanjana'
+      text: '𑖈',
+      mAtrA: HALANT + '𑖩𑖿𑖨𑖰',
+      text_krama: ['LR-svara'],
+      mAtrA_text_krama: ['LR-mAtrA'],
+      type: 'svara'
     },
     {
-      text: '𑖩𑖿𑖨𑖱',
-      text_krama: ['LRR-mAtrA', 'LRR-svara'],
-      type: 'vyanjana'
+      text: '𑖉',
+      mAtrA: HALANT + '𑖩𑖿𑖨𑖱',
+      text_krama: ['LRR-svara'],
+      mAtrA_text_krama: ['LRR-mAtrA'],
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: '𑖊',
       mAtrA: '𑖸',
       text_krama: ['E-svara', 'e-svara'],
       mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: '𑖋',

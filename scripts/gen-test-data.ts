@@ -130,9 +130,7 @@ const sanskrit_other_brahmic_scripts = async () => {
     "Gurumukhi",
     "Tamil",
     "Telugu", // as it lacks Dhz,Dz etc
-    "Granth",
-    "Sharada",
-    "Siddham",
+    "Siddham", // there is no L in Siddham, only l present
   ] as script_list_type[];
 
   const out_test_data: TestData[] = [];

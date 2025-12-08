@@ -113,28 +113,32 @@ const Gurumukhi = {
       mAtrA: HALANT + 'ਰਿ',
       text_krama: ['R-svara'],
       mAtrA_text_krama: ['R-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ਰੀ',
       mAtrA: HALANT + 'ਰੀ',
       text_krama: ['RR-svara'],
       mAtrA_text_krama: ['RR-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ਲ੍ਰਿ',
       mAtrA: HALANT + 'ਲ੍ਰਿ',
       text_krama: ['LR-svara'],
       mAtrA_text_krama: ['LR-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: 'ਲ੍ਰੀ',
       mAtrA: HALANT + 'ਲ੍ਰੀ',
       text_krama: ['LRR-svara'],
       mAtrA_text_krama: ['LRR-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
 
     // vyanjana

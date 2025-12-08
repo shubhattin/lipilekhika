@@ -45,7 +45,7 @@
   to: Granth
   input: ॥ सौंदर्य लहरी ॥
   output: ॥ 𑌸𑍌𑌀𑌦𑌰𑍍𑌯 𑌲𑌹𑌰𑍀 ॥
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Modi
@@ -57,7 +57,7 @@
   to: Sharada
   input: " सौंदर्य लहरी "
   output: " 𑆱𑆿𑆁𑆢𑆫𑇀𑆪 𑆬𑆲𑆫𑆵 "
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Siddham
@@ -147,7 +147,7 @@
   to: Granth
   input: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
   output: ॥ 𑌪𑍍𑌰𑌥𑌮𑌃 𑌭𑌾𑌗𑌃 - 𑌆𑌨𑌀𑌦𑌲𑌹𑌰𑍀 (௧-௪௧) ॥
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Modi
@@ -159,7 +159,7 @@
   to: Sharada
   input: " प्रथमः भागः - आनंदलहरी (१-४१) "
   output: " 𑆥𑇀𑆫𑆡𑆩𑆂 𑆨𑆳𑆓𑆂 - 𑆄𑆤𑆁𑆢𑆬𑆲𑆫𑆵 (𑇑-𑇔𑇑) "
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Siddham

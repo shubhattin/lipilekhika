@@ -19,6 +19,7 @@ import {
 import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
+import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
@@ -71,13 +72,30 @@ async function main() {
       val: number[],
       fallback_list_ref?: number | null
     ) {
+      // if (input_script_data.script_name === 'Siddham' && text.length === 2) {
+      //   console.log(text, text.split(''), val, fallback_list_ref);
+      // }
       // step by step create entries for the text mapping
       for (let i = 0; i < text.length; i++) {
+        const codePoint = text.codePointAt(i);
+        const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
+        if (char.length > 1) i++;
         const text_char = text.substring(0, i + 1); // from start to the current index
-        const next_char = text[i + 1] as string | undefined;
+        const next_codePoint = text.codePointAt(i + 1);
+        const next_char =
+          next_codePoint !== undefined ? String.fromCodePoint(next_codePoint) : undefined;
         const existing_entry_index = res.text_to_krama_map.findIndex(
           (item) => item[0] === text_char
         );
+        // if next_char is surroage lead then ignore it
+        if (
+          next_codePoint !== undefined &&
+          next_codePoint >= LEAD_SURROGATE_RANGE[0] &&
+          next_codePoint <= LEAD_SURROGATE_RANGE[1]
+        ) {
+          i++;
+          continue;
+        }
         if (existing_entry_index !== -1) {
           const current_next = res.text_to_krama_map[existing_entry_index][1].next;
           if (next_char)
@@ -86,9 +104,9 @@ async function main() {
                 ? current_next.indexOf(next_char) === -1
                   ? // if the next char is not in the current next, then add it to the current next
                     // else ignore it
-                    current_next + next_char
+                    [...current_next, next_char]
                   : current_next
-                : next_char;
+                : [next_char];
           // mapping the krama index
           if (i === text.length - 1) {
             res.text_to_krama_map[existing_entry_index][1].krama = val;
@@ -97,7 +115,7 @@ async function main() {
           }
           continue;
         }
-        res.text_to_krama_map.push([text_char, { ...(next_char ? { next: next_char } : {}) }]);
+        res.text_to_krama_map.push([text_char, { ...(next_char ? { next: [next_char] } : {}) }]);
         // mapping the krama index
         if (i === text.length - 1) {
           res.text_to_krama_map[res.text_to_krama_map.length - 1][1].krama = val;
@@ -265,9 +283,14 @@ async function main() {
         // interate from start to before the final chactacter of the text
         for (let j = 0; j < text.length - 1; j++) {
           const text_char = text.substring(0, j + 1);
-          const krama_key_references = text_char
-            .split('')
-            .map((char) => res.krama_text_arr.findIndex((item) => item[0] === char));
+          const krama_key_references = (() => {
+            const arr: number[] = [];
+            for (let char_code_point of text_char) {
+              // accessing non-bmp chars via this method does not resolve into surrogate pairs
+              arr.push(res.krama_text_arr.findIndex((item) => item[0] === char_code_point));
+            }
+            return arr;
+          })();
           // if the not text_char is not present then add
 
           // check if the character has a single krama reference, then it means we dont have to assign krama reference for all individual characters
@@ -299,23 +322,37 @@ async function main() {
       const text = text_krama_item[0];
       const text_krama_ref = text_krama_item[1].krama;
       const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
-      if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
+      if (
+        text_index !== -1 &&
+        (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0)
+      ) {
         text_krama_item[1].krama = [text_index];
       }
     }
     // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
     // then we can safely remove it as it directly looked up in the krama array
+    // also check if it actaully exists in the krama array (to not disrupt duplicates and mAtrA duplicates)
     const index_to_remove: number[] = [];
     for (let i = 0; i < res.text_to_krama_map.length; i++) {
       const text_krama_item = res.text_to_krama_map[i];
       const text = text_krama_item[0];
+      const codePoint = text.codePointAt(0);
       const text_krama_ref = text_krama_item[1].krama;
+      const text_krama_arr_index = res.krama_text_arr.findIndex((item) => item[0] === text);
       if (
-        text.length === 1 &&
-        text_krama_ref !== null &&
-        text_krama_ref !== undefined &&
-        text_krama_ref.length >= 1 &&
-        text_krama_item[1].next === null
+        // check if its a lead surrogate (as should not be there independently)
+        (codePoint !== undefined &&
+          codePoint >= LEAD_SURROGATE_RANGE[0] &&
+          codePoint <= LEAD_SURROGATE_RANGE[1]) ||
+        (text_krama_arr_index !== -1 &&
+          (text.length === 1 ||
+            (text.length === 2 && codePoint !== undefined && codePoint > BMP_CODE_LAST_INDEX)) &&
+          text_krama_ref !== null &&
+          text_krama_ref !== undefined &&
+          text_krama_ref.length >= 1 &&
+          (text_krama_item[1].next === null ||
+            text_krama_item[1].next === undefined ||
+            text_krama_item[1].next.length === 0))
       ) {
         index_to_remove.push(i);
       }

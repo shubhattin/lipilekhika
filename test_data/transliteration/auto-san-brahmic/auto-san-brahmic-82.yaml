@@ -45,7 +45,7 @@
   to: Granth
   input: ॥ इति दुर्गासूक्तम् ॥
   output: ॥ 𑌇𑌤𑌿 𑌦𑍁𑌰𑍍𑌗𑌾𑌸𑍂𑌕𑍍𑌤𑌮𑍍 ॥
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Modi
@@ -57,7 +57,7 @@
   to: Sharada
   input: " इति दुर्गासूक्तम् "
   output: " 𑆅𑆠𑆴 𑆢𑆶𑆫𑇀𑆓𑆳𑆱𑆷𑆑𑇀𑆠𑆩𑇀 "
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Siddham
@@ -147,7 +147,7 @@
   to: Granth
   input: ॐ शान्तिः शान्तिः शान्तिः ॥
   output: 𑍐 𑌶𑌾𑌨𑍍𑌤𑌿𑌃 𑌶𑌾𑌨𑍍𑌤𑌿𑌃 𑌶𑌾𑌨𑍍𑌤𑌿𑌃 ॥
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Modi
@@ -159,7 +159,7 @@
   to: Sharada
   input: "ॐ शान्तिः शान्तिः शान्तिः "
   output: "𑇄 𑆯𑆳𑆤𑇀𑆠𑆴𑆂 𑆯𑆳𑆤𑇀𑆠𑆴𑆂 𑆯𑆳𑆤𑇀𑆠𑆴𑆂 "
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Siddham
