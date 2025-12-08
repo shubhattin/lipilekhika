@@ -23,6 +23,9 @@ import { execSync } from 'child_process';
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
 
+const BMP_CODE_LAST_INDEX = 0xffff; // 65535
+const LEAD_SURROGATE_RANGE = [0xd800, 0xdbff];
+
 async function main() {
   // reset output folder
   if (fs.existsSync(OUT_FOLDER)) fs.rmSync(OUT_FOLDER, { recursive: true });
@@ -302,23 +305,37 @@ async function main() {
       const text = text_krama_item[0];
       const text_krama_ref = text_krama_item[1].krama;
       const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
-      if (text_index !== -1 && (text_krama_ref === null || text_krama_ref === undefined)) {
+      if (
+        text_index !== -1 &&
+        (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0)
+      ) {
         text_krama_item[1].krama = [text_index];
       }
     }
     // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
     // then we can safely remove it as it directly looked up in the krama array
+    // also check if it actauly exists in the krama array (to not disrupt duplicates and mAtrA duplicates)
     const index_to_remove: number[] = [];
     for (let i = 0; i < res.text_to_krama_map.length; i++) {
       const text_krama_item = res.text_to_krama_map[i];
       const text = text_krama_item[0];
+      const codePoint = text.codePointAt(0);
       const text_krama_ref = text_krama_item[1].krama;
+      const text_krama_arr_index = res.krama_text_arr.findIndex((item) => item[0] === text);
       if (
-        text.length === 1 &&
-        text_krama_ref !== null &&
-        text_krama_ref !== undefined &&
-        text_krama_ref.length >= 1 &&
-        text_krama_item[1].next === null
+        // check if its a lead surrogate (as should not be there independently)
+        (codePoint !== undefined &&
+          codePoint >= LEAD_SURROGATE_RANGE[0] &&
+          codePoint <= LEAD_SURROGATE_RANGE[1]) ||
+        (text_krama_arr_index !== -1 &&
+          (text.length === 1 ||
+            (text.length === 2 && codePoint !== undefined && codePoint > BMP_CODE_LAST_INDEX)) &&
+          text_krama_ref !== null &&
+          text_krama_ref !== undefined &&
+          text_krama_ref.length >= 1 &&
+          (text_krama_item[1]?.next === null ||
+            text_krama_item[1]?.next === undefined ||
+            text_krama_item[1]?.next?.length === 0))
       ) {
         index_to_remove.push(i);
       }
