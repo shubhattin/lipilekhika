@@ -72,6 +72,9 @@ async function main() {
       val: number[],
       fallback_list_ref?: number | null
     ) {
+      // if (input_script_data.script_name === 'Siddham' && text.length === 2) {
+      //   console.log(text, text.split(''), val, fallback_list_ref);
+      // }
       // step by step create entries for the text mapping
       for (let i = 0; i < text.length; i++) {
         const codePoint = text.codePointAt(i);
@@ -84,6 +87,15 @@ async function main() {
         const existing_entry_index = res.text_to_krama_map.findIndex(
           (item) => item[0] === text_char
         );
+        // if next_char is surroage lead then ignore it
+        if (
+          next_codePoint !== undefined &&
+          next_codePoint >= LEAD_SURROGATE_RANGE[0] &&
+          next_codePoint <= LEAD_SURROGATE_RANGE[1]
+        ) {
+          i++;
+          continue;
+        }
         if (existing_entry_index !== -1) {
           const current_next = res.text_to_krama_map[existing_entry_index][1].next;
           if (next_char)
