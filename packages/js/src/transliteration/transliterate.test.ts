@@ -5,7 +5,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { transliterate } from '../index';
-import z from 'zod';
+import { z } from 'zod';
 
 const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
 const TEST_FILES_TO_IGNORE: string[] = [];
