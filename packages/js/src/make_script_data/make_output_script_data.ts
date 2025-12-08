@@ -78,7 +78,9 @@ async function main() {
         const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
         if (char.length > 1) i++;
         const text_char = text.substring(0, i + 1); // from start to the current index
-        const next_char = text[i + 1] as string | undefined;
+        const next_codePoint = text.codePointAt(i + 1);
+        const next_char =
+          next_codePoint !== undefined ? String.fromCodePoint(next_codePoint) : undefined;
         const existing_entry_index = res.text_to_krama_map.findIndex(
           (item) => item[0] === text_char
         );

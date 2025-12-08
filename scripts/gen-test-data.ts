@@ -130,10 +130,6 @@ const sanskrit_other_brahmic_scripts = async () => {
     "Gurumukhi",
     "Tamil",
     "Telugu", // as it lacks Dhz,Dz etc
-    "Brahmi",
-    "Modi",
-    "Granth",
-    "Sharada",
     "Siddham",
   ] as script_list_type[];
 
