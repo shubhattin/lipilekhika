@@ -314,7 +314,7 @@ async function main() {
     }
     // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
     // then we can safely remove it as it directly looked up in the krama array
-    // also check if it actauly exists in the krama array (to not disrupt duplicates and mAtrA duplicates)
+    // also check if it actaully exists in the krama array (to not disrupt duplicates and mAtrA duplicates)
     const index_to_remove: number[] = [];
     for (let i = 0; i < res.text_to_krama_map.length; i++) {
       const text_krama_item = res.text_to_krama_map[i];

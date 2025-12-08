@@ -1,6 +1,8 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '𑖿';
+
 const Siddham = {
   script_type: 'brahmic',
   script_name: 'Siddham',
@@ -27,7 +29,7 @@ const Siddham = {
     nuqta: '𑗀',
     saMkShepachihna: '॰',
     avagraha: 'ऽ',
-    halant: '𑖿',
+    halant: HALANT,
     anudAttA: '↓',
     'udAtta-1': '↑',
     'udAtta-2': '↑↑',
@@ -100,13 +102,19 @@ const Siddham = {
 
     {
       text: '𑖩𑖿𑖨𑖰',
-      text_krama: ['LR-mAtrA', 'LR-svara'],
-      type: 'vyanjana'
+      mAtrA: HALANT + '𑖩𑖿𑖨𑖰',
+      text_krama: ['LR-mAtrA'],
+      mAtrA_text_krama: ['LR-mAtrA'],
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: '𑖩𑖿𑖨𑖱',
-      text_krama: ['LRR-mAtrA', 'LRR-svara'],
-      type: 'vyanjana'
+      mAtrA: HALANT + '𑖩𑖿𑖨𑖱',
+      text_krama: ['LRR-mAtrA'],
+      mAtrA_text_krama: ['LRR-mAtrA'],
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: '𑖊',
