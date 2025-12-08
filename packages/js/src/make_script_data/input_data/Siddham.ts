@@ -99,19 +99,17 @@ const Siddham = {
       mAtrA_text_krama: ['RR-mAtrA'],
       type: 'svara'
     },
-
     {
-      text: '𑖩𑖿𑖨𑖰',
+      text: '𑖈',
       mAtrA: HALANT + '𑖩𑖿𑖨𑖰',
-      text_krama: ['LR-mAtrA'],
+      text_krama: ['LR-svara'],
       mAtrA_text_krama: ['LR-mAtrA'],
-      type: 'svara',
-      prevent_auto_matching: true
+      type: 'svara'
     },
     {
-      text: '𑖩𑖿𑖨𑖱',
+      text: '𑖉',
       mAtrA: HALANT + '𑖩𑖿𑖨𑖱',
-      text_krama: ['LRR-mAtrA'],
+      text_krama: ['LRR-svara'],
       mAtrA_text_krama: ['LRR-mAtrA'],
       type: 'svara',
       prevent_auto_matching: true
@@ -121,7 +119,8 @@ const Siddham = {
       mAtrA: '𑖸',
       text_krama: ['E-svara', 'e-svara'],
       mAtrA_text_krama: ['E-mAtrA', 'e-mAtrA'],
-      type: 'svara'
+      type: 'svara',
+      prevent_auto_matching: true
     },
     {
       text: '𑖋',

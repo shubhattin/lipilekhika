@@ -283,9 +283,14 @@ async function main() {
         // interate from start to before the final chactacter of the text
         for (let j = 0; j < text.length - 1; j++) {
           const text_char = text.substring(0, j + 1);
-          const krama_key_references = text_char
-            .split('')
-            .map((char) => res.krama_text_arr.findIndex((item) => item[0] === char));
+          const krama_key_references = (() => {
+            const arr: number[] = [];
+            for (let char_code_point of text_char) {
+              // accessing non-bmp chars via this method does not resolve into surrogate pairs
+              arr.push(res.krama_text_arr.findIndex((item) => item[0] === char_code_point));
+            }
+            return arr;
+          })();
           // if the not text_char is not present then add
 
           // check if the character has a single krama reference, then it means we dont have to assign krama reference for all individual characters
