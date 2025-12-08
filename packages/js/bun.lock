@@ -7,15 +7,16 @@
       "devDependencies": {
         "@types/node": "^24.10.1",
         "@vitest/coverage-v8": "^4.0.14",
-        "@vitest/ui": "^4.0.13",
+        "@vitest/ui": "^4.0.14",
         "chalk": "^5.6.2",
-        "prettier": "^3.6.2",
+        "prettier": "^3.7.1",
         "typescript": "~5.9.3",
         "vite": "^7.2.4",
         "vite-node": "^5.2.0",
         "vite-plugin-dts": "^4.5.4",
-        "vitest": "^4.0.13",
+        "vitest": "^4.0.14",
         "yaml": "^2.8.1",
+        "zod": "^4.1.13",
       },
     },
   },
@@ -415,6 +416,8 @@
     "yallist": ["yallist@4.0.0", "", {}, "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A=="],
 
     "yaml": ["yaml@2.8.1", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw=="],
+
+    "zod": ["zod@4.1.13", "", {}, "sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig=="],
 
     "@microsoft/api-extractor/typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
 
