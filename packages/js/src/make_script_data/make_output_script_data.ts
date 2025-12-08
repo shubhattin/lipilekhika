@@ -73,6 +73,9 @@ async function main() {
     ) {
       // step by step create entries for the text mapping
       for (let i = 0; i < text.length; i++) {
+        const codePoint = text.codePointAt(i);
+        const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
+        if (char.length > 1) i++;
         const text_char = text.substring(0, i + 1); // from start to the current index
         const next_char = text[i + 1] as string | undefined;
         const existing_entry_index = res.text_to_krama_map.findIndex(
