@@ -3,7 +3,7 @@ import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
 const HALANT = '𑖿';
 
-const Siddham = {
+const Siddham: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Siddham',
   script_id: script_list_obj['Siddham'],
@@ -368,6 +368,6 @@ const Siddham = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Siddham;

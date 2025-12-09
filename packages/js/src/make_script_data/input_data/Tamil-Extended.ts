@@ -2,7 +2,7 @@ import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
 const HALANT = '்';
-const Tamil_Extended = {
+const Tamil_Extended: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Tamil-Extended',
   script_id: script_list_obj['Tamil-Extended'],
@@ -373,6 +373,6 @@ const Tamil_Extended = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Tamil_Extended;

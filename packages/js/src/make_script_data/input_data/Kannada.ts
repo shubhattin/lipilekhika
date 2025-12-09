@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Kannada = {
+const Kannada: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Kannada',
   script_id: script_list_obj['Kannada'],
@@ -390,6 +390,6 @@ const Kannada = {
     //   type: 'anya'
     // },
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Kannada;

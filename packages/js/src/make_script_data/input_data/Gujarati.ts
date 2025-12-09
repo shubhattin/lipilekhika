@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Gujarati = {
+const Gujarati: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Gujarati',
   script_id: script_list_obj['Gujarati'],
@@ -376,6 +376,6 @@ const Gujarati = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Gujarati;

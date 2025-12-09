@@ -4,6 +4,7 @@
 - Add Conversion of all Scripts to Normal Scripts Test (Important)
 - Add Conversion of Normal Scripts to all other Scripts Test (for Typing Tool)
 - For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added.
+- For Normal -> Other script conversion, we should also try to find cases where we can clear the prev_context_arr. This way it can be synchronised with the typing context window too. And as of now the context is only 5 so it might be fine.
 
 ## Todo for Ranges
 

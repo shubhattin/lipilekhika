@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Sharada = {
+const Sharada: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Sharada',
   script_id: script_list_obj['Sharada'],
@@ -398,6 +398,6 @@ const Sharada = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Sharada;

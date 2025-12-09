@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Brahmi = {
+const Brahmi: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Brahmi',
   script_id: script_list_obj['Brahmi'],
@@ -322,6 +322,6 @@ const Brahmi = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Brahmi;

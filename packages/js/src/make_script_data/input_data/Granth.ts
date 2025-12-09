@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Granth = {
+const Granth: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Granth',
   script_id: script_list_obj['Granth'],
@@ -389,6 +389,6 @@ const Granth = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Granth;
