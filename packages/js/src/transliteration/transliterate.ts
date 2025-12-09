@@ -2,7 +2,10 @@ import type {
   OutputScriptData,
   OutputBrahmicScriptData
 } from '../make_script_data/output_script_data_schema';
-import { binarySearch, binarySearchWithIndex } from '../utils/binary_search/binary_search';
+import {
+  binarySearchLower,
+  binarySearchLowerWithIndex
+} from '../utils/binary_search/binary_search';
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
@@ -229,7 +232,7 @@ export const transliterate_text = async (
                   )
                 : '')
             : text.substring(text_index, text_index + chars_to_scan + 1);
-        const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
+        const char_index = binarySearchLower(from_script_data.text_to_krama_map, char_to_search, {
           accessor: (arr, i) => arr[i][0]
         });
         if (char_index === -1) {
@@ -287,14 +290,14 @@ export const transliterate_text = async (
             ) {
               // the next character is also a superscript number and also is in the next list
               // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index = binarySearch(
+              const char_index = binarySearchLower(
                 from_script_data.text_to_krama_map,
                 char_to_search + n_1_th_next_character,
                 {
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const nth_char_text_index = binarySearchWithIndex(
+              const nth_char_text_index = binarySearchLowerWithIndex(
                 from_script_data.krama_text_arr,
                 from_script_data.krama_text_arr_index,
                 nth_next_character,
@@ -325,14 +328,14 @@ export const transliterate_text = async (
             ) {
               // the next character is also a superscript number and also is in the next list
               // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index = binarySearch(
+              const char_index = binarySearchLower(
                 from_script_data.text_to_krama_map,
                 char_to_search + n_2_th_next_character,
                 {
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const nth_char_text_index = binarySearchWithIndex(
+              const nth_char_text_index = binarySearchLowerWithIndex(
                 from_script_data.krama_text_arr,
                 from_script_data.krama_text_arr_index,
                 nth_next_character,
@@ -340,7 +343,7 @@ export const transliterate_text = async (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const n_1_th_char_text_index = binarySearchWithIndex(
+              const n_1_th_char_text_index = binarySearchLowerWithIndex(
                 from_script_data.krama_text_arr,
                 from_script_data.krama_text_arr_index,
                 n_1_th_next_character,
@@ -477,7 +480,7 @@ export const transliterate_text = async (
 
     // Step 2: Search for the character in the krama_text_map
     const char_to_search = text_to_krama_item === null ? char : text_to_krama_item[0];
-    const index = binarySearchWithIndex(
+    const index = binarySearchLowerWithIndex(
       from_script_data.krama_text_arr,
       from_script_data.krama_text_arr_index,
       char_to_search,
