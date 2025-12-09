@@ -5,6 +5,10 @@ import * as fs from "node:fs";
 import { type script_list_type } from "../packages/js/src/utils/lang_list";
 import chalk from "chalk";
 import path from "node:path";
+import {
+  type KramaKeysLabelType,
+  resolveKramaKeysExtendedType,
+} from "../packages/js/src/make_script_data/krama_array_keys";
 
 type TestData = {
   index: number;
@@ -125,18 +129,11 @@ const sanskrit_other_brahmic_scripts = async () => {
     "Siddham",
   ] satisfies script_list_type[];
 
-  const NOT_REVERSIBLE_SCRIPTS = [
-    "Bengali",
-    "Gurumukhi",
-    "Tamil",
-    "Telugu", // as it lacks Dhz,Dz etc
-    "Siddham", // there is no L in Siddham, only l present
-  ] as script_list_type[];
-
   const out_test_data: TestData[] = [];
 
   let index = 0;
   for (const other_script of OTHER_BRAHMI_SCRIPTS) {
+    const SCRIPT_IGNORE_RULE = NON_REVERSIBLE_SCRIPT_IGNORE_MAP[other_script];
     for (const _input of COMBINED_INPUTS) {
       let input = _input;
       if (
@@ -149,13 +146,17 @@ const sanskrit_other_brahmic_scripts = async () => {
         // data is fine so we bypass it, otherwise verified working fine
       }
       let output = await old_lipi_parivartak(input, FROM_SCRIPT, other_script);
+      const reversible = !(SCRIPT_IGNORE_RULE ?? []).some((rule) =>
+        input.includes(rule)
+      );
+      // ^ expression simlified using boolean algebra
       let test_data: TestData = {
         index: index++,
         from: FROM_SCRIPT,
         to: other_script,
-        input: input,
-        output: output,
-        reversible: !NOT_REVERSIBLE_SCRIPTS.includes(other_script),
+        input,
+        output,
+        reversible,
       };
       out_test_data.push(test_data);
     }
@@ -238,5 +239,52 @@ async function main() {
     sanskrit_non_brahmic_scripts(),
   ]);
 }
+
+const _NON_REVERSIBLE_SCRIPT_IGNORE_MAP: {
+  [script in script_list_type]?: KramaKeysLabelType[];
+} = {
+  Siddham: ["L"],
+  Telugu: ["Dhz", "Dz"],
+  Bengali: ["v"],
+  Gurumukhi: [
+    "Sh",
+    "L",
+    "R-svara",
+    "R-mAtrA",
+    "RR-svara",
+    "RR-mAtrA",
+    "LR-svara",
+    "LR-mAtrA",
+    "LRR-svara",
+    "LRR-mAtrA",
+  ],
+  Tamil: [
+    "kh",
+    "g",
+    "gh",
+    "Ch",
+    "jh",
+    "Th",
+    "D",
+    "Dh",
+    "Dz",
+    "Dhz",
+    "th",
+    "d",
+    "dh",
+    "ph",
+    "b",
+    "bh",
+  ],
+};
+/** Non Reversible in certain cases */
+const NON_REVERSIBLE_SCRIPT_IGNORE_MAP = Object.fromEntries(
+  Object.entries(_NON_REVERSIBLE_SCRIPT_IGNORE_MAP).map(([script, arr]) => [
+    script,
+    arr.map((item) => resolveKramaKeysExtendedType(item)),
+  ])
+) as {
+  [script in script_list_type]?: string[];
+};
 
 main();

@@ -87,7 +87,7 @@
   to: Bengali
   input: ॥ अथ दुर्गासूक्तम् ॥
   output: ॥ অথ দুর্গাসূক্তম্ ॥
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Bengali
@@ -141,19 +141,19 @@
   to: Bengali
   input: ॥ इति दुर्गासूक्तम् ॥
   output: ॥ ইতি দুর্গাসূক্তম্ ॥
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Bengali
   input: ॐ शान्तिः शान्तिः शान्तिः ॥
   output: ওঁ শান্তিঃ শান্তিঃ শান্তিঃ ॥
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Gurumukhi
   input: ॐ श्री परमात्मने नमः
   output: ੴ ਸ਼੍ਰੀ ਪਰਮਾਤ੍ਮਨੇ ਨਮਃ
-  reversible: false
+  reversible: true
 - index: 26
   from: Devanagari
   to: Gurumukhi
@@ -171,7 +171,7 @@
   to: Gurumukhi
   input: "तां ददर्श महातेजा मेनकां कुशिकात्मजः ।\nरूपेणाप्रतिमां तत्र विद्युतं जलदे यथा ॥१-६३-५॥"
   output: "ਤਾਂ ਦਦਰ੍ਸ਼ ਮਹਾਤੇਜਾ ਮੇਨਕਾਂ ਕੁਸ਼ਿਕਾਤ੍ਮਜਃ ।\nਰੂਪੇਣਾਪ੍ਰਤਿਮਾਂ ਤਤ੍ਰ ਵਿਦ੍ਯੁਤਂ ਜਲਦੇ ਯਥਾ ॥੧-੬੩-੫॥"
-  reversible: false
+  reversible: true
 - index: 29
   from: Devanagari
   to: Gurumukhi
@@ -183,7 +183,7 @@
   to: Gurumukhi
   input: "न जायते म्रियते वा कदाचिन्नायं भूत्वा भविता वा न भूयः ।\nअजो नित्यः शाश्वतोऽयं पुराणो न हन्यते हन्यमाने शरीरे ॥२-२०॥"
   output: "ਨ ਜਾਯਤੇ ਮ੍ਰਿਯਤੇ ਵਾ ਕਦਾਚਿਨ੍ਨਾਯਂ ਭੂਤ੍ਵਾ ਭਵਿਤਾ ਵਾ ਨ ਭੂਯਃ ।\nਅਜੋ ਨਿਤ੍ਯਃ ਸ਼ਾਸ਼੍ਵਤੋऽਯਂ ਪੁਰਾਣੋ ਨ ਹਨ੍ਯਤੇ ਹਨ੍ਯਮਾਨੇ ਸ਼ਰੀਰੇ ॥੨-੨੦॥"
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Gurumukhi
@@ -195,13 +195,13 @@
   to: Gurumukhi
   input: "कर्मेन्द्रियाणि संयम्य य आस्ते मनसा स्मरन् ।\nइन्द्रियार्थान्विमूढात्मा मिथ्याचारः स उच्यते ॥३-६॥"
   output: "ਕਰ੍ਮੇਨ੍ਦ੍ਰਿਯਾਣਿ ਸਂਯਮ੍ਯ ਯ ਆਸ੍ਤੇ ਮਨਸਾ ਸ੍ਮਰਨ੍ ।\nਇਨ੍ਦ੍ਰਿਯਾਰ੍ਥਾਨ੍ਵਿਮੂਢਾਤ੍ਮਾ ਮਿਥ੍ਯਾਚਾਰਃ ਸ ਉਚ੍ਯਤੇ ॥੩-੬॥"
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Gurumukhi
   input: "नियतं कुरु कर्म त्वं कर्म ज्यायो ह्यकर्मणः ।\nशरीरयात्रापि च ते न प्रसिद्ध्येदकर्मणः ॥३-८॥"
   output: "ਨਿਯਤਂ ਕੁਰੁ ਕਰ੍ਮ ਤ੍ਵਂ ਕਰ੍ਮ ਜ੍ਯਾਯੋ ਹ੍ਯਕਰ੍ਮਣਃ ।\nਸ਼ਰੀਰਯਾਤ੍ਰਾਪਿ ਚ ਤੇ ਨ ਪ੍ਰਸਿਦ੍ਧ੍ਯੇਦਕਰ੍ਮਣਃ ॥੩-੮॥"
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Gurumukhi
@@ -219,7 +219,7 @@
   to: Gurumukhi
   input: "प्रफुल्लनीलपङ्कजप्रपञ्चकालिमप्रभा-\n-वलम्बिकण्ठकन्दलीरुचिप्रबद्धकन्धरम् ।\nस्मरच्छिदं पुरच्छिदं भवच्छिदं मखच्छिदं\nगजच्छिदान्धकच्छिदं तमन्तकच्छिदं भजे ॥९॥"
   output: "ਪ੍ਰਫੁਲ੍ਲਨੀਲਪਙ੍ਕਜਪ੍ਰਪਞ੍ਚਕਾਲਿਮਪ੍ਰਭਾ-\n-ਵਲਮ੍ਬਿਕਣ੍ਠਕਨ੍ਦਲੀਰੁਚਿਪ੍ਰਬਦ੍ਧਕਨ੍ਧਰਮ੍ ।\nਸ੍ਮਰਚ੍ਛਿਦਂ ਪੁਰਚ੍ਛਿਦਂ ਭਵਚ੍ਛਿਦਂ ਮਖਚ੍ਛਿਦਂ\nਗਜਚ੍ਛਿਦਾਨ੍ਧਕਚ੍ਛਿਦਂ ਤਮਨ੍ਤਕਚ੍ਛਿਦਂ ਭਜੇ ॥੯॥"
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Gurumukhi
@@ -237,10 +237,10 @@
   to: Gurumukhi
   input: "कदा निलिम्पनिर्झरीनिकुञ्जकोटरे वसन्\nविमुक्तदुर्मतिः सदा शिरःस्थमञ्जलिं वहन् ।\nविमुक्तलोललोचनो ललामभाललग्नकः\nशिवेतिमन्त्रमुच्चरन् कदा सुखीभवाम्यहम् ॥१३॥"
   output: "ਕਦਾ ਨਿਲਿਮ੍ਪਨਿਰ੍ਝਰੀਨਿਕੁਞ੍ਜਕੋਟਰੇ ਵਸਨ੍\nਵਿਮੁਕ੍ਤਦੁਰ੍ਮਤਿਃ ਸਦਾ ਸ਼ਿਰਃਸ੍ਥਮਞ੍ਜਲਿਂ ਵਹਨ੍ ।\nਵਿਮੁਕ੍ਤਲੋਲਲੋਚਨੋ ਲਲਾਮਭਾਲਲਗ੍ਨਕਃ\nਸ਼ਿਵੇਤਿਮਨ੍ਤ੍ਰਮੁਚ੍ਚਰਨ੍ ਕਦਾ ਸੁਖੀਭਵਾਮ੍ਯਹਮ੍ ॥੧੩॥"
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Gurumukhi
   input: "नमामि पार्वतीपतिं नमामि जाह्नवीपतिं \nनमामि भक्तवत्सलं नमामि भाललोचनम् ।\nनमामि चन्द्रशेखरं नमामि दुःखमोचनं \nतदीयपादपङ्कजं स्मराम्यहं नटेश्वरम् ॥१७॥"
   output: "ਨਮਾਮਿ ਪਾਰ੍ਵਤੀਪਤਿਂ ਨਮਾਮਿ ਜਾਹ੍ਨਵੀਪਤਿਂ \nਨਮਾਮਿ ਭਕ੍ਤਵਤ੍ਸਲਂ ਨਮਾਮਿ ਭਾਲਲੋਚਨਮ੍ ।\nਨਮਾਮਿ ਚਨ੍ਦ੍ਰਸ਼ੇਖਰਂ ਨਮਾਮਿ ਦੁਃਖਮੋਚਨਂ \nਤਦੀਯਪਾਦਪਙ੍ਕਜਂ ਸ੍ਮਰਾਮ੍ਯਹਂ ਨਟੇਸ਼੍ਵਰਮ੍ ॥੧੭॥"
-  reversible: false
+  reversible: true

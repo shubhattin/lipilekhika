@@ -21,7 +21,7 @@
   to: Tamil
   input: हरिः ॐ ।
   output: ஹரிஃ ௐ ।
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Tamil

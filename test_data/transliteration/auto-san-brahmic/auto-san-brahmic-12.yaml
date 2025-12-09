@@ -15,7 +15,7 @@
   to: Gurumukhi
   input: "आयुधानामहं वज्रं धेनूनामस्मि कामधुक् ।\nप्रजनश्चास्मि कन्दर्पः सर्पाणामस्मि वासुकिः ॥१०-२८॥"
   output: "ਆਯੁਧਾਨਾਮਹਂ ਵਜ੍ਰਂ ਧੇਨੂਨਾਮਸ੍ਮਿ ਕਾਮਧੁਕ੍ ।\nਪ੍ਰਜਨਸ਼੍ਚਾਸ੍ਮਿ ਕਨ੍ਦਰ੍ਪਃ ਸਰ੍ਪਾਣਾਮਸ੍ਮਿ ਵਾਸੁਕਿਃ ॥੧੦-੨੮॥"
-  reversible: false
+  reversible: true
 - index: 3
   from: Devanagari
   to: Gurumukhi
@@ -39,7 +39,7 @@
   to: Gurumukhi
   input: "सर्गाणामादिरन्तश्च मध्यं चैवाहमर्जुन ।\nअध्यात्मविद्या विद्यानां वादः प्रवदतामहम् ॥१०-३२॥"
   output: "ਸਰ੍ਗਾਣਾਮਾਦਿਰਨ੍ਤਸ਼੍ਚ ਮਧ੍ਯਂ ਚੈਵਾਹਮਰ੍ਜੁਨ ।\nਅਧ੍ਯਾਤ੍ਮਵਿਦ੍ਯਾ ਵਿਦ੍ਯਾਨਾਂ ਵਾਦਃ ਪ੍ਰਵਦਤਾਮਹਮ੍ ॥੧੦-੩੨॥"
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Gurumukhi
@@ -63,7 +63,7 @@
   to: Gurumukhi
   input: "द्यूतं छलयतामस्मि तेजस्तेजस्विनामहम् ।\nजयोऽस्मि व्यवसायोऽस्मि सत्त्वं सत्त्ववतामहम् ॥१०-३६॥"
   output: "ਦ੍ਯੂਤਂ ਛਲਯਤਾਮਸ੍ਮਿ ਤੇਜਸ੍ਤੇਜਸ੍ਵਿਨਾਮਹਮ੍ ।\nਜਯੋऽਸ੍ਮਿ ਵ੍ਯਵਸਾਯੋऽਸ੍ਮਿ ਸਤ੍ਤ੍ਵਂ ਸਤ੍ਤ੍ਵਵਤਾਮਹਮ੍ ॥੧੦-੩੬॥"
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Gurumukhi
@@ -81,7 +81,7 @@
   to: Gurumukhi
   input: "यच्चापि सर्वभूतानां बीजं तदहमर्जुन ।\nन तदस्ति विना यत्स्यान्मया भूतं चराचरम् ॥१०-३९॥"
   output: "ਯਚ੍ਚਾਪਿ ਸਰ੍ਵਭੂਤਾਨਾਂ ਬੀਜਂ ਤਦਹਮਰ੍ਜੁਨ ।\nਨ ਤਦਸ੍ਤਿ ਵਿਨਾ ਯਤ੍ਸ੍ਯਾਨ੍ਮਯਾ ਭੂਤਂ ਚਰਾਚਰਮ੍ ॥੧੦-੩੯॥"
-  reversible: false
+  reversible: true
 - index: 14
   from: Devanagari
   to: Gurumukhi
@@ -93,7 +93,7 @@
   to: Gurumukhi
   input: "यद्यद्विभूतिमत्सत्त्वं श्रीमदूर्जितमेव वा ।\nतत्तदेवावगच्छ त्वं मम तेजोंऽशसम्भवम् ॥१०-४१॥"
   output: "ਯਦ੍ਯਦ੍ਵਿਭੂਤਿਮਤ੍ਸਤ੍ਤ੍ਵਂ ਸ਼੍ਰੀਮਦੂਰ੍ਜਿਤਮੇਵ ਵਾ ।\nਤਤ੍ਤਦੇਵਾਵਗਚ੍ਛ ਤ੍ਵਂ ਮਮ ਤੇਜੋਂऽਸ਼ਸਮ੍ਭਵਮ੍ ॥੧੦-੪੧॥"
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Gurumukhi
@@ -111,7 +111,7 @@
   to: Gurumukhi
   input: "श्रीभगवानुवाच ।\nऊर्ध्वमूलमधःशाखमश्वत्थं प्राहुरव्ययम् ।\nछन्दांसि यस्य पर्णानि यस्तं वेद स वेदवित् ॥१५-१॥"
   output: "ਸ਼੍ਰੀਭਗਵਾਨੁਵਾਚ ।\nਊਰ੍ਧ੍ਵਮੂਲਮਧਃਸ਼ਾਖਮਸ਼੍ਵਤ੍ਥਂ ਪ੍ਰਾਹੁਰਵ੍ਯਯਮ੍ ।\nਛਨ੍ਦਾਂਸਿ ਯਸ੍ਯ ਪਰ੍ਣਾਨਿ ਯਸ੍ਤਂ ਵੇਦ ਸ ਵੇਦਵਿਤ੍ ॥੧੫-੧॥"
-  reversible: false
+  reversible: true
 - index: 19
   from: Devanagari
   to: Gurumukhi
@@ -141,7 +141,7 @@
   to: Gurumukhi
   input: "न तद्भासयते सूर्यो न शशाङ्को न पावकः ।\nयद्गत्वा न निवर्तन्ते तद्धाम परमं मम ॥१५-६॥"
   output: "ਨ ਤਦ੍ਭਾਸਯਤੇ ਸੂਰ੍ਯੋ ਨ ਸ਼ਸ਼ਾਙ੍ਕੋ ਨ ਪਾਵਕਃ ।\nਯਦ੍ਗਤ੍ਵਾ ਨ ਨਿਵਰ੍ਤਨ੍ਤੇ ਤਦ੍ਧਾਮ ਪਰਮਂ ਮਮ ॥੧੫-੬॥"
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Gurumukhi
@@ -177,7 +177,7 @@
   to: Gurumukhi
   input: "यदादित्यगतं तेजो जगद्भासयतेऽखिलम् ।\nयच्चन्द्रमसि यच्चाग्नौ तत्तेजो विद्धि मामकम् ॥१५-१२॥"
   output: "ਯਦਾਦਿਤ੍ਯਗਤਂ ਤੇਜੋ ਜਗਦ੍ਭਾਸਯਤੇऽਖਿਲਮ੍ ।\nਯਚ੍ਚਨ੍ਦ੍ਰਮਸਿ ਯਚ੍ਚਾਗ੍ਨੌ ਤਤ੍ਤੇਜੋ ਵਿਦ੍ਧਿ ਮਾਮਕਮ੍ ॥੧੫-੧੨॥"
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Gurumukhi
@@ -189,19 +189,19 @@
   to: Gurumukhi
   input: ॥ अथ श्यामला दण्डकम् ॥
   output: ॥ ਅਥ ਸ਼੍ਯਾਮਲਾ ਦਣ੍ਡਕਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 32
   from: Devanagari
   to: Gurumukhi
   input: ॥ ध्यानम् ॥
   output: ॥ ਧ੍ਯਾਨਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Gurumukhi
   input: "माणिक्यवीणामुपलालयन्तीं\nमदालसां मञ्जुलवाग्विलासाम् ।\nमाहेन्द्रनीलद्युतिकोमलाङ्गीं\nमातङ्गकन्यां मनसा स्मरामि ॥ १॥"
   output: "ਮਾਣਿਕ੍ਯਵੀਣਾਮੁਪਲਾਲਯਨ੍ਤੀਂ\nਮਦਾਲਸਾਂ ਮਞ੍ਜੁਲਵਾਗ੍ਵਿਲਾਸਾਮ੍ ।\nਮਾਹੇਨ੍ਦ੍ਰਨੀਲਦ੍ਯੁਤਿਕੋਮਲਾਙ੍ਗੀਂ\nਮਾਤਙ੍ਗਕਨ੍ਯਾਂ ਮਨਸਾ ਸ੍ਮਰਾਮਿ ॥ ੧॥"
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Gurumukhi
@@ -213,7 +213,7 @@
   to: Gurumukhi
   input: ॥ विनियोगः ॥
   output: ॥ ਵਿਨਿਯੋਗਃ ॥
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Gurumukhi
@@ -225,19 +225,19 @@
   to: Gurumukhi
   input: ॥ स्तुति ॥
   output: ॥ ਸ੍ਤੁਤਿ ॥
-  reversible: false
+  reversible: true
 - index: 38
   from: Devanagari
   to: Gurumukhi
   input: "जय मातङ्गतनये जय नीलोत्पलद्युते ।\nजय सङ्गीतरसिके जय लीलाशुकप्रिये ॥ ४॥"
   output: "ਜਯ ਮਾਤਙ੍ਗਤਨਯੇ ਜਯ ਨੀਲੋਤ੍ਪਲਦ੍ਯੁਤੇ ।\nਜਯ ਸਙ੍ਗੀਤਰਸਿਕੇ ਜਯ ਲੀਲਾਸ਼ੁਕਪ੍ਰਿਯੇ ॥ ੪॥"
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Gurumukhi
   input: ॥ दण्डकम् ॥
   output: ॥ ਦਣ੍ਡਕਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Gurumukhi

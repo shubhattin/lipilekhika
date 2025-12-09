@@ -9,7 +9,7 @@
   to: Gurumukhi
   input: "इदं हि नित्यमेवमुक्तमुत्तमोत्तमं स्तवं\nपठन् स्मरन् ब्रुवन् नरो विशुद्धिमेति सन्ततम् ।\nहरे गुरौ सुभक्तिमाशुयाति नान्यथागतिं\nविमोहनं हि देहिनां सुशङ्करस्यचिन्तनम् ॥१४॥"
   output: "ਇਦਂ ਹਿ ਨਿਤ੍ਯਮੇਵਮੁਕ੍ਤਮੁਤ੍ਤਮੋਤ੍ਤਮਂ ਸ੍ਤਵਂ\nਪਠਨ੍ ਸ੍ਮਰਨ੍ ਬ੍ਰੁਵਨ੍ ਨਰੋ ਵਿਸ਼ੁਦ੍ਧਿਮੇਤਿ ਸਨ੍ਤਤਮ੍ ।\nਹਰੇ ਗੁਰੌ ਸੁਭਕ੍ਤਿਮਾਸ਼ੁਯਾਤਿ ਨਾਨ੍ਯਥਾਗਤਿਂ\nਵਿਮੋਹਨਂ ਹਿ ਦੇਹਿਨਾਂ ਸੁਸ਼ਙ੍ਕਰਸ੍ਯਚਿਨ੍ਤਨਮ੍ ॥੧੪॥"
-  reversible: false
+  reversible: true
 - index: 2
   from: Devanagari
   to: Gurumukhi
@@ -27,7 +27,7 @@
   to: Gurumukhi
   input: ॥इति श्रीरावणविरचितंशिवताण्डवस्तोत्रं सम्पूर्णम्॥
   output: ॥ਇਤਿ ਸ਼੍ਰੀਰਾਵਣਵਿਰਚਿਤਂਸ਼ਿਵਤਾਣ੍ਡਵਸ੍ਤੋਤ੍ਰਂ ਸਮ੍ਪੂਰ੍ਣਮ੍॥
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Gurumukhi
@@ -39,13 +39,13 @@
   to: Gurumukhi
   input: "इदं ज्ञानमुपाश्रित्य मम साधर्म्यमागताः ।\nसर्गेऽपि नोपजायन्ते प्रलये न व्यथन्ति च ॥१४-२॥"
   output: "ਇਦਂ ਜ੍ਞਾਨਮੁਪਾਸ਼੍ਰਿਤ੍ਯ ਮਮ ਸਾਧਰ੍ਮ੍ਯਮਾਗਤਾਃ ।\nਸਰ੍ਗੇऽਪਿ ਨੋਪਜਾਯਨ੍ਤੇ ਪ੍ਰਲਯੇ ਨ ਵ੍ਯਥਨ੍ਤਿ ਚ ॥੧੪-੨॥"
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Gurumukhi
   input: "मम योनिर्महद् ब्रह्म तस्मिन्गर्भं दधाम्यहम् ।\nसम्भवः सर्वभूतानां ततो भवति भारत ॥१४-३॥"
   output: "ਮਮ ਯੋਨਿਰ੍ਮਹਦ੍ ਬ੍ਰਹ੍ਮ ਤਸ੍ਮਿਨ੍ਗਰ੍ਭਂ ਦਧਾਮ੍ਯਹਮ੍ ।\nਸਮ੍ਭਵਃ ਸਰ੍ਵਭੂਤਾਨਾਂ ਤਤੋ ਭਵਤਿ ਭਾਰਤ ॥੧੪-੩॥"
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Gurumukhi
@@ -75,7 +75,7 @@
   to: Gurumukhi
   input: "मां च योऽव्यभिचारेण भक्तियोगेन सेवते ।\nस गुणान्समतीत्यैतान्ब्रह्मभूयाय कल्पते ॥१४-२६॥"
   output: "ਮਾਂ ਚ ਯੋऽਵ੍ਯਭਿਚਾਰੇਣ ਭਕ੍ਤਿਯੋਗੇਨ ਸੇਵਤੇ ।\nਸ ਗੁਣਾਨ੍ਸਮਤੀਤ੍ਯੈਤਾਨ੍ਬ੍ਰਹ੍ਮਭੂਯਾਯ ਕਲ੍ਪਤੇ ॥੧੪-੨੬॥"
-  reversible: false
+  reversible: true
 - index: 13
   from: Devanagari
   to: Gurumukhi
@@ -93,19 +93,19 @@
   to: Gurumukhi
   input: ॥ सौंदर्य लहरी ॥
   output: ॥ ਸੌਂਦਰ੍ਯ ਲਹਰੀ ॥
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Gurumukhi
   input: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
   output: ॥ ਪ੍ਰਥਮਃ ਭਾਗਃ - ਆਨਂਦਲਹਰੀ (੧-੪੧) ॥
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Gurumukhi
   input: "भूमौ स्खलितपादानां भूमिरेवावलम्बनं ।\nत्वयि जातापराधानां त्वमेव शरणं शिवे ॥"
   output: "ਭੂਮੌ ਸ੍ਖਲਿਤਪਾਦਾਨਾਂ ਭੂਮਿਰੇਵਾਵਲਮ੍ਬਨਂ ।\nਤ੍ਵਯਿ ਜਾਤਾਪਰਾਧਾਨਾਂ ਤ੍ਵਮੇਵ ਸ਼ਰਣਂ ਸ਼ਿਵੇ ॥"
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Gurumukhi
@@ -129,7 +129,7 @@
   to: Gurumukhi
   input: "त्वदन्यः पाणिभ्याम् अभयवरदो दैवतगणः\nत्वमेका नैवासि प्रकटितवराभीत्यभिनया ।\nभयात् त्रातुं दातुं फलमपि च वाञ्छासमधिकं\nशरण्ये लोकानां तव हि चरणावेव निपुणौ ॥४॥"
   output: "ਤ੍ਵਦਨ੍ਯਃ ਪਾਣਿਭ੍ਯਾਮ੍ ਅਭਯਵਰਦੋ ਦੈਵਤਗਣਃ\nਤ੍ਵਮੇਕਾ ਨੈਵਾਸਿ ਪ੍ਰਕਟਿਤਵਰਾਭੀਤ੍ਯਭਿਨਯਾ ।\nਭਯਾਤ੍ ਤ੍ਰਾਤੁਂ ਦਾਤੁਂ ਫਲਮਪਿ ਚ ਵਾਞ੍ਛਾਸਮਧਿਕਂ\nਸ਼ਰਣ੍ਯੇ ਲੋਕਾਨਾਂ ਤਵ ਹਿ ਚਰਣਾਵੇਵ ਨਿਪੁਣੌ ॥੪॥"
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Gurumukhi
@@ -153,7 +153,7 @@
   to: Gurumukhi
   input: "ॐ नमो नारायणाय\nअथ श्रीमन्नारायणीयम्\nप्रथमम् दशकम्\nभगवतः स्वरूपं माहात्म्यं च"
   output: "ੴ ਨਮੋ ਨਾਰਾਯਣਾਯ\nਅਥ ਸ਼੍ਰੀਮਨ੍ਨਾਰਾਯਣੀਯਮ੍\nਪ੍ਰਥਮਮ੍ ਦਸ਼ਕਮ੍\nਭਗਵਤਃ ਸ੍ਵਰੂਪਂ ਮਾਹਾਤ੍ਮ੍ਯਂ ਚ"
-  reversible: false
+  reversible: true
 - index: 26
   from: Devanagari
   to: Gurumukhi
@@ -183,13 +183,13 @@
   to: Gurumukhi
   input: "एतां विभूतिं योगं च मम यो वेत्ति तत्त्वतः ।\nसोऽविकम्पेन योगेन युज्यते नात्र संशयः ॥१०-७॥"
   output: "ਏਤਾਂ ਵਿਭੂਤਿਂ ਯੋਗਂ ਚ ਮਮ ਯੋ ਵੇਤ੍ਤਿ ਤਤ੍ਤ੍ਵਤਃ ।\nਸੋऽਵਿਕਮ੍ਪੇਨ ਯੋਗੇਨ ਯੁਜ੍ਯਤੇ ਨਾਤ੍ਰ ਸਂਸ਼ਯਃ ॥੧੦-੭॥"
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Gurumukhi
   input: "अहं सर्वस्य प्रभवो मत्तः सर्वं प्रवर्तते ।\nइति मत्वा भजन्ते मां बुधा भावसमन्विताः ॥१०-८॥"
   output: "ਅਹਂ ਸਰ੍ਵਸ੍ਯ ਪ੍ਰਭਵੋ ਮਤ੍ਤਃ ਸਰ੍ਵਂ ਪ੍ਰਵਰ੍ਤਤੇ ।\nਇਤਿ ਮਤ੍ਵਾ ਭਜਨ੍ਤੇ ਮਾਂ ਬੁਧਾ ਭਾਵਸਮਨ੍ਵਿਤਾਃ ॥੧੦-੮॥"
-  reversible: false
+  reversible: true
 - index: 32
   from: Devanagari
   to: Gurumukhi
@@ -213,7 +213,7 @@
   to: Gurumukhi
   input: "अहमात्मा गुडाकेश सर्वभूताशयस्थितः ।\nअहमादिश्च मध्यं च भूतानामन्त एव च ॥१०-२०॥"
   output: "ਅਹਮਾਤ੍ਮਾ ਗੁਡਾਕੇਸ਼ ਸਰ੍ਵਭੂਤਾਸ਼ਯਸ੍ਥਿਤਃ ।\nਅਹਮਾਦਿਸ਼੍ਚ ਮਧ੍ਯਂ ਚ ਭੂਤਾਨਾਮਨ੍ਤ ਏਵ ਚ ॥੧੦-੨੦॥"
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Gurumukhi
@@ -225,7 +225,7 @@
   to: Gurumukhi
   input: "वेदानां सामवेदोऽस्मि देवानामस्मि वासवः ।\nइन्द्रियाणां मनश्चास्मि भूतानामस्मि चेतना ॥१०-२२॥"
   output: "ਵੇਦਾਨਾਂ ਸਾਮਵੇਦੋऽਸ੍ਮਿ ਦੇਵਾਨਾਮਸ੍ਮਿ ਵਾਸਵਃ ।\nਇਨ੍ਦ੍ਰਿਯਾਣਾਂ ਮਨਸ਼੍ਚਾਸ੍ਮਿ ਭੂਤਾਨਾਮਸ੍ਮਿ ਚੇਤਨਾ ॥੧੦-੨੨॥"
-  reversible: false
+  reversible: true
 - index: 38
   from: Devanagari
   to: Gurumukhi

@@ -3,7 +3,7 @@
   to: Gurumukhi
   input: "सादरारब्धसंगीतसंभावनासंभ्रमालोल-\nनीपस्रगाबद्धचूलीसनाथत्रिके सानुमत्पुत्रिके"
   output: "ਸਾਦਰਾਰਬ੍ਧਸਂਗੀਤਸਂਭਾਵਨਾਸਂਭ੍ਰਮਾਲੋਲ-\nਨੀਪਸ੍ਰਗਾਬਦ੍ਧਚੂਲੀਸਨਾਥਤ੍ਰਿਕੇ ਸਾਨੁਮਤ੍ਪੁਤ੍ਰਿਕੇ"
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Gurumukhi
@@ -75,7 +75,7 @@
   to: Gurumukhi
   input: "चारुशिञ्चत्कटीसूत्रनिर्भत्सितानङ्गलीलधनुश्शिञ्चिनीडंबरे\nदिव्यरत्नाम्बरे"
   output: "ਚਾਰੁਸ਼ਿਞ੍ਚਤ੍ਕਟੀਸੂਤ੍ਰਨਿਰ੍ਭਤ੍ਸਿਤਾਨਙ੍ਗਲੀਲਧਨੁਸ਼੍ਸ਼ਿਞ੍ਚਿਨੀਡਂਬਰੇ\nਦਿਵ੍ਯਰਤ੍ਨਾਮ੍ਬਰੇ"
-  reversible: false
+  reversible: true
 - index: 13
   from: Devanagari
   to: Gurumukhi
@@ -117,7 +117,7 @@
   to: Gurumukhi
   input: "किन्न सिद्ध्येद्वपुः श्यामलं कोमलं चन्द्रचूडान्वितं\nतावकं ध्यायतः तस्य लीला सरोवारिधीः तस्य केलीवनं\nनन्दनं तस्य भद्रासनं भूतलं तस्य गीर्देवता किङ्करि\nतस्य चाज्ञाकरी श्री स्वयं"
   output: "ਕਿਨ੍ਨ ਸਿਦ੍ਧ੍ਯੇਦ੍ਵਪੁਃ ਸ਼੍ਯਾਮਲਂ ਕੋਮਲਂ ਚਨ੍ਦ੍ਰਚੂਡਾਨ੍ਵਿਤਂ\nਤਾਵਕਂ ਧ੍ਯਾਯਤਃ ਤਸ੍ਯ ਲੀਲਾ ਸਰੋਵਾਰਿਧੀਃ ਤਸ੍ਯ ਕੇਲੀਵਨਂ\nਨਨ੍ਦਨਂ ਤਸ੍ਯ ਭਦ੍ਰਾਸਨਂ ਭੂਤਲਂ ਤਸ੍ਯ ਗੀਰ੍ਦੇਵਤਾ ਕਿਙ੍ਕਰਿ\nਤਸ੍ਯ ਚਾਜ੍ਞਾਕਰੀ ਸ਼੍ਰੀ ਸ੍ਵਯਂ"
-  reversible: false
+  reversible: true
 - index: 20
   from: Devanagari
   to: Gurumukhi
@@ -129,7 +129,7 @@
   to: Gurumukhi
   input: ॥ इति श्यामला दण्डकं सम्पूर्णम् ॥
   output: ॥ ਇਤਿ ਸ਼੍ਯਾਮਲਾ ਦਣ੍ਡਕਂ ਸਮ੍ਪੂਰ੍ਣਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Gurumukhi
@@ -141,7 +141,7 @@
   to: Gurumukhi
   input: "नमः पन्नगनद्धाय वैकुण्ठवशवर्तिने ।\nश्रुतिसिन्धु सुधोत्पादमन्दराय गरुत्मते ॥ १॥"
   output: "ਨਮਃ ਪਨ੍ਨਗਨਦ੍ਧਾਯ ਵੈਕੁਣ੍ਠਵਸ਼ਵਰ੍ਤਿਨੇ ।\nਸ਼੍ਰੁਤਿਸਿਨ੍ਧੁ ਸੁਧੋਤ੍ਪਾਦਮਨ੍ਦਰਾਯ ਗਰੁਤ੍ਮਤੇ ॥ ੧॥"
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Gurumukhi
@@ -183,19 +183,19 @@
   to: Gurumukhi
   input: "कवितार्किकसिंहाय कल्यणगुणशालिने ।\nश्रीमते वेङ्कटेशाय वेदान्तगुरवे नमः ॥"
   output: "ਕਵਿਤਾਰ੍ਕਿਕਸਿਂਹਾਯ ਕਲ੍ਯਣਗੁਣਸ਼ਾਲਿਨੇ ।\nਸ਼੍ਰੀਮਤੇ ਵੇਙ੍ਕਟੇਸ਼ਾਯ ਵੇਦਾਨ੍ਤਗੁਰਵੇ ਨਮਃ ॥"
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Gurumukhi
   input: श्रीमते निगमान्तमहादेशिकाय नमः ॥
   output: ਸ਼੍ਰੀਮਤੇ ਨਿਗਮਾਨ੍ਤਮਹਾਦੇਸ਼ਿਕਾਯ ਨਮਃ ॥
-  reversible: false
+  reversible: true
 - index: 32
   from: Devanagari
   to: Gurumukhi
   input: इति श्रीवेदान्तदेशिकविरचितः गरुडदण्डकः सम्पूर्णः ।
   output: ਇਤਿ ਸ਼੍ਰੀਵੇਦਾਨ੍ਤਦੇਸ਼ਿਕਵਿਰਚਿਤਃ ਗਰੁਡਦਣ੍ਡਕਃ ਸਮ੍ਪੂਰ੍ਣਃ ।
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Gurumukhi
@@ -219,7 +219,7 @@
   to: Gurumukhi
   input: "नास॑दासी॒न्नो सदा॑सीत्त॒दानीं॒ नासी॒द्रजो॒ नो व्यो॑मा प॒रो यत् ।\nकिमाव॑रीवः॒ कुह॒ कस्य॒ शर्म॒न्नम्भः॒ किमा॑सी॒द्गह॑नं गभी॒रम् ॥ १॥"
   output: "ਨਾਸ॑ਦਾਸੀ॒ਨ੍ਨੋ ਸਦਾ॑ਸੀਤ੍ਤ॒ਦਾਨੀਂ॒ ਨਾਸੀ॒ਦ੍ਰਜੋ॒ ਨੋ ਵ੍ਯੋ॑ਮਾ ਪ॒ਰੋ ਯਤ੍ ।\nਕਿਮਾਵ॑ਰੀਵਃ॒ ਕੁਹ॒ ਕਸ੍ਯ॒ ਸ਼ਰ੍ਮ॒ਨ੍ਨਮ੍ਭਃ॒ ਕਿਮਾ॑ਸੀ॒ਦ੍ਗਹ॑ਨਂ ਗਭੀ॒ਰਮ੍ ॥ ੧॥"
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Gurumukhi

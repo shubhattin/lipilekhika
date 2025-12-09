@@ -27,7 +27,7 @@
   to: Gurumukhi
   input: "यज्ञेन यज्ञमयजन्त देवास्तानि धर्माणि प्रथमान्यासन् ।\nते ह नाकं महिमानः सचन्त यत्र पूर्वे साध्याः सन्ति देवाः ॥ १६॥"
   output: "ਯਜ੍ਞੇਨ ਯਜ੍ਞਮਯਜਨ੍ਤ ਦੇਵਾਸ੍ਤਾਨਿ ਧਰ੍ਮਾਣਿ ਪ੍ਰਥਮਾਨ੍ਯਾਸਨ੍ ।\nਤੇ ਹ ਨਾਕਂ ਮਹਿਮਾਨਃ ਸਚਨ੍ਤ ਯਤ੍ਰ ਪੂਰ੍ਵੇ ਸਾਧ੍ਯਾਃ ਸਨ੍ਤਿ ਦੇਵਾਃ ॥ ੧੬॥"
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Gurumukhi
@@ -39,7 +39,7 @@
   to: Gurumukhi
   input: ॥ अथ दुर्गासूक्तम् ॥
   output: ॥ ਅਥ ਦੁਰ੍ਗਾਸੂਕ੍ਤਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Gurumukhi
@@ -87,19 +87,19 @@
   to: Gurumukhi
   input: ॐ का॒त्या॒य॒नाय॑ वि॒द्महे॑ कन्याकु॒मारि॑ धीमहि । तन्नो॑ दुर्गिः प्रचो॒दया᳚त् ॥
   output: ੴ ਕਾ॒ਤ੍ਯਾ॒ਯ॒ਨਾਯ॑ ਵਿ॒ਦ੍ਮਹੇ॑ ਕਨ੍ਯਾਕੁ॒ਮਾਰਿ॑ ਧੀਮਹਿ । ਤਨ੍ਨੋ॑ ਦੁਰ੍ਗਿਃ ਪ੍ਰਚੋ॒ਦਯਾ᳚ਤ੍ ॥
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Gurumukhi
   input: ॥ इति दुर्गासूक्तम् ॥
   output: ॥ ਇਤਿ ਦੁਰ੍ਗਾਸੂਕ੍ਤਮ੍ ॥
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Gurumukhi
   input: ॐ शान्तिः शान्तिः शान्तिः ॥
   output: ੴ ਸ਼ਾਨ੍ਤਿਃ ਸ਼ਾਨ੍ਤਿਃ ਸ਼ਾਨ੍ਤਿਃ ॥
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Gujarati

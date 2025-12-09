@@ -99,7 +99,7 @@
   to: Bengali
   input: अथ पुरुषसूक्तम् ॥
   output: অথ পুরুষসূক্তম্ ॥
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Bengali
@@ -111,7 +111,7 @@
   to: Bengali
   input: हरिः ॐ ।
   output: হরিঃ ওঁ ।
-  reversible: false
+  reversible: true
 - index: 19
   from: Devanagari
   to: Bengali

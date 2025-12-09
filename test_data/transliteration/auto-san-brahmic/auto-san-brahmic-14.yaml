@@ -45,7 +45,7 @@
   to: Gurumukhi
   input: "स्व॒स्ति पन्था॒मनु॑ चरेम सूर्याचन्द्र॒मसा᳚विव ।\nपुन॒र्दद॒ताघ्न॑ता जान॒ता सं ग॑मेमहि ॥ ५.०५१.१५"
   output: "ਸ੍ਵ॒ਸ੍ਤਿ ਪਨ੍ਥਾ॒ਮਨੁ॑ ਚਰੇਮ ਸੂਰ੍ਯਾਚਨ੍ਦ੍ਰ॒ਮਸਾ᳚ਵਿਵ ।\nਪੁਨ॒ਰ੍ਦਦ॒ਤਾਘ੍ਨ॑ਤਾ ਜਾਨ॒ਤਾ ਸਂ ਗ॑ਮੇਮਹਿ ॥ ੫.੦੫੧.੧੫"
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Gurumukhi
@@ -63,7 +63,7 @@
   to: Gurumukhi
   input: हरिः ॐ ।
   output: ਹਰਿਃ ੴ ।
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Gurumukhi
@@ -129,7 +129,7 @@
   to: Gurumukhi
   input: "तस्मा॒दश्वा॑ अजायन्त । ये के चो॑भ॒याद॑तः ।\nगावो॑ ह जज्ञिरे॒ तस्मा᳚त् । तस्मा᳚ज्जा॒ता अ॑जा॒वयः॑ । ११"
   output: "ਤਸ੍ਮਾ॒ਦਸ਼੍ਵਾ॑ ਅਜਾਯਨ੍ਤ । ਯੇ ਕੇ ਚੋ॑ਭ॒ਯਾਦ॑ਤਃ ।\nਗਾਵੋ॑ ਹ ਜਜ੍ਞਿਰੇ॒ ਤਸ੍ਮਾ᳚ਤ੍ । ਤਸ੍ਮਾ᳚ਜ੍ਜਾ॒ਤਾ ਅ॑ਜਾ॒ਵਯਃ॑ । ੧੧"
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Gurumukhi
@@ -171,7 +171,7 @@
   to: Gurumukhi
   input: "य॒ज्ञेन॑ य॒ज्ञम॑यजन्त दे॒वाः । तानि॒ धर्मा॑णि प्रथ॒मान्या॑सन् ।\nते ह॒ नाकं॑ महि॒मानः॑ सचन्ते । यत्र॒ पूर्वे॑ सा॒ध्याः सन्ति॑ दे॒वाः । १८"
   output: "ਯ॒ਜ੍ਞੇਨ॑ ਯ॒ਜ੍ਞਮ॑ਯਜਨ੍ਤ ਦੇ॒ਵਾਃ । ਤਾਨਿ॒ ਧਰ੍ਮਾ॑ਣਿ ਪ੍ਰਥ॒ਮਾਨ੍ਯਾ॑ਸਨ੍ ।\nਤੇ ਹ॒ ਨਾਕਂ॑ ਮਹਿ॒ਮਾਨਃ॑ ਸਚਨ੍ਤੇ । ਯਤ੍ਰ॒ ਪੂਰ੍ਵੇ॑ ਸਾ॒ਧ੍ਯਾਃ ਸਨ੍ਤਿ॑ ਦੇ॒ਵਾਃ । ੧੮"
-  reversible: false
+  reversible: true
 - index: 29
   from: Devanagari
   to: Gurumukhi
@@ -225,7 +225,7 @@
   to: Gurumukhi
   input: "तस्मादश्वा अजायन्त ये के चोभयादतः ।\nगावो ह जज्ञिरे तस्मात्तस्माज्जाता अजावयः ॥ ८॥"
   output: "ਤਸ੍ਮਾਦਸ਼੍ਵਾ ਅਜਾਯਨ੍ਤ ਯੇ ਕੇ ਚੋਭਯਾਦਤਃ ।\nਗਾਵੋ ਹ ਜਜ੍ਞਿਰੇ ਤਸ੍ਮਾਤ੍ਤਸ੍ਮਾਜ੍ਜਾਤਾ ਅਜਾਵਯਃ ॥ ੮॥"
-  reversible: false
+  reversible: true
 - index: 38
   from: Devanagari
   to: Gurumukhi

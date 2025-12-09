@@ -3,13 +3,13 @@
   to: Telugu
   input: ॥ इति दुर्गासूक्तम् ॥
   output: ॥ ఇతి దుర్గాసూక్తమ్ ॥
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Telugu
   input: ॐ शान्तिः शान्तिः शान्तिः ॥
   output: ఓం శాన్తిః శాన్తిః శాన్తిః ॥
-  reversible: false
+  reversible: true
 - index: 2
   from: Devanagari
   to: Purna-Devanagari

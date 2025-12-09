@@ -201,7 +201,7 @@
   to: Bengali
   input: ॐ श्री परमात्मने नमः
   output: ওঁ শ্রী পরমাত্মনে নমঃ
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Bengali

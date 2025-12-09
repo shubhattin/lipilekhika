@@ -27,19 +27,19 @@
   to: Bengali
   input: ॥ स्तुति ॥
   output: ॥ স্তুতি ॥
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Bengali
   input: "जय मातङ्गतनये जय नीलोत्पलद्युते ।\nजय सङ्गीतरसिके जय लीलाशुकप्रिये ॥ ४॥"
   output: "জয মাতঙ্গতনযে জয নীলোত্পলদ্যুতে ।\nজয সঙ্গীতরসিকে জয লীলাশুকপ্রিযে ॥ ৪॥"
-  reversible: false
+  reversible: true
 - index: 6
   from: Devanagari
   to: Bengali
   input: ॥ दण्डकम् ॥
   output: ॥ দণ্ডকম্ ॥
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Bengali
@@ -177,7 +177,7 @@
   to: Bengali
   input: ॥ इति श्यामला दण्डकं सम्पूर्णम् ॥
   output: ॥ ইতি শ্যামলা দণ্ডকং সম্পূর্ণম্ ॥
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Bengali
@@ -237,7 +237,7 @@
   to: Bengali
   input: श्रीमते निगमान्तमहादेशिकाय नमः ॥
   output: শ্রীমতে নিগমান্তমহাদেশিকায নমঃ ॥
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Bengali

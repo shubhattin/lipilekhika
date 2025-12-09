@@ -141,13 +141,13 @@
   to: Bengali
   input: ॥ सौंदर्य लहरी ॥
   output: ॥ সৌংদর্য লহরী ॥
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Bengali
   input: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
   output: ॥ প্রথমঃ ভাগঃ - আনংদলহরী (১-৪১) ॥
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Bengali
@@ -243,4 +243,4 @@
   to: Bengali
   input: "मच्चित्ता मद्गतप्राणा बोधयन्तः परस्परम् ।\nकथयन्तश्च मां नित्यं तुष्यन्ति च रमन्ति च ॥१०-९॥"
   output: "মচ্চিত্তা মদ্গতপ্রাণা বোধযন্তঃ পরস্পরম্ ।\nকথযন্তশ্চ মাং নিত্যং তুষ্যন্তি চ রমন্তি চ ॥১০-৯॥"
-  reversible: false
+  reversible: true

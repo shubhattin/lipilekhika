@@ -111,7 +111,7 @@
   to: Tamil
   input: ॐ श्री परमात्मने नमः
   output: ௐ ஶ்ரீ பரமாத்மநே நமஃ
-  reversible: false
+  reversible: true
 - index: 19
   from: Devanagari
   to: Tamil

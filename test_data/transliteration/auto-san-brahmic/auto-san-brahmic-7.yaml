@@ -105,7 +105,7 @@
   to: Bengali
   input: "बृहत्साम तथा साम्नां गायत्री छन्दसामहम् ।\nमासानां मार्गशीर्षोऽहमृतूनां कुसुमाकरः ॥१०-३५॥"
   output: "বৃহত্সাম তথা সাম্নাং গাযত্রী ছন্দসামহম্ ।\nমাসানাং মার্গশীর্ষোঽহমৃতূনাং কুসুমাকরঃ ॥১০-৩৫॥"
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Bengali
@@ -237,10 +237,10 @@
   to: Bengali
   input: ॥ अथ श्यामला दण्डकम् ॥
   output: ॥ অথ শ্যামলা দণ্ডকম্ ॥
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Bengali
   input: ॥ ध्यानम् ॥
   output: ॥ ধ্যানম্ ॥
-  reversible: false
+  reversible: true

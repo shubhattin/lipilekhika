@@ -183,7 +183,7 @@
   to: Tamil
   input: ॥ स्तुति ॥
   output: ॥ ஸ்துதி ॥
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Tamil
