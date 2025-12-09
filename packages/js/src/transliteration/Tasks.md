@@ -3,7 +3,6 @@
 - Make sure Tamil Extended and Vedic Accents marks work together.
 - Add Conversion of all Scripts to Normal Scripts Test (Important)
 - Add Conversion of Normal Scripts to all other Scripts Test (for Typing Tool)
-- *Test Data Order and Grouping* : Consider changing the nested-iteration order in `gen-test-data.ts` to group the test data by script instead of by input. Evaluate the tradeoffs, as this approach will no longer keep the same text input together in the test data as it does now.
 - *For Non-Reversible Scripts*
   - If dev-gur is not reversible then make sure that gur (taken as input) produces consistent results with the old lipi lekhika transliteration.
   - Example: कृ -> ਕ੍ਰਿ => ਕ੍ਰਿ -> क्रि
