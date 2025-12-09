@@ -3,6 +3,7 @@
 - Make sure Tamil Extended and Vedic Accents marks work together.
 - Add Conversion of all Scripts to Normal Scripts Test (Important)
 - Add Conversion of Normal Scripts to all other Scripts Test (for Typing Tool)
+- For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added.
 
 ## Todo for Ranges
 
