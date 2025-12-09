@@ -3,11 +3,6 @@
 - Make sure Tamil Extended and Vedic Accents marks work together.
 - Add Conversion of all Scripts to Normal Scripts Test (Important)
 - Add Conversion of Normal Scripts to all other Scripts Test (for Typing Tool)
-- *For Non-Reversible Scripts*
-  - If dev-gur is not reversible then make sure that gur (taken as input) produces consistent results with the old lipi lekhika transliteration.
-  - Example: कृ -> ਕ੍ਰਿ => ਕ੍ਰਿ -> क्रि
-  - One more thing that can be done is identify patterns in which case it is irreversible and use the strategy above only in those cases; otherwise it will be reversible.
-  - This can be identified for different scripts.
 
 ## Todo for Ranges
 
