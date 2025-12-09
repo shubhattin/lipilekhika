@@ -132,9 +132,9 @@ const sanskrit_other_brahmic_scripts = async () => {
   const out_test_data: TestData[] = [];
 
   let index = 0;
-  for (const other_script of OTHER_BRAHMI_SCRIPTS) {
-    const SCRIPT_IGNORE_RULE = NON_REVERSIBLE_SCRIPT_IGNORE_MAP[other_script];
-    for (const _input of COMBINED_INPUTS) {
+  for (const _input of COMBINED_INPUTS) {
+    for (const other_script of OTHER_BRAHMI_SCRIPTS) {
+      const SCRIPT_IGNORE_RULE = NON_REVERSIBLE_SCRIPT_IGNORE_MAP[other_script];
       let input = _input;
       if (
         other_script === "Modi" ||
@@ -150,15 +150,31 @@ const sanskrit_other_brahmic_scripts = async () => {
         input.includes(rule)
       );
       // ^ expression simlified using boolean algebra
-      let test_data: TestData = {
+      out_test_data.push({
         index: index++,
         from: FROM_SCRIPT,
         to: other_script,
         input,
         output,
         reversible,
-      };
-      out_test_data.push(test_data);
+      });
+      if (!reversible) {
+        const input1 = await old_lipi_parivartak(
+          output,
+          other_script,
+          FROM_SCRIPT
+        );
+        if (input1 !== input) {
+          // out_test_data.push({
+          //   index: index++,
+          //   from: other_script,
+          //   to: FROM_SCRIPT,
+          //   input: output,
+          //   output: input1,
+          //   reversible: false,
+          // });
+        }
+      }
     }
   }
   writeTestDataFiles(out_test_data, OUT_FILE_NAME);
