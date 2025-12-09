@@ -4,7 +4,7 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { transliterate } from '../index';
+import { transliterate, preloadScriptData } from '../index';
 import { z } from 'zod';
 
 const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
@@ -35,7 +35,7 @@ const TestDataTypeSchema = z.object({
   reversible: z.boolean().optional()
 });
 
-describe('Test Transliteration Function Modules', async () => {
+describe('Transliteration', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
   for (const filePath of yamlFiles) {
     const relativePath = path.relative(TEST_DATA_FOLDER, filePath);
@@ -44,14 +44,16 @@ describe('Test Transliteration Function Modules', async () => {
       continue;
     }
     const test_data = TestDataTypeSchema.array().parse(parse(fs.readFileSync(filePath, 'utf8')));
-    describe(relativePath, async () => {
+    describe('⚙️ ' + relativePath.split('/').splice(-1, 1).join('/').split('.')[0], async () => {
       for (const test_data_item of test_data) {
+        preloadScriptData(test_data_item.from);
+        preloadScriptData(test_data_item.to);
         const result = await transliterate(
           test_data_item.input,
           test_data_item.from,
           test_data_item.to
         );
-        it(`Index ${test_data_item.index} ${test_data_item.from} ➡ ${test_data_item.to}`, async () => {
+        it(`${test_data_item.index} : ${test_data_item.from} → ${test_data_item.to}`, async () => {
           const errorMessage =
             `Transliteration failed:\n` +
             `  From: ${test_data_item.from}\n` +
@@ -62,7 +64,7 @@ describe('Test Transliteration Function Modules', async () => {
           expect(result, errorMessage).toBe(test_data_item.output);
         });
         if (test_data_item.reversible) {
-          it(`Index ${test_data_item.index} ${test_data_item.to} ⬅ ${test_data_item.from}`, async () => {
+          it(`${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`, async () => {
             const result_reversed = await transliterate(
               result,
               test_data_item.to,
