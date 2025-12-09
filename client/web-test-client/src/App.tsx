@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, For } from 'solid-js';
+import { batch, createEffect, createSignal, For } from 'solid-js';
 import { transliterate, preloadScriptData } from '../../../packages/js/src/index';
 import { SCRIPT_LIST, type script_list_type } from '../../../packages/js/src/utils/lang_list';
 
@@ -12,9 +12,6 @@ function App() {
   const [inputText, setInputText] = createSignal('');
   const [outputText, setOutputText] = createSignal('');
 
-  const filteredFromOptions = createMemo(() => SCRIPTS.filter((script) => script !== toScript()));
-  const filteredToOptions = createMemo(() => SCRIPTS.filter((script) => script !== fromScript()));
-
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     try {
@@ -25,6 +22,15 @@ function App() {
       console.error(error);
       setOutputText('');
     }
+  };
+
+  const handleSwap = () => {
+    const currentFrom = fromScript();
+    const currentTo = toScript();
+    batch(() => {
+      setFromScript(currentTo);
+      setToScript(currentFrom);
+    });
   };
 
   createEffect(() => {
@@ -39,15 +45,15 @@ function App() {
           class="space-y-8 rounded-3xl bg-slate-900/60 p-8 shadow-2xl ring-1 shadow-black/40 ring-white/5 backdrop-blur"
           onSubmit={handleSubmit}
         >
-          <div class="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:justify-between sm:gap-x-6">
-            <label class="flex flex-col gap-2">
+          <div class="flex flex-col items-stretch gap-4 sm:grid sm:grid-cols-3 sm:items-end sm:gap-6">
+            <label class="flex flex-col gap-2 sm:w-full">
               <span class="text-sm tracking-wider text-slate-400 uppercase">From script</span>
               <select
                 class="rounded-2xl border border-slate-800/70 bg-slate-950/80 px-4 py-3 text-base transition outline-none hover:border-teal-400/60 focus:border-teal-400 focus:ring focus:ring-teal-500/30"
                 value={fromScript()}
                 onChange={(event) => setFromScript(event.currentTarget.value as script_list_type)}
               >
-                <For each={filteredFromOptions()}>
+                <For each={SCRIPTS}>
                   {(script) => (
                     <option value={script} class="bg-slate-900 text-white">
                       {script}
@@ -56,14 +62,22 @@ function App() {
                 </For>
               </select>
             </label>
-            <label class="flex flex-col gap-2">
+            <button
+              type="button"
+              aria-label="Swap scripts"
+              class="inline-flex h-12 w-12 items-center justify-center self-center rounded-full border border-slate-800/70 bg-slate-950/80 text-lg font-semibold text-teal-200 shadow-sm shadow-black/30 transition hover:border-teal-400/60 hover:text-teal-100 focus-visible:ring focus-visible:ring-teal-500/40 focus-visible:outline-none sm:h-12 sm:w-12 sm:justify-self-center"
+              onClick={handleSwap}
+            >
+              ⇄
+            </button>
+            <label class="flex flex-col gap-2 sm:w-full">
               <span class="text-sm tracking-wider text-slate-400 uppercase">To script</span>
               <select
                 class="rounded-2xl border border-slate-800/70 bg-slate-950/80 px-4 py-3 text-base transition outline-none hover:border-teal-400/60 focus:border-teal-400 focus:ring focus:ring-teal-500/30"
                 value={toScript()}
                 onChange={(event) => setToScript(event.currentTarget.value as script_list_type)}
               >
-                <For each={filteredToOptions()}>
+                <For each={SCRIPTS}>
                   {(script) => (
                     <option value={script} class="bg-slate-900 text-white">
                       {script}

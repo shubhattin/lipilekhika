@@ -1,246 +1,246 @@
 - index: 0
   from: Devanagari
   to: Romanized
-  input: "स्व॒स्तये᳚ वा॒युमुप॑ ब्रवामहै॒ सोमं᳚ स्व॒स्ति भुव॑नस्य॒ यस्पतिः॑ ।\nबृह॒स्पतिं॒ सर्व॑गणं स्व॒स्तये᳚ स्व॒स्तय॑ आदि॒त्यासो᳚ भवन्तु नः ॥ ५.०५१.१२"
-  output: "sva↓stayē↑↑ vā↓yumupa↑ bravāmahai↓ sōmaṁ↑↑ sva↓sti bhuva↑nasya↓ yaspatiḥ↑ .\nbr̥ha↓spatiṁ↓ sarva↑gaṇaṁ sva↓stayē↑↑ sva↓staya↑ ādi↓tyāsō↑↑ bhavantu naḥ .. 5.051.12"
-  reversible: false
+  input: "माणिक्यवीणामुपलालयन्तीं\nमदालसां मञ्जुलवाग्विलासाम् ।\nमाहेन्द्रनीलद्युतिकोमलाङ्गीं\nमातङ्गकन्यां मनसा स्मरामि ॥ १॥"
+  output: "māṇikyavīṇāmupalālayantīṁ\nmadālasāṁ mañjulavāgvilāsām .\nmāhēndranīladyutikōmalāṅgīṁ\nmātaṅgakanyāṁ manasā smarāmi .. 1.."
+  reversible: true
 - index: 1
   from: Devanagari
-  to: Normal
-  input: "विश्वे᳚ दे॒वा नो᳚ अ॒द्या स्व॒स्तये᳚ वैश्वान॒रो वसु॑र॒ग्निः स्व॒स्तये᳚ ।\nदे॒वा अ॑वन्त्वृ॒भवः॑ स्व॒स्तये᳚ स्व॒स्ति नो᳚ रु॒द्रः पा॒त्वंह॑सः ॥ ५.०५१.१३"
-  output: "vishvE↑↑ dE↓vA nO↑↑ a↓dyA sva↓stayE↑↑ vaishvAna↓rO vasu↑ra↓gniH sva↓stayE↑↑ .\ndE↓vA a↑vantvR↓bhavaH↑ sva↓stayE↑↑ sva↓sti nO↑↑ ru↓draH pA↓tvaMha↑saH .. 5.051.13"
-  reversible: false
+  to: Romanized
+  input: "चतुर्भुजे चन्द्रकलावतंसे\nकुचोन्नते कुङ्कुमरागशोणे ।\nपुण्ड्रेक्षुपाशाङ्कुशपुष्पबाण-\nहस्ते नमस्ते जगदेकमातः ॥ २॥"
+  output: "Caturbhujē Candrakalāvataṁsē\nkuCōnnatē kuṅkumarāgaśōṇē .\npuṇḍrēkṣupāśāṅkuśapuṣpabāṇa-\nhastē namastē jagadēkamātaḥ .. 2.."
+  reversible: true
 - index: 2
   from: Devanagari
   to: Romanized
-  input: "विश्वे᳚ दे॒वा नो᳚ अ॒द्या स्व॒स्तये᳚ वैश्वान॒रो वसु॑र॒ग्निः स्व॒स्तये᳚ ।\nदे॒वा अ॑वन्त्वृ॒भवः॑ स्व॒स्तये᳚ स्व॒स्ति नो᳚ रु॒द्रः पा॒त्वंह॑सः ॥ ५.०५१.१३"
-  output: "viśvē↑↑ dē↓vā nō↑↑ a↓dyā sva↓stayē↑↑ vaiśvāna↓rō vasu↑ra↓gniḥ sva↓stayē↑↑ .\ndē↓vā a↑vantvr̥↓bhavaḥ↑ sva↓stayē↑↑ sva↓sti nō↑↑ ru↓draḥ pā↓tvaṁha↑saḥ .. 5.051.13"
-  reversible: false
+  input: ॥ विनियोगः ॥
+  output: .. viniyōgaḥ ..
+  reversible: true
 - index: 3
   from: Devanagari
-  to: Normal
-  input: "स्व॒स्ति मि॑त्रावरुणा स्व॒स्ति प॑थ्ये रेवति ।\nस्व॒स्ति न॒ इन्द्र॑श्चा॒ग्निश्च॑ स्व॒स्ति नो᳚ अदिते कृधि ॥ ५.०५१.१४"
-  output: "sva↓sti mi↑trAvaruNA sva↓sti pa↑thyE rEvati .\nsva↓sti na↓ indra↑shCA↓gnishCa↑ sva↓sti nO↑↑ aditE kRdhi .. 5.051.14"
-  reversible: false
+  to: Romanized
+  input: "माता मरकतश्यामा मातङ्गी मदशालिनी ।\nकुर्यात् कटाक्षं कल्याणी कदंबवनवासिनी ॥ ३॥"
+  output: "mātā marakataśyāmā mātaṅgī madaśālinī .\nkuryāt kaṭākṣaṁ kalyāṇī kadaṁbavanavāsinī .. 3.."
+  reversible: true
 - index: 4
   from: Devanagari
   to: Romanized
-  input: "स्व॒स्ति मि॑त्रावरुणा स्व॒स्ति प॑थ्ये रेवति ।\nस्व॒स्ति न॒ इन्द्र॑श्चा॒ग्निश्च॑ स्व॒स्ति नो᳚ अदिते कृधि ॥ ५.०५१.१४"
-  output: "sva↓sti mi↑trāvaruṇā sva↓sti pa↑thyē rēvati .\nsva↓sti na↓ indra↑śCā↓gniśCa↑ sva↓sti nō↑↑ aditē kr̥dhi .. 5.051.14"
-  reversible: false
+  input: ॥ स्तुति ॥
+  output: .. stuti ..
+  reversible: true
 - index: 5
   from: Devanagari
-  to: Normal
-  input: "स्व॒स्ति पन्था॒मनु॑ चरेम सूर्याचन्द्र॒मसा᳚विव ।\nपुन॒र्दद॒ताघ्न॑ता जान॒ता सं ग॑मेमहि ॥ ५.०५१.१५"
-  output: "sva↓sti panthA↓manu↑ CarEma sUryACandra↓masA↑↑viva .\npuna↓rdada↓tAghna↑tA jAna↓tA saM ga↑mEmahi .. 5.051.15"
-  reversible: false
+  to: Romanized
+  input: "जय मातङ्गतनये जय नीलोत्पलद्युते ।\nजय सङ्गीतरसिके जय लीलाशुकप्रिये ॥ ४॥"
+  output: "jaya mātaṅgatanayē jaya nīlōtpaladyutē .\njaya saṅgītarasikē jaya līlāśukapriyē .. 4.."
+  reversible: true
 - index: 6
   from: Devanagari
   to: Romanized
-  input: "स्व॒स्ति पन्था॒मनु॑ चरेम सूर्याचन्द्र॒मसा᳚विव ।\nपुन॒र्दद॒ताघ्न॑ता जान॒ता सं ग॑मेमहि ॥ ५.०५१.१५"
-  output: "sva↓sti panthā↓manu↑ Carēma sūryāCandra↓masā↑↑viva .\npuna↓rdada↓tāghna↑tā jāna↓tā saṁ ga↑mēmahi .. 5.051.15"
-  reversible: false
+  input: ॥ दण्डकम् ॥
+  output: .. daṇḍakam ..
+  reversible: true
 - index: 7
   from: Devanagari
-  to: Normal
-  input: अथ पुरुषसूक्तम् ॥
-  output: atha puruShasUktam ..
+  to: Romanized
+  input: "जय जननि सुधासमुद्रान्तरुद्यन्मणीद्वीपसंरूढ् -\nबिल्वाटवीमध्यकल्पद्रुमाकल्पकादंबकान्तारवासप्रिये\nकृत्तिवासप्रिये सर्वलोकप्रिये"
+  output: "jaya janani sudhāsamudrāntarudyanmaṇīdvīpasaṁrūḍh -\nbilvāṭavīmadhyakalpadrumākalpakādaṁbakāntāravāsapriyē\nkr̥ttivāsapriyē sarvalōkapriyē"
   reversible: true
 - index: 8
   from: Devanagari
   to: Romanized
-  input: अथ पुरुषसूक्तम् ॥
-  output: atha puruṣasūktam ..
+  input: "सादरारब्धसंगीतसंभावनासंभ्रमालोल-\nनीपस्रगाबद्धचूलीसनाथत्रिके सानुमत्पुत्रिके"
+  output: "sādarārabdhasaṁgītasaṁbhāvanāsaṁbhramālōla-\nnīpasragābaddhaCūlīsanāthatrikē sānumatputrikē"
   reversible: true
 - index: 9
   from: Devanagari
-  to: Normal
-  input: "ॐ तच्छं॒ योरावृ॑णीमहे । गा॒तुं य॒ज्ञाय॑ । गा॒तुं य॒ज्ञप॑तये । दैवी᳚ स्व॒स्तिर॑स्तु नः ।\nस्व॒स्तिर्मानु॑षेभ्यः । ऊ॒र्ध्वं जि॑गातु भेष॒जम् । शन्नो॑ अस्तु द्वि॒पदे᳚ । शं चतु॑ष्पदे ।\nॐ शान्तिः॒ शान्तिः॒ शान्तिः॑ ।"
-  output: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  to: Romanized
+  input: "शेखरीभूतशीतांशुरेखामयूखावलीबद्ध-\nसुस्निग्धनीलालकश्रेणिशृङ्गारिते लोकसंभाविते\nकामलीलाधनुस्सन्निभभ्रूलतापुष्पसन्दोहसन्देहकृल्लोचने\nवाक्सुधासेचने चारुगोरोचनापङ्ककेलीललामाभिरामे सुरामे रमे"
+  output: "śēkharībhūtaśītāṁśurēkhāmayūkhāvalībaddha-\nsusnigdhanīlālakaśrēṇiśr̥ṅgāritē lōkasaṁbhāvitē\nkāmalīlādhanussannibhabhrūlatāpuṣpasandōhasandēhakr̥llōCanē\nvāksudhāsēCanē CārugōrōCanāpaṅkakēlīlalāmābhirāmē surāmē ramē"
   reversible: true
 - index: 10
   from: Devanagari
   to: Romanized
-  input: "ॐ तच्छं॒ योरावृ॑णीमहे । गा॒तुं य॒ज्ञाय॑ । गा॒तुं य॒ज्ञप॑तये । दैवी᳚ स्व॒स्तिर॑स्तु नः ।\nस्व॒स्तिर्मानु॑षेभ्यः । ऊ॒र्ध्वं जि॑गातु भेष॒जम् । शन्नो॑ अस्तु द्वि॒पदे᳚ । शं चतु॑ष्पदे ।\nॐ शान्तिः॒ शान्तिः॒ शान्तिः॑ ।"
-  output: "āūṁ taCChaṁ↓ yōrāvr̥↑ṇīmahē . gā↓tuṁ ya↓jñāya↑ . gā↓tuṁ ya↓jñapa↑tayē . daivī↑↑ sva↓stira↑stu naḥ .\nsva↓stirmānu↑ṣēbhyaḥ . ū↓rdhvaṁ ji↑gātu bhēṣa↓jam . śannō↑ astu dvi↓padē↑↑ . śaṁ Catu↑ṣpadē .\nāūṁ śāntiḥ↓ śāntiḥ↓ śāntiḥ↑ ."
+  input: "प्रोल्लसद्ध्वालिकामौक्तिकश्रेणिकाचन्द्रिकामण्डलोद्भासि\nलावण्यगण्डस्थलन्यस्तकस्तूरिकापत्ररेखासमुद्भूतसौरभ्य-\nसंभ्रान्तभृङ्गाङ्गनागीतसान्द्रीभवन्मन्द्रतन्त्रीस्वरे\nसुस्वरे भास्वरे"
+  output: "prōllasaddhvālikāmauktikaśrēṇikāCandrikāmaṇḍalōdbhāsi\nlāvaṇyagaṇḍasthalanyastakastūrikāpatrarēkhāsamudbhūtasaurabhya-\nsaṁbhrāntabhr̥ṅgāṅganāgītasāndrībhavanmandratantrīsvarē\nsusvarē bhāsvarē"
   reversible: true
 - index: 11
   from: Devanagari
-  to: Normal
-  input: हरिः ॐ ।
-  output: hariH AUM .
+  to: Romanized
+  input: "वल्लकीवादनप्रक्रियालोलतालीदलाबद्ध-\nताटङ्कभूषाविशेषान्विते सिद्धसम्मानिते"
+  output: "vallakīvādanaprakriyālōlatālīdalābaddha-\ntāṭaṅkabhūṣāviśēṣānvitē siddhasammānitē"
   reversible: true
 - index: 12
   from: Devanagari
   to: Romanized
-  input: हरिः ॐ ।
-  output: hariḥ āūṁ .
+  input: "दिव्यहालामदोद्वेलहेलालसच्चक्षुरान्दोलनश्रीसमाक्षिप्तकर्णैक-\nनीलोत्पले श्यामले पूरिताशेषलोकाभिवाञ्छाफले श्रीफले"
+  output: "divyahālāmadōdvēlahēlālasaCCakṣurāndōlanaśrīsamākṣiptakarṇaika-\nnīlōtpalē śyāmalē pūritāśēṣalōkābhivāñChāphalē śrīphalē"
   reversible: true
 - index: 13
   from: Devanagari
-  to: Normal
-  input: "ॐ स॒हस्र॑शीर्षा॒ पुरु॑षः । स॒ह॒स्रा॒क्षः स॒हस्र॑पात् ।\nस भूमिं॑ वि॒श्वतो॑ वृ॒त्वा । अत्य॑तिष्ठद्दशाङ्गु॒लम् । १"
-  output: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . 1"
+  to: Romanized
+  input: "स्वेदबिन्दूल्लसद्फाललावण्य निष्यन्दसन्दोहसन्देहकृन्नासिकामौक्तिके\nसर्वविश्वात्मिके सर्वसिद्ध्यात्मिके कालिके मुग्द्धमन्दस्मितोदारवक्त्र-\nस्फुरत् पूगताम्बूलकर्पूरखण्डोत्करे ज्ञानमुद्राकरे सर्वसम्पत्करे\nपद्मभास्वत्करे श्रीकरे"
+  output: "svēdabindūllasadphālalāvaṇya niṣyandasandōhasandēhakr̥nnāsikāmauktikē\nsarvaviśvātmikē sarvasiddhyātmikē kālikē mugddhamandasmitōdāravaktra-\nsphurat pūgatāmbūlakarpūrakhaṇḍōtkarē jñānamudrākarē sarvasampatkarē\npadmabhāsvatkarē śrīkarē"
   reversible: true
 - index: 14
   from: Devanagari
   to: Romanized
-  input: "ॐ स॒हस्र॑शीर्षा॒ पुरु॑षः । स॒ह॒स्रा॒क्षः स॒हस्र॑पात् ।\nस भूमिं॑ वि॒श्वतो॑ वृ॒त्वा । अत्य॑तिष्ठद्दशाङ्गु॒लम् । १"
-  output: "āūṁ sa↓hasra↑śīrṣā↓ puru↑ṣaḥ . sa↓ha↓srā↓kṣaḥ sa↓hasra↑pāt .\nsa bhūmiṁ↑ vi↓śvatō↑ vr̥↓tvā . atya↑tiṣṭhaddaśāṅgu↓lam . 1"
+  input: "कुन्दपुष्पद्युतिस्निग्धदन्तावलीनिर्मलालोलकल्लोलसम्मेलन\nस्मेरशोणाधरे चारुवीणाधरे पक्वबिंबाधरे"
+  output: "kundapuṣpadyutisnigdhadantāvalīnirmalālōlakallōlasammēlana\nsmēraśōṇādharē Cāruvīṇādharē pakvabiṁbādharē"
   reversible: true
 - index: 15
   from: Devanagari
-  to: Normal
-  input: "पुरु॑ष ए॒वेदꣳ सर्वम्᳚ । यद्भू॒तं यच्च॒ भव्यम्᳚।\nउ॒तामृ॑त॒त्वस्येशा॑नः । यदन्ने॑नाति॒रोह॑ति । २"
-  output: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . 2"
+  to: Romanized
+  input: "सुललित नवयौवनारंभचन्द्रोदयोद्वेललावण्यदुग्धार्णवाविर्भवत्\nकम्बुबिम्बोकभृत्कन्थरे सत्कलामन्दिरे मन्थरे"
+  output: "sulalita navayauvanāraṁbhaCandrōdayōdvēlalāvaṇyadugdhārṇavāvirbhavat\nkambubimbōkabhr̥tkantharē satkalāmandirē mantharē"
   reversible: true
 - index: 16
   from: Devanagari
   to: Romanized
-  input: "पुरु॑ष ए॒वेदꣳ सर्वम्᳚ । यद्भू॒तं यच्च॒ भव्यम्᳚।\nउ॒तामृ॑त॒त्वस्येशा॑नः । यदन्ने॑नाति॒रोह॑ति । २"
-  output: "puru↑ṣa ē↓vēdaꣳ sarvam↑↑ . yadbhū↓taṁ yaCCa↓ bhavyam↑↑.\nu↓tāmr̥↑ta↓tvasyēśā↑naḥ . yadannē↑nāti↓rōha↑ti . 2"
+  input: "दिव्यरत्नप्रभाबन्धुरच्छन्नहारादिभूषासमुद्योतमानानवद्याङ्ग-\nशोभे शुभे"
+  output: "divyaratnaprabhābandhuraCChannahārādibhūṣāsamudyōtamānānavadyāṅga-\nśōbhē śubhē"
   reversible: true
 - index: 17
   from: Devanagari
-  to: Normal
-  input: "ए॒तावा॑नस्य महि॒मा । अतो॒ ज्यायाꣳ॑श्च॒ पूरु॑षः ।\nपादो᳚ऽस्य॒ विश्वा॑ भू॒तानि॑ । त्रि॒पाद॑स्या॒मृतं॑ दि॒वि । ३"
-  output: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . 3"
+  to: Romanized
+  input: "रत्नकेयूररश्मिच्छटापल्लवप्रोल्लसद्दोल्लताराजिते योगिभिः\nपूजिते विश्वदिङ्मण्डलव्याप्तमाणिक्यतेजस्स्फुरत्कङ्कणालंकृते\nविभ्रमालंकृते साधुभिः पूजिते वासरारंभवेलासमुज्जृम्भ\nमाणारविन्दप्रतिद्वन्द्विपाणिद्वये सन्ततोद्यद्दये अद्वये\nदिव्यरत्नोर्मिकादीधितिस्तोमसन्ध्यायमानाङ्गुलीपल्लवोद्य\nन्नखेन्दुप्रभामण्डले सन्नुताखण्डले चित्प्रभामण्डले प्रोल्लसत्कुण्डले"
+  output: "ratnakēyūraraśmiCChaṭāpallavaprōllasaddōllatārājitē yōgibhiḥ\npūjitē viśvadiṅmaṇḍalavyāptamāṇikyatējassphuratkaṅkaṇālaṁkr̥tē\nvibhramālaṁkr̥tē sādhubhiḥ pūjitē vāsarāraṁbhavēlāsamujjr̥mbha\nmāṇāravindapratidvandvipāṇidvayē santatōdyaddayē advayē\ndivyaratnōrmikādīdhitistōmasandhyāyamānāṅgulīpallavōdya\nnnakhēnduprabhāmaṇḍalē sannutākhaṇḍalē Citprabhāmaṇḍalē prōllasatkuṇḍalē"
   reversible: true
 - index: 18
   from: Devanagari
   to: Romanized
-  input: "ए॒तावा॑नस्य महि॒मा । अतो॒ ज्यायाꣳ॑श्च॒ पूरु॑षः ।\nपादो᳚ऽस्य॒ विश्वा॑ भू॒तानि॑ । त्रि॒पाद॑स्या॒मृतं॑ दि॒वि । ३"
-  output: "ē↓tāvā↑nasya mahi↓mā . atō↓ jyāyāꣳ↑śCa↓ pūru↑ṣaḥ .\npādō↑↑''sya↓ viśvā↑ bhū↓tāni↑ . tri↓pāda↑syā↓mr̥taṁ↑ di↓vi . 3"
+  input: "तारकाराजिनीकाशहारावलिस्मेर चारुस्तनाभोगभारानमन्मध्य-\nवल्लीवलिच्छेद वीचीसमुद्यत्समुल्लाससन्दर्शिताकारसौन्दर्यरत्नाकरे\nवल्लकीभृत्करे किङ्करश्रीकरे"
+  output: "tārakārājinīkāśahārāvalismēra Cārustanābhōgabhārānamanmadhya-\nvallīvaliCChēda vīCīsamudyatsamullāsasandarśitākārasaundaryaratnākarē\nvallakībhr̥tkarē kiṅkaraśrīkarē"
   reversible: true
 - index: 19
   from: Devanagari
-  to: Normal
-  input: "त्रि॒पादू॒र्ध्व उदै॒त्पुरु॑षः । पादो᳚ऽस्ये॒हाऽऽभ॑वा॒त्पुनः॑ ।\nततो॒ विश्व॒ङ्व्य॑क्रामत् । सा॒श॒ना॒न॒श॒ने अ॒भि । ४"
-  output: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . 4"
+  to: Romanized
+  input: "हेमकुंभोपमोत्तुङ्ग वक्षोजभारावनम्रे त्रिलोकावनम्रे\nलसद्वृत्तगंभीर नाभीसरस्तीरशैवालशङ्काकरश्यामरोमावलीभूषणे\nमञ्जुसंभाषणे"
+  output: "hēmakuṁbhōpamōttuṅga vakṣōjabhārāvanamrē trilōkāvanamrē\nlasadvr̥ttagaṁbhīra nābhīsarastīraśaivālaśaṅkākaraśyāmarōmāvalībhūṣaṇē\nmañjusaṁbhāṣaṇē"
   reversible: true
 - index: 20
   from: Devanagari
   to: Romanized
-  input: "त्रि॒पादू॒र्ध्व उदै॒त्पुरु॑षः । पादो᳚ऽस्ये॒हाऽऽभ॑वा॒त्पुनः॑ ।\nततो॒ विश्व॒ङ्व्य॑क्रामत् । सा॒श॒ना॒न॒श॒ने अ॒भि । ४"
-  output: "tri↓pādū↓rdhva udai↓tpuru↑ṣaḥ . pādō↑↑''syē↓hā''''bha↑vā↓tpunaḥ↑ .\ntatō↓ viśva↓ṅvya↑krāmat . sā↓śa↓nā↓na↓śa↓nē a↓bhi . 4"
+  input: "चारुशिञ्चत्कटीसूत्रनिर्भत्सितानङ्गलीलधनुश्शिञ्चिनीडंबरे\nदिव्यरत्नाम्बरे"
+  output: "CāruśiñCatkaṭīsūtranirbhatsitānaṅgalīladhanuśśiñCinīḍaṁbarē\ndivyaratnāmbarē"
   reversible: true
 - index: 21
   from: Devanagari
-  to: Normal
-  input: "तस्मा᳚द्वि॒राड॑जायत । वि॒राजो॒ अधि॒ पूरु॑षः ।\nस जा॒तो अत्य॑रिच्यत । प॒श्चाद्भूमि॒मथो॑ पु॒रः । ५"
-  output: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  to: Romanized
+  input: "पद्मरागोल्लस न्मेखलामौक्तिकश्रोणिशोभाजितस्वर्णभूभृत्तले\nचन्द्रिकाशीतले विकसितनवकिंशुकाताम्रदिव्यांशुकच्छन्न\nचारूरुशोभापराभूतसिन्दूरशोणायमानेन्द्रमातङ्ग\nहस्मार्ग्गले वैभवानर्ग्गले श्यामले कोमलस्निग्द्ध\nनीलोत्पलोत्पादितानङ्गतूणीरशङ्काकरोदार\nजंघालते चारुलीलागते नम्रदिक्पालसीमन्तिनी\nकुन्तलस्निग्द्धनीलप्रभापुञ्चसञ्जातदुर्वाङ्कुराशङ्क\nसारंगसंयोगरिंखन्नखेन्दूज्ज्वले प्रोज्ज्वले\nनिर्मले प्रह्व देवेश लक्ष्मीश भूतेश तोयेश वाणीश कीनाश\nदैत्येश यक्षेश वाय्वग्निकोटीरमाणिक्य संहृष्टबालातपोद्दाम--\nलाक्षारसारुण्यतारुण्य लक्ष्मीगृहिताङ्घ्रिपद्म्मे सुपद्मे उमे"
+  output: "padmarāgōllasa nmēkhalāmauktikaśrōṇiśōbhājitasvarṇabhūbhr̥ttalē\nCandrikāśītalē vikasitanavakiṁśukātāmradivyāṁśukaCChanna\nCārūruśōbhāparābhūtasindūraśōṇāyamānēndramātaṅga\nhasmārggalē vaibhavānarggalē śyāmalē kōmalasnigddha\nnīlōtpalōtpāditānaṅgatūṇīraśaṅkākarōdāra\njaṁghālatē Cārulīlāgatē namradikpālasīmantinī\nkuntalasnigddhanīlaprabhāpuñCasañjātadurvāṅkurāśaṅka\nsāraṁgasaṁyōgariṁkhannakhēndūjjvalē prōjjvalē\nnirmalē prahva dēvēśa lakṣmīśa bhūtēśa tōyēśa vāṇīśa kīnāśa\ndaityēśa yakṣēśa vāyvagnikōṭīramāṇikya saṁhr̥ṣṭabālātapōddāma--\nlākṣārasāruṇyatāruṇya lakṣmīgr̥hitāṅghripadmmē supadmē umē"
   reversible: true
 - index: 22
   from: Devanagari
   to: Romanized
-  input: "तस्मा᳚द्वि॒राड॑जायत । वि॒राजो॒ अधि॒ पूरु॑षः ।\nस जा॒तो अत्य॑रिच्यत । प॒श्चाद्भूमि॒मथो॑ पु॒रः । ५"
-  output: "tasmā↑↑dvi↓rāḍa↑jāyata . vi↓rājō↓ adhi↓ pūru↑ṣaḥ .\nsa jā↓tō atya↑riCyata . pa↓śCādbhūmi↓mathō↑ pu↓raḥ . 5"
+  input: "सुरुचिरनवरत्नपीठस्थिते सुस्थिते\nरत्नपद्मासने रत्नसिम्हासने शङ्खपद्मद्वयोपाश्रिते विश्रुते\nतत्र विघ्नेशदुर्गावटुक्षेत्रपालैर्युते मत्तमातङ्ग\nकन्यासमूहान्विते भैरवैरष्टभिर्वेष्टिते\nमञ्चुलामेनकाद्यङ्गनामानिते देवि वामादिभिः शक्तिभिस्सेविते\nधात्रि लक्ष्म्यादिशक्त्यष्टकैः संयुते मातृकामण्डलैर्मण्डिते\nयक्षगन्धर्वसिद्धाङ्गना मण्डलैरर्चिते"
+  output: "suruCiranavaratnapīṭhasthitē susthitē\nratnapadmāsanē ratnasimhāsanē śaṅkhapadmadvayōpāśritē viśrutē\ntatra vighnēśadurgāvaṭukṣētrapālairyutē mattamātaṅga\nkanyāsamūhānvitē bhairavairaṣṭabhirvēṣṭitē\nmañCulāmēnakādyaṅganāmānitē dēvi vāmādibhiḥ śaktibhissēvitē\ndhātri lakṣmyādiśaktyaṣṭakaiḥ saṁyutē mātr̥kāmaṇḍalairmaṇḍitē\nyakṣagandharvasiddhāṅganā maṇḍalairarCitē"
   reversible: true
 - index: 23
   from: Devanagari
-  to: Normal
-  input: "यत्पुरु॑षेण ह॒विषा᳚ । दे॒वा य॒ज्ञमत॑न्वत ।\nव॒स॒न्तो अ॑स्यासी॒दाज्यम्᳚ । ग्री॒ष्म इ॒ध्मः श॒रद्ध॒विः । ६"
-  output: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  to: Romanized
+  input: "भैरवी संवृते पञ्चबाणात्मिके पञ्चबाणेन रत्या च\nसंभाविते प्रीतिभाजा वसन्तेन चानन्दिते भक्तिभाजं परं श्रेयसे\nकल्पसे योगिनां मानसे द्योतसे छन्दसामोजसा भ्राजसे गीतविद्या\nविनोदाति तृष्णेन कृष्णेन सम्पूज्यसे भक्तिमच्चेतसा वेधसा\nस्तूयसे विश्वहृद्येन वाद्येन विद्याधरैर्गीयसे"
+  output: "bhairavī saṁvr̥tē pañCabāṇātmikē pañCabāṇēna ratyā Ca\nsaṁbhāvitē prītibhājā vasantēna Cānanditē bhaktibhājaṁ paraṁ śrēyasē\nkalpasē yōgināṁ mānasē dyōtasē Chandasāmōjasā bhrājasē gītavidyā\nvinōdāti tr̥ṣṇēna kr̥ṣṇēna sampūjyasē bhaktimaCCētasā vēdhasā\nstūyasē viśvahr̥dyēna vādyēna vidyādharairgīyasē"
   reversible: true
 - index: 24
   from: Devanagari
   to: Romanized
-  input: "यत्पुरु॑षेण ह॒विषा᳚ । दे॒वा य॒ज्ञमत॑न्वत ।\nव॒स॒न्तो अ॑स्यासी॒दाज्यम्᳚ । ग्री॒ष्म इ॒ध्मः श॒रद्ध॒विः । ६"
-  output: "yatpuru↑ṣēṇa ha↓viṣā↑↑ . dē↓vā ya↓jñamata↑nvata .\nva↓sa↓ntō a↑syāsī↓dājyam↑↑ . grī↓ṣma i↓dhmaḥ śa↓raddha↓viḥ . 6"
+  input: "श्रवणहरदक्षिणक्वाणया वीणया किन्नरैर्गीयसे\nयक्षगन्धर्वसिद्धाङ्गना मण्डलैरर्च्यसे"
+  output: "śravaṇaharadakṣiṇakvāṇayā vīṇayā kinnarairgīyasē\nyakṣagandharvasiddhāṅganā maṇḍalairarCyasē"
   reversible: true
 - index: 25
   from: Devanagari
-  to: Normal
-  input: "स॒प्तास्या॑सन्परि॒धयः॑ । त्रिः स॒प्त स॒मिधः॑ कृ॒ताः ।\nदे॒वा यद्य॒ज्ञं त॑न्वा॒नाः । अब॑ध्न॒न्पु॑रुषं प॒शुम् । ७"
-  output: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  to: Romanized
+  input: "सर्वसौभाग्यवाञ्छावतीभिर् वधूभिस्सुराणां समाराध्यसे\nसर्वविद्याविशेषत्मकं चाटुगाथा समुच्चारणाकण्ठमूलोल्लसद्-\nवर्णराजित्रयं कोमलश्यामलोदारपक्षद्वयं तुण्डशोभातिदूरीभवत्\nकिंशुकं तं शुकं लालयन्ती परिक्रीडसे"
+  output: "sarvasaubhāgyavāñChāvatībhir vadhūbhissurāṇāṁ samārādhyasē\nsarvavidyāviśēṣatmakaṁ Cāṭugāthā samuCCāraṇākaṇṭhamūlōllasad-\nvarṇarājitrayaṁ kōmalaśyāmalōdārapakṣadvayaṁ tuṇḍaśōbhātidūrībhavat\nkiṁśukaṁ taṁ śukaṁ lālayantī parikrīḍasē"
   reversible: true
 - index: 26
   from: Devanagari
   to: Romanized
-  input: "स॒प्तास्या॑सन्परि॒धयः॑ । त्रिः स॒प्त स॒मिधः॑ कृ॒ताः ।\nदे॒वा यद्य॒ज्ञं त॑न्वा॒नाः । अब॑ध्न॒न्पु॑रुषं प॒शुम् । ७"
-  output: "sa↓ptāsyā↑sanpari↓dhayaḥ↑ . triḥ sa↓pta sa↓midhaḥ↑ kr̥↓tāḥ .\ndē↓vā yadya↓jñaṁ ta↑nvā↓nāḥ . aba↑dhna↓npu↑ruṣaṁ pa↓śum . 7"
+  input: "पाणिपद्मद्वयेनाक्षमालामपि स्फाटिकीं ज्ञानसारात्मकं\nपुस्तकञ्चाङ्कुशं पाशमाबिभ्रती तेन सञ्चिन्त्यसे तस्य\nवक्त्रान्तराद् गद्यपद्यात्मिका भारती निस्सरेत् येन वाध्वंसनादा\nकृतिर्भाव्यसे तस्य वश्या भवन्तिस्तियः पूरुषाः येन वा\nशातकंबद्युतिर्भाव्यसे सोऽपि लक्ष्मीसहस्रैः परिक्रीडते"
+  output: "pāṇipadmadvayēnākṣamālāmapi sphāṭikīṁ jñānasārātmakaṁ\npustakañCāṅkuśaṁ pāśamābibhratī tēna sañCintyasē tasya\nvaktrāntarād gadyapadyātmikā bhāratī nissarēt yēna vādhvaṁsanādā\nkr̥tirbhāvyasē tasya vaśyā bhavantistiyaḥ pūruṣāḥ yēna vā\nśātakaṁbadyutirbhāvyasē sō''pi lakṣmīsahasraiḥ parikrīḍatē"
   reversible: true
 - index: 27
   from: Devanagari
-  to: Normal
-  input: "तं य॒ज्ञं ब॒र्हिषि॒ प्रौक्षन्॑ । पुरु॑षं जा॒तम॑ग्र॒तः ।\nतेन॑ दे॒वा अय॑जन्त । सा॒ध्या ऋष॑यश्च॒ ये । ८"
-  output: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  to: Romanized
+  input: "किन्न सिद्ध्येद्वपुः श्यामलं कोमलं चन्द्रचूडान्वितं\nतावकं ध्यायतः तस्य लीला सरोवारिधीः तस्य केलीवनं\nनन्दनं तस्य भद्रासनं भूतलं तस्य गीर्देवता किङ्करि\nतस्य चाज्ञाकरी श्री स्वयं"
+  output: "kinna siddhyēdvapuḥ śyāmalaṁ kōmalaṁ CandraCūḍānvitaṁ\ntāvakaṁ dhyāyataḥ tasya līlā sarōvāridhīḥ tasya kēlīvanaṁ\nnandanaṁ tasya bhadrāsanaṁ bhūtalaṁ tasya gīrdēvatā kiṅkari\ntasya Cājñākarī śrī svayaṁ"
   reversible: true
 - index: 28
   from: Devanagari
   to: Romanized
-  input: "तं य॒ज्ञं ब॒र्हिषि॒ प्रौक्षन्॑ । पुरु॑षं जा॒तम॑ग्र॒तः ।\nतेन॑ दे॒वा अय॑जन्त । सा॒ध्या ऋष॑यश्च॒ ये । ८"
-  output: "taṁ ya↓jñaṁ ba↓rhiṣi↓ praukṣan↑ . puru↑ṣaṁ jā↓tama↑gra↓taḥ .\ntēna↑ dē↓vā aya↑janta . sā↓dhyā r̥ṣa↑yaśCa↓ yē . 8"
+  input: "सर्वतीर्थात्मिके सर्व मन्त्रात्मिके\nसर्व यन्त्रात्मिके सर्व तन्त्रात्मिके\nसर्व चक्रात्मिके सर्व शक्त्यात्मिके\nसर्व पीठात्मिके सर्व वेदात्मिके\nसर्व विद्यात्मिके सर्व योगात्मिके\nसर्व वर्णात्मिके सर्वगीतात्मिके\nसर्व नादात्मिके सर्व शब्दात्मिके\nसर्व विश्वात्मिके सर्व वर्गात्मिके\nसर्व सर्वात्मिके सर्वगे सर्व रूपे\nजगन्मातृके पाहि मां पाहि मां पाहि मां\nदेवि तुभ्यं नमो देवि तुभ्यं नमो देवि तुभ्यं नमो\nदेवि तुभ्यं नमः"
+  output: "sarvatīrthātmikē sarva mantrātmikē\nsarva yantrātmikē sarva tantrātmikē\nsarva Cakrātmikē sarva śaktyātmikē\nsarva pīṭhātmikē sarva vēdātmikē\nsarva vidyātmikē sarva yōgātmikē\nsarva varṇātmikē sarvagītātmikē\nsarva nādātmikē sarva śabdātmikē\nsarva viśvātmikē sarva vargātmikē\nsarva sarvātmikē sarvagē sarva rūpē\njaganmātr̥kē pāhi māṁ pāhi māṁ pāhi māṁ\ndēvi tubhyaṁ namō dēvi tubhyaṁ namō dēvi tubhyaṁ namō\ndēvi tubhyaṁ namaḥ"
   reversible: true
 - index: 29
   from: Devanagari
-  to: Normal
-  input: "तस्मा᳚द्य॒ज्ञात्स॑र्व॒हुतः॑ । संभृ॑तं पृषदा॒ज्यम् ।\nप॒शूꣳस्ताꣳश्च॑क्रे वाय॒व्यान्॑ । आ॒र॒ण्यान्ग्रा॒म्याश्च॒ ये । ९"
-  output: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  to: Romanized
+  input: ॥ इति श्यामला दण्डकं सम्पूर्णम् ॥
+  output: .. iti śyāmalā daṇḍakaṁ sampūrṇam ..
   reversible: true
 - index: 30
   from: Devanagari
   to: Romanized
-  input: "तस्मा᳚द्य॒ज्ञात्स॑र्व॒हुतः॑ । संभृ॑तं पृषदा॒ज्यम् ।\nप॒शूꣳस्ताꣳश्च॑क्रे वाय॒व्यान्॑ । आ॒र॒ण्यान्ग्रा॒म्याश्च॒ ये । ९"
-  output: "tasmā↑↑dya↓jñātsa↑rva↓hutaḥ↑ . saṁbhr̥↑taṁ pr̥ṣadā↓jyam .\npa↓śūꣳstāꣳśCa↑krē vāya↓vyān↑ . ā↓ra↓ṇyāngrā↓myāśCa↓ yē . 9"
+  input: "श्रीमते निगमान्तमहादेशिकाय नमः ।\nश्रीमान् वेङ्कटनाथार्यः कवितार्किककेसरी ।\nवेदान्तचार्यवर्यो मे सन्निधत्ताम् सदाहृदि ॥"
+  output: "śrīmatē nigamāntamahādēśikāya namaḥ .\nśrīmān vēṅkaṭanāthāryaḥ kavitārkikakēsarī .\nvēdāntaCāryavaryō mē sannidhattām sadāhr̥di .."
   reversible: true
 - index: 31
   from: Devanagari
-  to: Normal
-  input: "तस्मा᳚द्य॒ज्ञात्स॑र्व॒हुतः॑ । ऋचः॒ सामा॑नि जज्ञिरे ।\nछन्दाꣳ॑सि जज्ञिरे॒ तस्मा᳚त् । यजु॒स्तस्मा॑दजायत । १०"
-  output: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  to: Romanized
+  input: "नमः पन्नगनद्धाय वैकुण्ठवशवर्तिने ।\nश्रुतिसिन्धु सुधोत्पादमन्दराय गरुत्मते ॥ १॥"
+  output: "namaḥ pannaganaddhāya vaikuṇṭhavaśavartinē .\nśrutisindhu sudhōtpādamandarāya garutmatē .. 1.."
   reversible: true
 - index: 32
   from: Devanagari
   to: Romanized
-  input: "तस्मा᳚द्य॒ज्ञात्स॑र्व॒हुतः॑ । ऋचः॒ सामा॑नि जज्ञिरे ।\nछन्दाꣳ॑सि जज्ञिरे॒ तस्मा᳚त् । यजु॒स्तस्मा॑दजायत । १०"
-  output: "tasmā↑↑dya↓jñātsa↑rva↓hutaḥ↑ . r̥Caḥ↓ sāmā↑ni jajñirē .\nChandāꣳ↑si jajñirē↓ tasmā↑↑t . yaju↓stasmā↑dajāyata . 10"
+  input: "गरुडमखिलवेदनीडाधिरूढम् द्विषत्पीडनोत्कण्ठिताकुण्ठवैकुण्ठपीठीकृत\nस्कन्धमीडे स्वनीडागतिप्रीतरुद्रासुकीर्तिस्तनाभोगगाढोपगूढ\nस्फुरत्कण्टकव्रात वेधव्यथावेपमान द्विजिह्वाधिपाकल्पविष्फार्यमाण\nस्फटावाटिका रत्नरोचिश्छटा राजिनीराजितं कान्तिकल्लोलिनीराजितम् ॥ २॥"
+  output: "garuḍamakhilavēdanīḍādhirūḍham dviṣatpīḍanōtkaṇṭhitākuṇṭhavaikuṇṭhapīṭhīkr̥ta\nskandhamīḍē svanīḍāgatiprītarudrāsukīrtistanābhōgagāḍhōpagūḍha\nsphuratkaṇṭakavrāta vēdhavyathāvēpamāna dvijihvādhipākalpaviṣphāryamāṇa\nsphaṭāvāṭikā ratnarōCiśChaṭā rājinīrājitaṁ kāntikallōlinīrājitam .. 2.."
   reversible: true
 - index: 33
   from: Devanagari
-  to: Normal
-  input: "तस्मा॒दश्वा॑ अजायन्त । ये के चो॑भ॒याद॑तः ।\nगावो॑ ह जज्ञिरे॒ तस्मा᳚त् । तस्मा᳚ज्जा॒ता अ॑जा॒वयः॑ । ११"
-  output: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  to: Romanized
+  input: "जयगरुड सुपर्ण दर्वीकराहार देवाधिपाहारहारिन्\nदिवौकस्पतिक्षिप्तदम्भोळिधाराकिणाकल्प कल्पान्तवातूल कल्पोदयानल्प\nवीरायितोद्यच्चमत्कार दैत्यारि जैत्रध्वजारोहनिर्धारितोत्कर्ष\nसङ्कर्षणात्मन् गरुत्मन् मरुत्पञ्च काधीश सत्यादिमूर्ते न कश्चित्\nसमस्ते नमस्ते पुनस्ते नमः ॥ ३॥"
+  output: "jayagaruḍa suparṇa darvīkarāhāra dēvādhipāhārahārin\ndivaukaspatikṣiptadambhōḷidhārākiṇākalpa kalpāntavātūla kalpōdayānalpa\nvīrāyitōdyaCCamatkāra daityāri jaitradhvajārōhanirdhāritōtkarṣa\nsaṅkarṣaṇātman garutman marutpañCa kādhīśa satyādimūrtē na kaśCit\nsamastē namastē punastē namaḥ .. 3.."
   reversible: true
 - index: 34
   from: Devanagari
   to: Romanized
-  input: "तस्मा॒दश्वा॑ अजायन्त । ये के चो॑भ॒याद॑तः ।\nगावो॑ ह जज्ञिरे॒ तस्मा᳚त् । तस्मा᳚ज्जा॒ता अ॑जा॒वयः॑ । ११"
-  output: "tasmā↓daśvā↑ ajāyanta . yē kē Cō↑bha↓yāda↑taḥ .\ngāvō↑ ha jajñirē↓ tasmā↑↑t . tasmā↑↑jjā↓tā a↑jā↓vayaḥ↑ . 11"
+  input: "नम इदमजहत्सपर्याय पर्यायनिर्यातपक्षानिलास्फालनोद्वेलपाथोधि\nवीचीचपेटाहतागाधपाताळभाङ्कारसंक्रुद्धनागेन्द्रपीडासृणीभाव-\nभास्वन्नखश्रेणये चण्डतुण्डाय नृत्यद्भुजङ्गभ्रुवे वज्रिणे दंष्ट्रय\nतुभ्यमध्यात्मविद्या विधेया विधेया भवद्दास्यमापादयेथा दयेथाश्च मे ॥ ४॥"
+  output: "nama idamajahatsaparyāya paryāyaniryātapakṣānilāsphālanōdvēlapāthōdhi\nvīCīCapēṭāhatāgādhapātāḷabhāṅkārasaṁkruddhanāgēndrapīḍāsr̥ṇībhāva-\nbhāsvannakhaśrēṇayē Caṇḍatuṇḍāya nr̥tyadbhujaṅgabhruvē vajriṇē daṁṣṭraya\ntubhyamadhyātmavidyā vidhēyā vidhēyā bhavaddāsyamāpādayēthā dayēthāśCa mē .. 4.."
   reversible: true
 - index: 35
   from: Devanagari
-  to: Normal
-  input: "यत्पुरु॑षं॒ व्य॑दधुः । क॒ति॒धा व्य॑कल्पयन् ।\nमुखं॒ किम॑स्य॒ कौ बा॒हू । कावू॒रू पादा॑वुच्येते । १२"
-  output: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  to: Romanized
+  input: "मनुरनुगत पक्षिवक्त्र स्फुरत्तारकस्तावकश्चित्रभानुप्रियाशेखरस्त्रायतां\nनस्त्रिवर्गापवर्गप्रसूतिः परव्योमधामन्\nवलद्वेषिदर्पज्वलद्वालखिल्यप्रतिज्ञावतीर्ण स्थिरां तत्त्वबुद्धिं परां\nभक्तिधेनुं जगन्मूलकन्दे मुकुन्दे म्हानन्ददोग्ध्रीं दधीथा\nमुधाकामहीनामहीनामहीनान्तक ॥ ५॥"
+  output: "manuranugata pakṣivaktra sphurattārakastāvakaśCitrabhānupriyāśēkharastrāyatāṁ\nnastrivargāpavargaprasūtiḥ paravyōmadhāman\nvaladvēṣidarpajvaladvālakhilyapratijñāvatīrṇa sthirāṁ tattvabuddhiṁ parāṁ\nbhaktidhēnuṁ jaganmūlakandē mukundē mhānandadōgdhrīṁ dadhīthā\nmudhākāmahīnāmahīnāmahīnāntaka .. 5.."
   reversible: true
 - index: 36
   from: Devanagari
   to: Romanized
-  input: "यत्पुरु॑षं॒ व्य॑दधुः । क॒ति॒धा व्य॑कल्पयन् ।\nमुखं॒ किम॑स्य॒ कौ बा॒हू । कावू॒रू पादा॑वुच्येते । १२"
-  output: "yatpuru↑ṣaṁ↓ vya↑dadhuḥ . ka↓ti↓dhā vya↑kalpayan .\nmukhaṁ↓ kima↑sya↓ kau bā↓hū . kāvū↓rū pādā↑vuCyētē . 12"
+  input: "षट्त्रिंशद्गणचरणो नरपरिपाटीनवीनगुम्भगणः ।\nविष्णुरथदण्डकोऽयं विघटयतु विपक्षवाहिनीव्यूहम् ॥ ६॥"
+  output: "ṣaṭtriṁśadgaṇaCaraṇō naraparipāṭīnavīnagumbhagaṇaḥ .\nviṣṇurathadaṇḍakō''yaṁ vighaṭayatu vipakṣavāhinīvyūham .. 6.."
   reversible: true
 - index: 37
   from: Devanagari
-  to: Normal
-  input: "ब्रा॒ह्म॒णो᳚ऽस्य॒ मुख॑मासीत् । बा॒हू रा॑ज॒न्यः॑ कृ॒तः ।\nऊ॒रू तद॑स्य॒ यद्वैश्यः॑ । प॒द्भ्याꣳ शू॒द्रो अ॑जायत । १३"
-  output: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . 13"
+  to: Romanized
+  input: "विचित्रसिद्धिदः सोऽयं वेङ्कटेशविपश्चिता ।\nगरुडध्वजतोषाय गीतो गरुडदण्डकः ॥ ७॥"
+  output: "viCitrasiddhidaḥ sō''yaṁ vēṅkaṭēśavipaśCitā .\ngaruḍadhvajatōṣāya gītō garuḍadaṇḍakaḥ .. 7.."
   reversible: true
 - index: 38
   from: Devanagari
   to: Romanized
-  input: "ब्रा॒ह्म॒णो᳚ऽस्य॒ मुख॑मासीत् । बा॒हू रा॑ज॒न्यः॑ कृ॒तः ।\nऊ॒रू तद॑स्य॒ यद्वैश्यः॑ । प॒द्भ्याꣳ शू॒द्रो अ॑जायत । १३"
-  output: "brā↓hma↓ṇō↑↑''sya↓ mukha↑māsīt . bā↓hū rā↑ja↓nyaḥ↑ kr̥↓taḥ .\nū↓rū tada↑sya↓ yadvaiśyaḥ↑ . pa↓dbhyāꣳ śū↓drō a↑jāyata . 13"
+  input: "कवितार्किकसिंहाय कल्यणगुणशालिने ।\nश्रीमते वेङ्कटेशाय वेदान्तगुरवे नमः ॥"
+  output: "kavitārkikasiṁhāya kalyaṇaguṇaśālinē .\nśrīmatē vēṅkaṭēśāya vēdāntaguravē namaḥ .."
   reversible: true
 - index: 39
   from: Devanagari
-  to: Normal
-  input: "च॒न्द्रमा॒ मन॑सो जा॒तः । चक्षोः॒ सूर्यो॑ अजायत ।\nमुखा॒दिन्द्र॑श्चा॒ग्निश्च॑ ।  प्रा॒णाद्वा॒युर॑जायत । १४"
-  output: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  to: Romanized
+  input: श्रीमते निगमान्तमहादेशिकाय नमः ॥
+  output: śrīmatē nigamāntamahādēśikāya namaḥ ..
   reversible: true
 - index: 40
   from: Devanagari
   to: Romanized
-  input: "च॒न्द्रमा॒ मन॑सो जा॒तः । चक्षोः॒ सूर्यो॑ अजायत ।\nमुखा॒दिन्द्र॑श्चा॒ग्निश्च॑ ।  प्रा॒णाद्वा॒युर॑जायत । १४"
-  output: "Ca↓ndramā↓ mana↑sō jā↓taḥ . Cakṣōḥ↓ sūryō↑ ajāyata .\nmukhā↓dindra↑śCā↓gniśCa↑ .  prā↓ṇādvā↓yura↑jāyata . 14"
+  input: इति श्रीवेदान्तदेशिकविरचितः गरुडदण्डकः सम्पूर्णः ।
+  output: iti śrīvēdāntadēśikaviraCitaḥ garuḍadaṇḍakaḥ sampūrṇaḥ .
   reversible: true
