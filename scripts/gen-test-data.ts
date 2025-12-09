@@ -136,8 +136,8 @@ const sanskrit_other_brahmic_scripts = async () => {
   const out_test_data: TestData[] = [];
 
   let index = 0;
-  for (const _input of COMBINED_INPUTS) {
-    for (const other_script of OTHER_BRAHMI_SCRIPTS) {
+  for (const other_script of OTHER_BRAHMI_SCRIPTS) {
+    for (const _input of COMBINED_INPUTS) {
       let input = _input;
       if (
         other_script === "Modi" ||
@@ -180,8 +180,8 @@ const sanskrit_non_brahmic_scripts = async () => {
   const out_test_data1: TestData[] = [];
   let index = 0;
   let index1 = 0;
-  for (const input of COMBINED_INPUTS) {
-    for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
+  for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
+    for (const input of COMBINED_INPUTS) {
       let output = await old_lipi_parivartak(
         input,
         FROM_SCRIPT,
