@@ -132,9 +132,9 @@ const sanskrit_other_brahmic_scripts = async () => {
   const out_test_data: TestData[] = [];
 
   let index = 0;
-  for (const _input of COMBINED_INPUTS) {
-    for (const other_script of OTHER_BRAHMI_SCRIPTS) {
-      const SCRIPT_IGNORE_RULE = NON_REVERSIBLE_SCRIPT_IGNORE_MAP[other_script];
+  for (const other_script of OTHER_BRAHMI_SCRIPTS) {
+    const SCRIPT_IGNORE_RULE = NON_REVERSIBLE_SCRIPT_IGNORE_MAP[other_script];
+    for (const _input of COMBINED_INPUTS) {
       let input = _input;
       if (
         other_script === "Modi" ||
@@ -164,15 +164,19 @@ const sanskrit_other_brahmic_scripts = async () => {
           other_script,
           FROM_SCRIPT
         );
-        if (input1 !== input) {
-          // out_test_data.push({
-          //   index: index++,
-          //   from: other_script,
-          //   to: FROM_SCRIPT,
-          //   input: output,
-          //   output: input1,
-          //   reversible: false,
-          // });
+        if (
+          input1 !== input &&
+          !(other_script === "Gurumukhi" && output.includes("ਰੀ"))
+          // ^ Edge case due to improper handling of this case in old lipi lekhika
+        ) {
+          out_test_data.push({
+            index: index++,
+            from: other_script,
+            to: FROM_SCRIPT,
+            input: output,
+            output: input1,
+            reversible: true,
+          });
         }
       }
     }
