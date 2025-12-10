@@ -3,7 +3,7 @@
   to: Normal
   input: "সর্বতীর্থাত্মিকে সর্ব মন্ত্রাত্মিকে\nসর্ব যন্ত্রাত্মিকে সর্ব তন্ত্রাত্মিকে\nসর্ব চক্রাত্মিকে সর্ব শক্ত্যাত্মিকে\nসর্ব পীঠাত্মিকে সর্ব বেদাত্মিকে\nসর্ব বিদ্যাত্মিকে সর্ব যোগাত্মিকে\nসর্ব বর্ণাত্মিকে সর্বগীতাত্মিকে\nসর্ব নাদাত্মিকে সর্ব শব্দাত্মিকে\nসর্ব বিশ্বাত্মিকে সর্ব বর্গাত্মিকে\nসর্ব সর্বাত্মিকে সর্বগে সর্ব রূপে\nজগন্মাতৃকে পাহি মাং পাহি মাং পাহি মাং\nদেবি তুভ্যং নমো দেবি তুভ্যং নমো দেবি তুভ্যং নমো\nদেবি তুভ্যং নমঃ"
   output: "sarbatIrthAtmikE sarba mantrAtmikE\nsarba yantrAtmikE sarba tantrAtmikE\nsarba CakrAtmikE sarba shaktyAtmikE\nsarba pIThAtmikE sarba bEdAtmikE\nsarba bidyAtmikE sarba yOgAtmikE\nsarba barNAtmikE sarbagItAtmikE\nsarba nAdAtmikE sarba shabdAtmikE\nsarba bishbAtmikE sarba bargAtmikE\nsarba sarbAtmikE sarbagE sarba rUpE\njaganmAtRkE pAhi mAM pAhi mAM pAhi mAM\ndEbi tubhyaM namO dEbi tubhyaM namO dEbi tubhyaM namO\ndEbi tubhyaM namaH"
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Bengali
@@ -27,7 +27,7 @@
   to: Normal
   input: "শ্রীমতে নিগমান্তমহাদেশিকায নমঃ ।\nশ্রীমান্ বেঙ্কটনাথার্যঃ কবিতার্কিককেসরী ।\nবেদান্তচার্যবর্যো মে সন্নিধত্তাম্ সদাহৃদি ॥"
   output: "shrImatE nigamAntamahAdEshikAya namaH .\nshrImAn bEGkaTanAthAryaH kabitArkikakEsarI .\nbEdAntaCAryabaryO mE sannidhattAm sadAhRdi .."
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Bengali
@@ -45,7 +45,7 @@
   to: Normal
   input: "নমঃ পন্নগনদ্ধায বৈকুণ্ঠবশবর্তিনে ।\nশ্রুতিসিন্ধু সুধোত্পাদমন্দরায গরুত্মতে ॥ ১॥"
   output: "namaH pannaganaddhAya baikuNThabashabartinE .\nshrutisindhu sudhOtpAdamandarAya garutmatE .. 1.."
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Bengali
@@ -63,7 +63,7 @@
   to: Normal
   input: "গরুডমখিলবেদনীডাধিরূঢম্ দ্বিষত্পীডনোত্কণ্ঠিতাকুণ্ঠবৈকুণ্ঠপীঠীকৃত\nস্কন্ধমীডে স্বনীডাগতিপ্রীতরুদ্রাসুকীর্তিস্তনাভোগগাঢোপগূঢ\nস্ফুরত্কণ্টকব্রাত বেধব্যথাবেপমান দ্বিজিহ্বাধিপাকল্পবিষ্ফার্যমাণ\nস্ফটাবাটিকা রত্নরোচিশ্ছটা রাজিনীরাজিতং কান্তিকল্লোলিনীরাজিতম্ ॥ ২॥"
   output: "garuDamakhilabEdanIDAdhirUDham dbiShatpIDanOtkaNThitAkuNThabaikuNThapIThIkRta\nskandhamIDE sbanIDAgatiprItarudrAsukIrtistanAbhOgagADhOpagUDha\nsphuratkaNTakabrAta bEdhabyathAbEpamAna dbijihbAdhipAkalpabiShphAryamANa\nsphaTAbATikA ratnarOCishChaTA rAjinIrAjitaM kAntikallOlinIrAjitam .. 2.."
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Bengali
@@ -81,7 +81,7 @@
   to: Normal
   input: "জযগরুড সুপর্ণ দর্বীকরাহার দেবাধিপাহারহারিন্\nদিবৌকস্পতিক্ষিপ্তদম্ভোল়িধারাকিণাকল্প কল্পান্তবাতূল কল্পোদযানল্প\nবীরাযিতোদ্যচ্চমত্কার দৈত্যারি জৈত্রধ্বজারোহনির্ধারিতোত্কর্ষ\nসঙ্কর্ষণাত্মন্ গরুত্মন্ মরুত্পঞ্চ কাধীশ সত্যাদিমূর্তে ন কশ্চিত্\nসমস্তে নমস্তে পুনস্তে নমঃ ॥ ৩॥"
   output: "jayagaruDa suparNa darbIkarAhAra dEbAdhipAhArahArin\ndibaukaspatikShiptadambhOLidhArAkiNAkalpa kalpAntabAtUla kalpOdayAnalpa\nbIrAyitOdyaCCamatkAra daityAri jaitradhbajArOhanirdhAritOtkarSha\nsaGkarShaNAtman garutman marutpaJCa kAdhIsha satyAdimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
-  reversible: false
+  reversible: true
 - index: 14
   from: Devanagari
   to: Bengali
@@ -99,7 +99,7 @@
   to: Normal
   input: "নম ইদমজহত্সপর্যায পর্যাযনির্যাতপক্ষানিলাস্ফালনোদ্বেলপাথোধি\nবীচীচপেটাহতাগাধপাতাল়ভাঙ্কারসংক্রুদ্ধনাগেন্দ্রপীডাসৃণীভাব-\nভাস্বন্নখশ্রেণযে চণ্ডতুণ্ডায নৃত্যদ্ভুজঙ্গভ্রুবে বজ্রিণে দংষ্ট্রয\nতুভ্যমধ্যাত্মবিদ্যা বিধেযা বিধেযা ভবদ্দাস্যমাপাদযেথা দযেথাশ্চ মে ॥ ৪॥"
   output: "nama idamajahatsaparyAya paryAyaniryAtapakShAnilAsphAlanOdbElapAthOdhi\nbICICapETAhatAgAdhapAtALabhAGkArasaMkruddhanAgEndrapIDAsRNIbhAba-\nbhAsbannakhashrENayE CaNDatuNDAya nRtyadbhujaGgabhrubE bajriNE daMShTraya\ntubhyamadhyAtmabidyA bidhEyA bidhEyA bhabaddAsyamApAdayEthA dayEthAshCa mE .. 4.."
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Bengali
@@ -117,7 +117,7 @@
   to: Normal
   input: "মনুরনুগত পক্ষিবক্ত্র স্ফুরত্তারকস্তাবকশ্চিত্রভানুপ্রিযাশেখরস্ত্রাযতাং\nনস্ত্রিবর্গাপবর্গপ্রসূতিঃ পরব্যোমধামন্\nবলদ্বেষিদর্পজ্বলদ্বালখিল্যপ্রতিজ্ঞাবতীর্ণ স্থিরাং তত্ত্ববুদ্ধিং পরাং\nভক্তিধেনুং জগন্মূলকন্দে মুকুন্দে ম্হানন্দদোগ্ধ্রীং দধীথা\nমুধাকামহীনামহীনামহীনান্তক ॥ ৫॥"
   output: "manuranugata pakShibaktra sphurattArakastAbakashCitrabhAnupriyAshEkharastrAyatAM\nnastribargApabargaprasUtiH parabyOmadhAman\nbaladbEShidarpajbaladbAlakhilyapratijJAbatIrNa sthirAM tattbabuddhiM parAM\nbhaktidhEnuM jaganmUlakandE mukundE mhAnandadOgdhrIM dadhIthA\nmudhAkAmahInAmahInAmahInAntaka .. 5.."
-  reversible: false
+  reversible: true
 - index: 20
   from: Devanagari
   to: Bengali
@@ -135,7 +135,7 @@
   to: Normal
   input: "ষট্ত্রিংশদ্গণচরণো নরপরিপাটীনবীনগুম্ভগণঃ ।\nবিষ্ণুরথদণ্ডকোঽযং বিঘটযতু বিপক্ষবাহিনীব্যূহম্ ॥ ৬॥"
   output: "ShaTtriMshadgaNaCaraNO naraparipATInabInagumbhagaNaH .\nbiShNurathadaNDakO''yaM bighaTayatu bipakShabAhinIbyUham .. 6.."
-  reversible: false
+  reversible: true
 - index: 23
   from: Devanagari
   to: Bengali
@@ -153,7 +153,7 @@
   to: Normal
   input: "বিচিত্রসিদ্ধিদঃ সোঽযং বেঙ্কটেশবিপশ্চিতা ।\nগরুডধ্বজতোষায গীতো গরুডদণ্ডকঃ ॥ ৭॥"
   output: "biCitrasiddhidaH sO''yaM bEGkaTEshabipashCitA .\ngaruDadhbajatOShAya gItO garuDadaNDakaH .. 7.."
-  reversible: false
+  reversible: true
 - index: 26
   from: Devanagari
   to: Bengali
@@ -171,7 +171,7 @@
   to: Normal
   input: "কবিতার্কিকসিংহায কল্যণগুণশালিনে ।\nশ্রীমতে বেঙ্কটেশায বেদান্তগুরবে নমঃ ॥"
   output: "kabitArkikasiMhAya kalyaNaguNashAlinE .\nshrImatE bEGkaTEshAya bEdAntagurabE namaH .."
-  reversible: false
+  reversible: true
 - index: 29
   from: Devanagari
   to: Bengali
@@ -195,7 +195,7 @@
   to: Normal
   input: ইতি শ্রীবেদান্তদেশিকবিরচিতঃ গরুডদণ্ডকঃ সম্পূর্ণঃ ।
   output: iti shrIbEdAntadEshikabiraCitaH garuDadaNDakaH sampUrNaH .
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Bengali

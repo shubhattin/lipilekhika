@@ -87,7 +87,7 @@
   to: Normal
   input: "ঋগ্বেদসংহিতাযাং পঞ্চমং মণ্ডলম্ । একপ্ঞ্চাশং সূক্তম্ ।\nঋষিঃ - স্বস্ত্যাত্রেযঃ, দেবতা - বিশ্বে দেবাঃ, ছন্দঃ - ১১ নিচৃত্ত্রিষ্টুপ্,\n১২ ত্রিষ্টুপ্, ১৩ পঙ্ক্তিঃ, ১৪, ১৫ অনুষ্টুপ্,\nস্বরঃ - ১১, ১২ ধৈবতঃ, ১৩ পঞ্চমঃ, ১৪, ১৫ গান্ধারঃ"
   output: "RgbEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - sbastyAtrEyaH, dEbatA - bishbE dEbAH, ChandaH - 11 niCRttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsbaraH - 11, 12 dhaibataH, 13 paJCamaH, 14, 15 gAndhAraH"
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Bengali

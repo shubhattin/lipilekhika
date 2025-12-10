@@ -15,7 +15,7 @@
   to: Normal
   input: "ஸுருசிரநவரத்நபீடஸ்திதே ஸுஸ்திதே\nரத்நபத்மாஸநே ரத்நஸிம்ஹாஸநே ஶங்கபத்மத்வயோபாஶ்ரிதே விஶ்ருதே\nதத்ர விக்நேஶதுர்காவடுக்ஷேத்ரபாலைர்யுதே மத்தமாதங்க\nகந்யாஸமூஹாந்விதே பைரவைரஷ்டபிர்வேஷ்டிதே\nமஞ்சுலாமேநகாத்யங்கநாமாநிதே தேவி வாமாதிபிஃ ஶக்திபிஸ்ஸேவிதே\nதாத்ரி லக்ஷ்ம்யாதிஶக்த்யஷ்டகைஃ ஸம்யுதே மாதிருகாமண்டலைர்மண்டிதே\nயக்ஷகந்தர்வஸித்தாங்கநா மண்டலைரர்சிதே"
   output: "suruCiranavaratnapITastitE sustitE\nratnapatmAsanE ratnasiMhAsanE shaGkapatmatvayOpAshritE vishrutE\ntatra viknEshaturkAvaTukShEtrapAlairyutE mattamAtaGka\nkanyAsamUhAnvitE pairavairaShTapirvEShTitE\nmaJCulAmEnakAtyaGkanAmAnitE tEvi vAmAtipiH shaktipissEvitE\ntAtri lakShMyAtishaktyaShTakaiH saMyutE mAtirukAmaNTalairmaNTitE\nyakShakantarvasittAGkanA maNTalairarCitE"
-  reversible: false
+  reversible: true
 - index: 3
   from: Devanagari
   to: Tamil
@@ -33,7 +33,7 @@
   to: Normal
   input: "பைரவீ ஸம்விருதே பஞ்சபாணாத்மிகே பஞ்சபாணேந ரத்யா ச\nஸம்பாவிதே ப்ரீதிபாஜா வஸந்தேந சாநந்திதே பக்திபாஜம் பரம் ஶ்ரேயஸே\nகல்பஸே யோகிநாம் மாநஸே த்யோதஸே சந்தஸாமோஜஸா ப்ராஜஸே கீதவித்யா\nவிநோதாதி திருஷ்ணேந கிருஷ்ணேந ஸம்பூஜ்யஸே பக்திமச்சேதஸா வேதஸா\nஸ்தூயஸே விஶ்வஹிருத்யேந வாத்யேந வித்யாதரைர்கீயஸே"
   output: "pairavI saMvirutE paJCapANAtmikE paJCapANEna ratyA Ca\nsaMpAvitE prItipAjA vasantEna CAnantitE paktipAjaM paraM shrEyasE\nkalpasE yOkinAM mAnasE tyOtasE CantasAmOjasA prAjasE kItavityA\nvinOtAti tiruShNEna kiruShNEna saMpUjyasE paktimaCCEtasA vEtasA\nstUyasE vishvahirutyEna vAtyEna vityAtarairkIyasE"
-  reversible: false
+  reversible: true
 - index: 6
   from: Devanagari
   to: Tamil
@@ -51,7 +51,7 @@
   to: Normal
   input: "ஶ்ரவணஹரதக்ஷிணக்வாணயா வீணயா கிந்நரைர்கீயஸே\nயக்ஷகந்தர்வஸித்தாங்கநா மண்டலைரர்ச்யஸே"
   output: "shravaNaharatakShiNakvANayA vINayA kinnarairkIyasE\nyakShakantarvasittAGkanA maNTalairarCyasE"
-  reversible: false
+  reversible: true
 - index: 9
   from: Devanagari
   to: Tamil
@@ -69,7 +69,7 @@
   to: Normal
   input: "ஸர்வஸௌபாக்யவாஞ்சாவதீபிர் வதூபிஸ்ஸுராணாம் ஸமாராத்யஸே\nஸர்வவித்யாவிஶேஷத்மகம் சாடுகாதா ஸமுச்சாரணாகண்டமூலோல்லஸத்-\nவர்ணராஜித்ரயம் கோமலஶ்யாமலோதாரபக்ஷத்வயம் துண்டஶோபாதிதூரீபவத்\nகிம்ஶுகம் தம் ஶுகம் லாலயந்தீ பரிக்ரீடஸே"
   output: "sarvasaupAkyavAJCAvatIpir vatUpissurANAM samArAtyasE\nsarvavityAvishEShatmakaM CATukAtA samuCCAraNAkaNTamUlOllasat-\nvarNarAjitrayaM kOmalashyAmalOtArapakShatvayaM tuNTashOpAtitUrIpavat\nkiMshukaM taM shukaM lAlayantI parikrITasE"
-  reversible: false
+  reversible: true
 - index: 12
   from: Devanagari
   to: Tamil
@@ -87,7 +87,7 @@
   to: Normal
   input: "பாணிபத்மத்வயேநாக்ஷமாலாமபி ஸ்பாடிகீம் ஜ்ஞாநஸாராத்மகம்\nபுஸ்தகஞ்சாங்குஶம் பாஶமாபிப்ரதீ தேந ஸஞ்சிந்த்யஸே தஸ்ய\nவக்த்ராந்தராத் கத்யபத்யாத்மிகா பாரதீ நிஸ்ஸரேத் யேந வாத்வம்ஸநாதா\nகிருதிர்பாவ்யஸே தஸ்ய வஶ்யா பவந்திஸ்தியஃ பூருஷாஃ யேந வா\nஶாதகம்பத்யுதிர்பாவ்யஸே ஸோऽபி லக்ஷ்மீஸஹஸ்ரைஃ பரிக்ரீடதே"
   output: "pANipatmatvayEnAkShamAlAmapi spATikIM jJAnasArAtmakaM\npustakaJCAGkushaM pAshamApipratI tEna saJCintyasE tasya\nvaktrAntarAt katyapatyAtmikA pAratI nissarEt yEna vAtvaMsanAtA\nkirutirpAvyasE tasya vashyA pavantistiyaH pUruShAH yEna vA\nshAtakaMpatyutirpAvyasE sO''pi lakShmIsahasraiH parikrITatE"
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Tamil
@@ -105,7 +105,7 @@
   to: Normal
   input: "கிந்ந ஸித்த்யேத்வபுஃ ஶ்யாமலம் கோமலம் சந்த்ரசூடாந்விதம்\nதாவகம் த்யாயதஃ தஸ்ய லீலா ஸரோவாரிதீஃ தஸ்ய கேலீவநம்\nநந்தநம் தஸ்ய பத்ராஸநம் பூதலம் தஸ்ய கீர்தேவதா கிங்கரி\nதஸ்ய சாஜ்ஞாகரீ ஶ்ரீ ஸ்வயம்"
   output: "kinna sittyEtvapuH shyAmalaM kOmalaM CantraCUTAnvitaM\ntAvakaM tyAyataH tasya lIlA sarOvAritIH tasya kElIvanaM\nnantanaM tasya patrAsanaM pUtalaM tasya kIrtEvatA kiGkari\ntasya CAjJAkarI shrI svayaM"
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Tamil
@@ -123,7 +123,7 @@
   to: Normal
   input: "ஸர்வதீர்தாத்மிகே ஸர்வ மந்த்ராத்மிகே\nஸர்வ யந்த்ராத்மிகே ஸர்வ தந்த்ராத்மிகே\nஸர்வ சக்ராத்மிகே ஸர்வ ஶக்த்யாத்மிகே\nஸர்வ பீடாத்மிகே ஸர்வ வேதாத்மிகே\nஸர்வ வித்யாத்மிகே ஸர்வ யோகாத்மிகே\nஸர்வ வர்ணாத்மிகே ஸர்வகீதாத்மிகே\nஸர்வ நாதாத்மிகே ஸர்வ ஶப்தாத்மிகே\nஸர்வ விஶ்வாத்மிகே ஸர்வ வர்காத்மிகே\nஸர்வ ஸர்வாத்மிகே ஸர்வகே ஸர்வ ரூபே\nஜகந்மாதிருகே பாஹி மாம் பாஹி மாம் பாஹி மாம்\nதேவி துப்யம் நமோ தேவி துப்யம் நமோ தேவி துப்யம் நமோ\nதேவி துப்யம் நமஃ"
   output: "sarvatIrtAtmikE sarva mantrAtmikE\nsarva yantrAtmikE sarva tantrAtmikE\nsarva CakrAtmikE sarva shaktyAtmikE\nsarva pITAtmikE sarva vEtAtmikE\nsarva vityAtmikE sarva yOkAtmikE\nsarva varNAtmikE sarvakItAtmikE\nsarva nAtAtmikE sarva shaptAtmikE\nsarva vishvAtmikE sarva varkAtmikE\nsarva sarvAtmikE sarvakE sarva rUpE\njakanmAtirukE pAhi mAM pAhi mAM pAhi mAM\ntEvi tupyaM namO tEvi tupyaM namO tEvi tupyaM namO\ntEvi tupyaM namaH"
-  reversible: false
+  reversible: true
 - index: 21
   from: Devanagari
   to: Tamil
@@ -141,7 +141,7 @@
   to: Normal
   input: ॥ இதி ஶ்யாமலா தண்டகம் ஸம்பூர்ணம் ॥
   output: .. iti shyAmalA taNTakaM saMpUrNaM ..
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Tamil
@@ -159,7 +159,7 @@
   to: Normal
   input: "ஶ்ரீமதே நிகமாந்தமஹாதேஶிகாய நமஃ ।\nஶ்ரீமாந் வேங்கடநாதார்யஃ கவிதார்கிககேஸரீ ।\nவேதாந்தசார்யவர்யோ மே ஸந்நிதத்தாம் ஸதாஹிருதி ॥"
   output: "shrImatE nikamAntamahAtEshikAya namaH .\nshrImAn vEGkaTanAtAryaH kavitArkikakEsarI .\nvEtAntaCAryavaryO mE sannitattAM satAhiruti .."
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Tamil
@@ -177,7 +177,7 @@
   to: Normal
   input: "நமஃ பந்நகநத்தாய வைகுண்டவஶவர்திநே ।\nஶ்ருதிஸிந்து ஸுதோத்பாதமந்தராய கருத்மதே ॥ ௧॥"
   output: "namaH pannakanattAya vaikuNTavashavartinE .\nshrutisintu sutOtpAtamantarAya karutmatE .. 1.."
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Tamil
@@ -195,7 +195,7 @@
   to: Normal
   input: "கருடமகிலவேதநீடாதிரூடம் த்விஷத்பீடநோத்கண்டிதாகுண்டவைகுண்டபீடீகிருத\nஸ்கந்தமீடே ஸ்வநீடாகதிப்ரீதருத்ராஸுகீர்திஸ்தநாபோககாடோபகூட\nஸ்புரத்கண்டகவ்ராத வேதவ்யதாவேபமாந த்விஜிஹ்வாதிபாகல்பவிஷ்பார்யமாண\nஸ்படாவாடிகா ரத்நரோசிஶ்சடா ராஜிநீராஜிதம் காந்திகல்லோலிநீராஜிதம் ॥ ௨॥"
   output: "karuTamakilavEtanITAtirUTaM tviShatpITanOtkaNTitAkuNTavaikuNTapITIkiruta\nskantamITE svanITAkatiprItarutrAsukIrtistanApOkakATOpakUTa\nspuratkaNTakavrAta vEtavyatAvEpamAna tvijihvAtipAkalpaviShpAryamANa\nspaTAvATikA ratnarOCishCaTA rAjinIrAjitaM kAntikallOlinIrAjitaM .. 2.."
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Tamil
@@ -213,7 +213,7 @@
   to: Normal
   input: "ஜயகருட ஸுபர்ண தர்வீகராஹார தேவாதிபாஹாரஹாரிந்\nதிவௌகஸ்பதிக்ஷிப்ததம்போளிதாராகிணாகல்ப கல்பாந்தவாதூல கல்போதயாநல்ப\nவீராயிதோத்யச்சமத்கார தைத்யாரி ஜைத்ரத்வஜாரோஹநிர்தாரிதோத்கர்ஷ\nஸங்கர்ஷணாத்மந் கருத்மந் மருத்பஞ்ச காதீஶ ஸத்யாதிமூர்தே ந கஶ்சித்\nஸமஸ்தே நமஸ்தே புநஸ்தே நமஃ ॥ ௩॥"
   output: "jayakaruTa suparNa tarvIkarAhAra tEvAtipAhArahArin\ntivaukaspatikShiptataMpOLitArAkiNAkalpa kalpAntavAtUla kalpOtayAnalpa\nvIrAyitOtyaCCamatkAra taityAri jaitratvajArOhanirtAritOtkarSha\nsaGkarShaNAtman karutman marutpaJCa kAtIsha satyAtimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Tamil
@@ -231,7 +231,7 @@
   to: Normal
   input: "நம இதமஜஹத்ஸபர்யாய பர்யாயநிர்யாதபக்ஷாநிலாஸ்பாலநோத்வேலபாதோதி\nவீசீசபேடாஹதாகாதபாதாளபாங்காரஸம்க்ருத்தநாகேந்த்ரபீடாஸிருணீபாவ-\nபாஸ்வந்நகஶ்ரேணயே சண்டதுண்டாய நிருத்யத்புஜங்கப்ருவே வஜ்ரிணே தம்ஷ்ட்ரய\nதுப்யமத்யாத்மவித்யா விதேயா விதேயா பவத்தாஸ்யமாபாதயேதா தயேதாஶ்ச மே ॥ ௪॥"
   output: "nama itamajahatsaparyAya paryAyaniryAtapakShAnilAspAlanOtvElapAtOti\nvICICapETAhatAkAtapAtALapAGkArasaMkruttanAkEntrapITAsiruNIpAva-\npAsvannakashrENayE CaNTatuNTAya nirutyatpujaGkapruvE vajriNE taMShTraya\ntupyamatyAtmavityA vitEyA vitEyA pavattAsyamApAtayEtA tayEtAshCa mE .. 4.."
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Tamil

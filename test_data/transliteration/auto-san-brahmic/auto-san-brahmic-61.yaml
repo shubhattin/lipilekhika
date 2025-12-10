@@ -69,7 +69,7 @@
   to: Normal
   input: ॥ அத ஶுக்லயஜுர்வேதீய புருஷஸூக்தஃ॥
   output: .. ata shuklayajurvEtIya puruShasUktaH..
-  reversible: false
+  reversible: true
 - index: 12
   from: Devanagari
   to: Tamil
@@ -87,7 +87,7 @@
   to: Normal
   input: "ஹரிஃ ௐ ஸஹஸ்ரஶீர்ஷா புருஷஃ ஸஹஸ்ராக்ஷஃ ஸஹஸ்ரபாத் ।\nஸ பூமிꣳ ஸர்வத ஸ்பிருத்வாऽத்யதிஷ்டத்தஶாங்குலம் ॥ ௧॥"
   output: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa pUmiꣳ sarvata spirutvA''tyatiShTattashAGkulaM .. 1.."
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Tamil
@@ -105,7 +105,7 @@
   to: Normal
   input: "புருஷ ஏவேதꣳ ஸர்வம் யத்பூதம் யச்ச பாவ்யம் ।\nஉதாமிருதத்வஸ்யேஶாநோ யதந்நேநாதிரோஹதி ॥ ௨॥"
   output: "puruSha EvEtaꣳ sarvaM yatpUtaM yaCCa pAvyaM .\nutAmirutatvasyEshAnO yatannEnAtirOhati .. 2.."
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Tamil
@@ -123,7 +123,7 @@
   to: Normal
   input: "ஏதாவாநஸ்ய மஹிமாதோ ஜ்யாயாம்'ஶ்ச பூருஷஃ ।\nபாதோऽஸ்ய விஶ்வா பூதாநி த்ரிபாதஸ்யாமிருதம் திவி ॥ ௩॥"
   output: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAtO''sya vishvA pUtAni tripAtasyAmirutaM tivi .. 3.."
-  reversible: false
+  reversible: true
 - index: 21
   from: Devanagari
   to: Tamil
@@ -141,7 +141,7 @@
   to: Normal
   input: "த்ரிபாதூர்த்வ உதைத்புருஷஃ பாதோऽஸ்யேஹாபவத் புநஃ ।\nததோ விஷ்வங் வ்யக்ராமத்ஸாஶநாநஶநே அபி ॥ ௪॥"
   output: "tripAtUrtva utaitpuruShaH pAtO''syEhApavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE api .. 4.."
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Tamil
@@ -159,7 +159,7 @@
   to: Normal
   input: "ததோ விராடஜாயத விராஜோ அதி பூருஷஃ ।\nஸ ஜாதோ அத்யரிச்யத பஶ்சாத்பூமிமதோ புரஃ ॥ ௫॥"
   output: "tatO virATajAyata virAjO ati pUruShaH .\nsa jAtO atyariCyata pashCAtpUmimatO puraH .. 5.."
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Tamil
@@ -177,7 +177,7 @@
   to: Normal
   input: "தஸ்மாத்யஜ்ஞாத் ஸர்வஹுதஃ ஸம்பிருதம் பிருஷதாஜ்யம் ।\nபஶூம்'ஸ்தாம்'ஶ்சக்ரே வாயவ்யாநாரண்யா க்ராம்யாஶ்ச யே ॥ ௬॥"
   output: "tasmAtyajJAt sarvahutaH saMpirutaM piruShatAjyaM .\npashUMMstAMMshCakrE vAyavyAnAraNyA krAMyAshCa yE .. 6.."
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Tamil
@@ -195,7 +195,7 @@
   to: Normal
   input: "தஸ்மாத்யஜ்ஞாத் ஸர்வஹுதஃ ருசஃ ஸாமாநி ஜஜ்ஞிரே ।\nசந்தாꣳஸி ஜஜ்ஞிரே தஸ்மாத்யஜுஸ்தஸ்மாதஜாயத ॥ ௭॥"
   output: "tasmAtyajJAt sarvahutaH ruCaH sAmAni jajJirE .\nCantAꣳsi jajJirE tasmAtyajustasmAtajAyata .. 7.."
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Tamil
@@ -213,7 +213,7 @@
   to: Normal
   input: "தஸ்மாதஶ்வா அஜாயந்த யே கே சோபயாததஃ ।\nகாவோ ஹ ஜஜ்ஞிரே தஸ்மாத்தஸ்மாஜ்ஜாதா அஜாவயஃ ॥ ௮॥"
   output: "tasmAtashvA ajAyanta yE kE COpayAtataH .\nkAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Tamil
@@ -231,7 +231,7 @@
   to: Normal
   input: "தம் யஜ்ஞம் பர்ஹிஷி ப்ரௌக்ஷந் புருஷம் ஜாதமக்ரதஃ ।\nதேந தேவா அயஜந்த ஸாத்யா ருஷயஶ்ச யே ॥ ௯॥"
   output: "taM yajJaM parhiShi praukShan puruShaM jAtamakrataH .\ntEna tEvA ayajanta sAtyA ruShayashCa yE .. 9.."
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Tamil

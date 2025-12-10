@@ -15,7 +15,7 @@
   to: Normal
   input: "অনন্তশ্চাস্মি নাগানাং বরুণো যাদসামহম্ ।\nপিতৄণামর্যমা চাস্মি যমঃ সংযমতামহম্ ॥১০-২৯॥"
   output: "anantashCAsmi nAgAnAM baruNO yAdasAmaham .\npitRRNAmaryamA CAsmi yamaH saMyamatAmaham ..10-29.."
-  reversible: false
+  reversible: true
 - index: 3
   from: Devanagari
   to: Bengali
@@ -33,7 +33,7 @@
   to: Normal
   input: "প্রহ্লাদশ্চাস্মি দৈত্যানাং কালঃ কলযতামহম্ ।\nমৃগাণাং চ মৃগেন্দ্রোঽহং বৈনতেযশ্চ পক্ষিণাম্ ॥১০-৩০॥"
   output: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM bainatEyashCa pakShiNAm ..10-30.."
-  reversible: false
+  reversible: true
 - index: 6
   from: Devanagari
   to: Bengali
@@ -51,7 +51,7 @@
   to: Normal
   input: "পবনঃ পবতামস্মি রামঃ শস্ত্রভৃতামহম্ ।\nঝষাণাং মকরশ্চাস্মি স্রোতসামস্মি জাহ্নবী ॥১০-৩১॥"
   output: "pabanaH pabatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnabI ..10-31.."
-  reversible: false
+  reversible: true
 - index: 9
   from: Devanagari
   to: Bengali
@@ -69,7 +69,7 @@
   to: Normal
   input: "সর্গাণামাদিরন্তশ্চ মধ্যং চৈবাহমর্জুন ।\nঅধ্যাত্মবিদ্যা বিদ্যানাং বাদঃ প্রবদতামহম্ ॥১০-৩২॥"
   output: "sargANAmAdirantashCa madhyaM CaibAhamarjuna .\nadhyAtmabidyA bidyAnAM bAdaH prabadatAmaham ..10-32.."
-  reversible: false
+  reversible: true
 - index: 12
   from: Devanagari
   to: Bengali
@@ -87,7 +87,7 @@
   to: Normal
   input: "অক্ষরাণামকারোঽস্মি দ্বন্দ্বঃ সামাসিকস্য চ ।\nঅহমেবাক্ষযঃ কালো ধাতাহং বিশ্বতোমুখঃ ॥১০-৩৩॥"
   output: "akSharANAmakArO''smi dbandbaH sAmAsikasya Ca .\nahamEbAkShayaH kAlO dhAtAhaM bishbatOmukhaH ..10-33.."
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Bengali
@@ -105,7 +105,7 @@
   to: Normal
   input: "মৃত্যুঃ সর্বহরশ্চাহমুদ্ভবশ্চ ভবিষ্যতাম্ ।\nকীর্তিঃ শ্রীর্বাক্চ নারীণাং স্মৃতির্মেধা ধৃতিঃ ক্ষমা ॥১০-৩৪॥"
   output: "mRtyuH sarbaharashCAhamudbhabashCa bhabiShyatAm .\nkIrtiH shrIrbAkCa nArINAM smRtirmEdhA dhRtiH kShamA ..10-34.."
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Bengali
@@ -129,7 +129,7 @@
   to: Normal
   input: "দ্যূতং ছলযতামস্মি তেজস্তেজস্বিনামহম্ ।\nজযোঽস্মি ব্যবসাযোঽস্মি সত্ত্বং সত্ত্ববতামহম্ ॥১০-৩৬॥"
   output: "dyUtaM ChalayatAmasmi tEjastEjasbinAmaham .\njayO''smi byabasAyO''smi sattbaM sattbabatAmaham ..10-36.."
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Bengali
@@ -147,7 +147,7 @@
   to: Normal
   input: "বৃষ্ণীনাং বাসুদেবোঽস্মি পাণ্ডবানাং ধনঞ্জযঃ ।\nমুনীনামপ্যহং ব্যাসঃ কবীনামুশনা কবিঃ ॥১০-৩৭॥"
   output: "bRShNInAM bAsudEbO''smi pANDabAnAM dhanaJjayaH .\nmunInAmapyahaM byAsaH kabInAmushanA kabiH ..10-37.."
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Bengali
@@ -165,7 +165,7 @@
   to: Normal
   input: "দণ্ডো দমযতামস্মি নীতিরস্মি জিগীষতাম্ ।\nমৌনং চৈবাস্মি গুহ্যানাং জ্ঞানং জ্ঞানবতামহম্ ॥১০-৩৮॥"
   output: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaibAsmi guhyAnAM jJAnaM jJAnabatAmaham ..10-38.."
-  reversible: false
+  reversible: true
 - index: 28
   from: Devanagari
   to: Bengali
@@ -183,7 +183,7 @@
   to: Normal
   input: "যচ্চাপি সর্বভূতানাং বীজং তদহমর্জুন ।\nন তদস্তি বিনা যত্স্যান্মযা ভূতং চরাচরম্ ॥১০-৩৯॥"
   output: "yaCCApi sarbabhUtAnAM bIjaM tadahamarjuna .\nna tadasti binA yatsyAnmayA bhUtaM CarACaram ..10-39.."
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Bengali
@@ -201,7 +201,7 @@
   to: Normal
   input: "নান্তোঽস্তি মম দিব্যানাং বিভূতীনাং পরন্তপ ।\nএষ তূদ্দেশতঃ প্রোক্তো বিভূতের্বিস্তরো মযা ॥১০-৪০॥"
   output: "nAntO''sti mama dibyAnAM bibhUtInAM parantapa .\nESha tUddEshataH prOktO bibhUtErbistarO mayA ..10-40.."
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Bengali
@@ -219,7 +219,7 @@
   to: Normal
   input: "যদ্যদ্বিভূতিমত্সত্ত্বং শ্রীমদূর্জিতমেব বা ।\nতত্তদেবাবগচ্ছ ত্বং মম তেজোংঽশসম্ভবম্ ॥১০-৪১॥"
   output: "yadyadbibhUtimatsattbaM shrImadUrjitamEba bA .\ntattadEbAbagaCCha tbaM mama tEjOM''shasambhabam ..10-41.."
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Bengali
@@ -237,7 +237,7 @@
   to: Normal
   input: "অথবা বহুনৈতেন কিং জ্ঞাতেন তবার্জুন ।\nবিষ্টভ্যাহমিদং কৃত্স্নমেকাংশেন স্থিতো জগত্ ॥১০-৪২॥"
   output: "athabA bahunaitEna kiM jJAtEna tabArjuna .\nbiShTabhyAhamidaM kRtsnamEkAMshEna sthitO jagat ..10-42.."
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Bengali

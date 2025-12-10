@@ -3,7 +3,7 @@
   to: Normal
   input: "ওঁ তত্সদিতি শ্রীমদ্ভগবদ্গীতাসূপনিষত্সু\nব্রহ্মবিদ্যাযাং যোগশাস্ত্রে শ্রীকৃষ্ণার্জুনসংবাদে\nগুণত্রযবিভাগযোগো নাম চতুর্দশোঽধ্যাযঃ ॥১৪॥"
   output: "AUM tatsaditi shrImadbhagabadgItAsUpaniShatsu\nbrahmabidyAyAM yOgashAstrE shrIkRShNArjunasaMbAdE\nguNatrayabibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Bengali
@@ -33,7 +33,7 @@
   to: Normal
   input: "ভূমৌ স্খলিতপাদানাং ভূমিরেবাবলম্বনং ।\nত্বযি জাতাপরাধানাং ত্বমেব শরণং শিবে ॥"
   output: "bhUmau skhalitapAdAnAM bhUmirEbAbalambanaM .\ntbayi jAtAparAdhAnAM tbamEba sharaNaM shibE .."
-  reversible: false
+  reversible: true
 - index: 6
   from: Devanagari
   to: Bengali
@@ -51,7 +51,7 @@
   to: Normal
   input: "শিবঃ শক্ত্যা যুক্তো যদি ভবতি শক্তঃ প্রভবিতুং\nন চেদেবং দেবো ন খলু কুশলঃ স্পন্দিতুমপি ।\nঅতস্ত্বামারাধ্যাং হরিহরবিরিঞ্চাদিভিরপি\nপ্রণন্তুং স্তোতুং বা কথমকৃতপুণ্যঃ প্রভবতি ॥১॥"
   output: "shibaH shaktyA yuktO yadi bhabati shaktaH prabhabituM\nna CEdEbaM dEbO na khalu kushalaH spanditumapi .\natastbAmArAdhyAM hariharabiriJCAdibhirapi\npraNantuM stOtuM bA kathamakRtapuNyaH prabhabati ..1.."
-  reversible: false
+  reversible: true
 - index: 9
   from: Devanagari
   to: Bengali
@@ -69,7 +69,7 @@
   to: Normal
   input: "তনীযাংসং পাংসুং তব চরণপঙ্কেরুহভবং\nবিরিঞ্চিস্সঞ্চিন্বন্ বিরচযতি লোকানবিকলম্ ।\nবহত্যেনং শৌরিঃ কথমপি সহস্রেণ শিরসাং\nহরস্সংক্ষুদ্যৈনং ভজতি ভসিতোদ্ধূল়নবিধিম্ ॥২॥"
   output: "tanIyAMsaM pAMsuM taba CaraNapaGkEruhabhabaM\nbiriJCissaJCinban biraCayati lOkAnabikalam .\nbahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanabidhim ..2.."
-  reversible: false
+  reversible: true
 - index: 12
   from: Devanagari
   to: Bengali
@@ -87,7 +87,7 @@
   to: Normal
   input: "অবিদ্যানামন্তস্তিমিরমিহিরদ্বীপনগরী\nজডানাং চৈতন্যস্তবকমকরন্দস্রুতিঝরী ।\nদরিদ্রাণাং চিন্তামণিগুণনিকা জন্মজলধৌ\nনিমগ্নানাং দংষ্ট্রা মুররিপুবরাহস্য ভবতি ॥৩॥"
   output: "abidyAnAmantastimiramihiradbIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripubarAhasya bhabati ..3.."
-  reversible: false
+  reversible: true
 - index: 15
   from: Devanagari
   to: Bengali
@@ -105,7 +105,7 @@
   to: Normal
   input: "ত্বদন্যঃ পাণিভ্যাম্ অভযবরদো দৈবতগণঃ\nত্বমেকা নৈবাসি প্রকটিতবরাভীত্যভিনযা ।\nভযাত্ ত্রাতুং দাতুং ফলমপি চ বাঞ্ছাসমধিকং\nশরণ্যে লোকানাং তব হি চরণাবেব নিপুণৌ ॥৪॥"
   output: "tbadanyaH pANibhyAm abhayabaradO daibatagaNaH\ntbamEkA naibAsi prakaTitabarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca bAJChAsamadhikaM\nsharaNyE lOkAnAM taba hi CaraNAbEba nipuNau ..4.."
-  reversible: false
+  reversible: true
 - index: 18
   from: Devanagari
   to: Bengali
@@ -123,7 +123,7 @@
   to: Normal
   input: "হরিস্ত্বামারাধ্য প্রণতজনসৌভাগ্যজননীং\nপুরা নারী ভূত্বা পুররিপুমপি ক্ষোভমনযত্ ।\nস্মরোঽপি ত্বাং নত্বা রতিনযনলেহ্যেন বপুষা\nমুনীনামপ্যন্তঃ প্রভবতি হি মোহায মহতাম্ ॥৫॥"
   output: "haristbAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtbA puraripumapi kShObhamanayat .\nsmarO''pi tbAM natbA ratinayanalEhyEna bapuShA\nmunInAmapyantaH prabhabati hi mOhAya mahatAm ..5.."
-  reversible: false
+  reversible: true
 - index: 21
   from: Devanagari
   to: Bengali
@@ -141,7 +141,7 @@
   to: Normal
   input: "সরস্বত্যা লক্ষ্ম্যা বিধিহরিসপত্নো বিহরতে\nরতেঃ পাতিব্রত্যং শিথিলযতি রম্যেণ বপুষা ।\nচিরং জীবন্নেব ক্ষপিতপশুপাশব্যতিকরঃ\nপরানন্দাভিখ্যম্ রসযতি রসং ত্বদ্ভজনবান্ ॥৯৯॥\nপ্রদীপজ্বালাভিঃ দিবসকরনীরাজনবিধিঃ\nসুধাসূতেশ্চন্দ্রোপলজললবৈরর্ঘ্যরচনা ।\nস্বকীযৈরম্ভোভিঃ সলিলনিধিসৌহিত্যকরণং\nত্বদীযাভির্বাগ্ভিঃ তব জননি বাচাং স্তুতিরিযম্ ॥১০০॥"
   output: "sarasbatyA lakShmyA bidhiharisapatnO biharatE\nratEH pAtibratyaM shithilayati ramyENa bapuShA .\nCiraM jIbannEba kShapitapashupAshabyatikaraH\nparAnandAbhikhyam rasayati rasaM tbadbhajanabAn ..99..\npradIpajbAlAbhiH dibasakaranIrAjanabidhiH\nsudhAsUtEshCandrOpalajalalabairarghyaraCanA .\nsbakIyairambhObhiH salilanidhisauhityakaraNaM\ntbadIyAbhirbAgbhiH taba janani bACAM stutiriyam ..100.."
-  reversible: false
+  reversible: true
 - index: 24
   from: Devanagari
   to: Bengali
@@ -159,7 +159,7 @@
   to: Normal
   input: "॥ ইতি শ্রীমত্পরমহংসপরিব্রাজকাচার্যস্য\nশ্রীগোবিন্দভগবত্পূজ্যপাদশিষ্যস্য\nশ্রীমচ্ছঙ্করভগবতঃ কৃতৌ সৌন্দর্যলহরী সমাপ্তা ॥"
   output: ".. iti shrImatparamahaMsaparibrAjakACAryasya\nshrIgObindabhagabatpUjyapAdashiShyasya\nshrImaCChaGkarabhagabataH kRtau saundaryalaharI samAptA .."
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Bengali
@@ -177,7 +177,7 @@
   to: Normal
   input: "ওঁ নমো নারাযণায\nঅথ শ্রীমন্নারাযণীযম্\nপ্রথমম্ দশকম্\nভগবতঃ স্বরূপং মাহাত্ম্যং চ"
   output: "AUM namO nArAyaNAya\natha shrImannArAyaNIyam\nprathamam dashakam\nbhagabataH sbarUpaM mAhAtmyaM Ca"
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Bengali
@@ -195,7 +195,7 @@
   to: Normal
   input: "সান্দ্রানন্দাববোধাত্মকমনুপমিতং কালদেশাবধিভ্যাং\nনির্মুক্তং নিত্যমুক্তং নিগমশতসহস্রেণ নির্ভাস্যমানম্ ।\nঅস্পষ্টং দৃষ্টমাত্রে পুনরুরুপুরুষার্থাত্মকং ব্রহ্ম তত্বং\nতত্তাবদ্ভাতি সাক্ষাদ্ গুরুপবনপুরে হন্ত ভাগ্যং জনানাম্ ॥১॥"
   output: "sAndrAnandAbabOdhAtmakamanupamitaM kAladEshAbadhibhyAM\nnirmuktaM nityamuktaM nigamashatasahasrENa nirbhAsyamAnam .\naspaShTaM dRShTamAtrE punarurupuruShArthAtmakaM brahma tatbaM\ntattAbadbhAti sAkShAd gurupabanapurE hanta bhAgyaM janAnAm ..1.."
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Bengali
@@ -213,7 +213,7 @@
   to: Normal
   input: "নম্রাণাং সন্নিধত্তে সততমপি পুরস্তৈরনভ্যর্থিতান -\nপ্যর্থান্ কামানজস্রং বিতরতি পরমানন্দসান্দ্রাং গতিং চ ।\nইত্থং নিশ্শেষলভ্যো নিরবধিকফল: পারিজাতো হরে ত্বং\nক্ষুদ্রং তং শক্রবাটীদ্রুমমভিলষতি ব্যর্থমর্থিব্রজোঽযম্ ॥৮॥"
   output: "namrANAM sannidhattE satatamapi purastairanabhyarthitAna -\npyarthAn kAmAnajasraM bitarati paramAnandasAndrAM gatiM Ca .\nitthaM nishshEShalabhyO nirabadhikaphala: pArijAtO harE tbaM\nkShudraM taM shakrabATIdrumamabhilaShati byarthamarthibrajO''yam ..8.."
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Bengali
@@ -231,7 +231,7 @@
   to: Normal
   input: "ঐশ্বর্যং শঙ্করাদীশ্বরবিনিযমনং বিশ্বতেজোহরাণাং\nতেজস্সংহারি বীর্যং বিমলমপি যশো নিস্পৃহৈশ্চোপগীতম্ ।\nঅঙ্গাসঙ্গা সদা শ্রীরখিলবিদসি ন ক্বাপি তে সঙ্গবার্তা\nতদ্বাতাগারবাসিন্ মুরহর ভগবচ্ছব্দমুখ্যাশ্রযোঽসি ॥১০॥"
   output: "aishbaryaM shaGkarAdIshbarabiniyamanaM bishbatEjOharANAM\ntEjassaMhAri bIryaM bimalamapi yashO nispRhaishCOpagItam .\naGgAsaGgA sadA shrIrakhilabidasi na kbApi tE saGgabArtA\ntadbAtAgArabAsin murahara bhagabaCChabdamukhyAshrayO''si ..10.."
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Bengali

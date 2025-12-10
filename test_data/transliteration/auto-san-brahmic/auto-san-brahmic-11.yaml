@@ -9,7 +9,7 @@
   to: Normal
   input: "যোগীন্দ্রাণাং ত্বদঙ্গেষ্বধিকসুমধুরং মুক্তিভাজাং নিবাসো\nভক্তানাং কামবর্ষদ্যুতরুকিসলযং নাথ তে পাদমূলম্ ।\nনিত্যং চিত্তস্থিতং মে পবনপুরপতে কৃষ্ণ কারুণ্যসিন্ধো\nহৃত্বা নিশ্শেষতাপান্ প্রদিশতু পরমানন্দসন্দোহলক্ষ্মীম্ ॥১০॥"
   output: "yOgIndrANAM tbadaGgEShbadhikasumadhuraM muktibhAjAM nibAsO\nbhaktAnAM kAmabarShadyutarukisalayaM nAtha tE pAdamUlam .\nnityaM CittasthitaM mE pabanapurapatE kRShNa kAruNyasindhO\nhRtbA nishshEShatApAn pradishatu paramAnandasandOhalakShmIm ..10.."
-  reversible: false
+  reversible: true
 - index: 2
   from: Devanagari
   to: Bengali
@@ -27,7 +27,7 @@
   to: Normal
   input: "শ্রীভগবানুবাচ ।\nঊর্ধ্বমূলমধঃশাখমশ্বত্থং প্রাহুরব্যযম্ ।\nছন্দাংসি যস্য পর্ণানি যস্তং বেদ স বেদবিত্ ॥১৫-১॥"
   output: "shrIbhagabAnubACa .\nUrdhbamUlamadhaHshAkhamashbatthaM prAhurabyayam .\nChandAMsi yasya parNAni yastaM bEda sa bEdabit ..15-1.."
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Bengali
@@ -45,7 +45,7 @@
   to: Normal
   input: "অধশ্চোর্ধ্বং প্রসৃতাস্তস্য শাখা\nগুণপ্রবৃদ্ধা বিষযপ্রবালাঃ ।\nঅধশ্চ মূলান্যনুসন্ততানি\nকর্মানুবন্ধীনি মনুষ্যলোকে ॥১৫-২॥"
   output: "adhashCOrdhbaM prasRtAstasya shAkhA\nguNaprabRddhA biShayaprabAlAH .\nadhashCa mUlAnyanusantatAni\nkarmAnubandhIni manuShyalOkE ..15-2.."
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Bengali
@@ -63,7 +63,7 @@
   to: Normal
   input: "ন রূপমস্যেহ তথোপলভ্যতে\nনান্তো ন চাদির্ন চ সম্প্রতিষ্ঠা ।\nঅশ্বত্থমেনং সুবিরূঢমূলং\nঅসঙ্গশস্ত্রেণ দৃঢেন ছিত্ত্বা ॥১৫-৩॥"
   output: "na rUpamasyEha tathOpalabhyatE\nnAntO na CAdirna Ca sampratiShThA .\nashbatthamEnaM subirUDhamUlaM\nasaGgashastrENa dRDhEna ChittbA ..15-3.."
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Bengali
@@ -81,7 +81,7 @@
   to: Normal
   input: "ততঃ পদং তত্পরিমার্গিতব্যং\nযস্মিন্গতা ন নিবর্তন্তি ভূযঃ ।\nতমেব চাদ্যং পুরুষং প্রপদ্যে ।\nযতঃ প্রবৃত্তিঃ প্রসৃতা পুরাণী ॥১৫-৪॥"
   output: "tataH padaM tatparimArgitabyaM\nyasmingatA na nibartanti bhUyaH .\ntamEba CAdyaM puruShaM prapadyE .\nyataH prabRttiH prasRtA purANI ..15-4.."
-  reversible: false
+  reversible: true
 - index: 14
   from: Devanagari
   to: Bengali
@@ -99,7 +99,7 @@
   to: Normal
   input: "নির্মানমোহা জিতসঙ্গদোষা\nঅধ্যাত্মনিত্যা বিনিবৃত্তকামাঃ ।\nদ্বন্দ্বৈর্বিমুক্তাঃ সুখদুঃখসংজ্ঞৈর্-\nগচ্ছন্ত্যমূঢাঃ পদমব্যযং তত্ ॥১৫-৫॥"
   output: "nirmAnamOhA jitasaGgadOShA\nadhyAtmanityA binibRttakAmAH .\ndbandbairbimuktAH sukhaduHkhasaMjJair-\ngaCChantyamUDhAH padamabyayaM tat ..15-5.."
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Bengali
@@ -117,7 +117,7 @@
   to: Normal
   input: "ন তদ্ভাসযতে সূর্যো ন শশাঙ্কো ন পাবকঃ ।\nযদ্গত্বা ন নিবর্তন্তে তদ্ধাম পরমং মম ॥১৫-৬॥"
   output: "na tadbhAsayatE sUryO na shashAGkO na pAbakaH .\nyadgatbA na nibartantE taddhAma paramaM mama ..15-6.."
-  reversible: false
+  reversible: true
 - index: 20
   from: Devanagari
   to: Bengali
@@ -135,7 +135,7 @@
   to: Normal
   input: "মমৈবাংশো জীবলোকে জীবভূতঃ সনাতনঃ ।\nমনঃষষ্ঠানীন্দ্রিযাণি প্রকৃতিস্থানি কর্ষতি ॥১৫-৭॥"
   output: "mamaibAMshO jIbalOkE jIbabhUtaH sanAtanaH .\nmanaHShaShThAnIndriyANi prakRtisthAni karShati ..15-7.."
-  reversible: false
+  reversible: true
 - index: 23
   from: Devanagari
   to: Bengali
@@ -153,7 +153,7 @@
   to: Normal
   input: "শরীরং যদবাপ্নোতি যচ্চাপ্যুত্ক্রামতীশ্বরঃ ।\nগৃহীত্বৈতানি সংযাতি বাযুর্গন্ধানিবাশযাত্ ॥১৫-৮॥"
   output: "sharIraM yadabApnOti yaCCApyutkrAmatIshbaraH .\ngRhItbaitAni saMyAti bAyurgandhAnibAshayAt ..15-8.."
-  reversible: false
+  reversible: true
 - index: 26
   from: Devanagari
   to: Bengali
@@ -171,7 +171,7 @@
   to: Normal
   input: "শ্রোত্রং চক্ষুঃ স্পর্শনং চ রসনং ঘ্রাণমেব চ ।\nঅধিষ্ঠায মনশ্চাযং বিষযানুপসেবতে ॥১৫-৯॥"
   output: "shrOtraM CakShuH sparshanaM Ca rasanaM ghrANamEba Ca .\nadhiShThAya manashCAyaM biShayAnupasEbatE ..15-9.."
-  reversible: false
+  reversible: true
 - index: 29
   from: Devanagari
   to: Bengali
@@ -189,7 +189,7 @@
   to: Normal
   input: "উত্ক্রামন্তং স্থিতং বাপি ভুঞ্জানং বা গুণান্বিতম্ ।\nবিমূঢা নানুপশ্যন্তি পশ্যন্তি জ্ঞানচক্ষুষঃ ॥১৫-১০॥"
   output: "utkrAmantaM sthitaM bApi bhuJjAnaM bA guNAnbitam .\nbimUDhA nAnupashyanti pashyanti jJAnaCakShuShaH ..15-10.."
-  reversible: false
+  reversible: true
 - index: 32
   from: Devanagari
   to: Bengali
@@ -207,7 +207,7 @@
   to: Normal
   input: "যতন্তো যোগিনশ্চৈনং পশ্যন্ত্যাত্মন্যবস্থিতম্ ।\nযতন্তোঽপ্যকৃতাত্মানো নৈনং পশ্যন্ত্যচেতসঃ ॥১৫-১১॥"
   output: "yatantO yOginashCainaM pashyantyAtmanyabasthitam .\nyatantO''pyakRtAtmAnO nainaM pashyantyaCEtasaH ..15-11.."
-  reversible: false
+  reversible: true
 - index: 35
   from: Devanagari
   to: Bengali
@@ -225,7 +225,7 @@
   to: Normal
   input: "যদাদিত্যগতং তেজো জগদ্ভাসযতেঽখিলম্ ।\nযচ্চন্দ্রমসি যচ্চাগ্নৌ তত্তেজো বিদ্ধি মামকম্ ॥১৫-১২॥"
   output: "yadAdityagataM tEjO jagadbhAsayatE''khilam .\nyaCCandramasi yaCCAgnau tattEjO biddhi mAmakam ..15-12.."
-  reversible: false
+  reversible: true
 - index: 38
   from: Devanagari
   to: Bengali
@@ -243,4 +243,4 @@
   to: Normal
   input: "গামাবিশ্য চ ভূতানি ধারযাম্যহমোজসা ।\nপুষ্ণামি চৌষধীঃ সর্বাঃ সোমো ভূত্বা রসাত্মকঃ ॥১৫-১৩॥"
   output: "gAmAbishya Ca bhUtAni dhArayAmyahamOjasA .\npuShNAmi CauShadhIH sarbAH sOmO bhUtbA rasAtmakaH ..15-13.."
-  reversible: false
+  reversible: true

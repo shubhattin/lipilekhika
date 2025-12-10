@@ -159,7 +159,7 @@
   to: Normal
   input: ॥ অথ শুক্লযজুর্বেদীয পুরুষসূক্তঃ॥
   output: .. atha shuklayajurbEdIya puruShasUktaH..
-  reversible: false
+  reversible: true
 - index: 27
   from: Devanagari
   to: Bengali
@@ -177,7 +177,7 @@
   to: Normal
   input: "হরিঃ ওঁ সহস্রশীর্ষা পুরুষঃ সহস্রাক্ষঃ সহস্রপাত্ ।\nস ভূমিꣳ সর্বত স্পৃত্বাঽত্যতিষ্ঠদ্দশাঙ্গুলম্ ॥ ১॥"
   output: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarbata spRtbA''tyatiShThaddashAGgulam .. 1.."
-  reversible: false
+  reversible: true
 - index: 30
   from: Devanagari
   to: Bengali
@@ -195,7 +195,7 @@
   to: Normal
   input: "পুরুষ এবেদꣳ সর্বং যদ্ভূতং যচ্চ ভাব্যম্ ।\nউতামৃতত্বস্যেশানো যদন্নেনাতিরোহতি ॥ ২॥"
   output: "puruSha EbEdaꣳ sarbaM yadbhUtaM yaCCa bhAbyam .\nutAmRtatbasyEshAnO yadannEnAtirOhati .. 2.."
-  reversible: false
+  reversible: true
 - index: 33
   from: Devanagari
   to: Bengali
@@ -213,7 +213,7 @@
   to: Normal
   input: "এতাবানস্য মহিমাতো জ্যাযাঁশ্চ পূরুষঃ ।\nপাদোঽস্য বিশ্বা ভূতানি ত্রিপাদস্যামৃতং দিবি ॥ ৩॥"
   output: "EtAbAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya bishbA bhUtAni tripAdasyAmRtaM dibi .. 3.."
-  reversible: false
+  reversible: true
 - index: 36
   from: Devanagari
   to: Bengali
@@ -231,7 +231,7 @@
   to: Normal
   input: "ত্রিপাদূর্ধ্ব উদৈত্পুরুষঃ পাদোঽস্যেহাভবত্ পুনঃ ।\nততো বিষ্বঙ্ ব্যক্রামত্সাশনানশনে অভি ॥ ৪॥"
   output: "tripAdUrdhba udaitpuruShaH pAdO''syEhAbhabat punaH .\ntatO biShbaG byakrAmatsAshanAnashanE abhi .. 4.."
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Bengali

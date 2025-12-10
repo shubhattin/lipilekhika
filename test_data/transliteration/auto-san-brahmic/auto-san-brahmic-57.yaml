@@ -9,7 +9,7 @@
   to: Normal
   input: "ஸாதராரப்தஸம்கீதஸம்பாவநாஸம்ப்ரமாலோல-\nநீபஸ்ரகாபத்தசூலீஸநாதத்ரிகே ஸாநுமத்புத்ரிகே"
   output: "sAtarAraptasaMkItasaMpAvanAsaMpramAlOla-\nnIpasrakApattaCUlIsanAtatrikE sAnumatputrikE"
-  reversible: false
+  reversible: true
 - index: 2
   from: Devanagari
   to: Tamil
@@ -27,7 +27,7 @@
   to: Normal
   input: "ஶேகரீபூதஶீதாம்ஶுரேகாமயூகாவலீபத்த-\nஸுஸ்நிக்தநீலாலகஶ்ரேணிஶிருங்காரிதே லோகஸம்பாவிதே\nகாமலீலாதநுஸ்ஸந்நிபப்ரூலதாபுஷ்பஸந்தோஹஸந்தேஹகிருல்லோசநே\nவாக்ஸுதாஸேசநே சாருகோரோசநாபங்ககேலீலலாமாபிராமே ஸுராமே ரமே"
   output: "shEkarIpUtashItAMshurEkAmayUkAvalIpatta-\nsusniktanIlAlakashrENishiruGkAritE lOkasaMpAvitE\nkAmalIlAtanussannipaprUlatApuShpasantOhasantEhakirullOCanE\nvAksutAsECanE CArukOrOCanApaGkakElIlalAmApirAmE surAmE ramE"
-  reversible: false
+  reversible: true
 - index: 5
   from: Devanagari
   to: Tamil
@@ -45,7 +45,7 @@
   to: Normal
   input: "ப்ரோல்லஸத்த்வாலிகாமௌக்திகஶ்ரேணிகாசந்த்ரிகாமண்டலோத்பாஸி\nலாவண்யகண்டஸ்தலந்யஸ்தகஸ்தூரிகாபத்ரரேகாஸமுத்பூதஸௌரப்ய-\nஸம்ப்ராந்தபிருங்காங்கநாகீதஸாந்த்ரீபவந்மந்த்ரதந்த்ரீஸ்வரே\nஸுஸ்வரே பாஸ்வரே"
   output: "prOllasattvAlikAmauktikashrENikACantrikAmaNTalOtpAsi\nlAvaNyakaNTastalanyastakastUrikApatrarEkAsamutpUtasaurapya-\nsaMprAntapiruGkAGkanAkItasAntrIpavanmantratantrIsvarE\nsusvarE pAsvarE"
-  reversible: false
+  reversible: true
 - index: 8
   from: Devanagari
   to: Tamil
@@ -63,7 +63,7 @@
   to: Normal
   input: "வல்லகீவாதநப்ரக்ரியாலோலதாலீதலாபத்த-\nதாடங்கபூஷாவிஶேஷாந்விதே ஸித்தஸம்மாநிதே"
   output: "vallakIvAtanaprakriyAlOlatAlItalApatta-\ntATaGkapUShAvishEShAnvitE sittasaMmAnitE"
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Tamil
@@ -81,7 +81,7 @@
   to: Normal
   input: "திவ்யஹாலாமதோத்வேலஹேலாலஸச்சக்ஷுராந்தோலநஶ்ரீஸமாக்ஷிப்தகர்ணைக-\nநீலோத்பலே ஶ்யாமலே பூரிதாஶேஷலோகாபிவாஞ்சாபலே ஶ்ரீபலே"
   output: "tivyahAlAmatOtvElahElAlasaCCakShurAntOlanashrIsamAkShiptakarNaika-\nnIlOtpalE shyAmalE pUritAshEShalOkApivAJCApalE shrIpalE"
-  reversible: false
+  reversible: true
 - index: 14
   from: Devanagari
   to: Tamil
@@ -99,7 +99,7 @@
   to: Normal
   input: "ஸ்வேதபிந்தூல்லஸத்பாலலாவண்ய நிஷ்யந்தஸந்தோஹஸந்தேஹகிருந்நாஸிகாமௌக்திகே\nஸர்வவிஶ்வாத்மிகே ஸர்வஸித்த்யாத்மிகே காலிகே முக்த்தமந்தஸ்மிதோதாரவக்த்ர-\nஸ்புரத் பூகதாம்பூலகர்பூரகண்டோத்கரே ஜ்ஞாநமுத்ராகரே ஸர்வஸம்பத்கரே\nபத்மபாஸ்வத்கரே ஶ்ரீகரே"
   output: "svEtapintUllasatpAlalAvaNya niShyantasantOhasantEhakirunnAsikAmauktikE\nsarvavishvAtmikE sarvasittyAtmikE kAlikE mukttamantasmitOtAravaktra-\nspurat pUkatAMpUlakarpUrakaNTOtkarE jJAnamutrAkarE sarvasaMpatkarE\npatmapAsvatkarE shrIkarE"
-  reversible: false
+  reversible: true
 - index: 17
   from: Devanagari
   to: Tamil
@@ -117,7 +117,7 @@
   to: Normal
   input: "குந்தபுஷ்பத்யுதிஸ்நிக்ததந்தாவலீநிர்மலாலோலகல்லோலஸம்மேலந\nஸ்மேரஶோணாதரே சாருவீணாதரே பக்வபிம்பாதரே"
   output: "kuntapuShpatyutisniktatantAvalInirmalAlOlakallOlasaMmElana\nsmErashONAtarE CAruvINAtarE pakvapiMpAtarE"
-  reversible: false
+  reversible: true
 - index: 20
   from: Devanagari
   to: Tamil
@@ -135,7 +135,7 @@
   to: Normal
   input: "ஸுலலித நவயௌவநாரம்பசந்த்ரோதயோத்வேலலாவண்யதுக்தார்ணவாவிர்பவத்\nகம்புபிம்போகபிருத்கந்தரே ஸத்கலாமந்திரே மந்தரே"
   output: "sulalita navayauvanAraMpaCantrOtayOtvElalAvaNyatuktArNavAvirpavat\nkaMpupiMpOkapirutkantarE satkalAmantirE mantarE"
-  reversible: false
+  reversible: true
 - index: 23
   from: Devanagari
   to: Tamil
@@ -153,7 +153,7 @@
   to: Normal
   input: "திவ்யரத்நப்ரபாபந்துரச்சந்நஹாராதிபூஷாஸமுத்யோதமாநாநவத்யாங்க-\nஶோபே ஶுபே"
   output: "tivyaratnaprapApanturaCCannahArAtipUShAsamutyOtamAnAnavatyAGka-\nshOpE shupE"
-  reversible: false
+  reversible: true
 - index: 26
   from: Devanagari
   to: Tamil
@@ -171,7 +171,7 @@
   to: Normal
   input: "ரத்நகேயூரரஶ்மிச்சடாபல்லவப்ரோல்லஸத்தோல்லதாராஜிதே யோகிபிஃ\nபூஜிதே விஶ்வதிங்மண்டலவ்யாப்தமாணிக்யதேஜஸ்ஸ்புரத்கங்கணாலம்கிருதே\nவிப்ரமாலம்கிருதே ஸாதுபிஃ பூஜிதே வாஸராரம்பவேலாஸமுஜ்ஜிரும்ப\nமாணாரவிந்தப்ரதித்வந்த்விபாணித்வயே ஸந்ததோத்யத்தயே அத்வயே\nதிவ்யரத்நோர்மிகாதீதிதிஸ்தோமஸந்த்யாயமாநாங்குலீபல்லவோத்ய\nந்நகேந்துப்ரபாமண்டலே ஸந்நுதாகண்டலே சித்ப்ரபாமண்டலே ப்ரோல்லஸத்குண்டலே"
   output: "ratnakEyUrarashmiCCaTApallavaprOllasattOllatArAjitE yOkipiH\npUjitE vishvatiGmaNTalavyAptamANikyatEjasspuratkaGkaNAlaMkirutE\nvipramAlaMkirutE sAtupiH pUjitE vAsarAraMpavElAsamujjiruMpa\nmANAravintapratitvantvipANitvayE santatOtyattayE atvayE\ntivyaratnOrmikAtItitistOmasantyAyamAnAGkulIpallavOtya\nnnakEntuprapAmaNTalE sannutAkaNTalE CitprapAmaNTalE prOllasatkuNTalE"
-  reversible: false
+  reversible: true
 - index: 29
   from: Devanagari
   to: Tamil
@@ -189,7 +189,7 @@
   to: Normal
   input: "தாரகாராஜிநீகாஶஹாராவலிஸ்மேர சாருஸ்தநாபோகபாராநமந்மத்ய-\nவல்லீவலிச்சேத வீசீஸமுத்யத்ஸமுல்லாஸஸந்தர்ஶிதாகாரஸௌந்தர்யரத்நாகரே\nவல்லகீபிருத்கரே கிங்கரஶ்ரீகரே"
   output: "tArakArAjinIkAshahArAvalismEra CArustanApOkapArAnamanmatya-\nvallIvaliCCEta vICIsamutyatsamullAsasantarshitAkArasauntaryaratnAkarE\nvallakIpirutkarE kiGkarashrIkarE"
-  reversible: false
+  reversible: true
 - index: 32
   from: Devanagari
   to: Tamil
@@ -207,7 +207,7 @@
   to: Normal
   input: "ஹேமகும்போபமோத்துங்க வக்ஷோஜபாராவநம்ரே த்ரிலோகாவநம்ரே\nலஸத்விருத்தகம்பீர நாபீஸரஸ்தீரஶைவாலஶங்காகரஶ்யாமரோமாவலீபூஷணே\nமஞ்ஜுஸம்பாஷணே"
   output: "hEmakuMpOpamOttuGka vakShOjapArAvanaMrE trilOkAvanaMrE\nlasatviruttakaMpIra nApIsarastIrashaivAlashaGkAkarashyAmarOmAvalIpUShaNE\nmaJjusaMpAShaNE"
-  reversible: false
+  reversible: true
 - index: 35
   from: Devanagari
   to: Tamil
@@ -225,7 +225,7 @@
   to: Normal
   input: "சாருஶிஞ்சத்கடீஸூத்ரநிர்பத்ஸிதாநங்கலீலதநுஶ்ஶிஞ்சிநீடம்பரே\nதிவ்யரத்நாம்பரே"
   output: "CArushiJCatkaTIsUtranirpatsitAnaGkalIlatanushshiJCinITaMparE\ntivyaratnAMparE"
-  reversible: false
+  reversible: true
 - index: 38
   from: Devanagari
   to: Tamil
@@ -243,4 +243,4 @@
   to: Normal
   input: "பத்மராகோல்லஸ ந்மேகலாமௌக்திகஶ்ரோணிஶோபாஜிதஸ்வர்ணபூபிருத்தலே\nசந்த்ரிகாஶீதலே விகஸிதநவகிம்ஶுகாதாம்ரதிவ்யாம்ஶுகச்சந்ந\nசாரூருஶோபாபராபூதஸிந்தூரஶோணாயமாநேந்த்ரமாதங்க\nஹஸ்மார்க்கலே வைபவாநர்க்கலே ஶ்யாமலே கோமலஸ்நிக்த்த\nநீலோத்பலோத்பாதிதாநங்கதூணீரஶங்காகரோதார\nஜம்காலதே சாருலீலாகதே நம்ரதிக்பாலஸீமந்திநீ\nகுந்தலஸ்நிக்த்தநீலப்ரபாபுஞ்சஸஞ்ஜாததுர்வாங்குராஶங்க\nஸாரம்கஸம்யோகரிம்கந்நகேந்தூஜ்ஜ்வலே ப்ரோஜ்ஜ்வலே\nநிர்மலே ப்ரஹ்வ தேவேஶ லக்ஷ்மீஶ பூதேஶ தோயேஶ வாணீஶ கீநாஶ\nதைத்யேஶ யக்ஷேஶ வாய்வக்நிகோடீரமாணிக்ய ஸம்ஹிருஷ்டபாலாதபோத்தாம--\nலாக்ஷாரஸாருண்யதாருண்ய லக்ஷ்மீகிருஹிதாங்க்ரிபத்ம்மே ஸுபத்மே உமே"
   output: "patmarAkOllasa nmEkalAmauktikashrONishOpAjitasvarNapUpiruttalE\nCantrikAshItalE vikasitanavakiMshukAtAMrativyAMshukaCCanna\nCArUrushOpAparApUtasintUrashONAyamAnEntramAtaGka\nhasmArkkalE vaipavAnarkkalE shyAmalE kOmalasniktta\nnIlOtpalOtpAtitAnaGkatUNIrashaGkAkarOtAra\njaMkAlatE CArulIlAkatE naMratikpAlasImantinI\nkuntalasnikttanIlaprapApuJCasaJjAtaturvAGkurAshaGka\nsAraMkasaMyOkariMkannakEntUjjvalE prOjjvalE\nnirmalE prahva tEvEsha lakShmIsha pUtEsha tOyEsha vANIsha kInAsha\ntaityEsha yakShEsha vAyvaknikOTIramANikya saMhiruShTapAlAtapOttAma--\nlAkShArasAruNyatAruNya lakShmIkiruhitAGkripatMmE supatmE umE"
-  reversible: false
+  reversible: true

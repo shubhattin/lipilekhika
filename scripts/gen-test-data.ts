@@ -234,7 +234,7 @@ const sanskrit_other_brahmic_scripts = async () => {
             to: "Normal",
             input: dot_free_output,
             output: input_norm1,
-            reversible: false,
+            reversible: true,
           });
         }
       }

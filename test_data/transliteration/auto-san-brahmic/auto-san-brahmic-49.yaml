@@ -243,4 +243,4 @@
   to: Normal
   input: "ருஷீணாம் ஸம்நிதௌ ராஜம்ஸ்தவ புத்ராகமம் ப்ரதி ।\nகாஶ்யபஸ்ய ச புத்ரோऽஸ்தி விபாண்டக இதி ஶ்ருதஃ ॥௧-௯-௩॥"
   output: "ruShINAM saMnitau rAjaMstava putrAkamaM prati .\nkAshyapasya Ca putrO''sti vipANTaka iti shrutaH ..1-9-3.."
-  reversible: false
+  reversible: true

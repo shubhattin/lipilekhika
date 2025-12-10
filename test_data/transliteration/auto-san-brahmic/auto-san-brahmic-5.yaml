@@ -219,7 +219,7 @@
   to: Normal
   input: "ঋষীণাং সংনিধৌ রাজংস্তব পুত্রাগমং প্রতি ।\nকাশ্যপস্য চ পুত্রোঽস্তি বিভাণ্ডক ইতি শ্রুতঃ ॥১-৯-৩॥"
   output: "RShINAM saMnidhau rAjaMstaba putrAgamaM prati .\nkAshyapasya Ca putrO''sti bibhANDaka iti shrutaH ..1-9-3.."
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Bengali
@@ -237,7 +237,7 @@
   to: Normal
   input: "বক্ষ্যন্তি তে মহীপালং ব্রাহ্মণা বেদপারগাঃ ।\nবিভাণ্ডকসুতং রাজন্ সর্বোপাযৈরিহানয ॥১-৯-১২॥"
   output: "bakShyanti tE mahIpAlaM brAhmaNA bEdapAragAH .\nbibhANDakasutaM rAjan sarbOpAyairihAnaya ..1-9-12.."
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Bengali

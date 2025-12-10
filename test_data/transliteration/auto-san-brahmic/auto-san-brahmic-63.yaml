@@ -15,7 +15,7 @@
   to: Normal
   input: ॥ இதி துர்காஸூக்தம் ॥
   output: .. iti turkAsUktaM ..
-  reversible: false
+  reversible: true
 - index: 3
   from: Devanagari
   to: Tamil

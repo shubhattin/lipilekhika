@@ -3,7 +3,7 @@
   to: Normal
   input: "நமாமி பார்வதீபதிம் நமாமி ஜாஹ்நவீபதிம் \nநமாமி பக்தவத்ஸலம் நமாமி பாலலோசநம் ।\nநமாமி சந்த்ரஶேகரம் நமாமி துஃகமோசநம் \nததீயபாதபங்கஜம் ஸ்மராம்யஹம் நடேஶ்வரம் ॥௧௭॥"
   output: "namAmi pArvatIpatiM namAmi jAhnavIpatiM \nnamAmi paktavatsalaM namAmi pAlalOCanaM .\nnamAmi CantrashEkaraM namAmi tuHkamOCanaM \ntatIyapAtapaGkajaM smarAMyahaM naTEshvaraM ..17.."
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Tamil
@@ -21,7 +21,7 @@
   to: Normal
   input: "அகர்வஸர்வமங்களாகளாகதம்பமஞ்ஜரீ\nரஸப்ரவாஹமாதுரீவிஜிரும்பணாமதுவ்ரதம் ।\nஸ்மராந்தகம் புராந்தகம் பவாந்தகம் மகாந்தகம்\nகஜாந்தகாந்தகாந்தகம் தமந்தகாந்தகம் பஜே ॥௧௦॥"
   output: "akarvasarvamaGkaLAkaLAkataMpamaJjarI\nrasapravAhamAturIvijiruMpaNAmatuvrataM .\nsmarAntakaM purAntakaM pavAntakaM makAntakaM\nkajAntakAntakAntakaM tamantakAntakaM pajE ..10.."
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Tamil
@@ -39,7 +39,7 @@
   to: Normal
   input: "இதம் ஹி நித்யமேவமுக்தமுத்தமோத்தமம் ஸ்தவம்\nபடந் ஸ்மரந் ப்ருவந் நரோ விஶுத்திமேதி ஸந்ததம் ।\nஹரே குரௌ ஸுபக்திமாஶுயாதி நாந்யதாகதிம்\nவிமோஹநம் ஹி தேஹிநாம் ஸுஶங்கரஸ்யசிந்தநம் ॥௧௪॥"
   output: "itaM hi nityamEvamuktamuttamOttamaM stavaM\npaTan smaran pruvan narO vishuttimEti santataM .\nharE kurau supaktimAshuyAti nAnyatAkatiM\nvimOhanaM hi tEhinAM sushaGkarasyaCintanaM ..14.."
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Tamil
@@ -57,7 +57,7 @@
   to: Normal
   input: "நிலிம்பநாதநாகரீகதம்பமௌலமல்லிகா-\nநிகும்பநிர்பரக்ஷரந்மதூஷ்ணிகாமநோஹரஃ ।\nதநோது நோ மநோமுதம் விநோதிநீமஹர்நிஶம்\nபரஶ்ரியஃ பரம்பதம் ததங்கஜத்விஷாம்சயஃ ॥௧௫॥"
   output: "niliMpanAtanAkarIkataMpamaulamallikA-\nnikuMpanirparakSharanmatUShNikAmanOharaH .\ntanOtu nO manOmutaM vinOtinImaharnishaM\nparashriyaH paraMpataM tataGkajatviShAMCayaH ..15.."
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Tamil
@@ -75,7 +75,7 @@
   to: Normal
   input: "பூஜாவஸாநஸமயேதஶவக்த்ரகீதம்\nயஃ ஶம்புபூஜநபரம்படதிப்ரதோஷே ।\nதஸ்யஸ்திராம் ரதகஜேந்த்ரதுரங்கயுக்தாம்\nலக்ஷ்மீம் ஸதைவஸுமுகீம் ப்ரததாதிஶம்புஃ ॥௧௮॥"
   output: "pUjAvasAnasamayEtashavaktrakItaM\nyaH shaMpupUjanaparaMpaTatipratOShE .\ntasyastirAM ratakajEntraturaGkayuktAM\nlakShmIM sataivasumukIM pratatAtishaMpuH ..18.."
-  reversible: false
+  reversible: true
 - index: 13
   from: Devanagari
   to: Tamil
@@ -93,7 +93,7 @@
   to: Normal
   input: ॥இதி ஶ்ரீராவணவிரசிதம்ஶிவதாண்டவஸ்தோத்ரம் ஸம்பூர்ணம்॥
   output: ..iti shrIrAvaNaviraCitaMshivatANTavastOtraM saMpUrNaM..
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Tamil
@@ -111,7 +111,7 @@
   to: Normal
   input: "பரம் பூயஃ ப்ரவக்ஷ்யாமி ஜ்ஞாநாநாம் ஜ்ஞாநமுத்தமம் ।\nயஜ்ஜ்ஞாத்வா முநயஃ ஸர்வே பராம் ஸித்திமிதோ கதாஃ ॥௧௪-௧॥"
   output: "paraM pUyaH pravakShyAmi jJAnAnAM jJAnamuttamaM .\nyajjJAtvA munayaH sarvE parAM sittimitO katAH ..14-1.."
-  reversible: false
+  reversible: true
 - index: 19
   from: Devanagari
   to: Tamil
@@ -129,7 +129,7 @@
   to: Normal
   input: "இதம் ஜ்ஞாநமுபாஶ்ரித்ய மம ஸாதர்ம்யமாகதாஃ ।\nஸர்கேऽபி நோபஜாயந்தே ப்ரலயே ந வ்யதந்தி ச ॥௧௪-௨॥"
   output: "itaM jJAnamupAshritya mama sAtarMyamAkatAH .\nsarkE''pi nOpajAyantE pralayE na vyatanti Ca ..14-2.."
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Tamil
@@ -147,7 +147,7 @@
   to: Normal
   input: "மம யோநிர்மஹத் ப்ரஹ்ம தஸ்மிந்கர்பம் ததாம்யஹம் ।\nஸம்பவஃ ஸர்வபூதாநாம் ததோ பவதி பாரத ॥௧௪-௩॥"
   output: "mama yOnirmahat prahma tasminkarpaM tatAMyahaM .\nsaMpavaH sarvapUtAnAM tatO pavati pArata ..14-3.."
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Tamil
@@ -165,7 +165,7 @@
   to: Normal
   input: "ஸர்வயோநிஷு கௌந்தேய மூர்தயஃ ஸம்பவந்தி யாஃ ।\nதாஸாம் ப்ரஹ்ம மஹத்யோநிரஹம் பீஜப்ரதஃ பிதா ॥௧௪-௪॥"
   output: "sarvayOniShu kauntEya mUrtayaH saMpavanti yAH .\ntAsAM prahma mahatyOnirahaM pIjaprataH pitA ..14-4.."
-  reversible: false
+  reversible: true
 - index: 28
   from: Devanagari
   to: Tamil
@@ -183,7 +183,7 @@
   to: Normal
   input: "ஸத்த்வம் ரஜஸ்தம இதி குணாஃ ப்ரகிருதிஸம்பவாஃ ।\nநிபத்நந்தி மஹாபாஹோ தேஹே தேஹிநமவ்யயம் ॥௧௪-௫॥"
   output: "sattvaM rajastama iti kuNAH prakirutisaMpavAH .\nnipatnanti mahApAhO tEhE tEhinamavyayaM ..14-5.."
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Tamil
@@ -201,7 +201,7 @@
   to: Normal
   input: "ஸமதுஃகஸுகஃ ஸ்வஸ்தஃ ஸமலோஷ்டாஶ்மகாஞ்சநஃ ।\nதுல்யப்ரியாப்ரியோ தீரஸ்துல்யநிந்தாத்மஸம்ஸ்துதிஃ ॥௧௪-௨௪॥"
   output: "samatuHkasukaH svastaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO tIrastulyanintAtmasaMstutiH ..14-24.."
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Tamil
@@ -219,7 +219,7 @@
   to: Normal
   input: "மாநாபமாநயோஸ்துல்யஸ்துல்யோ மித்ராரிபக்ஷயோஃ ।\nஸர்வாரம்பபரித்யாகீ குணாதீதஃ ஸ உச்யதே ॥௧௪-௨௫॥"
   output: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvAraMpaparityAkI kuNAtItaH sa uCyatE ..14-25.."
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Tamil
@@ -237,7 +237,7 @@
   to: Normal
   input: "மாம் ச யோऽவ்யபிசாரேண பக்தியோகேந ஸேவதே ।\nஸ குணாந்ஸமதீத்யைதாந்ப்ரஹ்மபூயாய கல்பதே ॥௧௪-௨௬॥"
   output: "mAM Ca yO''vyapiCArENa paktiyOkEna sEvatE .\nsa kuNAnsamatItyaitAnprahmapUyAya kalpatE ..14-26.."
-  reversible: false
+  reversible: true
 - index: 40
   from: Devanagari
   to: Tamil

@@ -63,7 +63,7 @@
   to: Normal
   input: அத புருஷஸூக்தம் ॥
   output: ata puruShasUktaM ..
-  reversible: false
+  reversible: true
 - index: 11
   from: Devanagari
   to: Tamil

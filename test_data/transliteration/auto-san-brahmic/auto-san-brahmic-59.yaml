@@ -3,7 +3,7 @@
   to: Normal
   input: "மநுரநுகத பக்ஷிவக்த்ர ஸ்புரத்தாரகஸ்தாவகஶ்சித்ரபாநுப்ரியாஶேகரஸ்த்ராயதாம்\nநஸ்த்ரிவர்காபவர்கப்ரஸூதிஃ பரவ்யோமதாமந்\nவலத்வேஷிதர்பஜ்வலத்வாலகில்யப்ரதிஜ்ஞாவதீர்ண ஸ்திராம் தத்த்வபுத்திம் பராம்\nபக்திதேநும் ஜகந்மூலகந்தே முகுந்தே ம்ஹாநந்ததோக்த்ரீம் ததீதா\nமுதாகாமஹீநாமஹீநாமஹீநாந்தக ॥ ௫॥"
   output: "manuranukata pakShivaktra spurattArakastAvakashCitrapAnupriyAshEkarastrAyatAM\nnastrivarkApavarkaprasUtiH paravyOmatAman\nvalatvEShitarpajvalatvAlakilyapratijJAvatIrNa stirAM tattvaputtiM parAM\npaktitEnuM jakanmUlakantE mukuntE MhAnantatOktrIM tatItA\nmutAkAmahInAmahInAmahInAntaka .. 5.."
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Tamil
@@ -21,7 +21,7 @@
   to: Normal
   input: "ஷட்த்ரிம்ஶத்கணசரணோ நரபரிபாடீநவீநகும்பகணஃ ।\nவிஷ்ணுரததண்டகோऽயம் விகடயது விபக்ஷவாஹிநீவ்யூஹம் ॥ ௬॥"
   output: "ShaTtriMshatkaNaCaraNO naraparipATInavInakuMpakaNaH .\nviShNuratataNTakO''yaM vikaTayatu vipakShavAhinIvyUhaM .. 6.."
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Tamil
@@ -39,7 +39,7 @@
   to: Normal
   input: "விசித்ரஸித்திதஃ ஸோऽயம் வேங்கடேஶவிபஶ்சிதா ।\nகருடத்வஜதோஷாய கீதோ கருடதண்டகஃ ॥ ௭॥"
   output: "viCitrasittitaH sO''yaM vEGkaTEshavipashCitA .\nkaruTatvajatOShAya kItO karuTataNTakaH .. 7.."
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Tamil
@@ -57,7 +57,7 @@
   to: Normal
   input: "கவிதார்கிகஸிம்ஹாய கல்யணகுணஶாலிநே ।\nஶ்ரீமதே வேங்கடேஶாய வேதாந்தகுரவே நமஃ ॥"
   output: "kavitArkikasiMhAya kalyaNakuNashAlinE .\nshrImatE vEGkaTEshAya vEtAntakuravE namaH .."
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Tamil
@@ -75,7 +75,7 @@
   to: Normal
   input: ஶ்ரீமதே நிகமாந்தமஹாதேஶிகாய நமஃ ॥
   output: shrImatE nikamAntamahAtEshikAya namaH ..
-  reversible: false
+  reversible: true
 - index: 13
   from: Devanagari
   to: Tamil
@@ -93,7 +93,7 @@
   to: Normal
   input: இதி ஶ்ரீவேதாந்ததேஶிகவிரசிதஃ கருடதண்டகஃ ஸம்பூர்ணஃ ।
   output: iti shrIvEtAntatEshikaviraCitaH karuTataNTakaH saMpUrNaH .
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Tamil
@@ -231,7 +231,7 @@
   to: Normal
   input: "ருக்வேதஸம்ஹிதாயாம் பஞ்சமம் மண்டலம் । ஏகப்ஞ்சாஶம் ஸூக்தம் ।\nருஷிஃ - ஸ்வஸ்த்யாத்ரேயஃ, தேவதா - விஶ்வே தேவாஃ, சந்தஃ - ௧௧ நிசிருத்த்ரிஷ்டுப்,\n௧௨ த்ரிஷ்டுப், ௧௩ பங்க்திஃ, ௧௪, ௧௫ அநுஷ்டுப்,\nஸ்வரஃ - ௧௧, ௧௨ தைவதஃ, ௧௩ பஞ்சமஃ, ௧௪, ௧௫ காந்தாரஃ"
   output: "rukvEtasaMhitAyAM paJCamaM maNTalaM . EkapJCAshaM sUktaM .\nruShiH - svastyAtrEyaH, tEvatA - vishvE tEvAH, CantaH - 11 niCiruttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsvaraH - 11, 12 taivataH, 13 paJCamaH, 14, 15 kAntAraH"
-  reversible: false
+  reversible: true
 - index: 39
   from: Devanagari
   to: Tamil

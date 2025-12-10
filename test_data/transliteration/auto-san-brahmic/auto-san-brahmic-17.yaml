@@ -3,7 +3,7 @@
   to: Normal
   input: "ততো বিরাডজাযত বিরাজো অধি পূরুষঃ ।\nস জাতো অত্যরিচ্যত পশ্চাদ্ভূমিমথো পুরঃ ॥ ৫॥"
   output: "tatO birADajAyata birAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
-  reversible: false
+  reversible: true
 - index: 1
   from: Devanagari
   to: Bengali
@@ -21,7 +21,7 @@
   to: Normal
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ সম্ভৃতং পৃষদাজ্যম্ ।\nপশূঁস্তাঁশ্চক্রে বাযব্যানারণ্যা গ্রাম্যাশ্চ যে ॥ ৬॥"
   output: "tasmAdyajJAt sarbahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE bAyabyAnAraNyA grAmyAshCa yE .. 6.."
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Bengali
@@ -39,7 +39,7 @@
   to: Normal
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ ঋচঃ সামানি জজ্ঞিরে ।\nছন্দাꣳসি জজ্ঞিরে তস্মাদ্যজুস্তস্মাদজাযত ॥ ৭॥"
   output: "tasmAdyajJAt sarbahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
-  reversible: false
+  reversible: true
 - index: 7
   from: Devanagari
   to: Bengali
@@ -57,7 +57,7 @@
   to: Normal
   input: "তস্মাদশ্বা অজাযন্ত যে কে চোভযাদতঃ ।\nগাবো হ জজ্ঞিরে তস্মাত্তস্মাজ্জাতা অজাবযঃ ॥ ৮॥"
   output: "tasmAdashbA ajAyanta yE kE CObhayAdataH .\ngAbO ha jajJirE tasmAttasmAjjAtA ajAbayaH .. 8.."
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Bengali
@@ -75,7 +75,7 @@
   to: Normal
   input: "তং যজ্ঞং বর্হিষি প্রৌক্ষন্ পুরুষং জাতমগ্রতঃ ।\nতেন দেবা অযজন্ত সাধ্যা ঋষযশ্চ যে ॥ ৯॥"
   output: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEbA ayajanta sAdhyA RShayashCa yE .. 9.."
-  reversible: false
+  reversible: true
 - index: 13
   from: Devanagari
   to: Bengali
@@ -93,7 +93,7 @@
   to: Normal
   input: "যত্পুরুষং ব্যদধুঃ কতিধা ব্যকল্পযন্ ।\nমুখং কিমস্যাসীত্ কিং বাহূ কিমূরূ পাদা উচ্যেতে ॥ ১০॥"
   output: "yatpuruShaM byadadhuH katidhA byakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
-  reversible: false
+  reversible: true
 - index: 16
   from: Devanagari
   to: Bengali
@@ -111,7 +111,7 @@
   to: Normal
   input: "ব্রাহ্মণোঽস্য মুখমাসীদ্বাহূ রাজন্যঃ কৃতঃ ।\nঊরূ তদস্য যদ্বৈশ্যঃ পদ্ভ্যাꣳ শূদ্রো অজাযত ॥ ১১॥"
   output: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadbaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
-  reversible: false
+  reversible: true
 - index: 19
   from: Devanagari
   to: Bengali
@@ -129,7 +129,7 @@
   to: Normal
   input: "চন্দ্রমা মনসো জাতশ্চক্ষোঃ সূর্যো অজাযত ।\nশ্রোত্রাদ্বাযুশ্চ প্রাণশ্চ মুখাদগ্নিরজাযত ॥ ১২॥"
   output: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdbAyushCa prANashCa mukhAdagnirajAyata .. 12.."
-  reversible: false
+  reversible: true
 - index: 22
   from: Devanagari
   to: Bengali
@@ -147,7 +147,7 @@
   to: Normal
   input: "নাভ্যা আসীদন্তরিক্ষꣳ শীর্ষ্ণো দ্যৌঃ সমবর্তত ।\nপদ্ভ্যাং ভূমির্দিশঃ শ্রোত্রাত্তথা লোকাঁঽকল্পযন্ ॥ ১৩॥"
   output: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samabartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
-  reversible: false
+  reversible: true
 - index: 25
   from: Devanagari
   to: Bengali
@@ -165,7 +165,7 @@
   to: Normal
   input: "যত্পুরুষেণ হবিষা দেবা যজ্ঞমতন্বত ।\nবসন্তোঽস্যাসীদাজ্যং গ্রীষ্ম ইধ্মঃ শরদ্ধবিঃ ॥ ১৪॥"
   output: "yatpuruShENa habiShA dEbA yajJamatanbata .\nbasantO''syAsIdAjyaM grIShma idhmaH sharaddhabiH .. 14.."
-  reversible: false
+  reversible: true
 - index: 28
   from: Devanagari
   to: Bengali
@@ -183,7 +183,7 @@
   to: Normal
   input: "সপ্তাস্যাসন্ পরিধযস্ত্রিঃ সপ্ত সমিধঃ কৃতাঃ ।\nদেবা যদ্যজ্ঞং তন্বানা অবধ্নন্ পুরুষং পশুম্ ॥ ১৫॥"
   output: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEbA yadyajJaM tanbAnA abadhnan puruShaM pashum .. 15.."
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Bengali
@@ -201,7 +201,7 @@
   to: Normal
   input: "যজ্ঞেন যজ্ঞমযজন্ত দেবাস্তানি ধর্মাণি প্রথমান্যাসন্ ।\nতে হ নাকং মহিমানঃ সচন্ত যত্র পূর্বে সাধ্যাঃ সন্তি দেবাঃ ॥ ১৬॥"
   output: "yajJEna yajJamayajanta dEbAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrbE sAdhyAH santi dEbAH .. 16.."
-  reversible: false
+  reversible: true
 - index: 34
   from: Devanagari
   to: Bengali
@@ -219,7 +219,7 @@
   to: Normal
   input: ॥ ইতি শুক্লযজুর্বেদীযপুরুষসূক্তং সম্পূর্ণম্॥
   output: .. iti shuklayajurbEdIyapuruShasUktaM sampUrNam..
-  reversible: false
+  reversible: true
 - index: 37
   from: Devanagari
   to: Bengali

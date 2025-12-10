@@ -21,7 +21,7 @@
   to: Normal
   input: "𑖕𑖘𑖯𑖘𑖪𑖱𑖐𑖩𑖕𑖿𑖕𑖩𑖢𑖿𑖨𑖪𑖯𑖮𑖢𑖯𑖪𑖰𑖝𑖭𑖿𑖞𑖩𑖸\n𑖐𑖩𑖸ऽ𑖪𑖩𑖦𑖿𑖤𑖿𑖧𑖩𑖦𑖿𑖤𑖰𑖝𑖯𑖽 𑖥𑖲𑖕𑖒𑖿𑖐𑖝𑖲𑖒𑖿𑖐𑖦𑖯𑖩𑖰𑖎𑖯𑖦𑖿 𑗂\n𑖚𑖦𑖚𑖿𑖚𑖦𑖚𑖿𑖚𑖦𑖚𑖿𑖚𑖦𑖡𑖿𑖡𑖰𑖡𑖯𑖟𑖪𑖚𑖿𑖚𑖦𑖨𑖿𑖪𑖧𑖽\n𑖓𑖎𑖯𑖨𑖓𑖜𑖿𑖚𑖝𑖯𑖜𑖿𑖚𑖪𑖽 𑖝𑖡𑖺𑖝𑖲𑖡𑖾𑖫𑖰𑖪𑖾𑖫𑖰𑖪𑖦𑖿 १"
   output: "jaTATavIgalajjalapravAhapAvitasthalE\ngalE''valambyalambitAM bhujaGgatuGgamAlikAm .\nDamaDDamaDDamaDDamanninAdavaDDamarvayaM\nCakAraCaNDatANDavaM tanOtunaHshivaHshivam 1"
-  reversible: false
+  reversible: true
 - index: 4
   from: Devanagari
   to: Siddham
@@ -57,7 +57,7 @@
   to: Normal
   input: "𑖀𑖏𑖨𑖿𑖪𑖭𑖨𑖿𑖪𑖦𑖒𑖿𑖐𑖩𑖯𑖎𑖩𑖯𑖎𑖟𑖦𑖿𑖤𑖦𑖗𑖿𑖕𑖨𑖱\n𑖨𑖭𑖢𑖿𑖨𑖪𑖯𑖮𑖦𑖯𑖠𑖲𑖨𑖱𑖪𑖰𑖕𑖴𑖦𑖿𑖥𑖜𑖯𑖦𑖠𑖲𑖪𑖿𑖨𑖝𑖦𑖿 𑗂\n𑖭𑖿𑖦𑖨𑖯𑖡𑖿𑖝𑖎𑖽 𑖢𑖲𑖨𑖯𑖡𑖿𑖝𑖎𑖽 𑖥𑖪𑖯𑖡𑖿𑖝𑖎𑖽 𑖦𑖏𑖯𑖡𑖿𑖝𑖎𑖽\n𑖐𑖕𑖯𑖡𑖿𑖝𑖎𑖯𑖡𑖿𑖠𑖎𑖯𑖡𑖿𑖝𑖎𑖽 𑖝𑖦𑖡𑖿𑖝𑖎𑖯𑖡𑖿𑖝𑖎𑖽 𑖥𑖕𑖸 १०"
   output: "akharvasarvamaGgalAkalAkadambamaJjarI\nrasapravAhamAdhurIvijRmbhaNAmadhuvratam .\nsmarAntakaM purAntakaM bhavAntakaM makhAntakaM\ngajAntakAndhakAntakaM tamantakAntakaM bhajE 10"
-  reversible: false
+  reversible: true
 - index: 10
   from: Devanagari
   to: Siddham
@@ -183,7 +183,7 @@
   to: Normal
   input: "𑖝𑖡𑖱𑖧𑖯𑖽𑖭𑖽 𑖢𑖯𑖽𑖭𑖲𑖽 𑖝𑖪 𑖓𑖨𑖜𑖢𑖒𑖿𑖎𑖸𑖨𑖲𑖮𑖥𑖪𑖽\n𑖪𑖰𑖨𑖰𑖗𑖿𑖓𑖰𑖭𑖿𑖭𑖗𑖿𑖓𑖰𑖡𑖿𑖪𑖡𑖿 𑖪𑖰𑖨𑖓𑖧𑖝𑖰 𑖩𑖺𑖎𑖯𑖡𑖪𑖰𑖎𑖩𑖦𑖿 𑗂\n𑖪𑖮𑖝𑖿𑖧𑖸𑖡𑖽 𑖫𑖻𑖨𑖰𑖾 𑖎𑖞𑖦𑖢𑖰 𑖭𑖮𑖭𑖿𑖨𑖸𑖜 𑖫𑖰𑖨𑖭𑖯𑖽\n𑖮𑖨𑖭𑖿𑖭𑖽𑖎𑖿𑖬𑖲𑖟𑖿𑖧𑖹𑖡𑖽 𑖥𑖕𑖝𑖰 𑖥𑖭𑖰𑖝𑖺𑖟𑖿𑖠𑖳𑖩𑖡𑖪𑖰𑖠𑖰𑖦𑖿 २"
   output: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhUlanavidhim 2"
-  reversible: false
+  reversible: true
 - index: 31
   from: Devanagari
   to: Siddham
