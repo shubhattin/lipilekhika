@@ -184,10 +184,10 @@ async function main() {
           )
         );
         res.list.push({
-          krama_ref: krama_key_list_index_list,
-          type: item.type,
           // @ts-ignore
-          ...(IS_DEV_MODE ? { text: item.text } : {})
+          ...(IS_DEV_MODE ? { text: item.text } : {}),
+          krama_ref: krama_key_list_index_list,
+          type: item.type
         });
         krama_key_list_index_list.forEach((krama_key_index) => {
           // link entries in the krama map to the list
@@ -207,13 +207,16 @@ async function main() {
               }
             )
           );
-          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
-          if (IS_DEV_MODE)
+          res.list.push({
             // @ts-ignore
-            res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
+            ...(IS_DEV_MODE ? { text: item.mAtrA } : {}),
+            krama_ref: mAtrA_krama_ref_index_list,
+            type: 'mAtrA'
+          });
+          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
-              res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
+              res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, res.list.length - 1];
             }
           });
         }
@@ -390,10 +393,6 @@ async function main() {
       for (let i = 0; i < res.list.length; i++) {
         // @ts-ignore
         res.list[i].text_uni = toUnicodeEscapes(res.list[i].text);
-        if (res.list[i].type === 'svara') {
-          // @ts-ignore
-          res.list[i].mAtrA_uni = toUnicodeEscapes(res.list[i].mAtrA);
-        }
       }
       for (let i = 0; i < KramaKeysArray.length; i++) {
         res.krama_text_arr[i].push(KramaKeysArray[i]);

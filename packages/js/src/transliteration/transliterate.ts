@@ -70,10 +70,10 @@ export const transliterate_text = async (
       ((BRAHMIC_NUQTA &&
         prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
         prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
-        prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
+        prev_context_arr.at(-1)?.[1]?.type === 'mAtrA') ||
         // or vyanjana, svara
         (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
-          prev_context_arr.at(-1)?.[1]?.type === 'svara')) &&
+          prev_context_arr.at(-1)?.[1]?.type === 'mAtrA')) &&
       // to anya or null
       (!item || item[1]?.type === 'anya')
     ) {
@@ -99,7 +99,7 @@ export const transliterate_text = async (
             prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
             prev_context_arr.at(-1)?.[0] === BRAHMIC_NUQTA)) &&
         // to anya or null
-        ((item[1]?.type !== 'svara' && item[0] !== BRAHMIC_HALANT!) ||
+        ((item[1]?.type !== 'mAtrA' && item[0] !== BRAHMIC_HALANT!) ||
           item[1]?.type === 'anya' ||
           item[1] === null ||
           item[1] === undefined)
@@ -113,9 +113,15 @@ export const transliterate_text = async (
       to_script_data.script_type === 'brahmic'
     ) {
       // custom logic when converting from other to brahmic
-      if (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' && item[1]?.type === 'svara') {
+      if (
+        prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' &&
+        (item[1]?.type === 'mAtrA' || item[1]?.type === 'svara')
+      ) {
         const linked_mAtrA =
-          to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '';
+          item[1]?.type === 'svara'
+            ? (to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '')
+            : item[0]!;
+        // const linked_mAtrA = item[0]!;
         if (
           to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
@@ -137,7 +143,7 @@ export const transliterate_text = async (
         result_str_concat_status = true;
       } else if (
         prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' &&
-        !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'svara')
+        !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
       ) {
         if (
           to_script_name === 'Tamil-Extended' &&
@@ -193,17 +199,17 @@ export const transliterate_text = async (
     //   to_script_data.script_type === 'brahmic';
     // ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
     //   prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
-    //   prev_context_arr.at(-1)?.[1]?.type === 'svara') ||
+    //   prev_context_arr.at(-1)?.[1]?.type === 'mAtrA') ||
     //   (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
-    //     prev_context_arr.at(-1)?.[1]?.type === 'svara'));
+    //     prev_context_arr.at(-1)?.[1]?.type === 'mAtrA'));
     let text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null = null;
     {
-      // Iterative matching with retraction support for vyanjana+svara context
-      // Instead of lookahead, we save the last valid svara match and retract if needed
+      // Iterative matching with retraction support for vyanjana+vowel context
+      // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
       let chars_to_scan = 0;
-      let last_valid_svara_match: OutputScriptData['text_to_krama_map'][number] | null = null;
-      // Flag to track if we're in a vyanjana+svara context where retraction may be needed
-      const check_svara_retraction =
+      let last_valid_vowel_match: OutputScriptData['text_to_krama_map'][number] | null = null;
+      // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
+      const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
         to_script_data.script_type === 'brahmic' &&
         (prev_context_arr.at(-1)?.[1]?.type === 'vyanjana' ||
@@ -244,10 +250,10 @@ export const transliterate_text = async (
         }
         const potential_match = from_script_data.text_to_krama_map[char_index];
 
-        // When in vyanjana context, track single-svara matches for potential retraction
+        // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
         if (
-          check_svara_retraction &&
+          check_vowel_retraction &&
           potential_match[1].krama &&
           potential_match[1].krama.length >= 1
         ) {
@@ -255,19 +261,20 @@ export const transliterate_text = async (
           const krama_id = krama[0];
           const brahmic_entry = to_script_data.krama_text_arr[krama_id];
           const list_index = brahmic_entry?.[1];
-          const is_single_svara =
+          const list_type = to_script_data.list[list_index ?? -1]?.type;
+          const is_single_vowel =
             krama.length === 1 &&
             list_index !== null &&
             list_index !== undefined &&
-            to_script_data.list[list_index]?.type === 'svara';
+            (list_type === 'svara' || list_type === 'mAtrA');
 
-          if (is_single_svara) {
+          if (is_single_vowel) {
             // Save this as a valid retraction point
-            last_valid_svara_match = potential_match;
-          } else if (last_valid_svara_match !== null) {
-            // Current match is NOT a single svara but we have a saved svara match
-            // Retract to the last valid svara match
-            text_to_krama_item = last_valid_svara_match;
+            last_valid_vowel_match = potential_match;
+          } else if (last_valid_vowel_match !== null) {
+            // Current match is NOT a single vowel but we have a saved vowel match
+            // Retract to the last valid vowel match
+            text_to_krama_item = last_valid_vowel_match;
             break;
           }
         }
@@ -311,12 +318,8 @@ export const transliterate_text = async (
               if (char_index !== -1 && nth_char_text_index !== -1) {
                 text_to_krama_item = from_script_data.text_to_krama_map[char_index];
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
-                if (
-                  nth_next_character === from_script_data.halant ||
-                  from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara'
-                  // we should actually be checking for the mAtrA text and match rather then checking
-                  // just the type but this shall also be fine as they are cases yet of a svara preceding it
-                ) {
+                const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
+                if (nth_next_character === from_script_data.halant || nth_char_type === 'mAtrA') {
                   ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 2;
                   break;
                 }
@@ -364,10 +367,10 @@ export const transliterate_text = async (
                 const n_1_th_char_text_item =
                   from_script_data.krama_text_arr[n_1_th_char_text_index];
                 text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-                if (
-                  from_script_data.list[nth_char_text_item[1] ?? -1]?.type === 'svara' &&
-                  from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type === 'svara'
-                ) {
+                const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
+                const n_1_th_char_type =
+                  from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type;
+                if (nth_char_type === 'mAtrA' && n_1_th_char_type === 'mAtrA') {
                   ignore_ta_ext_sup_num_text_index = text_index + chars_to_scan + 3;
                   break;
                 }
@@ -456,7 +459,7 @@ export const transliterate_text = async (
           if (
             to_script_data.script_type === 'brahmic' &&
             to_script_name === 'Tamil-Extended' &&
-            (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'svara' ||
+            (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
               result_text === to_script_data.halant) &&
             TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
               result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
@@ -521,7 +524,7 @@ export const transliterate_text = async (
       if (
         to_script_data.script_type === 'brahmic' &&
         to_script_name === 'Tamil-Extended' &&
-        (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'svara' ||
+        (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'mAtrA' ||
           to_add_text === to_script_data.halant) &&
         TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
           result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
