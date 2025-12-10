@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Devanagari
+  input: "jayagaruDa suparNa darvIkarAhAra dEvAdhipAhArahArin\ndivaukaspatikShiptadambhOLidhArAkiNAkalpa kalpAntavAtUla kalpOdayAnalpa\nvIrAyitOdyaCCamatkAra daityAri jaitradhvajArOhanirdhAritOtkarSha\nsaGkarShaNAtman garutman marutpaJCa kAdhIsha satyAdimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
+  output: "जयगरुड सुपर्ण दर्वीकराहार देवाधिपाहारहारिन्\nदिवौकस्पतिक्षिप्तदम्भोळिधाराकिणाकल्प कल्पान्तवातूल कल्पोदयानल्प\nवीरायितोद्यच्चमत्कार दैत्यारि जैत्रध्वजारोहनिर्धारितोत्कर्ष\nसङ्कर्षणात्मन् गरुत्मन् मरुत्पञ्च काधीश सत्यादिमूर्ते न कश्चित्\nसमस्ते नमस्ते पुनस्ते नमः ॥ ३॥"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Assamese
+  input: "jayagaruDa suparNa darvIkarAhAra dEvAdhipAhArahArin\ndivaukaspatikShiptadambhOLidhArAkiNAkalpa kalpAntavAtUla kalpOdayAnalpa\nvIrAyitOdyaCCamatkAra daityAri jaitradhvajArOhanirdhAritOtkarSha\nsaGkarShaNAtman garutman marutpaJCa kAdhIsha satyAdimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
+  output: "জযগৰুড সুপৰ্ণ দৰ্ৱীকৰাহাৰ দেৱাধিপাহাৰহাৰিন্\nদিৱৌকস্পতিক্ষিপ্তদম্ভোল়িধাৰাকিণাকল্প কল্পান্তৱাতূল কল্পোদযানল্প\nৱীৰাযিতোদ্যচ্চমত্কাৰ দৈত্যাৰি জৈত্ৰধ্ৱজাৰোহনিৰ্ধাৰিতোত্কৰ্ষ\nসঙ্কৰ্ষণাত্মন্ গৰুত্মন্ মৰুত্পঞ্চ কাধীশ সত্যাদিমূৰ্তে ন কশ্চিত্\nসমস্তে নমস্তে পুনস্তে নমঃ ॥ ৩॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Devanagari
+  input: "nama idamajahatsaparyAya paryAyaniryAtapakShAnilAsphAlanOdvElapAthOdhi\nvICICapETAhatAgAdhapAtALabhAGkArasaMkruddhanAgEndrapIDAsRNIbhAva-\nbhAsvannakhashrENayE CaNDatuNDAya nRtyadbhujaGgabhruvE vajriNE daMShTraya\ntubhyamadhyAtmavidyA vidhEyA vidhEyA bhavaddAsyamApAdayEthA dayEthAshCa mE .. 4.."
+  output: "नम इदमजहत्सपर्याय पर्यायनिर्यातपक्षानिलास्फालनोद्वेलपाथोधि\nवीचीचपेटाहतागाधपाताळभाङ्कारसंक्रुद्धनागेन्द्रपीडासृणीभाव-\nभास्वन्नखश्रेणये चण्डतुण्डाय नृत्यद्भुजङ्गभ्रुवे वज्रिणे दंष्ट्रय\nतुभ्यमध्यात्मविद्या विधेया विधेया भवद्दास्यमापादयेथा दयेथाश्च मे ॥ ४॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Assamese
+  input: "nama idamajahatsaparyAya paryAyaniryAtapakShAnilAsphAlanOdvElapAthOdhi\nvICICapETAhatAgAdhapAtALabhAGkArasaMkruddhanAgEndrapIDAsRNIbhAva-\nbhAsvannakhashrENayE CaNDatuNDAya nRtyadbhujaGgabhruvE vajriNE daMShTraya\ntubhyamadhyAtmavidyA vidhEyA vidhEyA bhavaddAsyamApAdayEthA dayEthAshCa mE .. 4.."
+  output: "নম ইদমজহত্সপৰ্যায পৰ্যাযনিৰ্যাতপক্ষানিলাস্ফালনোদ্ৱেলপাথোধি\nৱীচীচপেটাহতাগাধপাতাল়ভাঙ্কাৰসংক্ৰুদ্ধনাগেন্দ্ৰপীডাসৃণীভাৱ-\nভাস্ৱন্নখশ্ৰেণযে চণ্ডতুণ্ডায নৃত্যদ্ভুজঙ্গভ্ৰুৱে ৱজ্ৰিণে দংষ্ট্ৰয\nতুভ্যমধ্যাত্মৱিদ্যা ৱিধেযা ৱিধেযা ভৱদ্দাস্যমাপাদযেথা দযেথাশ্চ মে ॥ ৪॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Devanagari
+  input: "manuranugata pakShivaktra sphurattArakastAvakashCitrabhAnupriyAshEkharastrAyatAM\nnastrivargApavargaprasUtiH paravyOmadhAman\nvaladvEShidarpajvaladvAlakhilyapratijJAvatIrNa sthirAM tattvabuddhiM parAM\nbhaktidhEnuM jaganmUlakandE mukundE mhAnandadOgdhrIM dadhIthA\nmudhAkAmahInAmahInAmahInAntaka .. 5.."
+  output: "मनुरनुगत पक्षिवक्त्र स्फुरत्तारकस्तावकश्चित्रभानुप्रियाशेखरस्त्रायतां\nनस्त्रिवर्गापवर्गप्रसूतिः परव्योमधामन्\nवलद्वेषिदर्पज्वलद्वालखिल्यप्रतिज्ञावतीर्ण स्थिरां तत्त्वबुद्धिं परां\nभक्तिधेनुं जगन्मूलकन्दे मुकुन्दे म्हानन्ददोग्ध्रीं दधीथा\nमुधाकामहीनामहीनामहीनान्तक ॥ ५॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Assamese
+  input: "manuranugata pakShivaktra sphurattArakastAvakashCitrabhAnupriyAshEkharastrAyatAM\nnastrivargApavargaprasUtiH paravyOmadhAman\nvaladvEShidarpajvaladvAlakhilyapratijJAvatIrNa sthirAM tattvabuddhiM parAM\nbhaktidhEnuM jaganmUlakandE mukundE mhAnandadOgdhrIM dadhIthA\nmudhAkAmahInAmahInAmahInAntaka .. 5.."
+  output: "মনুৰনুগত পক্ষিৱক্ত্ৰ স্ফুৰত্তাৰকস্তাৱকশ্চিত্ৰভানুপ্ৰিযাশেখৰস্ত্ৰাযতাং\nনস্ত্ৰিৱৰ্গাপৱৰ্গপ্ৰসূতিঃ পৰৱ্যোমধামন্\nৱলদ্ৱেষিদৰ্পজ্ৱলদ্ৱালখিল্যপ্ৰতিজ্ঞাৱতীৰ্ণ স্থিৰাং তত্ত্ৱবুদ্ধিং পৰাং\nভক্তিধেনুং জগন্মূলকন্দে মুকুন্দে ম্হানন্দদোগ্ধ্ৰীং দধীথা\nমুধাকামহীনামহীনামহীনান্তক ॥ ৫॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Devanagari
+  input: "ShaTtriMshadgaNaCaraNO naraparipATInavInagumbhagaNaH .\nviShNurathadaNDakO''yaM vighaTayatu vipakShavAhinIvyUham .. 6.."
+  output: "षट्त्रिंशद्गणचरणो नरपरिपाटीनवीनगुम्भगणः ।\nविष्णुरथदण्डकोऽयं विघटयतु विपक्षवाहिनीव्यूहम् ॥ ६॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Assamese
+  input: "ShaTtriMshadgaNaCaraNO naraparipATInavInagumbhagaNaH .\nviShNurathadaNDakO''yaM vighaTayatu vipakShavAhinIvyUham .. 6.."
+  output: "ষট্ত্ৰিংশদ্গণচৰণো নৰপৰিপাটীনৱীনগুম্ভগণঃ ।\nৱিষ্ণুৰথদণ্ডকোঽযং ৱিঘটযতু ৱিপক্ষৱাহিনীৱ্যূহম্ ॥ ৬॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Devanagari
+  input: "viCitrasiddhidaH sO''yaM vEGkaTEshavipashCitA .\ngaruDadhvajatOShAya gItO garuDadaNDakaH .. 7.."
+  output: "विचित्रसिद्धिदः सोऽयं वेङ्कटेशविपश्चिता ।\nगरुडध्वजतोषाय गीतो गरुडदण्डकः ॥ ७॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Assamese
+  input: "viCitrasiddhidaH sO''yaM vEGkaTEshavipashCitA .\ngaruDadhvajatOShAya gItO garuDadaNDakaH .. 7.."
+  output: "ৱিচিত্ৰসিদ্ধিদঃ সোঽযং ৱেঙ্কটেশৱিপশ্চিতা ।\nগৰুডধ্ৱজতোষায গীতো গৰুডদণ্ডকঃ ॥ ৭॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Devanagari
+  input: "kavitArkikasiMhAya kalyaNaguNashAlinE .\nshrImatE vEGkaTEshAya vEdAntaguravE namaH .."
+  output: "कवितार्किकसिंहाय कल्यणगुणशालिने ।\nश्रीमते वेङ्कटेशाय वेदान्तगुरवे नमः ॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Assamese
+  input: "kavitArkikasiMhAya kalyaNaguNashAlinE .\nshrImatE vEGkaTEshAya vEdAntaguravE namaH .."
+  output: "কৱিতাৰ্কিকসিংহায কল্যণগুণশালিনে ।\nশ্ৰীমতে ৱেঙ্কটেশায ৱেদান্তগুৰৱে নমঃ ॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Devanagari
+  input: shrImatE nigamAntamahAdEshikAya namaH ..
+  output: श्रीमते निगमान्तमहादेशिकाय नमः ॥
+  reversible: true
+- index: 13
+  from: Normal
+  to: Assamese
+  input: shrImatE nigamAntamahAdEshikAya namaH ..
+  output: শ্ৰীমতে নিগমান্তমহাদেশিকায নমঃ ॥
+  reversible: true
+- index: 14
+  from: Normal
+  to: Devanagari
+  input: iti shrIvEdAntadEshikaviraCitaH garuDadaNDakaH sampUrNaH .
+  output: इति श्रीवेदान्तदेशिकविरचितः गरुडदण्डकः सम्पूर्णः ।
+  reversible: true
+- index: 15
+  from: Normal
+  to: Assamese
+  input: iti shrIvEdAntadEshikaviraCitaH garuDadaNDakaH sampUrNaH .
+  output: ইতি শ্ৰীৱেদান্তদেশিকৱিৰচিতঃ গৰুডদণ্ডকঃ সম্পূৰ্ণঃ ।
+  reversible: true
+- index: 16
+  from: Normal
+  to: Devanagari
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. 100101"
+  output: "अ॒ग्निमी॑ळे पु॒रोहि॑तं य॒ज्ञस्य॑ दे॒वमृ॒त्विज॑म् ।\nहोता॑रं रत्न॒धात॑मम् ॥ १००१०१"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Assamese
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. 100101"
+  output: "অ॒গ্নিমী॑ল়ে পু॒ৰোহি॑তং য॒জ্ঞস্য॑ দে॒ৱমৃ॒ত্ৱিজ॑ম্ ।\nহোতা॑ৰং ৰত্ন॒ধাত॑মম্ ॥ ১০০১০১"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Devanagari
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. 100106"
+  output: "यद॒ङ्ग दा॒शुषे॒ त्वमग्ने॑ भ॒द्रं क॑रि॒ष्यसि॑ ।\nतवेत्तत्स॒त्यम॑ङ्गिरः ॥ १००१०६"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Assamese
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. 100106"
+  output: "যদ॒ঙ্গ দা॒শুষে॒ ত্ৱমগ্নে॑ ভ॒দ্ৰং ক॑ৰি॒ষ্যসি॑ ।\nতৱেত্তত্স॒ত্যম॑ঙ্গিৰঃ ॥ ১০০১০৬"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Devanagari
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. 100301"
+  output: "अश्वि॑ना॒ यज्व॑री॒रिषो॒ द्रव॑त्पाणी॒ शुभ॑स्पती ।\nपुरु॑भुजा चन॒स्यत॑म् ॥ १००३०१"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Assamese
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. 100301"
+  output: "অশ্ৱি॑না॒ যজ্ৱ॑ৰী॒ৰিষো॒ দ্ৰৱ॑ত্পাণী॒ শুভ॑স্পতী ।\nপুৰু॑ভুজা চন॒স্যত॑ম্ ॥ ১০০৩০১"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Devanagari
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. 1.."
+  output: "नास॑दासी॒न्नो सदा॑सीत्त॒दानीं॒ नासी॒द्रजो॒ नो व्यो॑मा प॒रो यत् ।\nकिमाव॑रीवः॒ कुह॒ कस्य॒ शर्म॒न्नम्भः॒ किमा॑सी॒द्गह॑नं गभी॒रम् ॥ १॥"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Assamese
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. 1.."
+  output: "নাস॑দাসী॒ন্নো সদা॑সীত্ত॒দানীং॒ নাসী॒দ্ৰজো॒ নো ৱ্যো॑মা প॒ৰো যত্ ।\nকিমাৱ॑ৰীৱঃ॒ কুহ॒ কস্য॒ শৰ্ম॒ন্নম্ভঃ॒ কিমা॑সী॒দ্গহ॑নং গভী॒ৰম্ ॥ ১॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Devanagari
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. 2.."
+  output: "न मृ॒त्युरा॑सीद॒मृतं॒ न तर्हि॒ न रात्र्या॒ अह्न॑ आसीत्प्रके॒तः ।\nआनी॑दवा॒तं स्व॒धया॒ तदेकं॒ तस्मा॑द्धा॒न्यन्न प॒रः किं च॒नास॑ ॥ २॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Assamese
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. 2.."
+  output: "ন মৃ॒ত্যুৰা॑সীদ॒মৃতং॒ ন তৰ্হি॒ ন ৰাত্ৰ্যা॒ অহ্ন॑ আসীত্প্ৰকে॒তঃ ।\nআনী॑দৱা॒তং স্ৱ॒ধযা॒ তদেকং॒ তস্মা॑দ্ধা॒ন্যন্ন প॒ৰঃ কিং চ॒নাস॑ ॥ ২॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Devanagari
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. 3.."
+  output: "तम॑ आसी॒त्तम॑सा गू॒ळ्हमग्रे॑ऽप्रके॒तं स॑लि॒लं सर्व॑मा इ॒दम् ।\nतु॒च्छ्येना॒भ्वपि॑हितं॒ यदासी॒त्तप॑स॒स्तन्म॑हि॒नाजा॑य॒तैक॑म् ॥ ३॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Assamese
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. 3.."
+  output: "তম॑ আসী॒ত্তম॑সা গূ॒ল়্হমগ্ৰে॑ঽপ্ৰকে॒তং স॑লি॒লং সৰ্ৱ॑মা ই॒দম্ ।\nতু॒চ্ছ্যেনা॒ভ্ৱপি॑হিতং॒ যদাসী॒ত্তপ॑স॒স্তন্ম॑হি॒নাজা॑য॒তৈক॑ম্ ॥ ৩॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Devanagari
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. 4.."
+  output: "काम॒स्तदग्रे॒ सम॑वर्त॒ताधि॒ मन॑सो॒ रेतः॑ प्रथ॒मं यदासी॑त् ।\nस॒तो बन्धु॒मस॑ति॒ निर॑विन्दन्हृ॒दि प्र॒तीष्या॑ क॒वयो॑ मनी॒षा ॥ ४॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Assamese
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. 4.."
+  output: "কাম॒স্তদগ্ৰে॒ সম॑ৱৰ্ত॒তাধি॒ মন॑সো॒ ৰেতঃ॑ প্ৰথ॒মং যদাসী॑ত্ ।\nস॒তো বন্ধু॒মস॑তি॒ নিৰ॑ৱিন্দন্হৃ॒দি প্ৰ॒তীষ্যা॑ ক॒ৱযো॑ মনী॒ষা ॥ ৪॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Devanagari
+  input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI3du↓pari↑ svidAsI3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. 5.."
+  output: "ति॒र॒श्चीनो॒ वित॑तो र॒श्मिरे॑षाम॒धः स्वि॑दा॒सी३दु॒परि॑ स्विदासी३त् ।\nरे॒तो॒धा आ॑सन्महि॒मान॑ आसन्स्व॒धा अ॒वस्ता॒त्प्रय॑तिः प॒रस्ता॑त् ॥ ५॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Assamese
+  input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI3du↓pari↑ svidAsI3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. 5.."
+  output: "তি॒ৰ॒শ্চীনো॒ ৱিত॑তো ৰ॒শ্মিৰে॑ষাম॒ধঃ স্ৱি॑দা॒সী৩দু॒পৰি॑ স্ৱিদাসী৩ত্ ।\nৰে॒তো॒ধা আ॑সন্মহি॒মান॑ আসন্স্ৱ॒ধা অ॒ৱস্তা॒ত্প্ৰয॑তিঃ প॒ৰস্তা॑ত্ ॥ ৫॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Devanagari
+  input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. 6.."
+  output: "को अ॒द्धा वे॑द॒ क इ॒ह प्र वो॑च॒त्कुत॒ आजा॑ता॒ कुत॑ इ॒यं विसृ॑ष्टिः ।\nअ॒र्वाग्दे॒वा अ॒स्य वि॒सर्ज॑ने॒नाथा॒ को वे॑द॒ यत॑ आब॒भूव॑ ॥ ६॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Assamese
+  input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. 6.."
+  output: "কো অ॒দ্ধা ৱে॑দ॒ ক ই॒হ প্ৰ ৱো॑চ॒ত্কুত॒ আজা॑তা॒ কুত॑ ই॒যং ৱিসৃ॑ষ্টিঃ ।\nঅ॒ৰ্ৱাগ্দে॒ৱা অ॒স্য ৱি॒সৰ্জ॑নে॒নাথা॒ কো ৱে॑দ॒ যত॑ আব॒ভূৱ॑ ॥ ৬॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Devanagari
+  input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. 7.."
+  output: "इ॒यं विसृ॑ष्टि॒र्यत॑ आब॒भूव॒ यदि॑ वा द॒धे यदि॑ वा॒ न ।\nयो अ॒स्याध्य॑क्षः पर॒मे व्यो॑म॒न्सो अ॒ङ्ग वे॑द॒ यदि॑ वा॒ न वेद॑ ॥ ७॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Assamese
+  input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. 7.."
+  output: "ই॒যং ৱিসৃ॑ষ্টি॒ৰ্যত॑ আব॒ভূৱ॒ যদি॑ ৱা দ॒ধে যদি॑ ৱা॒ ন ।\nযো অ॒স্যাধ্য॑ক্ষঃ পৰ॒মে ৱ্যো॑ম॒ন্সো অ॒ঙ্গ ৱে॑দ॒ যদি॑ ৱা॒ ন ৱেদ॑ ॥ ৭॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Devanagari
+  input: "RgvEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - svastyAtrEyaH, dEvatA - vishvE dEvAH, ChandaH - 11 niCRttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsvaraH - 11, 12 dhaivataH, 13 paJCamaH, 14, 15 gAndhAraH"
+  output: "ऋग्वेदसंहितायां पञ्चमं मण्डलम् । एकप्ञ्चाशं सूक्तम् ।\nऋषिः - स्वस्त्यात्रेयः, देवता - विश्वे देवाः, छन्दः - ११ निचृत्त्रिष्टुप्,\n१२ त्रिष्टुप्, १३ पङ्क्तिः, १४, १५ अनुष्टुप्,\nस्वरः - ११, १२ धैवतः, १३ पञ्चमः, १४, १५ गान्धारः"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Assamese
+  input: "RgvEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - svastyAtrEyaH, dEvatA - vishvE dEvAH, ChandaH - 11 niCRttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsvaraH - 11, 12 dhaivataH, 13 paJCamaH, 14, 15 gAndhAraH"
+  output: "ঋগ্ৱেদসংহিতাযাং পঞ্চমং মণ্ডলম্ । একপ্ঞ্চাশং সূক্তম্ ।\nঋষিঃ - স্ৱস্ত্যাত্ৰেযঃ, দেৱতা - ৱিশ্ৱে দেৱাঃ, ছন্দঃ - ১১ নিচৃত্ত্ৰিষ্টুপ্,\n১২ ত্ৰিষ্টুপ্, ১৩ পঙ্ক্তিঃ, ১৪, ১৫ অনুষ্টুপ্,\nস্ৱৰঃ - ১১, ১২ ধৈৱতঃ, ১৩ পঞ্চমঃ, ১৪, ১৫ গান্ধাৰঃ"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Devanagari
+  input: "sva↓sti nO↑↑ mimItAma↓shvinA↓ bhagaH↑ sva↓sti dE↓vyadi↑tirana↓rvaNaH↑ .\nsva↓sti pU↓ShA asu↑rO dadhAtu naH sva↓sti dyAvA↑↑pRthi↓vI su↑CE↓tunA↑↑ .. 505111"
+  output: "स्व॒स्ति नो᳚ मिमीताम॒श्विना॒ भगः॑ स्व॒स्ति दे॒व्यदि॑तिरन॒र्वणः॑ ।\nस्व॒स्ति पू॒षा असु॑रो दधातु नः स्व॒स्ति द्यावा᳚पृथि॒वी सु॑चे॒तुना᳚ ॥ ५०५१११"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Assamese
+  input: "sva↓sti nO↑↑ mimItAma↓shvinA↓ bhagaH↑ sva↓sti dE↓vyadi↑tirana↓rvaNaH↑ .\nsva↓sti pU↓ShA asu↑rO dadhAtu naH sva↓sti dyAvA↑↑pRthi↓vI su↑CE↓tunA↑↑ .. 505111"
+  output: "স্ৱ॒স্তি নো᳚ মিমীতাম॒শ্ৱিনা॒ ভগঃ॑ স্ৱ॒স্তি দে॒ৱ্যদি॑তিৰন॒ৰ্ৱণঃ॑ ।\nস্ৱ॒স্তি পূ॒ষা অসু॑ৰো দধাতু নঃ স্ৱ॒স্তি দ্যাৱা᳚পৃথি॒ৱী সু॑চে॒তুনা᳚ ॥ ৫০৫১১১"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Devanagari
+  input: "sva↓stayE↑↑ vA↓yumupa↑ bravAmahai↓ sOmaM↑↑ sva↓sti bhuva↑nasya↓ yaspatiH↑ .\nbRha↓spatiM↓ sarva↑gaNaM sva↓stayE↑↑ sva↓staya↑ Adi↓tyAsO↑↑ bhavantu naH .. 505112"
+  output: "स्व॒स्तये᳚ वा॒युमुप॑ ब्रवामहै॒ सोमं᳚ स्व॒स्ति भुव॑नस्य॒ यस्पतिः॑ ।\nबृह॒स्पतिं॒ सर्व॑गणं स्व॒स्तये᳚ स्व॒स्तय॑ आदि॒त्यासो᳚ भवन्तु नः ॥ ५०५११२"
+  reversible: true

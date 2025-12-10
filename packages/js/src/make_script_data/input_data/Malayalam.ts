@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Malayalam = {
+const Malayalam: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Malayalam',
   script_id: script_list_obj['Malayalam'],
@@ -33,6 +33,14 @@ const Malayalam = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ഓം',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    // Svara
     {
       text: 'അ',
       mAtrA: '',
@@ -370,6 +378,6 @@ const Malayalam = {
       type: 'anya'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Malayalam;

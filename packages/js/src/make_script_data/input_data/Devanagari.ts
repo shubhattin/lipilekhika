@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Devanagari = {
+const Devanagari: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Devanagari',
   script_id: script_list_obj['Devanagari'],
@@ -403,6 +403,6 @@ const Devanagari = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Devanagari;

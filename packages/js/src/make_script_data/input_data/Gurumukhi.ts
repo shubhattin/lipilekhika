@@ -3,7 +3,7 @@ import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
 const HALANT = '੍';
 
-const Gurumukhi = {
+const Gurumukhi: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Gurumukhi',
   script_id: script_list_obj['Gurumukhi'],
@@ -37,6 +37,13 @@ const Gurumukhi = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ੴ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     // Svara
     {
       text: 'ਅ',
@@ -384,6 +391,6 @@ const Gurumukhi = {
     //   type: 'vyanjana'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Gurumukhi;

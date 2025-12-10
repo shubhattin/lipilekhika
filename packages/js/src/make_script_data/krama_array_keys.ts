@@ -1,4 +1,7 @@
-import { binarySearchWithIndex, createSearchIndex } from '../utils/binary_search/binary_search';
+import {
+  binarySearchLowerWithIndex,
+  createSearchIndex
+} from '../utils/binary_search/binary_search';
 
 /**
  * These Krama keys are written in an order where the keys which comes first shall take precedence if in the krama_text_map two have the same key
@@ -152,8 +155,8 @@ export type KramaKeysExtendedType = KramaKeysType | KramaKeysLabelType;
 export const resolveKramaKeysExtendedType = (
   krama_key_ext: KramaKeysExtendedType
 ): KramaKeysType => {
-  if (binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key_ext) !== -1)
+  if (binarySearchLowerWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key_ext) !== -1)
     return krama_key_ext as KramaKeysType;
-  const index = binarySearchWithIndex(KramaLabelsArray, KramaLabelsIndexB, krama_key_ext);
+  const index = binarySearchLowerWithIndex(KramaLabelsArray, KramaLabelsIndexB, krama_key_ext);
   return KramaKeysArray[index];
 };

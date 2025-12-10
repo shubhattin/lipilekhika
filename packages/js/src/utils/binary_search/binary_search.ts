@@ -38,7 +38,7 @@ export function createSearchIndex<T, K = T>(
 /**
  * Performs binary search(lower bound) using a pre-built index.
  */
-export function binarySearchWithIndex<T, K = T>(
+export function binarySearchLowerWithIndex<T, K = T>(
   arr: readonly T[],
   index: readonly number[],
   target: K,
@@ -108,7 +108,7 @@ export function sortArray<T, K = T>(arr: readonly T[], options?: SearchIndexOpti
  * Performs binary search(lower bound) on a sorted array.
  * Returns the index of the target element, or -1 if not found.
  */
-export function binarySearch<T, K = T>(
+export function binarySearchLower<T, K = T>(
   arr: readonly T[],
   target: K,
   options?: SearchIndexOptions<T, K>

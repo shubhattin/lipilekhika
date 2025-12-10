@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Bengali
+  input: "ashvatthaH sarvavRkShANAM dEvarShINAM Ca nAradaH .\ngandharvANAM CitrarathaH siddhAnAM kapilO muniH ..10-26.."
+  output: "অশ্বত্থঃ সর্ববৃক্ষাণাং দেবর্ষীণাং চ নারদঃ ।\nগন্ধর্বাণাং চিত্ররথঃ সিদ্ধানাং কপিলো মুনিঃ ॥১০-২৬॥"
+  reversible: false
+- index: 1
+  from: Normal
+  to: Bengali
+  input: "uCCaiHshravasamashvAnAM viddhi mAmamRtOdbhavam .\nairAvataM gajEndrANAM narANAM Ca narAdhipam ..10-27.."
+  output: "উচ্চৈঃশ্রবসমশ্বানাং বিদ্ধি মামমৃতোদ্ভবম্ ।\nঐরাবতং গজেন্দ্রাণাং নরাণাং চ নরাধিপম্ ॥১০-২৭॥"
+  reversible: false
+- index: 2
+  from: Normal
+  to: Bengali
+  input: "AyudhAnAmahaM vajraM dhEnUnAmasmi kAmadhuk .\nprajanashCAsmi kandarpaH sarpANAmasmi vAsukiH ..10-28.."
+  output: "আযুধানামহং বজ্রং ধেনূনামস্মি কামধুক্ ।\nপ্রজনশ্চাস্মি কন্দর্পঃ সর্পাণামস্মি বাসুকিঃ ॥১০-২৮॥"
+  reversible: false
+- index: 3
+  from: Normal
+  to: Bengali
+  input: "anantashCAsmi nAgAnAM varuNO yAdasAmaham .\npitRRNAmaryamA CAsmi yamaH saMyamatAmaham ..10-29.."
+  output: "অনন্তশ্চাস্মি নাগানাং বরুণো যাদসামহম্ ।\nপিতৄণামর্যমা চাস্মি যমঃ সংযমতামহম্ ॥১০-২৯॥"
+  reversible: false
+- index: 4
+  from: Normal
+  to: Bengali
+  input: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM vainatEyashCa pakShiNAm ..10-30.."
+  output: "প্রহ্লাদশ্চাস্মি দৈত্যানাং কালঃ কলযতামহম্ ।\nমৃগাণাং চ মৃগেন্দ্রোঽহং বৈনতেযশ্চ পক্ষিণাম্ ॥১০-৩০॥"
+  reversible: false
+- index: 5
+  from: Normal
+  to: Bengali
+  input: "pavanaH pavatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnavI ..10-31.."
+  output: "পবনঃ পবতামস্মি রামঃ শস্ত্রভৃতামহম্ ।\nঝষাণাং মকরশ্চাস্মি স্রোতসামস্মি জাহ্নবী ॥১০-৩১॥"
+  reversible: false
+- index: 6
+  from: Normal
+  to: Bengali
+  input: "sargANAmAdirantashCa madhyaM CaivAhamarjuna .\nadhyAtmavidyA vidyAnAM vAdaH pravadatAmaham ..10-32.."
+  output: "সর্গাণামাদিরন্তশ্চ মধ্যং চৈবাহমর্জুন ।\nঅধ্যাত্মবিদ্যা বিদ্যানাং বাদঃ প্রবদতামহম্ ॥১০-৩২॥"
+  reversible: false
+- index: 7
+  from: Normal
+  to: Bengali
+  input: "akSharANAmakArO''smi dvandvaH sAmAsikasya Ca .\nahamEvAkShayaH kAlO dhAtAhaM vishvatOmukhaH ..10-33.."
+  output: "অক্ষরাণামকারোঽস্মি দ্বন্দ্বঃ সামাসিকস্য চ ।\nঅহমেবাক্ষযঃ কালো ধাতাহং বিশ্বতোমুখঃ ॥১০-৩৩॥"
+  reversible: false
+- index: 8
+  from: Normal
+  to: Bengali
+  input: "mRtyuH sarvaharashCAhamudbhavashCa bhaviShyatAm .\nkIrtiH shrIrvAkCa nArINAM smRtirmEdhA dhRtiH kShamA ..10-34.."
+  output: "মৃত্যুঃ সর্বহরশ্চাহমুদ্ভবশ্চ ভবিষ্যতাম্ ।\nকীর্তিঃ শ্রীর্বাক্চ নারীণাং স্মৃতির্মেধা ধৃতিঃ ক্ষমা ॥১০-৩৪॥"
+  reversible: false
+- index: 9
+  from: Normal
+  to: Bengali
+  input: "bRhatsAma tathA sAmnAM gAyatrI ChandasAmaham .\nmAsAnAM mArgashIrShO''hamRtUnAM kusumAkaraH ..10-35.."
+  output: "বৃহত্সাম তথা সাম্নাং গাযত্রী ছন্দসামহম্ ।\nমাসানাং মার্গশীর্ষোঽহমৃতূনাং কুসুমাকরঃ ॥১০-৩৫॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Bengali
+  input: "dyUtaM ChalayatAmasmi tEjastEjasvinAmaham .\njayO''smi vyavasAyO''smi sattvaM sattvavatAmaham ..10-36.."
+  output: "দ্যূতং ছলযতামস্মি তেজস্তেজস্বিনামহম্ ।\nজযোঽস্মি ব্যবসাযোঽস্মি সত্ত্বং সত্ত্ববতামহম্ ॥১০-৩৬॥"
+  reversible: false
+- index: 11
+  from: Normal
+  to: Bengali
+  input: "vRShNInAM vAsudEvO''smi pANDavAnAM dhanaJjayaH .\nmunInAmapyahaM vyAsaH kavInAmushanA kaviH ..10-37.."
+  output: "বৃষ্ণীনাং বাসুদেবোঽস্মি পাণ্ডবানাং ধনঞ্জযঃ ।\nমুনীনামপ্যহং ব্যাসঃ কবীনামুশনা কবিঃ ॥১০-৩৭॥"
+  reversible: false
+- index: 12
+  from: Normal
+  to: Bengali
+  input: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaivAsmi guhyAnAM jJAnaM jJAnavatAmaham ..10-38.."
+  output: "দণ্ডো দমযতামস্মি নীতিরস্মি জিগীষতাম্ ।\nমৌনং চৈবাস্মি গুহ্যানাং জ্ঞানং জ্ঞানবতামহম্ ॥১০-৩৮॥"
+  reversible: false
+- index: 13
+  from: Normal
+  to: Bengali
+  input: "yaCCApi sarvabhUtAnAM bIjaM tadahamarjuna .\nna tadasti vinA yatsyAnmayA bhUtaM CarACaram ..10-39.."
+  output: "যচ্চাপি সর্বভূতানাং বীজং তদহমর্জুন ।\nন তদস্তি বিনা যত্স্যান্মযা ভূতং চরাচরম্ ॥১০-৩৯॥"
+  reversible: false
+- index: 14
+  from: Normal
+  to: Bengali
+  input: "nAntO''sti mama divyAnAM vibhUtInAM parantapa .\nESha tUddEshataH prOktO vibhUtErvistarO mayA ..10-40.."
+  output: "নান্তোঽস্তি মম দিব্যানাং বিভূতীনাং পরন্তপ ।\nএষ তূদ্দেশতঃ প্রোক্তো বিভূতের্বিস্তরো মযা ॥১০-৪০॥"
+  reversible: false
+- index: 15
+  from: Normal
+  to: Bengali
+  input: "yadyadvibhUtimatsattvaM shrImadUrjitamEva vA .\ntattadEvAvagaCCha tvaM mama tEjOM''shasambhavam ..10-41.."
+  output: "যদ্যদ্বিভূতিমত্সত্ত্বং শ্রীমদূর্জিতমেব বা ।\nতত্তদেবাবগচ্ছ ত্বং মম তেজোংঽশসম্ভবম্ ॥১০-৪১॥"
+  reversible: false
+- index: 16
+  from: Normal
+  to: Bengali
+  input: "athavA bahunaitEna kiM jJAtEna tavArjuna .\nviShTabhyAhamidaM kRtsnamEkAMshEna sthitO jagat ..10-42.."
+  output: "অথবা বহুনৈতেন কিং জ্ঞাতেন তবার্জুন ।\nবিষ্টভ্যাহমিদং কৃত্স্নমেকাংশেন স্থিতো জগত্ ॥১০-৪২॥"
+  reversible: false
+- index: 17
+  from: Normal
+  to: Bengali
+  input: "yOgIndrANAM tvadaGgEShvadhikasumadhuraM muktibhAjAM nivAsO\nbhaktAnAM kAmavarShadyutarukisalayaM nAtha tE pAdamUlam .\nnityaM CittasthitaM mE pavanapurapatE kRShNa kAruNyasindhO\nhRtvA nishshEShatApAn pradishatu paramAnandasandOhalakShmIm ..10.."
+  output: "যোগীন্দ্রাণাং ত্বদঙ্গেষ্বধিকসুমধুরং মুক্তিভাজাং নিবাসো\nভক্তানাং কামবর্ষদ্যুতরুকিসলযং নাথ তে পাদমূলম্ ।\nনিত্যং চিত্তস্থিতং মে পবনপুরপতে কৃষ্ণ কারুণ্যসিন্ধো\nহৃত্বা নিশ্শেষতাপান্ প্রদিশতু পরমানন্দসন্দোহলক্ষ্মীম্ ॥১০॥"
+  reversible: false
+- index: 18
+  from: Normal
+  to: Bengali
+  input: "shrIbhagavAnuvACa .\nUrdhvamUlamadhaHshAkhamashvatthaM prAhuravyayam .\nChandAMsi yasya parNAni yastaM vEda sa vEdavit ..15-1.."
+  output: "শ্রীভগবানুবাচ ।\nঊর্ধ্বমূলমধঃশাখমশ্বত্থং প্রাহুরব্যযম্ ।\nছন্দাংসি যস্য পর্ণানি যস্তং বেদ স বেদবিত্ ॥১৫-১॥"
+  reversible: false
+- index: 19
+  from: Normal
+  to: Bengali
+  input: "adhashCOrdhvaM prasRtAstasya shAkhA\nguNapravRddhA viShayapravAlAH .\nadhashCa mUlAnyanusantatAni\nkarmAnubandhIni manuShyalOkE ..15-2.."
+  output: "অধশ্চোর্ধ্বং প্রসৃতাস্তস্য শাখা\nগুণপ্রবৃদ্ধা বিষযপ্রবালাঃ ।\nঅধশ্চ মূলান্যনুসন্ততানি\nকর্মানুবন্ধীনি মনুষ্যলোকে ॥১৫-২॥"
+  reversible: false
+- index: 20
+  from: Normal
+  to: Bengali
+  input: "na rUpamasyEha tathOpalabhyatE\nnAntO na CAdirna Ca sampratiShThA .\nashvatthamEnaM suvirUDhamUlaM\nasaGgashastrENa dRDhEna ChittvA ..15-3.."
+  output: "ন রূপমস্যেহ তথোপলভ্যতে\nনান্তো ন চাদির্ন চ সম্প্রতিষ্ঠা ।\nঅশ্বত্থমেনং সুবিরূঢমূলং\nঅসঙ্গশস্ত্রেণ দৃঢেন ছিত্ত্বা ॥১৫-৩॥"
+  reversible: false
+- index: 21
+  from: Normal
+  to: Bengali
+  input: "tataH padaM tatparimArgitavyaM\nyasmingatA na nivartanti bhUyaH .\ntamEva CAdyaM puruShaM prapadyE .\nyataH pravRttiH prasRtA purANI ..15-4.."
+  output: "ততঃ পদং তত্পরিমার্গিতব্যং\nযস্মিন্গতা ন নিবর্তন্তি ভূযঃ ।\nতমেব চাদ্যং পুরুষং প্রপদ্যে ।\nযতঃ প্রবৃত্তিঃ প্রসৃতা পুরাণী ॥১৫-৪॥"
+  reversible: false
+- index: 22
+  from: Normal
+  to: Bengali
+  input: "nirmAnamOhA jitasaGgadOShA\nadhyAtmanityA vinivRttakAmAH .\ndvandvairvimuktAH sukhaduHkhasaMjJair-\ngaCChantyamUDhAH padamavyayaM tat ..15-5.."
+  output: "নির্মানমোহা জিতসঙ্গদোষা\nঅধ্যাত্মনিত্যা বিনিবৃত্তকামাঃ ।\nদ্বন্দ্বৈর্বিমুক্তাঃ সুখদুঃখসংজ্ঞৈর্-\nগচ্ছন্ত্যমূঢাঃ পদমব্যযং তত্ ॥১৫-৫॥"
+  reversible: false
+- index: 23
+  from: Normal
+  to: Bengali
+  input: "na tadbhAsayatE sUryO na shashAGkO na pAvakaH .\nyadgatvA na nivartantE taddhAma paramaM mama ..15-6.."
+  output: "ন তদ্ভাসযতে সূর্যো ন শশাঙ্কো ন পাবকঃ ।\nযদ্গত্বা ন নিবর্তন্তে তদ্ধাম পরমং মম ॥১৫-৬॥"
+  reversible: false
+- index: 24
+  from: Normal
+  to: Bengali
+  input: "mamaivAMshO jIvalOkE jIvabhUtaH sanAtanaH .\nmanaHShaShThAnIndriyANi prakRtisthAni karShati ..15-7.."
+  output: "মমৈবাংশো জীবলোকে জীবভূতঃ সনাতনঃ ।\nমনঃষষ্ঠানীন্দ্রিযাণি প্রকৃতিস্থানি কর্ষতি ॥১৫-৭॥"
+  reversible: false
+- index: 25
+  from: Normal
+  to: Bengali
+  input: "sharIraM yadavApnOti yaCCApyutkrAmatIshvaraH .\ngRhItvaitAni saMyAti vAyurgandhAnivAshayAt ..15-8.."
+  output: "শরীরং যদবাপ্নোতি যচ্চাপ্যুত্ক্রামতীশ্বরঃ ।\nগৃহীত্বৈতানি সংযাতি বাযুর্গন্ধানিবাশযাত্ ॥১৫-৮॥"
+  reversible: false
+- index: 26
+  from: Normal
+  to: Bengali
+  input: "shrOtraM CakShuH sparshanaM Ca rasanaM ghrANamEva Ca .\nadhiShThAya manashCAyaM viShayAnupasEvatE ..15-9.."
+  output: "শ্রোত্রং চক্ষুঃ স্পর্শনং চ রসনং ঘ্রাণমেব চ ।\nঅধিষ্ঠায মনশ্চাযং বিষযানুপসেবতে ॥১৫-৯॥"
+  reversible: false
+- index: 27
+  from: Normal
+  to: Bengali
+  input: "utkrAmantaM sthitaM vApi bhuJjAnaM vA guNAnvitam .\nvimUDhA nAnupashyanti pashyanti jJAnaCakShuShaH ..15-10.."
+  output: "উত্ক্রামন্তং স্থিতং বাপি ভুঞ্জানং বা গুণান্বিতম্ ।\nবিমূঢা নানুপশ্যন্তি পশ্যন্তি জ্ঞানচক্ষুষঃ ॥১৫-১০॥"
+  reversible: false
+- index: 28
+  from: Normal
+  to: Bengali
+  input: "yatantO yOginashCainaM pashyantyAtmanyavasthitam .\nyatantO''pyakRtAtmAnO nainaM pashyantyaCEtasaH ..15-11.."
+  output: "যতন্তো যোগিনশ্চৈনং পশ্যন্ত্যাত্মন্যবস্থিতম্ ।\nযতন্তোঽপ্যকৃতাত্মানো নৈনং পশ্যন্ত্যচেতসঃ ॥১৫-১১॥"
+  reversible: false
+- index: 29
+  from: Normal
+  to: Bengali
+  input: "yadAdityagataM tEjO jagadbhAsayatE''khilam .\nyaCCandramasi yaCCAgnau tattEjO viddhi mAmakam ..15-12.."
+  output: "যদাদিত্যগতং তেজো জগদ্ভাসযতেঽখিলম্ ।\nযচ্চন্দ্রমসি যচ্চাগ্নৌ তত্তেজো বিদ্ধি মামকম্ ॥১৫-১২॥"
+  reversible: false
+- index: 30
+  from: Normal
+  to: Bengali
+  input: "gAmAvishya Ca bhUtAni dhArayAmyahamOjasA .\npuShNAmi CauShadhIH sarvAH sOmO bhUtvA rasAtmakaH ..15-13.."
+  output: "গামাবিশ্য চ ভূতানি ধারযাম্যহমোজসা ।\nপুষ্ণামি চৌষধীঃ সর্বাঃ সোমো ভূত্বা রসাত্মকঃ ॥১৫-১৩॥"
+  reversible: false
+- index: 31
+  from: Normal
+  to: Bengali
+  input: .. atha shyAmalA daNDakam ..
+  output: ॥ অথ শ্যামলা দণ্ডকম্ ॥
+  reversible: true
+- index: 32
+  from: Normal
+  to: Bengali
+  input: .. dhyAnam ..
+  output: ॥ ধ্যানম্ ॥
+  reversible: true
+- index: 33
+  from: Normal
+  to: Bengali
+  input: "mANikyavINAmupalAlayantIM\nmadAlasAM maJjulavAgvilAsAm .\nmAhEndranIladyutikOmalAGgIM\nmAtaGgakanyAM manasA smarAmi .. 1.."
+  output: "মাণিক্যবীণামুপলালযন্তীং\nমদালসাং মঞ্জুলবাগ্বিলাসাম্ ।\nমাহেন্দ্রনীলদ্যুতিকোমলাঙ্গীং\nমাতঙ্গকন্যাং মনসা স্মরামি ॥ ১॥"
+  reversible: false
+- index: 34
+  from: Normal
+  to: Bengali
+  input: "CaturbhujE CandrakalAvataMsE\nkuCOnnatE kuGkumarAgashONE .\npuNDrEkShupAshAGkushapuShpabANa-\nhastE namastE jagadEkamAtaH .. 2.."
+  output: "চতুর্ভুজে চন্দ্রকলাবতংসে\nকুচোন্নতে কুঙ্কুমরাগশোণে ।\nপুণ্ড্রেক্ষুপাশাঙ্কুশপুষ্পবাণ-\nহস্তে নমস্তে জগদেকমাতঃ ॥ ২॥"
+  reversible: false
+- index: 35
+  from: Normal
+  to: Bengali
+  input: .. viniyOgaH ..
+  output: ॥ বিনিযোগঃ ॥
+  reversible: false
+- index: 36
+  from: Normal
+  to: Bengali
+  input: "mAtA marakatashyAmA mAtaGgI madashAlinI .\nkuryAt kaTAkShaM kalyANI kadaMbavanavAsinI .. 3.."
+  output: "মাতা মরকতশ্যামা মাতঙ্গী মদশালিনী ।\nকুর্যাত্ কটাক্ষং কল্যাণী কদংববনবাসিনী ॥ ৩॥"
+  reversible: false
+- index: 37
+  from: Normal
+  to: Bengali
+  input: .. stuti ..
+  output: ॥ স্তুতি ॥
+  reversible: true
+- index: 38
+  from: Normal
+  to: Bengali
+  input: "jaya mAtaGgatanayE jaya nIlOtpaladyutE .\njaya saGgItarasikE jaya lIlAshukapriyE .. 4.."
+  output: "জয মাতঙ্গতনযে জয নীলোত্পলদ্যুতে ।\nজয সঙ্গীতরসিকে জয লীলাশুকপ্রিযে ॥ ৪॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Bengali
+  input: .. daNDakam ..
+  output: ॥ দণ্ডকম্ ॥
+  reversible: true
+- index: 40
+  from: Normal
+  to: Bengali
+  input: "jaya janani sudhAsamudrAntarudyanmaNIdvIpasaMrUDh -\nbilvATavImadhyakalpadrumAkalpakAdaMbakAntAravAsapriyE\nkRttivAsapriyE sarvalOkapriyE"
+  output: "জয জননি সুধাসমুদ্রান্তরুদ্যন্মণীদ্বীপসংরূঢ্ -\nবিল্বাটবীমধ্যকল্পদ্রুমাকল্পকাদংবকান্তারবাসপ্রিযে\nকৃত্তিবাসপ্রিযে সর্বলোকপ্রিযে"
+  reversible: false

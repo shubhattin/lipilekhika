@@ -38,15 +38,15 @@ export type OutputBrahmicScriptData = Pick<
     list: {
       /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
       krama_ref: number[];
-      type: InputBrahmicScriptType['list'][number]['type'];
-      /** Only defined for type `svara` */
-      mAtrA_krama_ref?: number[];
+      type: InputBrahmicScriptType['list'][number]['type'] | 'mAtrA';
+      mAtrA_krama_ref?: number[] | null;
+      // ^ needed in other -> brahmic conversion
     }[];
   };
 
 export type OutputOtherScriptData = Pick<
   InputOtherScriptType,
-  'script_name' | 'script_id' | 'script_type'
+  'script_name' | 'script_id' | 'script_type' | 'schwa_character'
 > &
   CommonScriptData & {
     list: {

@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Odia
+  input: iti shrIvEdAntadEshikaviraCitaH garuDadaNDakaH sampUrNaH .
+  output: ଇତି ଶ୍ରୀଵେଦାନ୍ତଦେଶିକଵିରଚିତଃ ଗରୁଡଦଣ୍ଡକଃ ସମ୍ପୂର୍ଣଃ ।
+  reversible: true
+- index: 1
+  from: Normal
+  to: Odia
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. 100101"
+  output: "ଅ॒ଗ୍ନିମୀ॑ଳେ ପୁ॒ରୋହି॑ତଂ ୟ॒ଜ୍ଞସ୍ୟ॑ ଦେ॒ଵମୃ॒ତ୍ଵିଜ॑ମ୍ ।\nହୋତା॑ରଂ ରତ୍ନ॒ଧାତ॑ମମ୍ ॥ ୧୦୦୧୦୧"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Odia
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. 100106"
+  output: "ୟଦ॒ଙ୍ଗ ଦା॒ଶୁଷେ॒ ତ୍ଵମଗ୍ନେ॑ ଭ॒ଦ୍ରଂ କ॑ରି॒ଷ୍ୟସି॑ ।\nତଵେତ୍ତତ୍ସ॒ତ୍ୟମ॑ଙ୍ଗିରଃ ॥ ୧୦୦୧୦୬"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Odia
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. 100301"
+  output: "ଅଶ୍ଵି॑ନା॒ ୟଜ୍ଵ॑ରୀ॒ରିଷୋ॒ ଦ୍ରଵ॑ତ୍ପାଣୀ॒ ଶୁଭ॑ସ୍ପତୀ ।\nପୁରୁ॑ଭୁଜା ଚନ॒ସ୍ୟତ॑ମ୍ ॥ ୧୦୦୩୦୧"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Odia
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. 1.."
+  output: "ନାସ॑ଦାସୀ॒ନ୍ନୋ ସଦା॑ସୀତ୍ତ॒ଦାନୀଂ॒ ନାସୀ॒ଦ୍ରଜୋ॒ ନୋ ଵ୍ୟୋ॑ମା ପ॒ରୋ ୟତ୍ ।\nକିମାଵ॑ରୀଵଃ॒ କୁହ॒ କସ୍ୟ॒ ଶର୍ମ॒ନ୍ନମ୍ଭଃ॒ କିମା॑ସୀ॒ଦ୍ଗହ॑ନଂ ଗଭୀ॒ରମ୍ ॥ ୧॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Odia
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. 2.."
+  output: "ନ ମୃ॒ତ୍ୟୁରା॑ସୀଦ॒ମୃତଂ॒ ନ ତର୍ହି॒ ନ ରାତ୍ର୍ୟା॒ ଅହ୍ନ॑ ଆସୀତ୍ପ୍ରକେ॒ତଃ ।\nଆନୀ॑ଦଵା॒ତଂ ସ୍ଵ॒ଧୟା॒ ତଦେକଂ॒ ତସ୍ମା॑ଦ୍ଧା॒ନ୍ୟନ୍ନ ପ॒ରଃ କିଂ ଚ॒ନାସ॑ ॥ ୨॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Odia
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. 3.."
+  output: "ତମ॑ ଆସୀ॒ତ୍ତମ॑ସା ଗୂ॒ଳ୍ହମଗ୍ରେ॑ଽପ୍ରକେ॒ତଂ ସ॑ଲି॒ଲଂ ସର୍ଵ॑ମା ଇ॒ଦମ୍ ।\nତୁ॒ଚ୍ଛ୍ୟେନା॒ଭ୍ଵପି॑ହିତଂ॒ ୟଦାସୀ॒ତ୍ତପ॑ସ॒ସ୍ତନ୍ମ॑ହି॒ନାଜା॑ୟ॒ତୈକ॑ମ୍ ॥ ୩॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Odia
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. 4.."
+  output: "କାମ॒ସ୍ତଦଗ୍ରେ॒ ସମ॑ଵର୍ତ॒ତାଧି॒ ମନ॑ସୋ॒ ରେତଃ॑ ପ୍ରଥ॒ମଂ ୟଦାସୀ॑ତ୍ ।\nସ॒ତୋ ବନ୍ଧୁ॒ମସ॑ତି॒ ନିର॑ଵିନ୍ଦନ୍ହୃ॒ଦି ପ୍ର॒ତୀଷ୍ୟା॑ କ॒ଵୟୋ॑ ମନୀ॒ଷା ॥ ୪॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Odia
+  input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI3du↓pari↑ svidAsI3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. 5.."
+  output: "ତି॒ର॒ଶ୍ଚୀନୋ॒ ଵିତ॑ତୋ ର॒ଶ୍ମିରେ॑ଷାମ॒ଧଃ ସ୍ଵି॑ଦା॒ସୀ୩ଦୁ॒ପରି॑ ସ୍ଵିଦାସୀ୩ତ୍ ।\nରେ॒ତୋ॒ଧା ଆ॑ସନ୍ମହି॒ମାନ॑ ଆସନ୍ସ୍ଵ॒ଧା ଅ॒ଵସ୍ତା॒ତ୍ପ୍ରୟ॑ତିଃ ପ॒ରସ୍ତା॑ତ୍ ॥ ୫॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Odia
+  input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. 6.."
+  output: "କୋ ଅ॒ଦ୍ଧା ଵେ॑ଦ॒ କ ଇ॒ହ ପ୍ର ଵୋ॑ଚ॒ତ୍କୁତ॒ ଆଜା॑ତା॒ କୁତ॑ ଇ॒ୟଂ ଵିସୃ॑ଷ୍ଟିଃ ।\nଅ॒ର୍ଵାଗ୍ଦେ॒ଵା ଅ॒ସ୍ୟ ଵି॒ସର୍ଜ॑ନେ॒ନାଥା॒ କୋ ଵେ॑ଦ॒ ୟତ॑ ଆବ॒ଭୂଵ॑ ॥ ୬॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Odia
+  input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. 7.."
+  output: "ଇ॒ୟଂ ଵିସୃ॑ଷ୍ଟି॒ର୍ୟତ॑ ଆବ॒ଭୂଵ॒ ୟଦି॑ ଵା ଦ॒ଧେ ୟଦି॑ ଵା॒ ନ ।\nୟୋ ଅ॒ସ୍ୟାଧ୍ୟ॑କ୍ଷଃ ପର॒ମେ ଵ୍ୟୋ॑ମ॒ନ୍ସୋ ଅ॒ଙ୍ଗ ଵେ॑ଦ॒ ୟଦି॑ ଵା॒ ନ ଵେଦ॑ ॥ ୭॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Odia
+  input: "RgvEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - svastyAtrEyaH, dEvatA - vishvE dEvAH, ChandaH - 11 niCRttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsvaraH - 11, 12 dhaivataH, 13 paJCamaH, 14, 15 gAndhAraH"
+  output: "ଋଗ୍ଵେଦସଂହିତାୟାଂ ପଞ୍ଚମଂ ମଣ୍ଡଲମ୍ । ଏକପ୍ଞ୍ଚାଶଂ ସୂକ୍ତମ୍ ।\nଋଷିଃ - ସ୍ଵସ୍ତ୍ୟାତ୍ରେୟଃ, ଦେଵତା - ଵିଶ୍ଵେ ଦେଵାଃ, ଛନ୍ଦଃ - ୧୧ ନିଚୃତ୍ତ୍ରିଷ୍ଟୁପ୍,\n୧୨ ତ୍ରିଷ୍ଟୁପ୍, ୧୩ ପଙ୍କ୍ତିଃ, ୧୪, ୧୫ ଅନୁଷ୍ଟୁପ୍,\nସ୍ଵରଃ - ୧୧, ୧୨ ଧୈଵତଃ, ୧୩ ପଞ୍ଚମଃ, ୧୪, ୧୫ ଗାନ୍ଧାରଃ"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Odia
+  input: "sva↓sti nO↑↑ mimItAma↓shvinA↓ bhagaH↑ sva↓sti dE↓vyadi↑tirana↓rvaNaH↑ .\nsva↓sti pU↓ShA asu↑rO dadhAtu naH sva↓sti dyAvA↑↑pRthi↓vI su↑CE↓tunA↑↑ .. 505111"
+  output: "ସ୍ଵ॒ସ୍ତି ନୋ᳚ ମିମୀତାମ॒ଶ୍ଵିନା॒ ଭଗଃ॑ ସ୍ଵ॒ସ୍ତି ଦେ॒ଵ୍ୟଦି॑ତିରନ॒ର୍ଵଣଃ॑ ।\nସ୍ଵ॒ସ୍ତି ପୂ॒ଷା ଅସୁ॑ରୋ ଦଧାତୁ ନଃ ସ୍ଵ॒ସ୍ତି ଦ୍ୟାଵା᳚ପୃଥି॒ଵୀ ସୁ॑ଚେ॒ତୁନା᳚ ॥ ୫୦୫୧୧୧"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Odia
+  input: "sva↓stayE↑↑ vA↓yumupa↑ bravAmahai↓ sOmaM↑↑ sva↓sti bhuva↑nasya↓ yaspatiH↑ .\nbRha↓spatiM↓ sarva↑gaNaM sva↓stayE↑↑ sva↓staya↑ Adi↓tyAsO↑↑ bhavantu naH .. 505112"
+  output: "ସ୍ଵ॒ସ୍ତୟେ᳚ ଵା॒ୟୁମୁପ॑ ବ୍ରଵାମହୈ॒ ସୋମଂ᳚ ସ୍ଵ॒ସ୍ତି ଭୁଵ॑ନସ୍ୟ॒ ୟସ୍ପତିଃ॑ ।\nବୃହ॒ସ୍ପତିଂ॒ ସର୍ଵ॑ଗଣଂ ସ୍ଵ॒ସ୍ତୟେ᳚ ସ୍ଵ॒ସ୍ତୟ॑ ଆଦି॒ତ୍ୟାସୋ᳚ ଭଵନ୍ତୁ ନଃ ॥ ୫୦୫୧୧୨"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Odia
+  input: "vishvE↑↑ dE↓vA nO↑↑ a↓dyA sva↓stayE↑↑ vaishvAna↓rO vasu↑ra↓gniH sva↓stayE↑↑ .\ndE↓vA a↑vantvR↓bhavaH↑ sva↓stayE↑↑ sva↓sti nO↑↑ ru↓draH pA↓tvaMha↑saH .. 505113"
+  output: "ଵିଶ୍ଵେ᳚ ଦେ॒ଵା ନୋ᳚ ଅ॒ଦ୍ୟା ସ୍ଵ॒ସ୍ତୟେ᳚ ଵୈଶ୍ଵାନ॒ରୋ ଵସୁ॑ର॒ଗ୍ନିଃ ସ୍ଵ॒ସ୍ତୟେ᳚ ।\nଦେ॒ଵା ଅ॑ଵନ୍ତ୍ଵୃ॒ଭଵଃ॑ ସ୍ଵ॒ସ୍ତୟେ᳚ ସ୍ଵ॒ସ୍ତି ନୋ᳚ ରୁ॒ଦ୍ରଃ ପା॒ତ୍ଵଂହ॑ସଃ ॥ ୫୦୫୧୧୩"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Odia
+  input: "sva↓sti mi↑trAvaruNA sva↓sti pa↑thyE rEvati .\nsva↓sti na↓ indra↑shCA↓gnishCa↑ sva↓sti nO↑↑ aditE kRdhi .. 505114"
+  output: "ସ୍ଵ॒ସ୍ତି ମି॑ତ୍ରାଵରୁଣା ସ୍ଵ॒ସ୍ତି ପ॑ଥ୍ୟେ ରେଵତି ।\nସ୍ଵ॒ସ୍ତି ନ॒ ଇନ୍ଦ୍ର॑ଶ୍ଚା॒ଗ୍ନିଶ୍ଚ॑ ସ୍ଵ॒ସ୍ତି ନୋ᳚ ଅଦିତେ କୃଧି ॥ ୫୦୫୧୧୪"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Odia
+  input: "sva↓sti panthA↓manu↑ CarEma sUryACandra↓masA↑↑viva .\npuna↓rdada↓tAghna↑tA jAna↓tA saM ga↑mEmahi .. 505115"
+  output: "ସ୍ଵ॒ସ୍ତି ପନ୍ଥା॒ମନୁ॑ ଚରେମ ସୂର୍ୟାଚନ୍ଦ୍ର॒ମସା᳚ଵିଵ ।\nପୁନ॒ର୍ଦଦ॒ତାଘ୍ନ॑ତା ଜାନ॒ତା ସଂ ଗ॑ମେମହି ॥ ୫୦୫୧୧୫"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Odia
+  input: atha puruShasUktam ..
+  output: ଅଥ ପୁରୁଷସୂକ୍ତମ୍ ॥
+  reversible: true
+- index: 18
+  from: Normal
+  to: Odia
+  input: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  output: "ଓଁ ତଚ୍ଛଂ॒ ୟୋରାଵୃ॑ଣୀମହେ । ଗା॒ତୁଂ ୟ॒ଜ୍ଞାୟ॑ । ଗା॒ତୁଂ ୟ॒ଜ୍ଞପ॑ତୟେ । ଦୈଵୀ᳚ ସ୍ଵ॒ସ୍ତିର॑ସ୍ତୁ ନଃ ।\nସ୍ଵ॒ସ୍ତିର୍ମାନୁ॑ଷେଭ୍ୟଃ । ଊ॒ର୍ଧ୍ଵଂ ଜି॑ଗାତୁ ଭେଷ॒ଜମ୍ । ଶନ୍ନୋ॑ ଅସ୍ତୁ ଦ୍ଵି॒ପଦେ᳚ । ଶଂ ଚତୁ॑ଷ୍ପଦେ ।\nଓଁ ଶାନ୍ତିଃ॒ ଶାନ୍ତିଃ॒ ଶାନ୍ତିଃ॑ ।"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Odia
+  input: hariH AUM .
+  output: ହରିଃ ଓଁ ।
+  reversible: true
+- index: 20
+  from: Normal
+  to: Odia
+  input: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . 1"
+  output: "ଓଁ ସ॒ହସ୍ର॑ଶୀର୍ଷା॒ ପୁରୁ॑ଷଃ । ସ॒ହ॒ସ୍ରା॒କ୍ଷଃ ସ॒ହସ୍ର॑ପାତ୍ ।\nସ ଭୂମିଂ॑ ଵି॒ଶ୍ଵତୋ॑ ଵୃ॒ତ୍ଵା । ଅତ୍ୟ॑ତିଷ୍ଠଦ୍ଦଶାଙ୍ଗୁ॒ଲମ୍ । ୧"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Odia
+  input: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . 2"
+  output: "ପୁରୁ॑ଷ ଏ॒ଵେଦꣳ ସର୍ଵମ୍᳚ । ୟଦ୍ଭୂ॒ତଂ ୟଚ୍ଚ॒ ଭଵ୍ୟମ୍᳚।\nଉ॒ତାମୃ॑ତ॒ତ୍ଵସ୍ୟେଶା॑ନଃ । ୟଦନ୍ନେ॑ନାତି॒ରୋହ॑ତି । ୨"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Odia
+  input: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . 3"
+  output: "ଏ॒ତାଵା॑ନସ୍ୟ ମହି॒ମା । ଅତୋ॒ ଜ୍ୟାୟାꣳ॑ଶ୍ଚ॒ ପୂରୁ॑ଷଃ ।\nପାଦୋ᳚ଽସ୍ୟ॒ ଵିଶ୍ଵା॑ ଭୂ॒ତାନି॑ । ତ୍ରି॒ପାଦ॑ସ୍ୟା॒ମୃତଂ॑ ଦି॒ଵି । ୩"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Odia
+  input: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . 4"
+  output: "ତ୍ରି॒ପାଦୂ॒ର୍ଧ୍ଵ ଉଦୈ॒ତ୍ପୁରୁ॑ଷଃ । ପାଦୋ᳚ଽସ୍ୟେ॒ହାଽଽଭ॑ଵା॒ତ୍ପୁନଃ॑ ।\nତତୋ॒ ଵିଶ୍ଵ॒ଙ୍ଵ୍ୟ॑କ୍ରାମତ୍ । ସା॒ଶ॒ନା॒ନ॒ଶ॒ନେ ଅ॒ଭି । ୪"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Odia
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  output: "ତସ୍ମା᳚ଦ୍ଵି॒ରାଡ॑ଜାୟତ । ଵି॒ରାଜୋ॒ ଅଧି॒ ପୂରୁ॑ଷଃ ।\nସ ଜା॒ତୋ ଅତ୍ୟ॑ରିଚ୍ୟତ । ପ॒ଶ୍ଚାଦ୍ଭୂମି॒ମଥୋ॑ ପୁ॒ରଃ । ୫"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Odia
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  output: "ୟତ୍ପୁରୁ॑ଷେଣ ହ॒ଵିଷା᳚ । ଦେ॒ଵା ୟ॒ଜ୍ଞମତ॑ନ୍ଵତ ।\nଵ॒ସ॒ନ୍ତୋ ଅ॑ସ୍ୟାସୀ॒ଦାଜ୍ୟମ୍᳚ । ଗ୍ରୀ॒ଷ୍ମ ଇ॒ଧ୍ମଃ ଶ॒ରଦ୍ଧ॒ଵିଃ । ୬"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Odia
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  output: "ସ॒ପ୍ତାସ୍ୟା॑ସନ୍ପରି॒ଧୟଃ॑ । ତ୍ରିଃ ସ॒ପ୍ତ ସ॒ମିଧଃ॑ କୃ॒ତାଃ ।\nଦେ॒ଵା ୟଦ୍ୟ॒ଜ୍ଞଂ ତ॑ନ୍ଵା॒ନାଃ । ଅବ॑ଧ୍ନ॒ନ୍ପୁ॑ରୁଷଂ ପ॒ଶୁମ୍ । ୭"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Odia
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  output: "ତଂ ୟ॒ଜ୍ଞଂ ବ॒ର୍ହିଷି॒ ପ୍ରୌକ୍ଷନ୍॑ । ପୁରୁ॑ଷଂ ଜା॒ତମ॑ଗ୍ର॒ତଃ ।\nତେନ॑ ଦେ॒ଵା ଅୟ॑ଜନ୍ତ । ସା॒ଧ୍ୟା ଋଷ॑ୟଶ୍ଚ॒ ୟେ । ୮"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Odia
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  output: "ତସ୍ମା᳚ଦ୍ୟ॒ଜ୍ଞାତ୍ସ॑ର୍ଵ॒ହୁତଃ॑ । ସଂଭୃ॑ତଂ ପୃଷଦା॒ଜ୍ୟମ୍ ।\nପ॒ଶୂꣳସ୍ତାꣳଶ୍ଚ॑କ୍ରେ ଵାୟ॒ଵ୍ୟାନ୍॑ । ଆ॒ର॒ଣ୍ୟାନ୍ଗ୍ରା॒ମ୍ୟାଶ୍ଚ॒ ୟେ । ୯"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Odia
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  output: "ତସ୍ମା᳚ଦ୍ୟ॒ଜ୍ଞାତ୍ସ॑ର୍ଵ॒ହୁତଃ॑ । ଋଚଃ॒ ସାମା॑ନି ଜଜ୍ଞିରେ ।\nଛନ୍ଦାꣳ॑ସି ଜଜ୍ଞିରେ॒ ତସ୍ମା᳚ତ୍ । ୟଜୁ॒ସ୍ତସ୍ମା॑ଦଜାୟତ । ୧୦"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Odia
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  output: "ତସ୍ମା॒ଦଶ୍ଵା॑ ଅଜାୟନ୍ତ । ୟେ କେ ଚୋ॑ଭ॒ୟାଦ॑ତଃ ।\nଗାଵୋ॑ ହ ଜଜ୍ଞିରେ॒ ତସ୍ମା᳚ତ୍ । ତସ୍ମା᳚ଜ୍ଜା॒ତା ଅ॑ଜା॒ଵୟଃ॑ । ୧୧"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Odia
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  output: "ୟତ୍ପୁରୁ॑ଷଂ॒ ଵ୍ୟ॑ଦଧୁଃ । କ॒ତି॒ଧା ଵ୍ୟ॑କଲ୍ପୟନ୍ ।\nମୁଖଂ॒ କିମ॑ସ୍ୟ॒ କୌ ବା॒ହୂ । କାଵୂ॒ରୂ ପାଦା॑ଵୁଚ୍ୟେତେ । ୧୨"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Odia
+  input: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . 13"
+  output: "ବ୍ରା॒ହ୍ମ॒ଣୋ᳚ଽସ୍ୟ॒ ମୁଖ॑ମାସୀତ୍ । ବା॒ହୂ ରା॑ଜ॒ନ୍ୟଃ॑ କୃ॒ତଃ ।\nଊ॒ରୂ ତଦ॑ସ୍ୟ॒ ୟଦ୍ଵୈଶ୍ୟଃ॑ । ପ॒ଦ୍ଭ୍ୟାꣳ ଶୂ॒ଦ୍ରୋ ଅ॑ଜାୟତ । ୧୩"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Odia
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  output: "ଚ॒ନ୍ଦ୍ରମା॒ ମନ॑ସୋ ଜା॒ତଃ । ଚକ୍ଷୋଃ॒ ସୂର୍ୟୋ॑ ଅଜାୟତ ।\nମୁଖା॒ଦିନ୍ଦ୍ର॑ଶ୍ଚା॒ଗ୍ନିଶ୍ଚ॑ ।  ପ୍ରା॒ଣାଦ୍ଵା॒ୟୁର॑ଜାୟତ । ୧୪"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Odia
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . 15"
+  output: "ନାଭ୍ୟା॑ ଆସୀଦ॒ନ୍ତରି॑କ୍ଷମ୍ । ଶୀ॒ର୍ଷ୍ଣୋ ଦ୍ୟୌଃ ସମ॑ଵର୍ତତ ।\nପ॒ଦ୍ଭ୍ୟାଂ ଭୂମି॒ର୍ଦିଶଃ॒ ଶ୍ରୋତ୍ରା᳚ତ୍ । ତଥା॑ ଲୋ॒କାꣳ ଅ॑କଲ୍ପୟନ୍ । ୧୫"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Odia
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . 16"
+  output: "ଵେଦା॒ହମେ॒ତଂ ପୁରୁ॑ଷଂ ମ॒ହାନ୍ତମ୍᳚ । ଆ॒ଦି॒ତ୍ୟଵ॑ର୍ଣଂ॒ ତମ॑ସସ୍ତୁ॒ ପା॒ରେ ।\nସର୍ଵା॑ଣି ରୂ॒ପାଣି॑ ଵି॒ଚିତ୍ୟ॒ ଧୀରଃ॑ । ନାମା॑ନି କୃ॒ତ୍ଵାଽଭି॒ଵଦ॒ନ୍ ୟଦାସ୍ତେ᳚ । ୧୬"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Odia
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . 17"
+  output: "ଧା॒ତା ପୁ॒ରସ୍ତା॒ଦ୍ୟମୁ॑ଦାଜ॒ହାର॑ । ଶ॒କ୍ରଃ ପ୍ରଵି॒ଦ୍ଵାନ୍ପ୍ର॒ଦିଶ॒ଶ୍ଚତ॑ସ୍ରଃ ।\nତମେ॒ଵଂ ଵି॒ଦ୍ଵାନ॒ମୃତ॑ ଇ॒ହ ଭ॑ଵତି । ନାନ୍ୟଃ ପନ୍ଥା॒ ଅୟ॑ନାୟ ଵିଦ୍ୟତେ । ୧୭"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Odia
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . 18"
+  output: "ୟ॒ଜ୍ଞେନ॑ ୟ॒ଜ୍ଞମ॑ୟଜନ୍ତ ଦେ॒ଵାଃ । ତାନି॒ ଧର୍ମା॑ଣି ପ୍ରଥ॒ମାନ୍ୟା॑ସନ୍ ।\nତେ ହ॒ ନାକଂ॑ ମହି॒ମାନଃ॑ ସଚନ୍ତେ । ୟତ୍ର॒ ପୂର୍ଵେ॑ ସା॒ଧ୍ୟାଃ ସନ୍ତି॑ ଦେ॒ଵାଃ । ୧୮"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Odia
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: ॥ ଅଥ ଶୁକ୍ଲୟଜୁର୍ଵେଦୀୟ ପୁରୁଷସୂକ୍ତଃ॥
+  reversible: true
+- index: 39
+  from: Normal
+  to: Odia
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. 1.."
+  output: "ହରିଃ ଓଁ ସହସ୍ରଶୀର୍ଷା ପୁରୁଷଃ ସହସ୍ରାକ୍ଷଃ ସହସ୍ରପାତ୍ ।\nସ ଭୂମିꣳ ସର୍ଵତ ସ୍ପୃତ୍ଵାଽତ୍ୟତିଷ୍ଠଦ୍ଦଶାଙ୍ଗୁଲମ୍ ॥ ୧॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Odia
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. 2.."
+  output: "ପୁରୁଷ ଏଵେଦꣳ ସର୍ଵଂ ୟଦ୍ଭୂତଂ ୟଚ୍ଚ ଭାଵ୍ୟମ୍ ।\nଉତାମୃତତ୍ଵସ୍ୟେଶାନୋ ୟଦନ୍ନେନାତିରୋହତି ॥ ୨॥"
+  reversible: true

@@ -3,7 +3,7 @@ import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
 const HALANT = '்';
 
-const Tamil = {
+const Tamil: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Tamil',
   script_id: script_list_obj['Tamil'],
@@ -35,6 +35,13 @@ const Tamil = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ௐ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     {
       text: 'அ',
       mAtrA: '',
@@ -306,6 +313,6 @@ const Tamil = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Tamil;

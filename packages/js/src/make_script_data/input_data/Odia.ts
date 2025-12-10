@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Odia = {
+const Odia: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Odia',
   script_id: script_list_obj['Odia'],
@@ -35,6 +35,13 @@ const Odia = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ଓଁ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     {
       text: 'ଅ',
       mAtrA: '',
@@ -379,6 +386,6 @@ const Odia = {
     //   type: 'vyanjana'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Odia;

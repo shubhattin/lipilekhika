@@ -1,7 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
-const Bengali = {
+const Bengali: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Bengali',
   script_id: script_list_obj['Bengali'],
@@ -35,6 +35,13 @@ const Bengali = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ওঁ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     // Svara
     {
       text: 'অ',
@@ -357,6 +364,6 @@ const Bengali = {
       type: 'vyanjana'
     }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Bengali;

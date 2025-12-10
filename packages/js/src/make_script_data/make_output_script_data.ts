@@ -12,7 +12,7 @@ import {
   type KramaKeysType
 } from './krama_array_keys';
 import {
-  binarySearchWithIndex,
+  binarySearchLowerWithIndex,
   createSearchIndex,
   sortArray
 } from '../utils/binary_search/binary_search';
@@ -55,6 +55,7 @@ async function main() {
         script_type: 'other',
         script_name: input_script_data.script_name,
         script_id: input_script_data.script_id,
+        schwa_character: input_script_data.schwa_character,
         text_to_krama_map: [],
         list: [],
         krama_text_arr: [],
@@ -128,7 +129,7 @@ async function main() {
     // Part 1: Prefill the krama_text_map using the manual_krama_text_map
     for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
       const value = input_script_data.manual_krama_text_map![krama_key as KramaKeysType];
-      const krama_key_index = binarySearchWithIndex(
+      const krama_key_index = binarySearchLowerWithIndex(
         KramaKeysArray,
         KramaKeysIndexB,
         resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
@@ -176,17 +177,17 @@ async function main() {
       ) {
         const krama_key_list = item.text_krama;
         const krama_key_list_index_list = krama_key_list.map((krama_key) =>
-          binarySearchWithIndex(
+          binarySearchLowerWithIndex(
             KramaKeysArray,
             KramaKeysIndexB,
             resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
           )
         );
         res.list.push({
-          krama_ref: krama_key_list_index_list,
-          type: item.type,
           // @ts-ignore
-          ...(IS_DEV_MODE ? { text: item.text } : {})
+          ...(IS_DEV_MODE ? { text: item.text } : {}),
+          krama_ref: krama_key_list_index_list,
+          type: item.type
         });
         krama_key_list_index_list.forEach((krama_key_index) => {
           // link entries in the krama map to the list
@@ -197,7 +198,7 @@ async function main() {
         if (item.type === 'svara') {
           // handling svara references
           const mAtrA_krama_ref_index_list = item.mAtrA_text_krama.map((mAtrA_text_krama) =>
-            binarySearchWithIndex(
+            binarySearchLowerWithIndex(
               KramaKeysArray,
               KramaKeysIndexB,
               resolveKramaKeysExtendedType(mAtrA_text_krama as KramaKeysExtendedType),
@@ -206,13 +207,16 @@ async function main() {
               }
             )
           );
-          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
-          if (IS_DEV_MODE)
+          res.list.push({
             // @ts-ignore
-            res.list[key_to_reference_back_list].mAtrA = item.mAtrA;
+            ...(IS_DEV_MODE ? { text: item.mAtrA } : {}),
+            krama_ref: mAtrA_krama_ref_index_list,
+            type: 'mAtrA'
+          });
+          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
-              res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, key_to_reference_back_list];
+              res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, res.list.length - 1];
             }
           });
         }
@@ -225,7 +229,7 @@ async function main() {
       // refers to the first key_krama or mAtrA_key_krama as all of those will be the same
       if (item.duplicates) {
         for (const duplicate_text of item.duplicates) {
-          const krama_key_index = binarySearchWithIndex(
+          const krama_key_index = binarySearchLowerWithIndex(
             KramaKeysArray,
             KramaKeysIndexB,
             resolveKramaKeysExtendedType(item.text_krama[0] as KramaKeysExtendedType)
@@ -237,7 +241,7 @@ async function main() {
       }
       if (item.type === 'svara' && item.mAtrA_duplicates) {
         for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
-          const krama_key_index = binarySearchWithIndex(
+          const krama_key_index = binarySearchLowerWithIndex(
             KramaKeysArray,
             KramaKeysIndexB,
             resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
@@ -252,7 +256,7 @@ async function main() {
       // add fallback portion
       if (item.fallback && item.text_krama.length === 0) {
         const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
-          binarySearchWithIndex(
+          binarySearchLowerWithIndex(
             KramaKeysArray,
             KramaKeysIndexB,
             resolveKramaKeysExtendedType(fallback_key as KramaKeysExtendedType)
@@ -321,7 +325,7 @@ async function main() {
     for (const text_krama_item of res.text_to_krama_map) {
       const text = text_krama_item[0];
       const text_krama_ref = text_krama_item[1].krama;
-      const text_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, text);
+      const text_index = binarySearchLowerWithIndex(KramaKeysArray, KramaKeysIndexB, text);
       if (
         text_index !== -1 &&
         (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0)
@@ -389,10 +393,6 @@ async function main() {
       for (let i = 0; i < res.list.length; i++) {
         // @ts-ignore
         res.list[i].text_uni = toUnicodeEscapes(res.list[i].text);
-        if (res.list[i].type === 'svara') {
-          // @ts-ignore
-          res.list[i].mAtrA_uni = toUnicodeEscapes(res.list[i].mAtrA);
-        }
       }
       for (let i = 0; i < KramaKeysArray.length; i++) {
         res.krama_text_arr[i].push(KramaKeysArray[i]);

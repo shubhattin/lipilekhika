@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Tamil
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  output: "தஸ்மா᳚த்வி॒ராட॑ஜாயத । வி॒ராஜோ॒ அதி॒ பூரு॑ஷஃ ।\nஸ ஜா॒தோ அத்ய॑ரிச்யத । ப॒ஶ்சாத்பூமி॒மதோ॑ பு॒ரஃ । ௫"
+  reversible: false
+- index: 1
+  from: Normal
+  to: Tamil
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  output: "யத்புரு॑ஷேண ஹ॒விஷா᳚ । தே॒வா ய॒ஜ்ஞமத॑ந்வத ।\nவ॒ஸ॒ந்தோ அ॑ஸ்யாஸீ॒தாஜ்யம்᳚ । க்ரீ॒ஷ்ம இ॒த்மஃ ஶ॒ரத்த॒விஃ । ௬"
+  reversible: false
+- index: 2
+  from: Normal
+  to: Tamil
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  output: "ஸ॒ப்தாஸ்யா॑ஸந்பரி॒தயஃ॑ । த்ரிஃ ஸ॒ப்த ஸ॒மிதஃ॑ கிரு॒தாஃ ।\nதே॒வா யத்ய॒ஜ்ஞம் த॑ந்வா॒நாஃ । அப॑த்ந॒ந்பு॑ருஷம் ப॒ஶும் । ௭"
+  reversible: false
+- index: 3
+  from: Normal
+  to: Tamil
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  output: "தம் ய॒ஜ்ஞம் ப॒ர்ஹிஷி॒ ப்ரௌக்ஷந்॑ । புரு॑ஷம் ஜா॒தம॑க்ர॒தஃ ।\nதேந॑ தே॒வா அய॑ஜந்த । ஸா॒த்யா ருஷ॑யஶ்ச॒ யே । ௮"
+  reversible: false
+- index: 4
+  from: Normal
+  to: Tamil
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  output: "தஸ்மா᳚த்ய॒ஜ்ஞாத்ஸ॑ர்வ॒ஹுதஃ॑ । ஸம்பிரு॑தம் பிருஷதா॒ஜ்யம் ।\nப॒ஶூꣳஸ்தாꣳஶ்ச॑க்ரே வாய॒வ்யாந்॑ । ஆ॒ர॒ண்யாந்க்ரா॒ம்யாஶ்ச॒ யே । ௯"
+  reversible: false
+- index: 5
+  from: Normal
+  to: Tamil
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  output: "தஸ்மா᳚த்ய॒ஜ்ஞாத்ஸ॑ர்வ॒ஹுதஃ॑ । ருசஃ॒ ஸாமா॑நி ஜஜ்ஞிரே ।\nசந்தாꣳ॑ஸி ஜஜ்ஞிரே॒ தஸ்மா᳚த் । யஜு॒ஸ்தஸ்மா॑தஜாயத । ௧௦"
+  reversible: false
+- index: 6
+  from: Normal
+  to: Tamil
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  output: "தஸ்மா॒தஶ்வா॑ அஜாயந்த । யே கே சோ॑ப॒யாத॑தஃ ।\nகாவோ॑ ஹ ஜஜ்ஞிரே॒ தஸ்மா᳚த் । தஸ்மா᳚ஜ்ஜா॒தா அ॑ஜா॒வயஃ॑ । ௧௧"
+  reversible: false
+- index: 7
+  from: Normal
+  to: Tamil
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  output: "யத்புரு॑ஷம்॒ வ்ய॑ததுஃ । க॒தி॒தா வ்ய॑கல்பயந் ।\nமுகம்॒ கிம॑ஸ்ய॒ கௌ பா॒ஹூ । காவூ॒ரூ பாதா॑வுச்யேதே । ௧௨"
+  reversible: false
+- index: 8
+  from: Normal
+  to: Tamil
+  input: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . 13"
+  output: "ப்ரா॒ஹ்ம॒ணோ᳚ऽஸ்ய॒ முக॑மாஸீத் । பா॒ஹூ ரா॑ஜ॒ந்யஃ॑ கிரு॒தஃ ।\nஊ॒ரூ தத॑ஸ்ய॒ யத்வைஶ்யஃ॑ । ப॒த்ப்யாꣳ ஶூ॒த்ரோ அ॑ஜாயத । ௧௩"
+  reversible: false
+- index: 9
+  from: Normal
+  to: Tamil
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  output: "ச॒ந்த்ரமா॒ மந॑ஸோ ஜா॒தஃ । சக்ஷோஃ॒ ஸூர்யோ॑ அஜாயத ।\nமுகா॒திந்த்ர॑ஶ்சா॒க்நிஶ்ச॑ ।  ப்ரா॒ணாத்வா॒யுர॑ஜாயத । ௧௪"
+  reversible: false
+- index: 10
+  from: Normal
+  to: Tamil
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . 15"
+  output: "நாப்யா॑ ஆஸீத॒ந்தரி॑க்ஷம் । ஶீ॒ர்ஷ்ணோ த்யௌஃ ஸம॑வர்தத ।\nப॒த்ப்யாம் பூமி॒ர்திஶஃ॒ ஶ்ரோத்ரா᳚த் । ததா॑ லோ॒காꣳ அ॑கல்பயந் । ௧௫"
+  reversible: false
+- index: 11
+  from: Normal
+  to: Tamil
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . 16"
+  output: "வேதா॒ஹமே॒தம் புரு॑ஷம் ம॒ஹாந்தம்᳚ । ஆ॒தி॒த்யவ॑ர்ணம்॒ தம॑ஸஸ்து॒ பா॒ரே ।\nஸர்வா॑ணி ரூ॒பாணி॑ வி॒சித்ய॒ தீரஃ॑ । நாமா॑நி கிரு॒த்வாऽபி॒வத॒ந் யதாஸ்தே᳚ । ௧௬"
+  reversible: false
+- index: 12
+  from: Normal
+  to: Tamil
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . 17"
+  output: "தா॒தா பு॒ரஸ்தா॒த்யமு॑தாஜ॒ஹார॑ । ஶ॒க்ரஃ ப்ரவி॒த்வாந்ப்ர॒திஶ॒ஶ்சத॑ஸ்ரஃ ।\nதமே॒வம் வி॒த்வாந॒மிருத॑ இ॒ஹ ப॑வதி । நாந்யஃ பந்தா॒ அய॑நாய வித்யதே । ௧௭"
+  reversible: false
+- index: 13
+  from: Normal
+  to: Tamil
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . 18"
+  output: "ய॒ஜ்ஞேந॑ ய॒ஜ்ஞம॑யஜந்த தே॒வாஃ । தாநி॒ தர்மா॑ணி ப்ரத॒மாந்யா॑ஸந் ।\nதே ஹ॒ நாகம்॑ மஹி॒மாநஃ॑ ஸசந்தே । யத்ர॒ பூர்வே॑ ஸா॒த்யாஃ ஸந்தி॑ தே॒வாஃ । ௧௮"
+  reversible: false
+- index: 14
+  from: Normal
+  to: Tamil
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: ॥ அத ஶுக்லயஜுர்வேதீய புருஷஸூக்தஃ॥
+  reversible: false
+- index: 15
+  from: Normal
+  to: Tamil
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. 1.."
+  output: "ஹரிஃ ௐ ஸஹஸ்ரஶீர்ஷா புருஷஃ ஸஹஸ்ராக்ஷஃ ஸஹஸ்ரபாத் ।\nஸ பூமிꣳ ஸர்வத ஸ்பிருத்வாऽத்யதிஷ்டத்தஶாங்குலம் ॥ ௧॥"
+  reversible: false
+- index: 16
+  from: Normal
+  to: Tamil
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. 2.."
+  output: "புருஷ ஏவேதꣳ ஸர்வம் யத்பூதம் யச்ச பாவ்யம் ।\nஉதாமிருதத்வஸ்யேஶாநோ யதந்நேநாதிரோஹதி ॥ ௨॥"
+  reversible: false
+- index: 17
+  from: Normal
+  to: Tamil
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. 3.."
+  output: "ஏதாவாநஸ்ய மஹிமாதோ ஜ்யாயாம்'ஶ்ச பூருஷஃ ।\nபாதோऽஸ்ய விஶ்வா பூதாநி த்ரிபாதஸ்யாமிருதம் திவி ॥ ௩॥"
+  reversible: false
+- index: 18
+  from: Normal
+  to: Tamil
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. 4.."
+  output: "த்ரிபாதூர்த்வ உதைத்புருஷஃ பாதோऽஸ்யேஹாபவத் புநஃ ।\nததோ விஷ்வங் வ்யக்ராமத்ஸாஶநாநஶநே அபி ॥ ௪॥"
+  reversible: false
+- index: 19
+  from: Normal
+  to: Tamil
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
+  output: "ததோ விராடஜாயத விராஜோ அதி பூருஷஃ ।\nஸ ஜாதோ அத்யரிச்யத பஶ்சாத்பூமிமதோ புரஃ ॥ ௫॥"
+  reversible: false
+- index: 20
+  from: Normal
+  to: Tamil
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. 6.."
+  output: "தஸ்மாத்யஜ்ஞாத் ஸர்வஹுதஃ ஸம்பிருதம் பிருஷதாஜ்யம் ।\nபஶூம்'ஸ்தாம்'ஶ்சக்ரே வாயவ்யாநாரண்யா க்ராம்யாஶ்ச யே ॥ ௬॥"
+  reversible: false
+- index: 21
+  from: Normal
+  to: Tamil
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
+  output: "தஸ்மாத்யஜ்ஞாத் ஸர்வஹுதஃ ருசஃ ஸாமாநி ஜஜ்ஞிரே ।\nசந்தாꣳஸி ஜஜ்ஞிரே தஸ்மாத்யஜுஸ்தஸ்மாதஜாயத ॥ ௭॥"
+  reversible: false
+- index: 22
+  from: Normal
+  to: Tamil
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
+  output: "தஸ்மாதஶ்வா அஜாயந்த யே கே சோபயாததஃ ।\nகாவோ ஹ ஜஜ்ஞிரே தஸ்மாத்தஸ்மாஜ்ஜாதா அஜாவயஃ ॥ ௮॥"
+  reversible: false
+- index: 23
+  from: Normal
+  to: Tamil
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. 9.."
+  output: "தம் யஜ்ஞம் பர்ஹிஷி ப்ரௌக்ஷந் புருஷம் ஜாதமக்ரதஃ ।\nதேந தேவா அயஜந்த ஸாத்யா ருஷயஶ்ச யே ॥ ௯॥"
+  reversible: false
+- index: 24
+  from: Normal
+  to: Tamil
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
+  output: "யத்புருஷம் வ்யததுஃ கதிதா வ்யகல்பயந் ।\nமுகம் கிமஸ்யாஸீத் கிம் பாஹூ கிமூரூ பாதா உச்யேதே ॥ ௧௦॥"
+  reversible: false
+- index: 25
+  from: Normal
+  to: Tamil
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
+  output: "ப்ராஹ்மணோऽஸ்ய முகமாஸீத்பாஹூ ராஜந்யஃ கிருதஃ ।\nஊரூ ததஸ்ய யத்வைஶ்யஃ பத்ப்யாꣳ ஶூத்ரோ அஜாயத ॥ ௧௧॥"
+  reversible: false
+- index: 26
+  from: Normal
+  to: Tamil
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. 12.."
+  output: "சந்த்ரமா மநஸோ ஜாதஶ்சக்ஷோஃ ஸூர்யோ அஜாயத ।\nஶ்ரோத்ராத்வாயுஶ்ச ப்ராணஶ்ச முகாதக்நிரஜாயத ॥ ௧௨॥"
+  reversible: false
+- index: 27
+  from: Normal
+  to: Tamil
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
+  output: "நாப்யா ஆஸீதந்தரிக்ஷꣳ ஶீர்ஷ்ணோ த்யௌஃ ஸமவர்தத ।\nபத்ப்யாம் பூமிர்திஶஃ ஶ்ரோத்ராத்ததா லோகாம்'ऽகல்பயந் ॥ ௧௩॥"
+  reversible: false
+- index: 28
+  from: Normal
+  to: Tamil
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. 14.."
+  output: "யத்புருஷேண ஹவிஷா தேவா யஜ்ஞமதந்வத ।\nவஸந்தோऽஸ்யாஸீதாஜ்யம் க்ரீஷ்ம இத்மஃ ஶரத்தவிஃ ॥ ௧௪॥"
+  reversible: false
+- index: 29
+  from: Normal
+  to: Tamil
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. 15.."
+  output: "ஸப்தாஸ்யாஸந் பரிதயஸ்த்ரிஃ ஸப்த ஸமிதஃ கிருதாஃ ।\nதேவா யத்யஜ்ஞம் தந்வாநா அபத்நந் புருஷம் பஶும் ॥ ௧௫॥"
+  reversible: false
+- index: 30
+  from: Normal
+  to: Tamil
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. 16.."
+  output: "யஜ்ஞேந யஜ்ஞமயஜந்த தேவாஸ்தாநி தர்மாணி ப்ரதமாந்யாஸந் ।\nதே ஹ நாகம் மஹிமாநஃ ஸசந்த யத்ர பூர்வே ஸாத்யாஃ ஸந்தி தேவாஃ ॥ ௧௬॥"
+  reversible: false
+- index: 31
+  from: Normal
+  to: Tamil
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: ॥ இதி ஶுக்லயஜுர்வேதீயபுருஷஸூக்தம் ஸம்பூர்ணம்॥
+  reversible: false
+- index: 32
+  from: Normal
+  to: Tamil
+  input: .. atha durgAsUktam ..
+  output: ॥ அத துர்காஸூக்தம் ॥
+  reversible: false
+- index: 33
+  from: Normal
+  to: Tamil
+  input: "AUM jA↓tavE↑dasE sunavAma↓ sOma↑ marAtIya↓tO nida↑hAti↓ vEdaH↑ .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↑ nA↓vEva↓ sindhuM↑ duri↓tA''tya↓gniH .. 1.."
+  output: "ௐ ஜா॒தவே॑தஸே ஸுநவாம॒ ஸோம॑ மராதீய॒தோ நித॑ஹாதி॒ வேதஃ॑ ।\nஸ நஃ॑ பர்ஷ॒ததி॑ து॒ர்காணி॒ விஶ்வா॑ நா॒வேவ॒ ஸிந்தும்॑ துரி॒தாऽத்ய॒க்நிஃ ॥ ௧॥"
+  reversible: false
+- index: 34
+  from: Normal
+  to: Tamil
+  input: "tAma↓gniva↑rNAM↓ tapa↑sA jvala↓ntIM vai↑rOCa↓nIM ka↑rmapha↓lEShu↓ juShTA↑↑m .\ndu↓rgAM dE↓vIꣳ shara↑Nama↓haM prapa↑dyE su↓tara↑si tarasE↓ namaH↑ .. 2.."
+  output: "தாம॒க்நிவ॑ர்ணாம்॒ தப॑ஸா ஜ்வல॒ந்தீம் வை॑ரோச॒நீம் க॑ர்மப॒லேஷு॒ ஜுஷ்டா᳚ம் ।\nது॒ர்காம் தே॒வீꣳ ஶர॑ணம॒ஹம் ப்ரப॑த்யே ஸு॒தர॑ஸி தரஸே॒ நமஃ॑ ॥ ௨॥"
+  reversible: false
+- index: 35
+  from: Normal
+  to: Tamil
+  input: "agnE↓ tvaM pA↑rayA↓ navyO↑ a↓smAnthsva↓stibhi↓rati↑ du↓rgANi↓ vishvA↑↑ .\npUshCa↑ pR↓thvI ba↑hu↓lA na↑ u↓rvI bhavA↑ tO↓kAya↓ tana↑yAya↓ shaMyOH .. 3.."
+  output: "அக்நே॒ த்வம் பா॑ரயா॒ நவ்யோ॑ அ॒ஸ்மாந்த்ஸ்வ॒ஸ்திபி॒ரதி॑ து॒ர்காணி॒ விஶ்வா᳚ ।\nபூஶ்ச॑ பிரு॒த்வீ ப॑ஹு॒லா ந॑ உ॒ர்வீ பவா॑ தோ॒காய॒ தந॑யாய॒ ஶம்யோஃ ॥ ௩॥"
+  reversible: false
+- index: 36
+  from: Normal
+  to: Tamil
+  input: "vishvA↑ni nO du↓rgahA↑ jAtavEdaH↓ sindhu↓nna nA↓vA du↑ri↓tA''ti↑parShi .\nagnE↑ atri↓vanmana↑sA gRNA↓nO↑↑''smAkaM↑ bOdhyavi↓tA ta↓nUnA↑↑m .. 4.."
+  output: "விஶ்வா॑நி நோ து॒ர்கஹா॑ ஜாதவேதஃ॒ ஸிந்து॒ந்ந நா॒வா து॑ரி॒தாऽதி॑பர்ஷி ।\nஅக்நே॑ அத்ரி॒வந்மந॑ஸா கிருணா॒நோ᳚ऽஸ்மாகம்॑ போத்யவி॒தா த॒நூநா᳚ம் ॥ ௪॥"
+  reversible: false
+- index: 37
+  from: Normal
+  to: Tamil
+  input: "pR↓ta↓nA↓  jita↓ꣳ↓ saha↑mAnamu↓grama↓gniꣳ  hu↑vEma para↓mAthsa↓dhasthA↑↑t .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↓ kShAma↑ddE↓vO ati↑ duri↓tAtya↓gniH .. 5.."
+  output: "பிரு॒த॒நா॒  ஜித॒ꣳ॒ ஸஹ॑மாநமு॒க்ரம॒க்நிꣳ  ஹு॑வேம பர॒மாத்ஸ॒தஸ்தா᳚த் ।\nஸ நஃ॑ பர்ஷ॒ததி॑ து॒ர்காணி॒ விஶ்வா॒ க்ஷாம॑த்தே॒வோ அதி॑ துரி॒தாத்ய॒க்நிஃ ॥ ௫॥"
+  reversible: false
+- index: 38
+  from: Normal
+  to: Tamil
+  input: "pra↓tnOShi↑ ka↓mIDyO↑ adhva↓rEShu↑ sa↓nACCa↓ hOtA↓ navya↑shCa↓ sathsi↑ .\nsvAJCA↑↑gnE ta↓nuvaM↑ pi↓praya↑svA↓smabhyaM↑ Ca↓ saubha↑ga↓mAya↑jasva .. 6.."
+  output: "ப்ர॒த்நோஷி॑ க॒மீட்யோ॑ அத்வ॒ரேஷு॑ ஸ॒நாச்ச॒ ஹோதா॒ நவ்ய॑ஶ்ச॒ ஸத்ஸி॑ ।\nஸ்வாஞ்சா᳚க்நே த॒நுவம்॑ பி॒ப்ரய॑ஸ்வா॒ஸ்மப்யம்॑ ச॒ ஸௌப॑க॒மாய॑ஜஸ்வ ॥ ௬॥"
+  reversible: false
+- index: 39
+  from: Normal
+  to: Tamil
+  input: "gObhi↓rjuShTa↑ma↓yujO↓ niShi↑kta↓ntavE↑↑ndra viShNO↓ranusaMCa↑rEma .\nnAka↑sya pR↓ShThama↓bhi saM↓vasA↑nO↓ vaiShNa↑vIM lO↓ka i↓ha mA↑dayantAm .. 7.."
+  output: "கோபி॒ர்ஜுஷ்ட॑ம॒யுஜோ॒ நிஷி॑க்த॒ந்தவே᳚ந்த்ர விஷ்ணோ॒ரநுஸம்ச॑ரேம ।\nநாக॑ஸ்ய பிரு॒ஷ்டம॒பி ஸம்॒வஸா॑நோ॒ வைஷ்ண॑வீம் லோ॒க இ॒ஹ மா॑தயந்தாம் ॥ ௭॥"
+  reversible: false
+- index: 40
+  from: Normal
+  to: Tamil
+  input: AUM kA↓tyA↓ya↓nAya↑ vi↓dmahE↑ kanyAku↓mAri↑ dhImahi . tannO↑ durgiH praCO↓dayA↑↑t ..
+  output: ௐ கா॒த்யா॒ய॒நாய॑ வி॒த்மஹே॑ கந்யாகு॒மாரி॑ தீமஹி । தந்நோ॑ துர்கிஃ ப்ரசோ॒தயா᳚த் ॥
+  reversible: false

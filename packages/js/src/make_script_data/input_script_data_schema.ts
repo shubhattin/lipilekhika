@@ -94,6 +94,8 @@ export type InputOtherScriptType = {
   script_name: script_list_type;
   script_id: number;
   script_type: 'other';
+  /** Schwa deletion character, usually `a` */
+  schwa_character: string;
   manual_krama_text_map: {
     [key in KramaKeysExtendedType]?: string;
   };

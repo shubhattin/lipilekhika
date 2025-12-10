@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Gujarati
+  input: AUM shAntiH shAntiH shAntiH ..
+  output: ૐ શાન્તિઃ શાન્તિઃ શાન્તિઃ ॥
+  reversible: true
+- index: 1
+  from: Normal
+  to: Kannada
+  input: AUM shrI paramAtmanE namaH
+  output: ಓಂ ಶ್ರೀ ಪರಮಾತ್ಮನೇ ನಮಃ
+  reversible: true
+- index: 2
+  from: Normal
+  to: Kannada
+  input: "RShINAM saMnidhau rAjaMstava putrAgamaM prati .\nkAshyapasya Ca putrO''sti vibhANDaka iti shrutaH ..1-9-3.."
+  output: "ಋಷೀಣಾಂ ಸಂನಿಧೌ ರಾಜಂಸ್ತವ ಪುತ್ರಾಗಮಂ ಪ್ರತಿ ।\nಕಾಶ್ಯಪಸ್ಯ ಚ ಪುತ್ರೋಽಸ್ತಿ ವಿಭಾಣ್ಡಕ ಇತಿ ಶ್ರುತಃ ॥೧-೯-೩॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Kannada
+  input: "vakShyanti tE mahIpAlaM brAhmaNA vEdapAragAH .\nvibhANDakasutaM rAjan sarvOpAyairihAnaya ..1-9-12.."
+  output: "ವಕ್ಷ್ಯನ್ತಿ ತೇ ಮಹೀಪಾಲಂ ಬ್ರಾಹ್ಮಣಾ ವೇದಪಾರಗಾಃ ।\nವಿಭಾಣ್ಡಕಸುತಂ ರಾಜನ್ ಸರ್ವೋಪಾಯೈರಿಹಾನಯ ॥೧-೯-೧೨॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Kannada
+  input: "tAM dadarsha mahAtEjA mEnakAM kushikAtmajaH .\nrUpENApratimAM tatra vidyutaM jaladE yathA ..1-63-5.."
+  output: "ತಾಂ ದದರ್ಶ ಮಹಾತೇಜಾ ಮೇನಕಾಂ ಕುಶಿಕಾತ್ಮಜಃ ।\nರೂಪೇಣಾಪ್ರತಿಮಾಂ ತತ್ರ ವಿದ್ಯುತಂ ಜಲದೇ ಯಥಾ ॥೧-೬೩-೫॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Kannada
+  input: "imaM vivasvatE yOgaM prOktavAnahamavyayam .\nvivasvAnmanavE prAha manurikShvAkavE''bravIt ..4-1.."
+  output: "ಇಮಂ ವಿವಸ್ವತೇ ಯೋಗಂ ಪ್ರೋಕ್ತವಾನಹಮವ್ಯಯಮ್ ।\nವಿವಸ್ವಾನ್ಮನವೇ ಪ್ರಾಹ ಮನುರಿಕ್ಷ್ವಾಕವೇಽಬ್ರವೀತ್ ॥೪-೧॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Kannada
+  input: "na jAyatE mriyatE vA kadACinnAyaM bhUtvA bhavitA vA na bhUyaH .\najO nityaH shAshvatO''yaM purANO na hanyatE hanyamAnE sharIrE ..2-20.."
+  output: "ನ ಜಾಯತೇ ಮ್ರಿಯತೇ ವಾ ಕದಾಚಿನ್ನಾಯಂ ಭೂತ್ವಾ ಭವಿತಾ ವಾ ನ ಭೂಯಃ ।\nಅಜೋ ನಿತ್ಯಃ ಶಾಶ್ವತೋಽಯಂ ಪುರಾಣೋ ನ ಹನ್ಯತೇ ಹನ್ಯಮಾನೇ ಶರೀರೇ ॥೨-೨೦॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Kannada
+  input: "kathaM bhIShmamahaM saGkhyE drONaM Ca madhusUdana .\niShubhiH pratiyOtsyAmi pUjArhAvarisUdana ..2-4.."
+  output: "ಕಥಂ ಭೀಷ್ಮಮಹಂ ಸಙ್ಖ್ಯೇ ದ್ರೋಣಂ ಚ ಮಧುಸೂದನ ।\nಇಷುಭಿಃ ಪ್ರತಿಯೋತ್ಸ್ಯಾಮಿ ಪೂಜಾರ್ಹಾವರಿಸೂದನ ॥೨-೪॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Kannada
+  input: "karmEndriyANi saMyamya ya AstE manasA smaran .\nindriyArthAnvimUDhAtmA mithyACAraH sa uCyatE ..3-6.."
+  output: "ಕರ್ಮೇನ್ದ್ರಿಯಾಣಿ ಸಂಯಮ್ಯ ಯ ಆಸ್ತೇ ಮನಸಾ ಸ್ಮರನ್ ।\nಇನ್ದ್ರಿಯಾರ್ಥಾನ್ವಿಮೂಢಾತ್ಮಾ ಮಿಥ್ಯಾಚಾರಃ ಸ ಉಚ್ಯತೇ ॥೩-೬॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Kannada
+  input: "niyataM kuru karma tvaM karma jyAyO hyakarmaNaH .\nsharIrayAtrApi Ca tE na prasiddhyEdakarmaNaH ..3-8.."
+  output: "ನಿಯತಂ ಕುರು ಕರ್ಮ ತ್ವಂ ಕರ್ಮ ಜ್ಯಾಯೋ ಹ್ಯಕರ್ಮಣಃ ।\nಶರೀರಯಾತ್ರಾಪಿ ಚ ತೇ ನ ಪ್ರಸಿದ್ಧ್ಯೇದಕರ್ಮಣಃ ॥೩-೮॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Kannada
+  input: "iShTAnbhOgAnhi vO dEvA dAsyantE yajJabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
+  output: "ಇಷ್ಟಾನ್ಭೋಗಾನ್ಹಿ ವೋ ದೇವಾ ದಾಸ್ಯನ್ತೇ ಯಜ್ಞಭಾವಿತಾಃ ।\nತೈರ್ದತ್ತಾನಪ್ರದಾಯೈಭ್ಯೋ ಯೋ ಭುಙ್ಕ್ತೇ ಸ್ತೇನ ಏವ ಸಃ ॥೩-೧೨॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Kannada
+  input: "dharAdharEndranandinIvilAsabandhubandhura-\nsphuraddigantasantatipramOdamAnamAnasE .\nkRpAkaTAkShadhOraNIniruddhadurdharApadi\nkvaCiddigambarE manOvinOdamEtu vastuni ..3.."
+  output: "ಧರಾಧರೇನ್ದ್ರನನ್ದಿನೀವಿಲಾಸಬನ್ಧುಬನ್ಧುರ-\nಸ್ಫುರದ್ದಿಗನ್ತಸನ್ತತಿಪ್ರಮೋದಮಾನಮಾನಸೇ ।\nಕೃಪಾಕಟಾಕ್ಷಧೋರಣೀನಿರುದ್ಧದುರ್ಧರಾಪದಿ\nಕ್ವಚಿದ್ದಿಗಮ್ಬರೇ ಮನೋವಿನೋದಮೇತು ವಸ್ತುನಿ ॥೩॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Kannada
+  input: "praphullanIlapaGkajaprapaJCakAlimaprabhA-\n-valambikaNThakandalIruCiprabaddhakandharam .\nsmaraCChidaM puraCChidaM bhavaCChidaM makhaCChidaM\ngajaCChidAndhakaCChidaM tamantakaCChidaM bhajE ..9.."
+  output: "ಪ್ರಫುಲ್ಲನೀಲಪಙ್ಕಜಪ್ರಪಞ್ಚಕಾಲಿಮಪ್ರಭಾ-\n-ವಲಮ್ಬಿಕಣ್ಠಕನ್ದಲೀರುಚಿಪ್ರಬದ್ಧಕನ್ಧರಮ್ ।\nಸ್ಮರಚ್ಛಿದಂ ಪುರಚ್ಛಿದಂ ಭವಚ್ಛಿದಂ ಮಖಚ್ಛಿದಂ\nಗಜಚ್ಛಿದಾನ್ಧಕಚ್ಛಿದಂ ತಮನ್ತಕಚ್ಛಿದಂ ಭಜೇ ॥೯॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Kannada
+  input: "jaTATavIgalajjalapravAhapAvitasthalE\ngaLE''valambyalambitAM bhujaGgatuGgamAlikAm .\nDamaDDamaDDamaDDamanninAdavaDDamarvayaM\nCakAraCaNDatANDavaM tanOtunaHshivaHshivam ..1.."
+  output: "ಜಟಾಟವೀಗಲಜ್ಜಲಪ್ರವಾಹಪಾವಿತಸ್ಥಲೇ\nಗಳೇಽವಲಮ್ಬ್ಯಲಮ್ಬಿತಾಂ ಭುಜಙ್ಗತುಙ್ಗಮಾಲಿಕಾಮ್ ।\nಡಮಡ್ಡಮಡ್ಡಮಡ್ಡಮನ್ನಿನಾದವಡ್ಡಮರ್ವಯಂ\nಚಕಾರಚಣ್ಡತಾಣ್ಡವಂ ತನೋತುನಃಶಿವಃಶಿವಮ್ ॥೧॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Kannada
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "ನಿಲಿಮ್ಪನಾಥನಾಗರೀಕದಮ್ಬಮೌಲಮಲ್ಲಿಕಾ-\nನಿಗುಮ್ಫನಿರ್ಭರಕ್ಷರನ್ಮಧೂಷ್ಣಿಕಾಮನೋಹರಃ ।\nತನೋತು ನೋ ಮನೋಮುದಂ ವಿನೋದಿನೀಮಹರ್ನಿಶಂ\nಪರಶ್ರಿಯಃ ಪರಂಪದಂ ತದಙ್ಗಜತ್ವಿಷಾಂಚಯಃ ॥೧೫॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Kannada
+  input: "kadA nilimpanirjharInikuJjakOTarE vasan\nvimuktadurmatiH sadA shiraHsthamaJjaliM vahan .\nvimuktalOlalOCanO lalAmabhAlalagnakaH\nshivEtimantramuCCaran kadA sukhIbhavAmyaham ..13.."
+  output: "ಕದಾ ನಿಲಿಮ್ಪನಿರ್ಝರೀನಿಕುಞ್ಜಕೋಟರೇ ವಸನ್\nವಿಮುಕ್ತದುರ್ಮತಿಃ ಸದಾ ಶಿರಃಸ್ಥಮಞ್ಜಲಿಂ ವಹನ್ ।\nವಿಮುಕ್ತಲೋಲಲೋಚನೋ ಲಲಾಮಭಾಲಲಗ್ನಕಃ\nಶಿವೇತಿಮನ್ತ್ರಮುಚ್ಚರನ್ ಕದಾ ಸುಖೀಭವಾಮ್ಯಹಮ್ ॥೧೩॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Kannada
+  input: "namAmi pArvatIpatiM namAmi jAhnavIpatiM \nnamAmi bhaktavatsalaM namAmi bhAlalOCanam .\nnamAmi CandrashEkharaM namAmi duHkhamOCanaM \ntadIyapAdapaGkajaM smarAmyahaM naTEshvaram ..17.."
+  output: "ನಮಾಮಿ ಪಾರ್ವತೀಪತಿಂ ನಮಾಮಿ ಜಾಹ್ನವೀಪತಿಂ \nನಮಾಮಿ ಭಕ್ತವತ್ಸಲಂ ನಮಾಮಿ ಭಾಲಲೋಚನಮ್ ।\nನಮಾಮಿ ಚನ್ದ್ರಶೇಖರಂ ನಮಾಮಿ ದುಃಖಮೋಚನಂ \nತದೀಯಪಾದಪಙ್ಕಜಂ ಸ್ಮರಾಮ್ಯಹಂ ನಟೇಶ್ವರಮ್ ॥೧೭॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Kannada
+  input: "akharvasarvamaGgaLAkaLAkadambamaJjarI\nrasapravAhamAdhurIvijRmbhaNAmadhuvratam .\nsmarAntakaM purAntakaM bhavAntakaM makhAntakaM\ngajAntakAndhakAntakaM tamantakAntakaM bhajE ..10.."
+  output: "ಅಖರ್ವಸರ್ವಮಙ್ಗಳಾಕಳಾಕದಮ್ಬಮಞ್ಜರೀ\nರಸಪ್ರವಾಹಮಾಧುರೀವಿಜೃಮ್ಭಣಾಮಧುವ್ರತಮ್ ।\nಸ್ಮರಾನ್ತಕಂ ಪುರಾನ್ತಕಂ ಭವಾನ್ತಕಂ ಮಖಾನ್ತಕಂ\nಗಜಾನ್ತಕಾನ್ಧಕಾನ್ತಕಂ ತಮನ್ತಕಾನ್ತಕಂ ಭಜೇ ॥೧೦॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Kannada
+  input: "idaM hi nityamEvamuktamuttamOttamaM stavaM\npaThan smaran bruvan narO vishuddhimEti santatam .\nharE gurau subhaktimAshuyAti nAnyathAgatiM\nvimOhanaM hi dEhinAM sushaGkarasyaCintanam ..14.."
+  output: "ಇದಂ ಹಿ ನಿತ್ಯಮೇವಮುಕ್ತಮುತ್ತಮೋತ್ತಮಂ ಸ್ತವಂ\nಪಠನ್ ಸ್ಮರನ್ ಬ್ರುವನ್ ನರೋ ವಿಶುದ್ಧಿಮೇತಿ ಸನ್ತತಮ್ ।\nಹರೇ ಗುರೌ ಸುಭಕ್ತಿಮಾಶುಯಾತಿ ನಾನ್ಯಥಾಗತಿಂ\nವಿಮೋಹನಂ ಹಿ ದೇಹಿನಾಂ ಸುಶಙ್ಕರಸ್ಯಚಿನ್ತನಮ್ ॥೧೪॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Kannada
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "ನಿಲಿಮ್ಪನಾಥನಾಗರೀಕದಮ್ಬಮೌಲಮಲ್ಲಿಕಾ-\nನಿಗುಮ್ಫನಿರ್ಭರಕ್ಷರನ್ಮಧೂಷ್ಣಿಕಾಮನೋಹರಃ ।\nತನೋತು ನೋ ಮನೋಮುದಂ ವಿನೋದಿನೀಮಹರ್ನಿಶಂ\nಪರಶ್ರಿಯಃ ಪರಂಪದಂ ತದಙ್ಗಜತ್ವಿಷಾಂಚಯಃ ॥೧೫॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Kannada
+  input: "pUjAvasAnasamayEdashavaktragItaM\nyaH shambhupUjanaparaMpaThatipradOShE .\ntasyasthirAM rathagajEndraturaGgayuktAM\nlakShmIM sadaivasumukhIM pradadAtishambhuH ..18.."
+  output: "ಪೂಜಾವಸಾನಸಮಯೇದಶವಕ್ತ್ರಗೀತಂ\nಯಃ ಶಮ್ಭುಪೂಜನಪರಂಪಠತಿಪ್ರದೋಷೇ ।\nತಸ್ಯಸ್ಥಿರಾಂ ರಥಗಜೇನ್ದ್ರತುರಙ್ಗಯುಕ್ತಾಂ\nಲಕ್ಷ್ಮೀಂ ಸದೈವಸುಮುಖೀಂ ಪ್ರದದಾತಿಶಮ್ಭುಃ ॥೧೮॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Kannada
+  input: ..iti shrIrAvaNaviraCitaMshivatANDavastOtraM sampUrNam..
+  output: ॥ಇತಿ ಶ್ರೀರಾವಣವಿರಚಿತಂಶಿವತಾಣ್ಡವಸ್ತೋತ್ರಂ ಸಮ್ಪೂರ್ಣಮ್॥
+  reversible: true
+- index: 22
+  from: Normal
+  to: Kannada
+  input: "paraM bhUyaH pravakShyAmi jJAnAnAM jJAnamuttamam .\nyajjJAtvA munayaH sarvE parAM siddhimitO gatAH ..14-1.."
+  output: "ಪರಂ ಭೂಯಃ ಪ್ರವಕ್ಷ್ಯಾಮಿ ಜ್ಞಾನಾನಾಂ ಜ್ಞಾನಮುತ್ತಮಮ್ ।\nಯಜ್ಜ್ಞಾತ್ವಾ ಮುನಯಃ ಸರ್ವೇ ಪರಾಂ ಸಿದ್ಧಿಮಿತೋ ಗತಾಃ ॥೧೪-೧॥"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Kannada
+  input: "idaM jJAnamupAshritya mama sAdharmyamAgatAH .\nsargE''pi nOpajAyantE pralayE na vyathanti Ca ..14-2.."
+  output: "ಇದಂ ಜ್ಞಾನಮುಪಾಶ್ರಿತ್ಯ ಮಮ ಸಾಧರ್ಮ್ಯಮಾಗತಾಃ ।\nಸರ್ಗೇಽಪಿ ನೋಪಜಾಯನ್ತೇ ಪ್ರಲಯೇ ನ ವ್ಯಥನ್ತಿ ಚ ॥೧೪-೨॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Kannada
+  input: "mama yOnirmahad brahma tasmingarbhaM dadhAmyaham .\nsambhavaH sarvabhUtAnAM tatO bhavati bhArata ..14-3.."
+  output: "ಮಮ ಯೋನಿರ್ಮಹದ್ ಬ್ರಹ್ಮ ತಸ್ಮಿನ್ಗರ್ಭಂ ದಧಾಮ್ಯಹಮ್ ।\nಸಮ್ಭವಃ ಸರ್ವಭೂತಾನಾಂ ತತೋ ಭವತಿ ಭಾರತ ॥೧೪-೩॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Kannada
+  input: "sarvayOniShu kauntEya mUrtayaH sambhavanti yAH .\ntAsAM brahma mahadyOnirahaM bIjapradaH pitA ..14-4.."
+  output: "ಸರ್ವಯೋನಿಷು ಕೌನ್ತೇಯ ಮೂರ್ತಯಃ ಸಮ್ಭವನ್ತಿ ಯಾಃ ।\nತಾಸಾಂ ಬ್ರಹ್ಮ ಮಹದ್ಯೋನಿರಹಂ ಬೀಜಪ್ರದಃ ಪಿತಾ ॥೧೪-೪॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Kannada
+  input: "sattvaM rajastama iti guNAH prakRtisambhavAH .\nnibadhnanti mahAbAhO dEhE dEhinamavyayam ..14-5.."
+  output: "ಸತ್ತ್ವಂ ರಜಸ್ತಮ ಇತಿ ಗುಣಾಃ ಪ್ರಕೃತಿಸಮ್ಭವಾಃ ।\nನಿಬಧ್ನನ್ತಿ ಮಹಾಬಾಹೋ ದೇಹೇ ದೇಹಿನಮವ್ಯಯಮ್ ॥೧೪-೫॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Kannada
+  input: "samaduHkhasukhaH svasthaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO dhIrastulyanindAtmasaMstutiH ..14-24.."
+  output: "ಸಮದುಃಖಸುಖಃ ಸ್ವಸ್ಥಃ ಸಮಲೋಷ್ಟಾಶ್ಮಕಾಞ್ಚನಃ ।\nತುಲ್ಯಪ್ರಿಯಾಪ್ರಿಯೋ ಧೀರಸ್ತುಲ್ಯನಿನ್ದಾತ್ಮಸಂಸ್ತುತಿಃ ॥೧೪-೨೪॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Kannada
+  input: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvArambhaparityAgI guNAtItaH sa uCyatE ..14-25.."
+  output: "ಮಾನಾಪಮಾನಯೋಸ್ತುಲ್ಯಸ್ತುಲ್ಯೋ ಮಿತ್ರಾರಿಪಕ್ಷಯೋಃ ।\nಸರ್ವಾರಮ್ಭಪರಿತ್ಯಾಗೀ ಗುಣಾತೀತಃ ಸ ಉಚ್ಯತೇ ॥೧೪-೨೫॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Kannada
+  input: "mAM Ca yO''vyabhiCArENa bhaktiyOgEna sEvatE .\nsa guNAnsamatItyaitAnbrahmabhUyAya kalpatE ..14-26.."
+  output: "ಮಾಂ ಚ ಯೋಽವ್ಯಭಿಚಾರೇಣ ಭಕ್ತಿಯೋಗೇನ ಸೇವತೇ ।\nಸ ಗುಣಾನ್ಸಮತೀತ್ಯೈತಾನ್ಬ್ರಹ್ಮಭೂಯಾಯ ಕಲ್ಪತೇ ॥೧೪-೨೬॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Kannada
+  input: "brahmaNO hi pratiShThAhamamRtasyAvyayasya Ca .\nshAshvatasya Ca dharmasya sukhasyaikAntikasya Ca ..14-27.."
+  output: "ಬ್ರಹ್ಮಣೋ ಹಿ ಪ್ರತಿಷ್ಠಾಹಮಮೃತಸ್ಯಾವ್ಯಯಸ್ಯ ಚ ।\nಶಾಶ್ವತಸ್ಯ ಚ ಧರ್ಮಸ್ಯ ಸುಖಸ್ಯೈಕಾನ್ತಿಕಸ್ಯ ಚ ॥೧೪-೨೭॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Kannada
+  input: "AUM tatsaditi shrImadbhagavadgItAsUpaniShatsu\nbrahmavidyAyAM yOgashAstrE shrIkRShNArjunasaMvAdE\nguNatrayavibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
+  output: "ಓಂ ತತ್ಸದಿತಿ ಶ್ರೀಮದ್ಭಗವದ್ಗೀತಾಸೂಪನಿಷತ್ಸು\nಬ್ರಹ್ಮವಿದ್ಯಾಯಾಂ ಯೋಗಶಾಸ್ತ್ರೇ ಶ್ರೀಕೃಷ್ಣಾರ್ಜುನಸಂವಾದೇ\nಗುಣತ್ರಯವಿಭಾಗಯೋಗೋ ನಾಮ ಚತುರ್ದಶೋಽಧ್ಯಾಯಃ ॥೧೪॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Kannada
+  input: .. sauMdarya laharI ..
+  output: ॥ ಸೌಂದರ್ಯ ಲಹರೀ ॥
+  reversible: true
+- index: 33
+  from: Normal
+  to: Kannada
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ ಪ್ರಥಮಃ ಭಾಗಃ - ಆನಂದಲಹರೀ (೧-೪೧) ॥
+  reversible: true
+- index: 34
+  from: Normal
+  to: Kannada
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "ಭೂಮೌ ಸ್ಖಲಿತಪಾದಾನಾಂ ಭೂಮಿರೇವಾವಲಮ್ಬನಂ ।\nತ್ವಯಿ ಜಾತಾಪರಾಧಾನಾಂ ತ್ವಮೇವ ಶರಣಂ ಶಿವೇ ॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Kannada
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "ಶಿವಃ ಶಕ್ತ್ಯಾ ಯುಕ್ತೋ ಯದಿ ಭವತಿ ಶಕ್ತಃ ಪ್ರಭವಿತುಂ\nನ ಚೇದೇವಂ ದೇವೋ ನ ಖಲು ಕುಶಲಃ ಸ್ಪನ್ದಿತುಮಪಿ ।\nಅತಸ್ತ್ವಾಮಾರಾಧ್ಯಾಂ ಹರಿಹರವಿರಿಞ್ಚಾದಿಭಿರಪಿ\nಪ್ರಣನ್ತುಂ ಸ್ತೋತುಂ ವಾ ಕಥಮಕೃತಪುಣ್ಯಃ ಪ್ರಭವತಿ ॥೧॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Kannada
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "ತನೀಯಾಂಸಂ ಪಾಂಸುಂ ತವ ಚರಣಪಙ್ಕೇರುಹಭವಂ\nವಿರಿಞ್ಚಿಸ್ಸಞ್ಚಿನ್ವನ್ ವಿರಚಯತಿ ಲೋಕಾನವಿಕಲಮ್ ।\nವಹತ್ಯೇನಂ ಶೌರಿಃ ಕಥಮಪಿ ಸಹಸ್ರೇಣ ಶಿರಸಾಂ\nಹರಸ್ಸಂಕ್ಷುದ್ಯೈನಂ ಭಜತಿ ಭಸಿತೋದ್ಧೂಳನವಿಧಿಮ್ ॥೨॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Kannada
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "ಅವಿದ್ಯಾನಾಮನ್ತಸ್ತಿಮಿರಮಿಹಿರದ್ವೀಪನಗರೀ\nಜಡಾನಾಂ ಚೈತನ್ಯಸ್ತಬಕಮಕರನ್ದಸ್ರುತಿಝರೀ ।\nದರಿದ್ರಾಣಾಂ ಚಿನ್ತಾಮಣಿಗುಣನಿಕಾ ಜನ್ಮಜಲಧೌ\nನಿಮಗ್ನಾನಾಂ ದಂಷ್ಟ್ರಾ ಮುರರಿಪುವರಾಹಸ್ಯ ಭವತಿ ॥೩॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Kannada
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "ತ್ವದನ್ಯಃ ಪಾಣಿಭ್ಯಾಮ್ ಅಭಯವರದೋ ದೈವತಗಣಃ\nತ್ವಮೇಕಾ ನೈವಾಸಿ ಪ್ರಕಟಿತವರಾಭೀತ್ಯಭಿನಯಾ ।\nಭಯಾತ್ ತ್ರಾತುಂ ದಾತುಂ ಫಲಮಪಿ ಚ ವಾಞ್ಛಾಸಮಧಿಕಂ\nಶರಣ್ಯೇ ಲೋಕಾನಾಂ ತವ ಹಿ ಚರಣಾವೇವ ನಿಪುಣೌ ॥೪॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Kannada
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "ಹರಿಸ್ತ್ವಾಮಾರಾಧ್ಯ ಪ್ರಣತಜನಸೌಭಾಗ್ಯಜನನೀಂ\nಪುರಾ ನಾರೀ ಭೂತ್ವಾ ಪುರರಿಪುಮಪಿ ಕ್ಷೋಭಮನಯತ್ ।\nಸ್ಮರೋಽಪಿ ತ್ವಾಂ ನತ್ವಾ ರತಿನಯನಲೇಹ್ಯೇನ ವಪುಷಾ\nಮುನೀನಾಮಪ್ಯನ್ತಃ ಪ್ರಭವತಿ ಹಿ ಮೋಹಾಯ ಮಹತಾಮ್ ॥೫॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Kannada
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "ಸರಸ್ವತ್ಯಾ ಲಕ್ಷ್ಮ್ಯಾ ವಿಧಿಹರಿಸಪತ್ನೋ ವಿಹರತೇ\nರತೇಃ ಪಾತಿವ್ರತ್ಯಂ ಶಿಥಿಲಯತಿ ರಮ್ಯೇಣ ವಪುಷಾ ।\nಚಿರಂ ಜೀವನ್ನೇವ ಕ್ಷಪಿತಪಶುಪಾಶವ್ಯತಿಕರಃ\nಪರಾನನ್ದಾಭಿಖ್ಯಮ್ ರಸಯತಿ ರಸಂ ತ್ವದ್ಭಜನವಾನ್ ॥೯೯॥\nಪ್ರದೀಪಜ್ವಾಲಾಭಿಃ ದಿವಸಕರನೀರಾಜನವಿಧಿಃ\nಸುಧಾಸೂತೇಶ್ಚನ್ದ್ರೋಪಲಜಲಲವೈರರ್ಘ್ಯರಚನಾ ।\nಸ್ವಕೀಯೈರಮ್ಭೋಭಿಃ ಸಲಿಲನಿಧಿಸೌಹಿತ್ಯಕರಣಂ\nತ್ವದೀಯಾಭಿರ್ವಾಗ್ಭಿಃ ತವ ಜನನಿ ವಾಚಾಂ ಸ್ತುತಿರಿಯಮ್ ॥೧೦೦॥"
+  reversible: true

@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Tamil
+  input: "yadyadvibhUtimatsattvaM shrImadUrjitamEva vA .\ntattadEvAvagaCCha tvaM mama tEjOM''shasambhavam ..10-41.."
+  output: "யத்யத்விபூதிமத்ஸத்த்வம் ஶ்ரீமதூர்ஜிதமேவ வா ।\nதத்ததேவாவகச்ச த்வம் மம தேஜோம்ऽஶஸம்பவம் ॥௧௦-௪௧॥"
+  reversible: false
+- index: 1
+  from: Normal
+  to: Tamil
+  input: "athavA bahunaitEna kiM jJAtEna tavArjuna .\nviShTabhyAhamidaM kRtsnamEkAMshEna sthitO jagat ..10-42.."
+  output: "அதவா பஹுநைதேந கிம் ஜ்ஞாதேந தவார்ஜுந ।\nவிஷ்டப்யாஹமிதம் கிருத்ஸ்நமேகாம்ஶேந ஸ்திதோ ஜகத் ॥௧௦-௪௨॥"
+  reversible: false
+- index: 2
+  from: Normal
+  to: Tamil
+  input: "yOgIndrANAM tvadaGgEShvadhikasumadhuraM muktibhAjAM nivAsO\nbhaktAnAM kAmavarShadyutarukisalayaM nAtha tE pAdamUlam .\nnityaM CittasthitaM mE pavanapurapatE kRShNa kAruNyasindhO\nhRtvA nishshEShatApAn pradishatu paramAnandasandOhalakShmIm ..10.."
+  output: "யோகீந்த்ராணாம் த்வதங்கேஷ்வதிகஸுமதுரம் முக்திபாஜாம் நிவாஸோ\nபக்தாநாம் காமவர்ஷத்யுதருகிஸலயம் நாத தே பாதமூலம் ।\nநித்யம் சித்தஸ்திதம் மே பவநபுரபதே கிருஷ்ண காருண்யஸிந்தோ\nஹிருத்வா நிஶ்ஶேஷதாபாந் ப்ரதிஶது பரமாநந்தஸந்தோஹலக்ஷ்மீம் ॥௧௦॥"
+  reversible: false
+- index: 3
+  from: Normal
+  to: Tamil
+  input: "shrIbhagavAnuvACa .\nUrdhvamUlamadhaHshAkhamashvatthaM prAhuravyayam .\nChandAMsi yasya parNAni yastaM vEda sa vEdavit ..15-1.."
+  output: "ஶ்ரீபகவாநுவாச ।\nஊர்த்வமூலமதஃஶாகமஶ்வத்தம் ப்ராஹுரவ்யயம் ।\nசந்தாம்ஸி யஸ்ய பர்ணாநி யஸ்தம் வேத ஸ வேதவித் ॥௧௫-௧॥"
+  reversible: false
+- index: 4
+  from: Normal
+  to: Tamil
+  input: "adhashCOrdhvaM prasRtAstasya shAkhA\nguNapravRddhA viShayapravAlAH .\nadhashCa mUlAnyanusantatAni\nkarmAnubandhIni manuShyalOkE ..15-2.."
+  output: "அதஶ்சோர்த்வம் ப்ரஸிருதாஸ்தஸ்ய ஶாகா\nகுணப்ரவிருத்தா விஷயப்ரவாலாஃ ।\nஅதஶ்ச மூலாந்யநுஸந்ததாநி\nகர்மாநுபந்தீநி மநுஷ்யலோகே ॥௧௫-௨॥"
+  reversible: false
+- index: 5
+  from: Normal
+  to: Tamil
+  input: "na rUpamasyEha tathOpalabhyatE\nnAntO na CAdirna Ca sampratiShThA .\nashvatthamEnaM suvirUDhamUlaM\nasaGgashastrENa dRDhEna ChittvA ..15-3.."
+  output: "ந ரூபமஸ்யேஹ ததோபலப்யதே\nநாந்தோ ந சாதிர்ந ச ஸம்ப்ரதிஷ்டா ।\nஅஶ்வத்தமேநம் ஸுவிரூடமூலம்\nஅஸங்கஶஸ்த்ரேண திருடேந சித்த்வா ॥௧௫-௩॥"
+  reversible: false
+- index: 6
+  from: Normal
+  to: Tamil
+  input: "tataH padaM tatparimArgitavyaM\nyasmingatA na nivartanti bhUyaH .\ntamEva CAdyaM puruShaM prapadyE .\nyataH pravRttiH prasRtA purANI ..15-4.."
+  output: "ததஃ பதம் தத்பரிமார்கிதவ்யம்\nயஸ்மிந்கதா ந நிவர்தந்தி பூயஃ ।\nதமேவ சாத்யம் புருஷம் ப்ரபத்யே ।\nயதஃ ப்ரவிருத்திஃ ப்ரஸிருதா புராணீ ॥௧௫-௪॥"
+  reversible: false
+- index: 7
+  from: Normal
+  to: Tamil
+  input: "nirmAnamOhA jitasaGgadOShA\nadhyAtmanityA vinivRttakAmAH .\ndvandvairvimuktAH sukhaduHkhasaMjJair-\ngaCChantyamUDhAH padamavyayaM tat ..15-5.."
+  output: "நிர்மாநமோஹா ஜிதஸங்கதோஷா\nஅத்யாத்மநித்யா விநிவிருத்தகாமாஃ ।\nத்வந்த்வைர்விமுக்தாஃ ஸுகதுஃகஸம்ஜ்ஞைர்-\nகச்சந்த்யமூடாஃ பதமவ்யயம் தத் ॥௧௫-௫॥"
+  reversible: false
+- index: 8
+  from: Normal
+  to: Tamil
+  input: "na tadbhAsayatE sUryO na shashAGkO na pAvakaH .\nyadgatvA na nivartantE taddhAma paramaM mama ..15-6.."
+  output: "ந தத்பாஸயதே ஸூர்யோ ந ஶஶாங்கோ ந பாவகஃ ।\nயத்கத்வா ந நிவர்தந்தே தத்தாம பரமம் மம ॥௧௫-௬॥"
+  reversible: false
+- index: 9
+  from: Normal
+  to: Tamil
+  input: "mamaivAMshO jIvalOkE jIvabhUtaH sanAtanaH .\nmanaHShaShThAnIndriyANi prakRtisthAni karShati ..15-7.."
+  output: "மமைவாம்ஶோ ஜீவலோகே ஜீவபூதஃ ஸநாதநஃ ।\nமநஃஷஷ்டாநீந்த்ரியாணி ப்ரகிருதிஸ்தாநி கர்ஷதி ॥௧௫-௭॥"
+  reversible: false
+- index: 10
+  from: Normal
+  to: Tamil
+  input: "sharIraM yadavApnOti yaCCApyutkrAmatIshvaraH .\ngRhItvaitAni saMyAti vAyurgandhAnivAshayAt ..15-8.."
+  output: "ஶரீரம் யதவாப்நோதி யச்சாப்யுத்க்ராமதீஶ்வரஃ ।\nகிருஹீத்வைதாநி ஸம்யாதி வாயுர்கந்தாநிவாஶயாத் ॥௧௫-௮॥"
+  reversible: false
+- index: 11
+  from: Normal
+  to: Tamil
+  input: "shrOtraM CakShuH sparshanaM Ca rasanaM ghrANamEva Ca .\nadhiShThAya manashCAyaM viShayAnupasEvatE ..15-9.."
+  output: "ஶ்ரோத்ரம் சக்ஷுஃ ஸ்பர்ஶநம் ச ரஸநம் க்ராணமேவ ச ।\nஅதிஷ்டாய மநஶ்சாயம் விஷயாநுபஸேவதே ॥௧௫-௯॥"
+  reversible: false
+- index: 12
+  from: Normal
+  to: Tamil
+  input: "utkrAmantaM sthitaM vApi bhuJjAnaM vA guNAnvitam .\nvimUDhA nAnupashyanti pashyanti jJAnaCakShuShaH ..15-10.."
+  output: "உத்க்ராமந்தம் ஸ்திதம் வாபி புஞ்ஜாநம் வா குணாந்விதம் ।\nவிமூடா நாநுபஶ்யந்தி பஶ்யந்தி ஜ்ஞாநசக்ஷுஷஃ ॥௧௫-௧௦॥"
+  reversible: false
+- index: 13
+  from: Normal
+  to: Tamil
+  input: "yatantO yOginashCainaM pashyantyAtmanyavasthitam .\nyatantO''pyakRtAtmAnO nainaM pashyantyaCEtasaH ..15-11.."
+  output: "யதந்தோ யோகிநஶ்சைநம் பஶ்யந்த்யாத்மந்யவஸ்திதம் ।\nயதந்தோऽப்யகிருதாத்மாநோ நைநம் பஶ்யந்த்யசேதஸஃ ॥௧௫-௧௧॥"
+  reversible: false
+- index: 14
+  from: Normal
+  to: Tamil
+  input: "yadAdityagataM tEjO jagadbhAsayatE''khilam .\nyaCCandramasi yaCCAgnau tattEjO viddhi mAmakam ..15-12.."
+  output: "யதாதித்யகதம் தேஜோ ஜகத்பாஸயதேऽகிலம் ।\nயச்சந்த்ரமஸி யச்சாக்நௌ தத்தேஜோ வித்தி மாமகம் ॥௧௫-௧௨॥"
+  reversible: false
+- index: 15
+  from: Normal
+  to: Tamil
+  input: "gAmAvishya Ca bhUtAni dhArayAmyahamOjasA .\npuShNAmi CauShadhIH sarvAH sOmO bhUtvA rasAtmakaH ..15-13.."
+  output: "காமாவிஶ்ய ச பூதாநி தாரயாம்யஹமோஜஸா ।\nபுஷ்ணாமி சௌஷதீஃ ஸர்வாஃ ஸோமோ பூத்வா ரஸாத்மகஃ ॥௧௫-௧௩॥"
+  reversible: false
+- index: 16
+  from: Normal
+  to: Tamil
+  input: .. atha shyAmalA daNDakam ..
+  output: ॥ அத ஶ்யாமலா தண்டகம் ॥
+  reversible: false
+- index: 17
+  from: Normal
+  to: Tamil
+  input: .. dhyAnam ..
+  output: ॥ த்யாநம் ॥
+  reversible: false
+- index: 18
+  from: Normal
+  to: Tamil
+  input: "mANikyavINAmupalAlayantIM\nmadAlasAM maJjulavAgvilAsAm .\nmAhEndranIladyutikOmalAGgIM\nmAtaGgakanyAM manasA smarAmi .. 1.."
+  output: "மாணிக்யவீணாமுபலாலயந்தீம்\nமதாலஸாம் மஞ்ஜுலவாக்விலாஸாம் ।\nமாஹேந்த்ரநீலத்யுதிகோமலாங்கீம்\nமாதங்ககந்யாம் மநஸா ஸ்மராமி ॥ ௧॥"
+  reversible: false
+- index: 19
+  from: Normal
+  to: Tamil
+  input: "CaturbhujE CandrakalAvataMsE\nkuCOnnatE kuGkumarAgashONE .\npuNDrEkShupAshAGkushapuShpabANa-\nhastE namastE jagadEkamAtaH .. 2.."
+  output: "சதுர்புஜே சந்த்ரகலாவதம்ஸே\nகுசோந்நதே குங்குமராகஶோணே ।\nபுண்ட்ரேக்ஷுபாஶாங்குஶபுஷ்பபாண-\nஹஸ்தே நமஸ்தே ஜகதேகமாதஃ ॥ ௨॥"
+  reversible: false
+- index: 20
+  from: Normal
+  to: Tamil
+  input: .. viniyOgaH ..
+  output: ॥ விநியோகஃ ॥
+  reversible: false
+- index: 21
+  from: Normal
+  to: Tamil
+  input: "mAtA marakatashyAmA mAtaGgI madashAlinI .\nkuryAt kaTAkShaM kalyANI kadaMbavanavAsinI .. 3.."
+  output: "மாதா மரகதஶ்யாமா மாதங்கீ மதஶாலிநீ ।\nகுர்யாத் கடாக்ஷம் கல்யாணீ கதம்பவநவாஸிநீ ॥ ௩॥"
+  reversible: false
+- index: 22
+  from: Normal
+  to: Tamil
+  input: .. stuti ..
+  output: ॥ ஸ்துதி ॥
+  reversible: true
+- index: 23
+  from: Normal
+  to: Tamil
+  input: "jaya mAtaGgatanayE jaya nIlOtpaladyutE .\njaya saGgItarasikE jaya lIlAshukapriyE .. 4.."
+  output: "ஜய மாதங்கதநயே ஜய நீலோத்பலத்யுதே ।\nஜய ஸங்கீதரஸிகே ஜய லீலாஶுகப்ரியே ॥ ௪॥"
+  reversible: false
+- index: 24
+  from: Normal
+  to: Tamil
+  input: .. daNDakam ..
+  output: ॥ தண்டகம் ॥
+  reversible: false
+- index: 25
+  from: Normal
+  to: Tamil
+  input: "jaya janani sudhAsamudrAntarudyanmaNIdvIpasaMrUDh -\nbilvATavImadhyakalpadrumAkalpakAdaMbakAntAravAsapriyE\nkRttivAsapriyE sarvalOkapriyE"
+  output: "ஜய ஜநநி ஸுதாஸமுத்ராந்தருத்யந்மணீத்வீபஸம்ரூட் -\nபில்வாடவீமத்யகல்பத்ருமாகல்பகாதம்பகாந்தாரவாஸப்ரியே\nகிருத்திவாஸப்ரியே ஸர்வலோகப்ரியே"
+  reversible: false
+- index: 26
+  from: Normal
+  to: Tamil
+  input: "sAdarArabdhasaMgItasaMbhAvanAsaMbhramAlOla-\nnIpasragAbaddhaCUlIsanAthatrikE sAnumatputrikE"
+  output: "ஸாதராரப்தஸம்கீதஸம்பாவநாஸம்ப்ரமாலோல-\nநீபஸ்ரகாபத்தசூலீஸநாதத்ரிகே ஸாநுமத்புத்ரிகே"
+  reversible: false
+- index: 27
+  from: Normal
+  to: Tamil
+  input: "shEkharIbhUtashItAMshurEkhAmayUkhAvalIbaddha-\nsusnigdhanIlAlakashrENishRGgAritE lOkasaMbhAvitE\nkAmalIlAdhanussannibhabhrUlatApuShpasandOhasandEhakRllOCanE\nvAksudhAsECanE CArugOrOCanApaGkakElIlalAmAbhirAmE surAmE ramE"
+  output: "ஶேகரீபூதஶீதாம்ஶுரேகாமயூகாவலீபத்த-\nஸுஸ்நிக்தநீலாலகஶ்ரேணிஶிருங்காரிதே லோகஸம்பாவிதே\nகாமலீலாதநுஸ்ஸந்நிபப்ரூலதாபுஷ்பஸந்தோஹஸந்தேஹகிருல்லோசநே\nவாக்ஸுதாஸேசநே சாருகோரோசநாபங்ககேலீலலாமாபிராமே ஸுராமே ரமே"
+  reversible: false
+- index: 28
+  from: Normal
+  to: Tamil
+  input: "prOllasaddhvAlikAmauktikashrENikACandrikAmaNDalOdbhAsi\nlAvaNyagaNDasthalanyastakastUrikApatrarEkhAsamudbhUtasaurabhya-\nsaMbhrAntabhRGgAGganAgItasAndrIbhavanmandratantrIsvarE\nsusvarE bhAsvarE"
+  output: "ப்ரோல்லஸத்த்வாலிகாமௌக்திகஶ்ரேணிகாசந்த்ரிகாமண்டலோத்பாஸி\nலாவண்யகண்டஸ்தலந்யஸ்தகஸ்தூரிகாபத்ரரேகாஸமுத்பூதஸௌரப்ய-\nஸம்ப்ராந்தபிருங்காங்கநாகீதஸாந்த்ரீபவந்மந்த்ரதந்த்ரீஸ்வரே\nஸுஸ்வரே பாஸ்வரே"
+  reversible: false
+- index: 29
+  from: Normal
+  to: Tamil
+  input: "vallakIvAdanaprakriyAlOlatAlIdalAbaddha-\ntATaGkabhUShAvishEShAnvitE siddhasammAnitE"
+  output: "வல்லகீவாதநப்ரக்ரியாலோலதாலீதலாபத்த-\nதாடங்கபூஷாவிஶேஷாந்விதே ஸித்தஸம்மாநிதே"
+  reversible: false
+- index: 30
+  from: Normal
+  to: Tamil
+  input: "divyahAlAmadOdvElahElAlasaCCakShurAndOlanashrIsamAkShiptakarNaika-\nnIlOtpalE shyAmalE pUritAshEShalOkAbhivAJChAphalE shrIphalE"
+  output: "திவ்யஹாலாமதோத்வேலஹேலாலஸச்சக்ஷுராந்தோலநஶ்ரீஸமாக்ஷிப்தகர்ணைக-\nநீலோத்பலே ஶ்யாமலே பூரிதாஶேஷலோகாபிவாஞ்சாபலே ஶ்ரீபலே"
+  reversible: false
+- index: 31
+  from: Normal
+  to: Tamil
+  input: "svEdabindUllasadphAlalAvaNya niShyandasandOhasandEhakRnnAsikAmauktikE\nsarvavishvAtmikE sarvasiddhyAtmikE kAlikE mugddhamandasmitOdAravaktra-\nsphurat pUgatAmbUlakarpUrakhaNDOtkarE jJAnamudrAkarE sarvasampatkarE\npadmabhAsvatkarE shrIkarE"
+  output: "ஸ்வேதபிந்தூல்லஸத்பாலலாவண்ய நிஷ்யந்தஸந்தோஹஸந்தேஹகிருந்நாஸிகாமௌக்திகே\nஸர்வவிஶ்வாத்மிகே ஸர்வஸித்த்யாத்மிகே காலிகே முக்த்தமந்தஸ்மிதோதாரவக்த்ர-\nஸ்புரத் பூகதாம்பூலகர்பூரகண்டோத்கரே ஜ்ஞாநமுத்ராகரே ஸர்வஸம்பத்கரே\nபத்மபாஸ்வத்கரே ஶ்ரீகரே"
+  reversible: false
+- index: 32
+  from: Normal
+  to: Tamil
+  input: "kundapuShpadyutisnigdhadantAvalInirmalAlOlakallOlasammElana\nsmErashONAdharE CAruvINAdharE pakvabiMbAdharE"
+  output: "குந்தபுஷ்பத்யுதிஸ்நிக்ததந்தாவலீநிர்மலாலோலகல்லோலஸம்மேலந\nஸ்மேரஶோணாதரே சாருவீணாதரே பக்வபிம்பாதரே"
+  reversible: false
+- index: 33
+  from: Normal
+  to: Tamil
+  input: "sulalita navayauvanAraMbhaCandrOdayOdvElalAvaNyadugdhArNavAvirbhavat\nkambubimbOkabhRtkantharE satkalAmandirE mantharE"
+  output: "ஸுலலித நவயௌவநாரம்பசந்த்ரோதயோத்வேலலாவண்யதுக்தார்ணவாவிர்பவத்\nகம்புபிம்போகபிருத்கந்தரே ஸத்கலாமந்திரே மந்தரே"
+  reversible: false
+- index: 34
+  from: Normal
+  to: Tamil
+  input: "divyaratnaprabhAbandhuraCChannahArAdibhUShAsamudyOtamAnAnavadyAGga-\nshObhE shubhE"
+  output: "திவ்யரத்நப்ரபாபந்துரச்சந்நஹாராதிபூஷாஸமுத்யோதமாநாநவத்யாங்க-\nஶோபே ஶுபே"
+  reversible: false
+- index: 35
+  from: Normal
+  to: Tamil
+  input: "ratnakEyUrarashmiCChaTApallavaprOllasaddOllatArAjitE yOgibhiH\npUjitE vishvadiGmaNDalavyAptamANikyatEjassphuratkaGkaNAlaMkRtE\nvibhramAlaMkRtE sAdhubhiH pUjitE vAsarAraMbhavElAsamujjRmbha\nmANAravindapratidvandvipANidvayE santatOdyaddayE advayE\ndivyaratnOrmikAdIdhitistOmasandhyAyamAnAGgulIpallavOdya\nnnakhEnduprabhAmaNDalE sannutAkhaNDalE CitprabhAmaNDalE prOllasatkuNDalE"
+  output: "ரத்நகேயூரரஶ்மிச்சடாபல்லவப்ரோல்லஸத்தோல்லதாராஜிதே யோகிபிஃ\nபூஜிதே விஶ்வதிங்மண்டலவ்யாப்தமாணிக்யதேஜஸ்ஸ்புரத்கங்கணாலம்கிருதே\nவிப்ரமாலம்கிருதே ஸாதுபிஃ பூஜிதே வாஸராரம்பவேலாஸமுஜ்ஜிரும்ப\nமாணாரவிந்தப்ரதித்வந்த்விபாணித்வயே ஸந்ததோத்யத்தயே அத்வயே\nதிவ்யரத்நோர்மிகாதீதிதிஸ்தோமஸந்த்யாயமாநாங்குலீபல்லவோத்ய\nந்நகேந்துப்ரபாமண்டலே ஸந்நுதாகண்டலே சித்ப்ரபாமண்டலே ப்ரோல்லஸத்குண்டலே"
+  reversible: false
+- index: 36
+  from: Normal
+  to: Tamil
+  input: "tArakArAjinIkAshahArAvalismEra CArustanAbhOgabhArAnamanmadhya-\nvallIvaliCChEda vICIsamudyatsamullAsasandarshitAkArasaundaryaratnAkarE\nvallakIbhRtkarE kiGkarashrIkarE"
+  output: "தாரகாராஜிநீகாஶஹாராவலிஸ்மேர சாருஸ்தநாபோகபாராநமந்மத்ய-\nவல்லீவலிச்சேத வீசீஸமுத்யத்ஸமுல்லாஸஸந்தர்ஶிதாகாரஸௌந்தர்யரத்நாகரே\nவல்லகீபிருத்கரே கிங்கரஶ்ரீகரே"
+  reversible: false
+- index: 37
+  from: Normal
+  to: Tamil
+  input: "hEmakuMbhOpamOttuGga vakShOjabhArAvanamrE trilOkAvanamrE\nlasadvRttagaMbhIra nAbhIsarastIrashaivAlashaGkAkarashyAmarOmAvalIbhUShaNE\nmaJjusaMbhAShaNE"
+  output: "ஹேமகும்போபமோத்துங்க வக்ஷோஜபாராவநம்ரே த்ரிலோகாவநம்ரே\nலஸத்விருத்தகம்பீர நாபீஸரஸ்தீரஶைவாலஶங்காகரஶ்யாமரோமாவலீபூஷணே\nமஞ்ஜுஸம்பாஷணே"
+  reversible: false
+- index: 38
+  from: Normal
+  to: Tamil
+  input: "CArushiJCatkaTIsUtranirbhatsitAnaGgalIladhanushshiJCinIDaMbarE\ndivyaratnAmbarE"
+  output: "சாருஶிஞ்சத்கடீஸூத்ரநிர்பத்ஸிதாநங்கலீலதநுஶ்ஶிஞ்சிநீடம்பரே\nதிவ்யரத்நாம்பரே"
+  reversible: false
+- index: 39
+  from: Normal
+  to: Tamil
+  input: "padmarAgOllasa nmEkhalAmauktikashrONishObhAjitasvarNabhUbhRttalE\nCandrikAshItalE vikasitanavakiMshukAtAmradivyAMshukaCChanna\nCArUrushObhAparAbhUtasindUrashONAyamAnEndramAtaGga\nhasmArggalE vaibhavAnarggalE shyAmalE kOmalasnigddha\nnIlOtpalOtpAditAnaGgatUNIrashaGkAkarOdAra\njaMghAlatE CArulIlAgatE namradikpAlasImantinI\nkuntalasnigddhanIlaprabhApuJCasaJjAtadurvAGkurAshaGka\nsAraMgasaMyOgariMkhannakhEndUjjvalE prOjjvalE\nnirmalE prahva dEvEsha lakShmIsha bhUtEsha tOyEsha vANIsha kInAsha\ndaityEsha yakShEsha vAyvagnikOTIramANikya saMhRShTabAlAtapOddAma--\nlAkShArasAruNyatAruNya lakShmIgRhitAGghripadmmE supadmE umE"
+  output: "பத்மராகோல்லஸ ந்மேகலாமௌக்திகஶ்ரோணிஶோபாஜிதஸ்வர்ணபூபிருத்தலே\nசந்த்ரிகாஶீதலே விகஸிதநவகிம்ஶுகாதாம்ரதிவ்யாம்ஶுகச்சந்ந\nசாரூருஶோபாபராபூதஸிந்தூரஶோணாயமாநேந்த்ரமாதங்க\nஹஸ்மார்க்கலே வைபவாநர்க்கலே ஶ்யாமலே கோமலஸ்நிக்த்த\nநீலோத்பலோத்பாதிதாநங்கதூணீரஶங்காகரோதார\nஜம்காலதே சாருலீலாகதே நம்ரதிக்பாலஸீமந்திநீ\nகுந்தலஸ்நிக்த்தநீலப்ரபாபுஞ்சஸஞ்ஜாததுர்வாங்குராஶங்க\nஸாரம்கஸம்யோகரிம்கந்நகேந்தூஜ்ஜ்வலே ப்ரோஜ்ஜ்வலே\nநிர்மலே ப்ரஹ்வ தேவேஶ லக்ஷ்மீஶ பூதேஶ தோயேஶ வாணீஶ கீநாஶ\nதைத்யேஶ யக்ஷேஶ வாய்வக்நிகோடீரமாணிக்ய ஸம்ஹிருஷ்டபாலாதபோத்தாம--\nலாக்ஷாரஸாருண்யதாருண்ய லக்ஷ்மீகிருஹிதாங்க்ரிபத்ம்மே ஸுபத்மே உமே"
+  reversible: false
+- index: 40
+  from: Normal
+  to: Tamil
+  input: "suruCiranavaratnapIThasthitE susthitE\nratnapadmAsanE ratnasimhAsanE shaGkhapadmadvayOpAshritE vishrutE\ntatra vighnEshadurgAvaTukShEtrapAlairyutE mattamAtaGga\nkanyAsamUhAnvitE bhairavairaShTabhirvEShTitE\nmaJCulAmEnakAdyaGganAmAnitE dEvi vAmAdibhiH shaktibhissEvitE\ndhAtri lakShmyAdishaktyaShTakaiH saMyutE mAtRkAmaNDalairmaNDitE\nyakShagandharvasiddhAGganA maNDalairarCitE"
+  output: "ஸுருசிரநவரத்நபீடஸ்திதே ஸுஸ்திதே\nரத்நபத்மாஸநே ரத்நஸிம்ஹாஸநே ஶங்கபத்மத்வயோபாஶ்ரிதே விஶ்ருதே\nதத்ர விக்நேஶதுர்காவடுக்ஷேத்ரபாலைர்யுதே மத்தமாதங்க\nகந்யாஸமூஹாந்விதே பைரவைரஷ்டபிர்வேஷ்டிதே\nமஞ்சுலாமேநகாத்யங்கநாமாநிதே தேவி வாமாதிபிஃ ஶக்திபிஸ்ஸேவிதே\nதாத்ரி லக்ஷ்ம்யாதிஶக்த்யஷ்டகைஃ ஸம்யுதே மாதிருகாமண்டலைர்மண்டிதே\nயக்ஷகந்தர்வஸித்தாங்கநா மண்டலைரர்சிதே"
+  reversible: false

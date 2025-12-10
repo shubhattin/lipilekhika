@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Sinhala
+  input: "sva↓sti panthA↓manu↑ CarEma sUryACandra↓masA↑↑viva .\npuna↓rdada↓tAghna↑tA jAna↓tA saM ga↑mEmahi .. 505115"
+  output: "ස්ව॒ස්ති පන්ථා॒මනු॑ චරේම සූර්යාචන්ද්ර॒මසා᳚විව ।\nපුන॒ර්දද॒තාඝ්න॑තා ජාන॒තා සං ග॑මේමහි ॥ ෫෦෫෧෧෫"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Sinhala
+  input: atha puruShasUktam ..
+  output: අථ පුරුෂසූක්තම් ॥
+  reversible: true
+- index: 2
+  from: Normal
+  to: Sinhala
+  input: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  output: "ॐ තච්ඡං॒ යෝරාවෘ॑ණීමහේ । ගා॒තුං ය॒ජ්ඤාය॑ । ගා॒තුං ය॒ජ්ඤප॑තයේ । දෛවී᳚ ස්ව॒ස්තිර॑ස්තු නඃ ।\nස්ව॒ස්තිර්මානු॑ෂේභ්යඃ । ඌ॒ර්ධ්වං ජි॑ගාතු භේෂ॒ජම් । ශන්නෝ॑ අස්තු ද්වි॒පදේ᳚ । ශං චතු॑ෂ්පදේ ।\nॐ ශාන්තිඃ॒ ශාන්තිඃ॒ ශාන්තිඃ॑ ।"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Sinhala
+  input: hariH AUM .
+  output: හරිඃ ॐ ।
+  reversible: true
+- index: 4
+  from: Normal
+  to: Sinhala
+  input: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . 1"
+  output: "ॐ ස॒හස්ර॑ශීර්ෂා॒ පුරු॑ෂඃ । ස॒හ॒ස්රා॒ක්ෂඃ ස॒හස්ර॑පාත් ।\nස භූමිං॑ වි॒ශ්වතෝ॑ වෘ॒ත්වා । අත්ය॑තිෂ්ඨද්දශාඞ්ගු॒ලම් । ෧"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Sinhala
+  input: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . 2"
+  output: "පුරු॑ෂ ඒ॒වේදꣳ සර්වම්᳚ । යද්භූ॒තං යච්ච॒ භව්යම්᳚।\nඋ॒තාමෘ॑ත॒ත්වස්යේශා॑නඃ । යදන්නේ॑නාති॒රෝහ॑ති । ෨"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Sinhala
+  input: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . 3"
+  output: "ඒ॒තාවා॑නස්ය මහි॒මා । අතෝ॒ ජ්යායාꣳ॑ශ්ච॒ පූරු॑ෂඃ ।\nපාදෝ᳚ऽස්ය॒ විශ්වා॑ භූ॒තානි॑ । ත්රි॒පාද॑ස්යා॒මෘතං॑ දි॒වි । ෩"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Sinhala
+  input: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . 4"
+  output: "ත්රි॒පාදූ॒ර්ධ්ව උදෛ॒ත්පුරු॑ෂඃ । පාදෝ᳚ऽස්යේ॒හාऽऽභ॑වා॒ත්පුනඃ॑ ।\nතතෝ॒ විශ්ව॒ඞ්ව්ය॑ක්රාමත් । සා॒ශ॒නා॒න॒ශ॒නේ අ॒භි । ෪"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Sinhala
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  output: "තස්මා᳚ද්වි॒රාඩ॑ජායත । වි॒රාජෝ॒ අධි॒ පූරු॑ෂඃ ।\nස ජා॒තෝ අත්ය॑රිච්යත । ප॒ශ්චාද්භූමි॒මථෝ॑ පු॒රඃ । ෫"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Sinhala
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  output: "යත්පුරු॑ෂේණ හ॒විෂා᳚ । දේ॒වා ය॒ජ්ඤමත॑න්වත ।\nව॒ස॒න්තෝ අ॑ස්යාසී॒දාජ්යම්᳚ । ග්රී॒ෂ්ම ඉ॒ධ්මඃ ශ॒රද්ධ॒විඃ । ෬"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Sinhala
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  output: "ස॒ප්තාස්යා॑සන්පරි॒ධයඃ॑ । ත්රිඃ ස॒ප්ත ස॒මිධඃ॑ කෘ॒තාඃ ।\nදේ॒වා යද්ය॒ජ්ඤං ත॑න්වා॒නාඃ । අබ॑ධ්න॒න්පු॑රුෂං ප॒ශුම් । ෭"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Sinhala
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  output: "තං ය॒ජ්ඤං බ॒ර්හිෂි॒ ප්රෞක්ෂන්॑ । පුරු॑ෂං ජා॒තම॑ග්ර॒තඃ ।\nතේන॑ දේ॒වා අය॑ජන්ත । සා॒ධ්යා ඍෂ॑යශ්ච॒ යේ । ෮"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Sinhala
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  output: "තස්මා᳚ද්ය॒ජ්ඤාත්ස॑ර්ව॒හුතඃ॑ । සංභෘ॑තං පෘෂදා॒ජ්යම් ।\nප॒ශූꣳස්තාꣳශ්ච॑ක්රේ වාය॒ව්යාන්॑ । ආ॒ර॒ණ්යාන්ග්රා॒ම්යාශ්ච॒ යේ । ෯"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Sinhala
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  output: "තස්මා᳚ද්ය॒ජ්ඤාත්ස॑ර්ව॒හුතඃ॑ । ඍචඃ॒ සාමා॑නි ජජ්ඤිරේ ।\nඡන්දාꣳ॑සි ජජ්ඤිරේ॒ තස්මා᳚ත් । යජු॒ස්තස්මා॑දජායත । ෧෦"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Sinhala
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  output: "තස්මා॒දශ්වා॑ අජායන්ත । යේ කේ චෝ॑භ॒යාද॑තඃ ।\nගාවෝ॑ හ ජජ්ඤිරේ॒ තස්මා᳚ත් । තස්මා᳚ජ්ජා॒තා අ॑ජා॒වයඃ॑ । ෧෧"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Sinhala
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  output: "යත්පුරු॑ෂං॒ ව්ය॑දධුඃ । ක॒ති॒ධා ව්ය॑කල්පයන් ।\nමුඛං॒ කිම॑ස්ය॒ කෞ බා॒හූ । කාවූ॒රූ පාදා॑වුච්යේතේ । ෧෨"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Sinhala
+  input: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . 13"
+  output: "බ්රා॒හ්ම॒ණෝ᳚ऽස්ය॒ මුඛ॑මාසීත් । බා॒හූ රා॑ජ॒න්යඃ॑ කෘ॒තඃ ।\nඌ॒රූ තද॑ස්ය॒ යද්වෛශ්යඃ॑ । ප॒ද්භ්යාꣳ ශූ॒ද්රෝ අ॑ජායත । ෧෩"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Sinhala
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  output: "ච॒න්ද්රමා॒ මන॑සෝ ජා॒තඃ । චක්ෂෝඃ॒ සූර්යෝ॑ අජායත ।\nමුඛා॒දින්ද්ර॑ශ්චා॒ග්නිශ්ච॑ ।  ප්රා॒ණාද්වා॒යුර॑ජායත । ෧෪"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Sinhala
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . 15"
+  output: "නාභ්යා॑ ආසීද॒න්තරි॑ක්ෂම් । ශී॒ර්ෂ්ණෝ ද්යෞඃ සම॑වර්තත ।\nප॒ද්භ්යාං භූමි॒ර්දිශඃ॒ ශ්රෝත්රා᳚ත් । තථා॑ ලෝ॒කාꣳ අ॑කල්පයන් । ෧෫"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Sinhala
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . 16"
+  output: "වේදා॒හමේ॒තං පුරු॑ෂං ම॒හාන්තම්᳚ । ආ॒දි॒ත්යව॑ර්ණං॒ තම॑සස්තු॒ පා॒රේ ।\nසර්වා॑ණි රූ॒පාණි॑ වි॒චිත්ය॒ ධීරඃ॑ । නාමා॑නි කෘ॒ත්වාऽභි॒වද॒න් යදාස්තේ᳚ । ෧෬"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Sinhala
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . 17"
+  output: "ධා॒තා පු॒රස්තා॒ද්යමු॑දාජ॒හාර॑ । ශ॒ක්රඃ ප්රවි॒ද්වාන්ප්ර॒දිශ॒ශ්චත॑ස්රඃ ।\nතමේ॒වං වි॒ද්වාන॒මෘත॑ ඉ॒හ භ॑වති । නාන්යඃ පන්ථා॒ අය॑නාය විද්යතේ । ෧෭"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Sinhala
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . 18"
+  output: "ය॒ජ්ඤේන॑ ය॒ජ්ඤම॑යජන්ත දේ॒වාඃ । තානි॒ ධර්මා॑ණි ප්රථ॒මාන්යා॑සන් ।\nතේ හ॒ නාකං॑ මහි॒මානඃ॑ සචන්තේ । යත්ර॒ පූර්වේ॑ සා॒ධ්යාඃ සන්ති॑ දේ॒වාඃ । ෧෮"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Sinhala
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: ॥ අථ ශුක්ලයජුර්වේදීය පුරුෂසූක්තඃ॥
+  reversible: true
+- index: 23
+  from: Normal
+  to: Sinhala
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. 1.."
+  output: "හරිඃ ॐ සහස්රශීර්ෂා පුරුෂඃ සහස්රාක්ෂඃ සහස්රපාත් ।\nස භූමිꣳ සර්වත ස්පෘත්වාऽත්යතිෂ්ඨද්දශාඞ්ගුලම් ॥ ෧॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Sinhala
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. 2.."
+  output: "පුරුෂ ඒවේදꣳ සර්වං යද්භූතං යච්ච භාව්යම් ।\nඋතාමෘතත්වස්යේශානෝ යදන්නේනාතිරෝහති ॥ ෨॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Sinhala
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. 3.."
+  output: "ඒතාවානස්ය මහිමාතෝ ජ්යායාઁශ්ච පූරුෂඃ ।\nපාදෝऽස්ය විශ්වා භූතානි ත්රිපාදස්යාමෘතං දිවි ॥ ෩॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Sinhala
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. 4.."
+  output: "ත්රිපාදූර්ධ්ව උදෛත්පුරුෂඃ පාදෝऽස්යේහාභවත් පුනඃ ।\nතතෝ විෂ්වඞ් ව්යක්රාමත්සාශනානශනේ අභි ॥ ෪॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Sinhala
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
+  output: "තතෝ විරාඩජායත විරාජෝ අධි පූරුෂඃ ।\nස ජාතෝ අත්යරිච්යත පශ්චාද්භූමිමථෝ පුරඃ ॥ ෫॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Sinhala
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. 6.."
+  output: "තස්මාද්යජ්ඤාත් සර්වහුතඃ සම්භෘතං පෘෂදාජ්යම් ।\nපශූઁස්තාઁශ්චක්රේ වායව්යානාරණ්යා ග්රාම්යාශ්ච යේ ॥ ෬॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Sinhala
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
+  output: "තස්මාද්යජ්ඤාත් සර්වහුතඃ ඍචඃ සාමානි ජජ්ඤිරේ ।\nඡන්දාꣳසි ජජ්ඤිරේ තස්මාද්යජුස්තස්මාදජායත ॥ ෭॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Sinhala
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
+  output: "තස්මාදශ්වා අජායන්ත යේ කේ චෝභයාදතඃ ।\nගාවෝ හ ජජ්ඤිරේ තස්මාත්තස්මාජ්ජාතා අජාවයඃ ॥ ෮॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Sinhala
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. 9.."
+  output: "තං යජ්ඤං බර්හිෂි ප්රෞක්ෂන් පුරුෂං ජාතමග්රතඃ ।\nතේන දේවා අයජන්ත සාධ්යා ඍෂයශ්ච යේ ॥ ෯॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Sinhala
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
+  output: "යත්පුරුෂං ව්යදධුඃ කතිධා ව්යකල්පයන් ।\nමුඛං කිමස්යාසීත් කිං බාහූ කිමූරූ පාදා උච්යේතේ ॥ ෧෦॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Sinhala
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
+  output: "බ්රාහ්මණෝऽස්ය මුඛමාසීද්බාහූ රාජන්යඃ කෘතඃ ।\nඌරූ තදස්ය යද්වෛශ්යඃ පද්භ්යාꣳ ශූද්රෝ අජායත ॥ ෧෧॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Sinhala
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. 12.."
+  output: "චන්ද්රමා මනසෝ ජාතශ්චක්ෂෝඃ සූර්යෝ අජායත ।\nශ්රෝත්රාද්වායුශ්ච ප්රාණශ්ච මුඛාදග්නිරජායත ॥ ෧෨॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Sinhala
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
+  output: "නාභ්යා ආසීදන්තරික්ෂꣳ ශීර්ෂ්ණෝ ද්යෞඃ සමවර්තත ।\nපද්භ්යාං භූමිර්දිශඃ ශ්රෝත්රාත්තථා ලෝකාઁऽකල්පයන් ॥ ෧෩॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Sinhala
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. 14.."
+  output: "යත්පුරුෂේණ හවිෂා දේවා යජ්ඤමතන්වත ।\nවසන්තෝऽස්යාසීදාජ්යං ග්රීෂ්ම ඉධ්මඃ ශරද්ධවිඃ ॥ ෧෪॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Sinhala
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. 15.."
+  output: "සප්තාස්යාසන් පරිධයස්ත්රිඃ සප්ත සමිධඃ කෘතාඃ ।\nදේවා යද්යජ්ඤං තන්වානා අබධ්නන් පුරුෂං පශුම් ॥ ෧෫॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Sinhala
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. 16.."
+  output: "යජ්ඤේන යජ්ඤමයජන්ත දේවාස්තානි ධර්මාණි ප්රථමාන්යාසන් ।\nතේ හ නාකං මහිමානඃ සචන්ත යත්ර පූර්වේ සාධ්යාඃ සන්ති දේවාඃ ॥ ෧෬॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Sinhala
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: ॥ ඉති ශුක්ලයජුර්වේදීයපුරුෂසූක්තං සම්පූර්ණම්॥
+  reversible: true
+- index: 40
+  from: Normal
+  to: Sinhala
+  input: .. atha durgAsUktam ..
+  output: ॥ අථ දුර්ගාසූක්තම් ॥
+  reversible: true

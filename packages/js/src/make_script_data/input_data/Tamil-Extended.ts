@@ -2,7 +2,7 @@ import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
 const HALANT = '்';
-const Tamil_Extended = {
+const Tamil_Extended: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Tamil-Extended',
   script_id: script_list_obj['Tamil-Extended'],
@@ -19,7 +19,7 @@ const Tamil_Extended = {
     '7': '௭',
     '8': '௮',
     '9': '௯',
-    AUM: 'ॐ',
+    AUM: 'ௐ',
     // favouring this anusvAra over ம்² as it collides with ம when a mAtrA follows and it matches ம்
     // based on intermediates in the generated text_to_krama_map
     anusvAra: 'ஂ',
@@ -36,6 +36,13 @@ const Tamil_Extended = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ௐ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     {
       text: 'அ',
       mAtrA: '',
@@ -373,6 +380,6 @@ const Tamil_Extended = {
     //   type: 'anya'
     // }
   ]
-} satisfies InputBrahmicScriptType;
+};
 
 export default Tamil_Extended;

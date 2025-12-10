@@ -1,10 +1,11 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputOtherScriptType } from '../input_script_data_schema';
 
-const Normal = {
+const Normal: InputOtherScriptType = {
   script_name: 'Normal',
   script_id: script_list_obj['Normal'],
   script_type: 'other',
+  schwa_character: 'a',
   manual_krama_text_map: {
     ॐ: 'AUM',
     अ: 'a',
@@ -137,6 +138,6 @@ const Normal = {
       duplicates: ['chh']
     }
   ]
-} satisfies InputOtherScriptType;
+};
 
 export default Normal;
