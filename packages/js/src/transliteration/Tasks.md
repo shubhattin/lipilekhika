@@ -1,7 +1,6 @@
 # Tasks
 
 - Make sure Tamil Extended and Vedic Accents marks work together.
-- For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added. (fallback case remaining)
 
 ## Todo for Ranges
 
