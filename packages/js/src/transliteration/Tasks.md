@@ -2,7 +2,6 @@
 
 - Make sure Tamil Extended and Vedic Accents marks work together.
 - For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added. (fallback case remaining)
-- With reference to வரூ -> vrU. This isssue might need a change in list referencing. And mAtrA being a different seperata item in the list. Think about it.
 
 ## Todo for Ranges
 

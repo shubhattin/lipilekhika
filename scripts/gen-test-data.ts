@@ -167,11 +167,7 @@ const sanskrit_other_brahmic_scripts = async () => {
       // getting normal output from original devanagari input
       // it should also output same `output` as the original devanagari input
       const dot_free_input = input.replaceAll(".", "");
-      const dot_free_output = await old_lipi_parivartak(
-        dot_free_input,
-        FROM_SCRIPT,
-        other_script
-      );
+      const dot_free_output = output.replaceAll(".", "");
       const norm_output = (
         await old_lipi_parivartak(dot_free_input, FROM_SCRIPT, "Normal")
       )
@@ -219,21 +215,28 @@ const sanskrit_other_brahmic_scripts = async () => {
           });
         }
 
-        // const input_norm1 = await old_lipi_parivartak(
-        //   output,
-        //   other_script,
-        //   "Normal"
-        // );
-        // if (input_norm1 !== norm_output) {
-        //   sans_to_brahmic_data.push({
-        //     index: index++,
-        //     from: other_script,
-        //     to: "Normal",
-        //     input: output,
-        //     output: input_norm1,
-        //     reversible: false,
-        //   });
-        // }
+        const input_norm1 = (
+          await old_lipi_parivartak(dot_free_output, other_script, "Normal")
+        )
+          .replaceAll(/\.(?=\d)/g, "")
+          .replaceAll("chh", "Ch")
+          .replaceAll("ch", "C");
+        const VEDIC_SVARA_ALIAS = ["#s", "#ss", "#sss", "#an"];
+        if (
+          input_norm1 !== norm_output &&
+          !VEDIC_SVARA_ALIAS.some((alias) => input_norm1.includes(alias)) &&
+          (other_script !== "Gurumukhi" ||
+            ["rI"].some((alias) => input_norm1.includes(alias)))
+        ) {
+          sans_to_brahmic_data.push({
+            index: index++,
+            from: other_script,
+            to: "Normal",
+            input: dot_free_output,
+            output: input_norm1,
+            reversible: false,
+          });
+        }
       }
     }
     sans_to_normal_done = true;
