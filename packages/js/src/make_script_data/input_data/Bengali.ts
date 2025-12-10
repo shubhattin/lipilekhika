@@ -35,6 +35,13 @@ const Bengali: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ওঁ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     // Svara
     {
       text: 'অ',

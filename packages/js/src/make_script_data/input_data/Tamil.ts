@@ -36,6 +36,13 @@ const Tamil: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ௐ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    {
       text: 'அ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],

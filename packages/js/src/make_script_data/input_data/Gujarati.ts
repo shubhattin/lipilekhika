@@ -35,6 +35,13 @@ const Gujarati: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ૐ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     // Svara
     {
       text: 'અ',

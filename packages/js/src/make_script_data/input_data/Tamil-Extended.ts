@@ -19,7 +19,7 @@ const Tamil_Extended: InputBrahmicScriptType = {
     '7': '௭',
     '8': '௮',
     '9': '௯',
-    AUM: 'ॐ',
+    AUM: 'ௐ',
     // favouring this anusvAra over ம்² as it collides with ம when a mAtrA follows and it matches ம்
     // based on intermediates in the generated text_to_krama_map
     anusvAra: 'ஂ',
@@ -36,6 +36,13 @@ const Tamil_Extended: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ௐ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     {
       text: 'அ',
       mAtrA: '',

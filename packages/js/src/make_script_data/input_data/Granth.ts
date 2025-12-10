@@ -37,6 +37,13 @@ const Granth: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: '𑍐',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    {
       text: '𑌀',
       text_krama: ['anusvAra'],
       duplicates: ['𑌂'],

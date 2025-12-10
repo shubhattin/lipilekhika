@@ -37,6 +37,13 @@ const Sharada: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: '𑇄',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    {
       text: '𑆃',
       mAtrA: '',
       text_krama: ['a-svara'],

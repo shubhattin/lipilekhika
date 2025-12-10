@@ -164,7 +164,7 @@
   from: Devanagari
   to: Tamil-Extended
   input: ॐ श्री परमात्मने नमः
-  output: ॐ ஶ்ரீ பரமாத்மநே நமஃ
+  output: ௐ ஶ்ரீ பரமாத்மநே நமஃ
   reversible: true
 - index: 28
   from: Devanagari

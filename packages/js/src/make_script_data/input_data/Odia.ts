@@ -36,6 +36,13 @@ const Odia: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ଓଁ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    {
       text: 'ଅ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],

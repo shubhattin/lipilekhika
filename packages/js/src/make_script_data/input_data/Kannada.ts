@@ -36,6 +36,14 @@ const Kannada: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ಓಂ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    // Svara
+    {
       text: 'ಅ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],

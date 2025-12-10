@@ -34,6 +34,13 @@ const Telugu: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ఓం',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    {
       text: 'అ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],

@@ -34,6 +34,14 @@ const Malayalam: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ഓം',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
+    // Svara
+    {
       text: 'അ',
       mAtrA: '',
       text_krama: ['a-svara', 'a1-svara'],

@@ -37,6 +37,13 @@ const Gurumukhi: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: 'ੴ',
+      text_krama: ['AUM'],
+      duplicates: ['ॐ'],
+      type: 'anya'
+    },
+
     // Svara
     {
       text: 'ਅ',
