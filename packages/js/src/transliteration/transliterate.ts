@@ -83,7 +83,7 @@ export const transliterate_text = async (
       // custom logic when converting from brahmic to other
       // console.log(
       //   [item[0], item[1]?.type],
-      //   prev_context_arr.map((item) => item[1]?.type),
+      //   prev_context_arr.map((item) => item[1]?.type)
       // );
       if (
         item[0] !== BRAHMIC_HALANT! &&
@@ -427,13 +427,20 @@ export const transliterate_text = async (
                 // if otherwise then follow the the last kram ref
                 // use last as that is prev which will be used to decide svara or vyanjana
                 // This condition very well may change in the future so be careful
-                return text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
-                  ? from_script_data.list[
-                      from_script_data.krama_text_arr[
-                        text_to_krama_item[1].krama.at(-1) ?? -1
-                      ][1] ?? -1
-                    ]
-                  : null;
+                if (!text_to_krama_item[1].krama || text_to_krama_item[1].krama.length === 0)
+                  return null;
+                const list_refs = text_to_krama_item[1].krama.map(
+                  (krama_index) =>
+                    from_script_data.list[from_script_data.krama_text_arr[krama_index][1] ?? -1]
+                );
+                // if mixture of vyanjana and mAtrA then return the first item as anya type
+                if (
+                  list_refs.some((item) => item?.type === 'mAtrA') &&
+                  list_refs.some((item) => item?.type === 'vyanjana')
+                ) {
+                  return { ...list_refs[0], type: 'anya' };
+                }
+                return list_refs.at(-1);
               })()
             ]);
           } else if (to_script_data.script_type === 'brahmic') {

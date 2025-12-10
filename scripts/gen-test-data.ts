@@ -188,17 +188,15 @@ const sanskrit_other_brahmic_scripts = async () => {
           reversible: true,
         });
       }
-      if (other_script !== "Tamil-Extended") {
-        norm_to_brahmic_data.push({
-          index: index1++,
-          // using Nomral -> Brahmic to verify typing tool functionality
-          from: "Normal",
-          to: other_script,
-          input: norm_output,
-          output: dot_free_output,
-          reversible,
-        });
-      }
+      norm_to_brahmic_data.push({
+        index: index1++,
+        // using Nomral -> Brahmic to verify typing tool functionality
+        from: "Normal",
+        to: other_script,
+        input: norm_output,
+        output: dot_free_output,
+        reversible,
+      });
 
       if (!reversible) {
         const input1 = await old_lipi_parivartak(
