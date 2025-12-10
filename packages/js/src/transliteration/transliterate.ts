@@ -83,10 +83,13 @@ export const transliterate_text = async (
       // custom logic when converting from brahmic to other
       // console.log(
       //   [item[0], item[1]?.type],
-      //   prev_context_arr.map((item) => item[1]?.type)
+      //   prev_context_arr.map((item) => item[1]?.type),
       // );
       if (
         item[0] !== BRAHMIC_HALANT! &&
+        (from_script_name === 'Tamil-Extended' && item[0] && item[0].length > 0
+          ? item[0].charAt(0) !== BRAHMIC_HALANT!
+          : true) &&
         // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
         (!BRAHMIC_NUQTA || item[0] !== BRAHMIC_NUQTA) &&
         // ^ two special cases to ignore
@@ -103,7 +106,7 @@ export const transliterate_text = async (
         // ^ as halant also a null 'type'
       ) {
         result_str += 'a';
-        // this is 'a' is true for Romanized and Normal (could be different for others if added in future)
+        // console.log('a added');
       }
     } else if (
       from_script_data.script_type === 'other' &&

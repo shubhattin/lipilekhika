@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Telugu
+  input: "namaH pannaganaddhAya vaikuNThavashavartinE .\nshrutisindhu sudhOtpAdamandarAya garutmatE .. 1.."
+  output: "నమః పన్నగనద్ధాయ వైకుణ్ఠవశవర్తినే ।\nశ్రుతిసిన్ధు సుధోత్పాదమన్దరాయ గరుత్మతే ॥ ౧॥"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Telugu
+  input: "garuDamakhilavEdanIDAdhirUDham dviShatpIDanOtkaNThitAkuNThavaikuNThapIThIkRta\nskandhamIDE svanIDAgatiprItarudrAsukIrtistanAbhOgagADhOpagUDha\nsphuratkaNTakavrAta vEdhavyathAvEpamAna dvijihvAdhipAkalpaviShphAryamANa\nsphaTAvATikA ratnarOCishChaTA rAjinIrAjitaM kAntikallOlinIrAjitam .. 2.."
+  output: "గరుడమఖిలవేదనీడాధిరూఢమ్ ద్విషత్పీడనోత్కణ్ఠితాకుణ్ఠవైకుణ్ఠపీఠీకృత\nస్కన్ధమీడే స్వనీడాగతిప్రీతరుద్రాసుకీర్తిస్తనాభోగగాఢోపగూఢ\nస్ఫురత్కణ్టకవ్రాత వేధవ్యథావేపమాన ద్విజిహ్వాధిపాకల్పవిష్ఫార్యమాణ\nస్ఫటావాటికా రత్నరోచిశ్ఛటా రాజినీరాజితం కాన్తికల్లోలినీరాజితమ్ ॥ ౨॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Telugu
+  input: "jayagaruDa suparNa darvIkarAhAra dEvAdhipAhArahArin\ndivaukaspatikShiptadambhOLidhArAkiNAkalpa kalpAntavAtUla kalpOdayAnalpa\nvIrAyitOdyaCCamatkAra daityAri jaitradhvajArOhanirdhAritOtkarSha\nsaGkarShaNAtman garutman marutpaJCa kAdhIsha satyAdimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
+  output: "జయగరుడ సుపర్ణ దర్వీకరాహార దేవాధిపాహారహారిన్\nదివౌకస్పతిక్షిప్తదమ్భోళిధారాకిణాకల్ప కల్పాన్తవాతూల కల్పోదయానల్ప\nవీరాయితోద్యచ్చమత్కార దైత్యారి జైత్రధ్వజారోహనిర్ధారితోత్కర్ష\nసఙ్కర్షణాత్మన్ గరుత్మన్ మరుత్పఞ్చ కాధీశ సత్యాదిమూర్తే న కశ్చిత్\nసమస్తే నమస్తే పునస్తే నమః ॥ ౩॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Telugu
+  input: "nama idamajahatsaparyAya paryAyaniryAtapakShAnilAsphAlanOdvElapAthOdhi\nvICICapETAhatAgAdhapAtALabhAGkArasaMkruddhanAgEndrapIDAsRNIbhAva-\nbhAsvannakhashrENayE CaNDatuNDAya nRtyadbhujaGgabhruvE vajriNE daMShTraya\ntubhyamadhyAtmavidyA vidhEyA vidhEyA bhavaddAsyamApAdayEthA dayEthAshCa mE .. 4.."
+  output: "నమ ఇదమజహత్సపర్యాయ పర్యాయనిర్యాతపక్షానిలాస్ఫాలనోద్వేలపాథోధి\nవీచీచపేటాహతాగాధపాతాళభాఙ్కారసంక్రుద్ధనాగేన్ద్రపీడాసృణీభావ-\nభాస్వన్నఖశ్రేణయే చణ్డతుణ్డాయ నృత్యద్భుజఙ్గభ్రువే వజ్రిణే దంష్ట్రయ\nతుభ్యమధ్యాత్మవిద్యా విధేయా విధేయా భవద్దాస్యమాపాదయేథా దయేథాశ్చ మే ॥ ౪॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Telugu
+  input: "manuranugata pakShivaktra sphurattArakastAvakashCitrabhAnupriyAshEkharastrAyatAM\nnastrivargApavargaprasUtiH paravyOmadhAman\nvaladvEShidarpajvaladvAlakhilyapratijJAvatIrNa sthirAM tattvabuddhiM parAM\nbhaktidhEnuM jaganmUlakandE mukundE mhAnandadOgdhrIM dadhIthA\nmudhAkAmahInAmahInAmahInAntaka .. 5.."
+  output: "మనురనుగత పక్షివక్త్ర స్ఫురత్తారకస్తావకశ్చిత్రభానుప్రియాశేఖరస్త్రాయతాం\nనస్త్రివర్గాపవర్గప్రసూతిః పరవ్యోమధామన్\nవలద్వేషిదర్పజ్వలద్వాలఖిల్యప్రతిజ్ఞావతీర్ణ స్థిరాం తత్త్వబుద్ధిం పరాం\nభక్తిధేనుం జగన్మూలకన్దే ముకున్దే మ్హానన్దదోగ్ధ్రీం దధీథా\nముధాకామహీనామహీనామహీనాన్తక ॥ ౫॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Telugu
+  input: "ShaTtriMshadgaNaCaraNO naraparipATInavInagumbhagaNaH .\nviShNurathadaNDakO''yaM vighaTayatu vipakShavAhinIvyUham .. 6.."
+  output: "షట్త్రింశద్గణచరణో నరపరిపాటీనవీనగుమ్భగణః ।\nవిష్ణురథదణ్డకోఽయం విఘటయతు విపక్షవాహినీవ్యూహమ్ ॥ ౬॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Telugu
+  input: "viCitrasiddhidaH sO''yaM vEGkaTEshavipashCitA .\ngaruDadhvajatOShAya gItO garuDadaNDakaH .. 7.."
+  output: "విచిత్రసిద్ధిదః సోఽయం వేఙ్కటేశవిపశ్చితా ।\nగరుడధ్వజతోషాయ గీతో గరుడదణ్డకః ॥ ౭॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Telugu
+  input: "kavitArkikasiMhAya kalyaNaguNashAlinE .\nshrImatE vEGkaTEshAya vEdAntaguravE namaH .."
+  output: "కవితార్కికసింహాయ కల్యణగుణశాలినే ।\nశ్రీమతే వేఙ్కటేశాయ వేదాన్తగురవే నమః ॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Telugu
+  input: shrImatE nigamAntamahAdEshikAya namaH ..
+  output: శ్రీమతే నిగమాన్తమహాదేశికాయ నమః ॥
+  reversible: true
+- index: 9
+  from: Normal
+  to: Telugu
+  input: iti shrIvEdAntadEshikaviraCitaH garuDadaNDakaH sampUrNaH .
+  output: ఇతి శ్రీవేదాన్తదేశికవిరచితః గరుడదణ్డకః సమ్పూర్ణః ।
+  reversible: true
+- index: 10
+  from: Normal
+  to: Telugu
+  input: "a↓gnimI↑LE pu↓rOhi↑taM ya↓jJasya↑ dE↓vamR↓tvija↑m .\nhOtA↑raM ratna↓dhAta↑mam .. 100101"
+  output: "అ॒గ్నిమీ॑ళే పు॒రోహి॑తం య॒జ్ఞస్య॑ దే॒వమృ॒త్విజ॑మ్ ।\nహోతా॑రం రత్న॒ధాత॑మమ్ ॥ ౧౦౦౧౦౧"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Telugu
+  input: "yada↓Gga dA↓shuShE↓ tvamagnE↑ bha↓draM ka↑ri↓Shyasi↑ .\ntavEttatsa↓tyama↑GgiraH .. 100106"
+  output: "యద॒ఙ్గ దా॒శుషే॒ త్వమగ్నే॑ భ॒ద్రం క॑రి॒ష్యసి॑ ।\nతవేత్తత్స॒త్యమ॑ఙ్గిరః ॥ ౧౦౦౧౦౬"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Telugu
+  input: "ashvi↑nA↓ yajva↑rI↓riShO↓ drava↑tpANI↓ shubha↑spatI .\npuru↑bhujA Cana↓syata↑m .. 100301"
+  output: "అశ్వి॑నా॒ యజ్వ॑రీ॒రిషో॒ ద్రవ॑త్పాణీ॒ శుభ॑స్పతీ ।\nపురు॑భుజా చన॒స్యత॑మ్ ॥ ౧౦౦౩౦౧"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Telugu
+  input: "nAsa↑dAsI↓nnO sadA↑sItta↓dAnIM↓ nAsI↓drajO↓ nO vyO↑mA pa↓rO yat .\nkimAva↑rIvaH↓ kuha↓ kasya↓ sharma↓nnambhaH↓ kimA↑sI↓dgaha↑naM gabhI↓ram .. 1.."
+  output: "నాస॑దాసీ॒న్నో సదా॑సీత్త॒దానీం॒ నాసీ॒ద్రజో॒ నో వ్యో॑మా ప॒రో యత్ ।\nకిమావ॑రీవః॒ కుహ॒ కస్య॒ శర్మ॒న్నమ్భః॒ కిమా॑సీ॒ద్గహ॑నం గభీ॒రమ్ ॥ ౧॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Telugu
+  input: "na mR↓tyurA↑sIda↓mRtaM↓ na tarhi↓ na rAtryA↓ ahna↑ AsItprakE↓taH .\nAnI↑davA↓taM sva↓dhayA↓ tadEkaM↓ tasmA↑ddhA↓nyanna pa↓raH kiM Ca↓nAsa↑ .. 2.."
+  output: "న మృ॒త్యురా॑సీద॒మృతం॒ న తర్హి॒ న రాత్ర్యా॒ అహ్న॑ ఆసీత్ప్రకే॒తః ।\nఆనీ॑దవా॒తం స్వ॒ధయా॒ తదేకం॒ తస్మా॑ద్ధా॒న్యన్న ప॒రః కిం చ॒నాస॑ ॥ ౨॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Telugu
+  input: "tama↑ AsI↓ttama↑sA gU↓LhamagrE↑''prakE↓taM sa↑li↓laM sarva↑mA i↓dam .\ntu↓CChyEnA↓bhvapi↑hitaM↓ yadAsI↓ttapa↑sa↓stanma↑hi↓nAjA↑ya↓taika↑m .. 3.."
+  output: "తమ॑ ఆసీ॒త్తమ॑సా గూ॒ళ్హమగ్రే॑ఽప్రకే॒తం స॑లి॒లం సర్వ॑మా ఇ॒దమ్ ।\nతు॒చ్ఛ్యేనా॒భ్వపి॑హితం॒ యదాసీ॒త్తప॑స॒స్తన్మ॑హి॒నాజా॑య॒తైక॑మ్ ॥ ౩॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Telugu
+  input: "kAma↓stadagrE↓ sama↑varta↓tAdhi↓ mana↑sO↓ rEtaH↑ pratha↓maM yadAsI↑t .\nsa↓tO bandhu↓masa↑ti↓ nira↑vindanhR↓di pra↓tIShyA↑ ka↓vayO↑ manI↓ShA .. 4.."
+  output: "కామ॒స్తదగ్రే॒ సమ॑వర్త॒తాధి॒ మన॑సో॒ రేతః॑ ప్రథ॒మం యదాసీ॑త్ ।\nస॒తో బన్ధు॒మస॑తి॒ నిర॑విన్దన్హృ॒ది ప్ర॒తీష్యా॑ క॒వయో॑ మనీ॒షా ॥ ౪॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Telugu
+  input: "ti↓ra↓shCInO↓ vita↑tO ra↓shmirE↑ShAma↓dhaH svi↑dA↓sI3du↓pari↑ svidAsI3t .\nrE↓tO↓dhA A↑sanmahi↓mAna↑ Asansva↓dhA a↓vastA↓tpraya↑tiH pa↓rastA↑t .. 5.."
+  output: "తి॒ర॒శ్చీనో॒ విత॑తో ర॒శ్మిరే॑షామ॒ధః స్వి॑దా॒సీ౩దు॒పరి॑ స్విదాసీ౩త్ ।\nరే॒తో॒ధా ఆ॑సన్మహి॒మాన॑ ఆసన్స్వ॒ధా అ॒వస్తా॒త్ప్రయ॑తిః ప॒రస్తా॑త్ ॥ ౫॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Telugu
+  input: "kO a↓ddhA vE↑da↓ ka i↓ha pra vO↑Ca↓tkuta↓ AjA↑tA↓ kuta↑ i↓yaM visR↑ShTiH .\na↓rvAgdE↓vA a↓sya vi↓sarja↑nE↓nAthA↓ kO vE↑da↓ yata↑ Aba↓bhUva↑ .. 6.."
+  output: "కో అ॒ద్ధా వే॑ద॒ క ఇ॒హ ప్ర వో॑చ॒త్కుత॒ ఆజా॑తా॒ కుత॑ ఇ॒యం విసృ॑ష్టిః ।\nఅ॒ర్వాగ్దే॒వా అ॒స్య వి॒సర్జ॑నే॒నాథా॒ కో వే॑ద॒ యత॑ ఆబ॒భూవ॑ ॥ ౬॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Telugu
+  input: "i↓yaM visR↑ShTi↓ryata↑ Aba↓bhUva↓ yadi↑ vA da↓dhE yadi↑ vA↓ na .\nyO a↓syAdhya↑kShaH para↓mE vyO↑ma↓nsO a↓Gga vE↑da↓ yadi↑ vA↓ na vEda↑ .. 7.."
+  output: "ఇ॒యం విసృ॑ష్టి॒ర్యత॑ ఆబ॒భూవ॒ యది॑ వా ద॒ధే యది॑ వా॒ న ।\nయో అ॒స్యాధ్య॑క్షః పర॒మే వ్యో॑మ॒న్సో అ॒ఙ్గ వే॑ద॒ యది॑ వా॒ న వేద॑ ॥ ౭॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Telugu
+  input: "RgvEdasaMhitAyAM paJCamaM maNDalam . EkapJCAshaM sUktam .\nRShiH - svastyAtrEyaH, dEvatA - vishvE dEvAH, ChandaH - 11 niCRttriShTup,\n12 triShTup, 13 paGktiH, 14, 15 anuShTup,\nsvaraH - 11, 12 dhaivataH, 13 paJCamaH, 14, 15 gAndhAraH"
+  output: "ఋగ్వేదసంహితాయాం పఞ్చమం మణ్డలమ్ । ఏకప్ఞ్చాశం సూక్తమ్ ।\nఋషిః - స్వస్త్యాత్రేయః, దేవతా - విశ్వే దేవాః, ఛన్దః - ౧౧ నిచృత్త్రిష్టుప్,\n౧౨ త్రిష్టుప్, ౧౩ పఙ్క్తిః, ౧౪, ౧౫ అనుష్టుప్,\nస్వరః - ౧౧, ౧౨ ధైవతః, ౧౩ పఞ్చమః, ౧౪, ౧౫ గాన్ధారః"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Telugu
+  input: "sva↓sti nO↑↑ mimItAma↓shvinA↓ bhagaH↑ sva↓sti dE↓vyadi↑tirana↓rvaNaH↑ .\nsva↓sti pU↓ShA asu↑rO dadhAtu naH sva↓sti dyAvA↑↑pRthi↓vI su↑CE↓tunA↑↑ .. 505111"
+  output: "స్వ॒స్తి నో᳚ మిమీతామ॒శ్వినా॒ భగః॑ స్వ॒స్తి దే॒వ్యది॑తిరన॒ర్వణః॑ ।\nస్వ॒స్తి పూ॒షా అసు॑రో దధాతు నః స్వ॒స్తి ద్యావా᳚పృథి॒వీ సు॑చే॒తునా᳚ ॥ ౫౦౫౧౧౧"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Telugu
+  input: "sva↓stayE↑↑ vA↓yumupa↑ bravAmahai↓ sOmaM↑↑ sva↓sti bhuva↑nasya↓ yaspatiH↑ .\nbRha↓spatiM↓ sarva↑gaNaM sva↓stayE↑↑ sva↓staya↑ Adi↓tyAsO↑↑ bhavantu naH .. 505112"
+  output: "స్వ॒స్తయే᳚ వా॒యుముప॑ బ్రవామహై॒ సోమం᳚ స్వ॒స్తి భువ॑నస్య॒ యస్పతిః॑ ।\nబృహ॒స్పతిం॒ సర్వ॑గణం స్వ॒స్తయే᳚ స్వ॒స్తయ॑ ఆది॒త్యాసో᳚ భవన్తు నః ॥ ౫౦౫౧౧౨"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Telugu
+  input: "vishvE↑↑ dE↓vA nO↑↑ a↓dyA sva↓stayE↑↑ vaishvAna↓rO vasu↑ra↓gniH sva↓stayE↑↑ .\ndE↓vA a↑vantvR↓bhavaH↑ sva↓stayE↑↑ sva↓sti nO↑↑ ru↓draH pA↓tvaMha↑saH .. 505113"
+  output: "విశ్వే᳚ దే॒వా నో᳚ అ॒ద్యా స్వ॒స్తయే᳚ వైశ్వాన॒రో వసు॑ర॒గ్నిః స్వ॒స్తయే᳚ ।\nదే॒వా అ॑వన్త్వృ॒భవః॑ స్వ॒స్తయే᳚ స్వ॒స్తి నో᳚ రు॒ద్రః పా॒త్వంహ॑సః ॥ ౫౦౫౧౧౩"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Telugu
+  input: "sva↓sti mi↑trAvaruNA sva↓sti pa↑thyE rEvati .\nsva↓sti na↓ indra↑shCA↓gnishCa↑ sva↓sti nO↑↑ aditE kRdhi .. 505114"
+  output: "స్వ॒స్తి మి॑త్రావరుణా స్వ॒స్తి ప॑థ్యే రేవతి ।\nస్వ॒స్తి న॒ ఇన్ద్ర॑శ్చా॒గ్నిశ్చ॑ స్వ॒స్తి నో᳚ అదితే కృధి ॥ ౫౦౫౧౧౪"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Telugu
+  input: "sva↓sti panthA↓manu↑ CarEma sUryACandra↓masA↑↑viva .\npuna↓rdada↓tAghna↑tA jAna↓tA saM ga↑mEmahi .. 505115"
+  output: "స్వ॒స్తి పన్థా॒మను॑ చరేమ సూర్యాచన్ద్ర॒మసా᳚వివ ।\nపున॒ర్దద॒తాఘ్న॑తా జాన॒తా సం గ॑మేమహి ॥ ౫౦౫౧౧౫"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Telugu
+  input: atha puruShasUktam ..
+  output: అథ పురుషసూక్తమ్ ॥
+  reversible: true
+- index: 27
+  from: Normal
+  to: Telugu
+  input: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  output: "ఓం తచ్ఛం॒ యోరావృ॑ణీమహే । గా॒తుం య॒జ్ఞాయ॑ । గా॒తుం య॒జ్ఞప॑తయే । దైవీ᳚ స్వ॒స్తిర॑స్తు నః ।\nస్వ॒స్తిర్మాను॑షేభ్యః । ఊ॒ర్ధ్వం జి॑గాతు భేష॒జమ్ । శన్నో॑ అస్తు ద్వి॒పదే᳚ । శం చతు॑ష్పదే ।\nఓం శాన్తిః॒ శాన్తిః॒ శాన్తిః॑ ।"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Telugu
+  input: hariH AUM .
+  output: హరిః ఓం ।
+  reversible: true
+- index: 29
+  from: Normal
+  to: Telugu
+  input: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . 1"
+  output: "ఓం స॒హస్ర॑శీర్షా॒ పురు॑షః । స॒హ॒స్రా॒క్షః స॒హస్ర॑పాత్ ।\nస భూమిం॑ వి॒శ్వతో॑ వృ॒త్వా । అత్య॑తిష్ఠద్దశాఙ్గు॒లమ్ । ౧"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Telugu
+  input: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . 2"
+  output: "పురు॑ష ఏ॒వేదꣳ సర్వమ్᳚ । యద్భూ॒తం యచ్చ॒ భవ్యమ్᳚।\nఉ॒తామృ॑త॒త్వస్యేశా॑నః । యదన్నే॑నాతి॒రోహ॑తి । ౨"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Telugu
+  input: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . 3"
+  output: "ఏ॒తావా॑నస్య మహి॒మా । అతో॒ జ్యాయాꣳ॑శ్చ॒ పూరు॑షః ।\nపాదో᳚ఽస్య॒ విశ్వా॑ భూ॒తాని॑ । త్రి॒పాద॑స్యా॒మృతం॑ ది॒వి । ౩"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Telugu
+  input: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . 4"
+  output: "త్రి॒పాదూ॒ర్ధ్వ ఉదై॒త్పురు॑షః । పాదో᳚ఽస్యే॒హాఽఽభ॑వా॒త్పునః॑ ।\nతతో॒ విశ్వ॒ఙ్వ్య॑క్రామత్ । సా॒శ॒నా॒న॒శ॒నే అ॒భి । ౪"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Telugu
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  output: "తస్మా᳚ద్వి॒రాడ॑జాయత । వి॒రాజో॒ అధి॒ పూరు॑షః ।\nస జా॒తో అత్య॑రిచ్యత । ప॒శ్చాద్భూమి॒మథో॑ పు॒రః । ౫"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Telugu
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  output: "యత్పురు॑షేణ హ॒విషా᳚ । దే॒వా య॒జ్ఞమత॑న్వత ।\nవ॒స॒న్తో అ॑స్యాసీ॒దాజ్యమ్᳚ । గ్రీ॒ష్మ ఇ॒ధ్మః శ॒రద్ధ॒విః । ౬"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Telugu
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  output: "స॒ప్తాస్యా॑సన్పరి॒ధయః॑ । త్రిః స॒ప్త స॒మిధః॑ కృ॒తాః ।\nదే॒వా యద్య॒జ్ఞం త॑న్వా॒నాః । అబ॑ధ్న॒న్పు॑రుషం ప॒శుమ్ । ౭"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Telugu
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  output: "తం య॒జ్ఞం బ॒ర్హిషి॒ ప్రౌక్షన్॑ । పురు॑షం జా॒తమ॑గ్ర॒తః ।\nతేన॑ దే॒వా అయ॑జన్త । సా॒ధ్యా ఋష॑యశ్చ॒ యే । ౮"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Telugu
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  output: "తస్మా᳚ద్య॒జ్ఞాత్స॑ర్వ॒హుతః॑ । సంభృ॑తం పృషదా॒జ్యమ్ ।\nప॒శూꣳస్తాꣳశ్చ॑క్రే వాయ॒వ్యాన్॑ । ఆ॒ర॒ణ్యాన్గ్రా॒మ్యాశ్చ॒ యే । ౯"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Telugu
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  output: "తస్మా᳚ద్య॒జ్ఞాత్స॑ర్వ॒హుతః॑ । ఋచః॒ సామా॑ని జజ్ఞిరే ।\nఛన్దాꣳ॑సి జజ్ఞిరే॒ తస్మా᳚త్ । యజు॒స్తస్మా॑దజాయత । ౧౦"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Telugu
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  output: "తస్మా॒దశ్వా॑ అజాయన్త । యే కే చో॑భ॒యాద॑తః ।\nగావో॑ హ జజ్ఞిరే॒ తస్మా᳚త్ । తస్మా᳚జ్జా॒తా అ॑జా॒వయః॑ । ౧౧"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Telugu
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  output: "యత్పురు॑షం॒ వ్య॑దధుః । క॒తి॒ధా వ్య॑కల్పయన్ ।\nముఖం॒ కిమ॑స్య॒ కౌ బా॒హూ । కావూ॒రూ పాదా॑వుచ్యేతే । ౧౨"
+  reversible: true

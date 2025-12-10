@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Malayalam
+  input: "namAmi pArvatIpatiM namAmi jAhnavIpatiM \nnamAmi bhaktavatsalaM namAmi bhAlalOCanam .\nnamAmi CandrashEkharaM namAmi duHkhamOCanaM \ntadIyapAdapaGkajaM smarAmyahaM naTEshvaram ..17.."
+  output: "നമാമി പാര്വതീപതിം നമാമി ജാഹ്നവീപതിം \nനമാമി ഭക്തവത്സലം നമാമി ഭാലലോചനമ് ।\nനമാമി ചന്ദ്രശേഖരം നമാമി ദുഃഖമോചനം \nതദീയപാദപങ്കജം സ്മരാമ്യഹം നടേശ്വരമ് ॥൧൭॥"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Malayalam
+  input: "akharvasarvamaGgaLAkaLAkadambamaJjarI\nrasapravAhamAdhurIvijRmbhaNAmadhuvratam .\nsmarAntakaM purAntakaM bhavAntakaM makhAntakaM\ngajAntakAndhakAntakaM tamantakAntakaM bhajE ..10.."
+  output: "അഖര്വസര്വമങ്ഗളാകളാകദമ്ബമഞ്ജരീ\nരസപ്രവാഹമാധുരീവിജൃമ്ഭണാമധുവ്രതമ് ।\nസ്മരാന്തകം പുരാന്തകം ഭവാന്തകം മഖാന്തകം\nഗജാന്തകാന്ധകാന്തകം തമന്തകാന്തകം ഭജേ ॥൧൦॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Malayalam
+  input: "idaM hi nityamEvamuktamuttamOttamaM stavaM\npaThan smaran bruvan narO vishuddhimEti santatam .\nharE gurau subhaktimAshuyAti nAnyathAgatiM\nvimOhanaM hi dEhinAM sushaGkarasyaCintanam ..14.."
+  output: "ഇദം ഹി നിത്യമേവമുക്തമുത്തമോത്തമം സ്തവം\nപഠന് സ്മരന് ബ്രുവന് നരോ വിശുദ്ധിമേതി സന്തതമ് ।\nഹരേ ഗുരൗ സുഭക്തിമാശുയാതി നാന്യഥാഗതിം\nവിമോഹനം ഹി ദേഹിനാം സുശങ്കരസ്യചിന്തനമ് ॥൧൪॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Malayalam
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "നിലിമ്പനാഥനാഗരീകദമ്ബമൗലമല്ലികാ-\nനിഗുമ്ഫനിര്ഭരക്ഷരന്മധൂഷ്ണികാമനോഹരഃ ।\nതനോതു നോ മനോമുദം വിനോദിനീമഹര്നിശം\nപരശ്രിയഃ പരംപദം തദങ്ഗജത്വിഷാംചയഃ ॥൧൫॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Malayalam
+  input: "pUjAvasAnasamayEdashavaktragItaM\nyaH shambhupUjanaparaMpaThatipradOShE .\ntasyasthirAM rathagajEndraturaGgayuktAM\nlakShmIM sadaivasumukhIM pradadAtishambhuH ..18.."
+  output: "പൂജാവസാനസമയേദശവക്ത്രഗീതം\nയഃ ശമ്ഭുപൂജനപരംപഠതിപ്രദോഷേ ।\nതസ്യസ്ഥിരാം രഥഗജേന്ദ്രതുരങ്ഗയുക്താം\nലക്ഷ്മീം സദൈവസുമുഖീം പ്രദദാതിശമ്ഭുഃ ॥൧൮॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Malayalam
+  input: ..iti shrIrAvaNaviraCitaMshivatANDavastOtraM sampUrNam..
+  output: ॥ഇതി ശ്രീരാവണവിരചിതംശിവതാണ്ഡവസ്തോത്രം സമ്പൂര്ണമ്॥
+  reversible: true
+- index: 6
+  from: Normal
+  to: Malayalam
+  input: "paraM bhUyaH pravakShyAmi jJAnAnAM jJAnamuttamam .\nyajjJAtvA munayaH sarvE parAM siddhimitO gatAH ..14-1.."
+  output: "പരം ഭൂയഃ പ്രവക്ഷ്യാമി ജ്ഞാനാനാം ജ്ഞാനമുത്തമമ് ।\nയജ്ജ്ഞാത്വാ മുനയഃ സര്വേ പരാം സിദ്ധിമിതോ ഗതാഃ ॥൧൪-൧॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Malayalam
+  input: "idaM jJAnamupAshritya mama sAdharmyamAgatAH .\nsargE''pi nOpajAyantE pralayE na vyathanti Ca ..14-2.."
+  output: "ഇദം ജ്ഞാനമുപാശ്രിത്യ മമ സാധര്മ്യമാഗതാഃ ।\nസര്ഗേഽപി നോപജായന്തേ പ്രലയേ ന വ്യഥന്തി ച ॥൧൪-൨॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Malayalam
+  input: "mama yOnirmahad brahma tasmingarbhaM dadhAmyaham .\nsambhavaH sarvabhUtAnAM tatO bhavati bhArata ..14-3.."
+  output: "മമ യോനിര്മഹദ് ബ്രഹ്മ തസ്മിന്ഗര്ഭം ദധാമ്യഹമ് ।\nസമ്ഭവഃ സര്വഭൂതാനാം തതോ ഭവതി ഭാരത ॥൧൪-൩॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Malayalam
+  input: "sarvayOniShu kauntEya mUrtayaH sambhavanti yAH .\ntAsAM brahma mahadyOnirahaM bIjapradaH pitA ..14-4.."
+  output: "സര്വയോനിഷു കൗന്തേയ മൂര്തയഃ സമ്ഭവന്തി യാഃ ।\nതാസാം ബ്രഹ്മ മഹദ്യോനിരഹം ബീജപ്രദഃ പിതാ ॥൧൪-൪॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Malayalam
+  input: "sattvaM rajastama iti guNAH prakRtisambhavAH .\nnibadhnanti mahAbAhO dEhE dEhinamavyayam ..14-5.."
+  output: "സത്ത്വം രജസ്തമ ഇതി ഗുണാഃ പ്രകൃതിസമ്ഭവാഃ ।\nനിബധ്നന്തി മഹാബാഹോ ദേഹേ ദേഹിനമവ്യയമ് ॥൧൪-൫॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Malayalam
+  input: "samaduHkhasukhaH svasthaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO dhIrastulyanindAtmasaMstutiH ..14-24.."
+  output: "സമദുഃഖസുഖഃ സ്വസ്ഥഃ സമലോഷ്ടാശ്മകാഞ്ചനഃ ।\nതുല്യപ്രിയാപ്രിയോ ധീരസ്തുല്യനിന്ദാത്മസംസ്തുതിഃ ॥൧൪-൨൪॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Malayalam
+  input: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvArambhaparityAgI guNAtItaH sa uCyatE ..14-25.."
+  output: "മാനാപമാനയോസ്തുല്യസ്തുല്യോ മിത്രാരിപക്ഷയോഃ ।\nസര്വാരമ്ഭപരിത്യാഗീ ഗുണാതീതഃ സ ഉച്യതേ ॥൧൪-൨൫॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Malayalam
+  input: "mAM Ca yO''vyabhiCArENa bhaktiyOgEna sEvatE .\nsa guNAnsamatItyaitAnbrahmabhUyAya kalpatE ..14-26.."
+  output: "മാം ച യോഽവ്യഭിചാരേണ ഭക്തിയോഗേന സേവതേ ।\nസ ഗുണാന്സമതീത്യൈതാന്ബ്രഹ്മഭൂയായ കല്പതേ ॥൧൪-൨൬॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Malayalam
+  input: "brahmaNO hi pratiShThAhamamRtasyAvyayasya Ca .\nshAshvatasya Ca dharmasya sukhasyaikAntikasya Ca ..14-27.."
+  output: "ബ്രഹ്മണോ ഹി പ്രതിഷ്ഠാഹമമൃതസ്യാവ്യയസ്യ ച ।\nശാശ്വതസ്യ ച ധര്മസ്യ സുഖസ്യൈകാന്തികസ്യ ച ॥൧൪-൨൭॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Malayalam
+  input: "AUM tatsaditi shrImadbhagavadgItAsUpaniShatsu\nbrahmavidyAyAM yOgashAstrE shrIkRShNArjunasaMvAdE\nguNatrayavibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
+  output: "ഓം തത്സദിതി ശ്രീമദ്ഭഗവദ്ഗീതാസൂപനിഷത്സു\nബ്രഹ്മവിദ്യായാം യോഗശാസ്ത്രേ ശ്രീകൃഷ്ണാര്ജുനസംവാദേ\nഗുണത്രയവിഭാഗയോഗോ നാമ ചതുര്ദശോഽധ്യായഃ ॥൧൪॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Malayalam
+  input: .. sauMdarya laharI ..
+  output: ॥ സൗംദര്യ ലഹരീ ॥
+  reversible: true
+- index: 17
+  from: Normal
+  to: Malayalam
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ പ്രഥമഃ ഭാഗഃ - ആനംദലഹരീ (൧-൪൧) ॥
+  reversible: true
+- index: 18
+  from: Normal
+  to: Malayalam
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "ഭൂമൗ സ്ഖലിതപാദാനാം ഭൂമിരേവാവലമ്ബനം ।\nത്വയി ജാതാപരാധാനാം ത്വമേവ ശരണം ശിവേ ॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Malayalam
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "ശിവഃ ശക്ത്യാ യുക്തോ യദി ഭവതി ശക്തഃ പ്രഭവിതും\nന ചേദേവം ദേവോ ന ഖലു കുശലഃ സ്പന്ദിതുമപി ।\nഅതസ്ത്വാമാരാധ്യാം ഹരിഹരവിരിഞ്ചാദിഭിരപി\nപ്രണന്തും സ്തോതും വാ കഥമകൃതപുണ്യഃ പ്രഭവതി ॥൧॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Malayalam
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "തനീയാംസം പാംസും തവ ചരണപങ്കേരുഹഭവം\nവിരിഞ്ചിസ്സഞ്ചിന്വന് വിരചയതി ലോകാനവികലമ് ।\nവഹത്യേനം ശൗരിഃ കഥമപി സഹസ്രേണ ശിരസാം\nഹരസ്സംക്ഷുദ്യൈനം ഭജതി ഭസിതോദ്ധൂളനവിധിമ് ॥൨॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Malayalam
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "അവിദ്യാനാമന്തസ്തിമിരമിഹിരദ്വീപനഗരീ\nജഡാനാം ചൈതന്യസ്തബകമകരന്ദസ്രുതിഝരീ ।\nദരിദ്രാണാം ചിന്താമണിഗുണനികാ ജന്മജലധൗ\nനിമഗ്നാനാം ദംഷ്ട്രാ മുരരിപുവരാഹസ്യ ഭവതി ॥൩॥"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Malayalam
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "ത്വദന്യഃ പാണിഭ്യാമ് അഭയവരദോ ദൈവതഗണഃ\nത്വമേകാ നൈവാസി പ്രകടിതവരാഭീത്യഭിനയാ ।\nഭയാത് ത്രാതും ദാതും ഫലമപി ച വാഞ്ഛാസമധികം\nശരണ്യേ ലോകാനാം തവ ഹി ചരണാവേവ നിപുണൗ ॥൪॥"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Malayalam
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "ഹരിസ്ത്വാമാരാധ്യ പ്രണതജനസൗഭാഗ്യജനനീം\nപുരാ നാരീ ഭൂത്വാ പുരരിപുമപി ക്ഷോഭമനയത് ।\nസ്മരോഽപി ത്വാം നത്വാ രതിനയനലേഹ്യേന വപുഷാ\nമുനീനാമപ്യന്തഃ പ്രഭവതി ഹി മോഹായ മഹതാമ് ॥൫॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Malayalam
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "സരസ്വത്യാ ലക്ഷ്മ്യാ വിധിഹരിസപത്നോ വിഹരതേ\nരതേഃ പാതിവ്രത്യം ശിഥിലയതി രമ്യേണ വപുഷാ ।\nചിരം ജീവന്നേവ ക്ഷപിതപശുപാശവ്യതികരഃ\nപരാനന്ദാഭിഖ്യമ് രസയതി രസം ത്വദ്ഭജനവാന് ॥൯൯॥\nപ്രദീപജ്വാലാഭിഃ ദിവസകരനീരാജനവിധിഃ\nസുധാസൂതേശ്ചന്ദ്രോപലജലലവൈരര്ഘ്യരചനാ ।\nസ്വകീയൈരമ്ഭോഭിഃ സലിലനിധിസൗഹിത്യകരണം\nത്വദീയാഭിര്വാഗ്ഭിഃ തവ ജനനി വാചാം സ്തുതിരിയമ് ॥൧൦൦॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Malayalam
+  input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
+  output: "॥ ഇതി ശ്രീമത്പരമഹംസപരിവ്രാജകാചാര്യസ്യ\nശ്രീഗോവിന്ദഭഗവത്പൂജ്യപാദശിഷ്യസ്യ\nശ്രീമച്ഛങ്കരഭഗവതഃ കൃതൗ സൗന്ദര്യലഹരീ സമാപ്താ ॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Malayalam
+  input: "AUM namO nArAyaNAya\natha shrImannArAyaNIyam\nprathamam dashakam\nbhagavataH svarUpaM mAhAtmyaM Ca"
+  output: "ഓം നമോ നാരായണായ\nഅഥ ശ്രീമന്നാരായണീയമ്\nപ്രഥമമ് ദശകമ്\nഭഗവതഃ സ്വരൂപം മാഹാത്മ്യം ച"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Malayalam
+  input: "sAndrAnandAvabOdhAtmakamanupamitaM kAladEshAvadhibhyAM\nnirmuktaM nityamuktaM nigamashatasahasrENa nirbhAsyamAnam .\naspaShTaM dRShTamAtrE punarurupuruShArthAtmakaM brahma tatvaM\ntattAvadbhAti sAkShAd gurupavanapurE hanta bhAgyaM janAnAm ..1.."
+  output: "സാന്ദ്രാനന്ദാവബോധാത്മകമനുപമിതം കാലദേശാവധിഭ്യാം\nനിര്മുക്തം നിത്യമുക്തം നിഗമശതസഹസ്രേണ നിര്ഭാസ്യമാനമ് ।\nഅസ്പഷ്ടം ദൃഷ്ടമാത്രേ പുനരുരുപുരുഷാര്ഥാത്മകം ബ്രഹ്മ തത്വം\nതത്താവദ്ഭാതി സാക്ഷാദ് ഗുരുപവനപുരേ ഹന്ത ഭാഗ്യം ജനാനാമ് ॥൧॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Malayalam
+  input: "namrANAM sannidhattE satatamapi purastairanabhyarthitAna -\npyarthAn kAmAnajasraM vitarati paramAnandasAndrAM gatiM Ca .\nitthaM nishshEShalabhyO niravadhikaphala: pArijAtO harE tvaM\nkShudraM taM shakravATIdrumamabhilaShati vyarthamarthivrajO''yam ..8.."
+  output: "നമ്രാണാം സന്നിധത്തേ സതതമപി പുരസ്തൈരനഭ്യര്ഥിതാന -\nപ്യര്ഥാന് കാമാനജസ്രം വിതരതി പരമാനന്ദസാന്ദ്രാം ഗതിം ച ।\nഇത്ഥം നിശ്ശേഷലഭ്യോ നിരവധികഫല: പാരിജാതോ ഹരേ ത്വം\nക്ഷുദ്രം തം ശക്രവാടീദ്രുമമഭിലഷതി വ്യര്ഥമര്ഥിവ്രജോഽയമ് ॥൮॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Malayalam
+  input: "aishvaryaM shaGkarAdIshvaraviniyamanaM vishvatEjOharANAM\ntEjassaMhAri vIryaM vimalamapi yashO nispRhaishCOpagItam .\naGgAsaGgA sadA shrIrakhilavidasi na kvApi tE saGgavArtA\ntadvAtAgAravAsin murahara bhagavaCChabdamukhyAshrayO''si ..10.."
+  output: "ഐശ്വര്യം ശങ്കരാദീശ്വരവിനിയമനം വിശ്വതേജോഹരാണാം\nതേജസ്സംഹാരി വീര്യം വിമലമപി യശോ നിസ്പൃഹൈശ്ചോപഗീതമ് ।\nഅങ്ഗാസങ്ഗാ സദാ ശ്രീരഖിലവിദസി ന ക്വാപി തേ സങ്ഗവാര്താ\nതദ്വാതാഗാരവാസിന് മുരഹര ഭഗവച്ഛബ്ദമുഖ്യാശ്രയോഽസി ॥൧൦॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Malayalam
+  input: "avyaktaM tE svarUpaM duradhigamatamaM tattu shuddhaikasattvaM\nvyaktaM CApyEtadEva sphuTamamRtarasAmbhOdhikallOlatulyam .\nsarvOtkRShTAmabhIShTAM tadiha guNarasEnaiva CittaM harantIM\nmUrtiM tE saMshrayE''haM pavanapurapatE pAhi mAM kRShNa rOgAt ..10.."
+  output: "അവ്യക്തം തേ സ്വരൂപം ദുരധിഗമതമം തത്തു ശുദ്ധൈകസത്ത്വം\nവ്യക്തം ചാപ്യേതദേവ സ്ഫുടമമൃതരസാമ്ഭോധികല്ലോലതുല്യമ് ।\nസര്വോത്കൃഷ്ടാമഭീഷ്ടാം തദിഹ ഗുണരസേനൈവ ചിത്തം ഹരന്തീം\nമൂര്തിം തേ സംശ്രയേഽഹം പവനപുരപതേ പാഹി മാം കൃഷ്ണ രോഗാത് ॥൧൦॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Malayalam
+  input: "EtAM vibhUtiM yOgaM Ca mama yO vEtti tattvataH .\nsO''vikampEna yOgEna yujyatE nAtra saMshayaH ..10-7.."
+  output: "ഏതാം വിഭൂതിം യോഗം ച മമ യോ വേത്തി തത്ത്വതഃ ।\nസോഽവികമ്പേന യോഗേന യുജ്യതേ നാത്ര സംശയഃ ॥൧൦-൭॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Malayalam
+  input: "ahaM sarvasya prabhavO mattaH sarvaM pravartatE .\niti matvA bhajantE mAM budhA bhAvasamanvitAH ..10-8.."
+  output: "അഹം സര്വസ്യ പ്രഭവോ മത്തഃ സര്വം പ്രവര്തതേ ।\nഇതി മത്വാ ഭജന്തേ മാം ബുധാ ഭാവസമന്വിതാഃ ॥൧൦-൮॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Malayalam
+  input: "maCCittA madgataprANA bOdhayantaH parasparam .\nkathayantashCa mAM nityaM tuShyanti Ca ramanti Ca ..10-9.."
+  output: "മച്ചിത്താ മദ്ഗതപ്രാണാ ബോധയന്തഃ പരസ്പരമ് ।\nകഥയന്തശ്ച മാം നിത്യം തുഷ്യന്തി ച രമന്തി ച ॥൧൦-൯॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Malayalam
+  input: "tEShAM satatayuktAnAM bhajatAM prItipUrvakam .\ndadAmi buddhiyOgaM taM yEna mAmupayAnti tE ..10-10.."
+  output: "തേഷാം സതതയുക്താനാം ഭജതാം പ്രീതിപൂര്വകമ് ।\nദദാമി ബുദ്ധിയോഗം തം യേന മാമുപയാന്തി തേ ॥൧൦-൧൦॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Malayalam
+  input: "hanta tE kathayiShyAmi divyA hyAtmavibhUtayaH .\nprAdhAnyataH kurushrEShTha nAstyantO vistarasya mE ..10-19.."
+  output: "ഹന്ത തേ കഥയിഷ്യാമി ദിവ്യാ ഹ്യാത്മവിഭൂതയഃ ।\nപ്രാധാന്യതഃ കുരുശ്രേഷ്ഠ നാസ്ത്യന്തോ വിസ്തരസ്യ മേ ॥൧൦-൧൯॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Malayalam
+  input: "ahamAtmA guDAkEsha sarvabhUtAshayasthitaH .\nahamAdishCa madhyaM Ca bhUtAnAmanta Eva Ca ..10-20.."
+  output: "അഹമാത്മാ ഗുഡാകേശ സര്വഭൂതാശയസ്ഥിതഃ ।\nഅഹമാദിശ്ച മധ്യം ച ഭൂതാനാമന്ത ഏവ ച ॥൧൦-൨൦॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Malayalam
+  input: "AdityAnAmahaM viShNurjyOtiShAM raviraMshumAn .\nmarICirmarutAmasmi nakShatrANAmahaM shashI ..10-21.."
+  output: "ആദിത്യാനാമഹം വിഷ്ണുര്ജ്യോതിഷാം രവിരംശുമാന് ।\nമരീചിര്മരുതാമസ്മി നക്ഷത്രാണാമഹം ശശീ ॥൧൦-൨൧॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Malayalam
+  input: "vEdAnAM sAmavEdO''smi dEvAnAmasmi vAsavaH .\nindriyANAM manashCAsmi bhUtAnAmasmi CEtanA ..10-22.."
+  output: "വേദാനാം സാമവേദോഽസ്മി ദേവാനാമസ്മി വാസവഃ ।\nഇന്ദ്രിയാണാം മനശ്ചാസ്മി ഭൂതാനാമസ്മി ചേതനാ ॥൧൦-൨൨॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Malayalam
+  input: "rudrANAM shaGkarashCAsmi vittEshO yakSharakShasAm .\nvasUnAM pAvakashCAsmi mEruH shikhariNAmaham ..10-23.."
+  output: "രുദ്രാണാം ശങ്കരശ്ചാസ്മി വിത്തേശോ യക്ഷരക്ഷസാമ് ।\nവസൂനാം പാവകശ്ചാസ്മി മേരുഃ ശിഖരിണാമഹമ് ॥൧൦-൨൩॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Malayalam
+  input: "purOdhasAM Ca mukhyaM mAM viddhi pArtha bRhaspatim .\nsEnAnInAmahaM skandaH sarasAmasmi sAgaraH ..10-24.."
+  output: "പുരോധസാം ച മുഖ്യം മാം വിദ്ധി പാര്ഥ ബൃഹസ്പതിമ് ।\nസേനാനീനാമഹം സ്കന്ദഃ സരസാമസ്മി സാഗരഃ ॥൧൦-൨൪॥"
+  reversible: true

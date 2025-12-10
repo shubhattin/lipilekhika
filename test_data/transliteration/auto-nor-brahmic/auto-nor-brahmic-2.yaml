@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Assamese
+  input: ..iti shrIrAvaNaviraCitaMshivatANDavastOtraM sampUrNam..
+  output: ॥ইতি শ্ৰীৰাৱণৱিৰচিতংশিৱতাণ্ডৱস্তোত্ৰং সম্পূৰ্ণম্॥
+  reversible: true
+- index: 1
+  from: Normal
+  to: Devanagari
+  input: "paraM bhUyaH pravakShyAmi jJAnAnAM jJAnamuttamam .\nyajjJAtvA munayaH sarvE parAM siddhimitO gatAH ..14-1.."
+  output: "परं भूयः प्रवक्ष्यामि ज्ञानानां ज्ञानमुत्तमम् ।\nयज्ज्ञात्वा मुनयः सर्वे परां सिद्धिमितो गताः ॥१४-१॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Assamese
+  input: "paraM bhUyaH pravakShyAmi jJAnAnAM jJAnamuttamam .\nyajjJAtvA munayaH sarvE parAM siddhimitO gatAH ..14-1.."
+  output: "পৰং ভূযঃ প্ৰৱক্ষ্যামি জ্ঞানানাং জ্ঞানমুত্তমম্ ।\nযজ্জ্ঞাত্ৱা মুনযঃ সৰ্ৱে পৰাং সিদ্ধিমিতো গতাঃ ॥১৪-১॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Devanagari
+  input: "idaM jJAnamupAshritya mama sAdharmyamAgatAH .\nsargE''pi nOpajAyantE pralayE na vyathanti Ca ..14-2.."
+  output: "इदं ज्ञानमुपाश्रित्य मम साधर्म्यमागताः ।\nसर्गेऽपि नोपजायन्ते प्रलये न व्यथन्ति च ॥१४-२॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Assamese
+  input: "idaM jJAnamupAshritya mama sAdharmyamAgatAH .\nsargE''pi nOpajAyantE pralayE na vyathanti Ca ..14-2.."
+  output: "ইদং জ্ঞানমুপাশ্ৰিত্য মম সাধৰ্ম্যমাগতাঃ ।\nসৰ্গেঽপি নোপজাযন্তে প্ৰলযে ন ৱ্যথন্তি চ ॥১৪-২॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Devanagari
+  input: "mama yOnirmahad brahma tasmingarbhaM dadhAmyaham .\nsambhavaH sarvabhUtAnAM tatO bhavati bhArata ..14-3.."
+  output: "मम योनिर्महद् ब्रह्म तस्मिन्गर्भं दधाम्यहम् ।\nसम्भवः सर्वभूतानां ततो भवति भारत ॥१४-३॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Assamese
+  input: "mama yOnirmahad brahma tasmingarbhaM dadhAmyaham .\nsambhavaH sarvabhUtAnAM tatO bhavati bhArata ..14-3.."
+  output: "মম যোনিৰ্মহদ্ ব্ৰহ্ম তস্মিন্গৰ্ভং দধাম্যহম্ ।\nসম্ভৱঃ সৰ্ৱভূতানাং ততো ভৱতি ভাৰত ॥১৪-৩॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Devanagari
+  input: "sarvayOniShu kauntEya mUrtayaH sambhavanti yAH .\ntAsAM brahma mahadyOnirahaM bIjapradaH pitA ..14-4.."
+  output: "सर्वयोनिषु कौन्तेय मूर्तयः सम्भवन्ति याः ।\nतासां ब्रह्म महद्योनिरहं बीजप्रदः पिता ॥१४-४॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Assamese
+  input: "sarvayOniShu kauntEya mUrtayaH sambhavanti yAH .\ntAsAM brahma mahadyOnirahaM bIjapradaH pitA ..14-4.."
+  output: "সৰ্ৱযোনিষু কৌন্তেয মূৰ্তযঃ সম্ভৱন্তি যাঃ ।\nতাসাং ব্ৰহ্ম মহদ্যোনিৰহং বীজপ্ৰদঃ পিতা ॥১৪-৪॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Devanagari
+  input: "sattvaM rajastama iti guNAH prakRtisambhavAH .\nnibadhnanti mahAbAhO dEhE dEhinamavyayam ..14-5.."
+  output: "सत्त्वं रजस्तम इति गुणाः प्रकृतिसम्भवाः ।\nनिबध्नन्ति महाबाहो देहे देहिनमव्ययम् ॥१४-५॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Assamese
+  input: "sattvaM rajastama iti guNAH prakRtisambhavAH .\nnibadhnanti mahAbAhO dEhE dEhinamavyayam ..14-5.."
+  output: "সত্ত্ৱং ৰজস্তম ইতি গুণাঃ প্ৰকৃতিসম্ভৱাঃ ।\nনিবধ্নন্তি মহাবাহো দেহে দেহিনমৱ্যযম্ ॥১৪-৫॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Devanagari
+  input: "samaduHkhasukhaH svasthaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO dhIrastulyanindAtmasaMstutiH ..14-24.."
+  output: "समदुःखसुखः स्वस्थः समलोष्टाश्मकाञ्चनः ।\nतुल्यप्रियाप्रियो धीरस्तुल्यनिन्दात्मसंस्तुतिः ॥१४-२४॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Assamese
+  input: "samaduHkhasukhaH svasthaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO dhIrastulyanindAtmasaMstutiH ..14-24.."
+  output: "সমদুঃখসুখঃ স্ৱস্থঃ সমলোষ্টাশ্মকাঞ্চনঃ ।\nতুল্যপ্ৰিযাপ্ৰিযো ধীৰস্তুল্যনিন্দাত্মসংস্তুতিঃ ॥১৪-২৪॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Devanagari
+  input: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvArambhaparityAgI guNAtItaH sa uCyatE ..14-25.."
+  output: "मानापमानयोस्तुल्यस्तुल्यो मित्रारिपक्षयोः ।\nसर्वारम्भपरित्यागी गुणातीतः स उच्यते ॥१४-२५॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Assamese
+  input: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvArambhaparityAgI guNAtItaH sa uCyatE ..14-25.."
+  output: "মানাপমানযোস্তুল্যস্তুল্যো মিত্ৰাৰিপক্ষযোঃ ।\nসৰ্ৱাৰম্ভপৰিত্যাগী গুণাতীতঃ স উচ্যতে ॥১৪-২৫॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Devanagari
+  input: "mAM Ca yO''vyabhiCArENa bhaktiyOgEna sEvatE .\nsa guNAnsamatItyaitAnbrahmabhUyAya kalpatE ..14-26.."
+  output: "मां च योऽव्यभिचारेण भक्तियोगेन सेवते ।\nस गुणान्समतीत्यैतान्ब्रह्मभूयाय कल्पते ॥१४-२६॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Assamese
+  input: "mAM Ca yO''vyabhiCArENa bhaktiyOgEna sEvatE .\nsa guNAnsamatItyaitAnbrahmabhUyAya kalpatE ..14-26.."
+  output: "মাং চ যোঽৱ্যভিচাৰেণ ভক্তিযোগেন সেৱতে ।\nস গুণান্সমতীত্যৈতান্ব্ৰহ্মভূযায কল্পতে ॥১৪-২৬॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Devanagari
+  input: "brahmaNO hi pratiShThAhamamRtasyAvyayasya Ca .\nshAshvatasya Ca dharmasya sukhasyaikAntikasya Ca ..14-27.."
+  output: "ब्रह्मणो हि प्रतिष्ठाहममृतस्याव्ययस्य च ।\nशाश्वतस्य च धर्मस्य सुखस्यैकान्तिकस्य च ॥१४-२७॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Assamese
+  input: "brahmaNO hi pratiShThAhamamRtasyAvyayasya Ca .\nshAshvatasya Ca dharmasya sukhasyaikAntikasya Ca ..14-27.."
+  output: "ব্ৰহ্মণো হি প্ৰতিষ্ঠাহমমৃতস্যাৱ্যযস্য চ ।\nশাশ্ৱতস্য চ ধৰ্মস্য সুখস্যৈকান্তিকস্য চ ॥১৪-২৭॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Devanagari
+  input: "AUM tatsaditi shrImadbhagavadgItAsUpaniShatsu\nbrahmavidyAyAM yOgashAstrE shrIkRShNArjunasaMvAdE\nguNatrayavibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
+  output: "ॐ तत्सदिति श्रीमद्भगवद्गीतासूपनिषत्सु\nब्रह्मविद्यायां योगशास्त्रे श्रीकृष्णार्जुनसंवादे\nगुणत्रयविभागयोगो नाम चतुर्दशोऽध्यायः ॥१४॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Assamese
+  input: "AUM tatsaditi shrImadbhagavadgItAsUpaniShatsu\nbrahmavidyAyAM yOgashAstrE shrIkRShNArjunasaMvAdE\nguNatrayavibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
+  output: "ওঁ তত্সদিতি শ্ৰীমদ্ভগৱদ্গীতাসূপনিষত্সু\nব্ৰহ্মৱিদ্যাযাং যোগশাস্ত্ৰে শ্ৰীকৃষ্ণাৰ্জুনসংৱাদে\nগুণত্ৰযৱিভাগযোগো নাম চতুৰ্দশোঽধ্যাযঃ ॥১৪॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Devanagari
+  input: .. sauMdarya laharI ..
+  output: ॥ सौंदर्य लहरी ॥
+  reversible: true
+- index: 22
+  from: Normal
+  to: Assamese
+  input: .. sauMdarya laharI ..
+  output: ॥ সৌংদৰ্য লহৰী ॥
+  reversible: true
+- index: 23
+  from: Normal
+  to: Devanagari
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
+  reversible: true
+- index: 24
+  from: Normal
+  to: Assamese
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ প্ৰথমঃ ভাগঃ - আনংদলহৰী (১-৪১) ॥
+  reversible: true
+- index: 25
+  from: Normal
+  to: Devanagari
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "भूमौ स्खलितपादानां भूमिरेवावलम्बनं ।\nत्वयि जातापराधानां त्वमेव शरणं शिवे ॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Assamese
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "ভূমৌ স্খলিতপাদানাং ভূমিৰেৱাৱলম্বনং ।\nত্ৱযি জাতাপৰাধানাং ত্ৱমেৱ শৰণং শিৱে ॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Devanagari
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "शिवः शक्त्या युक्तो यदि भवति शक्तः प्रभवितुं\nन चेदेवं देवो न खलु कुशलः स्पन्दितुमपि ।\nअतस्त्वामाराध्यां हरिहरविरिञ्चादिभिरपि\nप्रणन्तुं स्तोतुं वा कथमकृतपुण्यः प्रभवति ॥१॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Assamese
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "শিৱঃ শক্ত্যা যুক্তো যদি ভৱতি শক্তঃ প্ৰভৱিতুং\nন চেদেৱং দেৱো ন খলু কুশলঃ স্পন্দিতুমপি ।\nঅতস্ত্ৱামাৰাধ্যাং হৰিহৰৱিৰিঞ্চাদিভিৰপি\nপ্ৰণন্তুং স্তোতুং ৱা কথমকৃতপুণ্যঃ প্ৰভৱতি ॥১॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Devanagari
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "तनीयांसं पांसुं तव चरणपङ्केरुहभवं\nविरिञ्चिस्सञ्चिन्वन् विरचयति लोकानविकलम् ।\nवहत्येनं शौरिः कथमपि सहस्रेण शिरसां\nहरस्संक्षुद्यैनं भजति भसितोद्धूळनविधिम् ॥२॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Assamese
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "তনীযাংসং পাংসুং তৱ চৰণপঙ্কেৰুহভৱং\nৱিৰিঞ্চিস্সঞ্চিন্ৱন্ ৱিৰচযতি লোকানৱিকলম্ ।\nৱহত্যেনং শৌৰিঃ কথমপি সহস্ৰেণ শিৰসাং\nহৰস্সংক্ষুদ্যৈনং ভজতি ভসিতোদ্ধূল়নৱিধিম্ ॥২॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Devanagari
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "अविद्यानामन्तस्तिमिरमिहिरद्वीपनगरी\nजडानां चैतन्यस्तबकमकरन्दस्रुतिझरी ।\nदरिद्राणां चिन्तामणिगुणनिका जन्मजलधौ\nनिमग्नानां दंष्ट्रा मुररिपुवराहस्य भवति ॥३॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Assamese
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "অৱিদ্যানামন্তস্তিমিৰমিহিৰদ্ৱীপনগৰী\nজডানাং চৈতন্যস্তবকমকৰন্দস্ৰুতিঝৰী ।\nদৰিদ্ৰাণাং চিন্তামণিগুণনিকা জন্মজলধৌ\nনিমগ্নানাং দংষ্ট্ৰা মুৰৰিপুৱৰাহস্য ভৱতি ॥৩॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Devanagari
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "त्वदन्यः पाणिभ्याम् अभयवरदो दैवतगणः\nत्वमेका नैवासि प्रकटितवराभीत्यभिनया ।\nभयात् त्रातुं दातुं फलमपि च वाञ्छासमधिकं\nशरण्ये लोकानां तव हि चरणावेव निपुणौ ॥४॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Assamese
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "ত্ৱদন্যঃ পাণিভ্যাম্ অভযৱৰদো দৈৱতগণঃ\nত্ৱমেকা নৈৱাসি প্ৰকটিতৱৰাভীত্যভিনযা ।\nভযাত্ ত্ৰাতুং দাতুং ফলমপি চ ৱাঞ্ছাসমধিকং\nশৰণ্যে লোকানাং তৱ হি চৰণাৱেৱ নিপুণৌ ॥৪॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Devanagari
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "हरिस्त्वामाराध्य प्रणतजनसौभाग्यजननीं\nपुरा नारी भूत्वा पुररिपुमपि क्षोभमनयत् ।\nस्मरोऽपि त्वां नत्वा रतिनयनलेह्येन वपुषा\nमुनीनामप्यन्तः प्रभवति हि मोहाय महताम् ॥५॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Assamese
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "হৰিস্ত্ৱামাৰাধ্য প্ৰণতজনসৌভাগ্যজননীং\nপুৰা নাৰী ভূত্ৱা পুৰৰিপুমপি ক্ষোভমনযত্ ।\nস্মৰোঽপি ত্ৱাং নত্ৱা ৰতিনযনলেহ্যেন ৱপুষা\nমুনীনামপ্যন্তঃ প্ৰভৱতি হি মোহায মহতাম্ ॥৫॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Devanagari
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "सरस्वत्या लक्ष्म्या विधिहरिसपत्नो विहरते\nरतेः पातिव्रत्यं शिथिलयति रम्येण वपुषा ।\nचिरं जीवन्नेव क्षपितपशुपाशव्यतिकरः\nपरानन्दाभिख्यम् रसयति रसं त्वद्भजनवान् ॥९९॥\nप्रदीपज्वालाभिः दिवसकरनीराजनविधिः\nसुधासूतेश्चन्द्रोपलजललवैरर्घ्यरचना ।\nस्वकीयैरम्भोभिः सलिलनिधिसौहित्यकरणं\nत्वदीयाभिर्वाग्भिः तव जननि वाचां स्तुतिरियम् ॥१००॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Assamese
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "সৰস্ৱত্যা লক্ষ্ম্যা ৱিধিহৰিসপত্নো ৱিহৰতে\nৰতেঃ পাতিৱ্ৰত্যং শিথিলযতি ৰম্যেণ ৱপুষা ।\nচিৰং জীৱন্নেৱ ক্ষপিতপশুপাশৱ্যতিকৰঃ\nপৰানন্দাভিখ্যম্ ৰসযতি ৰসং ত্ৱদ্ভজনৱান্ ॥৯৯॥\nপ্ৰদীপজ্ৱালাভিঃ দিৱসকৰনীৰাজনৱিধিঃ\nসুধাসূতেশ্চন্দ্ৰোপলজললৱৈৰৰ্ঘ্যৰচনা ।\nস্ৱকীযৈৰম্ভোভিঃ সলিলনিধিসৌহিত্যকৰণং\nত্ৱদীযাভিৰ্ৱাগ্ভিঃ তৱ জননি ৱাচাং স্তুতিৰিযম্ ॥১০০॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Devanagari
+  input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
+  output: "॥ इति श्रीमत्परमहंसपरिव्राजकाचार्यस्य\nश्रीगोविन्दभगवत्पूज्यपादशिष्यस्य\nश्रीमच्छङ्करभगवतः कृतौ सौन्दर्यलहरी समाप्ता ॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Assamese
+  input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
+  output: "॥ ইতি শ্ৰীমত্পৰমহংসপৰিৱ্ৰাজকাচাৰ্যস্য\nশ্ৰীগোৱিন্দভগৱত্পূজ্যপাদশিষ্যস্য\nশ্ৰীমচ্ছঙ্কৰভগৱতঃ কৃতৌ সৌন্দৰ্যলহৰী সমাপ্তা ॥"
+  reversible: true

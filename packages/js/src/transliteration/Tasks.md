@@ -1,10 +1,8 @@
 # Tasks
 
 - Make sure Tamil Extended and Vedic Accents marks work together.
-- Add Conversion of all Scripts to Normal Scripts Test (Important)
-- Add Conversion of Normal Scripts to all other Scripts Test (for Typing Tool)
-- For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added.
-- For Normal -> Other script conversion, we should also try to find cases where we can clear the prev_context_arr. This way it can be synchronised with the typing context window too. And as of now the context is only 5 so it might be fine.
+- For reversibility you can use the devanagari reversibility condition. Also evaluate if reversibility really has to be added. (fallback case remaining)
+- With reference to வரூ -> vrU. This isssue might need a change in list referencing. And mAtrA being a different seperata item in the list. Think about it.
 
 ## Todo for Ranges
 

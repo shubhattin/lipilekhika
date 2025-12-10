@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Tamil
+  input: .. iti durgAsUktam ..
+  output: ॥ இதி துர்காஸூக்தம் ॥
+  reversible: false
+- index: 1
+  from: Normal
+  to: Tamil
+  input: AUM shAntiH shAntiH shAntiH ..
+  output: ௐ ஶாந்திஃ ஶாந்திஃ ஶாந்திஃ ॥
+  reversible: true
+- index: 2
+  from: Normal
+  to: Telugu
+  input: AUM shrI paramAtmanE namaH
+  output: ఓం శ్రీ పరమాత్మనే నమః
+  reversible: true
+- index: 3
+  from: Normal
+  to: Telugu
+  input: "RShINAM saMnidhau rAjaMstava putrAgamaM prati .\nkAshyapasya Ca putrO''sti vibhANDaka iti shrutaH ..1-9-3.."
+  output: "ఋషీణాం సంనిధౌ రాజంస్తవ పుత్రాగమం ప్రతి ।\nకాశ్యపస్య చ పుత్రోఽస్తి విభాణ్డక ఇతి శ్రుతః ॥౧-౯-౩॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Telugu
+  input: "vakShyanti tE mahIpAlaM brAhmaNA vEdapAragAH .\nvibhANDakasutaM rAjan sarvOpAyairihAnaya ..1-9-12.."
+  output: "వక్ష్యన్తి తే మహీపాలం బ్రాహ్మణా వేదపారగాః ।\nవిభాణ్డకసుతం రాజన్ సర్వోపాయైరిహానయ ॥౧-౯-౧౨॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Telugu
+  input: "tAM dadarsha mahAtEjA mEnakAM kushikAtmajaH .\nrUpENApratimAM tatra vidyutaM jaladE yathA ..1-63-5.."
+  output: "తాం దదర్శ మహాతేజా మేనకాం కుశికాత్మజః ।\nరూపేణాప్రతిమాం తత్ర విద్యుతం జలదే యథా ॥౧-౬౩-౫॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Telugu
+  input: "imaM vivasvatE yOgaM prOktavAnahamavyayam .\nvivasvAnmanavE prAha manurikShvAkavE''bravIt ..4-1.."
+  output: "ఇమం వివస్వతే యోగం ప్రోక్తవానహమవ్యయమ్ ।\nవివస్వాన్మనవే ప్రాహ మనురిక్ష్వాకవేఽబ్రవీత్ ॥౪-౧॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Telugu
+  input: "na jAyatE mriyatE vA kadACinnAyaM bhUtvA bhavitA vA na bhUyaH .\najO nityaH shAshvatO''yaM purANO na hanyatE hanyamAnE sharIrE ..2-20.."
+  output: "న జాయతే మ్రియతే వా కదాచిన్నాయం భూత్వా భవితా వా న భూయః ।\nఅజో నిత్యః శాశ్వతోఽయం పురాణో న హన్యతే హన్యమానే శరీరే ॥౨-౨౦॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Telugu
+  input: "kathaM bhIShmamahaM saGkhyE drONaM Ca madhusUdana .\niShubhiH pratiyOtsyAmi pUjArhAvarisUdana ..2-4.."
+  output: "కథం భీష్మమహం సఙ్ఖ్యే ద్రోణం చ మధుసూదన ।\nఇషుభిః ప్రతియోత్స్యామి పూజార్హావరిసూదన ॥౨-౪॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Telugu
+  input: "karmEndriyANi saMyamya ya AstE manasA smaran .\nindriyArthAnvimUDhAtmA mithyACAraH sa uCyatE ..3-6.."
+  output: "కర్మేన్ద్రియాణి సంయమ్య య ఆస్తే మనసా స్మరన్ ।\nఇన్ద్రియార్థాన్విమూఢాత్మా మిథ్యాచారః స ఉచ్యతే ॥౩-౬॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Telugu
+  input: "niyataM kuru karma tvaM karma jyAyO hyakarmaNaH .\nsharIrayAtrApi Ca tE na prasiddhyEdakarmaNaH ..3-8.."
+  output: "నియతం కురు కర్మ త్వం కర్మ జ్యాయో హ్యకర్మణః ।\nశరీరయాత్రాపి చ తే న ప్రసిద్ధ్యేదకర్మణః ॥౩-౮॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Telugu
+  input: "iShTAnbhOgAnhi vO dEvA dAsyantE yajJabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
+  output: "ఇష్టాన్భోగాన్హి వో దేవా దాస్యన్తే యజ్ఞభావితాః ।\nతైర్దత్తానప్రదాయైభ్యో యో భుఙ్క్తే స్తేన ఏవ సః ॥౩-౧౨॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Telugu
+  input: "dharAdharEndranandinIvilAsabandhubandhura-\nsphuraddigantasantatipramOdamAnamAnasE .\nkRpAkaTAkShadhOraNIniruddhadurdharApadi\nkvaCiddigambarE manOvinOdamEtu vastuni ..3.."
+  output: "ధరాధరేన్ద్రనన్దినీవిలాసబన్ధుబన్ధుర-\nస్ఫురద్దిగన్తసన్తతిప్రమోదమానమానసే ।\nకృపాకటాక్షధోరణీనిరుద్ధదుర్ధరాపది\nక్వచిద్దిగమ్బరే మనోవినోదమేతు వస్తుని ॥౩॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Telugu
+  input: "praphullanIlapaGkajaprapaJCakAlimaprabhA-\n-valambikaNThakandalIruCiprabaddhakandharam .\nsmaraCChidaM puraCChidaM bhavaCChidaM makhaCChidaM\ngajaCChidAndhakaCChidaM tamantakaCChidaM bhajE ..9.."
+  output: "ప్రఫుల్లనీలపఙ్కజప్రపఞ్చకాలిమప్రభా-\n-వలమ్బికణ్ఠకన్దలీరుచిప్రబద్ధకన్ధరమ్ ।\nస్మరచ్ఛిదం పురచ్ఛిదం భవచ్ఛిదం మఖచ్ఛిదం\nగజచ్ఛిదాన్ధకచ్ఛిదం తమన్తకచ్ఛిదం భజే ॥౯॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Telugu
+  input: "jaTATavIgalajjalapravAhapAvitasthalE\ngaLE''valambyalambitAM bhujaGgatuGgamAlikAm .\nDamaDDamaDDamaDDamanninAdavaDDamarvayaM\nCakAraCaNDatANDavaM tanOtunaHshivaHshivam ..1.."
+  output: "జటాటవీగలజ్జలప్రవాహపావితస్థలే\nగళేఽవలమ్బ్యలమ్బితాం భుజఙ్గతుఙ్గమాలికామ్ ।\nడమడ్డమడ్డమడ్డమన్నినాదవడ్డమర్వయం\nచకారచణ్డతాణ్డవం తనోతునఃశివఃశివమ్ ॥౧॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Telugu
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "నిలిమ్పనాథనాగరీకదమ్బమౌలమల్లికా-\nనిగుమ్ఫనిర్భరక్షరన్మధూష్ణికామనోహరః ।\nతనోతు నో మనోముదం వినోదినీమహర్నిశం\nపరశ్రియః పరంపదం తదఙ్గజత్విషాంచయః ॥౧౫॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Telugu
+  input: "kadA nilimpanirjharInikuJjakOTarE vasan\nvimuktadurmatiH sadA shiraHsthamaJjaliM vahan .\nvimuktalOlalOCanO lalAmabhAlalagnakaH\nshivEtimantramuCCaran kadA sukhIbhavAmyaham ..13.."
+  output: "కదా నిలిమ్పనిర్ఝరీనికుఞ్జకోటరే వసన్\nవిముక్తదుర్మతిః సదా శిరఃస్థమఞ్జలిం వహన్ ।\nవిముక్తలోలలోచనో లలామభాలలగ్నకః\nశివేతిమన్త్రముచ్చరన్ కదా సుఖీభవామ్యహమ్ ॥౧౩॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Telugu
+  input: "namAmi pArvatIpatiM namAmi jAhnavIpatiM \nnamAmi bhaktavatsalaM namAmi bhAlalOCanam .\nnamAmi CandrashEkharaM namAmi duHkhamOCanaM \ntadIyapAdapaGkajaM smarAmyahaM naTEshvaram ..17.."
+  output: "నమామి పార్వతీపతిం నమామి జాహ్నవీపతిం \nనమామి భక్తవత్సలం నమామి భాలలోచనమ్ ।\nనమామి చన్ద్రశేఖరం నమామి దుఃఖమోచనం \nతదీయపాదపఙ్కజం స్మరామ్యహం నటేశ్వరమ్ ॥౧౭॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Telugu
+  input: "akharvasarvamaGgaLAkaLAkadambamaJjarI\nrasapravAhamAdhurIvijRmbhaNAmadhuvratam .\nsmarAntakaM purAntakaM bhavAntakaM makhAntakaM\ngajAntakAndhakAntakaM tamantakAntakaM bhajE ..10.."
+  output: "అఖర్వసర్వమఙ్గళాకళాకదమ్బమఞ్జరీ\nరసప్రవాహమాధురీవిజృమ్భణామధువ్రతమ్ ।\nస్మరాన్తకం పురాన్తకం భవాన్తకం మఖాన్తకం\nగజాన్తకాన్ధకాన్తకం తమన్తకాన్తకం భజే ॥౧౦॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Telugu
+  input: "idaM hi nityamEvamuktamuttamOttamaM stavaM\npaThan smaran bruvan narO vishuddhimEti santatam .\nharE gurau subhaktimAshuyAti nAnyathAgatiM\nvimOhanaM hi dEhinAM sushaGkarasyaCintanam ..14.."
+  output: "ఇదం హి నిత్యమేవముక్తముత్తమోత్తమం స్తవం\nపఠన్ స్మరన్ బ్రువన్ నరో విశుద్ధిమేతి సన్తతమ్ ।\nహరే గురౌ సుభక్తిమాశుయాతి నాన్యథాగతిం\nవిమోహనం హి దేహినాం సుశఙ్కరస్యచిన్తనమ్ ॥౧౪॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Telugu
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "నిలిమ్పనాథనాగరీకదమ్బమౌలమల్లికా-\nనిగుమ్ఫనిర్భరక్షరన్మధూష్ణికామనోహరః ।\nతనోతు నో మనోముదం వినోదినీమహర్నిశం\nపరశ్రియః పరంపదం తదఙ్గజత్విషాంచయః ॥౧౫॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Telugu
+  input: "pUjAvasAnasamayEdashavaktragItaM\nyaH shambhupUjanaparaMpaThatipradOShE .\ntasyasthirAM rathagajEndraturaGgayuktAM\nlakShmIM sadaivasumukhIM pradadAtishambhuH ..18.."
+  output: "పూజావసానసమయేదశవక్త్రగీతం\nయః శమ్భుపూజనపరంపఠతిప్రదోషే ।\nతస్యస్థిరాం రథగజేన్ద్రతురఙ్గయుక్తాం\nలక్ష్మీం సదైవసుముఖీం ప్రదదాతిశమ్భుః ॥౧౮॥"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Telugu
+  input: ..iti shrIrAvaNaviraCitaMshivatANDavastOtraM sampUrNam..
+  output: ॥ఇతి శ్రీరావణవిరచితంశివతాణ్డవస్తోత్రం సమ్పూర్ణమ్॥
+  reversible: true
+- index: 23
+  from: Normal
+  to: Telugu
+  input: "paraM bhUyaH pravakShyAmi jJAnAnAM jJAnamuttamam .\nyajjJAtvA munayaH sarvE parAM siddhimitO gatAH ..14-1.."
+  output: "పరం భూయః ప్రవక్ష్యామి జ్ఞానానాం జ్ఞానముత్తమమ్ ।\nయజ్జ్ఞాత్వా మునయః సర్వే పరాం సిద్ధిమితో గతాః ॥౧౪-౧॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Telugu
+  input: "idaM jJAnamupAshritya mama sAdharmyamAgatAH .\nsargE''pi nOpajAyantE pralayE na vyathanti Ca ..14-2.."
+  output: "ఇదం జ్ఞానముపాశ్రిత్య మమ సాధర్మ్యమాగతాః ।\nసర్గేఽపి నోపజాయన్తే ప్రలయే న వ్యథన్తి చ ॥౧౪-౨॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Telugu
+  input: "mama yOnirmahad brahma tasmingarbhaM dadhAmyaham .\nsambhavaH sarvabhUtAnAM tatO bhavati bhArata ..14-3.."
+  output: "మమ యోనిర్మహద్ బ్రహ్మ తస్మిన్గర్భం దధామ్యహమ్ ।\nసమ్భవః సర్వభూతానాం తతో భవతి భారత ॥౧౪-౩॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Telugu
+  input: "sarvayOniShu kauntEya mUrtayaH sambhavanti yAH .\ntAsAM brahma mahadyOnirahaM bIjapradaH pitA ..14-4.."
+  output: "సర్వయోనిషు కౌన్తేయ మూర్తయః సమ్భవన్తి యాః ।\nతాసాం బ్రహ్మ మహద్యోనిరహం బీజప్రదః పితా ॥౧౪-౪॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Telugu
+  input: "sattvaM rajastama iti guNAH prakRtisambhavAH .\nnibadhnanti mahAbAhO dEhE dEhinamavyayam ..14-5.."
+  output: "సత్త్వం రజస్తమ ఇతి గుణాః ప్రకృతిసమ్భవాః ।\nనిబధ్నన్తి మహాబాహో దేహే దేహినమవ్యయమ్ ॥౧౪-౫॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Telugu
+  input: "samaduHkhasukhaH svasthaH samalOShTAshmakAJCanaH .\ntulyapriyApriyO dhIrastulyanindAtmasaMstutiH ..14-24.."
+  output: "సమదుఃఖసుఖః స్వస్థః సమలోష్టాశ్మకాఞ్చనః ।\nతుల్యప్రియాప్రియో ధీరస్తుల్యనిన్దాత్మసంస్తుతిః ॥౧౪-౨౪॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Telugu
+  input: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvArambhaparityAgI guNAtItaH sa uCyatE ..14-25.."
+  output: "మానాపమానయోస్తుల్యస్తుల్యో మిత్రారిపక్షయోః ।\nసర్వారమ్భపరిత్యాగీ గుణాతీతః స ఉచ్యతే ॥౧౪-౨౫॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Telugu
+  input: "mAM Ca yO''vyabhiCArENa bhaktiyOgEna sEvatE .\nsa guNAnsamatItyaitAnbrahmabhUyAya kalpatE ..14-26.."
+  output: "మాం చ యోఽవ్యభిచారేణ భక్తియోగేన సేవతే ।\nస గుణాన్సమతీత్యైతాన్బ్రహ్మభూయాయ కల్పతే ॥౧౪-౨౬॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Telugu
+  input: "brahmaNO hi pratiShThAhamamRtasyAvyayasya Ca .\nshAshvatasya Ca dharmasya sukhasyaikAntikasya Ca ..14-27.."
+  output: "బ్రహ్మణో హి ప్రతిష్ఠాహమమృతస్యావ్యయస్య చ ।\nశాశ్వతస్య చ ధర్మస్య సుఖస్యైకాన్తికస్య చ ॥౧౪-౨౭॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Telugu
+  input: "AUM tatsaditi shrImadbhagavadgItAsUpaniShatsu\nbrahmavidyAyAM yOgashAstrE shrIkRShNArjunasaMvAdE\nguNatrayavibhAgayOgO nAma CaturdashO''dhyAyaH ..14.."
+  output: "ఓం తత్సదితి శ్రీమద్భగవద్గీతాసూపనిషత్సు\nబ్రహ్మవిద్యాయాం యోగశాస్త్రే శ్రీకృష్ణార్జునసంవాదే\nగుణత్రయవిభాగయోగో నామ చతుర్దశోఽధ్యాయః ॥౧౪॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Telugu
+  input: .. sauMdarya laharI ..
+  output: ॥ సౌందర్య లహరీ ॥
+  reversible: true
+- index: 34
+  from: Normal
+  to: Telugu
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ ప్రథమః భాగః - ఆనందలహరీ (౧-౪౧) ॥
+  reversible: true
+- index: 35
+  from: Normal
+  to: Telugu
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "భూమౌ స్ఖలితపాదానాం భూమిరేవావలమ్బనం ।\nత్వయి జాతాపరాధానాం త్వమేవ శరణం శివే ॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Telugu
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "శివః శక్త్యా యుక్తో యది భవతి శక్తః ప్రభవితుం\nన చేదేవం దేవో న ఖలు కుశలః స్పన్దితుమపి ।\nఅతస్త్వామారాధ్యాం హరిహరవిరిఞ్చాదిభిరపి\nప్రణన్తుం స్తోతుం వా కథమకృతపుణ్యః ప్రభవతి ॥౧॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Telugu
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "తనీయాంసం పాంసుం తవ చరణపఙ్కేరుహభవం\nవిరిఞ్చిస్సఞ్చిన్వన్ విరచయతి లోకానవికలమ్ ।\nవహత్యేనం శౌరిః కథమపి సహస్రేణ శిరసాం\nహరస్సంక్షుద్యైనం భజతి భసితోద్ధూళనవిధిమ్ ॥౨॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Telugu
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "అవిద్యానామన్తస్తిమిరమిహిరద్వీపనగరీ\nజడానాం చైతన్యస్తబకమకరన్దస్రుతిఝరీ ।\nదరిద్రాణాం చిన్తామణిగుణనికా జన్మజలధౌ\nనిమగ్నానాం దంష్ట్రా మురరిపువరాహస్య భవతి ॥౩॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Telugu
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "త్వదన్యః పాణిభ్యామ్ అభయవరదో దైవతగణః\nత్వమేకా నైవాసి ప్రకటితవరాభీత్యభినయా ।\nభయాత్ త్రాతుం దాతుం ఫలమపి చ వాఞ్ఛాసమధికం\nశరణ్యే లోకానాం తవ హి చరణావేవ నిపుణౌ ॥౪॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Telugu
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "హరిస్త్వామారాధ్య ప్రణతజనసౌభాగ్యజననీం\nపురా నారీ భూత్వా పురరిపుమపి క్షోభమనయత్ ।\nస్మరోఽపి త్వాం నత్వా రతినయనలేహ్యేన వపుషా\nమునీనామప్యన్తః ప్రభవతి హి మోహాయ మహతామ్ ॥౫॥"
+  reversible: true

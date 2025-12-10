@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Odia
+  input: .. dhyAnam ..
+  output: ॥ ଧ୍ୟାନମ୍ ॥
+  reversible: true
+- index: 1
+  from: Normal
+  to: Odia
+  input: "mANikyavINAmupalAlayantIM\nmadAlasAM maJjulavAgvilAsAm .\nmAhEndranIladyutikOmalAGgIM\nmAtaGgakanyAM manasA smarAmi .. 1.."
+  output: "ମାଣିକ୍ୟଵୀଣାମୁପଲାଲୟନ୍ତୀଂ\nମଦାଲସାଂ ମଞ୍ଜୁଲଵାଗ୍ଵିଲାସାମ୍ ।\nମାହେନ୍ଦ୍ରନୀଲଦ୍ୟୁତିକୋମଲାଙ୍ଗୀଂ\nମାତଙ୍ଗକନ୍ୟାଂ ମନସା ସ୍ମରାମି ॥ ୧॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Odia
+  input: "CaturbhujE CandrakalAvataMsE\nkuCOnnatE kuGkumarAgashONE .\npuNDrEkShupAshAGkushapuShpabANa-\nhastE namastE jagadEkamAtaH .. 2.."
+  output: "ଚତୁର୍ଭୁଜେ ଚନ୍ଦ୍ରକଲାଵତଂସେ\nକୁଚୋନ୍ନତେ କୁଙ୍କୁମରାଗଶୋଣେ ।\nପୁଣ୍ଡ୍ରେକ୍ଷୁପାଶାଙ୍କୁଶପୁଷ୍ପବାଣ-\nହସ୍ତେ ନମସ୍ତେ ଜଗଦେକମାତଃ ॥ ୨॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Odia
+  input: .. viniyOgaH ..
+  output: ॥ ଵିନିୟୋଗଃ ॥
+  reversible: true
+- index: 4
+  from: Normal
+  to: Odia
+  input: "mAtA marakatashyAmA mAtaGgI madashAlinI .\nkuryAt kaTAkShaM kalyANI kadaMbavanavAsinI .. 3.."
+  output: "ମାତା ମରକତଶ୍ୟାମା ମାତଙ୍ଗୀ ମଦଶାଲିନୀ ।\nକୁର୍ୟାତ୍ କଟାକ୍ଷଂ କଲ୍ୟାଣୀ କଦଂବଵନଵାସିନୀ ॥ ୩॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Odia
+  input: .. stuti ..
+  output: ॥ ସ୍ତୁତି ॥
+  reversible: true
+- index: 6
+  from: Normal
+  to: Odia
+  input: "jaya mAtaGgatanayE jaya nIlOtpaladyutE .\njaya saGgItarasikE jaya lIlAshukapriyE .. 4.."
+  output: "ଜୟ ମାତଙ୍ଗତନୟେ ଜୟ ନୀଲୋତ୍ପଲଦ୍ୟୁତେ ।\nଜୟ ସଙ୍ଗୀତରସିକେ ଜୟ ଲୀଲାଶୁକପ୍ରିୟେ ॥ ୪॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Odia
+  input: .. daNDakam ..
+  output: ॥ ଦଣ୍ଡକମ୍ ॥
+  reversible: true
+- index: 8
+  from: Normal
+  to: Odia
+  input: "jaya janani sudhAsamudrAntarudyanmaNIdvIpasaMrUDh -\nbilvATavImadhyakalpadrumAkalpakAdaMbakAntAravAsapriyE\nkRttivAsapriyE sarvalOkapriyE"
+  output: "ଜୟ ଜନନି ସୁଧାସମୁଦ୍ରାନ୍ତରୁଦ୍ୟନ୍ମଣୀଦ୍ଵୀପସଂରୂଢ୍ -\nବିଲ୍ଵାଟଵୀମଧ୍ୟକଲ୍ପଦ୍ରୁମାକଲ୍ପକାଦଂବକାନ୍ତାରଵାସପ୍ରିୟେ\nକୃତ୍ତିଵାସପ୍ରିୟେ ସର୍ଵଲୋକପ୍ରିୟେ"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Odia
+  input: "sAdarArabdhasaMgItasaMbhAvanAsaMbhramAlOla-\nnIpasragAbaddhaCUlIsanAthatrikE sAnumatputrikE"
+  output: "ସାଦରାରବ୍ଧସଂଗୀତସଂଭାଵନାସଂଭ୍ରମାଲୋଲ-\nନୀପସ୍ରଗାବଦ୍ଧଚୂଲୀସନାଥତ୍ରିକେ ସାନୁମତ୍ପୁତ୍ରିକେ"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Odia
+  input: "shEkharIbhUtashItAMshurEkhAmayUkhAvalIbaddha-\nsusnigdhanIlAlakashrENishRGgAritE lOkasaMbhAvitE\nkAmalIlAdhanussannibhabhrUlatApuShpasandOhasandEhakRllOCanE\nvAksudhAsECanE CArugOrOCanApaGkakElIlalAmAbhirAmE surAmE ramE"
+  output: "ଶେଖରୀଭୂତଶୀତାଂଶୁରେଖାମୟୂଖାଵଲୀବଦ୍ଧ-\nସୁସ୍ନିଗ୍ଧନୀଲାଲକଶ୍ରେଣିଶୃଙ୍ଗାରିତେ ଲୋକସଂଭାଵିତେ\nକାମଲୀଲାଧନୁସ୍ସନ୍ନିଭଭ୍ରୂଲତାପୁଷ୍ପସନ୍ଦୋହସନ୍ଦେହକୃଲ୍ଲୋଚନେ\nଵାକ୍ସୁଧାସେଚନେ ଚାରୁଗୋରୋଚନାପଙ୍କକେଲୀଲଲାମାଭିରାମେ ସୁରାମେ ରମେ"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Odia
+  input: "prOllasaddhvAlikAmauktikashrENikACandrikAmaNDalOdbhAsi\nlAvaNyagaNDasthalanyastakastUrikApatrarEkhAsamudbhUtasaurabhya-\nsaMbhrAntabhRGgAGganAgItasAndrIbhavanmandratantrIsvarE\nsusvarE bhAsvarE"
+  output: "ପ୍ରୋଲ୍ଲସଦ୍ଧ୍ଵାଲିକାମୌକ୍ତିକଶ୍ରେଣିକାଚନ୍ଦ୍ରିକାମଣ୍ଡଲୋଦ୍ଭାସି\nଲାଵଣ୍ୟଗଣ୍ଡସ୍ଥଲନ୍ୟସ୍ତକସ୍ତୂରିକାପତ୍ରରେଖାସମୁଦ୍ଭୂତସୌରଭ୍ୟ-\nସଂଭ୍ରାନ୍ତଭୃଙ୍ଗାଙ୍ଗନାଗୀତସାନ୍ଦ୍ରୀଭଵନ୍ମନ୍ଦ୍ରତନ୍ତ୍ରୀସ୍ଵରେ\nସୁସ୍ଵରେ ଭାସ୍ଵରେ"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Odia
+  input: "vallakIvAdanaprakriyAlOlatAlIdalAbaddha-\ntATaGkabhUShAvishEShAnvitE siddhasammAnitE"
+  output: "ଵଲ୍ଲକୀଵାଦନପ୍ରକ୍ରିୟାଲୋଲତାଲୀଦଲାବଦ୍ଧ-\nତାଟଙ୍କଭୂଷାଵିଶେଷାନ୍ଵିତେ ସିଦ୍ଧସମ୍ମାନିତେ"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Odia
+  input: "divyahAlAmadOdvElahElAlasaCCakShurAndOlanashrIsamAkShiptakarNaika-\nnIlOtpalE shyAmalE pUritAshEShalOkAbhivAJChAphalE shrIphalE"
+  output: "ଦିଵ୍ୟହାଲାମଦୋଦ୍ଵେଲହେଲାଲସଚ୍ଚକ୍ଷୁରାନ୍ଦୋଲନଶ୍ରୀସମାକ୍ଷିପ୍ତକର୍ଣୈକ-\nନୀଲୋତ୍ପଲେ ଶ୍ୟାମଲେ ପୂରିତାଶେଷଲୋକାଭିଵାଞ୍ଛାଫଲେ ଶ୍ରୀଫଲେ"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Odia
+  input: "svEdabindUllasadphAlalAvaNya niShyandasandOhasandEhakRnnAsikAmauktikE\nsarvavishvAtmikE sarvasiddhyAtmikE kAlikE mugddhamandasmitOdAravaktra-\nsphurat pUgatAmbUlakarpUrakhaNDOtkarE jJAnamudrAkarE sarvasampatkarE\npadmabhAsvatkarE shrIkarE"
+  output: "ସ୍ଵେଦବିନ୍ଦୂଲ୍ଲସଦ୍ଫାଲଲାଵଣ୍ୟ ନିଷ୍ୟନ୍ଦସନ୍ଦୋହସନ୍ଦେହକୃନ୍ନାସିକାମୌକ୍ତିକେ\nସର୍ଵଵିଶ୍ଵାତ୍ମିକେ ସର୍ଵସିଦ୍ଧ୍ୟାତ୍ମିକେ କାଲିକେ ମୁଗ୍ଦ୍ଧମନ୍ଦସ୍ମିତୋଦାରଵକ୍ତ୍ର-\nସ୍ଫୁରତ୍ ପୂଗତାମ୍ବୂଲକର୍ପୂରଖଣ୍ଡୋତ୍କରେ ଜ୍ଞାନମୁଦ୍ରାକରେ ସର୍ଵସମ୍ପତ୍କରେ\nପଦ୍ମଭାସ୍ଵତ୍କରେ ଶ୍ରୀକରେ"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Odia
+  input: "kundapuShpadyutisnigdhadantAvalInirmalAlOlakallOlasammElana\nsmErashONAdharE CAruvINAdharE pakvabiMbAdharE"
+  output: "କୁନ୍ଦପୁଷ୍ପଦ୍ୟୁତିସ୍ନିଗ୍ଧଦନ୍ତାଵଲୀନିର୍ମଲାଲୋଲକଲ୍ଲୋଲସମ୍ମେଲନ\nସ୍ମେରଶୋଣାଧରେ ଚାରୁଵୀଣାଧରେ ପକ୍ଵବିଂବାଧରେ"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Odia
+  input: "sulalita navayauvanAraMbhaCandrOdayOdvElalAvaNyadugdhArNavAvirbhavat\nkambubimbOkabhRtkantharE satkalAmandirE mantharE"
+  output: "ସୁଲଲିତ ନଵୟୌଵନାରଂଭଚନ୍ଦ୍ରୋଦୟୋଦ୍ଵେଲଲାଵଣ୍ୟଦୁଗ୍ଧାର୍ଣଵାଵିର୍ଭଵତ୍\nକମ୍ବୁବିମ୍ବୋକଭୃତ୍କନ୍ଥରେ ସତ୍କଲାମନ୍ଦିରେ ମନ୍ଥରେ"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Odia
+  input: "divyaratnaprabhAbandhuraCChannahArAdibhUShAsamudyOtamAnAnavadyAGga-\nshObhE shubhE"
+  output: "ଦିଵ୍ୟରତ୍ନପ୍ରଭାବନ୍ଧୁରଚ୍ଛନ୍ନହାରାଦିଭୂଷାସମୁଦ୍ୟୋତମାନାନଵଦ୍ୟାଙ୍ଗ-\nଶୋଭେ ଶୁଭେ"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Odia
+  input: "ratnakEyUrarashmiCChaTApallavaprOllasaddOllatArAjitE yOgibhiH\npUjitE vishvadiGmaNDalavyAptamANikyatEjassphuratkaGkaNAlaMkRtE\nvibhramAlaMkRtE sAdhubhiH pUjitE vAsarAraMbhavElAsamujjRmbha\nmANAravindapratidvandvipANidvayE santatOdyaddayE advayE\ndivyaratnOrmikAdIdhitistOmasandhyAyamAnAGgulIpallavOdya\nnnakhEnduprabhAmaNDalE sannutAkhaNDalE CitprabhAmaNDalE prOllasatkuNDalE"
+  output: "ରତ୍ନକେୟୂରରଶ୍ମିଚ୍ଛଟାପଲ୍ଲଵପ୍ରୋଲ୍ଲସଦ୍ଦୋଲ୍ଲତାରାଜିତେ ୟୋଗିଭିଃ\nପୂଜିତେ ଵିଶ୍ଵଦିଙ୍ମଣ୍ଡଲଵ୍ୟାପ୍ତମାଣିକ୍ୟତେଜସ୍ସ୍ଫୁରତ୍କଙ୍କଣାଲଂକୃତେ\nଵିଭ୍ରମାଲଂକୃତେ ସାଧୁଭିଃ ପୂଜିତେ ଵାସରାରଂଭଵେଲାସମୁଜ୍ଜୃମ୍ଭ\nମାଣାରଵିନ୍ଦପ୍ରତିଦ୍ଵନ୍ଦ୍ଵିପାଣିଦ୍ଵୟେ ସନ୍ତତୋଦ୍ୟଦ୍ଦୟେ ଅଦ୍ଵୟେ\nଦିଵ୍ୟରତ୍ନୋର୍ମିକାଦୀଧିତିସ୍ତୋମସନ୍ଧ୍ୟାୟମାନାଙ୍ଗୁଲୀପଲ୍ଲଵୋଦ୍ୟ\nନ୍ନଖେନ୍ଦୁପ୍ରଭାମଣ୍ଡଲେ ସନ୍ନୁତାଖଣ୍ଡଲେ ଚିତ୍ପ୍ରଭାମଣ୍ଡଲେ ପ୍ରୋଲ୍ଲସତ୍କୁଣ୍ଡଲେ"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Odia
+  input: "tArakArAjinIkAshahArAvalismEra CArustanAbhOgabhArAnamanmadhya-\nvallIvaliCChEda vICIsamudyatsamullAsasandarshitAkArasaundaryaratnAkarE\nvallakIbhRtkarE kiGkarashrIkarE"
+  output: "ତାରକାରାଜିନୀକାଶହାରାଵଲିସ୍ମେର ଚାରୁସ୍ତନାଭୋଗଭାରାନମନ୍ମଧ୍ୟ-\nଵଲ୍ଲୀଵଲିଚ୍ଛେଦ ଵୀଚୀସମୁଦ୍ୟତ୍ସମୁଲ୍ଲାସସନ୍ଦର୍ଶିତାକାରସୌନ୍ଦର୍ୟରତ୍ନାକରେ\nଵଲ୍ଲକୀଭୃତ୍କରେ କିଙ୍କରଶ୍ରୀକରେ"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Odia
+  input: "hEmakuMbhOpamOttuGga vakShOjabhArAvanamrE trilOkAvanamrE\nlasadvRttagaMbhIra nAbhIsarastIrashaivAlashaGkAkarashyAmarOmAvalIbhUShaNE\nmaJjusaMbhAShaNE"
+  output: "ହେମକୁଂଭୋପମୋତ୍ତୁଙ୍ଗ ଵକ୍ଷୋଜଭାରାଵନମ୍ରେ ତ୍ରିଲୋକାଵନମ୍ରେ\nଲସଦ୍ଵୃତ୍ତଗଂଭୀର ନାଭୀସରସ୍ତୀରଶୈଵାଲଶଙ୍କାକରଶ୍ୟାମରୋମାଵଲୀଭୂଷଣେ\nମଞ୍ଜୁସଂଭାଷଣେ"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Odia
+  input: "CArushiJCatkaTIsUtranirbhatsitAnaGgalIladhanushshiJCinIDaMbarE\ndivyaratnAmbarE"
+  output: "ଚାରୁଶିଞ୍ଚତ୍କଟୀସୂତ୍ରନିର୍ଭତ୍ସିତାନଙ୍ଗଲୀଲଧନୁଶ୍ଶିଞ୍ଚିନୀଡଂବରେ\nଦିଵ୍ୟରତ୍ନାମ୍ବରେ"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Odia
+  input: "padmarAgOllasa nmEkhalAmauktikashrONishObhAjitasvarNabhUbhRttalE\nCandrikAshItalE vikasitanavakiMshukAtAmradivyAMshukaCChanna\nCArUrushObhAparAbhUtasindUrashONAyamAnEndramAtaGga\nhasmArggalE vaibhavAnarggalE shyAmalE kOmalasnigddha\nnIlOtpalOtpAditAnaGgatUNIrashaGkAkarOdAra\njaMghAlatE CArulIlAgatE namradikpAlasImantinI\nkuntalasnigddhanIlaprabhApuJCasaJjAtadurvAGkurAshaGka\nsAraMgasaMyOgariMkhannakhEndUjjvalE prOjjvalE\nnirmalE prahva dEvEsha lakShmIsha bhUtEsha tOyEsha vANIsha kInAsha\ndaityEsha yakShEsha vAyvagnikOTIramANikya saMhRShTabAlAtapOddAma--\nlAkShArasAruNyatAruNya lakShmIgRhitAGghripadmmE supadmE umE"
+  output: "ପଦ୍ମରାଗୋଲ୍ଲସ ନ୍ମେଖଲାମୌକ୍ତିକଶ୍ରୋଣିଶୋଭାଜିତସ୍ଵର୍ଣଭୂଭୃତ୍ତଲେ\nଚନ୍ଦ୍ରିକାଶୀତଲେ ଵିକସିତନଵକିଂଶୁକାତାମ୍ରଦିଵ୍ୟାଂଶୁକଚ୍ଛନ୍ନ\nଚାରୂରୁଶୋଭାପରାଭୂତସିନ୍ଦୂରଶୋଣାୟମାନେନ୍ଦ୍ରମାତଙ୍ଗ\nହସ୍ମାର୍ଗ୍ଗଲେ ଵୈଭଵାନର୍ଗ୍ଗଲେ ଶ୍ୟାମଲେ କୋମଲସ୍ନିଗ୍ଦ୍ଧ\nନୀଲୋତ୍ପଲୋତ୍ପାଦିତାନଙ୍ଗତୂଣୀରଶଙ୍କାକରୋଦାର\nଜଂଘାଲତେ ଚାରୁଲୀଲାଗତେ ନମ୍ରଦିକ୍ପାଲସୀମନ୍ତିନୀ\nକୁନ୍ତଲସ୍ନିଗ୍ଦ୍ଧନୀଲପ୍ରଭାପୁଞ୍ଚସଞ୍ଜାତଦୁର୍ଵାଙ୍କୁରାଶଙ୍କ\nସାରଂଗସଂୟୋଗରିଂଖନ୍ନଖେନ୍ଦୂଜ୍ଜ୍ଵଲେ ପ୍ରୋଜ୍ଜ୍ଵଲେ\nନିର୍ମଲେ ପ୍ରହ୍ଵ ଦେଵେଶ ଲକ୍ଷ୍ମୀଶ ଭୂତେଶ ତୋୟେଶ ଵାଣୀଶ କୀନାଶ\nଦୈତ୍ୟେଶ ୟକ୍ଷେଶ ଵାୟ୍ଵଗ୍ନିକୋଟୀରମାଣିକ୍ୟ ସଂହୃଷ୍ଟବାଲାତପୋଦ୍ଦାମ--\nଲାକ୍ଷାରସାରୁଣ୍ୟତାରୁଣ୍ୟ ଲକ୍ଷ୍ମୀଗୃହିତାଙ୍ଘ୍ରିପଦ୍ମ୍ମେ ସୁପଦ୍ମେ ଉମେ"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Odia
+  input: "suruCiranavaratnapIThasthitE susthitE\nratnapadmAsanE ratnasimhAsanE shaGkhapadmadvayOpAshritE vishrutE\ntatra vighnEshadurgAvaTukShEtrapAlairyutE mattamAtaGga\nkanyAsamUhAnvitE bhairavairaShTabhirvEShTitE\nmaJCulAmEnakAdyaGganAmAnitE dEvi vAmAdibhiH shaktibhissEvitE\ndhAtri lakShmyAdishaktyaShTakaiH saMyutE mAtRkAmaNDalairmaNDitE\nyakShagandharvasiddhAGganA maNDalairarCitE"
+  output: "ସୁରୁଚିରନଵରତ୍ନପୀଠସ୍ଥିତେ ସୁସ୍ଥିତେ\nରତ୍ନପଦ୍ମାସନେ ରତ୍ନସିମ୍ହାସନେ ଶଙ୍ଖପଦ୍ମଦ୍ଵୟୋପାଶ୍ରିତେ ଵିଶ୍ରୁତେ\nତତ୍ର ଵିଘ୍ନେଶଦୁର୍ଗାଵଟୁକ୍ଷେତ୍ରପାଲୈର୍ୟୁତେ ମତ୍ତମାତଙ୍ଗ\nକନ୍ୟାସମୂହାନ୍ଵିତେ ଭୈରଵୈରଷ୍ଟଭିର୍ଵେଷ୍ଟିତେ\nମଞ୍ଚୁଲାମେନକାଦ୍ୟଙ୍ଗନାମାନିତେ ଦେଵି ଵାମାଦିଭିଃ ଶକ୍ତିଭିସ୍ସେଵିତେ\nଧାତ୍ରି ଲକ୍ଷ୍ମ୍ୟାଦିଶକ୍ତ୍ୟଷ୍ଟକୈଃ ସଂୟୁତେ ମାତୃକାମଣ୍ଡଲୈର୍ମଣ୍ଡିତେ\nୟକ୍ଷଗନ୍ଧର୍ଵସିଦ୍ଧାଙ୍ଗନା ମଣ୍ଡଲୈରର୍ଚିତେ"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Odia
+  input: "bhairavI saMvRtE paJCabANAtmikE paJCabANEna ratyA Ca\nsaMbhAvitE prItibhAjA vasantEna CAnanditE bhaktibhAjaM paraM shrEyasE\nkalpasE yOginAM mAnasE dyOtasE ChandasAmOjasA bhrAjasE gItavidyA\nvinOdAti tRShNEna kRShNEna sampUjyasE bhaktimaCCEtasA vEdhasA\nstUyasE vishvahRdyEna vAdyEna vidyAdharairgIyasE"
+  output: "ଭୈରଵୀ ସଂଵୃତେ ପଞ୍ଚବାଣାତ୍ମିକେ ପଞ୍ଚବାଣେନ ରତ୍ୟା ଚ\nସଂଭାଵିତେ ପ୍ରୀତିଭାଜା ଵସନ୍ତେନ ଚାନନ୍ଦିତେ ଭକ୍ତିଭାଜଂ ପରଂ ଶ୍ରେୟସେ\nକଲ୍ପସେ ୟୋଗିନାଂ ମାନସେ ଦ୍ୟୋତସେ ଛନ୍ଦସାମୋଜସା ଭ୍ରାଜସେ ଗୀତଵିଦ୍ୟା\nଵିନୋଦାତି ତୃଷ୍ଣେନ କୃଷ୍ଣେନ ସମ୍ପୂଜ୍ୟସେ ଭକ୍ତିମଚ୍ଚେତସା ଵେଧସା\nସ୍ତୂୟସେ ଵିଶ୍ଵହୃଦ୍ୟେନ ଵାଦ୍ୟେନ ଵିଦ୍ୟାଧରୈର୍ଗୀୟସେ"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Odia
+  input: "shravaNaharadakShiNakvANayA vINayA kinnarairgIyasE\nyakShagandharvasiddhAGganA maNDalairarCyasE"
+  output: "ଶ୍ରଵଣହରଦକ୍ଷିଣକ୍ଵାଣୟା ଵୀଣୟା କିନ୍ନରୈର୍ଗୀୟସେ\nୟକ୍ଷଗନ୍ଧର୍ଵସିଦ୍ଧାଙ୍ଗନା ମଣ୍ଡଲୈରର୍ଚ୍ୟସେ"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Odia
+  input: "sarvasaubhAgyavAJChAvatIbhir vadhUbhissurANAM samArAdhyasE\nsarvavidyAvishEShatmakaM CATugAthA samuCCAraNAkaNThamUlOllasad-\nvarNarAjitrayaM kOmalashyAmalOdArapakShadvayaM tuNDashObhAtidUrIbhavat\nkiMshukaM taM shukaM lAlayantI parikrIDasE"
+  output: "ସର୍ଵସୌଭାଗ୍ୟଵାଞ୍ଛାଵତୀଭିର୍ ଵଧୂଭିସ୍ସୁରାଣାଂ ସମାରାଧ୍ୟସେ\nସର୍ଵଵିଦ୍ୟାଵିଶେଷତ୍ମକଂ ଚାଟୁଗାଥା ସମୁଚ୍ଚାରଣାକଣ୍ଠମୂଲୋଲ୍ଲସଦ୍-\nଵର୍ଣରାଜିତ୍ରୟଂ କୋମଲଶ୍ୟାମଲୋଦାରପକ୍ଷଦ୍ଵୟଂ ତୁଣ୍ଡଶୋଭାତିଦୂରୀଭଵତ୍\nକିଂଶୁକଂ ତଂ ଶୁକଂ ଲାଲୟନ୍ତୀ ପରିକ୍ରୀଡସେ"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Odia
+  input: "pANipadmadvayEnAkShamAlAmapi sphATikIM jJAnasArAtmakaM\npustakaJCAGkushaM pAshamAbibhratI tEna saJCintyasE tasya\nvaktrAntarAd gadyapadyAtmikA bhAratI nissarEt yEna vAdhvaMsanAdA\nkRtirbhAvyasE tasya vashyA bhavantistiyaH pUruShAH yEna vA\nshAtakaMbadyutirbhAvyasE sO''pi lakShmIsahasraiH parikrIDatE"
+  output: "ପାଣିପଦ୍ମଦ୍ଵୟେନାକ୍ଷମାଲାମପି ସ୍ଫାଟିକୀଂ ଜ୍ଞାନସାରାତ୍ମକଂ\nପୁସ୍ତକଞ୍ଚାଙ୍କୁଶଂ ପାଶମାବିଭ୍ରତୀ ତେନ ସଞ୍ଚିନ୍ତ୍ୟସେ ତସ୍ୟ\nଵକ୍ତ୍ରାନ୍ତରାଦ୍ ଗଦ୍ୟପଦ୍ୟାତ୍ମିକା ଭାରତୀ ନିସ୍ସରେତ୍ ୟେନ ଵାଧ୍ଵଂସନାଦା\nକୃତିର୍ଭାଵ୍ୟସେ ତସ୍ୟ ଵଶ୍ୟା ଭଵନ୍ତିସ୍ତିୟଃ ପୂରୁଷାଃ ୟେନ ଵା\nଶାତକଂବଦ୍ୟୁତିର୍ଭାଵ୍ୟସେ ସୋଽପି ଲକ୍ଷ୍ମୀସହସ୍ରୈଃ ପରିକ୍ରୀଡତେ"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Odia
+  input: "kinna siddhyEdvapuH shyAmalaM kOmalaM CandraCUDAnvitaM\ntAvakaM dhyAyataH tasya lIlA sarOvAridhIH tasya kElIvanaM\nnandanaM tasya bhadrAsanaM bhUtalaM tasya gIrdEvatA kiGkari\ntasya CAjJAkarI shrI svayaM"
+  output: "କିନ୍ନ ସିଦ୍ଧ୍ୟେଦ୍ଵପୁଃ ଶ୍ୟାମଲଂ କୋମଲଂ ଚନ୍ଦ୍ରଚୂଡାନ୍ଵିତଂ\nତାଵକଂ ଧ୍ୟାୟତଃ ତସ୍ୟ ଲୀଲା ସରୋଵାରିଧୀଃ ତସ୍ୟ କେଲୀଵନଂ\nନନ୍ଦନଂ ତସ୍ୟ ଭଦ୍ରାସନଂ ଭୂତଲଂ ତସ୍ୟ ଗୀର୍ଦେଵତା କିଙ୍କରି\nତସ୍ୟ ଚାଜ୍ଞାକରୀ ଶ୍ରୀ ସ୍ଵୟଂ"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Odia
+  input: "sarvatIrthAtmikE sarva mantrAtmikE\nsarva yantrAtmikE sarva tantrAtmikE\nsarva CakrAtmikE sarva shaktyAtmikE\nsarva pIThAtmikE sarva vEdAtmikE\nsarva vidyAtmikE sarva yOgAtmikE\nsarva varNAtmikE sarvagItAtmikE\nsarva nAdAtmikE sarva shabdAtmikE\nsarva vishvAtmikE sarva vargAtmikE\nsarva sarvAtmikE sarvagE sarva rUpE\njaganmAtRkE pAhi mAM pAhi mAM pAhi mAM\ndEvi tubhyaM namO dEvi tubhyaM namO dEvi tubhyaM namO\ndEvi tubhyaM namaH"
+  output: "ସର୍ଵତୀର୍ଥାତ୍ମିକେ ସର୍ଵ ମନ୍ତ୍ରାତ୍ମିକେ\nସର୍ଵ ୟନ୍ତ୍ରାତ୍ମିକେ ସର୍ଵ ତନ୍ତ୍ରାତ୍ମିକେ\nସର୍ଵ ଚକ୍ରାତ୍ମିକେ ସର୍ଵ ଶକ୍ତ୍ୟାତ୍ମିକେ\nସର୍ଵ ପୀଠାତ୍ମିକେ ସର୍ଵ ଵେଦାତ୍ମିକେ\nସର୍ଵ ଵିଦ୍ୟାତ୍ମିକେ ସର୍ଵ ୟୋଗାତ୍ମିକେ\nସର୍ଵ ଵର୍ଣାତ୍ମିକେ ସର୍ଵଗୀତାତ୍ମିକେ\nସର୍ଵ ନାଦାତ୍ମିକେ ସର୍ଵ ଶବ୍ଦାତ୍ମିକେ\nସର୍ଵ ଵିଶ୍ଵାତ୍ମିକେ ସର୍ଵ ଵର୍ଗାତ୍ମିକେ\nସର୍ଵ ସର୍ଵାତ୍ମିକେ ସର୍ଵଗେ ସର୍ଵ ରୂପେ\nଜଗନ୍ମାତୃକେ ପାହି ମାଂ ପାହି ମାଂ ପାହି ମାଂ\nଦେଵି ତୁଭ୍ୟଂ ନମୋ ଦେଵି ତୁଭ୍ୟଂ ନମୋ ଦେଵି ତୁଭ୍ୟଂ ନମୋ\nଦେଵି ତୁଭ୍ୟଂ ନମଃ"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Odia
+  input: .. iti shyAmalA daNDakaM sampUrNam ..
+  output: ॥ ଇତି ଶ୍ୟାମଲା ଦଣ୍ଡକଂ ସମ୍ପୂର୍ଣମ୍ ॥
+  reversible: true
+- index: 31
+  from: Normal
+  to: Odia
+  input: "shrImatE nigamAntamahAdEshikAya namaH .\nshrImAn vEGkaTanAthAryaH kavitArkikakEsarI .\nvEdAntaCAryavaryO mE sannidhattAm sadAhRdi .."
+  output: "ଶ୍ରୀମତେ ନିଗମାନ୍ତମହାଦେଶିକାୟ ନମଃ ।\nଶ୍ରୀମାନ୍ ଵେଙ୍କଟନାଥାର୍ୟଃ କଵିତାର୍କିକକେସରୀ ।\nଵେଦାନ୍ତଚାର୍ୟଵର୍ୟୋ ମେ ସନ୍ନିଧତ୍ତାମ୍ ସଦାହୃଦି ॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Odia
+  input: "namaH pannaganaddhAya vaikuNThavashavartinE .\nshrutisindhu sudhOtpAdamandarAya garutmatE .. 1.."
+  output: "ନମଃ ପନ୍ନଗନଦ୍ଧାୟ ଵୈକୁଣ୍ଠଵଶଵର୍ତିନେ ।\nଶ୍ରୁତିସିନ୍ଧୁ ସୁଧୋତ୍ପାଦମନ୍ଦରାୟ ଗରୁତ୍ମତେ ॥ ୧॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Odia
+  input: "garuDamakhilavEdanIDAdhirUDham dviShatpIDanOtkaNThitAkuNThavaikuNThapIThIkRta\nskandhamIDE svanIDAgatiprItarudrAsukIrtistanAbhOgagADhOpagUDha\nsphuratkaNTakavrAta vEdhavyathAvEpamAna dvijihvAdhipAkalpaviShphAryamANa\nsphaTAvATikA ratnarOCishChaTA rAjinIrAjitaM kAntikallOlinIrAjitam .. 2.."
+  output: "ଗରୁଡମଖିଲଵେଦନୀଡାଧିରୂଢମ୍ ଦ୍ଵିଷତ୍ପୀଡନୋତ୍କଣ୍ଠିତାକୁଣ୍ଠଵୈକୁଣ୍ଠପୀଠୀକୃତ\nସ୍କନ୍ଧମୀଡେ ସ୍ଵନୀଡାଗତିପ୍ରୀତରୁଦ୍ରାସୁକୀର୍ତିସ୍ତନାଭୋଗଗାଢୋପଗୂଢ\nସ୍ଫୁରତ୍କଣ୍ଟକଵ୍ରାତ ଵେଧଵ୍ୟଥାଵେପମାନ ଦ୍ଵିଜିହ୍ଵାଧିପାକଲ୍ପଵିଷ୍ଫାର୍ୟମାଣ\nସ୍ଫଟାଵାଟିକା ରତ୍ନରୋଚିଶ୍ଛଟା ରାଜିନୀରାଜିତଂ କାନ୍ତିକଲ୍ଲୋଲିନୀରାଜିତମ୍ ॥ ୨॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Odia
+  input: "jayagaruDa suparNa darvIkarAhAra dEvAdhipAhArahArin\ndivaukaspatikShiptadambhOLidhArAkiNAkalpa kalpAntavAtUla kalpOdayAnalpa\nvIrAyitOdyaCCamatkAra daityAri jaitradhvajArOhanirdhAritOtkarSha\nsaGkarShaNAtman garutman marutpaJCa kAdhIsha satyAdimUrtE na kashCit\nsamastE namastE punastE namaH .. 3.."
+  output: "ଜୟଗରୁଡ ସୁପର୍ଣ ଦର୍ଵୀକରାହାର ଦେଵାଧିପାହାରହାରିନ୍\nଦିଵୌକସ୍ପତିକ୍ଷିପ୍ତଦମ୍ଭୋଳିଧାରାକିଣାକଲ୍ପ କଲ୍ପାନ୍ତଵାତୂଲ କଲ୍ପୋଦୟାନଲ୍ପ\nଵୀରାୟିତୋଦ୍ୟଚ୍ଚମତ୍କାର ଦୈତ୍ୟାରି ଜୈତ୍ରଧ୍ଵଜାରୋହନିର୍ଧାରିତୋତ୍କର୍ଷ\nସଙ୍କର୍ଷଣାତ୍ମନ୍ ଗରୁତ୍ମନ୍ ମରୁତ୍ପଞ୍ଚ କାଧୀଶ ସତ୍ୟାଦିମୂର୍ତେ ନ କଶ୍ଚିତ୍\nସମସ୍ତେ ନମସ୍ତେ ପୁନସ୍ତେ ନମଃ ॥ ୩॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Odia
+  input: "nama idamajahatsaparyAya paryAyaniryAtapakShAnilAsphAlanOdvElapAthOdhi\nvICICapETAhatAgAdhapAtALabhAGkArasaMkruddhanAgEndrapIDAsRNIbhAva-\nbhAsvannakhashrENayE CaNDatuNDAya nRtyadbhujaGgabhruvE vajriNE daMShTraya\ntubhyamadhyAtmavidyA vidhEyA vidhEyA bhavaddAsyamApAdayEthA dayEthAshCa mE .. 4.."
+  output: "ନମ ଇଦମଜହତ୍ସପର୍ୟାୟ ପର୍ୟାୟନିର୍ୟାତପକ୍ଷାନିଲାସ୍ଫାଲନୋଦ୍ଵେଲପାଥୋଧି\nଵୀଚୀଚପେଟାହତାଗାଧପାତାଳଭାଙ୍କାରସଂକ୍ରୁଦ୍ଧନାଗେନ୍ଦ୍ରପୀଡାସୃଣୀଭାଵ-\nଭାସ୍ଵନ୍ନଖଶ୍ରେଣୟେ ଚଣ୍ଡତୁଣ୍ଡାୟ ନୃତ୍ୟଦ୍ଭୁଜଙ୍ଗଭ୍ରୁଵେ ଵଜ୍ରିଣେ ଦଂଷ୍ଟ୍ରୟ\nତୁଭ୍ୟମଧ୍ୟାତ୍ମଵିଦ୍ୟା ଵିଧେୟା ଵିଧେୟା ଭଵଦ୍ଦାସ୍ୟମାପାଦୟେଥା ଦୟେଥାଶ୍ଚ ମେ ॥ ୪॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Odia
+  input: "manuranugata pakShivaktra sphurattArakastAvakashCitrabhAnupriyAshEkharastrAyatAM\nnastrivargApavargaprasUtiH paravyOmadhAman\nvaladvEShidarpajvaladvAlakhilyapratijJAvatIrNa sthirAM tattvabuddhiM parAM\nbhaktidhEnuM jaganmUlakandE mukundE mhAnandadOgdhrIM dadhIthA\nmudhAkAmahInAmahInAmahInAntaka .. 5.."
+  output: "ମନୁରନୁଗତ ପକ୍ଷିଵକ୍ତ୍ର ସ୍ଫୁରତ୍ତାରକସ୍ତାଵକଶ୍ଚିତ୍ରଭାନୁପ୍ରିୟାଶେଖରସ୍ତ୍ରାୟତାଂ\nନସ୍ତ୍ରିଵର୍ଗାପଵର୍ଗପ୍ରସୂତିଃ ପରଵ୍ୟୋମଧାମନ୍\nଵଲଦ୍ଵେଷିଦର୍ପଜ୍ଵଲଦ୍ଵାଲଖିଲ୍ୟପ୍ରତିଜ୍ଞାଵତୀର୍ଣ ସ୍ଥିରାଂ ତତ୍ତ୍ଵବୁଦ୍ଧିଂ ପରାଂ\nଭକ୍ତିଧେନୁଂ ଜଗନ୍ମୂଲକନ୍ଦେ ମୁକୁନ୍ଦେ ମ୍ହାନନ୍ଦଦୋଗ୍ଧ୍ରୀଂ ଦଧୀଥା\nମୁଧାକାମହୀନାମହୀନାମହୀନାନ୍ତକ ॥ ୫॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Odia
+  input: "ShaTtriMshadgaNaCaraNO naraparipATInavInagumbhagaNaH .\nviShNurathadaNDakO''yaM vighaTayatu vipakShavAhinIvyUham .. 6.."
+  output: "ଷଟ୍ତ୍ରିଂଶଦ୍ଗଣଚରଣୋ ନରପରିପାଟୀନଵୀନଗୁମ୍ଭଗଣଃ ।\nଵିଷ୍ଣୁରଥଦଣ୍ଡକୋଽୟଂ ଵିଘଟୟତୁ ଵିପକ୍ଷଵାହିନୀଵ୍ୟୂହମ୍ ॥ ୬॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Odia
+  input: "viCitrasiddhidaH sO''yaM vEGkaTEshavipashCitA .\ngaruDadhvajatOShAya gItO garuDadaNDakaH .. 7.."
+  output: "ଵିଚିତ୍ରସିଦ୍ଧିଦଃ ସୋଽୟଂ ଵେଙ୍କଟେଶଵିପଶ୍ଚିତା ।\nଗରୁଡଧ୍ଵଜତୋଷାୟ ଗୀତୋ ଗରୁଡଦଣ୍ଡକଃ ॥ ୭॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Odia
+  input: "kavitArkikasiMhAya kalyaNaguNashAlinE .\nshrImatE vEGkaTEshAya vEdAntaguravE namaH .."
+  output: "କଵିତାର୍କିକସିଂହାୟ କଲ୍ୟଣଗୁଣଶାଲିନେ ।\nଶ୍ରୀମତେ ଵେଙ୍କଟେଶାୟ ଵେଦାନ୍ତଗୁରଵେ ନମଃ ॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Odia
+  input: shrImatE nigamAntamahAdEshikAya namaH ..
+  output: ଶ୍ରୀମତେ ନିଗମାନ୍ତମହାଦେଶିକାୟ ନମଃ ॥
+  reversible: true

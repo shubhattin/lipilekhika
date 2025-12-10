@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Tamil
+  input: .. sauMdarya laharI ..
+  output: ॥ ஸௌம்தர்ய லஹரீ ॥
+  reversible: false
+- index: 1
+  from: Normal
+  to: Tamil
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ ப்ரதமஃ பாகஃ - ஆநம்தலஹரீ (௧-௪௧) ॥
+  reversible: false
+- index: 2
+  from: Normal
+  to: Tamil
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "பூமௌ ஸ்கலிதபாதாநாம் பூமிரேவாவலம்பநம் ।\nத்வயி ஜாதாபராதாநாம் த்வமேவ ஶரணம் ஶிவே ॥"
+  reversible: false
+- index: 3
+  from: Normal
+  to: Tamil
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "ஶிவஃ ஶக்த்யா யுக்தோ யதி பவதி ஶக்தஃ ப்ரபவிதும்\nந சேதேவம் தேவோ ந கலு குஶலஃ ஸ்பந்திதுமபி ।\nஅதஸ்த்வாமாராத்யாம் ஹரிஹரவிரிஞ்சாதிபிரபி\nப்ரணந்தும் ஸ்தோதும் வா கதமகிருதபுண்யஃ ப்ரபவதி ॥௧॥"
+  reversible: false
+- index: 4
+  from: Normal
+  to: Tamil
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "தநீயாம்ஸம் பாம்ஸும் தவ சரணபங்கேருஹபவம்\nவிரிஞ்சிஸ்ஸஞ்சிந்வந் விரசயதி லோகாநவிகலம் ।\nவஹத்யேநம் ஶௌரிஃ கதமபி ஸஹஸ்ரேண ஶிரஸாம்\nஹரஸ்ஸம்க்ஷுத்யைநம் பஜதி பஸிதோத்தூளநவிதிம் ॥௨॥"
+  reversible: false
+- index: 5
+  from: Normal
+  to: Tamil
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "அவித்யாநாமந்தஸ்திமிரமிஹிரத்வீபநகரீ\nஜடாநாம் சைதந்யஸ்தபகமகரந்தஸ்ருதிஜரீ ।\nதரித்ராணாம் சிந்தாமணிகுணநிகா ஜந்மஜலதௌ\nநிமக்நாநாம் தம்ஷ்ட்ரா முரரிபுவராஹஸ்ய பவதி ॥௩॥"
+  reversible: false
+- index: 6
+  from: Normal
+  to: Tamil
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "த்வதந்யஃ பாணிப்யாம் அபயவரதோ தைவதகணஃ\nத்வமேகா நைவாஸி ப்ரகடிதவராபீத்யபிநயா ।\nபயாத் த்ராதும் தாதும் பலமபி ச வாஞ்சாஸமதிகம்\nஶரண்யே லோகாநாம் தவ ஹி சரணாவேவ நிபுணௌ ॥௪॥"
+  reversible: false
+- index: 7
+  from: Normal
+  to: Tamil
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "ஹரிஸ்த்வாமாராத்ய ப்ரணதஜநஸௌபாக்யஜநநீம்\nபுரா நாரீ பூத்வா புரரிபுமபி க்ஷோபமநயத் ।\nஸ்மரோऽபி த்வாம் நத்வா ரதிநயநலேஹ்யேந வபுஷா\nமுநீநாமப்யந்தஃ ப்ரபவதி ஹி மோஹாய மஹதாம் ॥௫॥"
+  reversible: false
+- index: 8
+  from: Normal
+  to: Tamil
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "ஸரஸ்வத்யா லக்ஷ்ம்யா விதிஹரிஸபத்நோ விஹரதே\nரதேஃ பாதிவ்ரத்யம் ஶிதிலயதி ரம்யேண வபுஷா ।\nசிரம் ஜீவந்நேவ க்ஷபிதபஶுபாஶவ்யதிகரஃ\nபராநந்தாபிக்யம் ரஸயதி ரஸம் த்வத்பஜநவாந் ॥௯௯॥\nப்ரதீபஜ்வாலாபிஃ திவஸகரநீராஜநவிதிஃ\nஸுதாஸூதேஶ்சந்த்ரோபலஜலலவைரர்க்யரசநா ।\nஸ்வகீயைரம்போபிஃ ஸலிலநிதிஸௌஹித்யகரணம்\nத்வதீயாபிர்வாக்பிஃ தவ ஜநநி வாசாம் ஸ்துதிரியம் ॥௧௦௦॥"
+  reversible: false
+- index: 9
+  from: Normal
+  to: Tamil
+  input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
+  output: "॥ இதி ஶ்ரீமத்பரமஹம்ஸபரிவ்ராஜகாசார்யஸ்ய\nஶ்ரீகோவிந்தபகவத்பூஜ்யபாதஶிஷ்யஸ்ய\nஶ்ரீமச்சங்கரபகவதஃ கிருதௌ ஸௌந்தர்யலஹரீ ஸமாப்தா ॥"
+  reversible: false
+- index: 10
+  from: Normal
+  to: Tamil
+  input: "AUM namO nArAyaNAya\natha shrImannArAyaNIyam\nprathamam dashakam\nbhagavataH svarUpaM mAhAtmyaM Ca"
+  output: "ௐ நமோ நாராயணாய\nஅத ஶ்ரீமந்நாராயணீயம்\nப்ரதமம் தஶகம்\nபகவதஃ ஸ்வரூபம் மாஹாத்ம்யம் ச"
+  reversible: false
+- index: 11
+  from: Normal
+  to: Tamil
+  input: "sAndrAnandAvabOdhAtmakamanupamitaM kAladEshAvadhibhyAM\nnirmuktaM nityamuktaM nigamashatasahasrENa nirbhAsyamAnam .\naspaShTaM dRShTamAtrE punarurupuruShArthAtmakaM brahma tatvaM\ntattAvadbhAti sAkShAd gurupavanapurE hanta bhAgyaM janAnAm ..1.."
+  output: "ஸாந்த்ராநந்தாவபோதாத்மகமநுபமிதம் காலதேஶாவதிப்யாம்\nநிர்முக்தம் நித்யமுக்தம் நிகமஶதஸஹஸ்ரேண நிர்பாஸ்யமாநம் ।\nஅஸ்பஷ்டம் திருஷ்டமாத்ரே புநருருபுருஷார்தாத்மகம் ப்ரஹ்ம தத்வம்\nதத்தாவத்பாதி ஸாக்ஷாத் குருபவநபுரே ஹந்த பாக்யம் ஜநாநாம் ॥௧॥"
+  reversible: false
+- index: 12
+  from: Normal
+  to: Tamil
+  input: "namrANAM sannidhattE satatamapi purastairanabhyarthitAna -\npyarthAn kAmAnajasraM vitarati paramAnandasAndrAM gatiM Ca .\nitthaM nishshEShalabhyO niravadhikaphala: pArijAtO harE tvaM\nkShudraM taM shakravATIdrumamabhilaShati vyarthamarthivrajO''yam ..8.."
+  output: "நம்ராணாம் ஸந்நிதத்தே ஸததமபி புரஸ்தைரநப்யர்திதாந -\nப்யர்தாந் காமாநஜஸ்ரம் விதரதி பரமாநந்தஸாந்த்ராம் கதிம் ச ।\nஇத்தம் நிஶ்ஶேஷலப்யோ நிரவதிகபல: பாரிஜாதோ ஹரே த்வம்\nக்ஷுத்ரம் தம் ஶக்ரவாடீத்ருமமபிலஷதி வ்யர்தமர்திவ்ரஜோऽயம் ॥௮॥"
+  reversible: false
+- index: 13
+  from: Normal
+  to: Tamil
+  input: "aishvaryaM shaGkarAdIshvaraviniyamanaM vishvatEjOharANAM\ntEjassaMhAri vIryaM vimalamapi yashO nispRhaishCOpagItam .\naGgAsaGgA sadA shrIrakhilavidasi na kvApi tE saGgavArtA\ntadvAtAgAravAsin murahara bhagavaCChabdamukhyAshrayO''si ..10.."
+  output: "ஐஶ்வர்யம் ஶங்கராதீஶ்வரவிநியமநம் விஶ்வதேஜோஹராணாம்\nதேஜஸ்ஸம்ஹாரி வீர்யம் விமலமபி யஶோ நிஸ்பிருஹைஶ்சோபகீதம் ।\nஅங்காஸங்கா ஸதா ஶ்ரீரகிலவிதஸி ந க்வாபி தே ஸங்கவார்தா\nதத்வாதாகாரவாஸிந் முரஹர பகவச்சப்தமுக்யாஶ்ரயோऽஸி ॥௧௦॥"
+  reversible: false
+- index: 14
+  from: Normal
+  to: Tamil
+  input: "avyaktaM tE svarUpaM duradhigamatamaM tattu shuddhaikasattvaM\nvyaktaM CApyEtadEva sphuTamamRtarasAmbhOdhikallOlatulyam .\nsarvOtkRShTAmabhIShTAM tadiha guNarasEnaiva CittaM harantIM\nmUrtiM tE saMshrayE''haM pavanapurapatE pAhi mAM kRShNa rOgAt ..10.."
+  output: "அவ்யக்தம் தே ஸ்வரூபம் துரதிகமதமம் தத்து ஶுத்தைகஸத்த்வம்\nவ்யக்தம் சாப்யேததேவ ஸ்புடமமிருதரஸாம்போதிகல்லோலதுல்யம் ।\nஸர்வோத்கிருஷ்டாமபீஷ்டாம் ததிஹ குணரஸேநைவ சித்தம் ஹரந்தீம்\nமூர்திம் தே ஸம்ஶ்ரயேऽஹம் பவநபுரபதே பாஹி மாம் கிருஷ்ண ரோகாத் ॥௧௦॥"
+  reversible: false
+- index: 15
+  from: Normal
+  to: Tamil
+  input: "EtAM vibhUtiM yOgaM Ca mama yO vEtti tattvataH .\nsO''vikampEna yOgEna yujyatE nAtra saMshayaH ..10-7.."
+  output: "ஏதாம் விபூதிம் யோகம் ச மம யோ வேத்தி தத்த்வதஃ ।\nஸோऽவிகம்பேந யோகேந யுஜ்யதே நாத்ர ஸம்ஶயஃ ॥௧௦-௭॥"
+  reversible: false
+- index: 16
+  from: Normal
+  to: Tamil
+  input: "ahaM sarvasya prabhavO mattaH sarvaM pravartatE .\niti matvA bhajantE mAM budhA bhAvasamanvitAH ..10-8.."
+  output: "அஹம் ஸர்வஸ்ய ப்ரபவோ மத்தஃ ஸர்வம் ப்ரவர்ததே ।\nஇதி மத்வா பஜந்தே மாம் புதா பாவஸமந்விதாஃ ॥௧௦-௮॥"
+  reversible: false
+- index: 17
+  from: Normal
+  to: Tamil
+  input: "maCCittA madgataprANA bOdhayantaH parasparam .\nkathayantashCa mAM nityaM tuShyanti Ca ramanti Ca ..10-9.."
+  output: "மச்சித்தா மத்கதப்ராணா போதயந்தஃ பரஸ்பரம் ।\nகதயந்தஶ்ச மாம் நித்யம் துஷ்யந்தி ச ரமந்தி ச ॥௧௦-௯॥"
+  reversible: false
+- index: 18
+  from: Normal
+  to: Tamil
+  input: "tEShAM satatayuktAnAM bhajatAM prItipUrvakam .\ndadAmi buddhiyOgaM taM yEna mAmupayAnti tE ..10-10.."
+  output: "தேஷாம் ஸததயுக்தாநாம் பஜதாம் ப்ரீதிபூர்வகம் ।\nததாமி புத்தியோகம் தம் யேந மாமுபயாந்தி தே ॥௧௦-௧௦॥"
+  reversible: false
+- index: 19
+  from: Normal
+  to: Tamil
+  input: "hanta tE kathayiShyAmi divyA hyAtmavibhUtayaH .\nprAdhAnyataH kurushrEShTha nAstyantO vistarasya mE ..10-19.."
+  output: "ஹந்த தே கதயிஷ்யாமி திவ்யா ஹ்யாத்மவிபூதயஃ ।\nப்ராதாந்யதஃ குருஶ்ரேஷ்ட நாஸ்த்யந்தோ விஸ்தரஸ்ய மே ॥௧௦-௧௯॥"
+  reversible: false
+- index: 20
+  from: Normal
+  to: Tamil
+  input: "ahamAtmA guDAkEsha sarvabhUtAshayasthitaH .\nahamAdishCa madhyaM Ca bhUtAnAmanta Eva Ca ..10-20.."
+  output: "அஹமாத்மா குடாகேஶ ஸர்வபூதாஶயஸ்திதஃ ।\nஅஹமாதிஶ்ச மத்யம் ச பூதாநாமந்த ஏவ ச ॥௧௦-௨௦॥"
+  reversible: false
+- index: 21
+  from: Normal
+  to: Tamil
+  input: "AdityAnAmahaM viShNurjyOtiShAM raviraMshumAn .\nmarICirmarutAmasmi nakShatrANAmahaM shashI ..10-21.."
+  output: "ஆதித்யாநாமஹம் விஷ்ணுர்ஜ்யோதிஷாம் ரவிரம்ஶுமாந் ।\nமரீசிர்மருதாமஸ்மி நக்ஷத்ராணாமஹம் ஶஶீ ॥௧௦-௨௧॥"
+  reversible: false
+- index: 22
+  from: Normal
+  to: Tamil
+  input: "vEdAnAM sAmavEdO''smi dEvAnAmasmi vAsavaH .\nindriyANAM manashCAsmi bhUtAnAmasmi CEtanA ..10-22.."
+  output: "வேதாநாம் ஸாமவேதோऽஸ்மி தேவாநாமஸ்மி வாஸவஃ ।\nஇந்த்ரியாணாம் மநஶ்சாஸ்மி பூதாநாமஸ்மி சேதநா ॥௧௦-௨௨॥"
+  reversible: false
+- index: 23
+  from: Normal
+  to: Tamil
+  input: "rudrANAM shaGkarashCAsmi vittEshO yakSharakShasAm .\nvasUnAM pAvakashCAsmi mEruH shikhariNAmaham ..10-23.."
+  output: "ருத்ராணாம் ஶங்கரஶ்சாஸ்மி வித்தேஶோ யக்ஷரக்ஷஸாம் ।\nவஸூநாம் பாவகஶ்சாஸ்மி மேருஃ ஶிகரிணாமஹம் ॥௧௦-௨௩॥"
+  reversible: false
+- index: 24
+  from: Normal
+  to: Tamil
+  input: "purOdhasAM Ca mukhyaM mAM viddhi pArtha bRhaspatim .\nsEnAnInAmahaM skandaH sarasAmasmi sAgaraH ..10-24.."
+  output: "புரோதஸாம் ச முக்யம் மாம் வித்தி பார்த பிருஹஸ்பதிம் ।\nஸேநாநீநாமஹம் ஸ்கந்தஃ ஸரஸாமஸ்மி ஸாகரஃ ॥௧௦-௨௪॥"
+  reversible: false
+- index: 25
+  from: Normal
+  to: Tamil
+  input: "maharShINAM bhRgurahaM girAmasmyEkamakSharam .\nyajJAnAM japayajJO''smi sthAvarANAM himAlayaH ..10-25.."
+  output: "மஹர்ஷீணாம் பிருகுரஹம் கிராமஸ்ம்யேகமக்ஷரம் ।\nயஜ்ஞாநாம் ஜபயஜ்ஞோऽஸ்மி ஸ்தாவராணாம் ஹிமாலயஃ ॥௧௦-௨௫॥"
+  reversible: false
+- index: 26
+  from: Normal
+  to: Tamil
+  input: "ashvatthaH sarvavRkShANAM dEvarShINAM Ca nAradaH .\ngandharvANAM CitrarathaH siddhAnAM kapilO muniH ..10-26.."
+  output: "அஶ்வத்தஃ ஸர்வவிருக்ஷாணாம் தேவர்ஷீணாம் ச நாரதஃ ।\nகந்தர்வாணாம் சித்ரரதஃ ஸித்தாநாம் கபிலோ முநிஃ ॥௧௦-௨௬॥"
+  reversible: false
+- index: 27
+  from: Normal
+  to: Tamil
+  input: "uCCaiHshravasamashvAnAM viddhi mAmamRtOdbhavam .\nairAvataM gajEndrANAM narANAM Ca narAdhipam ..10-27.."
+  output: "உச்சைஃஶ்ரவஸமஶ்வாநாம் வித்தி மாமமிருதோத்பவம் ।\nஐராவதம் கஜேந்த்ராணாம் நராணாம் ச நராதிபம் ॥௧௦-௨௭॥"
+  reversible: false
+- index: 28
+  from: Normal
+  to: Tamil
+  input: "AyudhAnAmahaM vajraM dhEnUnAmasmi kAmadhuk .\nprajanashCAsmi kandarpaH sarpANAmasmi vAsukiH ..10-28.."
+  output: "ஆயுதாநாமஹம் வஜ்ரம் தேநூநாமஸ்மி காமதுக் ।\nப்ரஜநஶ்சாஸ்மி கந்தர்பஃ ஸர்பாணாமஸ்மி வாஸுகிஃ ॥௧௦-௨௮॥"
+  reversible: false
+- index: 29
+  from: Normal
+  to: Tamil
+  input: "anantashCAsmi nAgAnAM varuNO yAdasAmaham .\npitRRNAmaryamA CAsmi yamaH saMyamatAmaham ..10-29.."
+  output: "அநந்தஶ்சாஸ்மி நாகாநாம் வருணோ யாதஸாமஹம் ।\nபிதிரூணாமர்யமா சாஸ்மி யமஃ ஸம்யமதாமஹம் ॥௧௦-௨௯॥"
+  reversible: false
+- index: 30
+  from: Normal
+  to: Tamil
+  input: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM vainatEyashCa pakShiNAm ..10-30.."
+  output: "ப்ரஹ்லாதஶ்சாஸ்மி தைத்யாநாம் காலஃ கலயதாமஹம் ।\nமிருகாணாம் ச மிருகேந்த்ரோऽஹம் வைநதேயஶ்ச பக்ஷிணாம் ॥௧௦-௩௦॥"
+  reversible: false
+- index: 31
+  from: Normal
+  to: Tamil
+  input: "pavanaH pavatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnavI ..10-31.."
+  output: "பவநஃ பவதாமஸ்மி ராமஃ ஶஸ்த்ரபிருதாமஹம் ।\nஜஷாணாம் மகரஶ்சாஸ்மி ஸ்ரோதஸாமஸ்மி ஜாஹ்நவீ ॥௧௦-௩௧॥"
+  reversible: false
+- index: 32
+  from: Normal
+  to: Tamil
+  input: "sargANAmAdirantashCa madhyaM CaivAhamarjuna .\nadhyAtmavidyA vidyAnAM vAdaH pravadatAmaham ..10-32.."
+  output: "ஸர்காணாமாதிரந்தஶ்ச மத்யம் சைவாஹமர்ஜுந ।\nஅத்யாத்மவித்யா வித்யாநாம் வாதஃ ப்ரவததாமஹம் ॥௧௦-௩௨॥"
+  reversible: false
+- index: 33
+  from: Normal
+  to: Tamil
+  input: "akSharANAmakArO''smi dvandvaH sAmAsikasya Ca .\nahamEvAkShayaH kAlO dhAtAhaM vishvatOmukhaH ..10-33.."
+  output: "அக்ஷராணாமகாரோऽஸ்மி த்வந்த்வஃ ஸாமாஸிகஸ்ய ச ।\nஅஹமேவாக்ஷயஃ காலோ தாதாஹம் விஶ்வதோமுகஃ ॥௧௦-௩௩॥"
+  reversible: false
+- index: 34
+  from: Normal
+  to: Tamil
+  input: "mRtyuH sarvaharashCAhamudbhavashCa bhaviShyatAm .\nkIrtiH shrIrvAkCa nArINAM smRtirmEdhA dhRtiH kShamA ..10-34.."
+  output: "மிருத்யுஃ ஸர்வஹரஶ்சாஹமுத்பவஶ்ச பவிஷ்யதாம் ।\nகீர்திஃ ஶ்ரீர்வாக்ச நாரீணாம் ஸ்மிருதிர்மேதா திருதிஃ க்ஷமா ॥௧௦-௩௪॥"
+  reversible: false
+- index: 35
+  from: Normal
+  to: Tamil
+  input: "bRhatsAma tathA sAmnAM gAyatrI ChandasAmaham .\nmAsAnAM mArgashIrShO''hamRtUnAM kusumAkaraH ..10-35.."
+  output: "பிருஹத்ஸாம ததா ஸாம்நாம் காயத்ரீ சந்தஸாமஹம் ।\nமாஸாநாம் மார்கஶீர்ஷோऽஹமிருதூநாம் குஸுமாகரஃ ॥௧௦-௩௫॥"
+  reversible: false
+- index: 36
+  from: Normal
+  to: Tamil
+  input: "dyUtaM ChalayatAmasmi tEjastEjasvinAmaham .\njayO''smi vyavasAyO''smi sattvaM sattvavatAmaham ..10-36.."
+  output: "த்யூதம் சலயதாமஸ்மி தேஜஸ்தேஜஸ்விநாமஹம் ।\nஜயோऽஸ்மி வ்யவஸாயோऽஸ்மி ஸத்த்வம் ஸத்த்வவதாமஹம் ॥௧௦-௩௬॥"
+  reversible: false
+- index: 37
+  from: Normal
+  to: Tamil
+  input: "vRShNInAM vAsudEvO''smi pANDavAnAM dhanaJjayaH .\nmunInAmapyahaM vyAsaH kavInAmushanA kaviH ..10-37.."
+  output: "விருஷ்ணீநாம் வாஸுதேவோऽஸ்மி பாண்டவாநாம் தநஞ்ஜயஃ ।\nமுநீநாமப்யஹம் வ்யாஸஃ கவீநாமுஶநா கவிஃ ॥௧௦-௩௭॥"
+  reversible: false
+- index: 38
+  from: Normal
+  to: Tamil
+  input: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaivAsmi guhyAnAM jJAnaM jJAnavatAmaham ..10-38.."
+  output: "தண்டோ தமயதாமஸ்மி நீதிரஸ்மி ஜிகீஷதாம் ।\nமௌநம் சைவாஸ்மி குஹ்யாநாம் ஜ்ஞாநம் ஜ்ஞாநவதாமஹம் ॥௧௦-௩௮॥"
+  reversible: false
+- index: 39
+  from: Normal
+  to: Tamil
+  input: "yaCCApi sarvabhUtAnAM bIjaM tadahamarjuna .\nna tadasti vinA yatsyAnmayA bhUtaM CarACaram ..10-39.."
+  output: "யச்சாபி ஸர்வபூதாநாம் பீஜம் ததஹமர்ஜுந ।\nந ததஸ்தி விநா யத்ஸ்யாந்மயா பூதம் சராசரம் ॥௧௦-௩௯॥"
+  reversible: false
+- index: 40
+  from: Normal
+  to: Tamil
+  input: "nAntO''sti mama divyAnAM vibhUtInAM parantapa .\nESha tUddEshataH prOktO vibhUtErvistarO mayA ..10-40.."
+  output: "நாந்தோऽஸ்தி மம திவ்யாநாம் விபூதீநாம் பரந்தப ।\nஏஷ தூத்தேஶதஃ ப்ரோக்தோ விபூதேர்விஸ்தரோ மயா ॥௧௦-௪௦॥"
+  reversible: false

@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Gurumukhi
+  input: atha puruShasUktam ..
+  output: ਅਥ ਪੁਰੁਸ਼ਸੂਕ੍ਤਮ੍ ॥
+  reversible: false
+- index: 1
+  from: Normal
+  to: Gurumukhi
+  input: "AUM taCChaM↓ yOrAvR↑NImahE . gA↓tuM ya↓jJAya↑ . gA↓tuM ya↓jJapa↑tayE . daivI↑↑ sva↓stira↑stu naH .\nsva↓stirmAnu↑ShEbhyaH . U↓rdhvaM ji↑gAtu bhESha↓jam . shannO↑ astu dvi↓padE↑↑ . shaM Catu↑ShpadE .\nAUM shAntiH↓ shAntiH↓ shAntiH↑ ."
+  output: "ੴ ਤਚ੍ਛਂ॒ ਯੋਰਾਵ੍ਰਿ॑ਣੀਮਹੇ । ਗਾ॒ਤੁਂ ਯ॒ਜ੍ਞਾਯ॑ । ਗਾ॒ਤੁਂ ਯ॒ਜ੍ਞਪ॑ਤਯੇ । ਦੈਵੀ᳚ ਸ੍ਵ॒ਸ੍ਤਿਰ॑ਸ੍ਤੁ ਨਃ ।\nਸ੍ਵ॒ਸ੍ਤਿਰ੍ਮਾਨੁ॑ਸ਼ੇਭ੍ਯਃ । ਊ॒ਰ੍ਧ੍ਵਂ ਜਿ॑ਗਾਤੁ ਭੇਸ਼॒ਜਮ੍ । ਸ਼ਨ੍ਨੋ॑ ਅਸ੍ਤੁ ਦ੍ਵਿ॒ਪਦੇ᳚ । ਸ਼ਂ ਚਤੁ॑ਸ਼੍ਪਦੇ ।\nੴ ਸ਼ਾਨ੍ਤਿਃ॒ ਸ਼ਾਨ੍ਤਿਃ॒ ਸ਼ਾਨ੍ਤਿਃ॑ ।"
+  reversible: false
+- index: 2
+  from: Normal
+  to: Gurumukhi
+  input: hariH AUM .
+  output: ਹਰਿਃ ੴ ।
+  reversible: true
+- index: 3
+  from: Normal
+  to: Gurumukhi
+  input: "AUM sa↓hasra↑shIrShA↓ puru↑ShaH . sa↓ha↓srA↓kShaH sa↓hasra↑pAt .\nsa bhUmiM↑ vi↓shvatO↑ vR↓tvA . atya↑tiShThaddashAGgu↓lam . 1"
+  output: "ੴ ਸ॒ਹਸ੍ਰ॑ਸ਼ੀਰ੍ਸ਼ਾ॒ ਪੁਰੁ॑ਸ਼ਃ । ਸ॒ਹ॒ਸ੍ਰਾ॒ਕ੍ਸ਼ਃ ਸ॒ਹਸ੍ਰ॑ਪਾਤ੍ ।\nਸ ਭੂਮਿਂ॑ ਵਿ॒ਸ਼੍ਵਤੋ॑ ਵ੍ਰਿ॒ਤ੍ਵਾ । ਅਤ੍ਯ॑ਤਿਸ਼੍ਠਦ੍ਦਸ਼ਾਙ੍ਗੁ॒ਲਮ੍ । ੧"
+  reversible: false
+- index: 4
+  from: Normal
+  to: Gurumukhi
+  input: "puru↑Sha E↓vEdaꣳ sarvam↑↑ . yadbhU↓taM yaCCa↓ bhavyam↑↑.\nu↓tAmR↑ta↓tvasyEshA↑naH . yadannE↑nAti↓rOha↑ti . 2"
+  output: "ਪੁਰੁ॑ਸ਼ ਏ॒ਵੇਦꣳ ਸਰ੍ਵਮ੍᳚ । ਯਦ੍ਭੂ॒ਤਂ ਯਚ੍ਚ॒ ਭਵ੍ਯਮ੍᳚।\nਉ॒ਤਾਮ੍ਰਿ॑ਤ॒ਤ੍ਵਸ੍ਯੇਸ਼ਾ॑ਨਃ । ਯਦਨ੍ਨੇ॑ਨਾਤਿ॒ਰੋਹ॑ਤਿ । ੨"
+  reversible: false
+- index: 5
+  from: Normal
+  to: Gurumukhi
+  input: "E↓tAvA↑nasya mahi↓mA . atO↓ jyAyAꣳ↑shCa↓ pUru↑ShaH .\npAdO↑↑''sya↓ vishvA↑ bhU↓tAni↑ . tri↓pAda↑syA↓mRtaM↑ di↓vi . 3"
+  output: "ਏ॒ਤਾਵਾ॑ਨਸ੍ਯ ਮਹਿ॒ਮਾ । ਅਤੋ॒ ਜ੍ਯਾਯਾꣳ॑ਸ਼੍ਚ॒ ਪੂਰੁ॑ਸ਼ਃ ।\nਪਾਦੋ᳚ऽਸ੍ਯ॒ ਵਿਸ਼੍ਵਾ॑ ਭੂ॒ਤਾਨਿ॑ । ਤ੍ਰਿ॒ਪਾਦ॑ਸ੍ਯਾ॒ਮ੍ਰਿਤਂ॑ ਦਿ॒ਵਿ । ੩"
+  reversible: false
+- index: 6
+  from: Normal
+  to: Gurumukhi
+  input: "tri↓pAdU↓rdhva udai↓tpuru↑ShaH . pAdO↑↑''syE↓hA''''bha↑vA↓tpunaH↑ .\ntatO↓ vishva↓Gvya↑krAmat . sA↓sha↓nA↓na↓sha↓nE a↓bhi . 4"
+  output: "ਤ੍ਰਿ॒ਪਾਦੂ॒ਰ੍ਧ੍ਵ ਉਦੈ॒ਤ੍ਪੁਰੁ॑ਸ਼ਃ । ਪਾਦੋ᳚ऽਸ੍ਯੇ॒ਹਾऽऽਭ॑ਵਾ॒ਤ੍ਪੁਨਃ॑ ।\nਤਤੋ॒ ਵਿਸ਼੍ਵ॒ਙ੍ਵ੍ਯ॑ਕ੍ਰਾਮਤ੍ । ਸਾ॒ਸ਼॒ਨਾ॒ਨ॒ਸ਼॒ਨੇ ਅ॒ਭਿ । ੪"
+  reversible: false
+- index: 7
+  from: Normal
+  to: Gurumukhi
+  input: "tasmA↑↑dvi↓rADa↑jAyata . vi↓rAjO↓ adhi↓ pUru↑ShaH .\nsa jA↓tO atya↑riCyata . pa↓shCAdbhUmi↓mathO↑ pu↓raH . 5"
+  output: "ਤਸ੍ਮਾ᳚ਦ੍ਵਿ॒ਰਾਡ॑ਜਾਯਤ । ਵਿ॒ਰਾਜੋ॒ ਅਧਿ॒ ਪੂਰੁ॑ਸ਼ਃ ।\nਸ ਜਾ॒ਤੋ ਅਤ੍ਯ॑ਰਿਚ੍ਯਤ । ਪ॒ਸ਼੍ਚਾਦ੍ਭੂਮਿ॒ਮਥੋ॑ ਪੁ॒ਰਃ । ੫"
+  reversible: false
+- index: 8
+  from: Normal
+  to: Gurumukhi
+  input: "yatpuru↑ShENa ha↓viShA↑↑ . dE↓vA ya↓jJamata↑nvata .\nva↓sa↓ntO a↑syAsI↓dAjyam↑↑ . grI↓Shma i↓dhmaH sha↓raddha↓viH . 6"
+  output: "ਯਤ੍ਪੁਰੁ॑ਸ਼ੇਣ ਹ॒ਵਿਸ਼ਾ᳚ । ਦੇ॒ਵਾ ਯ॒ਜ੍ਞਮਤ॑ਨ੍ਵਤ ।\nਵ॒ਸ॒ਨ੍ਤੋ ਅ॑ਸ੍ਯਾਸੀ॒ਦਾਜ੍ਯਮ੍᳚ । ਗ੍ਰੀ॒ਸ਼੍ਮ ਇ॒ਧ੍ਮਃ ਸ਼॒ਰਦ੍ਧ॒ਵਿਃ । ੬"
+  reversible: false
+- index: 9
+  from: Normal
+  to: Gurumukhi
+  input: "sa↓ptAsyA↑sanpari↓dhayaH↑ . triH sa↓pta sa↓midhaH↑ kR↓tAH .\ndE↓vA yadya↓jJaM ta↑nvA↓nAH . aba↑dhna↓npu↑ruShaM pa↓shum . 7"
+  output: "ਸ॒ਪ੍ਤਾਸ੍ਯਾ॑ਸਨ੍ਪਰਿ॒ਧਯਃ॑ । ਤ੍ਰਿਃ ਸ॒ਪ੍ਤ ਸ॒ਮਿਧਃ॑ ਕ੍ਰਿ॒ਤਾਃ ।\nਦੇ॒ਵਾ ਯਦ੍ਯ॒ਜ੍ਞਂ ਤ॑ਨ੍ਵਾ॒ਨਾਃ । ਅਬ॑ਧ੍ਨ॒ਨ੍ਪੁ॑ਰੁਸ਼ਂ ਪ॒ਸ਼ੁਮ੍ । ੭"
+  reversible: false
+- index: 10
+  from: Normal
+  to: Gurumukhi
+  input: "taM ya↓jJaM ba↓rhiShi↓ praukShan↑ . puru↑ShaM jA↓tama↑gra↓taH .\ntEna↑ dE↓vA aya↑janta . sA↓dhyA RSha↑yashCa↓ yE . 8"
+  output: "ਤਂ ਯ॒ਜ੍ਞਂ ਬ॒ਰ੍ਹਿਸ਼ਿ॒ ਪ੍ਰੌਕ੍ਸ਼ਨ੍॑ । ਪੁਰੁ॑ਸ਼ਂ ਜਾ॒ਤਮ॑ਗ੍ਰ॒ਤਃ ।\nਤੇਨ॑ ਦੇ॒ਵਾ ਅਯ॑ਜਨ੍ਤ । ਸਾ॒ਧ੍ਯਾ ਰਿਸ਼॑ਯਸ਼੍ਚ॒ ਯੇ । ੮"
+  reversible: false
+- index: 11
+  from: Normal
+  to: Gurumukhi
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . saMbhR↑taM pRShadA↓jyam .\npa↓shUꣳstAꣳshCa↑krE vAya↓vyAn↑ . A↓ra↓NyAngrA↓myAshCa↓ yE . 9"
+  output: "ਤਸ੍ਮਾ᳚ਦ੍ਯ॒ਜ੍ਞਾਤ੍ਸ॑ਰ੍ਵ॒ਹੁਤਃ॑ । ਸਂਭ੍ਰਿ॑ਤਂ ਪ੍ਰਿਸ਼ਦਾ॒ਜ੍ਯਮ੍ ।\nਪ॒ਸ਼ੂꣳਸ੍ਤਾꣳਸ਼੍ਚ॑ਕ੍ਰੇ ਵਾਯ॒ਵ੍ਯਾਨ੍॑ । ਆ॒ਰ॒ਣ੍ਯਾਨ੍ਗ੍ਰਾ॒ਮ੍ਯਾਸ਼੍ਚ॒ ਯੇ । ੯"
+  reversible: false
+- index: 12
+  from: Normal
+  to: Gurumukhi
+  input: "tasmA↑↑dya↓jJAtsa↑rva↓hutaH↑ . RCaH↓ sAmA↑ni jajJirE .\nChandAꣳ↑si jajJirE↓ tasmA↑↑t . yaju↓stasmA↑dajAyata . 10"
+  output: "ਤਸ੍ਮਾ᳚ਦ੍ਯ॒ਜ੍ਞਾਤ੍ਸ॑ਰ੍ਵ॒ਹੁਤਃ॑ । ਰਿਚਃ॒ ਸਾਮਾ॑ਨਿ ਜਜ੍ਞਿਰੇ ।\nਛਨ੍ਦਾꣳ॑ਸਿ ਜਜ੍ਞਿਰੇ॒ ਤਸ੍ਮਾ᳚ਤ੍ । ਯਜੁ॒ਸ੍ਤਸ੍ਮਾ॑ਦਜਾਯਤ । ੧੦"
+  reversible: false
+- index: 13
+  from: Normal
+  to: Gurumukhi
+  input: "tasmA↓dashvA↑ ajAyanta . yE kE CO↑bha↓yAda↑taH .\ngAvO↑ ha jajJirE↓ tasmA↑↑t . tasmA↑↑jjA↓tA a↑jA↓vayaH↑ . 11"
+  output: "ਤਸ੍ਮਾ॒ਦਸ਼੍ਵਾ॑ ਅਜਾਯਨ੍ਤ । ਯੇ ਕੇ ਚੋ॑ਭ॒ਯਾਦ॑ਤਃ ।\nਗਾਵੋ॑ ਹ ਜਜ੍ਞਿਰੇ॒ ਤਸ੍ਮਾ᳚ਤ੍ । ਤਸ੍ਮਾ᳚ਜ੍ਜਾ॒ਤਾ ਅ॑ਜਾ॒ਵਯਃ॑ । ੧੧"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Gurumukhi
+  input: "yatpuru↑ShaM↓ vya↑dadhuH . ka↓ti↓dhA vya↑kalpayan .\nmukhaM↓ kima↑sya↓ kau bA↓hU . kAvU↓rU pAdA↑vuCyEtE . 12"
+  output: "ਯਤ੍ਪੁਰੁ॑ਸ਼ਂ॒ ਵ੍ਯ॑ਦਧੁਃ । ਕ॒ਤਿ॒ਧਾ ਵ੍ਯ॑ਕਲ੍ਪਯਨ੍ ।\nਮੁਖਂ॒ ਕਿਮ॑ਸ੍ਯ॒ ਕੌ ਬਾ॒ਹੂ । ਕਾਵੂ॒ਰੂ ਪਾਦਾ॑ਵੁਚ੍ਯੇਤੇ । ੧੨"
+  reversible: false
+- index: 15
+  from: Normal
+  to: Gurumukhi
+  input: "brA↓hma↓NO↑↑''sya↓ mukha↑mAsIt . bA↓hU rA↑ja↓nyaH↑ kR↓taH .\nU↓rU tada↑sya↓ yadvaishyaH↑ . pa↓dbhyAꣳ shU↓drO a↑jAyata . 13"
+  output: "ਬ੍ਰਾ॒ਹ੍ਮ॒ਣੋ᳚ऽਸ੍ਯ॒ ਮੁਖ॑ਮਾਸੀਤ੍ । ਬਾ॒ਹੂ ਰਾ॑ਜ॒ਨ੍ਯਃ॑ ਕ੍ਰਿ॒ਤਃ ।\nਊ॒ਰੂ ਤਦ॑ਸ੍ਯ॒ ਯਦ੍ਵੈਸ਼੍ਯਃ॑ । ਪ॒ਦ੍ਭ੍ਯਾꣳ ਸ਼ੂ॒ਦ੍ਰੋ ਅ॑ਜਾਯਤ । ੧੩"
+  reversible: false
+- index: 16
+  from: Normal
+  to: Gurumukhi
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  output: "ਚ॒ਨ੍ਦ੍ਰਮਾ॒ ਮਨ॑ਸੋ ਜਾ॒ਤਃ । ਚਕ੍ਸ਼ੋਃ॒ ਸੂਰ੍ਯੋ॑ ਅਜਾਯਤ ।\nਮੁਖਾ॒ਦਿਨ੍ਦ੍ਰ॑ਸ਼੍ਚਾ॒ਗ੍ਨਿਸ਼੍ਚ॑ ।  ਪ੍ਰਾ॒ਣਾਦ੍ਵਾ॒ਯੁਰ॑ਜਾਯਤ । ੧੪"
+  reversible: false
+- index: 17
+  from: Normal
+  to: Gurumukhi
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . 15"
+  output: "ਨਾਭ੍ਯਾ॑ ਆਸੀਦ॒ਨ੍ਤਰਿ॑ਕ੍ਸ਼ਮ੍ । ਸ਼ੀ॒ਰ੍ਸ਼੍ਣੋ ਦ੍ਯੌਃ ਸਮ॑ਵਰ੍ਤਤ ।\nਪ॒ਦ੍ਭ੍ਯਾਂ ਭੂਮਿ॒ਰ੍ਦਿਸ਼ਃ॒ ਸ਼੍ਰੋਤ੍ਰਾ᳚ਤ੍ । ਤਥਾ॑ ਲੋ॒ਕਾꣳ ਅ॑ਕਲ੍ਪਯਨ੍ । ੧੫"
+  reversible: false
+- index: 18
+  from: Normal
+  to: Gurumukhi
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . 16"
+  output: "ਵੇਦਾ॒ਹਮੇ॒ਤਂ ਪੁਰੁ॑ਸ਼ਂ ਮ॒ਹਾਨ੍ਤਮ੍᳚ । ਆ॒ਦਿ॒ਤ੍ਯਵ॑ਰ੍ਣਂ॒ ਤਮ॑ਸਸ੍ਤੁ॒ ਪਾ॒ਰੇ ।\nਸਰ੍ਵਾ॑ਣਿ ਰੂ॒ਪਾਣਿ॑ ਵਿ॒ਚਿਤ੍ਯ॒ ਧੀਰਃ॑ । ਨਾਮਾ॑ਨਿ ਕ੍ਰਿ॒ਤ੍ਵਾऽਭਿ॒ਵਦ॒ਨ੍ ਯਦਾਸ੍ਤੇ᳚ । ੧੬"
+  reversible: false
+- index: 19
+  from: Normal
+  to: Gurumukhi
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . 17"
+  output: "ਧਾ॒ਤਾ ਪੁ॒ਰਸ੍ਤਾ॒ਦ੍ਯਮੁ॑ਦਾਜ॒ਹਾਰ॑ । ਸ਼॒ਕ੍ਰਃ ਪ੍ਰਵਿ॒ਦ੍ਵਾਨ੍ਪ੍ਰ॒ਦਿਸ਼॒ਸ਼੍ਚਤ॑ਸ੍ਰਃ ।\nਤਮੇ॒ਵਂ ਵਿ॒ਦ੍ਵਾਨ॒ਮ੍ਰਿਤ॑ ਇ॒ਹ ਭ॑ਵਤਿ । ਨਾਨ੍ਯਃ ਪਨ੍ਥਾ॒ ਅਯ॑ਨਾਯ ਵਿਦ੍ਯਤੇ । ੧੭"
+  reversible: false
+- index: 20
+  from: Normal
+  to: Gurumukhi
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . 18"
+  output: "ਯ॒ਜ੍ਞੇਨ॑ ਯ॒ਜ੍ਞਮ॑ਯਜਨ੍ਤ ਦੇ॒ਵਾਃ । ਤਾਨਿ॒ ਧਰ੍ਮਾ॑ਣਿ ਪ੍ਰਥ॒ਮਾਨ੍ਯਾ॑ਸਨ੍ ।\nਤੇ ਹ॒ ਨਾਕਂ॑ ਮਹਿ॒ਮਾਨਃ॑ ਸਚਨ੍ਤੇ । ਯਤ੍ਰ॒ ਪੂਰ੍ਵੇ॑ ਸਾ॒ਧ੍ਯਾਃ ਸਨ੍ਤਿ॑ ਦੇ॒ਵਾਃ । ੧੮"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Gurumukhi
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: ॥ ਅਥ ਸ਼ੁਕ੍ਲਯਜੁਰ੍ਵੇਦੀਯ ਪੁਰੁਸ਼ਸੂਕ੍ਤਃ॥
+  reversible: false
+- index: 22
+  from: Normal
+  to: Gurumukhi
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. 1.."
+  output: "ਹਰਿਃ ੴ ਸਹਸ੍ਰਸ਼ੀਰ੍ਸ਼ਾ ਪੁਰੁਸ਼ਃ ਸਹਸ੍ਰਾਕ੍ਸ਼ਃ ਸਹਸ੍ਰਪਾਤ੍ ।\nਸ ਭੂਮਿꣳ ਸਰ੍ਵਤ ਸ੍ਪ੍ਰਿਤ੍ਵਾऽਤ੍ਯਤਿਸ਼੍ਠਦ੍ਦਸ਼ਾਙ੍ਗੁਲਮ੍ ॥ ੧॥"
+  reversible: false
+- index: 23
+  from: Normal
+  to: Gurumukhi
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. 2.."
+  output: "ਪੁਰੁਸ਼ ਏਵੇਦꣳ ਸਰ੍ਵਂ ਯਦ੍ਭੂਤਂ ਯਚ੍ਚ ਭਾਵ੍ਯਮ੍ ।\nਉਤਾਮ੍ਰਿਤਤ੍ਵਸ੍ਯੇਸ਼ਾਨੋ ਯਦਨ੍ਨੇਨਾਤਿਰੋਹਤਿ ॥ ੨॥"
+  reversible: false
+- index: 24
+  from: Normal
+  to: Gurumukhi
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. 3.."
+  output: "ਏਤਾਵਾਨਸ੍ਯ ਮਹਿਮਾਤੋ ਜ੍ਯਾਯਾਁਸ਼੍ਚ ਪੂਰੁਸ਼ਃ ।\nਪਾਦੋऽਸ੍ਯ ਵਿਸ਼੍ਵਾ ਭੂਤਾਨਿ ਤ੍ਰਿਪਾਦਸ੍ਯਾਮ੍ਰਿਤਂ ਦਿਵਿ ॥ ੩॥"
+  reversible: false
+- index: 25
+  from: Normal
+  to: Gurumukhi
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. 4.."
+  output: "ਤ੍ਰਿਪਾਦੂਰ੍ਧ੍ਵ ਉਦੈਤ੍ਪੁਰੁਸ਼ਃ ਪਾਦੋऽਸ੍ਯੇਹਾਭਵਤ੍ ਪੁਨਃ ।\nਤਤੋ ਵਿਸ਼੍ਵਙ੍ ਵ੍ਯਕ੍ਰਾਮਤ੍ਸਾਸ਼ਨਾਨਸ਼ਨੇ ਅਭਿ ॥ ੪॥"
+  reversible: false
+- index: 26
+  from: Normal
+  to: Gurumukhi
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
+  output: "ਤਤੋ ਵਿਰਾਡਜਾਯਤ ਵਿਰਾਜੋ ਅਧਿ ਪੂਰੁਸ਼ਃ ।\nਸ ਜਾਤੋ ਅਤ੍ਯਰਿਚ੍ਯਤ ਪਸ਼੍ਚਾਦ੍ਭੂਮਿਮਥੋ ਪੁਰਃ ॥ ੫॥"
+  reversible: false
+- index: 27
+  from: Normal
+  to: Gurumukhi
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. 6.."
+  output: "ਤਸ੍ਮਾਦ੍ਯਜ੍ਞਾਤ੍ ਸਰ੍ਵਹੁਤਃ ਸਮ੍ਭ੍ਰਿਤਂ ਪ੍ਰਿਸ਼ਦਾਜ੍ਯਮ੍ ।\nਪਸ਼ੂਁਸ੍ਤਾਁਸ਼੍ਚਕ੍ਰੇ ਵਾਯਵ੍ਯਾਨਾਰਣ੍ਯਾ ਗ੍ਰਾਮ੍ਯਾਸ਼੍ਚ ਯੇ ॥ ੬॥"
+  reversible: false
+- index: 28
+  from: Normal
+  to: Gurumukhi
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
+  output: "ਤਸ੍ਮਾਦ੍ਯਜ੍ਞਾਤ੍ ਸਰ੍ਵਹੁਤਃ ਰਿਚਃ ਸਾਮਾਨਿ ਜਜ੍ਞਿਰੇ ।\nਛਨ੍ਦਾꣳਸਿ ਜਜ੍ਞਿਰੇ ਤਸ੍ਮਾਦ੍ਯਜੁਸ੍ਤਸ੍ਮਾਦਜਾਯਤ ॥ ੭॥"
+  reversible: false
+- index: 29
+  from: Normal
+  to: Gurumukhi
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
+  output: "ਤਸ੍ਮਾਦਸ਼੍ਵਾ ਅਜਾਯਨ੍ਤ ਯੇ ਕੇ ਚੋਭਯਾਦਤਃ ।\nਗਾਵੋ ਹ ਜਜ੍ਞਿਰੇ ਤਸ੍ਮਾਤ੍ਤਸ੍ਮਾਜ੍ਜਾਤਾ ਅਜਾਵਯਃ ॥ ੮॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Gurumukhi
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. 9.."
+  output: "ਤਂ ਯਜ੍ਞਂ ਬਰ੍ਹਿਸ਼ਿ ਪ੍ਰੌਕ੍ਸ਼ਨ੍ ਪੁਰੁਸ਼ਂ ਜਾਤਮਗ੍ਰਤਃ ।\nਤੇਨ ਦੇਵਾ ਅਯਜਨ੍ਤ ਸਾਧ੍ਯਾ ਰਿਸ਼ਯਸ਼੍ਚ ਯੇ ॥ ੯॥"
+  reversible: false
+- index: 31
+  from: Normal
+  to: Gurumukhi
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
+  output: "ਯਤ੍ਪੁਰੁਸ਼ਂ ਵ੍ਯਦਧੁਃ ਕਤਿਧਾ ਵ੍ਯਕਲ੍ਪਯਨ੍ ।\nਮੁਖਂ ਕਿਮਸ੍ਯਾਸੀਤ੍ ਕਿਂ ਬਾਹੂ ਕਿਮੂਰੂ ਪਾਦਾ ਉਚ੍ਯੇਤੇ ॥ ੧੦॥"
+  reversible: false
+- index: 32
+  from: Normal
+  to: Gurumukhi
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
+  output: "ਬ੍ਰਾਹ੍ਮਣੋऽਸ੍ਯ ਮੁਖਮਾਸੀਦ੍ਬਾਹੂ ਰਾਜਨ੍ਯਃ ਕ੍ਰਿਤਃ ।\nਊਰੂ ਤਦਸ੍ਯ ਯਦ੍ਵੈਸ਼੍ਯਃ ਪਦ੍ਭ੍ਯਾꣳ ਸ਼ੂਦ੍ਰੋ ਅਜਾਯਤ ॥ ੧੧॥"
+  reversible: false
+- index: 33
+  from: Normal
+  to: Gurumukhi
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. 12.."
+  output: "ਚਨ੍ਦ੍ਰਮਾ ਮਨਸੋ ਜਾਤਸ਼੍ਚਕ੍ਸ਼ੋਃ ਸੂਰ੍ਯੋ ਅਜਾਯਤ ।\nਸ਼੍ਰੋਤ੍ਰਾਦ੍ਵਾਯੁਸ਼੍ਚ ਪ੍ਰਾਣਸ਼੍ਚ ਮੁਖਾਦਗ੍ਨਿਰਜਾਯਤ ॥ ੧੨॥"
+  reversible: false
+- index: 34
+  from: Normal
+  to: Gurumukhi
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
+  output: "ਨਾਭ੍ਯਾ ਆਸੀਦਨ੍ਤਰਿਕ੍ਸ਼ꣳ ਸ਼ੀਰ੍ਸ਼੍ਣੋ ਦ੍ਯੌਃ ਸਮਵਰ੍ਤਤ ।\nਪਦ੍ਭ੍ਯਾਂ ਭੂਮਿਰ੍ਦਿਸ਼ਃ ਸ਼੍ਰੋਤ੍ਰਾਤ੍ਤਥਾ ਲੋਕਾਁऽਕਲ੍ਪਯਨ੍ ॥ ੧੩॥"
+  reversible: false
+- index: 35
+  from: Normal
+  to: Gurumukhi
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. 14.."
+  output: "ਯਤ੍ਪੁਰੁਸ਼ੇਣ ਹਵਿਸ਼ਾ ਦੇਵਾ ਯਜ੍ਞਮਤਨ੍ਵਤ ।\nਵਸਨ੍ਤੋऽਸ੍ਯਾਸੀਦਾਜ੍ਯਂ ਗ੍ਰੀਸ਼੍ਮ ਇਧ੍ਮਃ ਸ਼ਰਦ੍ਧਵਿਃ ॥ ੧੪॥"
+  reversible: false
+- index: 36
+  from: Normal
+  to: Gurumukhi
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. 15.."
+  output: "ਸਪ੍ਤਾਸ੍ਯਾਸਨ੍ ਪਰਿਧਯਸ੍ਤ੍ਰਿਃ ਸਪ੍ਤ ਸਮਿਧਃ ਕ੍ਰਿਤਾਃ ।\nਦੇਵਾ ਯਦ੍ਯਜ੍ਞਂ ਤਨ੍ਵਾਨਾ ਅਬਧ੍ਨਨ੍ ਪੁਰੁਸ਼ਂ ਪਸ਼ੁਮ੍ ॥ ੧੫॥"
+  reversible: false
+- index: 37
+  from: Normal
+  to: Gurumukhi
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. 16.."
+  output: "ਯਜ੍ਞੇਨ ਯਜ੍ਞਮਯਜਨ੍ਤ ਦੇਵਾਸ੍ਤਾਨਿ ਧਰ੍ਮਾਣਿ ਪ੍ਰਥਮਾਨ੍ਯਾਸਨ੍ ।\nਤੇ ਹ ਨਾਕਂ ਮਹਿਮਾਨਃ ਸਚਨ੍ਤ ਯਤ੍ਰ ਪੂਰ੍ਵੇ ਸਾਧ੍ਯਾਃ ਸਨ੍ਤਿ ਦੇਵਾਃ ॥ ੧੬॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Gurumukhi
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: ॥ ਇਤਿ ਸ਼ੁਕ੍ਲਯਜੁਰ੍ਵੇਦੀਯਪੁਰੁਸ਼ਸੂਕ੍ਤਂ ਸਮ੍ਪੂਰ੍ਣਮ੍॥
+  reversible: false
+- index: 39
+  from: Normal
+  to: Gurumukhi
+  input: .. atha durgAsUktam ..
+  output: ॥ ਅਥ ਦੁਰ੍ਗਾਸੂਕ੍ਤਮ੍ ॥
+  reversible: true
+- index: 40
+  from: Normal
+  to: Gurumukhi
+  input: "AUM jA↓tavE↑dasE sunavAma↓ sOma↑ marAtIya↓tO nida↑hAti↓ vEdaH↑ .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↑ nA↓vEva↓ sindhuM↑ duri↓tA''tya↓gniH .. 1.."
+  output: "ੴ ਜਾ॒ਤਵੇ॑ਦਸੇ ਸੁਨਵਾਮ॒ ਸੋਮ॑ ਮਰਾਤੀਯ॒ਤੋ ਨਿਦ॑ਹਾਤਿ॒ ਵੇਦਃ॑ ।\nਸ ਨਃ॑ ਪਰ੍ਸ਼॒ਦਤਿ॑ ਦੁ॒ਰ੍ਗਾਣਿ॒ ਵਿਸ਼੍ਵਾ॑ ਨਾ॒ਵੇਵ॒ ਸਿਨ੍ਧੁਂ॑ ਦੁਰਿ॒ਤਾऽਤ੍ਯ॒ਗ੍ਨਿਃ ॥ ੧॥"
+  reversible: false

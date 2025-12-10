@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Odia
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. 3.."
+  output: "ଏତାଵାନସ୍ୟ ମହିମାତୋ ଜ୍ୟାୟାଁଶ୍ଚ ପୂରୁଷଃ ।\nପାଦୋଽସ୍ୟ ଵିଶ୍ଵା ଭୂତାନି ତ୍ରିପାଦସ୍ୟାମୃତଂ ଦିଵି ॥ ୩॥"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Odia
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. 4.."
+  output: "ତ୍ରିପାଦୂର୍ଧ୍ଵ ଉଦୈତ୍ପୁରୁଷଃ ପାଦୋଽସ୍ୟେହାଭଵତ୍ ପୁନଃ ।\nତତୋ ଵିଷ୍ଵଙ୍ ଵ୍ୟକ୍ରାମତ୍ସାଶନାନଶନେ ଅଭି ॥ ୪॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Odia
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
+  output: "ତତୋ ଵିରାଡଜାୟତ ଵିରାଜୋ ଅଧି ପୂରୁଷଃ ।\nସ ଜାତୋ ଅତ୍ୟରିଚ୍ୟତ ପଶ୍ଚାଦ୍ଭୂମିମଥୋ ପୁରଃ ॥ ୫॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Odia
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. 6.."
+  output: "ତସ୍ମାଦ୍ୟଜ୍ଞାତ୍ ସର୍ଵହୁତଃ ସମ୍ଭୃତଂ ପୃଷଦାଜ୍ୟମ୍ ।\nପଶୂଁସ୍ତାଁଶ୍ଚକ୍ରେ ଵାୟଵ୍ୟାନାରଣ୍ୟା ଗ୍ରାମ୍ୟାଶ୍ଚ ୟେ ॥ ୬॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Odia
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
+  output: "ତସ୍ମାଦ୍ୟଜ୍ଞାତ୍ ସର୍ଵହୁତଃ ଋଚଃ ସାମାନି ଜଜ୍ଞିରେ ।\nଛନ୍ଦାꣳସି ଜଜ୍ଞିରେ ତସ୍ମାଦ୍ୟଜୁସ୍ତସ୍ମାଦଜାୟତ ॥ ୭॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Odia
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
+  output: "ତସ୍ମାଦଶ୍ଵା ଅଜାୟନ୍ତ ୟେ କେ ଚୋଭୟାଦତଃ ।\nଗାଵୋ ହ ଜଜ୍ଞିରେ ତସ୍ମାତ୍ତସ୍ମାଜ୍ଜାତା ଅଜାଵୟଃ ॥ ୮॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Odia
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. 9.."
+  output: "ତଂ ୟଜ୍ଞଂ ବର୍ହିଷି ପ୍ରୌକ୍ଷନ୍ ପୁରୁଷଂ ଜାତମଗ୍ରତଃ ।\nତେନ ଦେଵା ଅୟଜନ୍ତ ସାଧ୍ୟା ଋଷୟଶ୍ଚ ୟେ ॥ ୯॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Odia
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
+  output: "ୟତ୍ପୁରୁଷଂ ଵ୍ୟଦଧୁଃ କତିଧା ଵ୍ୟକଲ୍ପୟନ୍ ।\nମୁଖଂ କିମସ୍ୟାସୀତ୍ କିଂ ବାହୂ କିମୂରୂ ପାଦା ଉଚ୍ୟେତେ ॥ ୧୦॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Odia
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
+  output: "ବ୍ରାହ୍ମଣୋଽସ୍ୟ ମୁଖମାସୀଦ୍ବାହୂ ରାଜନ୍ୟଃ କୃତଃ ।\nଊରୂ ତଦସ୍ୟ ୟଦ୍ଵୈଶ୍ୟଃ ପଦ୍ଭ୍ୟାꣳ ଶୂଦ୍ରୋ ଅଜାୟତ ॥ ୧୧॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Odia
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. 12.."
+  output: "ଚନ୍ଦ୍ରମା ମନସୋ ଜାତଶ୍ଚକ୍ଷୋଃ ସୂର୍ୟୋ ଅଜାୟତ ।\nଶ୍ରୋତ୍ରାଦ୍ଵାୟୁଶ୍ଚ ପ୍ରାଣଶ୍ଚ ମୁଖାଦଗ୍ନିରଜାୟତ ॥ ୧୨॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Odia
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
+  output: "ନାଭ୍ୟା ଆସୀଦନ୍ତରିକ୍ଷꣳ ଶୀର୍ଷ୍ଣୋ ଦ୍ୟୌଃ ସମଵର୍ତତ ।\nପଦ୍ଭ୍ୟାଂ ଭୂମିର୍ଦିଶଃ ଶ୍ରୋତ୍ରାତ୍ତଥା ଲୋକାଁଽକଲ୍ପୟନ୍ ॥ ୧୩॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Odia
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. 14.."
+  output: "ୟତ୍ପୁରୁଷେଣ ହଵିଷା ଦେଵା ୟଜ୍ଞମତନ୍ଵତ ।\nଵସନ୍ତୋଽସ୍ୟାସୀଦାଜ୍ୟଂ ଗ୍ରୀଷ୍ମ ଇଧ୍ମଃ ଶରଦ୍ଧଵିଃ ॥ ୧୪॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Odia
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. 15.."
+  output: "ସପ୍ତାସ୍ୟାସନ୍ ପରିଧୟସ୍ତ୍ରିଃ ସପ୍ତ ସମିଧଃ କୃତାଃ ।\nଦେଵା ୟଦ୍ୟଜ୍ଞଂ ତନ୍ଵାନା ଅବଧ୍ନନ୍ ପୁରୁଷଂ ପଶୁମ୍ ॥ ୧୫॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Odia
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. 16.."
+  output: "ୟଜ୍ଞେନ ୟଜ୍ଞମୟଜନ୍ତ ଦେଵାସ୍ତାନି ଧର୍ମାଣି ପ୍ରଥମାନ୍ୟାସନ୍ ।\nତେ ହ ନାକଂ ମହିମାନଃ ସଚନ୍ତ ୟତ୍ର ପୂର୍ଵେ ସାଧ୍ୟାଃ ସନ୍ତି ଦେଵାଃ ॥ ୧୬॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Odia
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: ॥ ଇତି ଶୁକ୍ଲୟଜୁର୍ଵେଦୀୟପୁରୁଷସୂକ୍ତଂ ସମ୍ପୂର୍ଣମ୍॥
+  reversible: true
+- index: 15
+  from: Normal
+  to: Odia
+  input: .. atha durgAsUktam ..
+  output: ॥ ଅଥ ଦୁର୍ଗାସୂକ୍ତମ୍ ॥
+  reversible: true
+- index: 16
+  from: Normal
+  to: Odia
+  input: "AUM jA↓tavE↑dasE sunavAma↓ sOma↑ marAtIya↓tO nida↑hAti↓ vEdaH↑ .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↑ nA↓vEva↓ sindhuM↑ duri↓tA''tya↓gniH .. 1.."
+  output: "ଓଁ ଜା॒ତଵେ॑ଦସେ ସୁନଵାମ॒ ସୋମ॑ ମରାତୀୟ॒ତୋ ନିଦ॑ହାତି॒ ଵେଦଃ॑ ।\nସ ନଃ॑ ପର୍ଷ॒ଦତି॑ ଦୁ॒ର୍ଗାଣି॒ ଵିଶ୍ଵା॑ ନା॒ଵେଵ॒ ସିନ୍ଧୁଂ॑ ଦୁରି॒ତାଽତ୍ୟ॒ଗ୍ନିଃ ॥ ୧॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Odia
+  input: "tAma↓gniva↑rNAM↓ tapa↑sA jvala↓ntIM vai↑rOCa↓nIM ka↑rmapha↓lEShu↓ juShTA↑↑m .\ndu↓rgAM dE↓vIꣳ shara↑Nama↓haM prapa↑dyE su↓tara↑si tarasE↓ namaH↑ .. 2.."
+  output: "ତାମ॒ଗ୍ନିଵ॑ର୍ଣାଂ॒ ତପ॑ସା ଜ୍ଵଲ॒ନ୍ତୀଂ ଵୈ॑ରୋଚ॒ନୀଂ କ॑ର୍ମଫ॒ଲେଷୁ॒ ଜୁଷ୍ଟା᳚ମ୍ ।\nଦୁ॒ର୍ଗାଂ ଦେ॒ଵୀꣳ ଶର॑ଣମ॒ହଂ ପ୍ରପ॑ଦ୍ୟେ ସୁ॒ତର॑ସି ତରସେ॒ ନମଃ॑ ॥ ୨॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Odia
+  input: "agnE↓ tvaM pA↑rayA↓ navyO↑ a↓smAnthsva↓stibhi↓rati↑ du↓rgANi↓ vishvA↑↑ .\npUshCa↑ pR↓thvI ba↑hu↓lA na↑ u↓rvI bhavA↑ tO↓kAya↓ tana↑yAya↓ shaMyOH .. 3.."
+  output: "ଅଗ୍ନେ॒ ତ୍ଵଂ ପା॑ରୟା॒ ନଵ୍ୟୋ॑ ଅ॒ସ୍ମାନ୍ଥ୍ସ୍ଵ॒ସ୍ତିଭି॒ରତି॑ ଦୁ॒ର୍ଗାଣି॒ ଵିଶ୍ଵା᳚ ।\nପୂଶ୍ଚ॑ ପୃ॒ଥ୍ଵୀ ବ॑ହୁ॒ଲା ନ॑ ଉ॒ର୍ଵୀ ଭଵା॑ ତୋ॒କାୟ॒ ତନ॑ୟାୟ॒ ଶଂୟୋଃ ॥ ୩॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Odia
+  input: "vishvA↑ni nO du↓rgahA↑ jAtavEdaH↓ sindhu↓nna nA↓vA du↑ri↓tA''ti↑parShi .\nagnE↑ atri↓vanmana↑sA gRNA↓nO↑↑''smAkaM↑ bOdhyavi↓tA ta↓nUnA↑↑m .. 4.."
+  output: "ଵିଶ୍ଵା॑ନି ନୋ ଦୁ॒ର୍ଗହା॑ ଜାତଵେଦଃ॒ ସିନ୍ଧୁ॒ନ୍ନ ନା॒ଵା ଦୁ॑ରି॒ତାଽତି॑ପର୍ଷି ।\nଅଗ୍ନେ॑ ଅତ୍ରି॒ଵନ୍ମନ॑ସା ଗୃଣା॒ନୋ᳚ଽସ୍ମାକଂ॑ ବୋଧ୍ୟଵି॒ତା ତ॒ନୂନା᳚ମ୍ ॥ ୪॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Odia
+  input: "pR↓ta↓nA↓  jita↓ꣳ↓ saha↑mAnamu↓grama↓gniꣳ  hu↑vEma para↓mAthsa↓dhasthA↑↑t .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↓ kShAma↑ddE↓vO ati↑ duri↓tAtya↓gniH .. 5.."
+  output: "ପୃ॒ତ॒ନା॒  ଜିତ॒ꣳ॒ ସହ॑ମାନମୁ॒ଗ୍ରମ॒ଗ୍ନିꣳ  ହୁ॑ଵେମ ପର॒ମାଥ୍ସ॒ଧସ୍ଥା᳚ତ୍ ।\nସ ନଃ॑ ପର୍ଷ॒ଦତି॑ ଦୁ॒ର୍ଗାଣି॒ ଵିଶ୍ଵା॒ କ୍ଷାମ॑ଦ୍ଦେ॒ଵୋ ଅତି॑ ଦୁରି॒ତାତ୍ୟ॒ଗ୍ନିଃ ॥ ୫॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Odia
+  input: "pra↓tnOShi↑ ka↓mIDyO↑ adhva↓rEShu↑ sa↓nACCa↓ hOtA↓ navya↑shCa↓ sathsi↑ .\nsvAJCA↑↑gnE ta↓nuvaM↑ pi↓praya↑svA↓smabhyaM↑ Ca↓ saubha↑ga↓mAya↑jasva .. 6.."
+  output: "ପ୍ର॒ତ୍ନୋଷି॑ କ॒ମୀଡ୍ୟୋ॑ ଅଧ୍ଵ॒ରେଷୁ॑ ସ॒ନାଚ୍ଚ॒ ହୋତା॒ ନଵ୍ୟ॑ଶ୍ଚ॒ ସଥ୍ସି॑ ।\nସ୍ଵାଞ୍ଚା᳚ଗ୍ନେ ତ॒ନୁଵଂ॑ ପି॒ପ୍ରୟ॑ସ୍ଵା॒ସ୍ମଭ୍ୟଂ॑ ଚ॒ ସୌଭ॑ଗ॒ମାୟ॑ଜସ୍ଵ ॥ ୬॥"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Odia
+  input: "gObhi↓rjuShTa↑ma↓yujO↓ niShi↑kta↓ntavE↑↑ndra viShNO↓ranusaMCa↑rEma .\nnAka↑sya pR↓ShThama↓bhi saM↓vasA↑nO↓ vaiShNa↑vIM lO↓ka i↓ha mA↑dayantAm .. 7.."
+  output: "ଗୋଭି॒ର୍ଜୁଷ୍ଟ॑ମ॒ୟୁଜୋ॒ ନିଷି॑କ୍ତ॒ନ୍ତଵେ᳚ନ୍ଦ୍ର ଵିଷ୍ଣୋ॒ରନୁସଂଚ॑ରେମ ।\nନାକ॑ସ୍ୟ ପୃ॒ଷ୍ଠମ॒ଭି ସଂ॒ଵସା॑ନୋ॒ ଵୈଷ୍ଣ॑ଵୀଂ ଲୋ॒କ ଇ॒ହ ମା॑ଦୟନ୍ତାମ୍ ॥ ୭॥"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Odia
+  input: AUM kA↓tyA↓ya↓nAya↑ vi↓dmahE↑ kanyAku↓mAri↑ dhImahi . tannO↑ durgiH praCO↓dayA↑↑t ..
+  output: ଓଁ କା॒ତ୍ୟା॒ୟ॒ନାୟ॑ ଵି॒ଦ୍ମହେ॑ କନ୍ୟାକୁ॒ମାରି॑ ଧୀମହି । ତନ୍ନୋ॑ ଦୁର୍ଗିଃ ପ୍ରଚୋ॒ଦୟା᳚ତ୍ ॥
+  reversible: true
+- index: 24
+  from: Normal
+  to: Odia
+  input: .. iti durgAsUktam ..
+  output: ॥ ଇତି ଦୁର୍ଗାସୂକ୍ତମ୍ ॥
+  reversible: true
+- index: 25
+  from: Normal
+  to: Odia
+  input: AUM shAntiH shAntiH shAntiH ..
+  output: ଓଁ ଶାନ୍ତିଃ ଶାନ୍ତିଃ ଶାନ୍ତିଃ ॥
+  reversible: true
+- index: 26
+  from: Normal
+  to: Malayalam
+  input: AUM shrI paramAtmanE namaH
+  output: ഓം ശ്രീ പരമാത്മനേ നമഃ
+  reversible: true
+- index: 27
+  from: Normal
+  to: Malayalam
+  input: "RShINAM saMnidhau rAjaMstava putrAgamaM prati .\nkAshyapasya Ca putrO''sti vibhANDaka iti shrutaH ..1-9-3.."
+  output: "ഋഷീണാം സംനിധൗ രാജംസ്തവ പുത്രാഗമം പ്രതി ।\nകാശ്യപസ്യ ച പുത്രോഽസ്തി വിഭാണ്ഡക ഇതി ശ്രുതഃ ॥൧-൯-൩॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Malayalam
+  input: "vakShyanti tE mahIpAlaM brAhmaNA vEdapAragAH .\nvibhANDakasutaM rAjan sarvOpAyairihAnaya ..1-9-12.."
+  output: "വക്ഷ്യന്തി തേ മഹീപാലം ബ്രാഹ്മണാ വേദപാരഗാഃ ।\nവിഭാണ്ഡകസുതം രാജന് സര്വോപായൈരിഹാനയ ॥൧-൯-൧൨॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Malayalam
+  input: "tAM dadarsha mahAtEjA mEnakAM kushikAtmajaH .\nrUpENApratimAM tatra vidyutaM jaladE yathA ..1-63-5.."
+  output: "താം ദദര്ശ മഹാതേജാ മേനകാം കുശികാത്മജഃ ।\nരൂപേണാപ്രതിമാം തത്ര വിദ്യുതം ജലദേ യഥാ ॥൧-൬൩-൫॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Malayalam
+  input: "imaM vivasvatE yOgaM prOktavAnahamavyayam .\nvivasvAnmanavE prAha manurikShvAkavE''bravIt ..4-1.."
+  output: "ഇമം വിവസ്വതേ യോഗം പ്രോക്തവാനഹമവ്യയമ് ।\nവിവസ്വാന്മനവേ പ്രാഹ മനുരിക്ഷ്വാകവേഽബ്രവീത് ॥൪-൧॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Malayalam
+  input: "na jAyatE mriyatE vA kadACinnAyaM bhUtvA bhavitA vA na bhUyaH .\najO nityaH shAshvatO''yaM purANO na hanyatE hanyamAnE sharIrE ..2-20.."
+  output: "ന ജായതേ മ്രിയതേ വാ കദാചിന്നായം ഭൂത്വാ ഭവിതാ വാ ന ഭൂയഃ ।\nഅജോ നിത്യഃ ശാശ്വതോഽയം പുരാണോ ന ഹന്യതേ ഹന്യമാനേ ശരീരേ ॥൨-൨൦॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Malayalam
+  input: "kathaM bhIShmamahaM saGkhyE drONaM Ca madhusUdana .\niShubhiH pratiyOtsyAmi pUjArhAvarisUdana ..2-4.."
+  output: "കഥം ഭീഷ്മമഹം സങ്ഖ്യേ ദ്രോണം ച മധുസൂദന ।\nഇഷുഭിഃ പ്രതിയോത്സ്യാമി പൂജാര്ഹാവരിസൂദന ॥൨-൪॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Malayalam
+  input: "karmEndriyANi saMyamya ya AstE manasA smaran .\nindriyArthAnvimUDhAtmA mithyACAraH sa uCyatE ..3-6.."
+  output: "കര്മേന്ദ്രിയാണി സംയമ്യ യ ആസ്തേ മനസാ സ്മരന് ।\nഇന്ദ്രിയാര്ഥാന്വിമൂഢാത്മാ മിഥ്യാചാരഃ സ ഉച്യതേ ॥൩-൬॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Malayalam
+  input: "niyataM kuru karma tvaM karma jyAyO hyakarmaNaH .\nsharIrayAtrApi Ca tE na prasiddhyEdakarmaNaH ..3-8.."
+  output: "നിയതം കുരു കര്മ ത്വം കര്മ ജ്യായോ ഹ്യകര്മണഃ ।\nശരീരയാത്രാപി ച തേ ന പ്രസിദ്ധ്യേദകര്മണഃ ॥൩-൮॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Malayalam
+  input: "iShTAnbhOgAnhi vO dEvA dAsyantE yajJabhAvitAH .\ntairdattAnapradAyaibhyO yO bhuGktE stEna Eva saH ..3-12.."
+  output: "ഇഷ്ടാന്ഭോഗാന്ഹി വോ ദേവാ ദാസ്യന്തേ യജ്ഞഭാവിതാഃ ।\nതൈര്ദത്താനപ്രദായൈഭ്യോ യോ ഭുങ്ക്തേ സ്തേന ഏവ സഃ ॥൩-൧൨॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Malayalam
+  input: "dharAdharEndranandinIvilAsabandhubandhura-\nsphuraddigantasantatipramOdamAnamAnasE .\nkRpAkaTAkShadhOraNIniruddhadurdharApadi\nkvaCiddigambarE manOvinOdamEtu vastuni ..3.."
+  output: "ധരാധരേന്ദ്രനന്ദിനീവിലാസബന്ധുബന്ധുര-\nസ്ഫുരദ്ദിഗന്തസന്തതിപ്രമോദമാനമാനസേ ।\nകൃപാകടാക്ഷധോരണീനിരുദ്ധദുര്ധരാപദി\nക്വചിദ്ദിഗമ്ബരേ മനോവിനോദമേതു വസ്തുനി ॥൩॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Malayalam
+  input: "praphullanIlapaGkajaprapaJCakAlimaprabhA-\n-valambikaNThakandalIruCiprabaddhakandharam .\nsmaraCChidaM puraCChidaM bhavaCChidaM makhaCChidaM\ngajaCChidAndhakaCChidaM tamantakaCChidaM bhajE ..9.."
+  output: "പ്രഫുല്ലനീലപങ്കജപ്രപഞ്ചകാലിമപ്രഭാ-\n-വലമ്ബികണ്ഠകന്ദലീരുചിപ്രബദ്ധകന്ധരമ് ।\nസ്മരച്ഛിദം പുരച്ഛിദം ഭവച്ഛിദം മഖച്ഛിദം\nഗജച്ഛിദാന്ധകച്ഛിദം തമന്തകച്ഛിദം ഭജേ ॥൯॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Malayalam
+  input: "jaTATavIgalajjalapravAhapAvitasthalE\ngaLE''valambyalambitAM bhujaGgatuGgamAlikAm .\nDamaDDamaDDamaDDamanninAdavaDDamarvayaM\nCakAraCaNDatANDavaM tanOtunaHshivaHshivam ..1.."
+  output: "ജടാടവീഗലജ്ജലപ്രവാഹപാവിതസ്ഥലേ\nഗളേഽവലമ്ബ്യലമ്ബിതാം ഭുജങ്ഗതുങ്ഗമാലികാമ് ।\nഡമഡ്ഡമഡ്ഡമഡ്ഡമന്നിനാദവഡ്ഡമര്വയം\nചകാരചണ്ഡതാണ്ഡവം തനോതുനഃശിവഃശിവമ് ॥൧॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Malayalam
+  input: "nilimpanAthanAgarIkadambamaulamallikA-\nnigumphanirbharakSharanmadhUShNikAmanOharaH .\ntanOtu nO manOmudaM vinOdinImaharnishaM\nparashriyaH paraMpadaM tadaGgajatviShAMCayaH ..15.."
+  output: "നിലിമ്പനാഥനാഗരീകദമ്ബമൗലമല്ലികാ-\nനിഗുമ്ഫനിര്ഭരക്ഷരന്മധൂഷ്ണികാമനോഹരഃ ।\nതനോതു നോ മനോമുദം വിനോദിനീമഹര്നിശം\nപരശ്രിയഃ പരംപദം തദങ്ഗജത്വിഷാംചയഃ ॥൧൫॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Malayalam
+  input: "kadA nilimpanirjharInikuJjakOTarE vasan\nvimuktadurmatiH sadA shiraHsthamaJjaliM vahan .\nvimuktalOlalOCanO lalAmabhAlalagnakaH\nshivEtimantramuCCaran kadA sukhIbhavAmyaham ..13.."
+  output: "കദാ നിലിമ്പനിര്ഝരീനികുഞ്ജകോടരേ വസന്\nവിമുക്തദുര്മതിഃ സദാ ശിരഃസ്ഥമഞ്ജലിം വഹന് ।\nവിമുക്തലോലലോചനോ ലലാമഭാലലഗ്നകഃ\nശിവേതിമന്ത്രമുച്ചരന് കദാ സുഖീഭവാമ്യഹമ് ॥൧൩॥"
+  reversible: true

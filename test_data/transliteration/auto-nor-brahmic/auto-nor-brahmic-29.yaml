@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Kannada
+  input: "Ca↓ndramA↓ mana↑sO jA↓taH . CakShOH↓ sUryO↑ ajAyata .\nmukhA↓dindra↑shCA↓gnishCa↑ .  prA↓NAdvA↓yura↑jAyata . 14"
+  output: "ಚ॒ನ್ದ್ರಮಾ॒ ಮನ॑ಸೋ ಜಾ॒ತಃ । ಚಕ್ಷೋಃ॒ ಸೂರ್ಯೋ॑ ಅಜಾಯತ ।\nಮುಖಾ॒ದಿನ್ದ್ರ॑ಶ್ಚಾ॒ಗ್ನಿಶ್ಚ॑ ।  ಪ್ರಾ॒ಣಾದ್ವಾ॒ಯುರ॑ಜಾಯತ । ೧೪"
+  reversible: true
+- index: 1
+  from: Normal
+  to: Kannada
+  input: "nAbhyA↑ AsIda↓ntari↑kSham . shI↓rShNO dyauH sama↑vartata .\npa↓dbhyAM bhUmi↓rdishaH↓ shrOtrA↑↑t . tathA↑ lO↓kAꣳ a↑kalpayan . 15"
+  output: "ನಾಭ್ಯಾ॑ ಆಸೀದ॒ನ್ತರಿ॑ಕ್ಷಮ್ । ಶೀ॒ರ್ಷ್ಣೋ ದ್ಯೌಃ ಸಮ॑ವರ್ತತ ।\nಪ॒ದ್ಭ್ಯಾಂ ಭೂಮಿ॒ರ್ದಿಶಃ॒ ಶ್ರೋತ್ರಾ᳚ತ್ । ತಥಾ॑ ಲೋ॒ಕಾꣳ ಅ॑ಕಲ್ಪಯನ್ । ೧೫"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Kannada
+  input: "vEdA↓hamE↓taM puru↑ShaM ma↓hAntam↑↑ . A↓di↓tyava↑rNaM↓ tama↑sastu↓ pA↓rE .\nsarvA↑Ni rU↓pANi↑ vi↓Citya↓ dhIraH↑ . nAmA↑ni kR↓tvA''bhi↓vada↓n yadAstE↑↑ . 16"
+  output: "ವೇದಾ॒ಹಮೇ॒ತಂ ಪುರು॑ಷಂ ಮ॒ಹಾನ್ತಮ್᳚ । ಆ॒ದಿ॒ತ್ಯವ॑ರ್ಣಂ॒ ತಮ॑ಸಸ್ತು॒ ಪಾ॒ರೇ ।\nಸರ್ವಾ॑ಣಿ ರೂ॒ಪಾಣಿ॑ ವಿ॒ಚಿತ್ಯ॒ ಧೀರಃ॑ । ನಾಮಾ॑ನಿ ಕೃ॒ತ್ವಾಽಭಿ॒ವದ॒ನ್ ಯದಾಸ್ತೇ᳚ । ೧೬"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Kannada
+  input: "dhA↓tA pu↓rastA↓dyamu↑dAja↓hAra↑ . sha↓kraH pravi↓dvAnpra↓disha↓shCata↑sraH .\ntamE↓vaM vi↓dvAna↓mRta↑ i↓ha bha↑vati . nAnyaH panthA↓ aya↑nAya vidyatE . 17"
+  output: "ಧಾ॒ತಾ ಪು॒ರಸ್ತಾ॒ದ್ಯಮು॑ದಾಜ॒ಹಾರ॑ । ಶ॒ಕ್ರಃ ಪ್ರವಿ॒ದ್ವಾನ್ಪ್ರ॒ದಿಶ॒ಶ್ಚತ॑ಸ್ರಃ ।\nತಮೇ॒ವಂ ವಿ॒ದ್ವಾನ॒ಮೃತ॑ ಇ॒ಹ ಭ॑ವತಿ । ನಾನ್ಯಃ ಪನ್ಥಾ॒ ಅಯ॑ನಾಯ ವಿದ್ಯತೇ । ೧೭"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Kannada
+  input: "ya↓jJEna↑ ya↓jJama↑yajanta dE↓vAH . tAni↓ dharmA↑Ni pratha↓mAnyA↑san .\ntE ha↓ nAkaM↑ mahi↓mAnaH↑ saCantE . yatra↓ pUrvE↑ sA↓dhyAH santi↑ dE↓vAH . 18"
+  output: "ಯ॒ಜ್ಞೇನ॑ ಯ॒ಜ್ಞಮ॑ಯಜನ್ತ ದೇ॒ವಾಃ । ತಾನಿ॒ ಧರ್ಮಾ॑ಣಿ ಪ್ರಥ॒ಮಾನ್ಯಾ॑ಸನ್ ।\nತೇ ಹ॒ ನಾಕಂ॑ ಮಹಿ॒ಮಾನಃ॑ ಸಚನ್ತೇ । ಯತ್ರ॒ ಪೂರ್ವೇ॑ ಸಾ॒ಧ್ಯಾಃ ಸನ್ತಿ॑ ದೇ॒ವಾಃ । ೧೮"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Kannada
+  input: .. atha shuklayajurvEdIya puruShasUktaH..
+  output: ॥ ಅಥ ಶುಕ್ಲಯಜುರ್ವೇದೀಯ ಪುರುಷಸೂಕ್ತಃ॥
+  reversible: true
+- index: 6
+  from: Normal
+  to: Kannada
+  input: "hariH AUM sahasrashIrShA puruShaH sahasrAkShaH sahasrapAt .\nsa bhUmiꣳ sarvata spRtvA''tyatiShThaddashAGgulam .. 1.."
+  output: "ಹರಿಃ ಓಂ ಸಹಸ್ರಶೀರ್ಷಾ ಪುರುಷಃ ಸಹಸ್ರಾಕ್ಷಃ ಸಹಸ್ರಪಾತ್ ।\nಸ ಭೂಮಿꣳ ಸರ್ವತ ಸ್ಪೃತ್ವಾಽತ್ಯತಿಷ್ಠದ್ದಶಾಙ್ಗುಲಮ್ ॥ ೧॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Kannada
+  input: "puruSha EvEdaꣳ sarvaM yadbhUtaM yaCCa bhAvyam .\nutAmRtatvasyEshAnO yadannEnAtirOhati .. 2.."
+  output: "ಪುರುಷ ಏವೇದꣳ ಸರ್ವಂ ಯದ್ಭೂತಂ ಯಚ್ಚ ಭಾವ್ಯಮ್ ।\nಉತಾಮೃತತ್ವಸ್ಯೇಶಾನೋ ಯದನ್ನೇನಾತಿರೋಹತಿ ॥ ೨॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Kannada
+  input: "EtAvAnasya mahimAtO jyAyAMMshCa pUruShaH .\npAdO''sya vishvA bhUtAni tripAdasyAmRtaM divi .. 3.."
+  output: "ಏತಾವಾನಸ್ಯ ಮಹಿಮಾತೋ ಜ್ಯಾಯಾಁಶ್ಚ ಪೂರುಷಃ ।\nಪಾದೋಽಸ್ಯ ವಿಶ್ವಾ ಭೂತಾನಿ ತ್ರಿಪಾದಸ್ಯಾಮೃತಂ ದಿವಿ ॥ ೩॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Kannada
+  input: "tripAdUrdhva udaitpuruShaH pAdO''syEhAbhavat punaH .\ntatO viShvaG vyakrAmatsAshanAnashanE abhi .. 4.."
+  output: "ತ್ರಿಪಾದೂರ್ಧ್ವ ಉದೈತ್ಪುರುಷಃ ಪಾದೋಽಸ್ಯೇಹಾಭವತ್ ಪುನಃ ।\nತತೋ ವಿಷ್ವಙ್ ವ್ಯಕ್ರಾಮತ್ಸಾಶನಾನಶನೇ ಅಭಿ ॥ ೪॥"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Kannada
+  input: "tatO virADajAyata virAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
+  output: "ತತೋ ವಿರಾಡಜಾಯತ ವಿರಾಜೋ ಅಧಿ ಪೂರುಷಃ ।\nಸ ಜಾತೋ ಅತ್ಯರಿಚ್ಯತ ಪಶ್ಚಾದ್ಭೂಮಿಮಥೋ ಪುರಃ ॥ ೫॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Kannada
+  input: "tasmAdyajJAt sarvahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE vAyavyAnAraNyA grAmyAshCa yE .. 6.."
+  output: "ತಸ್ಮಾದ್ಯಜ್ಞಾತ್ ಸರ್ವಹುತಃ ಸಮ್ಭೃತಂ ಪೃಷದಾಜ್ಯಮ್ ।\nಪಶೂಁಸ್ತಾಁಶ್ಚಕ್ರೇ ವಾಯವ್ಯಾನಾರಣ್ಯಾ ಗ್ರಾಮ್ಯಾಶ್ಚ ಯೇ ॥ ೬॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Kannada
+  input: "tasmAdyajJAt sarvahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
+  output: "ತಸ್ಮಾದ್ಯಜ್ಞಾತ್ ಸರ್ವಹುತಃ ಋಚಃ ಸಾಮಾನಿ ಜಜ್ಞಿರೇ ।\nಛನ್ದಾꣳಸಿ ಜಜ್ಞಿರೇ ತಸ್ಮಾದ್ಯಜುಸ್ತಸ್ಮಾದಜಾಯತ ॥ ೭॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Kannada
+  input: "tasmAdashvA ajAyanta yE kE CObhayAdataH .\ngAvO ha jajJirE tasmAttasmAjjAtA ajAvayaH .. 8.."
+  output: "ತಸ್ಮಾದಶ್ವಾ ಅಜಾಯನ್ತ ಯೇ ಕೇ ಚೋಭಯಾದತಃ ।\nಗಾವೋ ಹ ಜಜ್ಞಿರೇ ತಸ್ಮಾತ್ತಸ್ಮಾಜ್ಜಾತಾ ಅಜಾವಯಃ ॥ ೮॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Kannada
+  input: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEvA ayajanta sAdhyA RShayashCa yE .. 9.."
+  output: "ತಂ ಯಜ್ಞಂ ಬರ್ಹಿಷಿ ಪ್ರೌಕ್ಷನ್ ಪುರುಷಂ ಜಾತಮಗ್ರತಃ ।\nತೇನ ದೇವಾ ಅಯಜನ್ತ ಸಾಧ್ಯಾ ಋಷಯಶ್ಚ ಯೇ ॥ ೯॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Kannada
+  input: "yatpuruShaM vyadadhuH katidhA vyakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
+  output: "ಯತ್ಪುರುಷಂ ವ್ಯದಧುಃ ಕತಿಧಾ ವ್ಯಕಲ್ಪಯನ್ ।\nಮುಖಂ ಕಿಮಸ್ಯಾಸೀತ್ ಕಿಂ ಬಾಹೂ ಕಿಮೂರೂ ಪಾದಾ ಉಚ್ಯೇತೇ ॥ ೧೦॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Kannada
+  input: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadvaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
+  output: "ಬ್ರಾಹ್ಮಣೋಽಸ್ಯ ಮುಖಮಾಸೀದ್ಬಾಹೂ ರಾಜನ್ಯಃ ಕೃತಃ ।\nಊರೂ ತದಸ್ಯ ಯದ್ವೈಶ್ಯಃ ಪದ್ಭ್ಯಾꣳ ಶೂದ್ರೋ ಅಜಾಯತ ॥ ೧೧॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Kannada
+  input: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdvAyushCa prANashCa mukhAdagnirajAyata .. 12.."
+  output: "ಚನ್ದ್ರಮಾ ಮನಸೋ ಜಾತಶ್ಚಕ್ಷೋಃ ಸೂರ್ಯೋ ಅಜಾಯತ ।\nಶ್ರೋತ್ರಾದ್ವಾಯುಶ್ಚ ಪ್ರಾಣಶ್ಚ ಮುಖಾದಗ್ನಿರಜಾಯತ ॥ ೧೨॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Kannada
+  input: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samavartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
+  output: "ನಾಭ್ಯಾ ಆಸೀದನ್ತರಿಕ್ಷꣳ ಶೀರ್ಷ್ಣೋ ದ್ಯೌಃ ಸಮವರ್ತತ ।\nಪದ್ಭ್ಯಾಂ ಭೂಮಿರ್ದಿಶಃ ಶ್ರೋತ್ರಾತ್ತಥಾ ಲೋಕಾಁಽಕಲ್ಪಯನ್ ॥ ೧೩॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Kannada
+  input: "yatpuruShENa haviShA dEvA yajJamatanvata .\nvasantO''syAsIdAjyaM grIShma idhmaH sharaddhaviH .. 14.."
+  output: "ಯತ್ಪುರುಷೇಣ ಹವಿಷಾ ದೇವಾ ಯಜ್ಞಮತನ್ವತ ।\nವಸನ್ತೋಽಸ್ಯಾಸೀದಾಜ್ಯಂ ಗ್ರೀಷ್ಮ ಇಧ್ಮಃ ಶರದ್ಧವಿಃ ॥ ೧೪॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Kannada
+  input: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEvA yadyajJaM tanvAnA abadhnan puruShaM pashum .. 15.."
+  output: "ಸಪ್ತಾಸ್ಯಾಸನ್ ಪರಿಧಯಸ್ತ್ರಿಃ ಸಪ್ತ ಸಮಿಧಃ ಕೃತಾಃ ।\nದೇವಾ ಯದ್ಯಜ್ಞಂ ತನ್ವಾನಾ ಅಬಧ್ನನ್ ಪುರುಷಂ ಪಶುಮ್ ॥ ೧೫॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Kannada
+  input: "yajJEna yajJamayajanta dEvAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrvE sAdhyAH santi dEvAH .. 16.."
+  output: "ಯಜ್ಞೇನ ಯಜ್ಞಮಯಜನ್ತ ದೇವಾಸ್ತಾನಿ ಧರ್ಮಾಣಿ ಪ್ರಥಮಾನ್ಯಾಸನ್ ।\nತೇ ಹ ನಾಕಂ ಮಹಿಮಾನಃ ಸಚನ್ತ ಯತ್ರ ಪೂರ್ವೇ ಸಾಧ್ಯಾಃ ಸನ್ತಿ ದೇವಾಃ ॥ ೧೬॥"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Kannada
+  input: .. iti shuklayajurvEdIyapuruShasUktaM sampUrNam..
+  output: ॥ ಇತಿ ಶುಕ್ಲಯಜುರ್ವೇದೀಯಪುರುಷಸೂಕ್ತಂ ಸಮ್ಪೂರ್ಣಮ್॥
+  reversible: true
+- index: 23
+  from: Normal
+  to: Kannada
+  input: .. atha durgAsUktam ..
+  output: ॥ ಅಥ ದುರ್ಗಾಸೂಕ್ತಮ್ ॥
+  reversible: true
+- index: 24
+  from: Normal
+  to: Kannada
+  input: "AUM jA↓tavE↑dasE sunavAma↓ sOma↑ marAtIya↓tO nida↑hAti↓ vEdaH↑ .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↑ nA↓vEva↓ sindhuM↑ duri↓tA''tya↓gniH .. 1.."
+  output: "ಓಂ ಜಾ॒ತವೇ॑ದಸೇ ಸುನವಾಮ॒ ಸೋಮ॑ ಮರಾತೀಯ॒ತೋ ನಿದ॑ಹಾತಿ॒ ವೇದಃ॑ ।\nಸ ನಃ॑ ಪರ್ಷ॒ದತಿ॑ ದು॒ರ್ಗಾಣಿ॒ ವಿಶ್ವಾ॑ ನಾ॒ವೇವ॒ ಸಿನ್ಧುಂ॑ ದುರಿ॒ತಾಽತ್ಯ॒ಗ್ನಿಃ ॥ ೧॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Kannada
+  input: "tAma↓gniva↑rNAM↓ tapa↑sA jvala↓ntIM vai↑rOCa↓nIM ka↑rmapha↓lEShu↓ juShTA↑↑m .\ndu↓rgAM dE↓vIꣳ shara↑Nama↓haM prapa↑dyE su↓tara↑si tarasE↓ namaH↑ .. 2.."
+  output: "ತಾಮ॒ಗ್ನಿವ॑ರ್ಣಾಂ॒ ತಪ॑ಸಾ ಜ್ವಲ॒ನ್ತೀಂ ವೈ॑ರೋಚ॒ನೀಂ ಕ॑ರ್ಮಫ॒ಲೇಷು॒ ಜುಷ್ಟಾ᳚ಮ್ ।\nದು॒ರ್ಗಾಂ ದೇ॒ವೀꣳ ಶರ॑ಣಮ॒ಹಂ ಪ್ರಪ॑ದ್ಯೇ ಸು॒ತರ॑ಸಿ ತರಸೇ॒ ನಮಃ॑ ॥ ೨॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Kannada
+  input: "agnE↓ tvaM pA↑rayA↓ navyO↑ a↓smAnthsva↓stibhi↓rati↑ du↓rgANi↓ vishvA↑↑ .\npUshCa↑ pR↓thvI ba↑hu↓lA na↑ u↓rvI bhavA↑ tO↓kAya↓ tana↑yAya↓ shaMyOH .. 3.."
+  output: "ಅಗ್ನೇ॒ ತ್ವಂ ಪಾ॑ರಯಾ॒ ನವ್ಯೋ॑ ಅ॒ಸ್ಮಾನ್ಥ್ಸ್ವ॒ಸ್ತಿಭಿ॒ರತಿ॑ ದು॒ರ್ಗಾಣಿ॒ ವಿಶ್ವಾ᳚ ।\nಪೂಶ್ಚ॑ ಪೃ॒ಥ್ವೀ ಬ॑ಹು॒ಲಾ ನ॑ ಉ॒ರ್ವೀ ಭವಾ॑ ತೋ॒ಕಾಯ॒ ತನ॑ಯಾಯ॒ ಶಂಯೋಃ ॥ ೩॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Kannada
+  input: "vishvA↑ni nO du↓rgahA↑ jAtavEdaH↓ sindhu↓nna nA↓vA du↑ri↓tA''ti↑parShi .\nagnE↑ atri↓vanmana↑sA gRNA↓nO↑↑''smAkaM↑ bOdhyavi↓tA ta↓nUnA↑↑m .. 4.."
+  output: "ವಿಶ್ವಾ॑ನಿ ನೋ ದು॒ರ್ಗಹಾ॑ ಜಾತವೇದಃ॒ ಸಿನ್ಧು॒ನ್ನ ನಾ॒ವಾ ದು॑ರಿ॒ತಾಽತಿ॑ಪರ್ಷಿ ।\nಅಗ್ನೇ॑ ಅತ್ರಿ॒ವನ್ಮನ॑ಸಾ ಗೃಣಾ॒ನೋ᳚ಽಸ್ಮಾಕಂ॑ ಬೋಧ್ಯವಿ॒ತಾ ತ॒ನೂನಾ᳚ಮ್ ॥ ೪॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Kannada
+  input: "pR↓ta↓nA↓  jita↓ꣳ↓ saha↑mAnamu↓grama↓gniꣳ  hu↑vEma para↓mAthsa↓dhasthA↑↑t .\nsa naH↑ parSha↓dati↑ du↓rgANi↓ vishvA↓ kShAma↑ddE↓vO ati↑ duri↓tAtya↓gniH .. 5.."
+  output: "ಪೃ॒ತ॒ನಾ॒  ಜಿತ॒ꣳ॒ ಸಹ॑ಮಾನಮು॒ಗ್ರಮ॒ಗ್ನಿꣳ  ಹು॑ವೇಮ ಪರ॒ಮಾಥ್ಸ॒ಧಸ್ಥಾ᳚ತ್ ।\nಸ ನಃ॑ ಪರ್ಷ॒ದತಿ॑ ದು॒ರ್ಗಾಣಿ॒ ವಿಶ್ವಾ॒ ಕ್ಷಾಮ॑ದ್ದೇ॒ವೋ ಅತಿ॑ ದುರಿ॒ತಾತ್ಯ॒ಗ್ನಿಃ ॥ ೫॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Kannada
+  input: "pra↓tnOShi↑ ka↓mIDyO↑ adhva↓rEShu↑ sa↓nACCa↓ hOtA↓ navya↑shCa↓ sathsi↑ .\nsvAJCA↑↑gnE ta↓nuvaM↑ pi↓praya↑svA↓smabhyaM↑ Ca↓ saubha↑ga↓mAya↑jasva .. 6.."
+  output: "ಪ್ರ॒ತ್ನೋಷಿ॑ ಕ॒ಮೀಡ್ಯೋ॑ ಅಧ್ವ॒ರೇಷು॑ ಸ॒ನಾಚ್ಚ॒ ಹೋತಾ॒ ನವ್ಯ॑ಶ್ಚ॒ ಸಥ್ಸಿ॑ ।\nಸ್ವಾಞ್ಚಾ᳚ಗ್ನೇ ತ॒ನುವಂ॑ ಪಿ॒ಪ್ರಯ॑ಸ್ವಾ॒ಸ್ಮಭ್ಯಂ॑ ಚ॒ ಸೌಭ॑ಗ॒ಮಾಯ॑ಜಸ್ವ ॥ ೬॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Kannada
+  input: "gObhi↓rjuShTa↑ma↓yujO↓ niShi↑kta↓ntavE↑↑ndra viShNO↓ranusaMCa↑rEma .\nnAka↑sya pR↓ShThama↓bhi saM↓vasA↑nO↓ vaiShNa↑vIM lO↓ka i↓ha mA↑dayantAm .. 7.."
+  output: "ಗೋಭಿ॒ರ್ಜುಷ್ಟ॑ಮ॒ಯುಜೋ॒ ನಿಷಿ॑ಕ್ತ॒ನ್ತವೇ᳚ನ್ದ್ರ ವಿಷ್ಣೋ॒ರನುಸಂಚ॑ರೇಮ ।\nನಾಕ॑ಸ್ಯ ಪೃ॒ಷ್ಠಮ॒ಭಿ ಸಂ॒ವಸಾ॑ನೋ॒ ವೈಷ್ಣ॑ವೀಂ ಲೋ॒ಕ ಇ॒ಹ ಮಾ॑ದಯನ್ತಾಮ್ ॥ ೭॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Kannada
+  input: AUM kA↓tyA↓ya↓nAya↑ vi↓dmahE↑ kanyAku↓mAri↑ dhImahi . tannO↑ durgiH praCO↓dayA↑↑t ..
+  output: ಓಂ ಕಾ॒ತ್ಯಾ॒ಯ॒ನಾಯ॑ ವಿ॒ದ್ಮಹೇ॑ ಕನ್ಯಾಕು॒ಮಾರಿ॑ ಧೀಮಹಿ । ತನ್ನೋ॑ ದುರ್ಗಿಃ ಪ್ರಚೋ॒ದಯಾ᳚ತ್ ॥
+  reversible: true
+- index: 32
+  from: Normal
+  to: Kannada
+  input: .. iti durgAsUktam ..
+  output: ॥ ಇತಿ ದುರ್ಗಾಸೂಕ್ತಮ್ ॥
+  reversible: true
+- index: 33
+  from: Normal
+  to: Kannada
+  input: AUM shAntiH shAntiH shAntiH ..
+  output: ಓಂ ಶಾನ್ತಿಃ ಶಾನ್ತಿಃ ಶಾನ್ತಿಃ ॥
+  reversible: true
+- index: 34
+  from: Normal
+  to: Odia
+  input: AUM shrI paramAtmanE namaH
+  output: ଓଁ ଶ୍ରୀ ପରମାତ୍ମନେ ନମଃ
+  reversible: true
+- index: 35
+  from: Normal
+  to: Odia
+  input: "RShINAM saMnidhau rAjaMstava putrAgamaM prati .\nkAshyapasya Ca putrO''sti vibhANDaka iti shrutaH ..1-9-3.."
+  output: "ଋଷୀଣାଂ ସଂନିଧୌ ରାଜଂସ୍ତଵ ପୁତ୍ରାଗମଂ ପ୍ରତି ।\nକାଶ୍ୟପସ୍ୟ ଚ ପୁତ୍ରୋଽସ୍ତି ଵିଭାଣ୍ଡକ ଇତି ଶ୍ରୁତଃ ॥୧-୯-୩॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Odia
+  input: "vakShyanti tE mahIpAlaM brAhmaNA vEdapAragAH .\nvibhANDakasutaM rAjan sarvOpAyairihAnaya ..1-9-12.."
+  output: "ଵକ୍ଷ୍ୟନ୍ତି ତେ ମହୀପାଲଂ ବ୍ରାହ୍ମଣା ଵେଦପାରଗାଃ ।\nଵିଭାଣ୍ଡକସୁତଂ ରାଜନ୍ ସର୍ଵୋପାୟୈରିହାନୟ ॥୧-୯-୧୨॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Odia
+  input: "tAM dadarsha mahAtEjA mEnakAM kushikAtmajaH .\nrUpENApratimAM tatra vidyutaM jaladE yathA ..1-63-5.."
+  output: "ତାଂ ଦଦର୍ଶ ମହାତେଜା ମେନକାଂ କୁଶିକାତ୍ମଜଃ ।\nରୂପେଣାପ୍ରତିମାଂ ତତ୍ର ଵିଦ୍ୟୁତଂ ଜଲଦେ ୟଥା ॥୧-୬୩-୫॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Odia
+  input: "imaM vivasvatE yOgaM prOktavAnahamavyayam .\nvivasvAnmanavE prAha manurikShvAkavE''bravIt ..4-1.."
+  output: "ଇମଂ ଵିଵସ୍ଵତେ ୟୋଗଂ ପ୍ରୋକ୍ତଵାନହମଵ୍ୟୟମ୍ ।\nଵିଵସ୍ଵାନ୍ମନଵେ ପ୍ରାହ ମନୁରିକ୍ଷ୍ଵାକଵେଽବ୍ରଵୀତ୍ ॥୪-୧॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Odia
+  input: "na jAyatE mriyatE vA kadACinnAyaM bhUtvA bhavitA vA na bhUyaH .\najO nityaH shAshvatO''yaM purANO na hanyatE hanyamAnE sharIrE ..2-20.."
+  output: "ନ ଜାୟତେ ମ୍ରିୟତେ ଵା କଦାଚିନ୍ନାୟଂ ଭୂତ୍ଵା ଭଵିତା ଵା ନ ଭୂୟଃ ।\nଅଜୋ ନିତ୍ୟଃ ଶାଶ୍ଵତୋଽୟଂ ପୁରାଣୋ ନ ହନ୍ୟତେ ହନ୍ୟମାନେ ଶରୀରେ ॥୨-୨୦॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Odia
+  input: "kathaM bhIShmamahaM saGkhyE drONaM Ca madhusUdana .\niShubhiH pratiyOtsyAmi pUjArhAvarisUdana ..2-4.."
+  output: "କଥଂ ଭୀଷ୍ମମହଂ ସଙ୍ଖ୍ୟେ ଦ୍ରୋଣଂ ଚ ମଧୁସୂଦନ ।\nଇଷୁଭିଃ ପ୍ରତିୟୋତ୍ସ୍ୟାମି ପୂଜାର୍ହାଵରିସୂଦନ ॥୨-୪॥"
+  reversible: true

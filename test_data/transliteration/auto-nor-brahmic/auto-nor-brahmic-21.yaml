@@ -1,0 +1,246 @@
+- index: 0
+  from: Normal
+  to: Gujarati
+  input: .. prathamaH bhAgaH - AnaMdalaharI (1-41) ..
+  output: ॥ પ્રથમઃ ભાગઃ - આનંદલહરી (૧-૪૧) ॥
+  reversible: true
+- index: 1
+  from: Normal
+  to: Gujarati
+  input: "bhUmau skhalitapAdAnAM bhUmirEvAvalambanaM .\ntvayi jAtAparAdhAnAM tvamEva sharaNaM shivE .."
+  output: "ભૂમૌ સ્ખલિતપાદાનાં ભૂમિરેવાવલમ્બનં ।\nત્વયિ જાતાપરાધાનાં ત્વમેવ શરણં શિવે ॥"
+  reversible: true
+- index: 2
+  from: Normal
+  to: Gujarati
+  input: "shivaH shaktyA yuktO yadi bhavati shaktaH prabhavituM\nna CEdEvaM dEvO na khalu kushalaH spanditumapi .\natastvAmArAdhyAM hariharaviriJCAdibhirapi\npraNantuM stOtuM vA kathamakRtapuNyaH prabhavati ..1.."
+  output: "શિવઃ શક્ત્યા યુક્તો યદિ ભવતિ શક્તઃ પ્રભવિતું\nન ચેદેવં દેવો ન ખલુ કુશલઃ સ્પન્દિતુમપિ ।\nઅતસ્ત્વામારાધ્યાં હરિહરવિરિઞ્ચાદિભિરપિ\nપ્રણન્તું સ્તોતું વા કથમકૃતપુણ્યઃ પ્રભવતિ ॥૧॥"
+  reversible: true
+- index: 3
+  from: Normal
+  to: Gujarati
+  input: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhabhavaM\nviriJCissaJCinvan viraCayati lOkAnavikalam .\nvahatyEnaM shauriH kathamapi sahasrENa shirasAM\nharassaMkShudyainaM bhajati bhasitOddhULanavidhim ..2.."
+  output: "તનીયાંસં પાંસું તવ ચરણપઙ્કેરુહભવં\nવિરિઞ્ચિસ્સઞ્ચિન્વન્ વિરચયતિ લોકાનવિકલમ્ ।\nવહત્યેનં શૌરિઃ કથમપિ સહસ્રેણ શિરસાં\nહરસ્સંક્ષુદ્યૈનં ભજતિ ભસિતોદ્ધૂળનવિધિમ્ ॥૨॥"
+  reversible: true
+- index: 4
+  from: Normal
+  to: Gujarati
+  input: "avidyAnAmantastimiramihiradvIpanagarI\njaDAnAM CaitanyastabakamakarandasrutijharI .\ndaridrANAM CintAmaNiguNanikA janmajaladhau\nnimagnAnAM daMShTrA muraripuvarAhasya bhavati ..3.."
+  output: "અવિદ્યાનામન્તસ્તિમિરમિહિરદ્વીપનગરી\nજડાનાં ચૈતન્યસ્તબકમકરન્દસ્રુતિઝરી ।\nદરિદ્રાણાં ચિન્તામણિગુણનિકા જન્મજલધૌ\nનિમગ્નાનાં દંષ્ટ્રા મુરરિપુવરાહસ્ય ભવતિ ॥૩॥"
+  reversible: true
+- index: 5
+  from: Normal
+  to: Gujarati
+  input: "tvadanyaH pANibhyAm abhayavaradO daivatagaNaH\ntvamEkA naivAsi prakaTitavarAbhItyabhinayA .\nbhayAt trAtuM dAtuM phalamapi Ca vAJChAsamadhikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
+  output: "ત્વદન્યઃ પાણિભ્યામ્ અભયવરદો દૈવતગણઃ\nત્વમેકા નૈવાસિ પ્રકટિતવરાભીત્યભિનયા ।\nભયાત્ ત્રાતું દાતું ફલમપિ ચ વાઞ્છાસમધિકં\nશરણ્યે લોકાનાં તવ હિ ચરણાવેવ નિપુણૌ ॥૪॥"
+  reversible: true
+- index: 6
+  from: Normal
+  to: Gujarati
+  input: "haristvAmArAdhya praNatajanasaubhAgyajananIM\npurA nArI bhUtvA puraripumapi kShObhamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prabhavati hi mOhAya mahatAm ..5.."
+  output: "હરિસ્ત્વામારાધ્ય પ્રણતજનસૌભાગ્યજનનીં\nપુરા નારી ભૂત્વા પુરરિપુમપિ ક્ષોભમનયત્ ।\nસ્મરોઽપિ ત્વાં નત્વા રતિનયનલેહ્યેન વપુષા\nમુનીનામપ્યન્તઃ પ્રભવતિ હિ મોહાય મહતામ્ ॥૫॥"
+  reversible: true
+- index: 7
+  from: Normal
+  to: Gujarati
+  input: "sarasvatyA lakShmyA vidhiharisapatnO viharatE\nratEH pAtivratyaM shithilayati ramyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnandAbhikhyam rasayati rasaM tvadbhajanavAn ..99..\npradIpajvAlAbhiH divasakaranIrAjanavidhiH\nsudhAsUtEshCandrOpalajalalavairarghyaraCanA .\nsvakIyairambhObhiH salilanidhisauhityakaraNaM\ntvadIyAbhirvAgbhiH tava janani vACAM stutiriyam ..100.."
+  output: "સરસ્વત્યા લક્ષ્મ્યા વિધિહરિસપત્નો વિહરતે\nરતેઃ પાતિવ્રત્યં શિથિલયતિ રમ્યેણ વપુષા ।\nચિરં જીવન્નેવ ક્ષપિતપશુપાશવ્યતિકરઃ\nપરાનન્દાભિખ્યમ્ રસયતિ રસં ત્વદ્ભજનવાન્ ॥૯૯॥\nપ્રદીપજ્વાલાભિઃ દિવસકરનીરાજનવિધિઃ\nસુધાસૂતેશ્ચન્દ્રોપલજલલવૈરર્ઘ્યરચના ।\nસ્વકીયૈરમ્ભોભિઃ સલિલનિધિસૌહિત્યકરણં\nત્વદીયાભિર્વાગ્ભિઃ તવ જનનિ વાચાં સ્તુતિરિયમ્ ॥૧૦૦॥"
+  reversible: true
+- index: 8
+  from: Normal
+  to: Gujarati
+  input: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIgOvindabhagavatpUjyapAdashiShyasya\nshrImaCChaGkarabhagavataH kRtau saundaryalaharI samAptA .."
+  output: "॥ ઇતિ શ્રીમત્પરમહંસપરિવ્રાજકાચાર્યસ્ય\nશ્રીગોવિન્દભગવત્પૂજ્યપાદશિષ્યસ્ય\nશ્રીમચ્છઙ્કરભગવતઃ કૃતૌ સૌન્દર્યલહરી સમાપ્તા ॥"
+  reversible: true
+- index: 9
+  from: Normal
+  to: Gujarati
+  input: "AUM namO nArAyaNAya\natha shrImannArAyaNIyam\nprathamam dashakam\nbhagavataH svarUpaM mAhAtmyaM Ca"
+  output: "ૐ નમો નારાયણાય\nઅથ શ્રીમન્નારાયણીયમ્\nપ્રથમમ્ દશકમ્\nભગવતઃ સ્વરૂપં માહાત્મ્યં ચ"
+  reversible: true
+- index: 10
+  from: Normal
+  to: Gujarati
+  input: "sAndrAnandAvabOdhAtmakamanupamitaM kAladEshAvadhibhyAM\nnirmuktaM nityamuktaM nigamashatasahasrENa nirbhAsyamAnam .\naspaShTaM dRShTamAtrE punarurupuruShArthAtmakaM brahma tatvaM\ntattAvadbhAti sAkShAd gurupavanapurE hanta bhAgyaM janAnAm ..1.."
+  output: "સાન્દ્રાનન્દાવબોધાત્મકમનુપમિતં કાલદેશાવધિભ્યાં\nનિર્મુક્તં નિત્યમુક્તં નિગમશતસહસ્રેણ નિર્ભાસ્યમાનમ્ ।\nઅસ્પષ્ટં દૃષ્ટમાત્રે પુનરુરુપુરુષાર્થાત્મકં બ્રહ્મ તત્વં\nતત્તાવદ્ભાતિ સાક્ષાદ્ ગુરુપવનપુરે હન્ત ભાગ્યં જનાનામ્ ॥૧॥"
+  reversible: true
+- index: 11
+  from: Normal
+  to: Gujarati
+  input: "namrANAM sannidhattE satatamapi purastairanabhyarthitAna -\npyarthAn kAmAnajasraM vitarati paramAnandasAndrAM gatiM Ca .\nitthaM nishshEShalabhyO niravadhikaphala: pArijAtO harE tvaM\nkShudraM taM shakravATIdrumamabhilaShati vyarthamarthivrajO''yam ..8.."
+  output: "નમ્રાણાં સન્નિધત્તે સતતમપિ પુરસ્તૈરનભ્યર્થિતાન -\nપ્યર્થાન્ કામાનજસ્રં વિતરતિ પરમાનન્દસાન્દ્રાં ગતિં ચ ।\nઇત્થં નિશ્શેષલભ્યો નિરવધિકફલ: પારિજાતો હરે ત્વં\nક્ષુદ્રં તં શક્રવાટીદ્રુમમભિલષતિ વ્યર્થમર્થિવ્રજોઽયમ્ ॥૮॥"
+  reversible: true
+- index: 12
+  from: Normal
+  to: Gujarati
+  input: "aishvaryaM shaGkarAdIshvaraviniyamanaM vishvatEjOharANAM\ntEjassaMhAri vIryaM vimalamapi yashO nispRhaishCOpagItam .\naGgAsaGgA sadA shrIrakhilavidasi na kvApi tE saGgavArtA\ntadvAtAgAravAsin murahara bhagavaCChabdamukhyAshrayO''si ..10.."
+  output: "ઐશ્વર્યં શઙ્કરાદીશ્વરવિનિયમનં વિશ્વતેજોહરાણાં\nતેજસ્સંહારિ વીર્યં વિમલમપિ યશો નિસ્પૃહૈશ્ચોપગીતમ્ ।\nઅઙ્ગાસઙ્ગા સદા શ્રીરખિલવિદસિ ન ક્વાપિ તે સઙ્ગવાર્તા\nતદ્વાતાગારવાસિન્ મુરહર ભગવચ્છબ્દમુખ્યાશ્રયોઽસિ ॥૧૦॥"
+  reversible: true
+- index: 13
+  from: Normal
+  to: Gujarati
+  input: "avyaktaM tE svarUpaM duradhigamatamaM tattu shuddhaikasattvaM\nvyaktaM CApyEtadEva sphuTamamRtarasAmbhOdhikallOlatulyam .\nsarvOtkRShTAmabhIShTAM tadiha guNarasEnaiva CittaM harantIM\nmUrtiM tE saMshrayE''haM pavanapurapatE pAhi mAM kRShNa rOgAt ..10.."
+  output: "અવ્યક્તં તે સ્વરૂપં દુરધિગમતમં તત્તુ શુદ્ધૈકસત્ત્વં\nવ્યક્તં ચાપ્યેતદેવ સ્ફુટમમૃતરસામ્ભોધિકલ્લોલતુલ્યમ્ ।\nસર્વોત્કૃષ્ટામભીષ્ટાં તદિહ ગુણરસેનૈવ ચિત્તં હરન્તીં\nમૂર્તિં તે સંશ્રયેઽહં પવનપુરપતે પાહિ માં કૃષ્ણ રોગાત્ ॥૧૦॥"
+  reversible: true
+- index: 14
+  from: Normal
+  to: Gujarati
+  input: "EtAM vibhUtiM yOgaM Ca mama yO vEtti tattvataH .\nsO''vikampEna yOgEna yujyatE nAtra saMshayaH ..10-7.."
+  output: "એતાં વિભૂતિં યોગં ચ મમ યો વેત્તિ તત્ત્વતઃ ।\nસોઽવિકમ્પેન યોગેન યુજ્યતે નાત્ર સંશયઃ ॥૧૦-૭॥"
+  reversible: true
+- index: 15
+  from: Normal
+  to: Gujarati
+  input: "ahaM sarvasya prabhavO mattaH sarvaM pravartatE .\niti matvA bhajantE mAM budhA bhAvasamanvitAH ..10-8.."
+  output: "અહં સર્વસ્ય પ્રભવો મત્તઃ સર્વં પ્રવર્તતે ।\nઇતિ મત્વા ભજન્તે માં બુધા ભાવસમન્વિતાઃ ॥૧૦-૮॥"
+  reversible: true
+- index: 16
+  from: Normal
+  to: Gujarati
+  input: "maCCittA madgataprANA bOdhayantaH parasparam .\nkathayantashCa mAM nityaM tuShyanti Ca ramanti Ca ..10-9.."
+  output: "મચ્ચિત્તા મદ્ગતપ્રાણા બોધયન્તઃ પરસ્પરમ્ ।\nકથયન્તશ્ચ માં નિત્યં તુષ્યન્તિ ચ રમન્તિ ચ ॥૧૦-૯॥"
+  reversible: true
+- index: 17
+  from: Normal
+  to: Gujarati
+  input: "tEShAM satatayuktAnAM bhajatAM prItipUrvakam .\ndadAmi buddhiyOgaM taM yEna mAmupayAnti tE ..10-10.."
+  output: "તેષાં સતતયુક્તાનાં ભજતાં પ્રીતિપૂર્વકમ્ ।\nદદામિ બુદ્ધિયોગં તં યેન મામુપયાન્તિ તે ॥૧૦-૧૦॥"
+  reversible: true
+- index: 18
+  from: Normal
+  to: Gujarati
+  input: "hanta tE kathayiShyAmi divyA hyAtmavibhUtayaH .\nprAdhAnyataH kurushrEShTha nAstyantO vistarasya mE ..10-19.."
+  output: "હન્ત તે કથયિષ્યામિ દિવ્યા હ્યાત્મવિભૂતયઃ ।\nપ્રાધાન્યતઃ કુરુશ્રેષ્ઠ નાસ્ત્યન્તો વિસ્તરસ્ય મે ॥૧૦-૧૯॥"
+  reversible: true
+- index: 19
+  from: Normal
+  to: Gujarati
+  input: "ahamAtmA guDAkEsha sarvabhUtAshayasthitaH .\nahamAdishCa madhyaM Ca bhUtAnAmanta Eva Ca ..10-20.."
+  output: "અહમાત્મા ગુડાકેશ સર્વભૂતાશયસ્થિતઃ ।\nઅહમાદિશ્ચ મધ્યં ચ ભૂતાનામન્ત એવ ચ ॥૧૦-૨૦॥"
+  reversible: true
+- index: 20
+  from: Normal
+  to: Gujarati
+  input: "AdityAnAmahaM viShNurjyOtiShAM raviraMshumAn .\nmarICirmarutAmasmi nakShatrANAmahaM shashI ..10-21.."
+  output: "આદિત્યાનામહં વિષ્ણુર્જ્યોતિષાં રવિરંશુમાન્ ।\nમરીચિર્મરુતામસ્મિ નક્ષત્રાણામહં શશી ॥૧૦-૨૧॥"
+  reversible: true
+- index: 21
+  from: Normal
+  to: Gujarati
+  input: "vEdAnAM sAmavEdO''smi dEvAnAmasmi vAsavaH .\nindriyANAM manashCAsmi bhUtAnAmasmi CEtanA ..10-22.."
+  output: "વેદાનાં સામવેદોઽસ્મિ દેવાનામસ્મિ વાસવઃ ।\nઇન્દ્રિયાણાં મનશ્ચાસ્મિ ભૂતાનામસ્મિ ચેતના ॥૧૦-૨૨॥"
+  reversible: true
+- index: 22
+  from: Normal
+  to: Gujarati
+  input: "rudrANAM shaGkarashCAsmi vittEshO yakSharakShasAm .\nvasUnAM pAvakashCAsmi mEruH shikhariNAmaham ..10-23.."
+  output: "રુદ્રાણાં શઙ્કરશ્ચાસ્મિ વિત્તેશો યક્ષરક્ષસામ્ ।\nવસૂનાં પાવકશ્ચાસ્મિ મેરુઃ શિખરિણામહમ્ ॥૧૦-૨૩॥"
+  reversible: true
+- index: 23
+  from: Normal
+  to: Gujarati
+  input: "purOdhasAM Ca mukhyaM mAM viddhi pArtha bRhaspatim .\nsEnAnInAmahaM skandaH sarasAmasmi sAgaraH ..10-24.."
+  output: "પુરોધસાં ચ મુખ્યં માં વિદ્ધિ પાર્થ બૃહસ્પતિમ્ ।\nસેનાનીનામહં સ્કન્દઃ સરસામસ્મિ સાગરઃ ॥૧૦-૨૪॥"
+  reversible: true
+- index: 24
+  from: Normal
+  to: Gujarati
+  input: "maharShINAM bhRgurahaM girAmasmyEkamakSharam .\nyajJAnAM japayajJO''smi sthAvarANAM himAlayaH ..10-25.."
+  output: "મહર્ષીણાં ભૃગુરહં ગિરામસ્મ્યેકમક્ષરમ્ ।\nયજ્ઞાનાં જપયજ્ઞોઽસ્મિ સ્થાવરાણાં હિમાલયઃ ॥૧૦-૨૫॥"
+  reversible: true
+- index: 25
+  from: Normal
+  to: Gujarati
+  input: "ashvatthaH sarvavRkShANAM dEvarShINAM Ca nAradaH .\ngandharvANAM CitrarathaH siddhAnAM kapilO muniH ..10-26.."
+  output: "અશ્વત્થઃ સર્વવૃક્ષાણાં દેવર્ષીણાં ચ નારદઃ ।\nગન્ધર્વાણાં ચિત્રરથઃ સિદ્ધાનાં કપિલો મુનિઃ ॥૧૦-૨૬॥"
+  reversible: true
+- index: 26
+  from: Normal
+  to: Gujarati
+  input: "uCCaiHshravasamashvAnAM viddhi mAmamRtOdbhavam .\nairAvataM gajEndrANAM narANAM Ca narAdhipam ..10-27.."
+  output: "ઉચ્ચૈઃશ્રવસમશ્વાનાં વિદ્ધિ મામમૃતોદ્ભવમ્ ।\nઐરાવતં ગજેન્દ્રાણાં નરાણાં ચ નરાધિપમ્ ॥૧૦-૨૭॥"
+  reversible: true
+- index: 27
+  from: Normal
+  to: Gujarati
+  input: "AyudhAnAmahaM vajraM dhEnUnAmasmi kAmadhuk .\nprajanashCAsmi kandarpaH sarpANAmasmi vAsukiH ..10-28.."
+  output: "આયુધાનામહં વજ્રં ધેનૂનામસ્મિ કામધુક્ ।\nપ્રજનશ્ચાસ્મિ કન્દર્પઃ સર્પાણામસ્મિ વાસુકિઃ ॥૧૦-૨૮॥"
+  reversible: true
+- index: 28
+  from: Normal
+  to: Gujarati
+  input: "anantashCAsmi nAgAnAM varuNO yAdasAmaham .\npitRRNAmaryamA CAsmi yamaH saMyamatAmaham ..10-29.."
+  output: "અનન્તશ્ચાસ્મિ નાગાનાં વરુણો યાદસામહમ્ ।\nપિતૄણામર્યમા ચાસ્મિ યમઃ સંયમતામહમ્ ॥૧૦-૨૯॥"
+  reversible: true
+- index: 29
+  from: Normal
+  to: Gujarati
+  input: "prahlAdashCAsmi daityAnAM kAlaH kalayatAmaham .\nmRgANAM Ca mRgEndrO''haM vainatEyashCa pakShiNAm ..10-30.."
+  output: "પ્રહ્લાદશ્ચાસ્મિ દૈત્યાનાં કાલઃ કલયતામહમ્ ।\nમૃગાણાં ચ મૃગેન્દ્રોઽહં વૈનતેયશ્ચ પક્ષિણામ્ ॥૧૦-૩૦॥"
+  reversible: true
+- index: 30
+  from: Normal
+  to: Gujarati
+  input: "pavanaH pavatAmasmi rAmaH shastrabhRtAmaham .\njhaShANAM makarashCAsmi srOtasAmasmi jAhnavI ..10-31.."
+  output: "પવનઃ પવતામસ્મિ રામઃ શસ્ત્રભૃતામહમ્ ।\nઝષાણાં મકરશ્ચાસ્મિ સ્રોતસામસ્મિ જાહ્નવી ॥૧૦-૩૧॥"
+  reversible: true
+- index: 31
+  from: Normal
+  to: Gujarati
+  input: "sargANAmAdirantashCa madhyaM CaivAhamarjuna .\nadhyAtmavidyA vidyAnAM vAdaH pravadatAmaham ..10-32.."
+  output: "સર્ગાણામાદિરન્તશ્ચ મધ્યં ચૈવાહમર્જુન ।\nઅધ્યાત્મવિદ્યા વિદ્યાનાં વાદઃ પ્રવદતામહમ્ ॥૧૦-૩૨॥"
+  reversible: true
+- index: 32
+  from: Normal
+  to: Gujarati
+  input: "akSharANAmakArO''smi dvandvaH sAmAsikasya Ca .\nahamEvAkShayaH kAlO dhAtAhaM vishvatOmukhaH ..10-33.."
+  output: "અક્ષરાણામકારોઽસ્મિ દ્વન્દ્વઃ સામાસિકસ્ય ચ ।\nઅહમેવાક્ષયઃ કાલો ધાતાહં વિશ્વતોમુખઃ ॥૧૦-૩૩॥"
+  reversible: true
+- index: 33
+  from: Normal
+  to: Gujarati
+  input: "mRtyuH sarvaharashCAhamudbhavashCa bhaviShyatAm .\nkIrtiH shrIrvAkCa nArINAM smRtirmEdhA dhRtiH kShamA ..10-34.."
+  output: "મૃત્યુઃ સર્વહરશ્ચાહમુદ્ભવશ્ચ ભવિષ્યતામ્ ।\nકીર્તિઃ શ્રીર્વાક્ચ નારીણાં સ્મૃતિર્મેધા ધૃતિઃ ક્ષમા ॥૧૦-૩૪॥"
+  reversible: true
+- index: 34
+  from: Normal
+  to: Gujarati
+  input: "bRhatsAma tathA sAmnAM gAyatrI ChandasAmaham .\nmAsAnAM mArgashIrShO''hamRtUnAM kusumAkaraH ..10-35.."
+  output: "બૃહત્સામ તથા સામ્નાં ગાયત્રી છન્દસામહમ્ ।\nમાસાનાં માર્ગશીર્ષોઽહમૃતૂનાં કુસુમાકરઃ ॥૧૦-૩૫॥"
+  reversible: true
+- index: 35
+  from: Normal
+  to: Gujarati
+  input: "dyUtaM ChalayatAmasmi tEjastEjasvinAmaham .\njayO''smi vyavasAyO''smi sattvaM sattvavatAmaham ..10-36.."
+  output: "દ્યૂતં છલયતામસ્મિ તેજસ્તેજસ્વિનામહમ્ ।\nજયોઽસ્મિ વ્યવસાયોઽસ્મિ સત્ત્વં સત્ત્વવતામહમ્ ॥૧૦-૩૬॥"
+  reversible: true
+- index: 36
+  from: Normal
+  to: Gujarati
+  input: "vRShNInAM vAsudEvO''smi pANDavAnAM dhanaJjayaH .\nmunInAmapyahaM vyAsaH kavInAmushanA kaviH ..10-37.."
+  output: "વૃષ્ણીનાં વાસુદેવોઽસ્મિ પાણ્ડવાનાં ધનઞ્જયઃ ।\nમુનીનામપ્યહં વ્યાસઃ કવીનામુશના કવિઃ ॥૧૦-૩૭॥"
+  reversible: true
+- index: 37
+  from: Normal
+  to: Gujarati
+  input: "daNDO damayatAmasmi nItirasmi jigIShatAm .\nmaunaM CaivAsmi guhyAnAM jJAnaM jJAnavatAmaham ..10-38.."
+  output: "દણ્ડો દમયતામસ્મિ નીતિરસ્મિ જિગીષતામ્ ।\nમૌનં ચૈવાસ્મિ ગુહ્યાનાં જ્ઞાનં જ્ઞાનવતામહમ્ ॥૧૦-૩૮॥"
+  reversible: true
+- index: 38
+  from: Normal
+  to: Gujarati
+  input: "yaCCApi sarvabhUtAnAM bIjaM tadahamarjuna .\nna tadasti vinA yatsyAnmayA bhUtaM CarACaram ..10-39.."
+  output: "યચ્ચાપિ સર્વભૂતાનાં બીજં તદહમર્જુન ।\nન તદસ્તિ વિના યત્સ્યાન્મયા ભૂતં ચરાચરમ્ ॥૧૦-૩૯॥"
+  reversible: true
+- index: 39
+  from: Normal
+  to: Gujarati
+  input: "nAntO''sti mama divyAnAM vibhUtInAM parantapa .\nESha tUddEshataH prOktO vibhUtErvistarO mayA ..10-40.."
+  output: "નાન્તોઽસ્તિ મમ દિવ્યાનાં વિભૂતીનાં પરન્તપ ।\nએષ તૂદ્દેશતઃ પ્રોક્તો વિભૂતેર્વિસ્તરો મયા ॥૧૦-૪૦॥"
+  reversible: true
+- index: 40
+  from: Normal
+  to: Gujarati
+  input: "yadyadvibhUtimatsattvaM shrImadUrjitamEva vA .\ntattadEvAvagaCCha tvaM mama tEjOM''shasambhavam ..10-41.."
+  output: "યદ્યદ્વિભૂતિમત્સત્ત્વં શ્રીમદૂર્જિતમેવ વા ।\nતત્તદેવાવગચ્છ ત્વં મમ તેજોંઽશસમ્ભવમ્ ॥૧૦-૪૧॥"
+  reversible: true
