@@ -46,7 +46,7 @@ export type OutputBrahmicScriptData = Pick<
 
 export type OutputOtherScriptData = Pick<
   InputOtherScriptType,
-  'script_name' | 'script_id' | 'script_type'
+  'script_name' | 'script_id' | 'script_type' | 'schwa_character'
 > &
   CommonScriptData & {
     list: {

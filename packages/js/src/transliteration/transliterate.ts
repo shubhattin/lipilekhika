@@ -105,7 +105,7 @@ export const transliterate_text = async (
           item[1] === undefined)
         // ^ as halant also a null 'type'
       ) {
-        result_str += 'a';
+        result_str += to_script_data.schwa_character;
         // console.log('a added');
       }
     } else if (

@@ -55,6 +55,7 @@ async function main() {
         script_type: 'other',
         script_name: input_script_data.script_name,
         script_id: input_script_data.script_id,
+        schwa_character: input_script_data.schwa_character,
         text_to_krama_map: [],
         list: [],
         krama_text_arr: [],

@@ -5,6 +5,7 @@ const Romanized: InputOtherScriptType = {
   script_name: 'Romanized',
   script_id: script_list_obj['Romanized'],
   script_type: 'other',
+  schwa_character: 'a',
   manual_krama_text_map: {
     ॐ: 'āūṁ',
     अ: 'a',
