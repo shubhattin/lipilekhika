@@ -33,4 +33,13 @@ jobs:
           cd packages/js
           bun install
           bun run make-script-data
-          bun test --coverage --concurrent
+          # Run tests with coverage and capture output for the job summary
+          bun test --coverage --concurrent --only-failures | tee bun-test-output.txt
+
+          {
+            echo "## Test Summary"
+            echo
+            echo '```'
+            cat bun-test-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
