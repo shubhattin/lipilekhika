@@ -1,246 +1,246 @@
 - index: 0
+  from: Devanagari
+  to: Bengali
+  input: "त्रिपादूर्ध्व उदैत्पुरुषः पादोऽस्येहाभवत् पुनः ।\nततो विष्वङ् व्यक्रामत्साशनानशने अभि ॥ ४॥"
+  output: "ত্রিপাদূর্ধ্ব উদৈত্পুরুষঃ পাদোঽস্যেহাভবত্ পুনঃ ।\nততো বিষ্বঙ্ ব্যক্রামত্সাশনানশনে অভি ॥ ৪॥"
+  reversible: false
+- index: 1
+  from: Bengali
+  to: Devanagari
+  input: "ত্রিপাদূর্ধ্ব উদৈত্পুরুষঃ পাদোঽস্যেহাভবত্ পুনঃ ।\nততো বিষ্বঙ্ ব্যক্রামত্সাশনানশনে অভি ॥ ৪॥"
+  output: "त्रिपादूर्ध्ब उदैत्पुरुषः पादोऽस्येहाभबत् पुनः ।\nततो बिष्बङ् ब्यक्रामत्साशनानशने अभि ॥ ४॥"
+  reversible: true
+- index: 2
+  from: Bengali
+  to: Normal
+  input: "ত্রিপাদূর্ধ্ব উদৈত্পুরুষঃ পাদোঽস্যেহাভবত্ পুনঃ ।\nততো বিষ্বঙ্ ব্যক্রামত্সাশনানশনে অভি ॥ ৪॥"
+  output: "tripAdUrdhba udaitpuruShaH pAdO''syEhAbhabat punaH .\ntatO biShbaG byakrAmatsAshanAnashanE abhi .. 4.."
+  reversible: true
+- index: 3
+  from: Devanagari
+  to: Bengali
+  input: "ततो विराडजायत विराजो अधि पूरुषः ।\nस जातो अत्यरिच्यत पश्चाद्भूमिमथो पुरः ॥ ५॥"
+  output: "ততো বিরাডজাযত বিরাজো অধি পূরুষঃ ।\nস জাতো অত্যরিচ্যত পশ্চাদ্ভূমিমথো পুরঃ ॥ ৫॥"
+  reversible: false
+- index: 4
+  from: Bengali
+  to: Devanagari
+  input: "ততো বিরাডজাযত বিরাজো অধি পূরুষঃ ।\nস জাতো অত্যরিচ্যত পশ্চাদ্ভূমিমথো পুরঃ ॥ ৫॥"
+  output: "ततो बिराडजायत बिराजो अधि पूरुषः ।\nस जातो अत्यरिच्यत पश्चाद्भूमिमथो पुरः ॥ ५॥"
+  reversible: true
+- index: 5
   from: Bengali
   to: Normal
   input: "ততো বিরাডজাযত বিরাজো অধি পূরুষঃ ।\nস জাতো অত্যরিচ্যত পশ্চাদ্ভূমিমথো পুরঃ ॥ ৫॥"
   output: "tatO birADajAyata birAjO adhi pUruShaH .\nsa jAtO atyariCyata pashCAdbhUmimathO puraH .. 5.."
   reversible: true
-- index: 1
+- index: 6
   from: Devanagari
   to: Bengali
   input: "तस्माद्यज्ञात् सर्वहुतः सम्भृतं पृषदाज्यम् ।\nपशूँस्ताँश्चक्रे वायव्यानारण्या ग्राम्याश्च ये ॥ ६॥"
   output: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ সম্ভৃতং পৃষদাজ্যম্ ।\nপশূঁস্তাঁশ্চক্রে বাযব্যানারণ্যা গ্রাম্যাশ্চ যে ॥ ৬॥"
   reversible: false
-- index: 2
+- index: 7
   from: Bengali
   to: Devanagari
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ সম্ভৃতং পৃষদাজ্যম্ ।\nপশূঁস্তাঁশ্চক্রে বাযব্যানারণ্যা গ্রাম্যাশ্চ যে ॥ ৬॥"
   output: "तस्माद्यज्ञात् सर्बहुतः सम्भृतं पृषदाज्यम् ।\nपशूँस्ताँश्चक्रे बायब्यानारण्या ग्राम्याश्च ये ॥ ६॥"
   reversible: true
-- index: 3
+- index: 8
   from: Bengali
   to: Normal
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ সম্ভৃতং পৃষদাজ্যম্ ।\nপশূঁস্তাঁশ্চক্রে বাযব্যানারণ্যা গ্রাম্যাশ্চ যে ॥ ৬॥"
   output: "tasmAdyajJAt sarbahutaH sambhRtaM pRShadAjyam .\npashUMMstAMMshCakrE bAyabyAnAraNyA grAmyAshCa yE .. 6.."
   reversible: true
-- index: 4
+- index: 9
   from: Devanagari
   to: Bengali
   input: "तस्माद्यज्ञात् सर्वहुतः ऋचः सामानि जज्ञिरे ।\nछन्दाꣳसि जज्ञिरे तस्माद्यजुस्तस्मादजायत ॥ ७॥"
   output: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ ঋচঃ সামানি জজ্ঞিরে ।\nছন্দাꣳসি জজ্ঞিরে তস্মাদ্যজুস্তস্মাদজাযত ॥ ৭॥"
   reversible: false
-- index: 5
+- index: 10
   from: Bengali
   to: Devanagari
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ ঋচঃ সামানি জজ্ঞিরে ।\nছন্দাꣳসি জজ্ঞিরে তস্মাদ্যজুস্তস্মাদজাযত ॥ ৭॥"
   output: "तस्माद्यज्ञात् सर्बहुतः ऋचः सामानि जज्ञिरे ।\nछन्दाꣳसि जज्ञिरे तस्माद्यजुस्तस्मादजायत ॥ ७॥"
   reversible: true
-- index: 6
+- index: 11
   from: Bengali
   to: Normal
   input: "তস্মাদ্যজ্ঞাত্ সর্বহুতঃ ঋচঃ সামানি জজ্ঞিরে ।\nছন্দাꣳসি জজ্ঞিরে তস্মাদ্যজুস্তস্মাদজাযত ॥ ৭॥"
   output: "tasmAdyajJAt sarbahutaH RCaH sAmAni jajJirE .\nChandAꣳsi jajJirE tasmAdyajustasmAdajAyata .. 7.."
   reversible: true
-- index: 7
+- index: 12
   from: Devanagari
   to: Bengali
   input: "तस्मादश्वा अजायन्त ये के चोभयादतः ।\nगावो ह जज्ञिरे तस्मात्तस्माज्जाता अजावयः ॥ ८॥"
   output: "তস্মাদশ্বা অজাযন্ত যে কে চোভযাদতঃ ।\nগাবো হ জজ্ঞিরে তস্মাত্তস্মাজ্জাতা অজাবযঃ ॥ ৮॥"
   reversible: false
-- index: 8
+- index: 13
   from: Bengali
   to: Devanagari
   input: "তস্মাদশ্বা অজাযন্ত যে কে চোভযাদতঃ ।\nগাবো হ জজ্ঞিরে তস্মাত্তস্মাজ্জাতা অজাবযঃ ॥ ৮॥"
   output: "तस्मादश्बा अजायन्त ये के चोभयादतः ।\nगाबो ह जज्ञिरे तस्मात्तस्माज्जाता अजाबयः ॥ ८॥"
   reversible: true
-- index: 9
+- index: 14
   from: Bengali
   to: Normal
   input: "তস্মাদশ্বা অজাযন্ত যে কে চোভযাদতঃ ।\nগাবো হ জজ্ঞিরে তস্মাত্তস্মাজ্জাতা অজাবযঃ ॥ ৮॥"
   output: "tasmAdashbA ajAyanta yE kE CObhayAdataH .\ngAbO ha jajJirE tasmAttasmAjjAtA ajAbayaH .. 8.."
   reversible: true
-- index: 10
+- index: 15
   from: Devanagari
   to: Bengali
   input: "तं यज्ञं बर्हिषि प्रौक्षन् पुरुषं जातमग्रतः ।\nतेन देवा अयजन्त साध्या ऋषयश्च ये ॥ ९॥"
   output: "তং যজ্ঞং বর্হিষি প্রৌক্ষন্ পুরুষং জাতমগ্রতঃ ।\nতেন দেবা অযজন্ত সাধ্যা ঋষযশ্চ যে ॥ ৯॥"
   reversible: false
-- index: 11
+- index: 16
   from: Bengali
   to: Devanagari
   input: "তং যজ্ঞং বর্হিষি প্রৌক্ষন্ পুরুষং জাতমগ্রতঃ ।\nতেন দেবা অযজন্ত সাধ্যা ঋষযশ্চ যে ॥ ৯॥"
   output: "तं यज्ञं बर्हिषि प्रौक्षन् पुरुषं जातमग्रतः ।\nतेन देबा अयजन्त साध्या ऋषयश्च ये ॥ ९॥"
   reversible: true
-- index: 12
+- index: 17
   from: Bengali
   to: Normal
   input: "তং যজ্ঞং বর্হিষি প্রৌক্ষন্ পুরুষং জাতমগ্রতঃ ।\nতেন দেবা অযজন্ত সাধ্যা ঋষযশ্চ যে ॥ ৯॥"
   output: "taM yajJaM barhiShi praukShan puruShaM jAtamagrataH .\ntEna dEbA ayajanta sAdhyA RShayashCa yE .. 9.."
   reversible: true
-- index: 13
+- index: 18
   from: Devanagari
   to: Bengali
   input: "यत्पुरुषं व्यदधुः कतिधा व्यकल्पयन् ।\nमुखं किमस्यासीत् किं बाहू किमूरू पादा उच्येते ॥ १०॥"
   output: "যত্পুরুষং ব্যদধুঃ কতিধা ব্যকল্পযন্ ।\nমুখং কিমস্যাসীত্ কিং বাহূ কিমূরূ পাদা উচ্যেতে ॥ ১০॥"
   reversible: false
-- index: 14
+- index: 19
   from: Bengali
   to: Devanagari
   input: "যত্পুরুষং ব্যদধুঃ কতিধা ব্যকল্পযন্ ।\nমুখং কিমস্যাসীত্ কিং বাহূ কিমূরূ পাদা উচ্যেতে ॥ ১০॥"
   output: "यत्पुरुषं ब्यदधुः कतिधा ब्यकल्पयन् ।\nमुखं किमस्यासीत् किं बाहू किमूरू पादा उच्येते ॥ १०॥"
   reversible: true
-- index: 15
+- index: 20
   from: Bengali
   to: Normal
   input: "যত্পুরুষং ব্যদধুঃ কতিধা ব্যকল্পযন্ ।\nমুখং কিমস্যাসীত্ কিং বাহূ কিমূরূ পাদা উচ্যেতে ॥ ১০॥"
   output: "yatpuruShaM byadadhuH katidhA byakalpayan .\nmukhaM kimasyAsIt kiM bAhU kimUrU pAdA uCyEtE .. 10.."
   reversible: true
-- index: 16
+- index: 21
   from: Devanagari
   to: Bengali
   input: "ब्राह्मणोऽस्य मुखमासीद्बाहू राजन्यः कृतः ।\nऊरू तदस्य यद्वैश्यः पद्भ्याꣳ शूद्रो अजायत ॥ ११॥"
   output: "ব্রাহ্মণোঽস্য মুখমাসীদ্বাহূ রাজন্যঃ কৃতঃ ।\nঊরূ তদস্য যদ্বৈশ্যঃ পদ্ভ্যাꣳ শূদ্রো অজাযত ॥ ১১॥"
   reversible: false
-- index: 17
+- index: 22
   from: Bengali
   to: Devanagari
   input: "ব্রাহ্মণোঽস্য মুখমাসীদ্বাহূ রাজন্যঃ কৃতঃ ।\nঊরূ তদস্য যদ্বৈশ্যঃ পদ্ভ্যাꣳ শূদ্রো অজাযত ॥ ১১॥"
   output: "ब्राह्मणोऽस्य मुखमासीद्बाहू राजन्यः कृतः ।\nऊरू तदस्य यद्बैश्यः पद्भ्याꣳ शूद्रो अजायत ॥ ११॥"
   reversible: true
-- index: 18
+- index: 23
   from: Bengali
   to: Normal
   input: "ব্রাহ্মণোঽস্য মুখমাসীদ্বাহূ রাজন্যঃ কৃতঃ ।\nঊরূ তদস্য যদ্বৈশ্যঃ পদ্ভ্যাꣳ শূদ্রো অজাযত ॥ ১১॥"
   output: "brAhmaNO''sya mukhamAsIdbAhU rAjanyaH kRtaH .\nUrU tadasya yadbaishyaH padbhyAꣳ shUdrO ajAyata .. 11.."
   reversible: true
-- index: 19
+- index: 24
   from: Devanagari
   to: Bengali
   input: "चन्द्रमा मनसो जातश्चक्षोः सूर्यो अजायत ।\nश्रोत्राद्वायुश्च प्राणश्च मुखादग्निरजायत ॥ १२॥"
   output: "চন্দ্রমা মনসো জাতশ্চক্ষোঃ সূর্যো অজাযত ।\nশ্রোত্রাদ্বাযুশ্চ প্রাণশ্চ মুখাদগ্নিরজাযত ॥ ১২॥"
   reversible: false
-- index: 20
+- index: 25
   from: Bengali
   to: Devanagari
   input: "চন্দ্রমা মনসো জাতশ্চক্ষোঃ সূর্যো অজাযত ।\nশ্রোত্রাদ্বাযুশ্চ প্রাণশ্চ মুখাদগ্নিরজাযত ॥ ১২॥"
   output: "चन्द्रमा मनसो जातश्चक्षोः सूर्यो अजायत ।\nश्रोत्राद्बायुश्च प्राणश्च मुखादग्निरजायत ॥ १२॥"
   reversible: true
-- index: 21
+- index: 26
   from: Bengali
   to: Normal
   input: "চন্দ্রমা মনসো জাতশ্চক্ষোঃ সূর্যো অজাযত ।\nশ্রোত্রাদ্বাযুশ্চ প্রাণশ্চ মুখাদগ্নিরজাযত ॥ ১২॥"
   output: "CandramA manasO jAtashCakShOH sUryO ajAyata .\nshrOtrAdbAyushCa prANashCa mukhAdagnirajAyata .. 12.."
   reversible: true
-- index: 22
+- index: 27
   from: Devanagari
   to: Bengali
   input: "नाभ्या आसीदन्तरिक्षꣳ शीर्ष्णो द्यौः समवर्तत ।\nपद्भ्यां भूमिर्दिशः श्रोत्रात्तथा लोकाँऽकल्पयन् ॥ १३॥"
   output: "নাভ্যা আসীদন্তরিক্ষꣳ শীর্ষ্ণো দ্যৌঃ সমবর্তত ।\nপদ্ভ্যাং ভূমির্দিশঃ শ্রোত্রাত্তথা লোকাঁঽকল্পযন্ ॥ ১৩॥"
   reversible: false
-- index: 23
+- index: 28
   from: Bengali
   to: Devanagari
   input: "নাভ্যা আসীদন্তরিক্ষꣳ শীর্ষ্ণো দ্যৌঃ সমবর্তত ।\nপদ্ভ্যাং ভূমির্দিশঃ শ্রোত্রাত্তথা লোকাঁঽকল্পযন্ ॥ ১৩॥"
   output: "नाभ्या आसीदन्तरिक्षꣳ शीर्ष्णो द्यौः समबर्तत ।\nपद्भ्यां भूमिर्दिशः श्रोत्रात्तथा लोकाँऽकल्पयन् ॥ १३॥"
   reversible: true
-- index: 24
+- index: 29
   from: Bengali
   to: Normal
   input: "নাভ্যা আসীদন্তরিক্ষꣳ শীর্ষ্ণো দ্যৌঃ সমবর্তত ।\nপদ্ভ্যাং ভূমির্দিশঃ শ্রোত্রাত্তথা লোকাঁঽকল্পযন্ ॥ ১৩॥"
   output: "nAbhyA AsIdantarikShaꣳ shIrShNO dyauH samabartata .\npadbhyAM bhUmirdishaH shrOtrAttathA lOkAMM''kalpayan .. 13.."
   reversible: true
-- index: 25
+- index: 30
   from: Devanagari
   to: Bengali
   input: "यत्पुरुषेण हविषा देवा यज्ञमतन्वत ।\nवसन्तोऽस्यासीदाज्यं ग्रीष्म इध्मः शरद्धविः ॥ १४॥"
   output: "যত্পুরুষেণ হবিষা দেবা যজ্ঞমতন্বত ।\nবসন্তোঽস্যাসীদাজ্যং গ্রীষ্ম ইধ্মঃ শরদ্ধবিঃ ॥ ১৪॥"
   reversible: false
-- index: 26
+- index: 31
   from: Bengali
   to: Devanagari
   input: "যত্পুরুষেণ হবিষা দেবা যজ্ঞমতন্বত ।\nবসন্তোঽস্যাসীদাজ্যং গ্রীষ্ম ইধ্মঃ শরদ্ধবিঃ ॥ ১৪॥"
   output: "यत्पुरुषेण हबिषा देबा यज्ञमतन्बत ।\nबसन्तोऽस्यासीदाज्यं ग्रीष्म इध्मः शरद्धबिः ॥ १४॥"
   reversible: true
-- index: 27
+- index: 32
   from: Bengali
   to: Normal
   input: "যত্পুরুষেণ হবিষা দেবা যজ্ঞমতন্বত ।\nবসন্তোঽস্যাসীদাজ্যং গ্রীষ্ম ইধ্মঃ শরদ্ধবিঃ ॥ ১৪॥"
   output: "yatpuruShENa habiShA dEbA yajJamatanbata .\nbasantO''syAsIdAjyaM grIShma idhmaH sharaddhabiH .. 14.."
   reversible: true
-- index: 28
+- index: 33
   from: Devanagari
   to: Bengali
   input: "सप्तास्यासन् परिधयस्त्रिः सप्त समिधः कृताः ।\nदेवा यद्यज्ञं तन्वाना अबध्नन् पुरुषं पशुम् ॥ १५॥"
   output: "সপ্তাস্যাসন্ পরিধযস্ত্রিঃ সপ্ত সমিধঃ কৃতাঃ ।\nদেবা যদ্যজ্ঞং তন্বানা অবধ্নন্ পুরুষং পশুম্ ॥ ১৫॥"
   reversible: false
-- index: 29
+- index: 34
   from: Bengali
   to: Devanagari
   input: "সপ্তাস্যাসন্ পরিধযস্ত্রিঃ সপ্ত সমিধঃ কৃতাঃ ।\nদেবা যদ্যজ্ঞং তন্বানা অবধ্নন্ পুরুষং পশুম্ ॥ ১৫॥"
   output: "सप्तास्यासन् परिधयस्त्रिः सप्त समिधः कृताः ।\nदेबा यद्यज्ञं तन्बाना अबध्नन् पुरुषं पशुम् ॥ १५॥"
   reversible: true
-- index: 30
+- index: 35
   from: Bengali
   to: Normal
   input: "সপ্তাস্যাসন্ পরিধযস্ত্রিঃ সপ্ত সমিধঃ কৃতাঃ ।\nদেবা যদ্যজ্ঞং তন্বানা অবধ্নন্ পুরুষং পশুম্ ॥ ১৫॥"
   output: "saptAsyAsan paridhayastriH sapta samidhaH kRtAH .\ndEbA yadyajJaM tanbAnA abadhnan puruShaM pashum .. 15.."
   reversible: true
-- index: 31
+- index: 36
   from: Devanagari
   to: Bengali
   input: "यज्ञेन यज्ञमयजन्त देवास्तानि धर्माणि प्रथमान्यासन् ।\nते ह नाकं महिमानः सचन्त यत्र पूर्वे साध्याः सन्ति देवाः ॥ १६॥"
   output: "যজ্ঞেন যজ্ঞমযজন্ত দেবাস্তানি ধর্মাণি প্রথমান্যাসন্ ।\nতে হ নাকং মহিমানঃ সচন্ত যত্র পূর্বে সাধ্যাঃ সন্তি দেবাঃ ॥ ১৬॥"
   reversible: false
-- index: 32
+- index: 37
   from: Bengali
   to: Devanagari
   input: "যজ্ঞেন যজ্ঞমযজন্ত দেবাস্তানি ধর্মাণি প্রথমান্যাসন্ ।\nতে হ নাকং মহিমানঃ সচন্ত যত্র পূর্বে সাধ্যাঃ সন্তি দেবাঃ ॥ ১৬॥"
   output: "यज्ञेन यज्ञमयजन्त देबास्तानि धर्माणि प्रथमान्यासन् ।\nते ह नाकं महिमानः सचन्त यत्र पूर्बे साध्याः सन्ति देबाः ॥ १६॥"
   reversible: true
-- index: 33
+- index: 38
   from: Bengali
   to: Normal
   input: "যজ্ঞেন যজ্ঞমযজন্ত দেবাস্তানি ধর্মাণি প্রথমান্যাসন্ ।\nতে হ নাকং মহিমানঃ সচন্ত যত্র পূর্বে সাধ্যাঃ সন্তি দেবাঃ ॥ ১৬॥"
   output: "yajJEna yajJamayajanta dEbAstAni dharmANi prathamAnyAsan .\ntE ha nAkaM mahimAnaH saCanta yatra pUrbE sAdhyAH santi dEbAH .. 16.."
   reversible: true
-- index: 34
+- index: 39
   from: Devanagari
   to: Bengali
   input: ॥ इति शुक्लयजुर्वेदीयपुरुषसूक्तं सम्पूर्णम्॥
   output: ॥ ইতি শুক্লযজুর্বেদীযপুরুষসূক্তং সম্পূর্ণম্॥
   reversible: false
-- index: 35
+- index: 40
   from: Bengali
   to: Devanagari
   input: ॥ ইতি শুক্লযজুর্বেদীযপুরুষসূক্তং সম্পূর্ণম্॥
   output: ॥ इति शुक्लयजुर्बेदीयपुरुषसूक्तं सम्पूर्णम्॥
   reversible: true
-- index: 36
-  from: Bengali
-  to: Normal
-  input: ॥ ইতি শুক্লযজুর্বেদীযপুরুষসূক্তং সম্পূর্ণম্॥
-  output: .. iti shuklayajurbEdIyapuruShasUktaM sampUrNam..
-  reversible: true
-- index: 37
-  from: Devanagari
-  to: Bengali
-  input: ॥ अथ दुर्गासूक्तम् ॥
-  output: ॥ অথ দুর্গাসূক্তম্ ॥
-  reversible: true
-- index: 38
-  from: Devanagari
-  to: Bengali
-  input: "ॐ जा॒तवे॑दसे सुनवाम॒ सोम॑ मरातीय॒तो निद॑हाति॒ वेदः॑ ।\nस नः॑ पर्ष॒दति॑ दु॒र्गाणि॒ विश्वा॑ ना॒वेव॒ सिन्धुं॑ दुरि॒ताऽत्य॒ग्निः ॥ १॥"
-  output: "ওঁ জা॒তবে॑দসে সুনবাম॒ সোম॑ মরাতীয॒তো নিদ॑হাতি॒ বেদঃ॑ ।\nস নঃ॑ পর্ষ॒দতি॑ দু॒র্গাণি॒ বিশ্বা॑ না॒বেব॒ সিন্ধুং॑ দুরি॒তাঽত্য॒গ্নিঃ ॥ ১॥"
-  reversible: false
-- index: 39
-  from: Bengali
-  to: Devanagari
-  input: "ওঁ জা॒তবে॑দসে সুনবাম॒ সোম॑ মরাতীয॒তো নিদ॑হাতি॒ বেদঃ॑ ।\nস নঃ॑ পর্ষ॒দতি॑ দু॒র্গাণি॒ বিশ্বা॑ না॒বেব॒ সিন্ধুং॑ দুরি॒তাঽত্য॒গ্নিঃ ॥ ১॥"
-  output: "ॐ जा॒तबे॑दसे सुनबाम॒ सोम॑ मरातीय॒तो निद॑हाति॒ बेदः॑ ।\nस नः॑ पर्ष॒दति॑ दु॒र्गाणि॒ बिश्बा॑ ना॒बेब॒ सिन्धुं॑ दुरि॒ताऽत्य॒ग्निः ॥ १॥"
-  reversible: true
-- index: 40
-  from: Devanagari
-  to: Bengali
-  input: "ताम॒ग्निव॑र्णां॒ तप॑सा ज्वल॒न्तीं वै॑रोच॒नीं क॑र्मफ॒लेषु॒ जुष्टा᳚म् ।\nदु॒र्गां दे॒वीꣳ शर॑णम॒हं प्रप॑द्ये सु॒तर॑सि तरसे॒ नमः॑ ॥ २॥"
-  output: "তাম॒গ্নিব॑র্ণাং॒ তপ॑সা জ্বল॒ন্তীং বৈ॑রোচ॒নীং ক॑র্মফ॒লেষু॒ জুষ্টা᳚ম্ ।\nদু॒র্গাং দে॒বীꣳ শর॑ণম॒হং প্রপ॑দ্যে সু॒তর॑সি তরসে॒ নমঃ॑ ॥ ২॥"
-  reversible: false

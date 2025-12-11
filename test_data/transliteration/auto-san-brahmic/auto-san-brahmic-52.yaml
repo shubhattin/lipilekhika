@@ -1,246 +1,246 @@
 - index: 0
   from: Tamil
   to: Devanagari
+  input: "மாநாபமாநயோஸ்துல்யஸ்துல்யோ மித்ராரிபக்ஷயோஃ ।\nஸர்வாரம்பபரித்யாகீ குணாதீதஃ ஸ உச்யதே ॥௧௪-௨௫॥"
+  output: "मानापमानयोस्तुल्यस्तुल्यो मित्रारिपक्षयोः ।\nसर्वारंपपरित्याकी कुणातीतः स उच्यते ॥१४-२५॥"
+  reversible: true
+- index: 1
+  from: Tamil
+  to: Normal
+  input: "மாநாபமாநயோஸ்துல்யஸ்துல்யோ மித்ராரிபக்ஷயோஃ ।\nஸர்வாரம்பபரித்யாகீ குணாதீதஃ ஸ உச்யதே ॥௧௪-௨௫॥"
+  output: "mAnApamAnayOstulyastulyO mitrAripakShayOH .\nsarvAraMpaparityAkI kuNAtItaH sa uCyatE ..14-25.."
+  reversible: true
+- index: 2
+  from: Devanagari
+  to: Tamil
+  input: "मां च योऽव्यभिचारेण भक्तियोगेन सेवते ।\nस गुणान्समतीत्यैतान्ब्रह्मभूयाय कल्पते ॥१४-२६॥"
+  output: "மாம் ச யோऽவ்யபிசாரேண பக்தியோகேந ஸேவதே ।\nஸ குணாந்ஸமதீத்யைதாந்ப்ரஹ்மபூயாய கல்பதே ॥௧௪-௨௬॥"
+  reversible: false
+- index: 3
+  from: Tamil
+  to: Devanagari
+  input: "மாம் ச யோऽவ்யபிசாரேண பக்தியோகேந ஸேவதே ।\nஸ குணாந்ஸமதீத்யைதாந்ப்ரஹ்மபூயாய கல்பதே ॥௧௪-௨௬॥"
+  output: "मां च योऽव्यपिचारेण पक्तियोकेन सेवते ।\nस कुणान्समतीत्यैतान्प्रह्मपूयाय कल्पते ॥१४-२६॥"
+  reversible: true
+- index: 4
+  from: Tamil
+  to: Normal
+  input: "மாம் ச யோऽவ்யபிசாரேண பக்தியோகேந ஸேவதே ।\nஸ குணாந்ஸமதீத்யைதாந்ப்ரஹ்மபூயாய கல்பதே ॥௧௪-௨௬॥"
+  output: "mAM Ca yO''vyapiCArENa paktiyOkEna sEvatE .\nsa kuNAnsamatItyaitAnprahmapUyAya kalpatE ..14-26.."
+  reversible: true
+- index: 5
+  from: Devanagari
+  to: Tamil
+  input: "ब्रह्मणो हि प्रतिष्ठाहममृतस्याव्ययस्य च ।\nशाश्वतस्य च धर्मस्य सुखस्यैकान्तिकस्य च ॥१४-२७॥"
+  output: "ப்ரஹ்மணோ ஹி ப்ரதிஷ்டாஹமமிருதஸ்யாவ்யயஸ்ய ச ।\nஶாஶ்வதஸ்ய ச தர்மஸ்ய ஸுகஸ்யைகாந்திகஸ்ய ச ॥௧௪-௨௭॥"
+  reversible: false
+- index: 6
+  from: Tamil
+  to: Devanagari
   input: "ப்ரஹ்மணோ ஹி ப்ரதிஷ்டாஹமமிருதஸ்யாவ்யயஸ்ய ச ।\nஶாஶ்வதஸ்ய ச தர்மஸ்ய ஸுகஸ்யைகாந்திகஸ்ய ச ॥௧௪-௨௭॥"
   output: "प्रह्मणो हि प्रतिष्टाहममिरुतस्याव्ययस्य च ।\nशाश्वतस्य च तर्मस्य सुकस्यैकान्तिकस्य च ॥१४-२७॥"
   reversible: true
-- index: 1
+- index: 7
   from: Tamil
   to: Normal
   input: "ப்ரஹ்மணோ ஹி ப்ரதிஷ்டாஹமமிருதஸ்யாவ்யயஸ்ய ச ।\nஶாஶ்வதஸ்ய ச தர்மஸ்ய ஸுகஸ்யைகாந்திகஸ்ய ச ॥௧௪-௨௭॥"
   output: "prahmaNO hi pratiShTAhamamirutasyAvyayasya Ca .\nshAshvatasya Ca tarmasya sukasyaikAntikasya Ca ..14-27.."
   reversible: true
-- index: 2
+- index: 8
   from: Devanagari
   to: Tamil
   input: "ॐ तत्सदिति श्रीमद्भगवद्गीतासूपनिषत्सु\nब्रह्मविद्यायां योगशास्त्रे श्रीकृष्णार्जुनसंवादे\nगुणत्रयविभागयोगो नाम चतुर्दशोऽध्यायः ॥१४॥"
   output: "ௐ தத்ஸதிதி ஶ்ரீமத்பகவத்கீதாஸூபநிஷத்ஸு\nப்ரஹ்மவித்யாயாம் யோகஶாஸ்த்ரே ஶ்ரீகிருஷ்ணார்ஜுநஸம்வாதே\nகுணத்ரயவிபாகயோகோ நாம சதுர்தஶோऽத்யாயஃ ॥௧௪॥"
   reversible: false
-- index: 3
+- index: 9
   from: Tamil
   to: Devanagari
   input: "ௐ தத்ஸதிதி ஶ்ரீமத்பகவத்கீதாஸூபநிஷத்ஸு\nப்ரஹ்மவித்யாயாம் யோகஶாஸ்த்ரே ஶ்ரீகிருஷ்ணார்ஜுநஸம்வாதே\nகுணத்ரயவிபாகயோகோ நாம சதுர்தஶோऽத்யாயஃ ॥௧௪॥"
   output: "ॐ तत्सतिति श्रीमत्पकवत्कीतासूपनिषत्सु\nप्रह्मवित्यायां योकशास्त्रे श्रीकिरुष्णार्जुनसंवाते\nकुणत्रयविपाकयोको नाम चतुर्तशोऽत्यायः ॥१४॥"
   reversible: true
-- index: 4
+- index: 10
   from: Tamil
   to: Normal
   input: "ௐ தத்ஸதிதி ஶ்ரீமத்பகவத்கீதாஸூபநிஷத்ஸு\nப்ரஹ்மவித்யாயாம் யோகஶாஸ்த்ரே ஶ்ரீகிருஷ்ணார்ஜுநஸம்வாதே\nகுணத்ரயவிபாகயோகோ நாம சதுர்தஶோऽத்யாயஃ ॥௧௪॥"
   output: "AUM tatsatiti shrImatpakavatkItAsUpaniShatsu\nprahmavityAyAM yOkashAstrE shrIkiruShNArjunasaMvAtE\nkuNatrayavipAkayOkO nAma CaturtashO''tyAyaH ..14.."
   reversible: true
-- index: 5
+- index: 11
   from: Devanagari
   to: Tamil
   input: ॥ सौंदर्य लहरी ॥
   output: ॥ ஸௌம்தர்ய லஹரீ ॥
   reversible: false
-- index: 6
+- index: 12
   from: Tamil
   to: Devanagari
   input: ॥ ஸௌம்தர்ய லஹரீ ॥
   output: ॥ सौंतर्य लहरी ॥
   reversible: true
-- index: 7
+- index: 13
   from: Tamil
   to: Normal
   input: ॥ ஸௌம்தர்ய லஹரீ ॥
   output: .. sauMtarya laharI ..
   reversible: true
-- index: 8
+- index: 14
   from: Devanagari
   to: Tamil
   input: ॥ प्रथमः भागः - आनंदलहरी (१-४१) ॥
   output: ॥ ப்ரதமஃ பாகஃ - ஆநம்தலஹரீ (௧-௪௧) ॥
   reversible: false
-- index: 9
+- index: 15
   from: Tamil
   to: Devanagari
   input: ॥ ப்ரதமஃ பாகஃ - ஆநம்தலஹரீ (௧-௪௧) ॥
   output: ॥ प्रतमः पाकः - आनंतलहरी (१-४१) ॥
   reversible: true
-- index: 10
+- index: 16
   from: Tamil
   to: Normal
   input: ॥ ப்ரதமஃ பாகஃ - ஆநம்தலஹரீ (௧-௪௧) ॥
   output: .. pratamaH pAkaH - AnaMtalaharI (1-41) ..
   reversible: true
-- index: 11
+- index: 17
   from: Devanagari
   to: Tamil
   input: "भूमौ स्खलितपादानां भूमिरेवावलम्बनं ।\nत्वयि जातापराधानां त्वमेव शरणं शिवे ॥"
   output: "பூமௌ ஸ்கலிதபாதாநாம் பூமிரேவாவலம்பநம் ।\nத்வயி ஜாதாபராதாநாம் த்வமேவ ஶரணம் ஶிவே ॥"
   reversible: false
-- index: 12
+- index: 18
   from: Tamil
   to: Devanagari
   input: "பூமௌ ஸ்கலிதபாதாநாம் பூமிரேவாவலம்பநம் ।\nத்வயி ஜாதாபராதாநாம் த்வமேவ ஶரணம் ஶிவே ॥"
   output: "पूमौ स्कलितपातानां पूमिरेवावलंपनं ।\nत्वयि जातापरातानां त्वमेव शरणं शिवे ॥"
   reversible: true
-- index: 13
+- index: 19
   from: Tamil
   to: Normal
   input: "பூமௌ ஸ்கலிதபாதாநாம் பூமிரேவாவலம்பநம் ।\nத்வயி ஜாதாபராதாநாம் த்வமேவ ஶரணம் ஶிவே ॥"
   output: "pUmau skalitapAtAnAM pUmirEvAvalaMpanaM .\ntvayi jAtAparAtAnAM tvamEva sharaNaM shivE .."
   reversible: true
-- index: 14
+- index: 20
   from: Devanagari
   to: Tamil
   input: "शिवः शक्त्या युक्तो यदि भवति शक्तः प्रभवितुं\nन चेदेवं देवो न खलु कुशलः स्पन्दितुमपि ।\nअतस्त्वामाराध्यां हरिहरविरिञ्चादिभिरपि\nप्रणन्तुं स्तोतुं वा कथमकृतपुण्यः प्रभवति ॥१॥"
   output: "ஶிவஃ ஶக்த்யா யுக்தோ யதி பவதி ஶக்தஃ ப்ரபவிதும்\nந சேதேவம் தேவோ ந கலு குஶலஃ ஸ்பந்திதுமபி ।\nஅதஸ்த்வாமாராத்யாம் ஹரிஹரவிரிஞ்சாதிபிரபி\nப்ரணந்தும் ஸ்தோதும் வா கதமகிருதபுண்யஃ ப்ரபவதி ॥௧॥"
   reversible: false
-- index: 15
+- index: 21
   from: Tamil
   to: Devanagari
   input: "ஶிவஃ ஶக்த்யா யுக்தோ யதி பவதி ஶக்தஃ ப்ரபவிதும்\nந சேதேவம் தேவோ ந கலு குஶலஃ ஸ்பந்திதுமபி ।\nஅதஸ்த்வாமாராத்யாம் ஹரிஹரவிரிஞ்சாதிபிரபி\nப்ரணந்தும் ஸ்தோதும் வா கதமகிருதபுண்யஃ ப்ரபவதி ॥௧॥"
   output: "शिवः शक्त्या युक्तो यति पवति शक्तः प्रपवितुं\nन चेतेवं तेवो न कलु कुशलः स्पन्तितुमपि ।\nअतस्त्वामारात्यां हरिहरविरिञ्चातिपिरपि\nप्रणन्तुं स्तोतुं वा कतमकिरुतपुण्यः प्रपवति ॥१॥"
   reversible: true
-- index: 16
+- index: 22
   from: Tamil
   to: Normal
   input: "ஶிவஃ ஶக்த்யா யுக்தோ யதி பவதி ஶக்தஃ ப்ரபவிதும்\nந சேதேவம் தேவோ ந கலு குஶலஃ ஸ்பந்திதுமபி ।\nஅதஸ்த்வாமாராத்யாம் ஹரிஹரவிரிஞ்சாதிபிரபி\nப்ரணந்தும் ஸ்தோதும் வா கதமகிருதபுண்யஃ ப்ரபவதி ॥௧॥"
   output: "shivaH shaktyA yuktO yati pavati shaktaH prapavituM\nna CEtEvaM tEvO na kalu kushalaH spantitumapi .\natastvAmArAtyAM hariharaviriJCAtipirapi\npraNantuM stOtuM vA katamakirutapuNyaH prapavati ..1.."
   reversible: true
-- index: 17
+- index: 23
   from: Devanagari
   to: Tamil
   input: "तनीयांसं पांसुं तव चरणपङ्केरुहभवं\nविरिञ्चिस्सञ्चिन्वन् विरचयति लोकानविकलम् ।\nवहत्येनं शौरिः कथमपि सहस्रेण शिरसां\nहरस्संक्षुद्यैनं भजति भसितोद्धूळनविधिम् ॥२॥"
   output: "தநீயாம்ஸம் பாம்ஸும் தவ சரணபங்கேருஹபவம்\nவிரிஞ்சிஸ்ஸஞ்சிந்வந் விரசயதி லோகாநவிகலம் ।\nவஹத்யேநம் ஶௌரிஃ கதமபி ஸஹஸ்ரேண ஶிரஸாம்\nஹரஸ்ஸம்க்ஷுத்யைநம் பஜதி பஸிதோத்தூளநவிதிம் ॥௨॥"
   reversible: false
-- index: 18
+- index: 24
   from: Tamil
   to: Devanagari
   input: "தநீயாம்ஸம் பாம்ஸும் தவ சரணபங்கேருஹபவம்\nவிரிஞ்சிஸ்ஸஞ்சிந்வந் விரசயதி லோகாநவிகலம் ।\nவஹத்யேநம் ஶௌரிஃ கதமபி ஸஹஸ்ரேண ஶிரஸாம்\nஹரஸ்ஸம்க்ஷுத்யைநம் பஜதி பஸிதோத்தூளநவிதிம் ॥௨॥"
   output: "तनीयांसं पांसुं तव चरणपङ्केरुहपवं\nविरिञ्चिस्सञ्चिन्वन् विरचयति लोकानविकलं ।\nवहत्येनं शौरिः कतमपि सहस्रेण शिरसां\nहरस्संक्षुत्यैनं पजति पसितोत्तूळनवितिं ॥२॥"
   reversible: true
-- index: 19
+- index: 25
   from: Tamil
   to: Normal
   input: "தநீயாம்ஸம் பாம்ஸும் தவ சரணபங்கேருஹபவம்\nவிரிஞ்சிஸ்ஸஞ்சிந்வந் விரசயதி லோகாநவிகலம் ।\nவஹத்யேநம் ஶௌரிஃ கதமபி ஸஹஸ்ரேண ஶிரஸாம்\nஹரஸ்ஸம்க்ஷுத்யைநம் பஜதி பஸிதோத்தூளநவிதிம் ॥௨॥"
   output: "tanIyAMsaM pAMsuM tava CaraNapaGkEruhapavaM\nviriJCissaJCinvan viraCayati lOkAnavikalaM .\nvahatyEnaM shauriH katamapi sahasrENa shirasAM\nharassaMkShutyainaM pajati pasitOttULanavitiM ..2.."
   reversible: true
-- index: 20
+- index: 26
   from: Devanagari
   to: Tamil
   input: "अविद्यानामन्तस्तिमिरमिहिरद्वीपनगरी\nजडानां चैतन्यस्तबकमकरन्दस्रुतिझरी ।\nदरिद्राणां चिन्तामणिगुणनिका जन्मजलधौ\nनिमग्नानां दंष्ट्रा मुररिपुवराहस्य भवति ॥३॥"
   output: "அவித்யாநாமந்தஸ்திமிரமிஹிரத்வீபநகரீ\nஜடாநாம் சைதந்யஸ்தபகமகரந்தஸ்ருதிஜரீ ।\nதரித்ராணாம் சிந்தாமணிகுணநிகா ஜந்மஜலதௌ\nநிமக்நாநாம் தம்ஷ்ட்ரா முரரிபுவராஹஸ்ய பவதி ॥௩॥"
   reversible: false
-- index: 21
+- index: 27
   from: Tamil
   to: Devanagari
   input: "அவித்யாநாமந்தஸ்திமிரமிஹிரத்வீபநகரீ\nஜடாநாம் சைதந்யஸ்தபகமகரந்தஸ்ருதிஜரீ ।\nதரித்ராணாம் சிந்தாமணிகுணநிகா ஜந்மஜலதௌ\nநிமக்நாநாம் தம்ஷ்ட்ரா முரரிபுவராஹஸ்ய பவதி ॥௩॥"
   output: "अवित्यानामन्तस्तिमिरमिहिरत्वीपनकरी\nजटानां चैतन्यस्तपकमकरन्तस्रुतिजरी ।\nतरित्राणां चिन्तामणिकुणनिका जन्मजलतौ\nनिमक्नानां तंष्ट्रा मुररिपुवराहस्य पवति ॥३॥"
   reversible: true
-- index: 22
+- index: 28
   from: Tamil
   to: Normal
   input: "அவித்யாநாமந்தஸ்திமிரமிஹிரத்வீபநகரீ\nஜடாநாம் சைதந்யஸ்தபகமகரந்தஸ்ருதிஜரீ ।\nதரித்ராணாம் சிந்தாமணிகுணநிகா ஜந்மஜலதௌ\nநிமக்நாநாம் தம்ஷ்ட்ரா முரரிபுவராஹஸ்ய பவதி ॥௩॥"
   output: "avityAnAmantastimiramihiratvIpanakarI\njaTAnAM CaitanyastapakamakarantasrutijarI .\ntaritrANAM CintAmaNikuNanikA janmajalatau\nnimaknAnAM taMShTrA muraripuvarAhasya pavati ..3.."
   reversible: true
-- index: 23
+- index: 29
   from: Devanagari
   to: Tamil
   input: "त्वदन्यः पाणिभ्याम् अभयवरदो दैवतगणः\nत्वमेका नैवासि प्रकटितवराभीत्यभिनया ।\nभयात् त्रातुं दातुं फलमपि च वाञ्छासमधिकं\nशरण्ये लोकानां तव हि चरणावेव निपुणौ ॥४॥"
   output: "த்வதந்யஃ பாணிப்யாம் அபயவரதோ தைவதகணஃ\nத்வமேகா நைவாஸி ப்ரகடிதவராபீத்யபிநயா ।\nபயாத் த்ராதும் தாதும் பலமபி ச வாஞ்சாஸமதிகம்\nஶரண்யே லோகாநாம் தவ ஹி சரணாவேவ நிபுணௌ ॥௪॥"
   reversible: false
-- index: 24
+- index: 30
   from: Tamil
   to: Devanagari
   input: "த்வதந்யஃ பாணிப்யாம் அபயவரதோ தைவதகணஃ\nத்வமேகா நைவாஸி ப்ரகடிதவராபீத்யபிநயா ।\nபயாத் த்ராதும் தாதும் பலமபி ச வாஞ்சாஸமதிகம்\nஶரண்யே லோகாநாம் தவ ஹி சரணாவேவ நிபுணௌ ॥௪॥"
   output: "त्वतन्यः पाणिप्यां अपयवरतो तैवतकणः\nत्वमेका नैवासि प्रकटितवरापीत्यपिनया ।\nपयात् त्रातुं तातुं पलमपि च वाञ्चासमतिकं\nशरण्ये लोकानां तव हि चरणावेव निपुणौ ॥४॥"
   reversible: true
-- index: 25
+- index: 31
   from: Tamil
   to: Normal
   input: "த்வதந்யஃ பாணிப்யாம் அபயவரதோ தைவதகணஃ\nத்வமேகா நைவாஸி ப்ரகடிதவராபீத்யபிநயா ।\nபயாத் த்ராதும் தாதும் பலமபி ச வாஞ்சாஸமதிகம்\nஶரண்யே லோகாநாம் தவ ஹி சரணாவேவ நிபுணௌ ॥௪॥"
   output: "tvatanyaH pANipyAM apayavaratO taivatakaNaH\ntvamEkA naivAsi prakaTitavarApItyapinayA .\npayAt trAtuM tAtuM palamapi Ca vAJCAsamatikaM\nsharaNyE lOkAnAM tava hi CaraNAvEva nipuNau ..4.."
   reversible: true
-- index: 26
+- index: 32
   from: Devanagari
   to: Tamil
   input: "हरिस्त्वामाराध्य प्रणतजनसौभाग्यजननीं\nपुरा नारी भूत्वा पुररिपुमपि क्षोभमनयत् ।\nस्मरोऽपि त्वां नत्वा रतिनयनलेह्येन वपुषा\nमुनीनामप्यन्तः प्रभवति हि मोहाय महताम् ॥५॥"
   output: "ஹரிஸ்த்வாமாராத்ய ப்ரணதஜநஸௌபாக்யஜநநீம்\nபுரா நாரீ பூத்வா புரரிபுமபி க்ஷோபமநயத் ।\nஸ்மரோऽபி த்வாம் நத்வா ரதிநயநலேஹ்யேந வபுஷா\nமுநீநாமப்யந்தஃ ப்ரபவதி ஹி மோஹாய மஹதாம் ॥௫॥"
   reversible: false
-- index: 27
+- index: 33
   from: Tamil
   to: Devanagari
   input: "ஹரிஸ்த்வாமாராத்ய ப்ரணதஜநஸௌபாக்யஜநநீம்\nபுரா நாரீ பூத்வா புரரிபுமபி க்ஷோபமநயத் ।\nஸ்மரோऽபி த்வாம் நத்வா ரதிநயநலேஹ்யேந வபுஷா\nமுநீநாமப்யந்தஃ ப்ரபவதி ஹி மோஹாய மஹதாம் ॥௫॥"
   output: "हरिस्त्वामारात्य प्रणतजनसौपाक्यजननीं\nपुरा नारी पूत्वा पुररिपुमपि क्षोपमनयत् ।\nस्मरोऽपि त्वां नत्वा रतिनयनलेह्येन वपुषा\nमुनीनामप्यन्तः प्रपवति हि मोहाय महतां ॥५॥"
   reversible: true
-- index: 28
+- index: 34
   from: Tamil
   to: Normal
   input: "ஹரிஸ்த்வாமாராத்ய ப்ரணதஜநஸௌபாக்யஜநநீம்\nபுரா நாரீ பூத்வா புரரிபுமபி க்ஷோபமநயத் ।\nஸ்மரோऽபி த்வாம் நத்வா ரதிநயநலேஹ்யேந வபுஷா\nமுநீநாமப்யந்தஃ ப்ரபவதி ஹி மோஹாய மஹதாம் ॥௫॥"
   output: "haristvAmArAtya praNatajanasaupAkyajananIM\npurA nArI pUtvA puraripumapi kShOpamanayat .\nsmarO''pi tvAM natvA ratinayanalEhyEna vapuShA\nmunInAmapyantaH prapavati hi mOhAya mahatAM ..5.."
   reversible: true
-- index: 29
+- index: 35
   from: Devanagari
   to: Tamil
   input: "सरस्वत्या लक्ष्म्या विधिहरिसपत्नो विहरते\nरतेः पातिव्रत्यं शिथिलयति रम्येण वपुषा ।\nचिरं जीवन्नेव क्षपितपशुपाशव्यतिकरः\nपरानन्दाभिख्यम् रसयति रसं त्वद्भजनवान् ॥९९॥\nप्रदीपज्वालाभिः दिवसकरनीराजनविधिः\nसुधासूतेश्चन्द्रोपलजललवैरर्घ्यरचना ।\nस्वकीयैरम्भोभिः सलिलनिधिसौहित्यकरणं\nत्वदीयाभिर्वाग्भिः तव जननि वाचां स्तुतिरियम् ॥१००॥"
   output: "ஸரஸ்வத்யா லக்ஷ்ம்யா விதிஹரிஸபத்நோ விஹரதே\nரதேஃ பாதிவ்ரத்யம் ஶிதிலயதி ரம்யேண வபுஷா ।\nசிரம் ஜீவந்நேவ க்ஷபிதபஶுபாஶவ்யதிகரஃ\nபராநந்தாபிக்யம் ரஸயதி ரஸம் த்வத்பஜநவாந் ॥௯௯॥\nப்ரதீபஜ்வாலாபிஃ திவஸகரநீராஜநவிதிஃ\nஸுதாஸூதேஶ்சந்த்ரோபலஜலலவைரர்க்யரசநா ।\nஸ்வகீயைரம்போபிஃ ஸலிலநிதிஸௌஹித்யகரணம்\nத்வதீயாபிர்வாக்பிஃ தவ ஜநநி வாசாம் ஸ்துதிரியம் ॥௧௦௦॥"
   reversible: false
-- index: 30
+- index: 36
   from: Tamil
   to: Devanagari
   input: "ஸரஸ்வத்யா லக்ஷ்ம்யா விதிஹரிஸபத்நோ விஹரதே\nரதேஃ பாதிவ்ரத்யம் ஶிதிலயதி ரம்யேண வபுஷா ।\nசிரம் ஜீவந்நேவ க்ஷபிதபஶுபாஶவ்யதிகரஃ\nபராநந்தாபிக்யம் ரஸயதி ரஸம் த்வத்பஜநவாந் ॥௯௯॥\nப்ரதீபஜ்வாலாபிஃ திவஸகரநீராஜநவிதிஃ\nஸுதாஸூதேஶ்சந்த்ரோபலஜலலவைரர்க்யரசநா ।\nஸ்வகீயைரம்போபிஃ ஸலிலநிதிஸௌஹித்யகரணம்\nத்வதீயாபிர்வாக்பிஃ தவ ஜநநி வாசாம் ஸ்துதிரியம் ॥௧௦௦॥"
   output: "सरस्वत्या लक्ष्ंया वितिहरिसपत्नो विहरते\nरतेः पातिव्रत्यं शितिलयति रंयेण वपुषा ।\nचिरं जीवन्नेव क्षपितपशुपाशव्यतिकरः\nपरानन्तापिक्यं रसयति रसं त्वत्पजनवान् ॥९९॥\nप्रतीपज्वालापिः तिवसकरनीराजनवितिः\nसुतासूतेश्चन्त्रोपलजललवैरर्क्यरचना ।\nस्वकीयैरंपोपिः सलिलनितिसौहित्यकरणं\nत्वतीयापिर्वाक्पिः तव जननि वाचां स्तुतिरियं ॥१००॥"
   reversible: true
-- index: 31
+- index: 37
   from: Tamil
   to: Normal
   input: "ஸரஸ்வத்யா லக்ஷ்ம்யா விதிஹரிஸபத்நோ விஹரதே\nரதேஃ பாதிவ்ரத்யம் ஶிதிலயதி ரம்யேண வபுஷா ।\nசிரம் ஜீவந்நேவ க்ஷபிதபஶுபாஶவ்யதிகரஃ\nபராநந்தாபிக்யம் ரஸயதி ரஸம் த்வத்பஜநவாந் ॥௯௯॥\nப்ரதீபஜ்வாலாபிஃ திவஸகரநீராஜநவிதிஃ\nஸுதாஸூதேஶ்சந்த்ரோபலஜலலவைரர்க்யரசநா ।\nஸ்வகீயைரம்போபிஃ ஸலிலநிதிஸௌஹித்யகரணம்\nத்வதீயாபிர்வாக்பிஃ தவ ஜநநி வாசாம் ஸ்துதிரியம் ॥௧௦௦॥"
   output: "sarasvatyA lakShMyA vitiharisapatnO viharatE\nratEH pAtivratyaM shitilayati raMyENa vapuShA .\nCiraM jIvannEva kShapitapashupAshavyatikaraH\nparAnantApikyaM rasayati rasaM tvatpajanavAn ..99..\npratIpajvAlApiH tivasakaranIrAjanavitiH\nsutAsUtEshCantrOpalajalalavairarkyaraCanA .\nsvakIyairaMpOpiH salilanitisauhityakaraNaM\ntvatIyApirvAkpiH tava janani vACAM stutiriyaM ..100.."
   reversible: true
-- index: 32
+- index: 38
   from: Devanagari
   to: Tamil
   input: "॥ इति श्रीमत्परमहंसपरिव्राजकाचार्यस्य\nश्रीगोविन्दभगवत्पूज्यपादशिष्यस्य\nश्रीमच्छङ्करभगवतः कृतौ सौन्दर्यलहरी समाप्ता ॥"
   output: "॥ இதி ஶ்ரீமத்பரமஹம்ஸபரிவ்ராஜகாசார்யஸ்ய\nஶ்ரீகோவிந்தபகவத்பூஜ்யபாதஶிஷ்யஸ்ய\nஶ்ரீமச்சங்கரபகவதஃ கிருதௌ ஸௌந்தர்யலஹரீ ஸமாப்தா ॥"
   reversible: false
-- index: 33
+- index: 39
   from: Tamil
   to: Devanagari
   input: "॥ இதி ஶ்ரீமத்பரமஹம்ஸபரிவ்ராஜகாசார்யஸ்ய\nஶ்ரீகோவிந்தபகவத்பூஜ்யபாதஶிஷ்யஸ்ய\nஶ்ரீமச்சங்கரபகவதஃ கிருதௌ ஸௌந்தர்யலஹரீ ஸமாப்தா ॥"
   output: "॥ इति श्रीमत्परमहंसपरिव्राजकाचार्यस्य\nश्रीकोविन्तपकवत्पूज्यपातशिष्यस्य\nश्रीमच्चङ्करपकवतः किरुतौ सौन्तर्यलहरी समाप्ता ॥"
   reversible: true
-- index: 34
+- index: 40
   from: Tamil
   to: Normal
   input: "॥ இதி ஶ்ரீமத்பரமஹம்ஸபரிவ்ராஜகாசார்யஸ்ய\nஶ்ரீகோவிந்தபகவத்பூஜ்யபாதஶிஷ்யஸ்ய\nஶ்ரீமச்சங்கரபகவதஃ கிருதௌ ஸௌந்தர்யலஹரீ ஸமாப்தா ॥"
   output: ".. iti shrImatparamahaMsaparivrAjakACAryasya\nshrIkOvintapakavatpUjyapAtashiShyasya\nshrImaCCaGkarapakavataH kirutau sauntaryalaharI samAptA .."
-  reversible: true
-- index: 35
-  from: Devanagari
-  to: Tamil
-  input: "ॐ नमो नारायणाय\nअथ श्रीमन्नारायणीयम्\nप्रथमम् दशकम्\nभगवतः स्वरूपं माहात्म्यं च"
-  output: "ௐ நமோ நாராயணாய\nஅத ஶ்ரீமந்நாராயணீயம்\nப்ரதமம் தஶகம்\nபகவதஃ ஸ்வரூபம் மாஹாத்ம்யம் ச"
-  reversible: false
-- index: 36
-  from: Tamil
-  to: Devanagari
-  input: "ௐ நமோ நாராயணாய\nஅத ஶ்ரீமந்நாராயணீயம்\nப்ரதமம் தஶகம்\nபகவதஃ ஸ்வரூபம் மாஹாத்ம்யம் ச"
-  output: "ॐ नमो नारायणाय\nअत श्रीमन्नारायणीयं\nप्रतमं तशकं\nपकवतः स्वरूपं माहात्ंयं च"
-  reversible: true
-- index: 37
-  from: Tamil
-  to: Normal
-  input: "ௐ நமோ நாராயணாய\nஅத ஶ்ரீமந்நாராயணீயம்\nப்ரதமம் தஶகம்\nபகவதஃ ஸ்வரூபம் மாஹாத்ம்யம் ச"
-  output: "AUM namO nArAyaNAya\nata shrImannArAyaNIyaM\npratamaM tashakaM\npakavataH svarUpaM mAhAtMyaM Ca"
-  reversible: true
-- index: 38
-  from: Devanagari
-  to: Tamil
-  input: "सान्द्रानन्दावबोधात्मकमनुपमितं कालदेशावधिभ्यां\nनिर्मुक्तं नित्यमुक्तं निगमशतसहस्रेण निर्भास्यमानम् ।\nअस्पष्टं दृष्टमात्रे पुनरुरुपुरुषार्थात्मकं ब्रह्म तत्वं\nतत्तावद्भाति साक्षाद् गुरुपवनपुरे हन्त भाग्यं जनानाम् ॥१॥"
-  output: "ஸாந்த்ராநந்தாவபோதாத்மகமநுபமிதம் காலதேஶாவதிப்யாம்\nநிர்முக்தம் நித்யமுக்தம் நிகமஶதஸஹஸ்ரேண நிர்பாஸ்யமாநம் ।\nஅஸ்பஷ்டம் திருஷ்டமாத்ரே புநருருபுருஷார்தாத்மகம் ப்ரஹ்ம தத்வம்\nதத்தாவத்பாதி ஸாக்ஷாத் குருபவநபுரே ஹந்த பாக்யம் ஜநாநாம் ॥௧॥"
-  reversible: false
-- index: 39
-  from: Tamil
-  to: Devanagari
-  input: "ஸாந்த்ராநந்தாவபோதாத்மகமநுபமிதம் காலதேஶாவதிப்யாம்\nநிர்முக்தம் நித்யமுக்தம் நிகமஶதஸஹஸ்ரேண நிர்பாஸ்யமாநம் ।\nஅஸ்பஷ்டம் திருஷ்டமாத்ரே புநருருபுருஷார்தாத்மகம் ப்ரஹ்ம தத்வம்\nதத்தாவத்பாதி ஸாக்ஷாத் குருபவநபுரே ஹந்த பாக்யம் ஜநாநாம் ॥௧॥"
-  output: "सान्त्रानन्तावपोतात्मकमनुपमितं कालतेशावतिप्यां\nनिर्मुक्तं नित्यमुक्तं निकमशतसहस्रेण निर्पास्यमानं ।\nअस्पष्टं तिरुष्टमात्रे पुनरुरुपुरुषार्तात्मकं प्रह्म तत्वं\nतत्तावत्पाति साक्षात् कुरुपवनपुरे हन्त पाक्यं जनानां ॥१॥"
-  reversible: true
-- index: 40
-  from: Tamil
-  to: Normal
-  input: "ஸாந்த்ராநந்தாவபோதாத்மகமநுபமிதம் காலதேஶாவதிப்யாம்\nநிர்முக்தம் நித்யமுக்தம் நிகமஶதஸஹஸ்ரேண நிர்பாஸ்யமாநம் ।\nஅஸ்பஷ்டம் திருஷ்டமாத்ரே புநருருபுருஷார்தாத்மகம் ப்ரஹ்ம தத்வம்\nதத்தாவத்பாதி ஸாக்ஷாத் குருபவநபுரே ஹந்த பாக்யம் ஜநாநாம் ॥௧॥"
-  output: "sAntrAnantAvapOtAtmakamanupamitaM kAlatEshAvatipyAM\nnirmuktaM nityamuktaM nikamashatasahasrENa nirpAsyamAnaM .\naspaShTaM tiruShTamAtrE punarurupuruShArtAtmakaM prahma tatvaM\ntattAvatpAti sAkShAt kurupavanapurE hanta pAkyaM janAnAM ..1.."
   reversible: true
