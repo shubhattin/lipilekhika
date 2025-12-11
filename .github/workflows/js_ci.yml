@@ -33,4 +33,4 @@ jobs:
           cd packages/js
           bun install
           bun run make-script-data
-          bun test --coverage --concurrent
+          bun test --coverage --concurrent --only-failures
