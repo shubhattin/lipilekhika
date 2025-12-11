@@ -435,6 +435,7 @@ export const transliterate_text = async (
                 );
                 // if mixture of vyanjana and mAtrA then return the first item as anya type
                 if (
+                  from_script_name === "Tamil-Extended" &&
                   list_refs.some((item) => item?.type === 'mAtrA') &&
                   list_refs.some((item) => item?.type === 'vyanjana')
                 ) {
