@@ -1,6 +1,7 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 
+const HALANT = '්';
 const Sinhala: InputBrahmicScriptType = {
   script_type: 'brahmic',
   script_name: 'Sinhala',
@@ -24,8 +25,8 @@ const Sinhala: InputBrahmicScriptType = {
     visarga: 'ඃ',
     saMkShepachihna: '॰',
     avagraha: 'ऽ',
-    // Devanagari avagraha as not there in Sinhala
-    halant: '්',
+    // ^ Devanagari avagraha as not there in Sinhala
+    halant: HALANT,
     anudAttA: '॒',
     'udAtta-1': '॑',
     'udAtta-2': '᳚',
@@ -34,6 +35,15 @@ const Sinhala: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: HALANT,
+      text_krama: ['halant'],
+      type: 'anya',
+      duplicates: [HALANT + '\u200d']
+      // ^ a different variant of halant present in Sinhala which
+      // allows conjuct glyphs (saMyukAkShara)
+    },
+
     {
       text: 'අ',
       mAtrA: '',
