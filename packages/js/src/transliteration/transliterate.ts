@@ -439,8 +439,14 @@ export const transliterate_text = async (
                   list_refs.some((item) => item?.type === 'vyanjana')
                 ) {
                   return { ...list_refs[0], type: 'anya' };
+                } else if (
+                  from_script_name === 'Tamil-Extended' &&
+                  list_refs.length > 1 &&
+                  list_refs.some((item) => item === undefined || item === null)
+                ) {
+                  return list_refs.at(-1);
                 }
-                return list_refs.at(-1);
+                return list_refs[0];
               })()
             ]);
           } else if (to_script_data.script_type === 'brahmic') {
