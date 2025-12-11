@@ -150,7 +150,11 @@ const sanskrit_other_brahmic_scripts = async () => {
         // double danda transliteration issue in converter script
         // data is fine so we bypass it, otherwise verified working fine
       }
-      let output = await old_lipi_parivartak(input, FROM_SCRIPT, other_script);
+      let output: string = await old_lipi_parivartak(
+        input,
+        FROM_SCRIPT,
+        other_script
+      );
       const reversible = !(SCRIPT_IGNORE_RULE ?? []).some((rule) =>
         input.includes(rule)
       );
@@ -215,16 +219,23 @@ const sanskrit_other_brahmic_scripts = async () => {
           });
         }
 
-        const input_norm1 = (
-          await old_lipi_parivartak(dot_free_output, other_script, "Normal")
-        )
-          .replaceAll(/\.(?=\d)/g, "")
-          .replaceAll("chh", "Ch")
-          .replaceAll("ch", "C");
-        const VEDIC_SVARA_ALIAS = ["#s", "#ss", "#sss", "#an"];
+        const REPLACEMENTS: [string | RegExp, string][] = [
+          [/\.(?=\d)/g, ""],
+          ["chh", "Ch"],
+          ["ch", "C"],
+          ["#s", "↑"],
+          ["#an", "↓"],
+        ];
+        const input_norm1: string = await old_lipi_parivartak(
+          dot_free_output,
+          other_script,
+          "Normal"
+        );
+        const BLOCK_CASES = ["#sss", "#ss"];
+        // ^ block this transliteration case as #ss is in conflict with #s + s
         if (
           input_norm1 !== norm_output &&
-          !VEDIC_SVARA_ALIAS.some((alias) => input_norm1.includes(alias)) &&
+          !BLOCK_CASES.some((block) => input_norm1.includes(block)) &&
           (other_script !== "Gurumukhi" ||
             ["rI"].some((alias) => input_norm1.includes(alias)))
         ) {
@@ -233,7 +244,11 @@ const sanskrit_other_brahmic_scripts = async () => {
             from: other_script,
             to: "Normal",
             input: dot_free_output,
-            output: input_norm1,
+            output: REPLACEMENTS.reduce(
+              (acc, [pattern, replacement]) =>
+                acc.replaceAll(pattern, replacement),
+              input_norm1
+            ),
             reversible: true,
           });
         }
@@ -264,7 +279,7 @@ const sanskrit_non_brahmic_scripts = async () => {
   let index1 = 0;
   for (const non_brahmic_script of NON_BRAHMI_SCRIPTS) {
     for (const input of COMBINED_INPUTS) {
-      let output = await old_lipi_parivartak(
+      let output: string = await old_lipi_parivartak(
         input,
         FROM_SCRIPT,
         non_brahmic_script
@@ -287,7 +302,7 @@ const sanskrit_non_brahmic_scripts = async () => {
       if (non_brahmic_script === "Normal") {
         for (const other_script of NON_BRAHMI_SCRIPTS) {
           if (other_script === "Normal") continue;
-          const output1 = await old_lipi_parivartak(
+          const output1: string = await old_lipi_parivartak(
             output,
             non_brahmic_script,
             other_script
