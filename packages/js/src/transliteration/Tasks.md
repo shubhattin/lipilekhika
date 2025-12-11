@@ -1,6 +1,7 @@
 # Tasks
 
 - Make sure Tamil Extended and Vedic Accents marks work together.
+- Add Context Clear Conditions where applicable.
 
 ## Todo for Ranges
 
