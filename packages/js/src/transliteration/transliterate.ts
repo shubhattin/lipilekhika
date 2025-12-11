@@ -118,8 +118,8 @@ export const transliterate_text = async (
         (item[1]?.type === 'mAtrA' || item[1]?.type === 'svara')
       ) {
         const linked_mAtrA =
-          item[1]?.type === 'svara'
-            ? (to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '')
+          item[1].type === 'svara'
+            ? (to_script_data.krama_text_arr[item[1].mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '')
             : item[0]!;
         // const linked_mAtrA = item[0]!;
         if (

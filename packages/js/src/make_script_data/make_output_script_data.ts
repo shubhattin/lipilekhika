@@ -213,7 +213,9 @@ async function main() {
             krama_ref: mAtrA_krama_ref_index_list,
             type: 'mAtrA'
           });
-          res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
+          if (res.list[key_to_reference_back_list].type === 'svara') {
+            res.list[key_to_reference_back_list].mAtrA_krama_ref = mAtrA_krama_ref_index_list;
+          }
           mAtrA_krama_ref_index_list.forEach((mAtrA_krama_ref_index) => {
             if (mAtrA_krama_ref_index !== -1) {
               res.krama_text_arr[mAtrA_krama_ref_index] = [item.mAtrA, res.list.length - 1];
