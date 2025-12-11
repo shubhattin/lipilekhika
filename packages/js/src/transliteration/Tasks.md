@@ -1,6 +1,7 @@
 # Tasks
 
 - Make sure Tamil Extended and Vedic Accents marks work together.
+- Add Context Clear Conditions where applicable.
 
 ## Todo for Ranges
 
@@ -13,6 +14,6 @@
 - 'brahmic' -> `other`:
   - Option to replace avagraha(`''`) with `a`
   - Option to remove virAma (.) and pUrNa virAma (..)
-- `panchAmAkShara` -> `anunAsika` replacement when converting from *Devanagari/Purna-Devanagari* to other `brahmic` scripts (like Telugu, Kannada).
-Eg. काङ्क्षते -> kAMkShate instead of kAGkShate (Gk -> Mk)
+- `panchAmAkShara` -> `anunAsika` replacement when converting from _Devanagari/Purna-Devanagari_ to other `brahmic` scripts (like Telugu, Kannada).
+  Eg. काङ्क्षते -> kAMkShate instead of kAGkShate (Gk -> Mk)
 - Some `Sinhala` specific options. Look at the old lipi lekhika used in `thesanskritchannel_projects` repo for more details.

@@ -118,8 +118,8 @@ export const transliterate_text = async (
         (item[1]?.type === 'mAtrA' || item[1]?.type === 'svara')
       ) {
         const linked_mAtrA =
-          item[1]?.type === 'svara'
-            ? (to_script_data.krama_text_arr[item[1]?.mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '')
+          item[1].type === 'svara'
+            ? (to_script_data.krama_text_arr[item[1].mAtrA_krama_ref?.[0] ?? -1]?.[0] ?? '')
             : item[0]!;
         // const linked_mAtrA = item[0]!;
         if (
@@ -435,12 +435,19 @@ export const transliterate_text = async (
                 );
                 // if mixture of vyanjana and mAtrA then return the first item as anya type
                 if (
+                  from_script_name === 'Tamil-Extended' &&
                   list_refs.some((item) => item?.type === 'mAtrA') &&
                   list_refs.some((item) => item?.type === 'vyanjana')
                 ) {
                   return { ...list_refs[0], type: 'anya' };
+                } else if (
+                  from_script_name === 'Tamil-Extended' &&
+                  list_refs.length > 1 &&
+                  list_refs.some((item) => item === undefined || item === null)
+                ) {
+                  return list_refs.at(-1);
                 }
-                return list_refs.at(-1);
+                return list_refs[0];
               })()
             ]);
           } else if (to_script_data.script_type === 'brahmic') {

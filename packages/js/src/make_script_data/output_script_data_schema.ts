@@ -28,32 +28,35 @@ type CommonScriptData = {
       fallback_list_ref?: number | null;
     }
   ][];
+  list: {
+    /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
+    krama_ref: number[];
+    type: NonNullable<NonNullable<InputOtherScriptType['list']>[number]['type']>;
+  }[];
 };
 
 export type OutputBrahmicScriptData = Pick<
   InputBrahmicScriptType,
   'script_name' | 'script_id' | 'halant' | 'nuqta' | 'schwa_property' | 'script_type'
 > &
-  CommonScriptData & {
-    list: {
-      /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
-      krama_ref: number[];
-      type: InputBrahmicScriptType['list'][number]['type'] | 'mAtrA';
-      mAtrA_krama_ref?: number[] | null;
-      // ^ needed in other -> brahmic conversion
-    }[];
+  Omit<CommonScriptData, 'list'> & {
+    list: (Pick<CommonScriptData['list'][number], 'krama_ref'> &
+      (
+        | {
+            type: Exclude<InputBrahmicScriptType['list'][number]['type'] | 'mAtrA', 'svara'>;
+          }
+        | {
+            type: 'svara';
+            mAtrA_krama_ref?: number[] | null;
+            // ^ needed in other -> brahmic conversion
+          }
+      ))[];
   };
 
 export type OutputOtherScriptData = Pick<
   InputOtherScriptType,
   'script_name' | 'script_id' | 'script_type' | 'schwa_character'
 > &
-  CommonScriptData & {
-    list: {
-      /** Indexes of the the corresponding entries in `krama_key_map` corresponding to the `key_krama` */
-      krama_ref: number[];
-      type?: NonNullable<InputOtherScriptType['list']>[number]['type'];
-    }[];
-  };
+  CommonScriptData;
 
 export type OutputScriptData = OutputBrahmicScriptData | OutputOtherScriptData;
