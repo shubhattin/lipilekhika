@@ -8,4 +8,4 @@ node_modules
 # Script Data Ignore (Built Output)
 packages/js/src/script_data
 
-test_data/auto-*/auto-*.yaml
+test_data/transliteration/auto-*/auto-*.yaml
