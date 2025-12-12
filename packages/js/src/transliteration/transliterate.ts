@@ -8,6 +8,13 @@ import {
 } from '../utils/binary_search/binary_search';
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
+import custom_options_json from '../custom_options.json';
+import type { OptionsType } from '../make_script_data/custom_options_input';
+
+export type CustomOptionList = keyof typeof custom_options_json;
+export type CustomOptionType = {
+  [key in CustomOptionList]?: boolean;
+};
 
 type prev_context_array_type = [
   string | undefined,
@@ -21,10 +28,12 @@ const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
-  to_script_name: script_list_type
+  to_script_name: script_list_type,
+  input_options?: CustomOptionType
 ) => {
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
+  const options = get_active_custom_options(from_script_data, to_script_data, input_options);
 
   let result_str = '';
 
@@ -565,4 +574,41 @@ export const transliterate_text = async (
     /** Can be used to manage context while using the typing feature */
     context_length: prev_context_arr.length
   };
+};
+
+/**
+ * Returns the active custom options to applied based on the `from` and `to` script information
+ */
+export const get_active_custom_options = (
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  input_options?: CustomOptionType
+): CustomOptionType => {
+  const active_custom_options: CustomOptionType = {};
+  for (const [key, _] of Object.entries(input_options ?? {})) {
+    const option_info = custom_options_json[
+      key as CustomOptionList
+    ] as OptionsType[keyof OptionsType];
+    if (
+      (option_info.from_script_type !== undefined &&
+        (option_info.from_script_type === 'all' ||
+          option_info.from_script_type === from_script_data.script_type)) ||
+      (option_info.from_script_name !== undefined &&
+        option_info.from_script_name.includes(from_script_data.script_name))
+    ) {
+      if (
+        option_info.to_script_type !== undefined &&
+        (option_info.to_script_type === 'all' ||
+          option_info.to_script_type === to_script_data.script_type)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      } else if (
+        option_info.to_script_name !== undefined &&
+        option_info.to_script_name.includes(to_script_data.script_name)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      }
+    }
+  }
+  return active_custom_options;
 };

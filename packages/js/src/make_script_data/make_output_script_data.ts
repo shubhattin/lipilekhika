@@ -20,7 +20,7 @@ import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
-import { type OutputCustomOptionsType, CustomOptionsInput } from './custom_options_input';
+import { type OptionsType, CustomOptionsInput } from './custom_options_input';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
@@ -418,9 +418,9 @@ async function make_script_data() {
 }
 
 async function make_custom_option_json() {
-  const output: OutputCustomOptionsType = {};
+  const output: OptionsType = {};
   for (const [key, value] of Object.entries(CustomOptionsInput)) {
-    const rules: OutputCustomOptionsType[keyof OutputCustomOptionsType]['rules'] = [];
+    const rules: OptionsType[keyof OptionsType]['rules'] = [];
     for (const rule of value.rules) {
       if (rule.type === 'replace_prev_krama_keys') {
         rules.push({
@@ -465,7 +465,7 @@ async function make_custom_option_json() {
         });
       }
     }
-    output[key as keyof OutputCustomOptionsType] = {
+    output[key as keyof OptionsType] = {
       ...value,
       rules: rules
     };
