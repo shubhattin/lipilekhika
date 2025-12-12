@@ -33,7 +33,8 @@ const TestDataTypeSchema = z.object({
   input: z.string(),
   output: z.string(),
   reversible: z.boolean().optional(),
-  todo: z.boolean().optional()
+  todo: z.boolean().optional(),
+  options: z.record(z.string(), z.boolean()).optional()
 });
 
 describe('Transliteration', () => {
@@ -52,7 +53,8 @@ describe('Transliteration', () => {
         const result = await transliterate(
           test_data_item.input,
           test_data_item.from,
-          test_data_item.to
+          test_data_item.to,
+          test_data_item.options
         );
         it(`${test_data_item.index} : ${test_data_item.from} → ${test_data_item.to}`, async () => {
           const errorMessage =
@@ -69,7 +71,8 @@ describe('Transliteration', () => {
             const result_reversed = await transliterate(
               result,
               test_data_item.to,
-              test_data_item.from
+              test_data_item.from,
+              test_data_item.options
             );
             const errorMessage_reversed =
               `Reversed Transliteration failed:\n` +

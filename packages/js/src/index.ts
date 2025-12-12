@@ -1,4 +1,4 @@
-import { transliterate_text } from './transliteration/transliterate';
+import { transliterate_text, type CustomOptionType } from './transliteration/transliterate';
 import { getScriptData } from './utils/get_script_data';
 import {
   getNormalizedScriptName,
@@ -21,7 +21,12 @@ export const preloadScriptData = async (name: script_input_name_type) => {
 
 export type ScriptLangType = script_input_name_type;
 
-export async function transliterate(text: string, from: ScriptLangType, to: ScriptLangType) {
+export async function transliterate(
+  text: string,
+  from: ScriptLangType,
+  to: ScriptLangType,
+  options?: CustomOptionType
+) {
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
     throw new Error(`Invalid script name: ${from}`);
@@ -30,6 +35,6 @@ export async function transliterate(text: string, from: ScriptLangType, to: Scri
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to}`);
   }
-  const result = await transliterate_text(text, normalized_from, normalized_to);
+  const result = await transliterate_text(text, normalized_from, normalized_to, options);
   return result.output;
 }
