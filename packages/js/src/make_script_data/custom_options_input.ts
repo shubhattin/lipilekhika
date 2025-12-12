@@ -23,7 +23,9 @@ type DirectReplaceRule = {
   to_replace: KramaKeysExtendedType[][];
   replace_with: KramaKeysExtendedType;
 };
-type InputRuleTypes = ReplacePrevKramaKeysRule | DirectReplaceRule;
+type InputRuleTypes = {
+  check_in: 'to' | 'from';
+} & (ReplacePrevKramaKeysRule | DirectReplaceRule);
 type CustomOptionsRecordType = {
   description: string;
   from_script_name?: script_list_type[];
@@ -50,7 +52,7 @@ type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
 export type OptionsType = Record<
   `${string}:${string}`,
   Omit<CustomOptionsRecordType, 'rules'> & {
-    rules: (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule)[];
+    rules: ({ check_in: 'from' | 'to' } & (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule))[];
   }
 >;
 
@@ -65,6 +67,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     rules: [
       // ka varga
       {
+        check_in: 'to',
         type: 'replace_prev_krama_keys',
         prev: ['G'],
         following: VARGAS.ka,
@@ -72,6 +75,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // cha varga
       {
+        check_in: 'to',
         type: 'replace_prev_krama_keys',
         prev: ['J'],
         following: VARGAS.cha,
@@ -88,6 +92,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     rules: [
       // ka varga
       {
+        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['G', 'halant'],
         following: VARGAS.ka,
@@ -95,6 +100,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // cha varga
       {
+        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['J', 'halant'],
         following: VARGAS.cha,
@@ -102,6 +108,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // Ta varga
       {
+        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['N', 'halant'],
         following: VARGAS.Ta,
@@ -109,6 +116,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // ta varga
       {
+        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['n', 'halant'],
         following: VARGAS.ta,
@@ -116,6 +124,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // pa varga
       {
+        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['m', 'halant'],
         following: VARGAS.pa,
@@ -136,6 +145,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     description: 'Remove virAma (.) and pUrNa virAma (..) from the text',
     rules: [
       {
+        check_in: 'to',
         type: 'direct_replace',
         to_replace: [['virama'], ['double_virama']],
         replace_with: ''
@@ -148,6 +158,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     description: "Replace avagraha('') with a",
     rules: [
       {
+        check_in: 'to',
         type: 'direct_replace',
         to_replace: [['avagraha']],
         replace_with: 'a-svara'
