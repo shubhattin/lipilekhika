@@ -97,7 +97,7 @@ const get_custom_options = async (
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  return Object.keys(options) as CustomOptionList[];
+  return Object.keys(options) as Array<keyof typeof options>;
 };
 
 const check_array_match = (arr1: string[], arr2: string[]) => {

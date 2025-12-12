@@ -34,6 +34,7 @@ export const transliterate_text = async (
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
+  options;
 
   let result_str = '';
 
@@ -585,7 +586,8 @@ export const get_active_custom_options = (
   input_options?: CustomOptionType
 ): CustomOptionType => {
   const active_custom_options: CustomOptionType = {};
-  for (const [key, _] of Object.entries(input_options ?? {})) {
+  for (const [key, enabled] of Object.entries(input_options ?? {})) {
+    if (!enabled) continue;
     const option_info = custom_options_json[
       key as CustomOptionList
     ] as OptionsType[keyof OptionsType];
