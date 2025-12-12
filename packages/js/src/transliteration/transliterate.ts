@@ -172,7 +172,7 @@ export const transliterate_text = async (
    */
   let ignore_ta_ext_sup_num_text_index = -1;
 
-  for (; text_index < text.length; ) {
+  while (text_index < text.length) {
     const codePoint = text.codePointAt(text_index);
     const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
     // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
@@ -193,21 +193,12 @@ export const transliterate_text = async (
     }
 
     // Step 1: Search for the character in the text_to_krama_map
-    // const context_break_condition =
-    //   PREV_CONTEXT_IN_USE &&
-    //   // context breaker currently needed like this only for other to brahmic conversion
-    //   to_script_data.script_type === 'brahmic';
-    // ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
-    //   prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
-    //   prev_context_arr.at(-1)?.[1]?.type === 'mAtrA') ||
-    //   (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
-    //     prev_context_arr.at(-1)?.[1]?.type === 'mAtrA'));
-    let text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null = null;
+    let text_to_krama_item_index = -1;
     {
       // Iterative matching with retraction support for vyanjana+vowel context
       // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
       let chars_to_scan = 0;
-      let last_valid_vowel_match: OutputScriptData['text_to_krama_map'][number] | null = null;
+      let last_valid_vowel_match_index = -1;
       // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
       const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
@@ -241,14 +232,18 @@ export const transliterate_text = async (
                   )
                 : '')
             : text.substring(text_index, text_index + chars_to_scan + 1);
-        const char_index = binarySearchLower(from_script_data.text_to_krama_map, char_to_search, {
-          accessor: (arr, i) => arr[i][0]
-        });
-        if (char_index === -1) {
-          text_to_krama_item = null;
+        const potential_match_index = binarySearchLower(
+          from_script_data.text_to_krama_map,
+          char_to_search,
+          {
+            accessor: (arr, i) => arr[i][0]
+          }
+        );
+        if (potential_match_index === -1) {
+          text_to_krama_item_index = -1;
           break;
         }
-        const potential_match = from_script_data.text_to_krama_map[char_index];
+        const potential_match = from_script_data.text_to_krama_map[potential_match_index];
 
         // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -270,11 +265,11 @@ export const transliterate_text = async (
 
           if (is_single_vowel) {
             // Save this as a valid retraction point
-            last_valid_vowel_match = potential_match;
-          } else if (last_valid_vowel_match !== null) {
+            last_valid_vowel_match_index = potential_match_index;
+          } else if (last_valid_vowel_match_index !== -1) {
             // Current match is NOT a single vowel but we have a saved vowel match
             // Retract to the last valid vowel match
-            text_to_krama_item = last_valid_vowel_match;
+            text_to_krama_item_index = last_valid_vowel_match_index;
             break;
           }
         }
@@ -316,7 +311,7 @@ export const transliterate_text = async (
                 }
               );
               if (char_index !== -1 && nth_char_text_index !== -1) {
-                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                text_to_krama_item_index = char_index;
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 if (nth_next_character === from_script_data.halant || nth_char_type === 'mAtrA') {
@@ -366,7 +361,7 @@ export const transliterate_text = async (
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const n_1_th_char_text_item =
                   from_script_data.krama_text_arr[n_1_th_char_text_index];
-                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                text_to_krama_item_index = char_index;
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 const n_1_th_char_type =
                   from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type;
@@ -385,10 +380,15 @@ export const transliterate_text = async (
             continue;
           }
         }
-        text_to_krama_item = potential_match;
+        text_to_krama_item_index = potential_match_index;
         break;
       }
     }
+
+    const text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null =
+      text_to_krama_item_index !== -1
+        ? from_script_data.text_to_krama_map[text_to_krama_item_index]
+        : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
       const index_delete_length =
@@ -566,47 +566,3 @@ export const transliterate_text = async (
     context_length: prev_context_arr.length
   };
 };
-
-/**
- * Recursively searches for the longest matching character sequence by probing krama_text_map
- * and retrieving the corresponding entry from text_to_krama_map. Returns null if no match.
- * @returns the krama index of the text if found else null
- */
-// function search_in_text_to_krama_map(
-//   text: string,
-//   text_index: number,
-//   from_script_data: OutputScriptData,
-//   to_script_data: OutputScriptData,
-//   context_break_condition_helper: boolean,
-//   chars_scanned: number = 0
-// ): OutputScriptData['text_to_krama_map'][number] | null {
-//   const char_to_search = text.substring(text_index, text_index + chars_scanned + 1);
-//   const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
-//     accessor: (arr, i) => arr[i][0]
-//   });
-//   if (char_index === -1) {
-//     // if the character is not found, then retun null
-//     return null;
-//   }
-//   const text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-//   let further_lookup_flag = true;
-//   // try to reach to the last possible character following the next using recursion
-//   if (further_lookup_flag && text_to_krama_item[1].next && text_to_krama_item[1].next.length > 0) {
-//     const nth_next_character = text[text_index + chars_scanned + 1] as string | undefined;
-//     if (
-//       nth_next_character !== undefined &&
-//       text_to_krama_item[1].next.indexOf(nth_next_character) !== -1
-//     ) {
-//       // we can return the result as we know that it exists as it is defined in `next` field
-//       return search_in_text_to_krama_map(
-//         text,
-//         text_index,
-//         from_script_data,
-//         to_script_data,
-//         context_break_condition_helper,
-//         chars_scanned + 1
-//       );
-//     }
-//   }
-//   return text_to_krama_item;
-// }

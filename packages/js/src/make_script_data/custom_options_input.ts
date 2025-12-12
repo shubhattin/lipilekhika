@@ -44,6 +44,8 @@ type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
   to_replace: number[][];
   replace_with: number;
 };
+// Using the krama key index instead of the krama key directly to have support for multiple scripts at a time
+// As same corresponding key values will have identical indexes across scripts
 /** This is final type that will be actually used by the transliterator */
 export type OutputCustomOptionsType = Record<
   `${string}:${string}`,
@@ -58,7 +60,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     to_script_name: ['Normal'],
     description:
       'Replace G and J when preceded by ka varga or cha varga vyanjanas\n' +
-      'More natutal to read\n' +
+      'More natural to read\n' +
       'Example: raJjitiam -> ranjitam, raGgam -> rangam',
     rules: [
       // ka varga
@@ -124,7 +126,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
   'all_to_sinhala:use_conjuct_enabling_halant': {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
-    description: 'Use conjuct enabling halant (halant + \\u200d)',
+    description: 'Use conjunct(saMyuktAkShara) enabling halant (halant + \\u200d)',
     // initially we will implementing this rule manually in the code
     rules: []
   },
