@@ -7,7 +7,7 @@
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
 - index: 1
-  todo: true
+  todo: false
   from: Devanagari
   to: Telugu
   input: रञ्जितरङ्ग

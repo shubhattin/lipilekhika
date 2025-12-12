@@ -34,7 +34,12 @@ export const transliterate_text = async (
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  options;
+  const active_custom_rules = Object.keys(options).flatMap(
+    (key) =>
+      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  );
+  // console.log(active_custom_rules);
+  // ^ all active rules for auto processing extracted
 
   let result_str = '';
 
@@ -175,6 +180,77 @@ export const transliterate_text = async (
     }
 
     return result_str_concat_status;
+  }
+
+  function apply_custom_rules(text_index: number, delta: number) {
+    const current_text_index = text_index + delta;
+    for (let rule_index = 0; rule_index < active_custom_rules.length; rule_index++) {
+      const rule = active_custom_rules[rule_index];
+      if (rule.type === 'replace_prev_krama_keys') {
+        let prev_exits = true;
+        let prev_matched_indexes: number[] = [];
+        for (let i = 0; i < rule.prev.length; i++) {
+          const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
+          const current_char_code_point = text.codePointAt(current_text_index - i);
+          if (current_char_code_point === undefined) {
+            prev_exits = false;
+            break;
+          }
+          const current_char = String.fromCodePoint(current_char_code_point);
+          const current_char_krama_index = binarySearchLowerWithIndex(
+            from_script_data.krama_text_arr,
+            from_script_data.krama_text_arr_index,
+            current_char,
+            {
+              accessor: (arr, i) => arr[i][0]
+            }
+          );
+          if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
+            prev_exits = false;
+            break;
+          }
+          prev_matched_indexes.push(current_char_krama_index);
+        }
+        const previous_mactched_str_length_in_from = prev_matched_indexes.reduce((acc, curr) => {
+          return acc + (from_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
+        }, 0);
+        const next_char_code_point = text.codePointAt(text_index);
+        if (prev_exits) {
+          console.log(
+            current_text_index,
+            text_index,
+            text[text_index],
+            text[current_text_index],
+            previous_mactched_str_length_in_from
+          );
+        }
+        if (prev_exits && next_char_code_point !== undefined) {
+          const next_char = String.fromCodePoint(next_char_code_point);
+          const next_char_krama_index = binarySearchLowerWithIndex(
+            from_script_data.krama_text_arr,
+            from_script_data.krama_text_arr_index,
+            next_char,
+            {
+              accessor: (arr, i) => arr[i][0]
+            }
+          );
+          if (
+            next_char_krama_index !== -1 &&
+            rule.following.indexOf(next_char_krama_index) !== -1
+          ) {
+            // using previous matched indexes find the length of the resulant added to the
+            // result_str (i.e. the `to` script)
+            const previous_mactched_str_length_in_to = prev_matched_indexes.reduce((acc, curr) => {
+              return acc + (to_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
+            }, 0);
+            console.log(result_str.split(''), text[current_text_index]);
+            result_str =
+              result_str.slice(0, -previous_mactched_str_length_in_to) +
+              (to_script_data.krama_text_arr[rule.replace_with]?.[0] ?? '');
+          }
+        }
+      }
+    }
   }
 
   /** A flag to indicate when to ignore the tamil extended numeral
@@ -502,6 +578,7 @@ export const transliterate_text = async (
             result_str += result_text;
           }
         }
+        apply_custom_rules(text_index, -(text_to_krama_item[0].length - index_delete_length));
         continue;
       }
     } else {
@@ -567,6 +644,7 @@ export const transliterate_text = async (
         result_str += to_add_text;
       }
     }
+    apply_custom_rules(text_index, -char.length);
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
 
@@ -585,9 +663,10 @@ export const get_active_custom_options = (
   to_script_data: OutputScriptData,
   input_options?: CustomOptionType
 ): CustomOptionType => {
+  if (!input_options) return {};
   const active_custom_options: CustomOptionType = {};
   for (const [key, enabled] of Object.entries(input_options ?? {})) {
-    if (!enabled) continue;
+    if (!enabled || !(key in custom_options_json)) continue;
     const option_info = custom_options_json[
       key as CustomOptionList
     ] as OptionsType[keyof OptionsType];
