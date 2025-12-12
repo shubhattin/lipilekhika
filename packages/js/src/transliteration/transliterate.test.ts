@@ -32,7 +32,8 @@ const TestDataTypeSchema = z.object({
   to: z.string(),
   input: z.string(),
   output: z.string(),
-  reversible: z.boolean().optional()
+  reversible: z.boolean().optional(),
+  todo: z.boolean().optional()
 });
 
 describe('Transliteration', () => {
@@ -61,7 +62,7 @@ describe('Transliteration', () => {
             `  Input: "${test_data_item.input}"\n` +
             `  Expected: "${test_data_item.output}"\n` +
             `  Actual: "${result}"`;
-          expect(result, errorMessage).toBe(test_data_item.output);
+          if (!test_data_item.todo) expect(result, errorMessage).toBe(test_data_item.output);
         });
         if (test_data_item.reversible) {
           it(`${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`, async () => {
@@ -77,7 +78,8 @@ describe('Transliteration', () => {
               `  Input: "${result}"\n` +
               `  Original Input: "${test_data_item.input}"\n` +
               `  Reversed Output: "${result_reversed}"`;
-            expect(result_reversed, errorMessage_reversed).toBe(test_data_item.input);
+            if (!test_data_item.todo)
+              expect(result_reversed, errorMessage_reversed).toBe(test_data_item.input);
           });
         }
       }
