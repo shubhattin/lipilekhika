@@ -1,14 +1,6 @@
 import type { script_list_type } from '../utils/lang_list';
 import type { KramaKeysExtendedType } from './krama_array_keys';
 
-type RuleTypes = {
-  /** in this we check if the string prev_krama_keys combines string appears before any one of the following_krama_keys */
-  type: 'replace_prev_krama_keys';
-  prev_krama_keys: KramaKeysExtendedType[];
-  following_krama_keys: KramaKeysExtendedType[];
-  replace_with: KramaKeysExtendedType;
-};
-
 const VARGAS = {
   ka: ['k', 'kz', 'kh', 'khz', 'g', 'gz', 'g1', 'gh'],
   cha: ['C', 'Ch', 'j', 'jz', 'j1', 'jh'],
@@ -17,19 +9,48 @@ const VARGAS = {
   pa: ['p', 'ph', 'b', 'b1', 'bh']
 } satisfies Record<string, KramaKeysExtendedType[]>;
 
-type CustomOptionsInput = Record<
+type ReplacePrevKramaKeysRule = {
+  /** in this we check if the string prev_krama_keys combines string appears before any one of the following_krama_keys */
+  type: 'replace_prev_krama_keys';
+  prev: KramaKeysExtendedType[];
+  following: KramaKeysExtendedType[];
+  replace_with: KramaKeysExtendedType;
+};
+type DirectReplaceRule = {
+  type: 'direct_replace';
+  /** set of inividual krama key combinations to replace */
+  to_replace: KramaKeysExtendedType[][];
+  replace_with: KramaKeysExtendedType;
+};
+type InputRuleTypes = ReplacePrevKramaKeysRule | DirectReplaceRule;
+type CustomOptionsRecordType = {
+  description: string;
+  from_script_name?: script_list_type[];
+  from_script_type?: 'brahmic' | 'other' | 'all';
+  to_script_name?: script_list_type[];
+  to_script_type?: 'brahmic' | 'other' | 'all';
+  rules: InputRuleTypes[];
+};
+type InputCustomOptionsType = Record<`${string}:${string}`, CustomOptionsRecordType>;
+
+type out_ReplacePrevKramaKeysRule = Pick<ReplacePrevKramaKeysRule, 'type'> & {
+  prev: number[];
+  following: number[];
+  replace_with: number;
+};
+type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
+  to_replace: number[][];
+  replace_with: number;
+};
+/** This is final type that will be actually used by the transliterator */
+export type OutputCustomOptionsType = Record<
   `${string}:${string}`,
-  {
-    description: string;
-    from_script_name?: script_list_type[];
-    from_script_type?: 'brahmic' | 'other' | 'all';
-    to_script_name?: script_list_type[];
-    to_script_type?: 'brahmic' | 'other' | 'all';
-    rules: RuleTypes[];
+  Omit<CustomOptionsRecordType, 'rules'> & {
+    rules: (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule)[];
   }
 >;
 
-export const CustomOptionsInput: CustomOptionsInput = {
+export const CustomOptionsInput: InputCustomOptionsType = {
   'all_to_normal:replace_pancham_varga_varna_with_n': {
     from_script_type: 'all',
     to_script_name: ['Normal'],
@@ -41,15 +62,15 @@ export const CustomOptionsInput: CustomOptionsInput = {
       // ka varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['G'],
-        following_krama_keys: VARGAS.ka,
+        prev: ['G'],
+        following: VARGAS.ka,
         replace_with: 'n'
       },
       // cha varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['J'],
-        following_krama_keys: VARGAS.cha,
+        prev: ['J'],
+        following: VARGAS.cha,
         replace_with: 'n'
       }
     ]
@@ -64,36 +85,36 @@ export const CustomOptionsInput: CustomOptionsInput = {
       // ka varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['G', 'halant'],
-        following_krama_keys: VARGAS.ka,
+        prev: ['G', 'halant'],
+        following: VARGAS.ka,
         replace_with: 'anusvAra'
       },
       // cha varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['J', 'halant'],
-        following_krama_keys: VARGAS.cha,
+        prev: ['J', 'halant'],
+        following: VARGAS.cha,
         replace_with: 'anusvAra'
       },
       // Ta varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['N', 'halant'],
-        following_krama_keys: VARGAS.Ta,
+        prev: ['N', 'halant'],
+        following: VARGAS.Ta,
         replace_with: 'anusvAra'
       },
       // ta varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['n', 'halant'],
-        following_krama_keys: VARGAS.ta,
+        prev: ['n', 'halant'],
+        following: VARGAS.ta,
         replace_with: 'anusvAra'
       },
       // pa varga
       {
         type: 'replace_prev_krama_keys',
-        prev_krama_keys: ['m', 'halant'],
-        following_krama_keys: VARGAS.pa,
+        prev: ['m', 'halant'],
+        following: VARGAS.pa,
         replace_with: 'anusvAra'
       }
     ]
@@ -109,12 +130,24 @@ export const CustomOptionsInput: CustomOptionsInput = {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     description: 'Remove virAma (.) and pUrNa virAma (..) from the text',
-    rules: []
+    rules: [
+      {
+        type: 'direct_replace',
+        to_replace: [['virama'], ['double_virama']],
+        replace_with: ''
+      }
+    ]
   },
   'all_to_normal:replace_avagraha_with_a': {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     description: "Replace avagraha('') with a",
-    rules: []
+    rules: [
+      {
+        type: 'direct_replace',
+        to_replace: [['avagraha']],
+        replace_with: 'a-svara'
+      }
+    ]
   }
 };
