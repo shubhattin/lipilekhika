@@ -20,11 +20,13 @@ import chalk from 'chalk';
 import { toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
+import { type OutputCustomOptionsType, CustomOptionsInput } from './custom_options_input';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
-const OUT_FOLDER = path.resolve('.', 'src', 'script_data');
+const OUT_FOLDER = path.resolve('./src/script_data');
+const CUSTOM_OPTIONS_OUT_FOLDER = path.resolve('./src/custom_options.json');
 
-async function main() {
+async function make_script_data() {
   // reset output folder
   if (fs.existsSync(OUT_FOLDER)) fs.rmSync(OUT_FOLDER, { recursive: true });
   fs.mkdirSync(OUT_FOLDER, { recursive: true });
@@ -415,7 +417,65 @@ async function main() {
   }
 }
 
-main()
+async function make_custom_option_json() {
+  const output: OutputCustomOptionsType = {};
+  for (const [key, value] of Object.entries(CustomOptionsInput)) {
+    const rules: OutputCustomOptionsType[keyof OutputCustomOptionsType]['rules'] = [];
+    for (const rule of value.rules) {
+      if (rule.type === 'replace_prev_krama_keys') {
+        rules.push({
+          type: rule.type,
+          prev: rule.prev.map((prev) =>
+            binarySearchLowerWithIndex(
+              KramaKeysArray,
+              KramaKeysIndexB,
+              resolveKramaKeysExtendedType(prev)
+            )
+          ),
+          following: rule.following.map((following) =>
+            binarySearchLowerWithIndex(
+              KramaKeysArray,
+              KramaKeysIndexB,
+              resolveKramaKeysExtendedType(following)
+            )
+          ),
+          replace_with: binarySearchLowerWithIndex(
+            KramaKeysArray,
+            KramaKeysIndexB,
+            resolveKramaKeysExtendedType(rule.replace_with)
+          )
+        });
+      } else if (rule.type === 'direct_replace') {
+        rules.push({
+          type: rule.type,
+          to_replace: rule.to_replace.map((to_replace) =>
+            to_replace.map((to_replace_item) =>
+              binarySearchLowerWithIndex(
+                KramaKeysArray,
+                KramaKeysIndexB,
+                resolveKramaKeysExtendedType(to_replace_item)
+              )
+            )
+          ),
+          replace_with: binarySearchLowerWithIndex(
+            KramaKeysArray,
+            KramaKeysIndexB,
+            resolveKramaKeysExtendedType(rule.replace_with)
+          )
+        });
+      }
+    }
+    output[key as keyof OutputCustomOptionsType] = {
+      ...value,
+      rules: rules
+    };
+  }
+
+  const jsonOutput = JSON.stringify(output, null, 2);
+  fs.writeFileSync(CUSTOM_OPTIONS_OUT_FOLDER, jsonOutput);
+}
+
+make_script_data()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
     try {
@@ -427,3 +487,7 @@ main()
   .catch((err) => {
     console.error(chalk.red('✖  Error generating script data'), err);
   });
+
+make_custom_option_json().catch((err) => {
+  console.error(chalk.red('✖  Error generating custom option json'), err);
+});

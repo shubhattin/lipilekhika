@@ -9,6 +9,7 @@ const VARGAS = {
   pa: ['p', 'ph', 'b', 'b1', 'bh']
 } satisfies Record<string, KramaKeysExtendedType[]>;
 
+// Input types
 type ReplacePrevKramaKeysRule = {
   /** in this we check if the string prev_krama_keys combines string appears before any one of the following_krama_keys */
   type: 'replace_prev_krama_keys';
@@ -33,6 +34,7 @@ type CustomOptionsRecordType = {
 };
 type InputCustomOptionsType = Record<`${string}:${string}`, CustomOptionsRecordType>;
 
+// Output types
 type out_ReplacePrevKramaKeysRule = Pick<ReplacePrevKramaKeysRule, 'type'> & {
   prev: number[];
   following: number[];
