@@ -25,6 +25,46 @@ type prev_context_array_type = [
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
 
+const string_builder = () => {
+  let result: string[] = [];
+
+  function pushPiece(s: string) {
+    if (!s) return;
+    result.push(s);
+  }
+
+  function lastPiece(): string | undefined {
+    return result.at(-1);
+  }
+
+  function lastChar(): string | undefined {
+    const lp = lastPiece();
+    return lp?.at(-1);
+  }
+
+  function popLastChar(): string | undefined {
+    const lp = lastPiece();
+    if (!lp) return undefined;
+    const ch = lp.at(-1);
+    const rest = lp.slice(0, -1);
+    if (rest) result[result.length - 1] = rest;
+    else result.pop();
+    return ch;
+  }
+
+  function replaceLastPieces(count: number, newPieces: string[]) {
+    result.splice(-count, count, ...newPieces.filter(Boolean));
+  }
+  return {
+    pushPiece,
+    lastPiece,
+    lastChar,
+    popLastChar,
+    replaceLastPieces,
+    toString: () => result.join('')
+  };
+};
+
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
@@ -42,8 +82,7 @@ export const transliterate_text = async (
 
   text = apply_repalce_rules(text, from_script_data, custom_rules, 'input');
 
-  let result_str = '';
-
+  const result = string_builder();
   let text_index = 0;
 
   const MAX_CONTEXT_LENGTH = 5;
@@ -124,7 +163,7 @@ export const transliterate_text = async (
           item[1] === undefined)
         // ^ as halant also a null 'type'
       ) {
-        result_str += to_script_data.schwa_character;
+        result.pushPiece(to_script_data.schwa_character);
         // console.log('a added');
       }
     } else if (
@@ -144,20 +183,21 @@ export const transliterate_text = async (
         if (
           to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-            result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+            result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
           ) !== -1
         ) {
+          const last_pop = result.popLastChar() ?? '';
+          // remove the last character (not item)
           if (linked_mAtrA[0] === to_script_data.halant) {
-            result_str =
-              result_str.slice(0, -1) +
-              to_script_data.halant +
-              (result_str.at(-1) ?? '') +
-              linked_mAtrA.slice(1);
+            result.pushPiece(to_script_data.halant);
+            result.pushPiece(last_pop);
+            result.pushPiece(linked_mAtrA.slice(1));
           } else {
-            result_str = result_str.slice(0, -1) + linked_mAtrA + result_str.at(-1)!;
+            result.pushPiece(linked_mAtrA);
+            result.pushPiece(last_pop);
           }
         } else {
-          result_str += linked_mAtrA;
+          result.pushPiece(linked_mAtrA);
         }
         result_str_concat_status = true;
       } else if (
@@ -167,12 +207,14 @@ export const transliterate_text = async (
         if (
           to_script_name === 'Tamil-Extended' &&
           TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-            result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+            result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
           ) !== -1
         ) {
-          result_str = result_str.slice(0, -1) + BRAHMIC_HALANT + result_str.at(-1)!;
+          const last_char = result.popLastChar() ?? '';
+          result.pushPiece(BRAHMIC_HALANT!);
+          result.pushPiece(last_char);
         } else {
-          result_str += BRAHMIC_HALANT;
+          result.pushPiece(BRAHMIC_HALANT!);
         }
       }
     }
@@ -233,16 +275,12 @@ export const transliterate_text = async (
             next_char_krama_index !== -1 &&
             rule.following.indexOf(next_char_krama_index) !== -1
           ) {
-            // using previous matched indexes find the length of the resulant added to the
-            // result_str (i.e. the `to` script)
-            const previous_mactched_str_length_in_to = prev_matched_indexes.reduce((acc, curr) => {
-              return acc + (to_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
-            }, 0);
-            const replace_with_string = rule.replace_with
+            // Replace last K output pieces corresponding to the matched previous krama keys.
+            // This is token-safe and avoids char-count slicing.
+            const replace_with_pieces = rule.replace_with
               .map((replace_with) => to_script_data.krama_text_arr[replace_with]?.[0] ?? '')
-              .join('');
-            result_str =
-              result_str.slice(0, -previous_mactched_str_length_in_to) + replace_with_string;
+              .filter(Boolean);
+            result.replaceLastPieces(prev_matched_indexes.length, replace_with_pieces);
           }
         }
       }
@@ -270,7 +308,7 @@ export const transliterate_text = async (
         prev_context_cleanup_func([' ', null]);
         prev_context_arr = [];
       }
-      result_str += char;
+      result.pushPiece(char);
       continue;
     }
 
@@ -488,12 +526,11 @@ export const transliterate_text = async (
       // we have to componsate for the superscript number's length
       if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
         // as the krama index is present we can skip the Step 2 and return the result directly
-        const result_text = text_to_krama_item[1].krama
-          .map(
-            (krama_index) => to_script_data.krama_text_arr[krama_index]?.[0] ?? ''
-            // revert to the original character if the krama index is not found
-          )
-          .join('');
+        const result_pieces_to_add = text_to_krama_item[1].krama.map(
+          (krama_index) => to_script_data.krama_text_arr[krama_index]?.[0] ?? ''
+          // revert to the original character if the krama index is not found
+        );
+        const result_text = result_pieces_to_add.join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
           if (from_script_data.script_type === 'brahmic') {
@@ -558,20 +595,24 @@ export const transliterate_text = async (
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
               result_text === to_script_data.halant) &&
             TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-              result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+              result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
             ) !== -1
           ) {
-            if (result_text[0] === to_script_data.halant) {
-              result_str =
-                result_str.slice(0, -1) +
-                to_script_data.halant +
-                (result_str.at(-1) ?? '') +
-                result_text.slice(1);
+            const last_char = result.popLastChar() ?? '';
+            const first_piece = result_pieces_to_add[0] ?? '';
+            if (first_piece[0] === to_script_data.halant) {
+              result.pushPiece(to_script_data.halant);
+              result.pushPiece(last_char);
+              const rest_first = first_piece.slice(1);
+              if (rest_first) result.pushPiece(rest_first);
+              for (let i = 1; i < result_pieces_to_add.length; i++)
+                result.pushPiece(result_pieces_to_add[i]);
             } else {
-              result_str = result_str.slice(0, -1) + result_text + result_str.at(-1)!;
+              for (const p of result_pieces_to_add) result.pushPiece(p);
+              result.pushPiece(last_char);
             }
           } else {
-            result_str += result_text;
+            for (const p of result_pieces_to_add) result.pushPiece(p);
           }
         }
         apply_custom_rules(text_index, -(text_to_krama_item[0].length - index_delete_length));
@@ -598,7 +639,7 @@ export const transliterate_text = async (
         prev_context_arr = [];
         // clear the array as an unidentified character found
       }
-      result_str += char_to_search;
+      result.pushPiece(char_to_search);
       continue;
     }
     let result_concat_status = false;
@@ -624,30 +665,31 @@ export const transliterate_text = async (
         (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'mAtrA' ||
           to_add_text === to_script_data.halant) &&
         TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-          result_str.at(-1)! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+          result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
         ) !== -1
       ) {
+        const last_char = result.popLastChar() ?? '';
         if (to_add_text[0] === to_script_data.halant) {
-          result_str =
-            result_str.slice(0, -1) +
-            to_script_data.halant +
-            (result_str.at(-1) ?? '') +
-            to_add_text.slice(1);
+          result.pushPiece(to_script_data.halant);
+          result.pushPiece(last_char);
+          result.pushPiece(to_add_text.slice(1));
         } else {
-          result_str = result_str.slice(0, -1) + to_add_text + result_str.at(-1)!;
+          result.pushPiece(to_add_text);
+          result.pushPiece(last_char);
         }
       } else {
-        result_str += to_add_text;
+        result.pushPiece(to_add_text);
       }
     }
     apply_custom_rules(text_index, -char.length);
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
 
-  result_str = apply_repalce_rules(result_str, to_script_data, custom_rules, 'output');
+  let output = result.toString();
+  output = apply_repalce_rules(output, to_script_data, custom_rules, 'output');
 
   return {
-    output: result_str,
+    output,
     /** Can be used to manage context while using the typing feature */
     context_length: prev_context_arr.length
   };
