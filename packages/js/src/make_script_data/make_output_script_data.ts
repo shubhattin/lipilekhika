@@ -441,10 +441,12 @@ async function make_custom_option_json() {
               resolveKramaKeysExtendedType(following)
             )
           ),
-          replace_with: binarySearchLowerWithIndex(
-            KramaKeysArray,
-            KramaKeysIndexB,
-            resolveKramaKeysExtendedType(rule.replace_with)
+          replace_with: rule.replace_with.map((replace_with) =>
+            binarySearchLowerWithIndex(
+              KramaKeysArray,
+              KramaKeysIndexB,
+              resolveKramaKeysExtendedType(replace_with)
+            )
           )
         });
       } else if (rule.type === 'direct_replace') {
@@ -461,13 +463,16 @@ async function make_custom_option_json() {
               )
             )
           ),
-          replace_with: rule.replace_with
-            ? binarySearchLowerWithIndex(
-                KramaKeysArray,
-                KramaKeysIndexB,
-                resolveKramaKeysExtendedType(rule.replace_with)
-              )
-            : -1 // blank space
+          replace_with: rule.replace_with.map(
+            (replace_with) =>
+              replace_with
+                ? binarySearchLowerWithIndex(
+                    KramaKeysArray,
+                    KramaKeysIndexB,
+                    resolveKramaKeysExtendedType(replace_with)
+                  )
+                : -1 // blank space
+          )
         });
       }
     }

@@ -238,9 +238,11 @@ export const transliterate_text = async (
             const previous_mactched_str_length_in_to = prev_matched_indexes.reduce((acc, curr) => {
               return acc + (to_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
             }, 0);
+            const replace_with_string = rule.replace_with
+              .map((replace_with) => to_script_data.krama_text_arr[replace_with]?.[0] ?? '')
+              .join('');
             result_str =
-              result_str.slice(0, -previous_mactched_str_length_in_to) +
-              (to_script_data.krama_text_arr[rule.replace_with]?.[0] ?? '');
+              result_str.slice(0, -previous_mactched_str_length_in_to) + replace_with_string;
           }
         }
       }
@@ -707,7 +709,9 @@ export const apply_repalce_rules = (
       for (let follow_krama_index of rule.following) {
         const follow_krama_string = script_data.krama_text_arr[follow_krama_index]?.[0] ?? '';
         const replace_string =
-          (script_data.krama_text_arr[rule.replace_with]?.[0] ?? '') + follow_krama_string;
+          rule.replace_with
+            .map((replace_with) => script_data.krama_text_arr[replace_with]?.[0] ?? '')
+            .join('') + follow_krama_string;
         text = text.replaceAll(prev_string + follow_krama_string, replace_string);
       }
     } else if (rule.type === 'direct_replace') {
@@ -719,7 +723,9 @@ export const apply_repalce_rules = (
       for (let to_replace_string of to_replace_strings) {
         text = text.replaceAll(
           to_replace_string,
-          script_data.krama_text_arr[rule.replace_with]?.[0] ?? ''
+          rule.replace_with
+            .map((replace_with) => script_data.krama_text_arr[replace_with]?.[0] ?? '')
+            .join('')
         );
       }
     }

@@ -15,13 +15,14 @@ type ReplacePrevKramaKeysRule = {
   type: 'replace_prev_krama_keys';
   prev: KramaKeysExtendedType[];
   following: KramaKeysExtendedType[];
-  replace_with: KramaKeysExtendedType;
+  /** will be combined to a single string */
+  replace_with: KramaKeysExtendedType[];
 };
 type DirectReplaceRule = {
   type: 'direct_replace';
   /** set of individual krama key combinations to replace */
   to_replace: KramaKeysExtendedType[][];
-  replace_with: KramaKeysExtendedType | null;
+  replace_with: (KramaKeysExtendedType | null)[];
 };
 type CommonRuleTypeAttributes = {
   /** Specifies if the pattern has to checked in input or output text */
@@ -59,11 +60,11 @@ type InputCustomOptionsType = Record<`${string}:${string}`, CustomOptionsRecordT
 type out_ReplacePrevKramaKeysRule = Pick<ReplacePrevKramaKeysRule, 'type'> & {
   prev: number[];
   following: number[];
-  replace_with: number;
+  replace_with: number[];
 };
 type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
   to_replace: number[][];
-  replace_with: number;
+  replace_with: number[];
 };
 // Using the krama key index instead of the krama key directly to have support for multiple scripts at a time
 // As same corresponding key values will have identical indexes across scripts
@@ -75,7 +76,7 @@ export type OptionsType = Record<
   }
 >;
 
-export const CustomOptionsInput = {
+export const CustomOptionsInput: InputCustomOptionsType = {
   /**
    * Replace G and J when preceded by ka varga or cha varga vyanjanas.
    * Its more natural to read
@@ -93,14 +94,14 @@ export const CustomOptionsInput = {
         type: 'replace_prev_krama_keys',
         prev: ['G'],
         following: VARGAS.ka,
-        replace_with: 'n'
+        replace_with: ['n']
       },
       // cha varga
       {
         type: 'replace_prev_krama_keys',
         prev: ['J'],
         following: VARGAS.cha,
-        replace_with: 'n'
+        replace_with: ['n']
       }
     ]
   },
@@ -119,35 +120,35 @@ export const CustomOptionsInput = {
         type: 'replace_prev_krama_keys',
         prev: ['G', 'halant'],
         following: VARGAS.ka,
-        replace_with: 'anusvAra'
+        replace_with: ['anusvAra']
       },
       // cha varga
       {
         type: 'replace_prev_krama_keys',
         prev: ['J', 'halant'],
         following: VARGAS.cha,
-        replace_with: 'anusvAra'
+        replace_with: ['anusvAra']
       },
       // Ta varga
       {
         type: 'replace_prev_krama_keys',
         prev: ['N', 'halant'],
         following: VARGAS.Ta,
-        replace_with: 'anusvAra'
+        replace_with: ['anusvAra']
       },
       // ta varga
       {
         type: 'replace_prev_krama_keys',
         prev: ['n', 'halant'],
         following: VARGAS.ta,
-        replace_with: 'anusvAra'
+        replace_with: ['anusvAra']
       },
       // pa varga
       {
         type: 'replace_prev_krama_keys',
         prev: ['m', 'halant'],
         following: VARGAS.pa,
-        replace_with: 'anusvAra'
+        replace_with: ['anusvAra']
       }
     ]
   },
@@ -155,9 +156,15 @@ export const CustomOptionsInput = {
   'all_to_sinhala:use_conjuct_enabling_halant': {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
-    check_in: 'input',
-    // initially we will implementing this rule manually in the code
-    rules: []
+    check_in: 'output',
+    use_replace: true,
+    rules: [
+      {
+        type: 'direct_replace',
+        to_replace: [['halant']],
+        replace_with: ['halant', 'zero_width_joiner']
+      }
+    ]
   },
   /** Remove virAma (.) and pUrNa virAma (..) from the text */
   'all_to_normal:remove_virAma_and_double_virAma': {
@@ -169,7 +176,7 @@ export const CustomOptionsInput = {
       {
         type: 'direct_replace',
         to_replace: [['double_virama'], ['virama']],
-        replace_with: null
+        replace_with: [null]
       }
     ]
   },
@@ -183,8 +190,8 @@ export const CustomOptionsInput = {
       {
         type: 'direct_replace',
         to_replace: [['avagraha']],
-        replace_with: 'a-svara'
+        replace_with: ['a-svara']
       }
     ]
   }
-} satisfies InputCustomOptionsType;
+};
