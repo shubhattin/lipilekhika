@@ -1,7 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { transliterate, preloadScriptData } from '../../../packages/js/src/index';
+  import {
+    transliterate,
+    preloadScriptData,
+    getAllOptions,
+    type TransliterationOptions
+  } from '../../../packages/js/src/index';
   import { SCRIPT_LIST, type script_list_type } from '../../../packages/js/src/utils/lang_list';
+  import Switch from './Switch.svelte';
+  import { slide } from 'svelte/transition';
 
   const SCRIPTS = SCRIPT_LIST as script_list_type[];
   const DEFAULT_FROM: script_list_type = 'Devanagari';
@@ -11,11 +18,14 @@
   let toScript = $state<script_list_type>(DEFAULT_TO);
   let inputText = $state('');
   let outputText = $state('');
+  let options = $state<TransliterationOptions>({});
+  let showOptions = $state(false);
+  let availableOptions = $state<string[]>([]);
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     try {
-      const result = await transliterate(inputText, fromScript, toScript);
+      const result = await transliterate(inputText, fromScript, toScript, options);
       console.log(result);
       outputText = result;
     } catch (error) {
@@ -34,6 +44,13 @@
     inputText = currentOutputText;
     outputText = currentInputText;
   };
+
+  $effect(() => {
+    getAllOptions(fromScript, toScript).then((all_options) => {
+      options = Object.fromEntries(all_options.map((v) => [v, false]));
+      availableOptions = all_options;
+    });
+  });
 
   onMount(() => {
     preloadScriptData(fromScript);
@@ -82,6 +99,49 @@
             {/each}
           </select>
         </label>
+      </div>
+
+      <!-- Options Section -->
+      <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-950/50">
+        <button
+          type="button"
+          class="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-900/40"
+          onclick={() => (showOptions = !showOptions)}
+        >
+          <span class="text-sm font-medium tracking-wider text-slate-300 uppercase">
+            Transliteration Options
+          </span>
+          <svg
+            class="h-5 w-5 text-slate-400 transition-transform duration-200"
+            class:rotate-180={showOptions}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
+            ></path>
+          </svg>
+        </button>
+
+        {#if showOptions}
+          <div class="border-t border-slate-800/60 px-5 py-4" transition:slide>
+            <div class="space-y-4">
+              {#each availableOptions as option}
+                <label class="group flex cursor-pointer items-center gap-3">
+                  <Switch
+                    bind:checked={options[option as keyof TransliterationOptions]}
+                    label="Toggle {option}"
+                    trackClass="h-6 w-11"
+                    thumbClass="h-4 w-4"
+                  />
+                  <span class="text-sm text-slate-300 transition group-hover:text-slate-100">
+                    {option}
+                  </span>
+                </label>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
 
       <div class="grid gap-6 md:grid-cols-2">

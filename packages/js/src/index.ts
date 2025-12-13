@@ -72,3 +72,5 @@ export async function getAllOptions(
     )
   ) as CustomOptionList[];
 }
+
+export type TransliterationOptions = CustomOptionType;
