@@ -707,7 +707,10 @@ export const apply_repalce_rules = (
         .map((prev) => script_data.krama_text_arr[prev]?.[0] ?? '')
         .join('');
       for (let follow_krama_index of rule.following) {
-        const follow_krama_string = script_data.krama_text_arr[follow_krama_index]?.[0] ?? '';
+        const follow_krama_string = script_data.krama_text_arr[follow_krama_index]?.[0] as
+          | string
+          | undefined;
+        if (!follow_krama_string) continue;
         const replace_string =
           rule.replace_with
             .map((replace_with) => script_data.krama_text_arr[replace_with]?.[0] ?? '')
