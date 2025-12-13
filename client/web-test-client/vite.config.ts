@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
-import solid from 'vite-plugin-solid';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 
+// https://vite.dev/config/
 export default defineConfig({
   base: '/lipilekhika/',
-  plugins: [tailwindcss(), solid()]
+  plugins: [tailwindcss(), svelte()]
 });
