@@ -659,7 +659,7 @@ export const transliterate_text = async (
 export const get_active_custom_options = (
   from_script_data: OutputScriptData,
   to_script_data: OutputScriptData,
-  input_options?: CustomOptionType
+  input_options?: Record<string, boolean>
 ): CustomOptionType => {
   if (!input_options) return {};
   const active_custom_options: CustomOptionType = {};
