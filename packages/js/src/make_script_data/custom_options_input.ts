@@ -39,6 +39,7 @@ type CommonRuleTypeAttributes = {
    * Keep this limitation in mind and think of all edge cases
    *
    * Always fall back to `use_replace` when implementation becomes too complex or otherwise.
+   * The *Aim* should be to develop techniques so we dont have to rely on it too much.
    */
   use_replace?: boolean;
 };
@@ -46,7 +47,6 @@ type InputRuleTypes = Omit<CommonRuleTypeAttributes, 'check_in'> & {
   check_in?: CommonRuleTypeAttributes['check_in'];
 } & (ReplacePrevKramaKeysRule | DirectReplaceRule);
 type CustomOptionsRecordType = {
-  description: string;
   from_script_name?: script_list_type[];
   from_script_type?: 'brahmic' | 'other' | 'all';
   to_script_name?: script_list_type[];
@@ -75,14 +75,16 @@ export type OptionsType = Record<
   }
 >;
 
-export const CustomOptionsInput: InputCustomOptionsType = {
+export const CustomOptionsInput = {
+  /**
+   * Replace G and J when preceded by ka varga or cha varga vyanjanas.
+   * Its more natural to read
+   *
+   * Example: raJjitiam -> ranjitam, raGgam -> rangam
+   */
   'all_to_normal:replace_pancham_varga_varna_with_n': {
     from_script_type: 'all',
     to_script_name: ['Normal'],
-    description:
-      'Replace G and J when preceded by ka varga or cha varga vyanjanas\n' +
-      'More natural to read\n' +
-      'Example: raJjitiam -> ranjitam, raGgam -> rangam',
     check_in: 'output',
     use_replace: true,
     rules: [
@@ -102,12 +104,14 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       }
     ]
   },
+  /**
+   * Replace the varga's(ka, cha, Ta, ta, pa) pancham varna preceded by other varga vyanjanas with anuvsvAra
+   *
+   * Example: kAGkShate(Devanagari) -> kAMkShate(Telugu)
+   */
   'brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra': {
     from_script_type: 'brahmic',
     to_script_type: 'brahmic',
-    description:
-      "Replace the varga's(ka, cha, Ta, ta, pa) pancham varna preceded by other varga vyanjanas with anuvsvAra\n" +
-      'Example: kAGkShate(Devanagari) -> kAMkShate(Telugu)',
     check_in: 'input',
     rules: [
       // ka varga
@@ -147,18 +151,18 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       }
     ]
   },
+  /** Use conjunct(saMyuktAkShara) enabling halant (halant + \u200d) */
   'all_to_sinhala:use_conjuct_enabling_halant': {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
-    description: 'Use conjunct(saMyuktAkShara) enabling halant (halant + \\u200d)',
     check_in: 'input',
     // initially we will implementing this rule manually in the code
     rules: []
   },
+  /** Remove virAma (.) and pUrNa virAma (..) from the text */
   'all_to_normal:remove_virAma_and_double_virAma': {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
-    description: 'Remove virAma (.) and pUrNa virAma (..) from the text',
     check_in: 'output',
     use_replace: true,
     rules: [
@@ -169,10 +173,10 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       }
     ]
   },
+  /** Replace avagraha('') with a */
   'all_to_normal:replace_avagraha_with_a': {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
-    description: "Replace avagraha('') with a",
     check_in: 'output',
     use_replace: true,
     rules: [
@@ -183,4 +187,4 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       }
     ]
   }
-};
+} satisfies InputCustomOptionsType;

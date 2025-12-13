@@ -34,18 +34,13 @@ export const transliterate_text = async (
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  const _active_custom_rules = Object.keys(options).flatMap(
+  const custom_rules = Object.keys(options).flatMap(
     (key) =>
       custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
   );
-  const active_replace_rules = _active_custom_rules.filter((rule) => rule.use_replace === true);
-  const active_custom_rules = _active_custom_rules.filter((rule) => !rule.use_replace);
-  // console.log(active_custom_rules);
   // ^ all active rules for auto processing extracted
 
-  if (active_replace_rules.length > 0) {
-    text = apply_repalce_rules(text, from_script_data, active_replace_rules, 'input');
-  }
+  text = apply_repalce_rules(text, from_script_data, custom_rules, 'input');
 
   let result_str = '';
 
@@ -56,6 +51,9 @@ export const transliterate_text = async (
    * Use only when converted Brahmic -> Other or Other -> Brahmic
    * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
    * and the characters match text of the brahmic script
+   *
+   * **Note** :- The `arr[i][0]` stores the contents of the `text` (not `result_str`) but the `arr[i][1]`
+   * stores the attributes of the brahmic script (in both cases)
    */
   let prev_context_arr: prev_context_array_type = [];
   const PREV_CONTEXT_IN_USE =
@@ -190,8 +188,9 @@ export const transliterate_text = async (
 
   function apply_custom_rules(text_index: number, delta: number) {
     const current_text_index = text_index + delta;
-    for (let rule_index = 0; rule_index < active_custom_rules.length; rule_index++) {
-      const rule = active_custom_rules[rule_index];
+    for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
+      if (custom_rules[rule_index].use_replace === true) continue;
+      const rule = custom_rules[rule_index];
       if (rule.check_in === 'output') continue;
       // output rule handling will be added
       if (rule.type === 'replace_prev_krama_keys') {
@@ -642,9 +641,9 @@ export const transliterate_text = async (
     apply_custom_rules(text_index, -char.length);
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
-  if (active_replace_rules.length > 0) {
-    result_str = apply_repalce_rules(result_str, to_script_data, active_replace_rules, 'output');
-  }
+
+  result_str = apply_repalce_rules(result_str, to_script_data, custom_rules, 'output');
+
   return {
     output: result_str,
     /** Can be used to manage context while using the typing feature */
@@ -691,15 +690,16 @@ export const get_active_custom_options = (
   return active_custom_options;
 };
 
-/** Apply replacement rules using direct replaceAll method */
+/** Apply replacement rules using direct replaceAll method if exist */
 export const apply_repalce_rules = (
   text: string,
   script_data: OutputScriptData,
   rules: OptionsType[keyof OptionsType]['rules'],
   allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
 ) => {
+  if (rules.length === 0) return text;
   for (const rule of rules) {
-    if (rule.check_in !== allowed_input_rule_type) continue;
+    if (rule.use_replace !== true || rule.check_in !== allowed_input_rule_type) continue;
     if (rule.type === 'replace_prev_krama_keys') {
       const prev_string = rule.prev
         .map((prev) => script_data.krama_text_arr[prev]?.[0] ?? '')

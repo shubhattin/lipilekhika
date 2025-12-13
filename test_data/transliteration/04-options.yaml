@@ -6,6 +6,7 @@
   output: ranjitaranga
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
+  reversible: false
 - index: 0.1
   todo: false
   from: Romanized
@@ -14,6 +15,7 @@
   output: ranjitaranga
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
+  reversible: false
 - index: 1
   from: Devanagari
   to: Telugu
@@ -21,6 +23,7 @@
   output: రంజితరంగ
   options:
     "brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra": true
+  reversible: false
 - index: 2
   todo: false
   from: Devanagari
@@ -29,6 +32,7 @@
   output: kRtO''ham -
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
+  reversible: false
 - index: 3
   todo: false
   from: Devanagari
@@ -38,6 +42,7 @@
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
     "all_to_normal:replace_avagraha_with_a": true
+  reversible: false
 - index: 4
   todo: false
   from: Romanized
@@ -47,3 +52,4 @@
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
     "all_to_normal:replace_avagraha_with_a": true
+  reversible: false
