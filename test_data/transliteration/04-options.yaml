@@ -57,12 +57,19 @@
   todo: false
   from: Devanagari
   to: Sinhala
-  input: शान्तिरस्तु
-  output: ශාන්‍තිරස්‍තු
+  input: द्वयम्
+  output: ද්‍වයම්‍
   options:
     "all_to_sinhala:use_conjuct_enabling_halant": true
+- index: 5.1
+  todo: false
+  from: Devanagari
+  to: Sinhala
+  input: द्वयम्
+  output: ද්වයම්
+  # ^ Without conjunct enabling halant
 - index: 6
   from: Sinhala
   to: Devanagari
-  input: ශාන්‍තිරස්‍තු
-  output: शान्तिरस्तु
+  input: ද්‍වයම්‍
+  output: द्वयम्
