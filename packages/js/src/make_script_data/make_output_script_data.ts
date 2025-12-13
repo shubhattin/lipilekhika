@@ -425,6 +425,8 @@ async function make_custom_option_json() {
       if (rule.type === 'replace_prev_krama_keys') {
         rules.push({
           type: rule.type,
+          check_in: rule.check_in ?? value.check_in,
+          use_replace: rule.use_replace ?? value.use_replace,
           prev: rule.prev.map((prev) =>
             binarySearchLowerWithIndex(
               KramaKeysArray,
@@ -448,6 +450,8 @@ async function make_custom_option_json() {
       } else if (rule.type === 'direct_replace') {
         rules.push({
           type: rule.type,
+          check_in: rule.check_in ?? value.check_in,
+          use_replace: rule.use_replace ?? value.use_replace,
           to_replace: rule.to_replace.map((to_replace) =>
             to_replace.map((to_replace_item) =>
               binarySearchLowerWithIndex(
@@ -457,11 +461,13 @@ async function make_custom_option_json() {
               )
             )
           ),
-          replace_with: binarySearchLowerWithIndex(
-            KramaKeysArray,
-            KramaKeysIndexB,
-            resolveKramaKeysExtendedType(rule.replace_with)
-          )
+          replace_with: rule.replace_with
+            ? binarySearchLowerWithIndex(
+                KramaKeysArray,
+                KramaKeysIndexB,
+                resolveKramaKeysExtendedType(rule.replace_with)
+              )
+            : -1 // blank space
         });
       }
     }

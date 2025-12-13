@@ -1,5 +1,5 @@
 - index: 0
-  todo: true
+  todo: false
   from: Devanagari
   to: Normal
   input: रञ्जितरङ्ग
@@ -7,7 +7,6 @@
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
 - index: 1
-  todo: false
   from: Devanagari
   to: Telugu
   input: रञ्जितरङ्ग
@@ -15,19 +14,19 @@
   options:
     "brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra": true
 - index: 2
-  todo: true
+  todo: false
   from: Devanagari
   to: Normal
   input: देहेऽस्मिन् ।-॥
-  output: dehe''smin -
+  output: dEhE''smin -
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
 - index: 3
-  todo: true
+  todo: false
   from: Devanagari
   to: Normal
   input: देहेऽस्मिन् ।-॥
-  output: deheasmin -
+  output: dEhEasmin -
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
     "all_to_normal:replace_avagraha_with_a": true

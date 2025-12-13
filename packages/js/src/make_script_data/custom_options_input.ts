@@ -19,12 +19,24 @@ type ReplacePrevKramaKeysRule = {
 };
 type DirectReplaceRule = {
   type: 'direct_replace';
-  /** set of inividual krama key combinations to replace */
+  /** set of individual krama key combinations to replace */
   to_replace: KramaKeysExtendedType[][];
-  replace_with: KramaKeysExtendedType;
+  replace_with: KramaKeysExtendedType | null;
 };
-type InputRuleTypes = {
-  check_in: 'to' | 'from';
+type CommonRuleTypeAttributes = {
+  /** Specifies if the pattern has to checked in input or output text */
+  check_in: 'input' | 'output';
+  /** Use `replaceAll` to directly replace the pattern with the replace_with string
+   *
+   * **Note** :- Avoid using this pattern as much as possible it can be slower for large inputs
+   *
+   * When the `check_in` is `input` then we replace before the process and
+   * when it is `output` then we replace after the process.
+   */
+  use_replace?: boolean;
+};
+type InputRuleTypes = Omit<CommonRuleTypeAttributes, 'check_in'> & {
+  check_in?: CommonRuleTypeAttributes['check_in'];
 } & (ReplacePrevKramaKeysRule | DirectReplaceRule);
 type CustomOptionsRecordType = {
   description: string;
@@ -33,7 +45,7 @@ type CustomOptionsRecordType = {
   to_script_name?: script_list_type[];
   to_script_type?: 'brahmic' | 'other' | 'all';
   rules: InputRuleTypes[];
-};
+} & CommonRuleTypeAttributes;
 type InputCustomOptionsType = Record<`${string}:${string}`, CustomOptionsRecordType>;
 
 // Output types
@@ -52,7 +64,7 @@ type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
 export type OptionsType = Record<
   `${string}:${string}`,
   Omit<CustomOptionsRecordType, 'rules'> & {
-    rules: ({ check_in: 'from' | 'to' } & (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule))[];
+    rules: (CommonRuleTypeAttributes & (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule))[];
   }
 >;
 
@@ -64,10 +76,11 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       'Replace G and J when preceded by ka varga or cha varga vyanjanas\n' +
       'More natural to read\n' +
       'Example: raJjitiam -> ranjitam, raGgam -> rangam',
+    check_in: 'output',
+    use_replace: true,
     rules: [
       // ka varga
       {
-        check_in: 'to',
         type: 'replace_prev_krama_keys',
         prev: ['G'],
         following: VARGAS.ka,
@@ -75,7 +88,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // cha varga
       {
-        check_in: 'to',
         type: 'replace_prev_krama_keys',
         prev: ['J'],
         following: VARGAS.cha,
@@ -89,10 +101,10 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     description:
       "Replace the varga's(ka, cha, Ta, ta, pa) pancham varna preceded by other varga vyanjanas with anuvsvAra\n" +
       'Example: kAGkShate(Devanagari) -> kAMkShate(Telugu)',
+    check_in: 'input',
     rules: [
       // ka varga
       {
-        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['G', 'halant'],
         following: VARGAS.ka,
@@ -100,7 +112,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // cha varga
       {
-        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['J', 'halant'],
         following: VARGAS.cha,
@@ -108,7 +119,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // Ta varga
       {
-        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['N', 'halant'],
         following: VARGAS.Ta,
@@ -116,7 +126,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // ta varga
       {
-        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['n', 'halant'],
         following: VARGAS.ta,
@@ -124,7 +133,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       },
       // pa varga
       {
-        check_in: 'from',
         type: 'replace_prev_krama_keys',
         prev: ['m', 'halant'],
         following: VARGAS.pa,
@@ -136,6 +144,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
     description: 'Use conjunct(saMyuktAkShara) enabling halant (halant + \\u200d)',
+    check_in: 'input',
     // initially we will implementing this rule manually in the code
     rules: []
   },
@@ -143,12 +152,13 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     description: 'Remove virAma (.) and pUrNa virAma (..) from the text',
+    check_in: 'output',
+    use_replace: true,
     rules: [
       {
-        check_in: 'to',
         type: 'direct_replace',
-        to_replace: [['virama'], ['double_virama']],
-        replace_with: ''
+        to_replace: [['double_virama'], ['virama']],
+        replace_with: null
       }
     ]
   },
@@ -156,9 +166,10 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     description: "Replace avagraha('') with a",
+    check_in: 'output',
+    use_replace: true,
     rules: [
       {
-        check_in: 'to',
         type: 'direct_replace',
         to_replace: [['avagraha']],
         replace_with: 'a-svara'

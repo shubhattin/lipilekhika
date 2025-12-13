@@ -34,12 +34,18 @@ export const transliterate_text = async (
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  const active_custom_rules = Object.keys(options).flatMap(
+  const _active_custom_rules = Object.keys(options).flatMap(
     (key) =>
       custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
   );
+  const active_replace_rules = _active_custom_rules.filter((rule) => rule.use_replace === true);
+  const active_custom_rules = _active_custom_rules.filter((rule) => !rule.use_replace);
   // console.log(active_custom_rules);
   // ^ all active rules for auto processing extracted
+
+  if (active_replace_rules.length > 0) {
+    text = apply_repalce_rules(text, from_script_data, active_replace_rules, 'input');
+  }
 
   let result_str = '';
 
@@ -186,14 +192,16 @@ export const transliterate_text = async (
     const current_text_index = text_index + delta;
     for (let rule_index = 0; rule_index < active_custom_rules.length; rule_index++) {
       const rule = active_custom_rules[rule_index];
+      if (rule.check_in === 'output') continue;
+      // output rule handling will be added
       if (rule.type === 'replace_prev_krama_keys') {
-        let prev_exits = true;
+        let prev_exists = true;
         let prev_matched_indexes: number[] = [];
         for (let i = 0; i < rule.prev.length; i++) {
           const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
           const current_char_code_point = text.codePointAt(current_text_index - i);
           if (current_char_code_point === undefined) {
-            prev_exits = false;
+            prev_exists = false;
             break;
           }
           const current_char = String.fromCodePoint(current_char_code_point);
@@ -206,25 +214,13 @@ export const transliterate_text = async (
             }
           );
           if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
-            prev_exits = false;
+            prev_exists = false;
             break;
           }
           prev_matched_indexes.push(current_char_krama_index);
         }
-        const previous_mactched_str_length_in_from = prev_matched_indexes.reduce((acc, curr) => {
-          return acc + (from_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
-        }, 0);
         const next_char_code_point = text.codePointAt(text_index);
-        if (prev_exits) {
-          console.log(
-            current_text_index,
-            text_index,
-            text[text_index],
-            text[current_text_index],
-            previous_mactched_str_length_in_from
-          );
-        }
-        if (prev_exits && next_char_code_point !== undefined) {
+        if (prev_exists && next_char_code_point !== undefined) {
           const next_char = String.fromCodePoint(next_char_code_point);
           const next_char_krama_index = binarySearchLowerWithIndex(
             from_script_data.krama_text_arr,
@@ -243,7 +239,6 @@ export const transliterate_text = async (
             const previous_mactched_str_length_in_to = prev_matched_indexes.reduce((acc, curr) => {
               return acc + (to_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
             }, 0);
-            console.log(result_str.split(''), text[current_text_index]);
             result_str =
               result_str.slice(0, -previous_mactched_str_length_in_to) +
               (to_script_data.krama_text_arr[rule.replace_with]?.[0] ?? '');
@@ -647,7 +642,9 @@ export const transliterate_text = async (
     apply_custom_rules(text_index, -char.length);
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
-
+  if (active_replace_rules.length > 0) {
+    result_str = apply_repalce_rules(result_str, to_script_data, active_replace_rules, 'output');
+  }
   return {
     output: result_str,
     /** Can be used to manage context while using the typing feature */
@@ -692,4 +689,40 @@ export const get_active_custom_options = (
     }
   }
   return active_custom_options;
+};
+
+/** Apply replacement rules using direct replaceAll method */
+export const apply_repalce_rules = (
+  text: string,
+  script_data: OutputScriptData,
+  rules: OptionsType[keyof OptionsType]['rules'],
+  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
+) => {
+  for (const rule of rules) {
+    if (rule.check_in !== allowed_input_rule_type) continue;
+    if (rule.type === 'replace_prev_krama_keys') {
+      const prev_string = rule.prev
+        .map((prev) => script_data.krama_text_arr[prev]?.[0] ?? '')
+        .join('');
+      for (let follow_krama_index of rule.following) {
+        const follow_krama_string = script_data.krama_text_arr[follow_krama_index]?.[0] ?? '';
+        const replace_string =
+          (script_data.krama_text_arr[rule.replace_with]?.[0] ?? '') + follow_krama_string;
+        text = text.replaceAll(prev_string + follow_krama_string, replace_string);
+      }
+    } else if (rule.type === 'direct_replace') {
+      const to_replace_strings = rule.to_replace.map((to_replace) =>
+        to_replace
+          .map((to_replace_item) => script_data.krama_text_arr[to_replace_item]?.[0] ?? '')
+          .join('')
+      );
+      for (let to_replace_string of to_replace_strings) {
+        text = text.replaceAll(
+          to_replace_string,
+          script_data.krama_text_arr[rule.replace_with]?.[0] ?? ''
+        );
+      }
+    }
+  }
+  return text;
 };
