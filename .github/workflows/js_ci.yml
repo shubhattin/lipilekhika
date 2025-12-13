@@ -13,8 +13,8 @@ jobs:
         run: |
           cd packages/js
           bun install
-          bun run check
           bun run build
+          bun run check
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -33,4 +33,4 @@ jobs:
           cd packages/js
           bun install
           bun run make-script-data
-          bun test --coverage --concurrent
+          bun test --coverage --concurrent --only-failures

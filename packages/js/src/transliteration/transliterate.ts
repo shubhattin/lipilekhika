@@ -8,6 +8,13 @@ import {
 } from '../utils/binary_search/binary_search';
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
+import custom_options_json from '../custom_options.json';
+import type { OptionsType } from '../make_script_data/custom_options_input';
+
+export type CustomOptionList = keyof typeof custom_options_json;
+export type CustomOptionType = {
+  [key in CustomOptionList]?: boolean;
+};
 
 type prev_context_array_type = [
   string | undefined,
@@ -21,10 +28,19 @@ const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
-  to_script_name: script_list_type
+  to_script_name: script_list_type,
+  input_options?: CustomOptionType
 ) => {
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
+  const options = get_active_custom_options(from_script_data, to_script_data, input_options);
+  const custom_rules = Object.keys(options).flatMap(
+    (key) =>
+      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  );
+  // ^ all active rules for auto processing extracted
+
+  text = apply_repalce_rules(text, from_script_data, custom_rules, 'input');
 
   let result_str = '';
 
@@ -35,6 +51,9 @@ export const transliterate_text = async (
    * Use only when converted Brahmic -> Other or Other -> Brahmic
    * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
    * and the characters match text of the brahmic script
+   *
+   * **Note** :- The `arr[i][0]` stores the contents of the `text` (not `result_str`) but the `arr[i][1]`
+   * stores the attributes of the brahmic script (in both cases)
    */
   let prev_context_arr: prev_context_array_type = [];
   const PREV_CONTEXT_IN_USE =
@@ -167,12 +186,75 @@ export const transliterate_text = async (
     return result_str_concat_status;
   }
 
+  function apply_custom_rules(text_index: number, delta: number) {
+    const current_text_index = text_index + delta;
+    for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
+      if (custom_rules[rule_index].use_replace === true) continue;
+      const rule = custom_rules[rule_index];
+      if (rule.check_in === 'output') continue;
+      // output rule handling will be added
+      if (rule.type === 'replace_prev_krama_keys') {
+        let prev_exists = true;
+        let prev_matched_indexes: number[] = [];
+        for (let i = 0; i < rule.prev.length; i++) {
+          const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
+          const current_char_code_point = text.codePointAt(current_text_index - i);
+          if (current_char_code_point === undefined) {
+            prev_exists = false;
+            break;
+          }
+          const current_char = String.fromCodePoint(current_char_code_point);
+          const current_char_krama_index = binarySearchLowerWithIndex(
+            from_script_data.krama_text_arr,
+            from_script_data.krama_text_arr_index,
+            current_char,
+            {
+              accessor: (arr, i) => arr[i][0]
+            }
+          );
+          if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
+            prev_exists = false;
+            break;
+          }
+          prev_matched_indexes.push(current_char_krama_index);
+        }
+        const next_char_code_point = text.codePointAt(text_index);
+        if (prev_exists && next_char_code_point !== undefined) {
+          const next_char = String.fromCodePoint(next_char_code_point);
+          const next_char_krama_index = binarySearchLowerWithIndex(
+            from_script_data.krama_text_arr,
+            from_script_data.krama_text_arr_index,
+            next_char,
+            {
+              accessor: (arr, i) => arr[i][0]
+            }
+          );
+          if (
+            next_char_krama_index !== -1 &&
+            rule.following.indexOf(next_char_krama_index) !== -1
+          ) {
+            // using previous matched indexes find the length of the resulant added to the
+            // result_str (i.e. the `to` script)
+            const previous_mactched_str_length_in_to = prev_matched_indexes.reduce((acc, curr) => {
+              return acc + (to_script_data.krama_text_arr[curr]?.[0]?.length ?? 0);
+            }, 0);
+            const replace_with_string = rule.replace_with
+              .map((replace_with) => to_script_data.krama_text_arr[replace_with]?.[0] ?? '')
+              .join('');
+            result_str =
+              result_str.slice(0, -previous_mactched_str_length_in_to) + replace_with_string;
+          }
+        }
+      }
+    }
+  }
+
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
    */
   let ignore_ta_ext_sup_num_text_index = -1;
 
-  for (; text_index < text.length; ) {
+  while (text_index < text.length) {
     const codePoint = text.codePointAt(text_index);
     const char = codePoint !== undefined ? String.fromCodePoint(codePoint) : '';
     // console.log(['index', char, text_index, ignore_ta_ext_sup_num_text_index]);
@@ -193,21 +275,12 @@ export const transliterate_text = async (
     }
 
     // Step 1: Search for the character in the text_to_krama_map
-    // const context_break_condition =
-    //   PREV_CONTEXT_IN_USE &&
-    //   // context breaker currently needed like this only for other to brahmic conversion
-    //   to_script_data.script_type === 'brahmic';
-    // ((prev_context_arr.at(-3)?.[1]?.type === 'vyanjana' &&
-    //   prev_context_arr.at(-2)?.[0] === BRAHMIC_NUQTA &&
-    //   prev_context_arr.at(-1)?.[1]?.type === 'mAtrA') ||
-    //   (prev_context_arr.at(-2)?.[1]?.type === 'vyanjana' &&
-    //     prev_context_arr.at(-1)?.[1]?.type === 'mAtrA'));
-    let text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null = null;
+    let text_to_krama_item_index = -1;
     {
       // Iterative matching with retraction support for vyanjana+vowel context
       // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
       let chars_to_scan = 0;
-      let last_valid_vowel_match: OutputScriptData['text_to_krama_map'][number] | null = null;
+      let last_valid_vowel_match_index = -1;
       // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
       const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
@@ -241,14 +314,18 @@ export const transliterate_text = async (
                   )
                 : '')
             : text.substring(text_index, text_index + chars_to_scan + 1);
-        const char_index = binarySearchLower(from_script_data.text_to_krama_map, char_to_search, {
-          accessor: (arr, i) => arr[i][0]
-        });
-        if (char_index === -1) {
-          text_to_krama_item = null;
+        const potential_match_index = binarySearchLower(
+          from_script_data.text_to_krama_map,
+          char_to_search,
+          {
+            accessor: (arr, i) => arr[i][0]
+          }
+        );
+        if (potential_match_index === -1) {
+          text_to_krama_item_index = -1;
           break;
         }
-        const potential_match = from_script_data.text_to_krama_map[char_index];
+        const potential_match = from_script_data.text_to_krama_map[potential_match_index];
 
         // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -270,11 +347,11 @@ export const transliterate_text = async (
 
           if (is_single_vowel) {
             // Save this as a valid retraction point
-            last_valid_vowel_match = potential_match;
-          } else if (last_valid_vowel_match !== null) {
+            last_valid_vowel_match_index = potential_match_index;
+          } else if (last_valid_vowel_match_index !== -1) {
             // Current match is NOT a single vowel but we have a saved vowel match
             // Retract to the last valid vowel match
-            text_to_krama_item = last_valid_vowel_match;
+            text_to_krama_item_index = last_valid_vowel_match_index;
             break;
           }
         }
@@ -316,7 +393,7 @@ export const transliterate_text = async (
                 }
               );
               if (char_index !== -1 && nth_char_text_index !== -1) {
-                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                text_to_krama_item_index = char_index;
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 if (nth_next_character === from_script_data.halant || nth_char_type === 'mAtrA') {
@@ -366,7 +443,7 @@ export const transliterate_text = async (
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const n_1_th_char_text_item =
                   from_script_data.krama_text_arr[n_1_th_char_text_index];
-                text_to_krama_item = from_script_data.text_to_krama_map[char_index];
+                text_to_krama_item_index = char_index;
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 const n_1_th_char_type =
                   from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type;
@@ -385,10 +462,15 @@ export const transliterate_text = async (
             continue;
           }
         }
-        text_to_krama_item = potential_match;
+        text_to_krama_item_index = potential_match_index;
         break;
       }
     }
+
+    const text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null =
+      text_to_krama_item_index !== -1
+        ? from_script_data.text_to_krama_map[text_to_krama_item_index]
+        : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
       const index_delete_length =
@@ -492,6 +574,7 @@ export const transliterate_text = async (
             result_str += result_text;
           }
         }
+        apply_custom_rules(text_index, -(text_to_krama_item[0].length - index_delete_length));
         continue;
       }
     } else {
@@ -557,8 +640,11 @@ export const transliterate_text = async (
         result_str += to_add_text;
       }
     }
+    apply_custom_rules(text_index, -char.length);
   }
   if (PREV_CONTEXT_IN_USE) prev_context_cleanup_func([undefined, null]);
+
+  result_str = apply_repalce_rules(result_str, to_script_data, custom_rules, 'output');
 
   return {
     output: result_str,
@@ -568,45 +654,84 @@ export const transliterate_text = async (
 };
 
 /**
- * Recursively searches for the longest matching character sequence by probing krama_text_map
- * and retrieving the corresponding entry from text_to_krama_map. Returns null if no match.
- * @returns the krama index of the text if found else null
+ * Returns the active custom options to applied based on the `from` and `to` script information
  */
-// function search_in_text_to_krama_map(
-//   text: string,
-//   text_index: number,
-//   from_script_data: OutputScriptData,
-//   to_script_data: OutputScriptData,
-//   context_break_condition_helper: boolean,
-//   chars_scanned: number = 0
-// ): OutputScriptData['text_to_krama_map'][number] | null {
-//   const char_to_search = text.substring(text_index, text_index + chars_scanned + 1);
-//   const char_index = binarySearch(from_script_data.text_to_krama_map, char_to_search, {
-//     accessor: (arr, i) => arr[i][0]
-//   });
-//   if (char_index === -1) {
-//     // if the character is not found, then retun null
-//     return null;
-//   }
-//   const text_to_krama_item = from_script_data.text_to_krama_map[char_index];
-//   let further_lookup_flag = true;
-//   // try to reach to the last possible character following the next using recursion
-//   if (further_lookup_flag && text_to_krama_item[1].next && text_to_krama_item[1].next.length > 0) {
-//     const nth_next_character = text[text_index + chars_scanned + 1] as string | undefined;
-//     if (
-//       nth_next_character !== undefined &&
-//       text_to_krama_item[1].next.indexOf(nth_next_character) !== -1
-//     ) {
-//       // we can return the result as we know that it exists as it is defined in `next` field
-//       return search_in_text_to_krama_map(
-//         text,
-//         text_index,
-//         from_script_data,
-//         to_script_data,
-//         context_break_condition_helper,
-//         chars_scanned + 1
-//       );
-//     }
-//   }
-//   return text_to_krama_item;
-// }
+export const get_active_custom_options = (
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  input_options?: Record<string, boolean>
+): CustomOptionType => {
+  if (!input_options) return {};
+  const active_custom_options: CustomOptionType = {};
+  for (const [key, enabled] of Object.entries(input_options ?? {})) {
+    if (!enabled || !(key in custom_options_json)) continue;
+    const option_info = custom_options_json[
+      key as CustomOptionList
+    ] as OptionsType[keyof OptionsType];
+    if (
+      (option_info.from_script_type !== undefined &&
+        (option_info.from_script_type === 'all' ||
+          option_info.from_script_type === from_script_data.script_type)) ||
+      (option_info.from_script_name !== undefined &&
+        option_info.from_script_name.includes(from_script_data.script_name))
+    ) {
+      if (
+        option_info.to_script_type !== undefined &&
+        (option_info.to_script_type === 'all' ||
+          option_info.to_script_type === to_script_data.script_type)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      } else if (
+        option_info.to_script_name !== undefined &&
+        option_info.to_script_name.includes(to_script_data.script_name)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      }
+    }
+  }
+  return active_custom_options;
+};
+
+/** Apply replacement rules using direct replaceAll method if exist */
+export const apply_repalce_rules = (
+  text: string,
+  script_data: OutputScriptData,
+  rules: OptionsType[keyof OptionsType]['rules'],
+  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
+) => {
+  if (rules.length === 0) return text;
+  for (const rule of rules) {
+    if (rule.use_replace !== true || rule.check_in !== allowed_input_rule_type) continue;
+    if (rule.type === 'replace_prev_krama_keys') {
+      const prev_string = rule.prev
+        .map((prev) => script_data.krama_text_arr[prev]?.[0] ?? '')
+        .join('');
+      for (let follow_krama_index of rule.following) {
+        const follow_krama_string = script_data.krama_text_arr[follow_krama_index]?.[0] as
+          | string
+          | undefined;
+        if (!follow_krama_string) continue;
+        const replace_string =
+          rule.replace_with
+            .map((replace_with) => script_data.krama_text_arr[replace_with]?.[0] ?? '')
+            .join('') + follow_krama_string;
+        text = text.replaceAll(prev_string + follow_krama_string, replace_string);
+      }
+    } else if (rule.type === 'direct_replace') {
+      const to_replace_strings = rule.to_replace.map((to_replace) =>
+        to_replace
+          .map((to_replace_item) => script_data.krama_text_arr[to_replace_item]?.[0] ?? '')
+          .join('')
+      );
+      for (let to_replace_string of to_replace_strings) {
+        text = text.replaceAll(
+          to_replace_string,
+          rule.replace_with
+            .map((replace_with) => script_data.krama_text_arr[replace_with]?.[0] ?? '')
+            .join('')
+        );
+      }
+    }
+  }
+  return text;
+};

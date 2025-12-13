@@ -32,7 +32,8 @@ const Sinhala: InputBrahmicScriptType = {
     'udAtta-2': '᳚',
     'udAtta-3': '᳛',
     virama: '।',
-    double_virama: '॥'
+    double_virama: '॥',
+    zero_width_joiner: '\u200d'
   },
   list: [
     {

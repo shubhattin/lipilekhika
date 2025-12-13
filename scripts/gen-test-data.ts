@@ -17,6 +17,7 @@ type TestData = {
   input: string;
   output: string;
   reversible?: boolean;
+  todo?: boolean;
 };
 
 const MAX_ARRAY_TEST_SIZE = 41;

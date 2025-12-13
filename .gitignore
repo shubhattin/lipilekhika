@@ -7,5 +7,6 @@ node_modules
 
 # Script Data Ignore (Built Output)
 packages/js/src/script_data
+packages/js/src/custom_options.json
 
 test_data/transliteration/auto-*/auto-*.yaml
