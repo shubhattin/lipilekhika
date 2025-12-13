@@ -6,6 +6,14 @@
   output: ranjitaranga
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
+- index: 0.1
+  todo: false
+  from: Romanized
+  to: Normal
+  input: rañjitaraṅga
+  output: ranjitaranga
+  options:
+    "all_to_normal:replace_pancham_varga_varna_with_n": true
 - index: 1
   from: Devanagari
   to: Telugu
@@ -17,16 +25,25 @@
   todo: false
   from: Devanagari
   to: Normal
-  input: देहेऽस्मिन् ।-॥
-  output: dEhE''smin -
+  input: कृतोऽहम् ।-॥
+  output: kRtO''ham -
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
 - index: 3
   todo: false
   from: Devanagari
   to: Normal
-  input: देहेऽस्मिन् ।-॥
-  output: dEhEasmin -
+  input: कृतोऽहम् ।-॥
+  output: kRtOaham -
+  options:
+    "all_to_normal:remove_virAma_and_double_virAma": true
+    "all_to_normal:replace_avagraha_with_a": true
+- index: 4
+  todo: false
+  from: Romanized
+  to: Normal
+  input: kr̥tō''ham .-..
+  output: kRtOaham -
   options:
     "all_to_normal:remove_virAma_and_double_virAma": true
     "all_to_normal:replace_avagraha_with_a": true

@@ -32,6 +32,13 @@ type CommonRuleTypeAttributes = {
    *
    * When the `check_in` is `input` then we replace before the process and
    * when it is `output` then we replace after the process.
+   *
+   * For the `output` type rule application without using `use_replace`. We will have to use
+   * `prev_context_arr` to keep track of previous.
+   * **Current Limitation** :- The previous context array work only when converted brahmic <> other scripts
+   * Keep this limitation in mind and think of all edge cases
+   *
+   * Always fall back to `use_replace` when implementation becomes too complex or otherwise.
    */
   use_replace?: boolean;
 };

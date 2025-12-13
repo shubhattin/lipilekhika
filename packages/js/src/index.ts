@@ -35,6 +35,7 @@ export async function transliterate(
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to}`);
   }
+  if (normalized_from === normalized_to) return text;
   const result = await transliterate_text(text, normalized_from, normalized_to, options);
   return result.output;
 }
