@@ -7,6 +7,7 @@
     "build": "rm -rf dist && bun run make-script-data && vite build",
     "check": "tsc --noEmit",
     "test": "vitest",
+    "test:bun": "bun test --concurrent --only-failures",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
     "format": "prettier --write .",
