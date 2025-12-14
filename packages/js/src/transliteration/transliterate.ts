@@ -18,7 +18,7 @@ import {
   emitPiecesWithTaExtSuperscriptReorder,
   isTaExtSuperscriptTail,
   type prev_context_array_type,
-  isScriptTaExt
+  isScriptTamilExt
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
@@ -223,7 +223,7 @@ export const transliterate_text = async (
           const nth_next = cursor.peekAt(end_index);
           const nth_next_character = nth_next?.ch;
 
-          if (isScriptTaExt(from_script_name) && from_script_data.script_type === 'brahmic') {
+          if (isScriptTamilExt(from_script_name) && from_script_data.script_type === 'brahmic') {
             const n_1_th_next = nth_next ? cursor.peekAt(end_index + nth_next.width) : null;
             const n_1_th_next_character = n_1_th_next?.ch;
             // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
@@ -377,13 +377,13 @@ export const transliterate_text = async (
               );
               // if mixture of vyanjana and mAtrA then return the first item as anya type
               if (
-                isScriptTaExt(from_script_name) &&
+                isScriptTamilExt(from_script_name) &&
                 list_refs.some((item) => item?.type === 'mAtrA') &&
                 list_refs.some((item) => item?.type === 'vyanjana')
               ) {
                 item = { ...list_refs[0], type: 'anya' };
               } else if (
-                isScriptTaExt(from_script_name) &&
+                isScriptTamilExt(from_script_name) &&
                 list_refs.length > 1 &&
                 list_refs.some((item) => item === undefined || item === null)
               ) {
@@ -405,7 +405,7 @@ export const transliterate_text = async (
               item =
                 text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
                   ? (to_script_data.list[
-                      to_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
+                      to_script_data.krama_text_arr[text_to_krama_item[1].krama[0]]?.[1] ?? -1
                     ] ?? null)
                   : null;
             }
@@ -415,7 +415,7 @@ export const transliterate_text = async (
         if (!result_concat_status) {
           if (
             to_script_data.script_type === 'brahmic' &&
-            isScriptTaExt(to_script_name) &&
+            isScriptTamilExt(to_script_name) &&
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
               result_text === to_script_data.halant) &&
             isTaExtSuperscriptTail(result.lastChar())
@@ -470,7 +470,7 @@ export const transliterate_text = async (
       // In tamil Extended check if the current one is a halant or a svara(mAtrA)
       if (
         to_script_data.script_type === 'brahmic' &&
-        isScriptTaExt(to_script_name) &&
+        isScriptTamilExt(to_script_name) &&
         (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'mAtrA' ||
           to_add_text === to_script_data.halant) &&
         isTaExtSuperscriptTail(result.lastChar())
@@ -536,7 +536,7 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
     // );
     if (
       item[0] !== BRAHMIC_HALANT! &&
-      (isScriptTaExt(from_script_name) && item[0] && item[0].length > 0
+      (isScriptTamilExt(from_script_name) && item[0] && item[0].length > 0
         ? item[0].charAt(0) !== BRAHMIC_HALANT!
         : true) &&
       // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
@@ -568,7 +568,7 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
           ? kramaTextOrEmpty(to_script_data, item[1].mAtrA_krama_ref?.[0] ?? -1)
           : item[0]!;
       // const linked_mAtrA = item[0]!;
-      if (isScriptTaExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
         emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
       } else {
         emitPiecesWithTaExtSuperscriptReorder(
@@ -583,7 +583,7 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
       prev_context.typeAt(-1) === 'vyanjana' &&
       !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
     ) {
-      if (isScriptTaExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
         emitPiecesWithTaExtSuperscriptReorder(
           result,
           [BRAHMIC_HALANT!],

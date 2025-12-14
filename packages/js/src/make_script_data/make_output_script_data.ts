@@ -412,6 +412,20 @@ async function make_script_data() {
       accessor: (arr, i) => arr[i][0]
     });
 
+    // Scan for -1 values in text_to_krama_map krama field
+    for (let i = 0; i < res.text_to_krama_map.length; i++) {
+      const text_krama_item = res.text_to_krama_map[i];
+      const text = text_krama_item[0];
+      const krama_arr = text_krama_item[1].krama;
+      if (krama_arr && krama_arr.includes(-1)) {
+        console.warn(
+          chalk.yellow(
+            `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
+          )
+        );
+      }
+    }
+
     const jsonOutput = JSON.stringify(res, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
     fs.writeFileSync(path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`), jsonOutput);
   }
