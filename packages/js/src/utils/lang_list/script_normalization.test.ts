@@ -29,9 +29,13 @@ describe('getNormalizedScriptName', () => {
     });
 
     it('should handle case-insensitive acronyms', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('DEV')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('Te')).toBe('Telugu');
+      // @ts-ignore
       expect(getNormalizedScriptName('TEL')).toBe('Telugu');
+      // @ts-ignore
       expect(getNormalizedScriptName('TAM-EX')).toBe('Tamil-Extended');
     });
   });
@@ -49,8 +53,11 @@ describe('getNormalizedScriptName', () => {
     });
 
     it('should handle case-insensitive language acronyms', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('SA')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('San')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('HIN')).toBe('Devanagari');
     });
   });
@@ -100,52 +107,73 @@ describe('getNormalizedScriptName', () => {
 
   describe('Case variations', () => {
     it('should handle lowercase script names', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('devanagari')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('telugu')).toBe('Telugu');
+      // @ts-ignore
       expect(getNormalizedScriptName('tamil-extended')).toBe('Tamil-Extended');
     });
 
     it('should handle mixed case script names', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('devanagari')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('Devanagari')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('DEvanagari')).toBe('Devanagari');
     });
 
     it('should handle lowercase language names', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('sanskrit')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('hindi')).toBe('Devanagari');
+      // @ts-ignore
       expect(getNormalizedScriptName('punjabi')).toBe('Gurumukhi');
     });
   });
 
   describe('Invalid inputs', () => {
     it('should return null for unknown acronyms', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('xyz')).toBeNull();
+      // @ts-ignore
       expect(getNormalizedScriptName('unknown')).toBeNull();
+      // @ts-ignore
       expect(getNormalizedScriptName('abc')).toBeNull();
     });
 
     it('should return null for unknown script names', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('UnknownScript')).toBeNull();
+      // @ts-ignore
       expect(getNormalizedScriptName('Latin')).toBeNull();
+      // @ts-ignore
       expect(getNormalizedScriptName('Cyrillic')).toBeNull();
     });
 
     it('should return null for empty string', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('')).toBeNull();
     });
 
     it('should return null for invalid types', () => {
       // TypeScript will prevent this, but testing runtime behavior
+      // @ts-ignore
       expect(getNormalizedScriptName('123')).toBeNull();
+      // @ts-ignore
       expect(getNormalizedScriptName('!@#')).toBeNull();
     });
   });
 
   describe('Edge cases', () => {
     it('should handle acronyms with dashes correctly', () => {
+      // @ts-ignore
       expect(getNormalizedScriptName('tam-ex')).toBe('Tamil-Extended');
+      // @ts-ignore
       expect(getNormalizedScriptName('TAM-EX')).toBe('Tamil-Extended');
+      // @ts-ignore
       expect(getNormalizedScriptName('Tam-Ex')).toBe('Tamil-Extended');
     });
 
