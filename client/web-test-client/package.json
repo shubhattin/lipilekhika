@@ -25,7 +25,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "lipilekhika": "../../packages/js",
+    "lipilekhika": "link:lipilekhika",
     "pretty-ms": "^9.3.0"
   }
 }
