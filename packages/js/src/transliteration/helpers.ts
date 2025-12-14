@@ -3,6 +3,7 @@ import type {
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
 import { binarySearchLowerWithIndex } from '../utils/binary_search/binary_search';
+import type { script_list_type } from '../utils/lang_list';
 
 export type prev_context_array_type = [
   string | undefined,
@@ -99,6 +100,7 @@ export const string_builder = () => {
     if (index < 0) {
       index = result.length + index;
     }
+    if (index < 0 || index >= result.length) return;
     result[index] = newPiece;
   }
 
@@ -244,4 +246,49 @@ export const replaceWithPieces = (
   script_data: OutputScriptData
 ): string[] => {
   return replace_with.map((k) => kramaTextOrEmpty(script_data, k)).filter(Boolean);
+};
+
+export const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
+export const isTaExtSuperscriptTail = (ch: string | undefined): boolean => {
+  return (
+    !!ch &&
+    TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
+      ch as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
+    ) !== -1
+  );
+};
+
+export const isScriptTaExt = (script_name: script_list_type): boolean => {
+  return script_name === 'Tamil-Extended';
+};
+
+/** Emit pieces, optionally reordering relative to a trailing Tamil-Extended superscript number.
+ *
+ * When `should_reorder` is true, this will move the last output *character* (typically the superscript)
+ * after the emitted pieces (with special handling when the first piece begins with `halant`).
+ *
+ * Caller is responsible for deciding when reordering is semantically correct.
+ */
+export const emitPiecesWithTaExtSuperscriptReorder = (
+  result: ReturnType<typeof string_builder>,
+  pieces: string[],
+  halant: string,
+  should_reorder: boolean
+) => {
+  if (pieces.length === 0) return;
+  if (!should_reorder) {
+    result.emitPieces(pieces);
+    return;
+  }
+
+  const first_piece = pieces[0] ?? '';
+  if (first_piece[0] === halant) {
+    const rest_first = first_piece.slice(1);
+    const after_pieces: string[] = [];
+    if (rest_first) after_pieces.push(rest_first);
+    for (let i = 1; i < pieces.length; i++) after_pieces.push(pieces[i]!);
+    result.withLastCharMovedAfter([halant], after_pieces);
+  } else {
+    result.withLastCharMovedAfter(pieces, []);
+  }
 };

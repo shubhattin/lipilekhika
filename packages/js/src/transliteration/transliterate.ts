@@ -13,9 +13,12 @@ import {
   prev_context_builder,
   string_builder,
   kramaIndexOfText,
-  type prev_context_array_type,
   matchPrevKramaSequence,
-  replaceWithPieces
+  replaceWithPieces,
+  emitPiecesWithTaExtSuperscriptReorder,
+  isTaExtSuperscriptTail,
+  type prev_context_array_type,
+  isScriptTaExt
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
@@ -25,7 +28,6 @@ export type CustomOptionType = {
 
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
-const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
 
 type TransliterateCtx = {
   from_script_name: script_list_type;
@@ -161,9 +163,7 @@ export const transliterate_text = async (
         if (
           ignore_ta_ext_sup_num_text_index !== -1 &&
           next_char &&
-          TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-            next_char as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-          ) !== -1
+          isTaExtSuperscriptTail(next_char)
         ) {
           scan_units += next?.width ?? 0;
         }
@@ -223,7 +223,7 @@ export const transliterate_text = async (
           const nth_next = cursor.peekAt(end_index);
           const nth_next_character = nth_next?.ch;
 
-          if (from_script_name === 'Tamil-Extended' && from_script_data.script_type === 'brahmic') {
+          if (isScriptTaExt(from_script_name) && from_script_data.script_type === 'brahmic') {
             const n_1_th_next = nth_next ? cursor.peekAt(end_index + nth_next.width) : null;
             const n_1_th_next_character = n_1_th_next?.ch;
             // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
@@ -235,9 +235,7 @@ export const transliterate_text = async (
             if (
               ignore_ta_ext_sup_num_text_index === -1 &&
               n_1_th_next_character !== undefined &&
-              TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-                n_1_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-              ) !== -1 &&
+              isTaExtSuperscriptTail(n_1_th_next_character) &&
               potential_match[1].next.indexOf(n_1_th_next_character) !== -1
             ) {
               // the next character is also a superscript number and also is in the next list
@@ -269,9 +267,7 @@ export const transliterate_text = async (
             } else if (
               ignore_ta_ext_sup_num_text_index === -1 &&
               n_2_th_next_character !== undefined &&
-              TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-                n_2_th_next_character as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-              ) !== -1 &&
+              isTaExtSuperscriptTail(n_2_th_next_character) &&
               potential_match[1].next.indexOf(n_2_th_next_character) !== -1
             ) {
               // the next character is also a superscript number and also is in the next list
@@ -345,9 +341,7 @@ export const transliterate_text = async (
         from_script_data.list[
           from_script_data.krama_text_arr[text_to_krama_item[1].krama?.[0] ?? -1]?.[1] ?? -1
         ]?.type === 'vyanjana' &&
-        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-          text_to_krama_item[0].at(-1) as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-        ) !== -1
+        isTaExtSuperscriptTail(text_to_krama_item[0].at(-1) ?? undefined)
           ? 1
           : 0;
       const matched_len_units = text_to_krama_item[0].length - index_delete_length;
@@ -383,13 +377,13 @@ export const transliterate_text = async (
               );
               // if mixture of vyanjana and mAtrA then return the first item as anya type
               if (
-                from_script_name === 'Tamil-Extended' &&
+                isScriptTaExt(from_script_name) &&
                 list_refs.some((item) => item?.type === 'mAtrA') &&
                 list_refs.some((item) => item?.type === 'vyanjana')
               ) {
                 item = { ...list_refs[0], type: 'anya' };
               } else if (
-                from_script_name === 'Tamil-Extended' &&
+                isScriptTaExt(from_script_name) &&
                 list_refs.length > 1 &&
                 list_refs.some((item) => item === undefined || item === null)
               ) {
@@ -420,24 +414,17 @@ export const transliterate_text = async (
         if (!result_concat_status) {
           if (
             to_script_data.script_type === 'brahmic' &&
-            to_script_name === 'Tamil-Extended' &&
+            isScriptTaExt(to_script_name) &&
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
               result_text === to_script_data.halant) &&
-            TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-              result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-            ) !== -1
+            isTaExtSuperscriptTail(result.lastChar())
           ) {
-            const first_piece = result_pieces_to_add[0] ?? '';
-            if (first_piece[0] === to_script_data.halant) {
-              const rest_first = first_piece.slice(1);
-              const after_pieces: string[] = [];
-              if (rest_first) after_pieces.push(rest_first);
-              for (let i = 1; i < result_pieces_to_add.length; i++)
-                after_pieces.push(result_pieces_to_add[i]);
-              result.withLastCharMovedAfter([to_script_data.halant], after_pieces);
-            } else {
-              result.withLastCharMovedAfter(result_pieces_to_add, []);
-            }
+            emitPiecesWithTaExtSuperscriptReorder(
+              result,
+              result_pieces_to_add,
+              to_script_data.halant!,
+              true
+            );
           } else {
             result.emitPieces(result_pieces_to_add);
           }
@@ -452,14 +439,7 @@ export const transliterate_text = async (
 
     // Step 2: Search for the character in the krama_text_map
     const char_to_search = text_to_krama_item === null ? char : text_to_krama_item[0];
-    const index = binarySearchLowerWithIndex(
-      from_script_data.krama_text_arr,
-      from_script_data.krama_text_arr_index,
-      char_to_search,
-      {
-        accessor: (arr, i) => arr[i][0]
-      }
-    );
+    const index = kramaIndexOfText(from_script_data, char_to_search);
     if (index === -1) {
       // text not matched so ignore and return as it is
       if (PREV_CONTEXT_IN_USE) {
@@ -489,18 +469,12 @@ export const transliterate_text = async (
       // In tamil Extended check if the current one is a halant or a svara(mAtrA)
       if (
         to_script_data.script_type === 'brahmic' &&
-        to_script_name === 'Tamil-Extended' &&
+        isScriptTaExt(to_script_name) &&
         (to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]?.type === 'mAtrA' ||
           to_add_text === to_script_data.halant) &&
-        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-          result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-        ) !== -1
+        isTaExtSuperscriptTail(result.lastChar())
       ) {
-        if (to_add_text[0] === to_script_data.halant) {
-          result.withLastCharMovedAfter([to_script_data.halant], [to_add_text.slice(1)]);
-        } else {
-          result.withLastCharMovedAfter([to_add_text], []);
-        }
+        emitPiecesWithTaExtSuperscriptReorder(result, [to_add_text], to_script_data.halant!, true);
       } else {
         result.emit(to_add_text);
       }
@@ -561,7 +535,7 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
     // );
     if (
       item[0] !== BRAHMIC_HALANT! &&
-      (from_script_name === 'Tamil-Extended' && item[0] && item[0].length > 0
+      (isScriptTaExt(from_script_name) && item[0] && item[0].length > 0
         ? item[0].charAt(0) !== BRAHMIC_HALANT!
         : true) &&
       // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
@@ -593,34 +567,35 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
           ? kramaTextOrEmpty(to_script_data, item[1].mAtrA_krama_ref?.[0] ?? -1)
           : item[0]!;
       // const linked_mAtrA = item[0]!;
-      if (
-        to_script_name === 'Tamil-Extended' &&
-        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-          result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-        ) !== -1
-      ) {
-        if (linked_mAtrA[0] === to_script_data.halant) {
-          result.withLastCharMovedAfter([to_script_data.halant], [linked_mAtrA.slice(1)]);
-        } else {
-          result.withLastCharMovedAfter([linked_mAtrA], []);
-        }
+      if (isScriptTaExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
       } else {
-        result.emit(linked_mAtrA);
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [linked_mAtrA],
+          to_script_data.halant!,
+          false
+        );
       }
       result_str_concat_status = true;
     } else if (
       prev_context.typeAt(-1) === 'vyanjana' &&
       !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
     ) {
-      if (
-        to_script_name === 'Tamil-Extended' &&
-        TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-          result.lastChar()! as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-        ) !== -1
-      ) {
-        result.withLastCharMovedAfter([BRAHMIC_HALANT!], []);
+      if (isScriptTaExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [BRAHMIC_HALANT!],
+          to_script_data.halant!,
+          true
+        );
       } else {
-        result.emit(BRAHMIC_HALANT!);
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [BRAHMIC_HALANT!],
+          to_script_data.halant!,
+          false
+        );
         if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
           result.rewriteAt(-1, result.lastPiece() + '\u200d');
         }
@@ -685,37 +660,11 @@ function applyCustomRules(ctx: TransliterateCtx, text_index: number, delta: numb
     } else if (rule.type === 'direct_replace') {
       const lookup_data = rule.check_in === 'output' ? to_script_data : from_script_data;
       for (const search_group of rule.to_replace) {
-        let search_found = true;
-        const search_indexes: number[] = [];
-        for (let i = 0; i < search_group.length; i++) {
-          const current_krama_index = search_group[search_group.length - 1 - i];
-          const current_char_info = result.peekAt(-1 - i);
-          if (current_char_info === null) {
-            search_found = false;
-            break;
-          }
-          const current_char = current_char_info.ch;
-          const current_char_krama_index = binarySearchLowerWithIndex(
-            lookup_data.krama_text_arr,
-            lookup_data.krama_text_arr_index,
-            current_char,
-            {
-              accessor: (arr, i) => arr[i][0]
-            }
-          );
-          if (current_char_krama_index === -1 || current_char_krama_index !== current_krama_index) {
-            search_found = false;
-            break;
-          }
-          search_indexes.push(current_char_krama_index);
-          if (search_found) {
-            const replace_with_pieces = rule.replace_with
-              .map((replace_with) => kramaTextOrEmpty(lookup_data, replace_with))
-              .filter(Boolean);
-            result.rewriteTailPieces(search_indexes.length, replace_with_pieces);
-            break;
-          }
-        }
+        const match = matchPrevKramaSequence(result.peekAt, -1, search_group, lookup_data);
+        if (!match.matched) continue;
+        const replace_with_pieces = replaceWithPieces(rule.replace_with, lookup_data);
+        result.rewriteTailPieces(match.matchedLen, replace_with_pieces);
+        break;
       }
     }
   }
@@ -760,6 +709,10 @@ export const get_active_custom_options = (
   return active_custom_options;
 };
 
+const get_rule_replace_text = (
+  rule: OptionsType[keyof OptionsType]['rules'][number],
+  script_data: OutputScriptData
+) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
 export const apply_custom_repalce_rules = (
   text: string,
@@ -775,10 +728,7 @@ export const apply_custom_repalce_rules = (
       for (let follow_krama_index of rule.following) {
         const follow_krama_string = kramaTextOrEmpty(script_data, follow_krama_index);
         if (!follow_krama_string) continue;
-        const replace_string =
-          rule.replace_with
-            .map((replace_with) => kramaTextOrEmpty(script_data, replace_with))
-            .join('') + follow_krama_string;
+        const replace_string = get_rule_replace_text(rule, script_data) + follow_krama_string;
         text = text.replaceAll(prev_string + follow_krama_string, replace_string);
       }
     } else if (rule.type === 'direct_replace') {
@@ -786,12 +736,7 @@ export const apply_custom_repalce_rules = (
         to_replace.map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item)).join('')
       );
       for (let to_replace_string of to_replace_strings) {
-        text = text.replaceAll(
-          to_replace_string,
-          rule.replace_with
-            .map((replace_with) => kramaTextOrEmpty(script_data, replace_with))
-            .join('')
-        );
+        text = text.replaceAll(to_replace_string, get_rule_replace_text(rule, script_data));
       }
     }
   }
