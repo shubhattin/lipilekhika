@@ -34,12 +34,7 @@ type CommonRuleTypeAttributes = {
    * When the `check_in` is `input` then we replace before the process and
    * when it is `output` then we replace after the process.
    *
-   * For the `output` type rule application without using `use_replace`. We will have to use
-   * `prev_context_arr` to keep track of previous.
-   * **Current Limitation** :- The previous context array work only when converted brahmic <> other scripts
-   * Keep this limitation in mind and think of all edge cases
-   *
-   * Always fall back to `use_replace` when implementation becomes too complex or otherwise.
+   * Always fall back to `use_replace` only when implementation becomes too complex or otherwise.
    * The *Aim* should be to develop techniques so we dont have to rely on it too much.
    */
   use_replace?: boolean;
@@ -156,7 +151,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
     check_in: 'output',
-    use_replace: true,
     rules: [
       {
         type: 'direct_replace',
@@ -170,7 +164,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     check_in: 'output',
-    use_replace: true,
     rules: [
       {
         type: 'direct_replace',
@@ -184,7 +177,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Normal', 'Romanized'],
     check_in: 'output',
-    use_replace: true,
     rules: [
       {
         type: 'direct_replace',

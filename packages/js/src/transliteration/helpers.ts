@@ -98,7 +98,9 @@ export const string_builder = () => {
     popLastChar,
     rewriteTailPieces,
     withLastCharMovedAfter,
-    toString: () => result.join(''),
+    toString: () => {
+      return result.join('');
+    },
     rewriteAt,
     peekAt
   };

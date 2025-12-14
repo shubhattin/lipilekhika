@@ -167,6 +167,12 @@ export const transliterate_text = async (
           result.withLastCharMovedAfter([BRAHMIC_HALANT!], []);
         } else {
           result.emit(BRAHMIC_HALANT!);
+          if (
+            to_script_name === 'Sinhala' &&
+            options['all_to_sinhala:use_conjuct_enabling_halant']
+          ) {
+            result.rewriteAt(-1, result.lastPiece() + '\u200d');
+          }
         }
       }
     }
@@ -182,9 +188,10 @@ export const transliterate_text = async (
     for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
       if (custom_rules[rule_index].use_replace === true) continue;
       const rule = custom_rules[rule_index];
-      if (rule.check_in === 'input') {
-        // output rule handling will be added
-        if (rule.type === 'replace_prev_krama_keys') {
+
+      if (rule.type === 'replace_prev_krama_keys') {
+        if (rule.check_in === 'input') {
+          // output rule handling will be added
           let prev_exists = true;
           let prev_matched_indexes: number[] = [];
           for (let i = 0; i < rule.prev.length; i++) {
@@ -232,10 +239,9 @@ export const transliterate_text = async (
               result.rewriteTailPieces(prev_matched_indexes.length, replace_with_pieces);
             }
           }
-        }
-      } else if (rule.check_in === 'output') {
-        // in this approch we will have check backwards
-        if (rule.type === 'replace_prev_krama_keys') {
+        } else if (rule.check_in === 'output') {
+          // in this approch we will have check backwards
+
           const last_piece = result.lastPiece();
           if (!last_piece) continue;
           const following_krama_indexes = binarySearchLowerWithIndex(
@@ -281,8 +287,49 @@ export const transliterate_text = async (
               const replace_with_pieces = rule.replace_with
                 .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
                 .filter(Boolean);
-              // result.result_arr[result.result_arr.length - 2] = replace_with_pieces.join('');
               result.rewriteAt(-2, replace_with_pieces.join(''));
+              // if the prev is more than one pieces then we have set the previous ones blank
+              for (let i = 1; i < prev_matched_indexes.length - rule.replace_with.length; i++) {
+                result.rewriteAt(-2 - i, '');
+              }
+            }
+          }
+        }
+      } else if (rule.type === 'direct_replace') {
+        const lookup_data = rule.check_in === 'output' ? to_script_data : from_script_data;
+        for (const search_group of rule.to_replace) {
+          let search_found = true;
+          const search_indexes: number[] = [];
+          for (let i = 0; i < search_group.length; i++) {
+            const current_krama_index = search_group[search_group.length - 1 - i];
+            const current_char_info = result.peekAt(-1);
+            if (current_char_info === null) {
+              search_found = false;
+              break;
+            }
+            const current_char = current_char_info.ch;
+            const current_char_krama_index = binarySearchLowerWithIndex(
+              lookup_data.krama_text_arr,
+              lookup_data.krama_text_arr_index,
+              current_char,
+              {
+                accessor: (arr, i) => arr[i][0]
+              }
+            );
+            if (
+              current_char_krama_index === -1 ||
+              current_char_krama_index !== current_krama_index
+            ) {
+              search_found = false;
+              break;
+            }
+            search_indexes.push(current_char_krama_index);
+            if (search_found) {
+              const replace_with_pieces = rule.replace_with
+                .map((replace_with) => kramaTextOrEmpty(lookup_data, replace_with))
+                .filter(Boolean);
+              result.rewriteTailPieces(search_indexes.length, replace_with_pieces);
+              break;
             }
           }
         }
