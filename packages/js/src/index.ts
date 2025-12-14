@@ -10,6 +10,33 @@ import {
   type script_input_name_type
 } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
+import {
+  SCRIPT_LIST,
+  LANG_LIST,
+  ALL_LANG_SCRIPT_LIST,
+  type script_list_type,
+  type lang_list_type,
+  type script_and_lang_list_type
+} from './utils/lang_list';
+
+export {
+  /**
+   * The list of all supported script names
+   */
+  SCRIPT_LIST,
+  /**
+   * The list of all supported language names which are mapped to a script
+   */
+  LANG_LIST,
+  /** Lists of all Supported Script/Language */
+  ALL_LANG_SCRIPT_LIST
+};
+/** Type of the script list */
+export type ScriptListType = script_list_type;
+/** Type of the language list */
+export type LangListType = lang_list_type;
+/** Type of the script and language list */
+export type ScriptAndLangListType = script_and_lang_list_type;
 
 /**
  * Preloads the script data. Useful for browsers as avoids the fetch latency

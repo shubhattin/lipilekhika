@@ -4,33 +4,54 @@
     transliterate,
     preloadScriptData,
     getAllOptions,
+    SCRIPT_LIST,
+    type ScriptListType,
     type TransliterationOptions
-  } from '../../../packages/js/src/index';
-  import { SCRIPT_LIST, type script_list_type } from '../../../packages/js/src/utils/lang_list';
+  } from 'lipilekhika';
   import Switch from './Switch.svelte';
   import { slide } from 'svelte/transition';
+  import prettyMs from 'pretty-ms';
 
-  const SCRIPTS = SCRIPT_LIST as script_list_type[];
-  const DEFAULT_FROM: script_list_type = 'Devanagari';
-  const DEFAULT_TO: script_list_type = 'Romanized';
+  const SCRIPTS = SCRIPT_LIST as ScriptListType[];
+  const DEFAULT_FROM: ScriptListType = 'Devanagari';
+  const DEFAULT_TO: ScriptListType = 'Romanized';
 
-  let fromScript = $state<script_list_type>(DEFAULT_FROM);
-  let toScript = $state<script_list_type>(DEFAULT_TO);
+  let fromScript = $state<ScriptListType>(DEFAULT_FROM);
+  let toScript = $state<ScriptListType>(DEFAULT_TO);
   let inputText = $state('');
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
   let showOptions = $state(false);
   let availableOptions = $state<string[]>([]);
+  let conversionTime = $state<string>('');
+  let timeoutId: number | undefined;
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     try {
+      const startTime = performance.now();
       const result = await transliterate(inputText, fromScript, toScript, options);
+      const endTime = performance.now();
+      const timeTaken = endTime - startTime;
+
+      conversionTime = prettyMs(timeTaken);
+      console.log(`Conversion took: ${conversionTime}`);
       console.log(result);
       outputText = result;
+
+      // Clear any existing timeout
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+
+      // Hide the time after 5 seconds
+      timeoutId = setTimeout(() => {
+        conversionTime = '';
+      }, 5000);
     } catch (error) {
       console.error(error);
       outputText = '';
+      conversionTime = '';
     }
   };
 
@@ -155,7 +176,12 @@
         </label>
 
         <label class="flex flex-col gap-3">
-          <span class="text-sm tracking-wider text-slate-400 uppercase">Converted output</span>
+          <div class="flex items-center justify-between">
+            <span class="text-sm tracking-wider text-slate-400 uppercase">Converted output</span>
+            {#if conversionTime}
+              <span class="text-xs font-medium text-emerald-400">⏱ {conversionTime}</span>
+            {/if}
+          </div>
           <textarea
             class="min-h-[180px] rounded-2xl border border-slate-800/60 bg-slate-900/70 px-5 py-4 text-base text-teal-100"
             value={outputText}

@@ -3,6 +3,10 @@ node_modules
 **/a.ts
 **/a.js
 **/a.txt
+**/a.py
+**/a.sh
+**/a.rs
+**/a.go
 **/tmp/
 
 # Script Data Ignore (Built Output)
