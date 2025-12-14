@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lipilekhika"
-version = "0.0.0-alpha.0"
+version = "0.0.0a1"
 description = "Lipi Lekhika is a library for transliterating text from one script to another."
 readme = "README.md"
 license = "MIT"
@@ -12,4 +12,4 @@ requires-python = ">=3.10"
 dependencies = []
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["lipilekhika"]
