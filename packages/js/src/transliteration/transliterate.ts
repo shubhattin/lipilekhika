@@ -12,7 +12,10 @@ import {
   kramaTextOrEmpty,
   prev_context_builder,
   string_builder,
-  type prev_context_array_type
+  kramaIndexOfText,
+  type prev_context_array_type,
+  matchPrevKramaSequence,
+  replaceWithPieces
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
@@ -185,58 +188,29 @@ export const transliterate_text = async (
 
   function apply_custom_rules(text_index: number, delta: number) {
     const current_text_index = text_index + delta;
+
     for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
       if (custom_rules[rule_index].use_replace === true) continue;
       const rule = custom_rules[rule_index];
 
       if (rule.type === 'replace_prev_krama_keys') {
         if (rule.check_in === 'input') {
-          // output rule handling will be added
-          let prev_exists = true;
-          let prev_matched_indexes: number[] = [];
-          for (let i = 0; i < rule.prev.length; i++) {
-            const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
-            const current_char_info = cursor.peekAt(current_text_index - i);
-            if (current_char_info === null) {
-              prev_exists = false;
-              break;
-            }
-            const current_char = current_char_info.ch;
-            const current_char_krama_index = binarySearchLowerWithIndex(
-              from_script_data.krama_text_arr,
-              from_script_data.krama_text_arr_index,
-              current_char,
-              {
-                accessor: (arr, i) => arr[i][0]
-              }
-            );
-            if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
-              prev_exists = false;
-              break;
-            }
-            prev_matched_indexes.push(current_char_krama_index);
-          }
+          const prev_match = matchPrevKramaSequence(
+            cursor.peekAt,
+            current_text_index,
+            rule.prev,
+            from_script_data
+          );
           const next_char_info = cursor.peekAt(text_index);
-          if (prev_exists && next_char_info !== null) {
+          if (prev_match.matched && next_char_info !== null) {
             const next_char = next_char_info.ch;
-            const next_char_krama_index = binarySearchLowerWithIndex(
-              from_script_data.krama_text_arr,
-              from_script_data.krama_text_arr_index,
-              next_char,
-              {
-                accessor: (arr, i) => arr[i][0]
-              }
-            );
+            const next_char_krama_index = kramaIndexOfText(from_script_data, next_char);
             if (
               next_char_krama_index !== -1 &&
               rule.following.indexOf(next_char_krama_index) !== -1
             ) {
-              // Replace last K output pieces corresponding to the matched previous krama keys.
-              // This is token-safe and avoids char-count slicing.
-              const replace_with_pieces = rule.replace_with
-                .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
-                .filter(Boolean);
-              result.rewriteTailPieces(prev_matched_indexes.length, replace_with_pieces);
+              const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
+              result.rewriteTailPieces(prev_match.matchedLen, replace_with_pieces);
             }
           }
         } else if (rule.check_in === 'output') {
@@ -244,54 +218,18 @@ export const transliterate_text = async (
 
           const last_piece = result.lastPiece();
           if (!last_piece) continue;
-          const following_krama_indexes = binarySearchLowerWithIndex(
-            to_script_data.krama_text_arr,
-            to_script_data.krama_text_arr_index,
-            result.lastPiece(),
-            {
-              accessor: (arr, i) => arr[i][0]
-            }
-          );
+          const following_krama_indexes = kramaIndexOfText(to_script_data, last_piece);
           if (
             following_krama_indexes !== -1 &&
             rule.following.indexOf(following_krama_indexes) !== -1
           ) {
-            let prev_exists = true;
-            let prev_matched_indexes: number[] = [];
-            for (let i = 0; i < rule.prev.length; i++) {
-              const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
-              const current_char_info = result.peekAt(-i - 2);
-              if (current_char_info === null) {
-                prev_exists = false;
-                break;
-              }
-              const current_char = current_char_info.ch;
-              const current_char_krama_index = binarySearchLowerWithIndex(
-                to_script_data.krama_text_arr,
-                to_script_data.krama_text_arr_index,
-                current_char,
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
-              );
-              if (
-                current_char_krama_index === -1 ||
-                current_char_krama_index !== prev_krama_index
-              ) {
-                prev_exists = false;
-                break;
-              }
-              prev_matched_indexes.push(current_char_krama_index);
-            }
-            if (prev_exists) {
-              const replace_with_pieces = rule.replace_with
-                .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
-                .filter(Boolean);
-              result.rewriteAt(-2, replace_with_pieces.join(''));
-              // if the prev is more than one pieces then we have set the previous ones blank
-              for (let i = 1; i < prev_matched_indexes.length - rule.replace_with.length; i++) {
-                result.rewriteAt(-2 - i, '');
-              }
+            const prev_match = matchPrevKramaSequence(result.peekAt, -2, rule.prev, to_script_data);
+            if (prev_match.matched) {
+              const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
+              result.rewriteTailPieces(prev_match.matchedLen + 1, [
+                ...replace_with_pieces,
+                last_piece
+              ]);
             }
           }
         }

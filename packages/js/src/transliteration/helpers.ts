@@ -2,6 +2,7 @@ import type {
   OutputBrahmicScriptData,
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
+import { binarySearchLowerWithIndex } from '../utils/binary_search/binary_search';
 
 export type prev_context_array_type = [
   string | undefined,
@@ -15,6 +16,17 @@ export const kramaTextOrNull = (script: OutputScriptData, idx: number): string |
 
 export const kramaTextOrEmpty = (script: OutputScriptData, idx: number): string => {
   return kramaTextOrNull(script, idx) ?? '';
+};
+
+export const kramaIndexOfText = (script_data: OutputScriptData, text: string): number => {
+  return binarySearchLowerWithIndex(
+    script_data.krama_text_arr,
+    script_data.krama_text_arr_index,
+    text,
+    {
+      accessor: (arr, i) => arr[i][0]
+    }
+  );
 };
 
 export const string_builder = () => {
@@ -205,4 +217,31 @@ export const make_input_cursor = (text: string) => {
     advance,
     slice
   };
+};
+
+type PeekAtLike = (index: number) => { ch: string } | null;
+
+export const matchPrevKramaSequence = (
+  peekAt: PeekAtLike,
+  anchorIndex: number,
+  prev: number[],
+  script_data: OutputScriptData
+): { matched: boolean; matchedLen: number } => {
+  for (let i = 0; i < prev.length; i++) {
+    const expected_krama_index = prev[prev.length - 1 - i];
+    const info = peekAt(anchorIndex - i);
+    if (info === null) return { matched: false, matchedLen: 0 };
+    const got_krama_index = kramaIndexOfText(script_data, info.ch);
+    if (got_krama_index === -1 || got_krama_index !== expected_krama_index) {
+      return { matched: false, matchedLen: 0 };
+    }
+  }
+  return { matched: true, matchedLen: prev.length };
+};
+
+export const replaceWithPieces = (
+  replace_with: number[],
+  script_data: OutputScriptData
+): string[] => {
+  return replace_with.map((k) => kramaTextOrEmpty(script_data, k)).filter(Boolean);
 };
