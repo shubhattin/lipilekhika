@@ -1,8 +1,14 @@
 {
   "name": "lipilekhika",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.0.0-alpha.0",
   "type": "module",
+  "license": "MIT",
+  "repository": "https://github.com/shubhattin/lipilekhika/tree/main/packages/js",
+  "author": {
+    "name": "Shubham Anand Gupta",
+    "email": "shubhattin@gmail.com",
+    "url": "https://github.com/shubhattin"
+  },
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",

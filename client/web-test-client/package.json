@@ -23,5 +23,9 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "lipilekhika": "../../packages/js",
+    "pretty-ms": "^9.3.0"
   }
 }
