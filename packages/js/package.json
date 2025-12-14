@@ -3,8 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "rm -rf dist && bun run make-script-data && vite build",
+    "build": "./build.sh",
     "check": "tsc --noEmit",
     "test": "vitest",
     "test:bun": "bun test --concurrent --only-failures",
@@ -14,6 +27,7 @@
     "make-script-data": "vite-node src/make_script_data/make_output_script_data.ts"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.55.2",
     "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^4.0.14",
     "@vitest/ui": "^4.0.14",

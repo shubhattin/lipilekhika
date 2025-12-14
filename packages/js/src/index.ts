@@ -15,6 +15,7 @@ import custom_options_json from './custom_options.json';
  * Preloads the script data. Useful for browsers as avoids the fetch latency
  * @param name - The name of the script/language to preload
  * @returns The script data
+ * @public
  */
 export const preloadScriptData = async (name: script_input_name_type) => {
   const normalizedName = getNormalizedScriptName(name);
@@ -25,8 +26,19 @@ export const preloadScriptData = async (name: script_input_name_type) => {
   return scriptData;
 };
 
+/**
+ * Supported script/language identifier types
+ */
 export type ScriptLangType = script_input_name_type;
 
+/**
+ * Transliterates `text` from `from` to `to`.
+ * @param text - The text to transliterate
+ * @param from - The script/language to transliterate from
+ * @param to - The script/language to transliterate to
+ * @param options - The custom options to use for the transliteration
+ * @returns The transliterated text
+ */
 export async function transliterate(
   text: string,
   from: ScriptLangType,
@@ -49,6 +61,9 @@ export async function transliterate(
 /**
  * This returns the list of all supported custom options for
  * transliterations for the provided script pair
+ * @param from_script_name - The script/language to transliterate from
+ * @param to_script_name - The script/language to transliterate to
+ * @returns The list of all supported custom options for the provided script pair
  */
 export async function getAllOptions(
   from_script_name: ScriptLangType,

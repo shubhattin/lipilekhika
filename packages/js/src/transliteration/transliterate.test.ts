@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { transliterate, preloadScriptData } from '../index';
 import { z } from 'zod';
+import type { script_input_name_type } from '../utils/lang_list/script_normalization';
 
 const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
 const TEST_FILES_TO_IGNORE: string[] = [];
@@ -48,12 +49,12 @@ describe('Transliteration', () => {
     const test_data = TestDataTypeSchema.array().parse(parse(fs.readFileSync(filePath, 'utf8')));
     describe('⚙️ ' + relativePath.split('/').splice(-1, 1).join('/').split('.')[0], async () => {
       for (const test_data_item of test_data) {
-        preloadScriptData(test_data_item.from);
-        preloadScriptData(test_data_item.to);
+        preloadScriptData(test_data_item.from as script_input_name_type);
+        preloadScriptData(test_data_item.to as script_input_name_type);
         const result = await transliterate(
           test_data_item.input,
-          test_data_item.from,
-          test_data_item.to,
+          test_data_item.from as script_input_name_type,
+          test_data_item.to as script_input_name_type,
           test_data_item.options
         );
         it(`${test_data_item.index} : ${test_data_item.from} → ${test_data_item.to}`, async () => {
@@ -70,8 +71,8 @@ describe('Transliteration', () => {
           it(`${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`, async () => {
             const result_reversed = await transliterate(
               result,
-              test_data_item.to,
-              test_data_item.from,
+              test_data_item.to as script_input_name_type,
+              test_data_item.from as script_input_name_type,
               test_data_item.options
             );
             const errorMessage_reversed =
