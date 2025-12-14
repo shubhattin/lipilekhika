@@ -73,3 +73,11 @@
   to: Devanagari
   input: ද්‍වයම්‍
   output: द्वयम्
+- index: 7
+  todo: false
+  from: Normal
+  to: Sinhala
+  input: dvayam
+  output: ද්‍වයම්‍
+  options:
+    "all_to_sinhala:use_conjuct_enabling_halant": true

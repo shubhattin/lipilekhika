@@ -87,7 +87,6 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     from_script_type: 'all',
     to_script_name: ['Normal'],
     check_in: 'output',
-    use_replace: true,
     rules: [
       // ka varga
       {

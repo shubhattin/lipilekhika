@@ -72,6 +72,24 @@ export const string_builder = () => {
     emitPieces(afterPieces);
   }
 
+  /** Peek at the piece at the given index */
+  function peekAt(index: number): CursorCp | null {
+    const item = result.at(index);
+    if (!item) return null;
+    return {
+      cp: index,
+      ch: item,
+      width: item.length
+    };
+  }
+
+  function rewriteAt(index: number, newPiece: string) {
+    if (index < 0) {
+      index = result.length + index;
+    }
+    result[index] = newPiece;
+  }
+
   return {
     emit,
     emitPieces,
@@ -80,7 +98,9 @@ export const string_builder = () => {
     popLastChar,
     rewriteTailPieces,
     withLastCharMovedAfter,
-    toString: () => result.join('')
+    toString: () => result.join(''),
+    rewriteAt,
+    peekAt
   };
 };
 

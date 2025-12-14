@@ -182,54 +182,108 @@ export const transliterate_text = async (
     for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
       if (custom_rules[rule_index].use_replace === true) continue;
       const rule = custom_rules[rule_index];
-      if (rule.check_in === 'output') continue;
-      // output rule handling will be added
-      if (rule.type === 'replace_prev_krama_keys') {
-        let prev_exists = true;
-        let prev_matched_indexes: number[] = [];
-        for (let i = 0; i < rule.prev.length; i++) {
-          const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
-          const current_char_info = cursor.peekAt(current_text_index - i);
-          if (current_char_info === null) {
-            prev_exists = false;
-            break;
-          }
-          const current_char = current_char_info.ch;
-          const current_char_krama_index = binarySearchLowerWithIndex(
-            from_script_data.krama_text_arr,
-            from_script_data.krama_text_arr_index,
-            current_char,
-            {
-              accessor: (arr, i) => arr[i][0]
+      if (rule.check_in === 'input') {
+        // output rule handling will be added
+        if (rule.type === 'replace_prev_krama_keys') {
+          let prev_exists = true;
+          let prev_matched_indexes: number[] = [];
+          for (let i = 0; i < rule.prev.length; i++) {
+            const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
+            const current_char_info = cursor.peekAt(current_text_index - i);
+            if (current_char_info === null) {
+              prev_exists = false;
+              break;
             }
-          );
-          if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
-            prev_exists = false;
-            break;
+            const current_char = current_char_info.ch;
+            const current_char_krama_index = binarySearchLowerWithIndex(
+              from_script_data.krama_text_arr,
+              from_script_data.krama_text_arr_index,
+              current_char,
+              {
+                accessor: (arr, i) => arr[i][0]
+              }
+            );
+            if (current_char_krama_index === -1 || current_char_krama_index !== prev_krama_index) {
+              prev_exists = false;
+              break;
+            }
+            prev_matched_indexes.push(current_char_krama_index);
           }
-          prev_matched_indexes.push(current_char_krama_index);
+          const next_char_info = cursor.peekAt(text_index);
+          if (prev_exists && next_char_info !== null) {
+            const next_char = next_char_info.ch;
+            const next_char_krama_index = binarySearchLowerWithIndex(
+              from_script_data.krama_text_arr,
+              from_script_data.krama_text_arr_index,
+              next_char,
+              {
+                accessor: (arr, i) => arr[i][0]
+              }
+            );
+            if (
+              next_char_krama_index !== -1 &&
+              rule.following.indexOf(next_char_krama_index) !== -1
+            ) {
+              // Replace last K output pieces corresponding to the matched previous krama keys.
+              // This is token-safe and avoids char-count slicing.
+              const replace_with_pieces = rule.replace_with
+                .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
+                .filter(Boolean);
+              result.rewriteTailPieces(prev_matched_indexes.length, replace_with_pieces);
+            }
+          }
         }
-        const next_char_info = cursor.peekAt(text_index);
-        if (prev_exists && next_char_info !== null) {
-          const next_char = next_char_info.ch;
-          const next_char_krama_index = binarySearchLowerWithIndex(
-            from_script_data.krama_text_arr,
-            from_script_data.krama_text_arr_index,
-            next_char,
+      } else if (rule.check_in === 'output') {
+        // in this approch we will have check backwards
+        if (rule.type === 'replace_prev_krama_keys') {
+          const last_piece = result.lastPiece();
+          if (!last_piece) continue;
+          const following_krama_indexes = binarySearchLowerWithIndex(
+            to_script_data.krama_text_arr,
+            to_script_data.krama_text_arr_index,
+            result.lastPiece(),
             {
               accessor: (arr, i) => arr[i][0]
             }
           );
           if (
-            next_char_krama_index !== -1 &&
-            rule.following.indexOf(next_char_krama_index) !== -1
+            following_krama_indexes !== -1 &&
+            rule.following.indexOf(following_krama_indexes) !== -1
           ) {
-            // Replace last K output pieces corresponding to the matched previous krama keys.
-            // This is token-safe and avoids char-count slicing.
-            const replace_with_pieces = rule.replace_with
-              .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
-              .filter(Boolean);
-            result.rewriteTailPieces(prev_matched_indexes.length, replace_with_pieces);
+            let prev_exists = true;
+            let prev_matched_indexes: number[] = [];
+            for (let i = 0; i < rule.prev.length; i++) {
+              const prev_krama_index = rule.prev[rule.prev.length - 1 - i];
+              const current_char_info = result.peekAt(-i - 2);
+              if (current_char_info === null) {
+                prev_exists = false;
+                break;
+              }
+              const current_char = current_char_info.ch;
+              const current_char_krama_index = binarySearchLowerWithIndex(
+                to_script_data.krama_text_arr,
+                to_script_data.krama_text_arr_index,
+                current_char,
+                {
+                  accessor: (arr, i) => arr[i][0]
+                }
+              );
+              if (
+                current_char_krama_index === -1 ||
+                current_char_krama_index !== prev_krama_index
+              ) {
+                prev_exists = false;
+                break;
+              }
+              prev_matched_indexes.push(current_char_krama_index);
+            }
+            if (prev_exists) {
+              const replace_with_pieces = rule.replace_with
+                .map((replace_with) => kramaTextOrEmpty(to_script_data, replace_with))
+                .filter(Boolean);
+              // result.result_arr[result.result_arr.length - 2] = replace_with_pieces.join('');
+              result.rewriteAt(-2, replace_with_pieces.join(''));
+            }
           }
         }
       }
