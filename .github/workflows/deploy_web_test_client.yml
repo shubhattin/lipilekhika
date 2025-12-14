@@ -20,8 +20,8 @@ jobs:
           cd packages/js
           bun install
           bun run build
-          bun link link:lipilekhika
-      - name: Build
+          bun link
+      - name: Build Client Application
         run: |
           cd client/web-test-client
           bun install
