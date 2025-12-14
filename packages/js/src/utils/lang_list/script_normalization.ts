@@ -87,8 +87,9 @@ export type script_input_name_type = acronym_type | script_and_lang_list_type;
 
 export const getNormalizedScriptName = (name: script_input_name_type): script_list_type | null => {
   const capitalizedName = capitalizeFirstAndAfterDash(name);
-  if (SCRIPT_LIST.includes(capitalizedName)) return capitalizedName as script_list_type;
-  if (LANG_LIST.includes(capitalizedName))
+  if (SCRIPT_LIST.includes(capitalizedName as script_list_type))
+    return capitalizedName as script_list_type;
+  if (LANG_LIST.includes(capitalizedName as lang_list_type))
     return LANG_SCRIPT_MAP[capitalizedName as lang_list_type];
   if (name.toLocaleLowerCase() in ACRONYMS_MAP)
     return ACRONYMS_MAP[name.toLocaleLowerCase() as acronym_type];
