@@ -358,7 +358,7 @@ export const transliterate_text = async (
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
           if (from_script_data.script_type === 'brahmic') {
-            let item: (typeof from_script_data.list)[number] | null = null;
+            let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null
@@ -387,7 +387,7 @@ export const transliterate_text = async (
                 list_refs.length > 1 &&
                 list_refs.some((item) => item === undefined || item === null)
               ) {
-                item = list_refs.at(-1) ?? null;
+                item = list_refs.at(-1);
               } else {
                 item = list_refs[0];
               }
@@ -395,19 +395,20 @@ export const transliterate_text = async (
 
             result_concat_status = prevContextCleanup(ctx, [text_to_krama_item[0], item]);
           } else if (to_script_data.script_type === 'brahmic') {
-            let item: (typeof to_script_data.list)[number] | null = null;
+            let item: (typeof to_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null
             ) {
               item = to_script_data.list[text_to_krama_item[1].fallback_list_ref];
+            } else {
+              item =
+                text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
+                  ? (to_script_data.list[
+                      to_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
+                    ] ?? null)
+                  : null;
             }
-            item =
-              text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0
-                ? (to_script_data.list[
-                    to_script_data.krama_text_arr[text_to_krama_item[1].krama[0]][1] ?? -1
-                  ] ?? null)
-                : null;
             result_concat_status = prevContextCleanup(ctx, [text_to_krama_item[0], item]);
           }
         }
