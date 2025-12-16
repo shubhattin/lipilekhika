@@ -6,4 +6,6 @@ dist
 pnpm-lock.yaml
 bun.lock
 
+src/script_data
+src/custom_options.json
 tmp
