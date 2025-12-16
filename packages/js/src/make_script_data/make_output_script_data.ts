@@ -31,12 +31,15 @@ async function make_script_data() {
   if (fs.existsSync(OUT_FOLDER)) fs.rmSync(OUT_FOLDER, { recursive: true });
   fs.mkdirSync(OUT_FOLDER, { recursive: true });
 
-  const script_data_list = Object.values(
-    import.meta.glob('./input_data/*.ts', {
-      eager: true,
-      import: 'default'
-    })
-  ) as InputScriptInfoType[];
+  // Load all script data files from input_data directory
+  const inputDataDir = path.resolve('./src/make_script_data/input_data');
+  const files = fs.readdirSync(inputDataDir).filter((file) => file.endsWith('.ts'));
+  const script_data_list: InputScriptInfoType[] = [];
+  for (const file of files) {
+    const filePath = path.resolve(inputDataDir, file);
+    const module = await import(filePath);
+    script_data_list.push(module.default);
+  }
   for (const input_script_data of script_data_list) {
     let res: OutputScriptData;
     if (input_script_data.script_type === 'brahmic') {
