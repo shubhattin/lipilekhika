@@ -7,8 +7,8 @@ import {
   SCRIPT_LIST
 } from '.';
 
-const ACRONYMS = [
-  /* Script Acronyms */
+const ALTERNATES = [
+  /* Script Alternates */
   'dev', // Devanagari
   'te', // Telugu
   'tel', // Telugu
@@ -28,11 +28,14 @@ const ACRONYMS = [
   'sinh', // Sinhala
   'sin', // Sinhala
   'en', // Normal
+  'eng', // Normal
+  'la', // Normal
+  'lat', // Normal
   'rom', // romanized
   'gur', // Gurumukhi
   'as', // Assamese
 
-  /* Language Acronyms (Do not repeat) */
+  /* Language Alternates (Do not repeat) */
   'sa', // Devanagari (Sanskrit)
   'san', // Devanagari (Sanskrit)
   'hin', // Devanagari (Hindi)
@@ -43,9 +46,9 @@ const ACRONYMS = [
   'pun' // Gurumukhi (Punjabi)
 ] as const;
 
-export type acronym_type = (typeof ACRONYMS)[number];
+export type alternate_script_type = (typeof ALTERNATES)[number];
 
-const ACRONYMS_MAP: Record<acronym_type, script_list_type> = {
+const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_type> = {
   dev: 'Devanagari',
   te: 'Telugu',
   tel: 'Telugu',
@@ -65,6 +68,9 @@ const ACRONYMS_MAP: Record<acronym_type, script_list_type> = {
   sinh: 'Sinhala',
   sin: 'Sinhala',
   en: 'Normal',
+  eng: 'Normal',
+  la: 'Normal',
+  lat: 'Normal',
   rom: 'Romanized',
   gur: 'Gurumukhi',
   as: 'Assamese',
@@ -83,7 +89,7 @@ function capitalizeFirstAndAfterDash(str: string): string {
   return str.toLowerCase().replace(/(^|-)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
 }
 
-export type script_input_name_type = acronym_type | script_and_lang_list_type;
+export type script_input_name_type = alternate_script_type | script_and_lang_list_type;
 
 export const getNormalizedScriptName = (name: script_input_name_type): script_list_type | null => {
   const capitalizedName = capitalizeFirstAndAfterDash(name);
@@ -91,7 +97,7 @@ export const getNormalizedScriptName = (name: script_input_name_type): script_li
     return capitalizedName as script_list_type;
   if (LANG_LIST.includes(capitalizedName as lang_list_type))
     return LANG_SCRIPT_MAP[capitalizedName as lang_list_type];
-  if (name.toLocaleLowerCase() in ACRONYMS_MAP)
-    return ACRONYMS_MAP[name.toLocaleLowerCase() as acronym_type];
+  if (name.toLocaleLowerCase() in ALTERNATE_TO_SCRIPT_MAP)
+    return ALTERNATE_TO_SCRIPT_MAP[name.toLocaleLowerCase() as alternate_script_type];
   return null;
 };
