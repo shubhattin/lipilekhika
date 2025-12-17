@@ -1,3 +1,6 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
 @layer base, starlight, theme, components, utilities;
 
 @import '@astrojs/starlight-tailwind';
@@ -16,8 +19,7 @@ Add additional Tailwind styles to this file:
 https://tailwindcss.com/docs/adding-custom-styles#using-custom-css
 */
 
-@import 'tailwindcss';
-@import 'tw-animate-css';
+/* Shadcn UI Theme */
 
 @custom-variant dark (&:is(.dark *));
 

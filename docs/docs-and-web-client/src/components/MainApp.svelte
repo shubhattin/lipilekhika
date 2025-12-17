@@ -212,7 +212,9 @@
               Converted output
             </label>
             {#if conversionTime}
-              <span class="text-xs font-medium text-primary">⏱ {conversionTime}</span>
+              <span class="text-xs font-medium text-green-600 dark:text-green-400"
+                >⏱ {conversionTime}</span
+              >
             {/if}
           </div>
           <Textarea
