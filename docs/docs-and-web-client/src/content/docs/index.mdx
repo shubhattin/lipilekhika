@@ -27,6 +27,17 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Button } from '$lib/components/ui/button';
+
+<a href="/lipilekhika/app">
+  <Button
+    asChild
+    variant="outline"
+    class="px-6 py-3 rounded-xl border border-teal-400/50 bg-slate-900/80 hover:bg-teal-400/20 hover:border-teal-400 hover:text-teal-200 text-lg font-semibold transition-colors shadow-md shadow-black/20 backdrop-blur"
+  >
+    App
+  </Button>
+</a>
 
 ## Next steps
 
