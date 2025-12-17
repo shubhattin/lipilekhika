@@ -9,8 +9,13 @@ import svelte from '@astrojs/svelte';
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'My Docs',
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+      title: 'Docs with Tailwind',
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' }
+      ],
+      components: {
+        Head: './src/components/starlight/Head.astro'
+      },
       sidebar: [
         {
           label: 'Guides',
@@ -23,7 +28,8 @@ export default defineConfig({
           label: 'Reference',
           autogenerate: { directory: 'reference' }
         }
-      ]
+      ],
+      customCss: ['./src/styles/global.css']
     }),
     svelte()
   ],
