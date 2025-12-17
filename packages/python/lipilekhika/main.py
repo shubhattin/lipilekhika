@@ -1,4 +1,4 @@
-""" ""
+"""
 This module contains the main function for the lipi lekhika library.
 """
 
