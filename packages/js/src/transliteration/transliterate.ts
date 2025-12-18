@@ -29,8 +29,21 @@ export type CustomOptionType = {
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
-/** Return flag to indicate if the result concat has to be done as it already is concatenated here. */
-function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
+/**
+ * Mostly used is -1 for prev context.
+ * But even in the theoretical case it is -3 for now
+ */
+const MAX_CONTEXT_LENGTH = 3;
+
+/**
+ * @return flag to indicate if the result concat has to be done as it already is concatenated here.
+ */
+function prev_context_cleanup(
+  ctx: TransliterateCtx,
+  item: prev_context_array_type[number],
+  next?: string[],
+  last_extra_call?: boolean
+) {
   const {
     from_script_name,
     to_script_name,
@@ -40,16 +53,17 @@ function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_ty
     result,
     prev_context,
     BRAHMIC_HALANT,
-    BRAHMIC_NUQTA
+    BRAHMIC_NUQTA,
+    typing_mode
   } = ctx;
   let result_str_concat_status = false;
 
-  // custom cleanup logic/cases
   // console.log(
   //   [item[0], item[1]?.type],
   //   prev_context_arr.map((item) => item[1]?.type),
   //   result_str.split('')
   // );
+  // custom cleanup logic/cases
   if (
     // vyanjana, nuqta, svara
     ((BRAHMIC_NUQTA &&
@@ -138,9 +152,20 @@ function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_ty
       }
     }
   }
-
+  // custom typing mode context clear logic
+  // only clear context if there are no next characters or if its last extra call
+  let to_clear_context = false;
+  if (typing_mode && (next === undefined || next.length === 0) && !last_extra_call) {
+    to_clear_context = true;
+    // do not clear the context only if case where the current added element is a vyanjana
+    if (item[1]?.type === 'vyanjana') to_clear_context = false;
+    if (to_clear_context) {
+      prev_context.clear();
+    }
+  }
   // addition and shifting
-  prev_context.push(item);
+  // in typing it should not be the last extra call
+  if (!typing_mode ? true : !last_extra_call && !to_clear_context) prev_context.push(item);
 
   return result_str_concat_status;
 }
@@ -297,14 +322,17 @@ type TransliterateCtx = {
   PREV_CONTEXT_IN_USE: boolean;
   BRAHMIC_NUQTA: string | null;
   BRAHMIC_HALANT: string | null;
+  typing_mode: boolean;
 };
 
 export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  input_options?: CustomOptionType
+  input_options?: CustomOptionType,
+  _typing_mode?: boolean
 ) => {
+  const typing_mode = _typing_mode ?? false;
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
   const options = get_active_custom_options(from_script_data, to_script_data, input_options);
@@ -320,7 +348,6 @@ export const transliterate_text = async (
   let text_index = 0;
   const cursor = make_input_cursor(text);
 
-  const MAX_CONTEXT_LENGTH = 5;
   /** It stores the previous attribute types of the brahmic scripts
    * Use only when converted Brahmic -> Other or Other -> Brahmic
    * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
@@ -358,7 +385,8 @@ export const transliterate_text = async (
     prev_context,
     PREV_CONTEXT_IN_USE,
     BRAHMIC_NUQTA,
-    BRAHMIC_HALANT
+    BRAHMIC_HALANT,
+    typing_mode
   };
 
   /** A flag to indicate when to ignore the tamil extended numeral
@@ -668,7 +696,14 @@ export const transliterate_text = async (
                     ] ?? null)
                   : null;
             }
-            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
+            if (typing_mode && from_script_name === 'Normal')
+              // Note :- this is the only over place where next chars can be found
+              result_concat_status = prev_context_cleanup(
+                ctx,
+                [text_to_krama_item[0], item],
+                text_to_krama_item[1].next ?? undefined
+              );
+            else result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           }
         }
         if (!result_concat_status) {
@@ -749,14 +784,18 @@ export const transliterate_text = async (
     }
     apply_custom_rules(ctx, text_index, -char_width);
   }
-  if (PREV_CONTEXT_IN_USE) prev_context_cleanup(ctx, [undefined, null]);
+  if (PREV_CONTEXT_IN_USE)
+    // calling with last extra index flag
+    prev_context_cleanup(ctx, [undefined, null], undefined, true);
 
   let output = result.toString();
   output = apply_custom_replace_rules(output, to_script_data, custom_rules, 'output');
 
   return {
     output,
-    /** Can be used to manage context while using the typing feature */
+    /** Can be used to manage context while using the typing feature.
+     * If this is 0, the external context can be cleared
+     */
     context_length: prev_context.length()
   };
 };
