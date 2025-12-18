@@ -27,6 +27,7 @@
   to: Telugu
   input: कॆशं केशं
   output: కెశం కేశం
+  reversible: true
 - index: 5
   from: Devanagari
   to: Telugu
@@ -67,3 +68,10 @@
   input: க்ரு²தி கிருதி க அலக் கோ³தோதொ³ த்³வேஷ் த்³ த³ த்³வேஷ க்⁴ல்ரி² க்ல்ரி² கோ³ கொ³ க்³ரு² க்⁴ரு²
   output: कृति किरुति क अलक् गोतोदॊ द्वेष् द् द द्वेष घॢ कॢ गो गॊ गृ घृ
   reversible: false
+  # Non reversible as contain duplicate mAtrAs which exactly the same
+- index: 7
+  from: Normal
+  to: Devanagari
+  input: kL kLR
+  output: क्ळ् कॢ
+  reversible: true

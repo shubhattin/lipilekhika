@@ -23,6 +23,10 @@ type DirectReplaceRule = {
   /** set of individual krama key combinations to replace */
   to_replace: KramaKeysExtendedType[][];
   replace_with: (KramaKeysExtendedType | null)[];
+  /** If this is present it will take precedence over the replace_with array.
+   * Text here will be directly without any krama mappings
+   */
+  replace_text?: string;
 };
 type CommonRuleTypeAttributes = {
   /** Specifies if the pattern has to checked in input or output text */
@@ -60,6 +64,7 @@ type out_ReplacePrevKramaKeysRule = Pick<ReplacePrevKramaKeysRule, 'type'> & {
 type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
   to_replace: number[][];
   replace_with: number[];
+  replace_text?: string;
 };
 // Using the krama key index instead of the krama key directly to have support for multiple scripts at a time
 // As same corresponding key values will have identical indexes across scripts
@@ -155,7 +160,8 @@ export const CustomOptionsInput: InputCustomOptionsType = {
       {
         type: 'direct_replace',
         to_replace: [['halant']],
-        replace_with: ['halant', 'zero_width_joiner']
+        replace_with: [],
+        replace_text: '්' + '\u200d'
       }
     ]
   },

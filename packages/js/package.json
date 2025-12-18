@@ -4,6 +4,7 @@
   "type": "module",
   "license": "MIT",
   "repository": "https://github.com/shubhattin/lipilekhika/tree/main/packages/js",
+  "sideEffects": false,
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",

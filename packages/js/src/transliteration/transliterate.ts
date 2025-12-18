@@ -663,6 +663,11 @@ function applyCustomRules(ctx: TransliterateCtx, text_index: number, delta: numb
       for (const search_group of rule.to_replace) {
         const match = matchPrevKramaSequence(result.peekAt, -1, search_group, lookup_data);
         if (!match.matched) continue;
+        if (rule.replace_text) {
+          // handling direct text replace rules which are not krama specific for a certain script
+          result.rewriteTailPieces(match.matchedLen, [rule.replace_text]);
+          break;
+        }
         const replace_with_pieces = replaceWithPieces(rule.replace_with, lookup_data);
         result.rewriteTailPieces(match.matchedLen, replace_with_pieces);
         break;
