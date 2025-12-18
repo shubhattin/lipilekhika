@@ -10,11 +10,12 @@ Assamese.script_id = script_list_obj['Assamese'];
 // Changes are there in the ra and va
 // ba and va
 const prev_bengali_ba = Bengali.list.findIndex((item) => item.text === 'ব');
+type AssameseListType = InputBrahmicScriptType['list'][number];
 Assamese.list[prev_bengali_ba] = {
   text: 'ব',
   text_krama: ['b', 'b1'],
   type: 'vyanjana'
-} satisfies InputBrahmicScriptType['list'][number];
+} satisfies AssameseListType;
 Assamese.list.push({
   text: 'ৱ',
   text_krama: ['v'],
@@ -26,6 +27,12 @@ Assamese.list[prev_bengali_ra] = {
   text_krama: ['r'],
   duplicates: ['র'],
   type: 'vyanjana'
-} satisfies InputBrahmicScriptType['list'][number];
-
+} as AssameseListType;
+const prev_bengali_ra_nuqta = Bengali.list.findIndex((item) => item.text === 'র' + Bengali.nuqta);
+Assamese.list[prev_bengali_ra_nuqta] = {
+  text: 'ৰ' + Bengali.nuqta,
+  text_krama: ['rz'],
+  duplicates: ['র' + Bengali.nuqta],
+  type: 'vyanjana'
+} as AssameseListType;
 export default Assamese;

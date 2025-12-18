@@ -31,12 +31,15 @@ async function make_script_data() {
   if (fs.existsSync(OUT_FOLDER)) fs.rmSync(OUT_FOLDER, { recursive: true });
   fs.mkdirSync(OUT_FOLDER, { recursive: true });
 
-  const script_data_list = Object.values(
-    import.meta.glob('./input_data/*.ts', {
-      eager: true,
-      import: 'default'
-    })
-  ) as InputScriptInfoType[];
+  // Load all script data files from input_data directory
+  const inputDataDir = path.resolve('./src/make_script_data/input_data');
+  const files = fs.readdirSync(inputDataDir).filter((file) => file.endsWith('.ts'));
+  const script_data_list: InputScriptInfoType[] = [];
+  for (const file of files) {
+    const filePath = path.resolve(inputDataDir, file);
+    const module = await import(filePath);
+    script_data_list.push(module.default);
+  }
   for (const input_script_data of script_data_list) {
     let res: OutputScriptData;
     if (input_script_data.script_type === 'brahmic') {
@@ -412,6 +415,29 @@ async function make_script_data() {
       accessor: (arr, i) => arr[i][0]
     });
 
+    // Scan for -1 values in text_to_krama_map krama field
+    for (let i = 0; i < res.text_to_krama_map.length; i++) {
+      const text_krama_item = res.text_to_krama_map[i];
+      const text = text_krama_item[0];
+      const krama_arr = text_krama_item[1].krama;
+      if (krama_arr) {
+        const minus_1_count = krama_arr.filter((krama_index) => krama_index === -1).length;
+        if (minus_1_count > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
+            )
+          );
+        }
+        // console.warn(
+        //   chalk.yellow(
+        //     `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
+        //   )
+        // );
+        // ^ Now we dont have to add the warning as the new expected behaviour is add the text directly if -1
+      }
+    }
+
     const jsonOutput = JSON.stringify(res, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
     fs.writeFileSync(path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`), jsonOutput);
   }
@@ -463,16 +489,19 @@ async function make_custom_option_json() {
               )
             )
           ),
-          replace_with: rule.replace_with.map(
-            (replace_with) =>
-              replace_with
-                ? binarySearchLowerWithIndex(
-                    KramaKeysArray,
-                    KramaKeysIndexB,
-                    resolveKramaKeysExtendedType(replace_with)
-                  )
-                : -1 // blank space
-          )
+          replace_text: rule.replace_text ? rule.replace_text : undefined,
+          replace_with: rule.replace_text
+            ? []
+            : rule.replace_with.map(
+                (replace_with) =>
+                  replace_with
+                    ? binarySearchLowerWithIndex(
+                        KramaKeysArray,
+                        KramaKeysIndexB,
+                        resolveKramaKeysExtendedType(replace_with)
+                      )
+                    : -1 // blank space
+              )
         });
       }
     }

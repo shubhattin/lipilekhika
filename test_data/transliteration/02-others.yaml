@@ -29,3 +29,9 @@
   input: க்ரு²தி கிருதி க அலக் கோ³தோதொ³ த்³வேஷ் த்³ த³ த்³வேஷ க்⁴ல்ரி² க்ல்ரி² கோ³ கொ³ க்³ரு² க்⁴ரு²
   output: kRti kiruti ka alak gOtOdo dvESh d da dvESha ghLR kLR gO go gR ghR
   reversible: false
+- index: 6
+  from: Normal
+  to: Devanagari
+  input: dva q Sha S
+  output: द्व q ष S
+  reversible: true
