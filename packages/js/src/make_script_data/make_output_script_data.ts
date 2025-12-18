@@ -420,12 +420,21 @@ async function make_script_data() {
       const text_krama_item = res.text_to_krama_map[i];
       const text = text_krama_item[0];
       const krama_arr = text_krama_item[1].krama;
-      if (krama_arr && krama_arr.includes(-1)) {
-        console.warn(
-          chalk.yellow(
-            `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
-          )
-        );
+      if (krama_arr) {
+        const minus_1_count = krama_arr.filter((krama_index) => krama_index === -1).length;
+        if (minus_1_count > 1) {
+          console.warn(
+            chalk.yellow(
+              `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
+            )
+          );
+        }
+        // console.warn(
+        //   chalk.yellow(
+        //     `⚠️  Invalid krama index (-1) found in "${input_script_data.script_name}" at text_to_krama_map[${i}] for text "${text}"`
+        //   )
+        // );
+        // ^ Now we dont have to add the warning as the new expected behaviour is add the text directly if -1
       }
     }
 

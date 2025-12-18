@@ -603,7 +603,11 @@ export const transliterate_text = async (
       cursor.advance(matched_len_units);
       text_index = cursor.pos;
       // we have to componsate for the superscript number's length
-      if (text_to_krama_item[1].krama !== null && text_to_krama_item[1].krama !== undefined) {
+      if (
+        text_to_krama_item[1].krama !== null &&
+        text_to_krama_item[1].krama !== undefined &&
+        text_to_krama_item[1].krama.some((krama_index) => krama_index !== -1)
+      ) {
         // as the krama index is present we can skip the Step 2 and return the result directly
         const result_pieces_to_add = text_to_krama_item[1].krama.map(
           (krama_index) => kramaTextOrEmpty(to_script_data, krama_index)
@@ -686,6 +690,14 @@ export const transliterate_text = async (
           }
         }
         applyCustomRules(ctx, text_index, -matched_len_units);
+        continue;
+      } else if (
+        text_to_krama_item[1].krama !== null &&
+        text_to_krama_item[1].krama !== undefined &&
+        text_to_krama_item[1].krama.some((krama_index) => krama_index === -1)
+      ) {
+        // handle cases where any one of the krama poiting is -1
+        result.emit(text_to_krama_item[0]);
         continue;
       }
     } else {

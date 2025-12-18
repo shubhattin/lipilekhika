@@ -32,6 +32,6 @@
 - index: 6
   from: Normal
   to: Devanagari
-  input: dva q Sh S
+  input: dva q Sha S
   output: द्व q ष S
   reversible: true
