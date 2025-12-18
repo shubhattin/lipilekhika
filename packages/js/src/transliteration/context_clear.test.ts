@@ -5,14 +5,19 @@ import { describe, expect, it } from 'vitest';
 import YAML from 'yaml';
 import z from 'zod';
 
+/**
+ * This context length test is the foundation of an efficient typing tool.
+ * As it will decide when to clear the context array.
+ *
+ * Clearing context helps keeping the client side context windows as short as possible.
+ */
 const schema = z.object({
   index: z.number(),
   text: z.string(),
-  // context length
   context: z.number()
 });
 
-const data_folder = path.join('..', '..', 'test_data', 'typing', 'context');
+const data_folder = path.join(__dirname, '../../../../test_data/typing/context');
 
 describe('Context Clear (Typing Mode)', () => {
   for (let file of fs.readdirSync(data_folder)) {

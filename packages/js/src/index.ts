@@ -116,3 +116,36 @@ export async function getAllOptions(
 }
 
 export type TransliterationOptions = CustomOptionType;
+
+export async function emulateTyping(text: string, typing_lang: ScriptLangType) {
+  const normalized_typing_lang = getNormalizedScriptName(typing_lang);
+  if (!normalized_typing_lang) {
+    throw new Error(`Invalid script name: ${typing_lang}`);
+  }
+
+  let result = '';
+  // context variables
+  let prev_input = '';
+  let prev_output = '';
+  for (let i = 0; i < text.length; i++) {
+    prev_input += text[i];
+    const { context_length, output } = await transliterate_text(
+      prev_input,
+      'Normal',
+      normalized_typing_lang,
+      {},
+      true
+    );
+    if (context_length > 0) {
+      prev_output = output;
+    } else if (context_length === 0) {
+      prev_input = '';
+      prev_output = '';
+      result += output;
+    }
+  }
+  if (prev_output.length > 0) {
+    result += prev_output;
+  }
+  return result;
+}

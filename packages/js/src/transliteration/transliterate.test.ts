@@ -5,10 +5,10 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { transliterate, preloadScriptData } from '../index';
-import { z } from 'zod';
 import type { script_input_name_type } from '../utils/lang_list/script_normalization';
+import { TestDataTypeSchema } from './test_commons';
 
-const TEST_DATA_FOLDER = path.resolve('..', '..', 'test_data', 'transliteration');
+const TEST_DATA_FOLDER = path.resolve(__dirname, '../../../../test_data/transliteration');
 const TEST_FILES_TO_IGNORE: string[] = [];
 
 const listYamlFiles = (directory: string): string[] => {
@@ -26,17 +26,6 @@ const listYamlFiles = (directory: string): string[] => {
   }
   return collected;
 };
-
-const TestDataTypeSchema = z.object({
-  index: z.number(),
-  from: z.string(),
-  to: z.string(),
-  input: z.string(),
-  output: z.string(),
-  reversible: z.boolean().optional(),
-  todo: z.boolean().optional(),
-  options: z.record(z.string(), z.boolean()).optional()
-});
 
 describe('Transliteration', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
