@@ -17,8 +17,8 @@ import {
   replaceWithPieces,
   emitPiecesWithTaExtSuperscriptReorder,
   isTaExtSuperscriptTail,
-  type prev_context_array_type,
-  isScriptTamilExt
+  isScriptTamilExt,
+  type prev_context_array_type
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
