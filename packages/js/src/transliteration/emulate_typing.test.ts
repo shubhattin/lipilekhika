@@ -21,7 +21,7 @@ describe('Emulate Typing', () => {
       describe(`⌨️ ${yamlFile.split('.')[0]}`, () => {
         for (const test of testData) {
           if (test.todo || test.from !== 'Normal' || test.to === 'Normal') continue;
-          it(`${test.index} - ${test.input}`, async () => {
+          it(`${test.index} - ${test.to}`, async () => {
             const result = await emulateTyping(test.input, test.to as script_and_lang_list_type);
             expect(result).toBe(test.output);
           });

@@ -733,6 +733,15 @@ export const transliterate_text = async (
       ) {
         // handle cases where any one of the krama poiting is -1
         result.emit(text_to_krama_item[0]);
+        if (typing_mode) {
+          // custom context setup call where -1
+          // Like for Sh('), ''(')\
+          prev_context_cleanup(
+            ctx,
+            [text_to_krama_item[0], null],
+            text_to_krama_item[1].next ?? undefined
+          );
+        }
         continue;
       }
     } else {
