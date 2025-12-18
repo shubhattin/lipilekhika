@@ -19,7 +19,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "./build.sh",
+    "build": "bun build.ts",
     "check": "tsc --noEmit",
     "test": "vitest",
     "test:bun": "bun test --concurrent --only-failures",
