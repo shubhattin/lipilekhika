@@ -30,7 +30,7 @@ export type CustomOptionType = {
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
 /** Return flag to indicate if the result concat has to be done as it already is concatenated here. */
-function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
+function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
   const {
     from_script_name,
     to_script_name,
@@ -145,7 +145,7 @@ function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type
   return result_str_concat_status;
 }
 
-function applyCustomRules(ctx: TransliterateCtx, text_index: number, delta: number) {
+function apply_custom_rules(ctx: TransliterateCtx, text_index: number, delta: number) {
   const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
   const current_text_index = text_index + delta;
 
@@ -255,7 +255,7 @@ const get_rule_replace_text = (
   script_data: OutputScriptData
 ) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
-export const apply_custom_repalce_rules = (
+export const apply_custom_replace_rules = (
   text: string,
   script_data: OutputScriptData,
   rules: OptionsType[keyof OptionsType]['rules'],
@@ -314,7 +314,7 @@ export const transliterate_text = async (
   );
   // ^ all active rules for auto processing extracted
 
-  text = apply_custom_repalce_rules(text, from_script_data, custom_rules, 'input');
+  text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
   const result = string_builder();
   let text_index = 0;
@@ -389,7 +389,7 @@ export const transliterate_text = async (
       // ignore blank spaces
       cursor.advance(char_width);
       if (PREV_CONTEXT_IN_USE) {
-        prevContextCleanup(ctx, [' ', null]);
+        prev_context_cleanup(ctx, [' ', null]);
         prev_context.clear();
       }
       result.emit(char);
@@ -652,7 +652,7 @@ export const transliterate_text = async (
               }
             }
 
-            result_concat_status = prevContextCleanup(ctx, [text_to_krama_item[0], item]);
+            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           } else if (to_script_data.script_type === 'brahmic') {
             let item: (typeof to_script_data.list)[number] | null | undefined = null;
             if (
@@ -668,7 +668,7 @@ export const transliterate_text = async (
                     ] ?? null)
                   : null;
             }
-            result_concat_status = prevContextCleanup(ctx, [text_to_krama_item[0], item]);
+            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           }
         }
         if (!result_concat_status) {
@@ -689,7 +689,7 @@ export const transliterate_text = async (
             result.emitPieces(result_pieces_to_add);
           }
         }
-        applyCustomRules(ctx, text_index, -matched_len_units);
+        apply_custom_rules(ctx, text_index, -matched_len_units);
         continue;
       } else if (
         text_to_krama_item[1].krama !== null &&
@@ -711,7 +711,7 @@ export const transliterate_text = async (
     if (index === -1) {
       // text not matched so ignore and return as it is
       if (PREV_CONTEXT_IN_USE) {
-        prevContextCleanup(ctx, [char_to_search, null]);
+        prev_context_cleanup(ctx, [char_to_search, null]);
         prev_context.clear();
         // clear the array as an unidentified character found
       }
@@ -721,12 +721,12 @@ export const transliterate_text = async (
     let result_concat_status = false;
     if (PREV_CONTEXT_IN_USE) {
       if (from_script_data.script_type === 'brahmic') {
-        result_concat_status = prevContextCleanup(ctx, [
+        result_concat_status = prev_context_cleanup(ctx, [
           char_to_search,
           from_script_data.list[from_script_data.krama_text_arr[index][1] ?? -1]
         ]);
       } else if (to_script_data.script_type === 'brahmic') {
-        result_concat_status = prevContextCleanup(ctx, [
+        result_concat_status = prev_context_cleanup(ctx, [
           char_to_search,
           to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]
         ]);
@@ -747,12 +747,12 @@ export const transliterate_text = async (
         result.emit(to_add_text);
       }
     }
-    applyCustomRules(ctx, text_index, -char_width);
+    apply_custom_rules(ctx, text_index, -char_width);
   }
-  if (PREV_CONTEXT_IN_USE) prevContextCleanup(ctx, [undefined, null]);
+  if (PREV_CONTEXT_IN_USE) prev_context_cleanup(ctx, [undefined, null]);
 
   let output = result.toString();
-  output = apply_custom_repalce_rules(output, to_script_data, custom_rules, 'output');
+  output = apply_custom_replace_rules(output, to_script_data, custom_rules, 'output');
 
   return {
     output,
