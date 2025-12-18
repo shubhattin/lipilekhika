@@ -29,6 +29,261 @@ export type CustomOptionType = {
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
+/** Return flag to indicate if the result concat has to be done as it already is concatenated here. */
+function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
+  const {
+    from_script_name,
+    to_script_name,
+    from_script_data,
+    to_script_data,
+    options,
+    result,
+    prev_context,
+    BRAHMIC_HALANT,
+    BRAHMIC_NUQTA
+  } = ctx;
+  let result_str_concat_status = false;
+
+  // custom cleanup logic/cases
+  // console.log(
+  //   [item[0], item[1]?.type],
+  //   prev_context_arr.map((item) => item[1]?.type),
+  //   result_str.split('')
+  // );
+  if (
+    // vyanjana, nuqta, svara
+    ((BRAHMIC_NUQTA &&
+      prev_context.typeAt(-3) === 'vyanjana' &&
+      prev_context.textAt(-2) === BRAHMIC_NUQTA &&
+      prev_context.typeAt(-1) === 'mAtrA') ||
+      // or vyanjana, svara
+      (prev_context.typeAt(-2) === 'vyanjana' && prev_context.typeAt(-1) === 'mAtrA')) &&
+    // to anya or null
+    (!item || item[1]?.type === 'anya')
+  ) {
+    prev_context.clear();
+  }
+  if (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') {
+    // custom logic when converting from brahmic to other
+    // console.log(
+    //   [item[0], item[1]?.type],
+    //   prev_context_arr.map((item) => item[1]?.type)
+    // );
+    if (
+      item[0] !== BRAHMIC_HALANT! &&
+      (isScriptTamilExt(from_script_name) && item[0] && item[0].length > 0
+        ? item[0].charAt(0) !== BRAHMIC_HALANT!
+        : true) &&
+      // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
+      (!BRAHMIC_NUQTA || item[0] !== BRAHMIC_NUQTA) &&
+      // ^ two special cases to ignore
+      // vyanjana or vyanjana, nuqta
+      (prev_context.typeAt(-1) === 'vyanjana' ||
+        (BRAHMIC_NUQTA &&
+          prev_context.typeAt(-2) === 'vyanjana' &&
+          prev_context.textAt(-1) === BRAHMIC_NUQTA)) &&
+      // to anya or null
+      ((item[1]?.type !== 'mAtrA' && item[0] !== BRAHMIC_HALANT!) ||
+        item[1]?.type === 'anya' ||
+        item[1] === null ||
+        item[1] === undefined)
+      // ^ as halant also a null 'type'
+    ) {
+      result.emit(to_script_data.schwa_character);
+      // console.log('a added');
+    }
+  } else if (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') {
+    // custom logic when converting from other to brahmic
+    if (
+      prev_context.typeAt(-1) === 'vyanjana' &&
+      (item[1]?.type === 'mAtrA' || item[1]?.type === 'svara')
+    ) {
+      const linked_mAtrA =
+        item[1].type === 'svara'
+          ? kramaTextOrEmpty(to_script_data, item[1].mAtrA_krama_ref?.[0] ?? -1)
+          : item[0]!;
+      // const linked_mAtrA = item[0]!;
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
+      } else {
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [linked_mAtrA],
+          to_script_data.halant!,
+          false
+        );
+      }
+      result_str_concat_status = true;
+    } else if (
+      prev_context.typeAt(-1) === 'vyanjana' &&
+      !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
+    ) {
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [BRAHMIC_HALANT!],
+          to_script_data.halant!,
+          true
+        );
+      } else {
+        emitPiecesWithTaExtSuperscriptReorder(
+          result,
+          [BRAHMIC_HALANT!],
+          to_script_data.halant!,
+          false
+        );
+        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
+          result.rewriteAt(-1, result.lastPiece() + '\u200d');
+        }
+      }
+    }
+  }
+
+  // addition and shifting
+  prev_context.push(item);
+
+  return result_str_concat_status;
+}
+
+function applyCustomRules(ctx: TransliterateCtx, text_index: number, delta: number) {
+  const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
+  const current_text_index = text_index + delta;
+
+  for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
+    if (custom_rules[rule_index].use_replace === true) continue;
+    const rule = custom_rules[rule_index];
+
+    if (rule.type === 'replace_prev_krama_keys') {
+      if (rule.check_in === 'input') {
+        const prev_match = matchPrevKramaSequence(
+          cursor.peekAt,
+          current_text_index,
+          rule.prev,
+          from_script_data
+        );
+        const next_char_info = cursor.peekAt(text_index);
+        if (prev_match.matched && next_char_info !== null) {
+          const next_char = next_char_info.ch;
+          const next_char_krama_index = kramaIndexOfText(from_script_data, next_char);
+          if (
+            next_char_krama_index !== -1 &&
+            rule.following.indexOf(next_char_krama_index) !== -1
+          ) {
+            const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
+            result.rewriteTailPieces(prev_match.matchedLen, replace_with_pieces);
+          }
+        }
+      } else if (rule.check_in === 'output') {
+        // in this approch we will have check backwards
+
+        const last_piece = result.lastPiece();
+        if (!last_piece) continue;
+        const following_krama_indexes = kramaIndexOfText(to_script_data, last_piece);
+        if (
+          following_krama_indexes !== -1 &&
+          rule.following.indexOf(following_krama_indexes) !== -1
+        ) {
+          const prev_match = matchPrevKramaSequence(result.peekAt, -2, rule.prev, to_script_data);
+          if (prev_match.matched) {
+            const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
+            result.rewriteTailPieces(prev_match.matchedLen + 1, [
+              ...replace_with_pieces,
+              last_piece
+            ]);
+          }
+        }
+      }
+    } else if (rule.type === 'direct_replace') {
+      const lookup_data = rule.check_in === 'output' ? to_script_data : from_script_data;
+      for (const search_group of rule.to_replace) {
+        const match = matchPrevKramaSequence(result.peekAt, -1, search_group, lookup_data);
+        if (!match.matched) continue;
+        if (rule.replace_text) {
+          // handling direct text replace rules which are not krama specific for a certain script
+          result.rewriteTailPieces(match.matchedLen, [rule.replace_text]);
+          break;
+        }
+        const replace_with_pieces = replaceWithPieces(rule.replace_with, lookup_data);
+        result.rewriteTailPieces(match.matchedLen, replace_with_pieces);
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * Returns the active custom options to applied based on the `from` and `to` script information
+ */
+export const get_active_custom_options = (
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  input_options?: Record<string, boolean>
+): CustomOptionType => {
+  if (!input_options) return {};
+  const active_custom_options: CustomOptionType = {};
+  for (const [key, enabled] of Object.entries(input_options ?? {})) {
+    if (!enabled || !(key in custom_options_json)) continue;
+    const option_info = custom_options_json[
+      key as CustomOptionList
+    ] as OptionsType[keyof OptionsType];
+    if (
+      (option_info.from_script_type !== undefined &&
+        (option_info.from_script_type === 'all' ||
+          option_info.from_script_type === from_script_data.script_type)) ||
+      (option_info.from_script_name !== undefined &&
+        option_info.from_script_name.includes(from_script_data.script_name))
+    ) {
+      if (
+        option_info.to_script_type !== undefined &&
+        (option_info.to_script_type === 'all' ||
+          option_info.to_script_type === to_script_data.script_type)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      } else if (
+        option_info.to_script_name !== undefined &&
+        option_info.to_script_name.includes(to_script_data.script_name)
+      ) {
+        active_custom_options[key as CustomOptionList] = true;
+      }
+    }
+  }
+  return active_custom_options;
+};
+
+const get_rule_replace_text = (
+  rule: OptionsType[keyof OptionsType]['rules'][number],
+  script_data: OutputScriptData
+) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
+/** Apply replacement rules using direct replaceAll method if exist */
+export const apply_custom_repalce_rules = (
+  text: string,
+  script_data: OutputScriptData,
+  rules: OptionsType[keyof OptionsType]['rules'],
+  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
+) => {
+  if (rules.length === 0) return text;
+  for (const rule of rules) {
+    if (rule.use_replace !== true || rule.check_in !== allowed_input_rule_type) continue;
+    if (rule.type === 'replace_prev_krama_keys') {
+      const prev_string = rule.prev.map((prev) => kramaTextOrEmpty(script_data, prev)).join('');
+      for (let follow_krama_index of rule.following) {
+        const follow_krama_string = kramaTextOrEmpty(script_data, follow_krama_index);
+        if (!follow_krama_string) continue;
+        const replace_string = get_rule_replace_text(rule, script_data) + follow_krama_string;
+        text = text.replaceAll(prev_string + follow_krama_string, replace_string);
+      }
+    } else if (rule.type === 'direct_replace') {
+      const to_replace_strings = rule.to_replace.map((to_replace) =>
+        to_replace.map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item)).join('')
+      );
+      for (let to_replace_string of to_replace_strings) {
+        text = text.replaceAll(to_replace_string, get_rule_replace_text(rule, script_data));
+      }
+    }
+  }
+  return text;
+};
+
 type TransliterateCtx = {
   from_script_name: script_list_type;
   to_script_name: script_list_type;
@@ -492,259 +747,4 @@ export const transliterate_text = async (
     /** Can be used to manage context while using the typing feature */
     context_length: prev_context.length()
   };
-};
-
-/** Return flag to indicate if the result concat has to be done as it already is concatenated here. */
-function prevContextCleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
-  const {
-    from_script_name,
-    to_script_name,
-    from_script_data,
-    to_script_data,
-    options,
-    result,
-    prev_context,
-    BRAHMIC_HALANT,
-    BRAHMIC_NUQTA
-  } = ctx;
-  let result_str_concat_status = false;
-
-  // custom cleanup logic/cases
-  // console.log(
-  //   [item[0], item[1]?.type],
-  //   prev_context_arr.map((item) => item[1]?.type),
-  //   result_str.split('')
-  // );
-  if (
-    // vyanjana, nuqta, svara
-    ((BRAHMIC_NUQTA &&
-      prev_context.typeAt(-3) === 'vyanjana' &&
-      prev_context.textAt(-2) === BRAHMIC_NUQTA &&
-      prev_context.typeAt(-1) === 'mAtrA') ||
-      // or vyanjana, svara
-      (prev_context.typeAt(-2) === 'vyanjana' && prev_context.typeAt(-1) === 'mAtrA')) &&
-    // to anya or null
-    (!item || item[1]?.type === 'anya')
-  ) {
-    prev_context.clear();
-  }
-  if (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') {
-    // custom logic when converting from brahmic to other
-    // console.log(
-    //   [item[0], item[1]?.type],
-    //   prev_context_arr.map((item) => item[1]?.type)
-    // );
-    if (
-      item[0] !== BRAHMIC_HALANT! &&
-      (isScriptTamilExt(from_script_name) && item[0] && item[0].length > 0
-        ? item[0].charAt(0) !== BRAHMIC_HALANT!
-        : true) &&
-      // (BRAHMIC_NUQTA ? item[0] !== BRAHMIC_NUQTA : true) &&
-      (!BRAHMIC_NUQTA || item[0] !== BRAHMIC_NUQTA) &&
-      // ^ two special cases to ignore
-      // vyanjana or vyanjana, nuqta
-      (prev_context.typeAt(-1) === 'vyanjana' ||
-        (BRAHMIC_NUQTA &&
-          prev_context.typeAt(-2) === 'vyanjana' &&
-          prev_context.textAt(-1) === BRAHMIC_NUQTA)) &&
-      // to anya or null
-      ((item[1]?.type !== 'mAtrA' && item[0] !== BRAHMIC_HALANT!) ||
-        item[1]?.type === 'anya' ||
-        item[1] === null ||
-        item[1] === undefined)
-      // ^ as halant also a null 'type'
-    ) {
-      result.emit(to_script_data.schwa_character);
-      // console.log('a added');
-    }
-  } else if (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') {
-    // custom logic when converting from other to brahmic
-    if (
-      prev_context.typeAt(-1) === 'vyanjana' &&
-      (item[1]?.type === 'mAtrA' || item[1]?.type === 'svara')
-    ) {
-      const linked_mAtrA =
-        item[1].type === 'svara'
-          ? kramaTextOrEmpty(to_script_data, item[1].mAtrA_krama_ref?.[0] ?? -1)
-          : item[0]!;
-      // const linked_mAtrA = item[0]!;
-      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
-      } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [linked_mAtrA],
-          to_script_data.halant!,
-          false
-        );
-      }
-      result_str_concat_status = true;
-    } else if (
-      prev_context.typeAt(-1) === 'vyanjana' &&
-      !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
-    ) {
-      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          true
-        );
-      } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          false
-        );
-        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
-          result.rewriteAt(-1, result.lastPiece() + '\u200d');
-        }
-      }
-    }
-  }
-
-  // addition and shifting
-  prev_context.push(item);
-
-  return result_str_concat_status;
-}
-
-function applyCustomRules(ctx: TransliterateCtx, text_index: number, delta: number) {
-  const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
-  const current_text_index = text_index + delta;
-
-  for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
-    if (custom_rules[rule_index].use_replace === true) continue;
-    const rule = custom_rules[rule_index];
-
-    if (rule.type === 'replace_prev_krama_keys') {
-      if (rule.check_in === 'input') {
-        const prev_match = matchPrevKramaSequence(
-          cursor.peekAt,
-          current_text_index,
-          rule.prev,
-          from_script_data
-        );
-        const next_char_info = cursor.peekAt(text_index);
-        if (prev_match.matched && next_char_info !== null) {
-          const next_char = next_char_info.ch;
-          const next_char_krama_index = kramaIndexOfText(from_script_data, next_char);
-          if (
-            next_char_krama_index !== -1 &&
-            rule.following.indexOf(next_char_krama_index) !== -1
-          ) {
-            const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
-            result.rewriteTailPieces(prev_match.matchedLen, replace_with_pieces);
-          }
-        }
-      } else if (rule.check_in === 'output') {
-        // in this approch we will have check backwards
-
-        const last_piece = result.lastPiece();
-        if (!last_piece) continue;
-        const following_krama_indexes = kramaIndexOfText(to_script_data, last_piece);
-        if (
-          following_krama_indexes !== -1 &&
-          rule.following.indexOf(following_krama_indexes) !== -1
-        ) {
-          const prev_match = matchPrevKramaSequence(result.peekAt, -2, rule.prev, to_script_data);
-          if (prev_match.matched) {
-            const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
-            result.rewriteTailPieces(prev_match.matchedLen + 1, [
-              ...replace_with_pieces,
-              last_piece
-            ]);
-          }
-        }
-      }
-    } else if (rule.type === 'direct_replace') {
-      const lookup_data = rule.check_in === 'output' ? to_script_data : from_script_data;
-      for (const search_group of rule.to_replace) {
-        const match = matchPrevKramaSequence(result.peekAt, -1, search_group, lookup_data);
-        if (!match.matched) continue;
-        if (rule.replace_text) {
-          // handling direct text replace rules which are not krama specific for a certain script
-          result.rewriteTailPieces(match.matchedLen, [rule.replace_text]);
-          break;
-        }
-        const replace_with_pieces = replaceWithPieces(rule.replace_with, lookup_data);
-        result.rewriteTailPieces(match.matchedLen, replace_with_pieces);
-        break;
-      }
-    }
-  }
-}
-
-/**
- * Returns the active custom options to applied based on the `from` and `to` script information
- */
-export const get_active_custom_options = (
-  from_script_data: OutputScriptData,
-  to_script_data: OutputScriptData,
-  input_options?: Record<string, boolean>
-): CustomOptionType => {
-  if (!input_options) return {};
-  const active_custom_options: CustomOptionType = {};
-  for (const [key, enabled] of Object.entries(input_options ?? {})) {
-    if (!enabled || !(key in custom_options_json)) continue;
-    const option_info = custom_options_json[
-      key as CustomOptionList
-    ] as OptionsType[keyof OptionsType];
-    if (
-      (option_info.from_script_type !== undefined &&
-        (option_info.from_script_type === 'all' ||
-          option_info.from_script_type === from_script_data.script_type)) ||
-      (option_info.from_script_name !== undefined &&
-        option_info.from_script_name.includes(from_script_data.script_name))
-    ) {
-      if (
-        option_info.to_script_type !== undefined &&
-        (option_info.to_script_type === 'all' ||
-          option_info.to_script_type === to_script_data.script_type)
-      ) {
-        active_custom_options[key as CustomOptionList] = true;
-      } else if (
-        option_info.to_script_name !== undefined &&
-        option_info.to_script_name.includes(to_script_data.script_name)
-      ) {
-        active_custom_options[key as CustomOptionList] = true;
-      }
-    }
-  }
-  return active_custom_options;
-};
-
-const get_rule_replace_text = (
-  rule: OptionsType[keyof OptionsType]['rules'][number],
-  script_data: OutputScriptData
-) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
-/** Apply replacement rules using direct replaceAll method if exist */
-export const apply_custom_repalce_rules = (
-  text: string,
-  script_data: OutputScriptData,
-  rules: OptionsType[keyof OptionsType]['rules'],
-  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
-) => {
-  if (rules.length === 0) return text;
-  for (const rule of rules) {
-    if (rule.use_replace !== true || rule.check_in !== allowed_input_rule_type) continue;
-    if (rule.type === 'replace_prev_krama_keys') {
-      const prev_string = rule.prev.map((prev) => kramaTextOrEmpty(script_data, prev)).join('');
-      for (let follow_krama_index of rule.following) {
-        const follow_krama_string = kramaTextOrEmpty(script_data, follow_krama_index);
-        if (!follow_krama_string) continue;
-        const replace_string = get_rule_replace_text(rule, script_data) + follow_krama_string;
-        text = text.replaceAll(prev_string + follow_krama_string, replace_string);
-      }
-    } else if (rule.type === 'direct_replace') {
-      const to_replace_strings = rule.to_replace.map((to_replace) =>
-        to_replace.map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item)).join('')
-      );
-      for (let to_replace_string of to_replace_strings) {
-        text = text.replaceAll(to_replace_string, get_rule_replace_text(rule, script_data));
-      }
-    }
-  }
-  return text;
 };
