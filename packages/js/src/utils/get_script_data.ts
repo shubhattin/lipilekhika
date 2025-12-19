@@ -11,9 +11,6 @@ const UMD_SCRIPT_DATA_PROMISE_CACHE: {
   [script_name in script_list_type]?: Promise<OutputScriptData>;
 } = {};
 
-// In ESM mode, dynamic imports are async and can add per-call overhead even when cached by the runtime.
-// Memoize the Promise so callers share the same pending/resolved work.
-// Useful for typing mode where less latency is desirable
 const ESM_SCRIPT_DATA_PROMISE_CACHE: {
   [script_name in script_list_type]?: Promise<OutputScriptData>;
 } = {};

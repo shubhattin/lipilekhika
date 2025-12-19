@@ -161,6 +161,9 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     curr_input = '';
     curr_output = '';
   }
+  // having `takeKeyInput` as async function resulted in some latency issues
+  // so we have reorganized the code be synchronous
+
   /**
    * Accepts character by character input and returns the diff
    * @param key  The key to take input for
@@ -217,4 +220,78 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     takeKeyInput,
     getCurrentOutput: () => curr_output
   };
+}
+
+type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
+/**
+ * Cross-framework event type for `<input>` / `<textarea>` handlers.
+ *
+ * - Svelte / Solid / Vue typically pass the native DOM event (`InputEvent` at runtime).
+ * - React wraps DOM events in a SyntheticEvent which exposes the original via `nativeEvent`.
+ *
+ * We keep this structural (no React/Vue imports) so the package stays framework-agnostic.
+ */
+export type TextInputEvent =
+  | (Event & { currentTarget: TextInputElement })
+  | { currentTarget: TextInputElement; nativeEvent: Event };
+function unwrapNativeEvent(event: TextInputEvent): Event {
+  return 'nativeEvent' in event ? event.nativeEvent : event;
+}
+/**
+ * Handles input events for transliteration typing in `input` and `textarea` elements
+ *
+ * @param typingContext - The typing context created for the element
+ * @param event - Input Event
+ * @param onValueChange - Optional callback function invoked when the value changes
+ */
+export async function handleTypingInputEvent(
+  typingContext: ReturnType<typeof createTypingContext>,
+  event: TextInputEvent,
+  onValueChange?: (updatedValue: string) => void
+) {
+  const inputElement = event.currentTarget;
+  const nativeEvent = unwrapNativeEvent(event);
+
+  // react synthetic event handling
+  const isInputEvent =
+    typeof InputEvent !== 'undefined' &&
+    nativeEvent instanceof InputEvent &&
+    nativeEvent.data !== null;
+  if (isInputEvent) {
+    await typingContext.ready;
+
+    const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(nativeEvent.data);
+    const currentValue = inputElement.value;
+    const cursorPosition = (inputElement.selectionStart ?? 0) + 1;
+
+    // Split the text into three parts: before cursor, changed part, and after cursor
+    const deleteStartPosition = cursorPosition - to_delete_chars_count - 2;
+    const textBeforeCursor = currentValue.substring(0, deleteStartPosition);
+    const transliteratedText = diff_add_text;
+
+    let textAfterCursor = '';
+    const isAtEnd = currentValue.length + 1 === cursorPosition;
+    const isNotAtEnd = currentValue.length + 1 !== cursorPosition;
+
+    if (isAtEnd) {
+      textAfterCursor = currentValue.substring(cursorPosition + 1);
+    } else if (isNotAtEnd) {
+      textAfterCursor = currentValue.substring(cursorPosition - 1);
+    }
+
+    const newCursorPosition = textBeforeCursor.length + transliteratedText.length;
+    const updatedValue = textBeforeCursor + transliteratedText + textAfterCursor;
+
+    // Update the input element
+    inputElement.value = updatedValue;
+    inputElement.focus();
+    inputElement.selectionStart = newCursorPosition;
+    inputElement.selectionEnd = newCursorPosition;
+
+    onValueChange?.(updatedValue);
+  } else {
+    // Handle non-character events (delete, backspace, paste, etc.)
+    onValueChange?.(inputElement.value);
+    typingContext.clearContext();
+  }
 }
