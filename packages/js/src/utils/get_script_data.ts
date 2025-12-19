@@ -7,8 +7,15 @@ import {
 
 const IS_UMD_BUILD_MODE = get_is_umd_build_mode_macro();
 
-const UMD_SCRIPT_DATA_CACHE: {
-  [script_name in script_list_type]?: OutputScriptData;
+const UMD_SCRIPT_DATA_PROMISE_CACHE: {
+  [script_name in script_list_type]?: Promise<OutputScriptData>;
+} = {};
+
+// In ESM mode, dynamic imports are async and can add per-call overhead even when cached by the runtime.
+// Memoize the Promise so callers share the same pending/resolved work.
+// Useful for typing mode where less latency is desirable
+const ESM_SCRIPT_DATA_PROMISE_CACHE: {
+  [script_name in script_list_type]?: Promise<OutputScriptData>;
 } = {};
 
 /**
@@ -18,17 +25,20 @@ const UMD_SCRIPT_DATA_CACHE: {
  */
 export const getScriptData = async (script_name: script_list_type): Promise<OutputScriptData> => {
   if (IS_UMD_BUILD_MODE) {
-    if (UMD_SCRIPT_DATA_CACHE[script_name]) {
-      return UMD_SCRIPT_DATA_CACHE[script_name];
+    if (UMD_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
+      return UMD_SCRIPT_DATA_PROMISE_CACHE[script_name];
     }
     const package_current_version = get_package_current_version_macro();
     const SCRIPT_DATA_URL = `https://cdn.jsdelivr.net/npm/lipilekhika@${package_current_version}/dist/umd_json/script_data/${script_name}.json`;
     const response = await fetch(SCRIPT_DATA_URL);
-    const data = (await response.json()) as OutputScriptData;
-    UMD_SCRIPT_DATA_CACHE[script_name] = data;
+    const data = response.json() as Promise<OutputScriptData>;
+    UMD_SCRIPT_DATA_PROMISE_CACHE[script_name] = data;
     return data;
   }
-  const scriptData = (await import(`../script_data/${script_name}.json`))
-    .default as OutputScriptData;
-  return scriptData;
+  if (!ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
+    ESM_SCRIPT_DATA_PROMISE_CACHE[script_name] = import(`../script_data/${script_name}.json`).then(
+      (m) => m.default as OutputScriptData
+    );
+  }
+  return ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]!;
 };

@@ -26,6 +26,8 @@ export type CustomOptionType = {
   [key in CustomOptionList]?: boolean;
 };
 
+type CustomRulesType = OptionsType[keyof OptionsType]['rules'];
+
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
@@ -277,6 +279,24 @@ export const get_active_custom_options = (
   return active_custom_options;
 };
 
+/** Resolve active options + flattened rule list once, so hot paths can reuse it. */
+export const resolve_transliteration_rules = (
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  transliteration_input_options?: CustomOptionType
+): { trans_options: CustomOptionType; custom_rules: CustomRulesType } => {
+  const trans_options = get_active_custom_options(
+    from_script_data,
+    to_script_data,
+    transliteration_input_options
+  );
+  const custom_rules = Object.keys(trans_options).flatMap(
+    (key) =>
+      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  );
+  return { trans_options, custom_rules };
+};
+
 const get_rule_replace_text = (
   rule: OptionsType[keyof OptionsType]['rules'][number],
   script_data: OutputScriptData
@@ -317,7 +337,7 @@ type TransliterateCtx = {
   from_script_data: OutputScriptData;
   to_script_data: OutputScriptData;
   trans_options: CustomOptionType;
-  custom_rules: OptionsType[keyof OptionsType]['rules'];
+  custom_rules: CustomRulesType;
   cursor: ReturnType<typeof make_input_cursor>;
   result: ReturnType<typeof string_builder>;
   prev_context: ReturnType<typeof prev_context_builder>;
@@ -327,11 +347,19 @@ type TransliterateCtx = {
   typing_mode: boolean;
 };
 
-export const transliterate_text = async (
+/**
+ * Synchronous version for low latency use cases
+ *
+ * Like typing
+ */
+export const transliterate_text_core = (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  transliteration_input_options?: CustomOptionType,
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  trans_options: CustomOptionType,
+  custom_rules: CustomRulesType,
   options?: {
     /** This enables typing mode, returns a context length which will be used to clear the external context */
     typing_mode?: boolean;
@@ -341,18 +369,6 @@ export const transliterate_text = async (
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
-  const from_script_data = await getScriptData(from_script_name);
-  const to_script_data = await getScriptData(to_script_name);
-  const trans_options = get_active_custom_options(
-    from_script_data,
-    to_script_data,
-    transliteration_input_options
-  );
-  const custom_rules = Object.keys(trans_options).flatMap(
-    (key) =>
-      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
-  );
-  // ^ all active rules for auto processing extracted
 
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
@@ -831,4 +847,40 @@ export const transliterate_text = async (
      */
     context_length: prev_context.length()
   };
+};
+
+/** Async version for general use */
+export const transliterate_text = async (
+  text: string,
+  from_script_name: script_list_type,
+  to_script_name: script_list_type,
+  transliteration_input_options?: CustomOptionType,
+  options?: {
+    /** This enables typing mode, returns a context length which will be used to clear the external context */
+    typing_mode?: boolean;
+  }
+) => {
+  const typing_mode = options?.typing_mode ?? false;
+  if (typing_mode && from_script_name !== 'Normal') {
+    throw new Error('Typing mode is only supported with Normal script as the input');
+  }
+  const [from_script_data, to_script_data] = await Promise.all([
+    getScriptData(from_script_name),
+    getScriptData(to_script_name)
+  ]);
+  const { trans_options, custom_rules } = resolve_transliteration_rules(
+    from_script_data,
+    to_script_data,
+    transliteration_input_options
+  );
+  return transliterate_text_core(
+    text,
+    from_script_name,
+    to_script_name,
+    from_script_data,
+    to_script_data,
+    trans_options,
+    custom_rules,
+    options
+  );
 };

@@ -1,6 +1,8 @@
 import {
   transliterate_text,
   get_active_custom_options,
+  resolve_transliteration_rules,
+  transliterate_text_core,
   type CustomOptionType,
   type CustomOptionList
 } from './transliteration/transliterate';
@@ -122,6 +124,8 @@ export type TransliterationOptions = CustomOptionType;
 
 /**
  * Creates a stateful isolated context for character by character input typing
+ *
+ * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
  * @param typing_lang - The script/language to type in
  * @returns A closed over context object with the following methods:
  */
@@ -130,11 +134,27 @@ export function createTypingContext(typing_lang: ScriptLangType) {
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
   }
-  // preload typing script data
-  Promise.allSettled([preloadScriptData(normalized_typing_lang), preloadScriptData('Normal')]);
 
   let curr_input = '';
   let curr_output = '';
+
+  let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
+  let to_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
+  let trans_options: CustomOptionType = {};
+  let custom_rules: ReturnType<typeof resolve_transliteration_rules>['custom_rules'] = [];
+
+  /** Resolves script data + rules once, so per-key typing stays synchronous. */
+  const ready: Promise<void> = (async () => {
+    const [fromData, toData] = await Promise.all([
+      getScriptData('Normal'),
+      getScriptData(normalized_typing_lang)
+    ]);
+    from_script_data = fromData;
+    to_script_data = toData;
+    const resolved = resolve_transliteration_rules(fromData, toData);
+    trans_options = resolved.trans_options;
+    custom_rules = resolved.custom_rules;
+  })();
 
   /** Cleares all internal states and contexts */
   function clearContext() {
@@ -146,15 +166,23 @@ export function createTypingContext(typing_lang: ScriptLangType) {
    * @param key  The key to take input for
    * @returns The diff of the previous and current output
    */
-  async function takeKeyInput(key: string) {
+  function takeKeyInput(key: string) {
+    if (!from_script_data || !to_script_data) {
+      throw new Error(
+        'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'
+      );
+    }
     let char_key = key?.[0] ?? '';
     curr_input += char_key;
     let prev_output = curr_output;
-    const { context_length, output } = await transliterate_text(
+    const { context_length, output } = transliterate_text_core(
       curr_input,
       'Normal',
       normalized_typing_lang!,
-      {},
+      from_script_data,
+      to_script_data,
+      trans_options,
+      custom_rules,
       { typing_mode: true }
     );
     if (context_length > 0) {
@@ -183,6 +211,8 @@ export function createTypingContext(typing_lang: ScriptLangType) {
   }
 
   return {
+    /** Await once, then use `takeKeyInputSync` for best typing latency. */
+    ready,
     clearContext,
     takeKeyInput,
     getCurrentOutput: () => curr_output

@@ -15,9 +15,10 @@ export const TestDataTypeSchema = z.object({
 
 export async function emulateTyping(text: string, typing_lang: script_and_lang_list_type) {
   const ctx = createTypingContext(typing_lang);
+  await ctx.ready;
   let result = '';
   for (const char of text) {
-    const { diff_add_text, to_delete_chars_count } = await ctx.takeKeyInput(char);
+    const { diff_add_text, to_delete_chars_count } = ctx.takeKeyInput(char);
     if (to_delete_chars_count > 0) {
       result = result.slice(0, -to_delete_chars_count);
     }

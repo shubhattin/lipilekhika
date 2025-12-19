@@ -218,10 +218,10 @@
             oninput={async (e) => {
               // check if the event is instance of InputEvent
               if (e instanceof InputEvent && e.data !== null) {
-                console.time('takeKeyInput');
                 const elm = e.currentTarget;
+                await from_input_typing_context.ready;
                 const { diff_add_text, to_delete_chars_count } =
-                  await from_input_typing_context.takeKeyInput(e.data);
+                  from_input_typing_context.takeKeyInput(e.data);
                 let elm_current_value = elm.value;
                 let current_cursor_pos = elm.selectionStart + 1;
                 let ex = 0;
@@ -242,7 +242,6 @@
                 elm.selectionStart = length;
                 elm.selectionEnd = length;
                 inputText = new_value;
-                console.timeEnd('takeKeyInput');
               } else {
                 inputText = e.currentTarget.value;
                 from_input_typing_context.clearContext();
