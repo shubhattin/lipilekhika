@@ -329,7 +329,7 @@ export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  translaliteration_input_options?: CustomOptionType,
+  transliteration_input_options?: CustomOptionType,
   options?: {
     /** This enables typing mode, returns a context length which will be used to clear the external context */
     typing_mode?: boolean;
@@ -344,7 +344,7 @@ export const transliterate_text = async (
   const trans_options = get_active_custom_options(
     from_script_data,
     to_script_data,
-    translaliteration_input_options
+    transliteration_input_options
   );
   const custom_rules = Object.keys(trans_options).flatMap(
     (key) =>
