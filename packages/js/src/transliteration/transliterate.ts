@@ -331,6 +331,7 @@ export const transliterate_text = async (
   to_script_name: script_list_type,
   translaliteration_input_options?: CustomOptionType,
   options?: {
+    /** This enables typing mode, returns a context length which will be used to clear the external context */
     typing_mode?: boolean;
   }
 ) => {
@@ -368,7 +369,8 @@ export const transliterate_text = async (
   const prev_context = prev_context_builder(MAX_CONTEXT_LENGTH);
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
-    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
+    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') ||
+    (typing_mode && from_script_name === 'Normal' && to_script_data.script_type === 'other');
   const BRAHMIC_NUQTA =
     from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
       ? (from_script_data.nuqta ?? null)
@@ -443,6 +445,7 @@ export const transliterate_text = async (
       // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
       const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
+        from_script_data.script_type === 'other' &&
         to_script_data.script_type === 'brahmic' &&
         (prev_context.typeAt(-1) === 'vyanjana' ||
           (BRAHMIC_NUQTA &&
@@ -653,7 +656,10 @@ export const transliterate_text = async (
         const result_text = result_pieces_to_add.join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
-          if (from_script_data.script_type === 'brahmic') {
+          if (
+            from_script_data.script_type === 'brahmic' &&
+            to_script_data.script_type === 'other'
+          ) {
             let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
@@ -690,7 +696,10 @@ export const transliterate_text = async (
             }
 
             result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
-          } else if (to_script_data.script_type === 'brahmic') {
+          } else if (
+            to_script_data.script_type === 'brahmic' &&
+            from_script_data.script_type === 'other'
+          ) {
             let item: (typeof to_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
@@ -705,14 +714,24 @@ export const transliterate_text = async (
                     ] ?? null)
                   : null;
             }
-            if (typing_mode && from_script_name === 'Normal')
+            if (typing_mode && from_script_name === 'Normal') {
               // Note :- this is the only over place where next chars can be found
               result_concat_status = prev_context_cleanup(
                 ctx,
                 [text_to_krama_item[0], item],
                 text_to_krama_item[1].next ?? undefined
               );
-            else result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
+            } else result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
+          } else if (
+            typing_mode &&
+            from_script_name === 'Normal' &&
+            to_script_data.script_type === 'other'
+          ) {
+            result_concat_status = prev_context_cleanup(
+              ctx,
+              [text_to_krama_item[0], null],
+              text_to_krama_item[1].next ?? undefined
+            );
           }
         }
         if (!result_concat_status) {
