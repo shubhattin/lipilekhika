@@ -82,7 +82,7 @@
   });
 </script>
 
-<div class="dark min-h-screen bg-background text-foreground">
+<div class="min-h-screen bg-background text-foreground">
   <div class="mx-auto max-w-5xl px-4 py-12 md:py-16">
     <form
       class="space-y-8 rounded-xl border border-border bg-card p-8 shadow-2xl"
