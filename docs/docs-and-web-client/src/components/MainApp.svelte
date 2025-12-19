@@ -8,7 +8,8 @@
     createTypingContext,
     type ScriptListType,
     type TransliterationOptions
-  } from 'lipilekhika';
+  } from '../../../../packages/js/src/index';
+  // ^ import directly for real time development
   import { slide } from 'svelte/transition';
   import prettyMs from 'pretty-ms';
 
@@ -217,7 +218,7 @@
             oninput={async (e) => {
               // check if the event is instance of InputEvent
               if (e instanceof InputEvent && e.data !== null) {
-                // inputText = e.currentTarget.value;
+                console.time('takeKeyInput');
                 const elm = e.currentTarget;
                 const { diff_add_text, to_delete_chars_count } =
                   await from_input_typing_context.takeKeyInput(e.data);
@@ -241,6 +242,7 @@
                 elm.selectionStart = length;
                 elm.selectionEnd = length;
                 inputText = new_value;
+                console.timeEnd('takeKeyInput');
               } else {
                 inputText = e.currentTarget.value;
                 from_input_typing_context.clearContext();
