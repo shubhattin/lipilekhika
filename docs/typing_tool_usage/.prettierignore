@@ -1,0 +1,10 @@
+node_modules
+build
+dist
+.astro/
+
+# Ignore files for PNPM, NPM and YARN
+pnpm-lock.yaml
+bun.lock
+
+tmp

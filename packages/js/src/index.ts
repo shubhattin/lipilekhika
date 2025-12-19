@@ -222,19 +222,6 @@ export function createTypingContext(typing_lang: ScriptLangType) {
   };
 }
 
-type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
-/**
- * Cross-framework event type for `<input>` / `<textarea>` handlers.
- *
- * - Svelte / Solid / Vue typically pass the native DOM event (`InputEvent` at runtime).
- * - React wraps DOM events in a SyntheticEvent which exposes the original via `nativeEvent`.
- */
-export type TextInputEvent =
-  | (Event & { currentTarget: TextInputElement })
-  | { currentTarget: TextInputElement; nativeEvent: Event };
-function unwrapNativeEvent(event: TextInputEvent): Event {
-  return 'nativeEvent' in event ? event.nativeEvent : event;
-}
 /**
  * Handles input events for transliteration typing in `input` and `textarea` elements
  *
@@ -244,21 +231,26 @@ function unwrapNativeEvent(event: TextInputEvent): Event {
  */
 export async function handleTypingInputEvent(
   typingContext: ReturnType<typeof createTypingContext>,
-  event: TextInputEvent,
+  event: any,
   onValueChange?: (updatedValue: string) => void
 ) {
-  const inputElement = event.currentTarget;
-  const nativeEvent = unwrapNativeEvent(event);
-
   // react synthetic event handling
-  const isInputEvent =
-    typeof InputEvent !== 'undefined' &&
-    nativeEvent instanceof InputEvent &&
-    nativeEvent.data !== null;
+  const isReactSyntheticEvent = 'nativeEvent' in event;
+  const isInputEvent = isReactSyntheticEvent
+    ? typeof InputEvent !== 'undefined' &&
+      event?.nativeEvent instanceof InputEvent &&
+      event.nativeEvent.data !== null
+    : typeof InputEvent !== 'undefined' && event instanceof InputEvent && event.data !== null;
+  const inputElement = isReactSyntheticEvent ? event.nativeEvent.target : event.currentTarget;
   if (isInputEvent) {
+    if (isReactSyntheticEvent && onValueChange) {
+      // extra step required in react
+      onValueChange(event.currentTarget.value);
+    }
     await typingContext.ready;
 
-    const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(nativeEvent.data);
+    const inputData = isReactSyntheticEvent ? event.nativeEvent.data : event.data;
+    const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
     const currentValue = inputElement.value;
     const cursorPosition = (inputElement.selectionStart ?? 0) + 1;
 
@@ -316,25 +308,24 @@ const CONTEXT_CLEAR_KEYS = new Set([
  * @param ctx - The typing context
  * @returns True if the keydown event should clear the typing context, false otherwise
  */
-export function clearTypingContextOnKeyDown(
-  e: KeyboardEvent,
-  ctx: ReturnType<typeof createTypingContext>
-) {
-  // Mobile virtual keyboards and IME/composition frequently report keys like
-  // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.
-  if (e.isComposing) return false;
+export function clearTypingContextOnKeyDown(e: any, ctx: ReturnType<typeof createTypingContext>) {
+  if (e instanceof KeyboardEvent) {
+    // Mobile virtual keyboards and IME/composition frequently report keys like
+    // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.
+    if (e.isComposing) return false;
 
-  const key = e.key;
-  if (!key) return false;
+    const key = e.key;
+    if (!key) return false;
 
-  if (key === 'Unidentified' || key === 'Process' || key === 'Dead') return false;
+    if (key === 'Unidentified' || key === 'Process' || key === 'Dead') return false;
 
-  // Respect shortcut chords / OS-level commands; these should not affect context.
-  if (e.ctrlKey || e.metaKey || e.altKey) return false;
+    // Respect shortcut chords / OS-level commands; these should not affect context.
+    if (e.ctrlKey || e.metaKey || e.altKey) return false;
 
-  if (CONTEXT_CLEAR_KEYS.has(key)) {
-    ctx.clearContext();
-    return true;
+    if (CONTEXT_CLEAR_KEYS.has(key)) {
+      ctx.clearContext();
+      return true;
+    }
   }
   return false;
 }
