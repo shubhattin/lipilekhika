@@ -1,9 +1,8 @@
 import path from 'path';
-import { TestDataTypeSchema } from './test_commons';
+import { emulateTyping, TestDataTypeSchema } from './test_commons';
 import { describe, expect, it } from 'vitest';
 import YAML from 'yaml';
 import * as fs from 'node:fs';
-import { emulateTyping } from '../index';
 import type { script_and_lang_list_type } from '../utils/lang_list';
 
 const INPUT_FOLDERS = [

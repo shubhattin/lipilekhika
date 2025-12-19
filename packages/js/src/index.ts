@@ -115,37 +115,65 @@ export async function getAllOptions(
   ) as CustomOptionList[];
 }
 
+/**
+ * Custom Transliteration Options
+ */
 export type TransliterationOptions = CustomOptionType;
 
-export async function emulateTyping(text: string, typing_lang: ScriptLangType) {
+/**
+ * Creates a stateful isolated context for character by character input typing
+ * @param typing_lang - The script/language to type in
+ * @returns A closed over context object with the following methods:
+ */
+export function createTypingContext(typing_lang: ScriptLangType) {
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
   }
+  // preload typing script data
+  preloadScriptData(normalized_typing_lang);
+  preloadScriptData('Normal');
 
-  let result = '';
-  // context variables
-  let prev_input = '';
-  let prev_output = '';
-  for (let i = 0; i < text.length; i++) {
-    prev_input += text[i];
+  let curr_input = '';
+  let curr_output = '';
+
+  /** Cleares all internal states and contexts */
+  function clearContext() {
+    curr_input = '';
+    curr_output = '';
+  }
+  /**
+   * Accepts character by character input and returns the previous and current output for diffing
+   * @param key  The key to take input for
+   * @returns by diffing the previous and current output, the client can determine the changes and apply them to the UI
+   */
+  async function takeKeyInput(key: string) {
+    let char_key = key?.[0] ?? '';
+    curr_input += char_key;
+    // let prev_output = curr_output;
     const { context_length, output } = await transliterate_text(
-      prev_input,
+      curr_input,
       'Normal',
-      normalized_typing_lang,
+      normalized_typing_lang!,
       {},
       { typing_mode: true }
     );
     if (context_length > 0) {
-      prev_output = output;
+      curr_output = output;
     } else if (context_length === 0) {
-      prev_input = '';
-      prev_output = '';
-      result += output;
+      curr_input = '';
+      curr_output = '';
     }
+
+    return {
+      output,
+      context_length
+    };
   }
-  if (prev_output.length > 0) {
-    result += prev_output;
-  }
-  return result;
+
+  return {
+    clearContext,
+    takeKeyInput,
+    getCurrentOutput: () => curr_output
+  };
 }

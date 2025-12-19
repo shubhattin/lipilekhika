@@ -27,6 +27,7 @@
     "test": "vitest",
     "test:bun": "bun test --concurrent --only-failures",
     "test:ui": "vitest --ui",
+    "test:run": "vitest --run",
     "coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
