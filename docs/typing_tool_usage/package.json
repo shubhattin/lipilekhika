@@ -24,7 +24,8 @@
     "svelte": "^5.46.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vue": "^3.5.26"
+    "vue": "^3.5.26",
+    "lipilekhika": "../../packages/js"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

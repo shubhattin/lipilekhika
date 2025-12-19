@@ -27,15 +27,10 @@ export const getScriptData = async (script_name: script_list_type): Promise<Outp
     }
     const package_current_version = get_package_current_version_macro();
     const SCRIPT_DATA_URL = `https://cdn.jsdelivr.net/npm/lipilekhika@${package_current_version}/dist/umd_json/script_data/${script_name}.json`;
-    try {
-      const response = await fetch(SCRIPT_DATA_URL);
-      const data = response.json() as Promise<OutputScriptData>;
-      UMD_SCRIPT_DATA_PROMISE_CACHE[script_name] = data;
-      return data;
-    } catch (error) {
-      console.error(`Error fetching script data for ${script_name}:`, error);
-      throw error;
-    }
+    const response = await fetch(SCRIPT_DATA_URL);
+    const data = response.json() as Promise<OutputScriptData>;
+    UMD_SCRIPT_DATA_PROMISE_CACHE[script_name] = data;
+    return data;
   }
   if (!ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
     ESM_SCRIPT_DATA_PROMISE_CACHE[script_name] = import(`../script_data/${script_name}.json`).then(
