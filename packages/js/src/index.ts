@@ -131,8 +131,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     throw new Error(`Invalid script name: ${typing_lang}`);
   }
   // preload typing script data
-  preloadScriptData(normalized_typing_lang);
-  preloadScriptData('Normal');
+  Promise.allSettled([preloadScriptData(normalized_typing_lang), preloadScriptData('Normal')]);
 
   let curr_input = '';
   let curr_output = '';

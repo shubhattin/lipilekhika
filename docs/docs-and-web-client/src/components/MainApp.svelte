@@ -5,6 +5,7 @@
     preloadScriptData,
     getAllOptions,
     SCRIPT_LIST,
+    createTypingContext,
     type ScriptListType,
     type TransliterationOptions
   } from 'lipilekhika';
@@ -30,6 +31,19 @@
   let availableOptions = $state<string[]>([]);
   let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
+
+  let from_input_typing_context = $derived(createTypingContext(fromScript));
+
+  onMount(() => {
+    const handleClick = () => {
+      from_input_typing_context.clearContext();
+    };
+    // on click anywhere on the page, clear the typing context
+    document.addEventListener('click', handleClick);
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  });
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -199,7 +213,39 @@
             id="source-text"
             class="min-h-[180px] resize-none"
             placeholder="Enter text to transliterate..."
-            bind:value={inputText}
+            value={inputText}
+            oninput={async (e) => {
+              // check if the event is instance of InputEvent
+              if (e instanceof InputEvent && e.data !== null) {
+                // inputText = e.currentTarget.value;
+                const elm = e.currentTarget;
+                const { diff_add_text, to_delete_chars_count } =
+                  await from_input_typing_context.takeKeyInput(e.data);
+                let elm_current_value = elm.value;
+                let current_cursor_pos = elm.selectionStart + 1;
+                let ex = 0;
+                let pre_part = elm_current_value.substring(
+                  0,
+                  current_cursor_pos - to_delete_chars_count - 2
+                );
+                let changing_part = diff_add_text;
+                let post_part = '';
+                if (elm_current_value.length + 1 + ex === current_cursor_pos)
+                  post_part = elm_current_value.substring(current_cursor_pos + 1);
+                else if (elm_current_value.length + 1 != current_cursor_pos)
+                  post_part = elm_current_value.substring(current_cursor_pos - 1 - ex);
+                let length = pre_part.length + changing_part.length;
+                const new_value = pre_part + changing_part + post_part;
+                elm.value = new_value;
+                elm.focus();
+                elm.selectionStart = length;
+                elm.selectionEnd = length;
+                inputText = new_value;
+              } else {
+                inputText = e.currentTarget.value;
+                from_input_typing_context.clearContext();
+              }
+            }}
           />
         </div>
 
