@@ -8,11 +8,17 @@
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/lipilekhika.umd.js",
+  "jsdelivr": "./dist/lipilekhika.umd.js",
+  "browser": "./dist/lipilekhika.umd.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
+    },
+    "./umd": {
+      "default": "./dist/lipilekhika.umd.js"
     }
   },
   "files": [
@@ -35,6 +41,7 @@
     "@vitest/ui": "^4.0.16",
     "chalk": "^5.6.2",
     "cross-env": "^10.1.0",
+    "happy-dom": "^18.0.1",
     "prettier": "^3.7.4",
     "typescript": "~5.9.3",
     "unplugin-macros": "^0.18.6",

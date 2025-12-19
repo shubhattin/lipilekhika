@@ -63,23 +63,25 @@ function copyAndMinifyJsonPlugin(): Plugin {
   return {
     name: 'copy-minify-json',
     closeBundle: async () => {
-      const srcDir = path.resolve(__dirname, 'src/script_data');
-      const destDir = path.resolve(__dirname, 'dist/umd_json/script_data');
-      const customOptionsSource = path.resolve(__dirname, 'src/custom_options.json');
-      const customOptionsDest = path.resolve(__dirname, 'dist/umd_json/custom_options.json');
+      try {
+        const srcDir = path.resolve(__dirname, 'src/script_data');
+        const destDir = path.resolve(__dirname, 'dist/umd_json/script_data');
 
-      fs.mkdirSync(destDir, { recursive: true });
+        fs.mkdirSync(destDir, { recursive: true });
 
-      // script data files
-      const files = fs.readdirSync(srcDir);
-      for (const file of files) {
-        if (file.endsWith('.json')) {
-          const sourcePath = path.join(srcDir, file);
-          const destPath = path.join(destDir, file);
-          const content = fs.readFileSync(sourcePath, 'utf-8');
-          const minified = JSON.stringify(JSON.parse(content));
-          fs.writeFileSync(destPath, minified, 'utf-8');
+        // script data files
+        const files = fs.readdirSync(srcDir);
+        for (const file of files) {
+          if (file.endsWith('.json')) {
+            const sourcePath = path.join(srcDir, file);
+            const destPath = path.join(destDir, file);
+            const content = fs.readFileSync(sourcePath, 'utf-8');
+            const minified = JSON.stringify(JSON.parse(content));
+            fs.writeFileSync(destPath, minified, 'utf-8');
+          }
         }
+      } catch (error) {
+        console.error('Error copying and minifying JSON files:', error);
       }
     }
   };

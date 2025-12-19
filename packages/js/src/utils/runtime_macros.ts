@@ -1,5 +1,5 @@
 /**
- * The function's value will be caulted at runtime and included in the bundle for this macro file
+ * The function's value will be calculated at runtime and included in the bundle for this macro file
  */
 
 import package_json from '../../package.json';
