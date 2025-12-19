@@ -686,6 +686,7 @@ export const lipi_parivartak = async (val, from, to) => {
 /**
  * The mukhya function performs a specific task.
  *
+ * @param {any} elm - The element to be updated.
  * @param {string} [event_data=''] - The text parameter. Default value is an empty string.
  * @param {string} [lang=''] - The lang parameter. Default value is an empty string.
  * @param {boolean} [on_status=true] - The on_status parameter. Default value is true.
@@ -693,11 +694,38 @@ export const lipi_parivartak = async (val, from, to) => {
  * @param {0|1|undefined|null} [sa_mode=null] - The sa_mode parameter. Default value is null.
  */
 export const lekhika_typing_tool = async (
+  elm,
   event_data = "",
   lang = "",
   on_status = true,
   sa_mode = null
 ) => {
   const input_data = LipiLekhikA.mukhya(event_data, lang, on_status, sa_mode);
-  return input_data;
+  // console.timeEnd('lekhika_typing_tool');
+  // only load the main lipi_lekhika_lib to improve as some lag noticed while typing
+  // the latencry is at least 6x higher than worker method (direct :- 0.14ms, worker :- 10ms)
+  if (!input_data) return;
+  const { val, from_click } = input_data;
+  if (val.length === 0) return;
+  let dyn = elm.value;
+  let current_cursor_pos = elm.selectionStart + 1;
+  let ex = 0;
+  if (from_click) {
+    current_cursor_pos++;
+    ex = 1;
+  }
+  let pre_part = dyn.substring(0, current_cursor_pos - val[1] - 2);
+  let changing_part = val[0];
+  let post_part = "";
+  if (dyn.length + 1 + (from_click ? 1 : 0) == current_cursor_pos)
+    post_part = dyn.substring(current_cursor_pos + 1);
+  else if (dyn.length + 1 != current_cursor_pos)
+    post_part = dyn.substring(current_cursor_pos - 1 - ex);
+  let length = pre_part.length + changing_part.length;
+  const new_value = pre_part + changing_part + post_part;
+  elm.value = new_value;
+  elm.focus();
+  elm.selectionStart = length;
+  elm.selectionEnd = length;
+  callback && callback(new_value);
 };

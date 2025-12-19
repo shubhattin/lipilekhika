@@ -150,7 +150,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
   async function takeKeyInput(key: string) {
     let char_key = key?.[0] ?? '';
     curr_input += char_key;
-    // let prev_output = curr_output;
+    let prev_output = curr_output;
     const { context_length, output } = await transliterate_text(
       curr_input,
       'Normal',
@@ -167,7 +167,8 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 
     return {
       output,
-      context_length
+      prev_output,
+      context_empty: context_length === 0
     };
   }
 

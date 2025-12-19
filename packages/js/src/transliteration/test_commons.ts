@@ -17,8 +17,8 @@ export async function emulateTyping(text: string, typing_lang: script_and_lang_l
   const ctx = createTypingContext(typing_lang);
   let result = '';
   for (const char of text) {
-    const { output, context_length } = await ctx.takeKeyInput(char);
-    if (context_length === 0) {
+    const { output, context_empty } = await ctx.takeKeyInput(char);
+    if (context_empty) {
       result += output;
     }
   }
