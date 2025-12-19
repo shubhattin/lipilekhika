@@ -143,9 +143,9 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     curr_output = '';
   }
   /**
-   * Accepts character by character input and returns the previous and current output for diffing
+   * Accepts character by character input and returns the diff
    * @param key  The key to take input for
-   * @returns by diffing the previous and current output, the client can determine the changes and apply them to the UI
+   * @returns The diff of the previous and current output
    */
   async function takeKeyInput(key: string) {
     let char_key = key?.[0] ?? '';
@@ -165,10 +165,21 @@ export function createTypingContext(typing_lang: ScriptLangType) {
       curr_output = '';
     }
 
+    // calculate the diff
+    let common_index = 0;
+    for (let n = 0; n < output.length; n++) {
+      if (output.length == common_index) break;
+      if (output[common_index] != prev_output[common_index]) break;
+      common_index++;
+    }
+    let diff_add_text = output.substring(common_index);
+    let to_delete_chars_count = prev_output.length - common_index;
+
     return {
-      output,
-      prev_output,
-      context_empty: context_length === 0
+      /** These number of characters need to be deleted from the current "app" input state */
+      to_delete_chars_count,
+      /** These characters need to be added to the current "app" input state */
+      diff_add_text
     };
   }
 

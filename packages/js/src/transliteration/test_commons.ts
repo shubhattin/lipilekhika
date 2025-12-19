@@ -17,14 +17,11 @@ export async function emulateTyping(text: string, typing_lang: script_and_lang_l
   const ctx = createTypingContext(typing_lang);
   let result = '';
   for (const char of text) {
-    const { output, context_empty } = await ctx.takeKeyInput(char);
-    if (context_empty) {
-      result += output;
+    const { diff_add_text, to_delete_chars_count } = await ctx.takeKeyInput(char);
+    if (to_delete_chars_count > 0) {
+      result = result.slice(0, -to_delete_chars_count);
     }
-  }
-  const last_output = ctx.getCurrentOutput();
-  if (last_output.length > 0) {
-    result += last_output;
+    result += diff_add_text;
   }
   return result;
 }
