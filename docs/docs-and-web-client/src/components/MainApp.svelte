@@ -7,6 +7,7 @@
     SCRIPT_LIST,
     createTypingContext,
     handleTypingInputEvent,
+    clearTypingContextOnKeyDown,
     type ScriptListType,
     type TransliterationOptions
   } from '../../../../packages/js/src/index';
@@ -212,10 +213,7 @@
                 (new_value) => (inputText = new_value)
               )}
             onblur={() => from_input_typing_context.clearContext()}
-            onkeydown={(e) => {
-              if (e.key.length > 1 && !(e.shiftKey || e.ctrlKey))
-                from_input_typing_context.clearContext();
-            }}
+            onkeydown={(e) => clearTypingContextOnKeyDown(e, from_input_typing_context)}
           />
         </div>
 

@@ -293,3 +293,48 @@ export async function handleTypingInputEvent(
     typingContext.clearContext();
   }
 }
+
+const CONTEXT_CLEAR_KEYS = new Set([
+  'Backspace',
+  'Delete',
+  'Enter',
+  'Tab',
+  'Escape',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'Home',
+  'End',
+  'PageUp',
+  'PageDown'
+]);
+
+/**
+ * Checks if the keydown event should clear the typing context
+ * @param e - The keydown event
+ * @param ctx - The typing context
+ * @returns True if the keydown event should clear the typing context, false otherwise
+ */
+export function clearTypingContextOnKeyDown(
+  e: KeyboardEvent,
+  ctx: ReturnType<typeof createTypingContext>
+) {
+  // Mobile virtual keyboards and IME/composition frequently report keys like
+  // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.
+  if (e.isComposing) return false;
+
+  const key = e.key;
+  if (!key) return false;
+
+  if (key === 'Unidentified' || key === 'Process' || key === 'Dead') return false;
+
+  // Respect shortcut chords / OS-level commands; these should not affect context.
+  if (e.ctrlKey || e.metaKey || e.altKey) return false;
+
+  if (CONTEXT_CLEAR_KEYS.has(key)) {
+    ctx.clearContext();
+    return true;
+  }
+  return false;
+}
