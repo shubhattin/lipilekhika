@@ -17,8 +17,8 @@ import {
   replaceWithPieces,
   emitPiecesWithTaExtSuperscriptReorder,
   isTaExtSuperscriptTail,
-  type prev_context_array_type,
-  isScriptTamilExt
+  isScriptTamilExt,
+  type prev_context_array_type
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
@@ -26,30 +26,48 @@ export type CustomOptionType = {
   [key in CustomOptionList]?: boolean;
 };
 
+type CustomRulesType = OptionsType[keyof OptionsType]['rules'];
+
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
 
-/** Return flag to indicate if the result concat has to be done as it already is concatenated here. */
-function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_type[number]) {
+/**
+ * Mostly used is -1 for prev context.
+ * But even in the theoretical case it is -3 for now
+ */
+const MAX_CONTEXT_LENGTH = 3;
+
+/**
+ * @return flag to indicate if the result concat has to be done as it already is concatenated here.
+ */
+function prev_context_cleanup(
+  ctx: TransliterateCtx,
+  item: prev_context_array_type[number],
+  additional?: {
+    next?: string[];
+    last_extra_call?: boolean;
+  }
+) {
   const {
     from_script_name,
     to_script_name,
     from_script_data,
     to_script_data,
-    options,
+    trans_options: options,
     result,
     prev_context,
     BRAHMIC_HALANT,
-    BRAHMIC_NUQTA
+    BRAHMIC_NUQTA,
+    typing_mode
   } = ctx;
+  const { next, last_extra_call } = additional ?? {};
   let result_str_concat_status = false;
-
-  // custom cleanup logic/cases
   // console.log(
   //   [item[0], item[1]?.type],
   //   prev_context_arr.map((item) => item[1]?.type),
   //   result_str.split('')
   // );
+  // custom cleanup logic/cases
   if (
     // vyanjana, nuqta, svara
     ((BRAHMIC_NUQTA &&
@@ -138,9 +156,20 @@ function prev_context_cleanup(ctx: TransliterateCtx, item: prev_context_array_ty
       }
     }
   }
-
+  // custom typing mode context clear logic
+  // only clear context if there are no next characters or if its last extra call
+  let to_clear_context = false;
+  if (typing_mode && (next === undefined || next.length === 0) && !last_extra_call) {
+    to_clear_context = true;
+    // do not clear the context only if case where the current added element is a vyanjana
+    if (item[1]?.type === 'vyanjana') to_clear_context = false;
+    if (to_clear_context) {
+      prev_context.clear();
+    }
+  }
   // addition and shifting
-  prev_context.push(item);
+  // in typing it should not be the last extra call
+  if (!typing_mode ? true : !last_extra_call && !to_clear_context) prev_context.push(item);
 
   return result_str_concat_status;
 }
@@ -250,6 +279,24 @@ export const get_active_custom_options = (
   return active_custom_options;
 };
 
+/** Resolve active options + flattened rule list once, so hot paths can reuse it. */
+export const resolve_transliteration_rules = (
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  transliteration_input_options?: CustomOptionType
+): { trans_options: CustomOptionType; custom_rules: CustomRulesType } => {
+  const trans_options = get_active_custom_options(
+    from_script_data,
+    to_script_data,
+    transliteration_input_options
+  );
+  const custom_rules = Object.keys(trans_options).flatMap(
+    (key) =>
+      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  );
+  return { trans_options, custom_rules };
+};
+
 const get_rule_replace_text = (
   rule: OptionsType[keyof OptionsType]['rules'][number],
   script_data: OutputScriptData
@@ -289,30 +336,39 @@ type TransliterateCtx = {
   to_script_name: script_list_type;
   from_script_data: OutputScriptData;
   to_script_data: OutputScriptData;
-  options: CustomOptionType;
-  custom_rules: OptionsType[keyof OptionsType]['rules'];
+  trans_options: CustomOptionType;
+  custom_rules: CustomRulesType;
   cursor: ReturnType<typeof make_input_cursor>;
   result: ReturnType<typeof string_builder>;
   prev_context: ReturnType<typeof prev_context_builder>;
   PREV_CONTEXT_IN_USE: boolean;
   BRAHMIC_NUQTA: string | null;
   BRAHMIC_HALANT: string | null;
+  typing_mode: boolean;
 };
 
-export const transliterate_text = async (
+/**
+ * Synchronous version for low latency use cases
+ *
+ * Like typing
+ */
+export const transliterate_text_core = (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  input_options?: CustomOptionType
+  from_script_data: OutputScriptData,
+  to_script_data: OutputScriptData,
+  trans_options: CustomOptionType,
+  custom_rules: CustomRulesType,
+  options?: {
+    /** This enables typing mode, returns a context length which will be used to clear the external context */
+    typing_mode?: boolean;
+  }
 ) => {
-  const from_script_data = await getScriptData(from_script_name);
-  const to_script_data = await getScriptData(to_script_name);
-  const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  const custom_rules = Object.keys(options).flatMap(
-    (key) =>
-      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
-  );
-  // ^ all active rules for auto processing extracted
+  const typing_mode = options?.typing_mode ?? false;
+  if (typing_mode && from_script_name !== 'Normal') {
+    throw new Error('Typing mode is only supported with Normal script as the input');
+  }
 
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
@@ -320,7 +376,6 @@ export const transliterate_text = async (
   let text_index = 0;
   const cursor = make_input_cursor(text);
 
-  const MAX_CONTEXT_LENGTH = 5;
   /** It stores the previous attribute types of the brahmic scripts
    * Use only when converted Brahmic -> Other or Other -> Brahmic
    * Stores attributes of the Brahmic script like svara, vyanjana, anya not of the Other script
@@ -332,7 +387,8 @@ export const transliterate_text = async (
   const prev_context = prev_context_builder(MAX_CONTEXT_LENGTH);
   const PREV_CONTEXT_IN_USE =
     (from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other') ||
-    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic');
+    (from_script_data.script_type === 'other' && to_script_data.script_type === 'brahmic') ||
+    (typing_mode && from_script_name === 'Normal' && to_script_data.script_type === 'other');
   const BRAHMIC_NUQTA =
     from_script_data.script_type === 'brahmic' && to_script_data.script_type === 'other'
       ? (from_script_data.nuqta ?? null)
@@ -351,14 +407,15 @@ export const transliterate_text = async (
     to_script_name,
     from_script_data,
     to_script_data,
-    options,
+    trans_options,
     custom_rules,
     cursor,
     result,
     prev_context,
     PREV_CONTEXT_IN_USE,
     BRAHMIC_NUQTA,
-    BRAHMIC_HALANT
+    BRAHMIC_HALANT,
+    typing_mode
   };
 
   /** A flag to indicate when to ignore the tamil extended numeral
@@ -406,6 +463,7 @@ export const transliterate_text = async (
       // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
       const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
+        from_script_data.script_type === 'other' &&
         to_script_data.script_type === 'brahmic' &&
         (prev_context.typeAt(-1) === 'vyanjana' ||
           (BRAHMIC_NUQTA &&
@@ -616,7 +674,10 @@ export const transliterate_text = async (
         const result_text = result_pieces_to_add.join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
-          if (from_script_data.script_type === 'brahmic') {
+          if (
+            from_script_data.script_type === 'brahmic' &&
+            to_script_data.script_type === 'other'
+          ) {
             let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
@@ -653,7 +714,10 @@ export const transliterate_text = async (
             }
 
             result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
-          } else if (to_script_data.script_type === 'brahmic') {
+          } else if (
+            to_script_data.script_type === 'brahmic' &&
+            from_script_data.script_type === 'other'
+          ) {
             let item: (typeof to_script_data.list)[number] | null | undefined = null;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
@@ -668,7 +732,20 @@ export const transliterate_text = async (
                     ] ?? null)
                   : null;
             }
-            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
+            if (typing_mode && from_script_name === 'Normal') {
+              // Note :- this is the only over place where next chars can be found
+              result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item], {
+                next: text_to_krama_item[1].next ?? undefined
+              });
+            } else result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
+          } else if (
+            typing_mode &&
+            from_script_name === 'Normal' &&
+            to_script_data.script_type === 'other'
+          ) {
+            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], null], {
+              next: text_to_krama_item[1].next ?? undefined
+            });
           }
         }
         if (!result_concat_status) {
@@ -698,6 +775,13 @@ export const transliterate_text = async (
       ) {
         // handle cases where any one of the krama poiting is -1
         result.emit(text_to_krama_item[0]);
+        if (typing_mode) {
+          // custom context setup call where -1
+          // Like for Sh('), ''(')\
+          prev_context_cleanup(ctx, [text_to_krama_item[0], null], {
+            next: text_to_krama_item[1].next ?? undefined
+          });
+        }
         continue;
       }
     } else {
@@ -749,14 +833,54 @@ export const transliterate_text = async (
     }
     apply_custom_rules(ctx, text_index, -char_width);
   }
-  if (PREV_CONTEXT_IN_USE) prev_context_cleanup(ctx, [undefined, null]);
+  if (PREV_CONTEXT_IN_USE)
+    // calling with last extra index flag
+    prev_context_cleanup(ctx, [undefined, null], { last_extra_call: true });
 
   let output = result.toString();
   output = apply_custom_replace_rules(output, to_script_data, custom_rules, 'output');
 
   return {
     output,
-    /** Can be used to manage context while using the typing feature */
+    /** Can be used to manage context while using the typing feature.
+     * If this is 0, the external context can be cleared
+     */
     context_length: prev_context.length()
   };
+};
+
+/** Async version for general use */
+export const transliterate_text = async (
+  text: string,
+  from_script_name: script_list_type,
+  to_script_name: script_list_type,
+  transliteration_input_options?: CustomOptionType,
+  options?: {
+    /** This enables typing mode, returns a context length which will be used to clear the external context */
+    typing_mode?: boolean;
+  }
+) => {
+  const typing_mode = options?.typing_mode ?? false;
+  if (typing_mode && from_script_name !== 'Normal') {
+    throw new Error('Typing mode is only supported with Normal script as the input');
+  }
+  const [from_script_data, to_script_data] = await Promise.all([
+    getScriptData(from_script_name),
+    getScriptData(to_script_name)
+  ]);
+  const { trans_options, custom_rules } = resolve_transliteration_rules(
+    from_script_data,
+    to_script_data,
+    transliteration_input_options
+  );
+  return transliterate_text_core(
+    text,
+    from_script_name,
+    to_script_name,
+    from_script_data,
+    to_script_data,
+    trans_options,
+    custom_rules,
+    options
+  );
 };

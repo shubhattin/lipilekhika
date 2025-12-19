@@ -31,6 +31,8 @@ const ALTERNATES = [
   'eng', // Normal
   'la', // Normal
   'lat', // Normal
+  'nor', // Normal
+  'norm', // Normal
   'rom', // romanized
   'gur', // Gurumukhi
   'as', // Assamese
@@ -71,6 +73,8 @@ const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_type> =
   eng: 'Normal',
   la: 'Normal',
   lat: 'Normal',
+  nor: 'Normal',
+  norm: 'Normal',
   rom: 'Romanized',
   gur: 'Gurumukhi',
   as: 'Assamese',

@@ -5,9 +5,12 @@
     preloadScriptData,
     getAllOptions,
     SCRIPT_LIST,
+    createTypingContext,
+    handleTypingInputEvent,
     type ScriptListType,
     type TransliterationOptions
-  } from 'lipilekhika';
+  } from '../../../../packages/js/src/index';
+  // ^ import directly for real time development
   import { slide } from 'svelte/transition';
   import prettyMs from 'pretty-ms';
 
@@ -30,6 +33,8 @@
   let availableOptions = $state<string[]>([]);
   let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
+
+  let from_input_typing_context = $derived(createTypingContext(fromScript));
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -82,7 +87,7 @@
   });
 </script>
 
-<div class="dark min-h-screen bg-background text-foreground">
+<div class="min-h-screen bg-background text-foreground">
   <div class="mx-auto max-w-5xl px-4 py-12 md:py-16">
     <form
       class="space-y-8 rounded-xl border border-border bg-card p-8 shadow-2xl"
@@ -199,7 +204,18 @@
             id="source-text"
             class="min-h-[180px] resize-none"
             placeholder="Enter text to transliterate..."
-            bind:value={inputText}
+            value={inputText}
+            oninput={(e) =>
+              handleTypingInputEvent(
+                from_input_typing_context,
+                e,
+                (new_value) => (inputText = new_value)
+              )}
+            onblur={() => from_input_typing_context.clearContext()}
+            onkeydown={(e) => {
+              if (e.key.length > 1 && !(e.shiftKey || e.ctrlKey))
+                from_input_typing_context.clearContext();
+            }}
           />
         </div>
 

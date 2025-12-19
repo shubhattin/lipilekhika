@@ -18,9 +18,12 @@ async function main() {
   const packageRoot = path.resolve(path.dirname(thisFile), '.');
 
   await rm(path.join(packageRoot, 'dist'), { recursive: true, force: true });
-  runStep('make-script-data', 'bun', ['make-script-data'], { cwd: packageRoot });
-  runStep('vite build', 'bun', ['vite', 'build'], { cwd: packageRoot });
-  runStep('api-extractor', 'bun', ['api-extractor', 'run', '--local'], {
+  runStep('Make Script Data', 'bun', ['make-script-data'], { cwd: packageRoot });
+  runStep('Build UMD', 'bun', ['cross-env', 'VITE_IS_UMD_BUILD_MODE=true', 'vite', 'build'], {
+    cwd: packageRoot
+  });
+  runStep('Build ESM and CJS', 'bun', ['vite', 'build'], { cwd: packageRoot });
+  runStep('.d.ts file unification', 'bun', ['api-extractor', 'run', '--local'], {
     cwd: packageRoot,
     quiet: true
   });

@@ -1,0 +1,9 @@
+- index: 0
+  text: kh
+  context: 1
+- index: 1
+  text: khz
+  context: 1
+- index: 2
+  text: khe
+  context: 0
