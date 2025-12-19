@@ -134,7 +134,7 @@ export async function emulateTyping(text: string, typing_lang: ScriptLangType) {
       'Normal',
       normalized_typing_lang,
       {},
-      true
+      { typing_mode: true }
     );
     if (context_length > 0) {
       prev_output = output;

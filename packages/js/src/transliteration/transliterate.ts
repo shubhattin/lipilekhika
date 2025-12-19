@@ -49,7 +49,7 @@ function prev_context_cleanup(
     to_script_name,
     from_script_data,
     to_script_data,
-    options,
+    trans_options: options,
     result,
     prev_context,
     BRAHMIC_HALANT,
@@ -314,7 +314,7 @@ type TransliterateCtx = {
   to_script_name: script_list_type;
   from_script_data: OutputScriptData;
   to_script_data: OutputScriptData;
-  options: CustomOptionType;
+  trans_options: CustomOptionType;
   custom_rules: OptionsType[keyof OptionsType]['rules'];
   cursor: ReturnType<typeof make_input_cursor>;
   result: ReturnType<typeof string_builder>;
@@ -329,14 +329,23 @@ export const transliterate_text = async (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  input_options?: CustomOptionType,
-  _typing_mode?: boolean
+  translaliteration_input_options?: CustomOptionType,
+  options?: {
+    typing_mode?: boolean;
+  }
 ) => {
-  const typing_mode = _typing_mode ?? false;
+  const typing_mode = options?.typing_mode ?? false;
+  if (typing_mode && from_script_name !== 'Normal') {
+    throw new Error('Typing mode is only supported with Normal script as the input');
+  }
   const from_script_data = await getScriptData(from_script_name);
   const to_script_data = await getScriptData(to_script_name);
-  const options = get_active_custom_options(from_script_data, to_script_data, input_options);
-  const custom_rules = Object.keys(options).flatMap(
+  const trans_options = get_active_custom_options(
+    from_script_data,
+    to_script_data,
+    translaliteration_input_options
+  );
+  const custom_rules = Object.keys(trans_options).flatMap(
     (key) =>
       custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
   );
@@ -378,7 +387,7 @@ export const transliterate_text = async (
     to_script_name,
     from_script_data,
     to_script_data,
-    options,
+    trans_options,
     custom_rules,
     cursor,
     result,

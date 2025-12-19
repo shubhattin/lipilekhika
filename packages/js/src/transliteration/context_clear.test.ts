@@ -28,7 +28,13 @@ describe('Context Clear (Typing Mode)', () => {
         .parse(YAML.parse(fs.readFileSync(path.join(data_folder, file), 'utf-8')));
       test_data.forEach((test_case) => {
         it(`${test_case.index} - "${test_case.text}"`, async () => {
-          const result = await transliterate_text(test_case.text, 'Normal', 'Devanagari', {}, true);
+          const result = await transliterate_text(
+            test_case.text,
+            'Normal',
+            'Devanagari',
+            {},
+            { typing_mode: true }
+          );
           expect(result.context_length).toBe(test_case.context);
         });
       });
