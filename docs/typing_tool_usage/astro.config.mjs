@@ -10,6 +10,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  base: '/lipilekhika/typing_tool_examples/',
   integrations: [
     svelte(),
     vue(),
