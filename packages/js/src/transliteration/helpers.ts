@@ -258,7 +258,7 @@ export const isTaExtSuperscriptTail = (ch: string | undefined): boolean => {
   );
 };
 
-export const isScriptTaExt = (script_name: script_list_type): boolean => {
+export const isScriptTamilExt = (script_name: script_list_type): boolean => {
   return script_name === 'Tamil-Extended';
 };
 

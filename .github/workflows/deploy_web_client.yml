@@ -20,7 +20,6 @@ jobs:
           cd packages/js
           bun install
           bun run build
-          bun link
       - name: Build Client Application
         run: |
           cd docs/docs-and-web-client
