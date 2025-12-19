@@ -36,7 +36,9 @@ export default function SolidComp() {
           class="w-full cursor-pointer appearance-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 pr-10 text-base text-slate-200 transition-all duration-200 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
         >
           {SCRIPT_LIST.map((script) => (
-            <option value={script}>{script}</option>
+            <option key={script} value={script}>
+              {script}
+            </option>
           ))}
         </select>
       </div>

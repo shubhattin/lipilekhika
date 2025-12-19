@@ -238,7 +238,7 @@ export async function handleTypingInputEvent(
   const isReactSyntheticEvent = 'nativeEvent' in event;
   const isInputEvent = isReactSyntheticEvent
     ? typeof InputEvent !== 'undefined' &&
-      event.nativeEvent instanceof InputEvent &&
+      event?.nativeEvent instanceof InputEvent &&
       event.nativeEvent.data !== null
     : typeof InputEvent !== 'undefined' && event instanceof InputEvent && event.data !== null;
   const inputElement = isReactSyntheticEvent ? event.nativeEvent.target : event.currentTarget;
