@@ -123,7 +123,8 @@ export async function getAllOptions(
 export type TransliterationOptions = CustomOptionType;
 
 /**
- * Creates a stateful isolated context for character by character input typing
+ * Creates a stateful isolated context for character by character input typing.
+ * This is the main function which returns the `diff`, different realtime schems can be implemented using this.
  *
  * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
  * @param typing_lang - The script/language to type in
@@ -197,9 +198,8 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 
     // calculate the diff
     let common_index = 0;
-    for (let n = 0; n < output.length; n++) {
-      if (output.length == common_index) break;
-      if (output[common_index] != prev_output[common_index]) break;
+    while (common_index < output.length && common_index < prev_output.length) {
+      if (output[common_index] !== prev_output[common_index]) break;
       common_index++;
     }
     let diff_add_text = output.substring(common_index);
@@ -228,8 +228,6 @@ type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
  *
  * - Svelte / Solid / Vue typically pass the native DOM event (`InputEvent` at runtime).
  * - React wraps DOM events in a SyntheticEvent which exposes the original via `nativeEvent`.
- *
- * We keep this structural (no React/Vue imports) so the package stays framework-agnostic.
  */
 export type TextInputEvent =
   | (Event & { currentTarget: TextInputElement })

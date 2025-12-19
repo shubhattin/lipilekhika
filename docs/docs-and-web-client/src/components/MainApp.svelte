@@ -36,17 +36,6 @@
 
   let from_input_typing_context = $derived(createTypingContext(fromScript));
 
-  onMount(() => {
-    const handleClick = () => {
-      from_input_typing_context.clearContext();
-    };
-    // on click anywhere on the page, clear the typing context
-    document.addEventListener('click', handleClick);
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  });
-
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     try {
@@ -222,6 +211,11 @@
                 e,
                 (new_value) => (inputText = new_value)
               )}
+            onblur={() => from_input_typing_context.clearContext()}
+            onkeydown={(e) => {
+              if (e.key.length > 1 && !(e.shiftKey || e.ctrlKey))
+                from_input_typing_context.clearContext();
+            }}
           />
         </div>
 
