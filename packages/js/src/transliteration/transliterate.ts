@@ -41,8 +41,10 @@ const MAX_CONTEXT_LENGTH = 3;
 function prev_context_cleanup(
   ctx: TransliterateCtx,
   item: prev_context_array_type[number],
-  next?: string[],
-  last_extra_call?: boolean
+  additional?: {
+    next?: string[];
+    last_extra_call?: boolean;
+  }
 ) {
   const {
     from_script_name,
@@ -56,8 +58,8 @@ function prev_context_cleanup(
     BRAHMIC_NUQTA,
     typing_mode
   } = ctx;
+  const { next, last_extra_call } = additional ?? {};
   let result_str_concat_status = false;
-
   // console.log(
   //   [item[0], item[1]?.type],
   //   prev_context_arr.map((item) => item[1]?.type),
@@ -716,22 +718,18 @@ export const transliterate_text = async (
             }
             if (typing_mode && from_script_name === 'Normal') {
               // Note :- this is the only over place where next chars can be found
-              result_concat_status = prev_context_cleanup(
-                ctx,
-                [text_to_krama_item[0], item],
-                text_to_krama_item[1].next ?? undefined
-              );
+              result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item], {
+                next: text_to_krama_item[1].next ?? undefined
+              });
             } else result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           } else if (
             typing_mode &&
             from_script_name === 'Normal' &&
             to_script_data.script_type === 'other'
           ) {
-            result_concat_status = prev_context_cleanup(
-              ctx,
-              [text_to_krama_item[0], null],
-              text_to_krama_item[1].next ?? undefined
-            );
+            result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], null], {
+              next: text_to_krama_item[1].next ?? undefined
+            });
           }
         }
         if (!result_concat_status) {
@@ -764,11 +762,9 @@ export const transliterate_text = async (
         if (typing_mode) {
           // custom context setup call where -1
           // Like for Sh('), ''(')\
-          prev_context_cleanup(
-            ctx,
-            [text_to_krama_item[0], null],
-            text_to_krama_item[1].next ?? undefined
-          );
+          prev_context_cleanup(ctx, [text_to_krama_item[0], null], {
+            next: text_to_krama_item[1].next ?? undefined
+          });
         }
         continue;
       }
@@ -823,7 +819,7 @@ export const transliterate_text = async (
   }
   if (PREV_CONTEXT_IN_USE)
     // calling with last extra index flag
-    prev_context_cleanup(ctx, [undefined, null], undefined, true);
+    prev_context_cleanup(ctx, [undefined, null], { last_extra_call: true });
 
   let output = result.toString();
   output = apply_custom_replace_rules(output, to_script_data, custom_rules, 'output');
