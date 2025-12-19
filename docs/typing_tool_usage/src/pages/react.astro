@@ -1,8 +1,8 @@
 ---
 import RootLayout from '../RootLayout.astro';
-import ReactComp from '../components/ReactComp';
+import ReactComp from '../components/react/ReactComp.tsx';
 ---
 
 <RootLayout title="React Typing Tool Usage Example">
-  <ReactComp client:only="react" />
+  <ReactComp client:load />
 </RootLayout>

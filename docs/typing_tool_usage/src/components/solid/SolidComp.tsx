@@ -46,12 +46,12 @@ export default function SolidComp() {
           placeholder="Start typing here..."
           value={textareaText()}
           onInput={(e) =>
-            handleTypingInputEvent(textareaTypingContext(), e as any, (newValue) =>
+            handleTypingInputEvent(textareaTypingContext(), e, (newValue) =>
               setTextareaText(newValue)
             )
           }
           onBlur={() => textareaTypingContext().clearContext()}
-          onKeyDown={(e) => clearTypingContextOnKeyDown(e as any, textareaTypingContext())}
+          onKeyDown={(e) => clearTypingContextOnKeyDown(e, textareaTypingContext())}
           class="min-h-[150px] w-full resize-y rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base leading-relaxed text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
         ></textarea>
       </div>
@@ -62,12 +62,10 @@ export default function SolidComp() {
           placeholder="Type here..."
           value={inputText()}
           onInput={(e) =>
-            handleTypingInputEvent(inputTypingContext(), e as any, (newValue) =>
-              setInputText(newValue)
-            )
+            handleTypingInputEvent(inputTypingContext(), e, (newValue) => setInputText(newValue))
           }
           onBlur={() => inputTypingContext().clearContext()}
-          onKeyDown={(e) => clearTypingContextOnKeyDown(e as any, inputTypingContext())}
+          onKeyDown={(e) => clearTypingContextOnKeyDown(e, inputTypingContext())}
           class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
         />
       </div>
