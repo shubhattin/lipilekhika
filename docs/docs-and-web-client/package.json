@@ -16,6 +16,7 @@
     "@astrojs/svelte": "^7.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.6",
+    "lucide-svelte": "^0.562.0",
     "pretty-ms": "^9.3.0",
     "sharp": "^0.34.5",
     "svelte": "^5.46.0",

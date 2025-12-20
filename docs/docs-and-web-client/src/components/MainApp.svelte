@@ -20,6 +20,7 @@
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import { Separator } from '$lib/components/ui/separator';
+  import { KeyboardIcon } from 'lucide-svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_FROM: ScriptListType = 'Devanagari';
@@ -34,6 +35,8 @@
   let availableOptions = $state<string[]>([]);
   let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
+
+  let typing_enabled = $state(true);
 
   let from_input_typing_context = $derived(createTypingContext(fromScript));
 
@@ -198,9 +201,18 @@
       <!-- Text Areas -->
       <div class="grid gap-6 md:grid-cols-2">
         <div class="flex flex-col gap-3">
-          <label for="source-text" class="text-sm font-medium tracking-wide text-muted-foreground">
-            Source text
-          </label>
+          <div class="flex items-center justify-between">
+            <label
+              for="source-text"
+              class="text-sm font-medium tracking-wide text-muted-foreground"
+            >
+              Source text
+            </label>
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+              <KeyboardIcon class="h-7 w-10" />
+              <Switch bind:checked={typing_enabled} />
+            </label>
+          </div>
           <Textarea
             id="source-text"
             class="min-h-[180px] resize-none"
@@ -210,7 +222,8 @@
               handleTypingInputEvent(
                 from_input_typing_context,
                 e,
-                (new_value) => (inputText = new_value)
+                (new_value) => (inputText = new_value),
+                typing_enabled
               )}
             onblur={() => from_input_typing_context.clearContext()}
             onkeydown={(e) => clearTypingContextOnKeyDown(e, from_input_typing_context)}

@@ -217,8 +217,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     /** Await once, then use `takeKeyInputSync` for best typing latency. */
     ready,
     clearContext,
-    takeKeyInput,
-    getCurrentOutput: () => curr_output
+    takeKeyInput
   };
 }
 
@@ -232,8 +231,14 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 export async function handleTypingInputEvent(
   typingContext: ReturnType<typeof createTypingContext>,
   event: any,
-  onValueChange?: (updatedValue: string) => void
+  onValueChange?: (updatedValue: string) => void,
+  enabled_?: boolean
 ) {
+  const enabled = enabled_ ?? true;
+  if (!enabled) {
+    onValueChange?.(event.currentTarget.value);
+    return;
+  }
   // react synthetic event handling
   const isReactSyntheticEvent = 'nativeEvent' in event;
   const isInputEvent = isReactSyntheticEvent
@@ -285,6 +290,64 @@ export async function handleTypingInputEvent(
     typingContext.clearContext();
   }
 }
+
+/**
+ * Handles `beforeinput` events for transliteration typing in `input` and `textarea` elements.
+ *
+ * This is the recommended browser-native approach:
+ * - Use `beforeinput` to "suppress" the default insertion via `preventDefault()`
+ * - Apply the transliteration diff using the native `setRangeText` API
+ *
+ * For non-character events (backspace/delete/paste/etc), do NOT prevent default here.
+ * Pair this with `handleTypingInputEvent` on `input` to keep state in sync for those cases.
+ *
+ * @param typingContext - The typing context created for the element
+ * @param event - BeforeInput event (native or React synthetic)
+ * @param onValueChange - Optional callback function invoked when the value changes
+ */
+// export async function handleTypingBeforeInputEvent(
+//   typingContext: ReturnType<typeof createTypingContext>,
+//   event: any,
+//   onValueChange?: (updatedValue: string) => void
+// ) {
+//   const nativeEvent: any = event?.nativeEvent ?? event;
+//   const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
+//     nativeEvent?.target) as any;
+
+//   if (!nativeEvent || !inputElement) return;
+
+//   // Don’t interfere with IME/composition; this breaks mobile/IME typing.
+//   if (nativeEvent.isComposing) return;
+
+//   // Only handle actual text insertions. Let the browser do everything else.
+//   // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
+//   if (nativeEvent.inputType !== 'insertText') return;
+//   const inputData: unknown = nativeEvent.data;
+//   if (typeof inputData !== 'string' || inputData.length === 0) return;
+
+//   // If there is a selection, we don’t have a clean incremental diff story yet.
+//   // Let the browser replace the selection and reset the typing context.
+//   const selectionStart = inputElement.selectionStart ?? 0;
+//   const selectionEnd = inputElement.selectionEnd ?? selectionStart;
+//   if (selectionStart !== selectionEnd) {
+//     typingContext.clearContext();
+//     return;
+//   }
+
+//   await typingContext.ready;
+
+//   // Suppress the default browser insertion.
+//   nativeEvent.preventDefault?.();
+
+//   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
+
+//   // Replace the "context" immediately before the caret with the transliterated diff.
+//   const replaceEnd = selectionStart;
+//   const replaceStart = Math.max(0, replaceEnd - to_delete_chars_count);
+//   inputElement.setRangeText(diff_add_text, replaceStart, replaceEnd, 'end');
+
+//   onValueChange?.(inputElement.value);
+// }
 
 const CONTEXT_CLEAR_KEYS = new Set([
   'Backspace',
