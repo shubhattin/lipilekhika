@@ -208,10 +208,15 @@
             >
               Source text
             </label>
-            <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-              <KeyboardIcon class="h-7 w-10" />
-              <Switch bind:checked={typing_enabled} />
-            </label>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-muted-foreground"
+                >Use <span class="font-bold">Alt+x</span> to toggle</span
+              >
+              <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                <KeyboardIcon class="h-7 w-10" />
+                <Switch bind:checked={typing_enabled} />
+              </label>
+            </div>
           </div>
           <Textarea
             id="source-text"
@@ -226,7 +231,15 @@
                 typing_enabled
               )}
             onblur={() => from_input_typing_context.clearContext()}
-            onkeydown={(e) => clearTypingContextOnKeyDown(e, from_input_typing_context)}
+            onkeydown={(e) => {
+              // Toggle typing on Alt+X
+              if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+                e.preventDefault();
+                typing_enabled = !typing_enabled;
+                return;
+              }
+              clearTypingContextOnKeyDown(e, from_input_typing_context);
+            }}
           />
         </div>
 

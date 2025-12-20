@@ -54,3 +54,19 @@ function runStep(name: string, command: string, args: string[], opts: RunOptions
     throw new Error(`${name} failed with exit code ${res.status ?? 'unknown'}`);
   }
 }
+
+/*
+# Manual Purge for jsdelivr on new version publish
+
+CDN Cache Purge Tool : https://www.jsdelivr.com/tools/purge
+
+Links :- (10 max at once)
+
+https://cdn.jsdelivr.net/npm/lipilekhika/dist/lipilekhika.umd.js
+https://cdn.jsdelivr.net/npm/lipilekhika@latest/dist/lipilekhika.umd.js
+https://cdn.jsdelivr.net/npm/lipilekhika
+https://cdn.jsdelivr.net/npm/lipilekhika@latest
+https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs
+https://cdn.jsdelivr.net/npm/lipilekhika@latest/dist/esm/index.mjs
+
+*/
