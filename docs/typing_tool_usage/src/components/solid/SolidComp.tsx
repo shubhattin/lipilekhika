@@ -1,4 +1,4 @@
-import { createSignal, createMemo } from 'solid-js';
+import { createSignal, createMemo, createEffect } from 'solid-js';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
@@ -14,6 +14,13 @@ export default function SolidComp() {
 
   const textareaTypingContext = createMemo(() => createTypingContext(selectedScript()));
   const inputTypingContext = createMemo(() => createTypingContext(selectedScript()));
+
+  // Eagerly access contexts to trigger background preloading
+  // to avoid lazy evaluation of `createMemo`
+  createEffect(() => {
+    textareaTypingContext().ready;
+    inputTypingContext().ready;
+  });
 
   return (
     <div class="mx-auto max-w-[700px] p-8 font-sans">

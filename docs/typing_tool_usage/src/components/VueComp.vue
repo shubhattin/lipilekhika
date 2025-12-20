@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
@@ -14,6 +14,13 @@ const selectedScript = ref<ScriptListType>('Devanagari');
 
 const textareaTypingContext = computed(() => createTypingContext(selectedScript.value));
 const inputTypingContext = computed(() => createTypingContext(selectedScript.value));
+
+// Eagerly access contexts to trigger background preloading
+// to avoid lazy evaluation of `computed`
+watchEffect(() => {
+  textareaTypingContext.value.ready;
+  inputTypingContext.value.ready;
+});
 </script>
 
 <template>

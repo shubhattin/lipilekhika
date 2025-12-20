@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
@@ -17,6 +17,13 @@ export default function ReactComp() {
     [selectedScript]
   );
   const inputTypingContext = useMemo(() => createTypingContext(selectedScript), [selectedScript]);
+
+  // Eagerly trigger preloading by accessing contexts
+  // to avoid lazy evaluation of `useMemo`
+  useEffect(() => {
+    textareaTypingContext.ready;
+    inputTypingContext.ready;
+  }, [textareaTypingContext, inputTypingContext]);
 
   return (
     <div className="mx-auto max-w-[700px] p-8 font-sans">

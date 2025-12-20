@@ -14,6 +14,13 @@
 
   let textarea_typing_context = $derived(createTypingContext(selected_script));
   let input_typing_context = $derived(createTypingContext(selected_script));
+
+  // Eagerly access contexts to trigger background preloading
+  // to avoid lazy evaluation of `$derived`
+  $effect(() => {
+    textarea_typing_context.ready;
+    input_typing_context.ready;
+  });
 </script>
 
 <div class="mx-auto max-w-[700px] p-8 font-sans">

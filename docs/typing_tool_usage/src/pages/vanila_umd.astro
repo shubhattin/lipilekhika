@@ -5,11 +5,6 @@ import RootLayout from '../RootLayout.astro';
 <RootLayout title="Vanilla UMD Typing Tool Usage Example">
   <div class="mx-auto max-w-[700px] p-8 font-sans">
     <div class="mb-10 text-center">
-      <div class="mb-4">
-        <a href="/" class="text-sm text-slate-400 underline-offset-4 hover:underline">
-          ← Back to examples
-        </a>
-      </div>
       <h1 class="mb-2 text-xl font-bold tracking-tight text-slate-200">Vanilla (UMD)</h1>
       <p class="text-[0.95rem] text-slate-400">Lipi Lekhika Typing Tool Usage Example</p>
     </div>
@@ -53,7 +48,7 @@ import RootLayout from '../RootLayout.astro';
     </div>
   </div>
 
-  <script src={`https://cdn.jsdelivr.net/npm/lipilekhika`} is:inline></script>
+  <script src="https://cdn.jsdelivr.net/npm/lipilekhika" is:inline></script>
   <script is:inline>
     const select = document.getElementById('script-select');
     const textarea = document.getElementById('textarea');
@@ -70,8 +65,15 @@ import RootLayout from '../RootLayout.astro';
     let selectedScript = 'Devanagari';
     select.value = selectedScript;
 
-    let textareaCtx = lipilekhika.createTypingContext(selectedScript);
-    let inputCtx = lipilekhika.createTypingContext(selectedScript);
+    let textareaCtx;
+    let inputCtx;
+    Promise.all([
+      lipilekhika.preloadScriptData(selectedScript),
+      lipilekhika.preloadScriptData('Normal')
+    ]).then(() => {
+      textareaCtx = lipilekhika.createTypingContext(selectedScript);
+      inputCtx = lipilekhika.createTypingContext(selectedScript);
+    });
 
     async function resetContexts(nextScript) {
       selectedScript = nextScript;
