@@ -23,13 +23,6 @@ async function main() {
     cwd: packageRoot
   });
   runStep('Build ESM and CJS', 'bun', ['vite', 'build'], { cwd: packageRoot });
-  runStep('.d.ts file unification', 'bun', ['api-extractor', 'run', '--local'], {
-    cwd: packageRoot,
-    quiet: true
-  });
-
-  await rm(path.join(packageRoot, 'dist', 'types'), { recursive: true, force: true });
-  await rm(path.join(packageRoot, 'tsdoc-metadata.json'), { force: true });
 }
 
 await main();

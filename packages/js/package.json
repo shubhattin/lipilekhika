@@ -7,15 +7,20 @@
   "sideEffects": false,
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/src/index.d.ts",
   "unpkg": "./dist/lipilekhika.umd.js",
   "jsdelivr": "./dist/lipilekhika.umd.js",
   "browser": "./dist/lipilekhika.umd.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/src/index.d.ts",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
+    },
+    "./typing": {
+      "types": "./dist/types/src/typing.d.ts",
+      "import": "./dist/esm/typing.mjs",
+      "require": "./dist/cjs/typing.cjs"
     }
   },
   "files": [

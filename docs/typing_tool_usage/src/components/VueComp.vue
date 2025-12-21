@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from 'vue';
 import {
-  createTypingContext,
-  clearTypingContextOnKeyDown,
-  handleTypingInputEvent,
   SCRIPT_LIST,
   type ScriptListType
 } from 'lipilekhika';
+import {
+  createTypingContext,
+  clearTypingContextOnKeyDown,
+  handleTypingInputEvent
+} from 'lipilekhika/typing';
 
 const textareaText = ref('');
 const inputText = ref('');

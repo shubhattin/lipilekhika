@@ -16,18 +16,28 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: IS_UMD_BUILD_MODE
+        ? path.resolve(__dirname, 'src/index.ts')
+        : {
+            index: path.resolve(__dirname, 'src/index.ts'),
+            typing: path.resolve(__dirname, 'src/typing.ts')
+          },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
       // formats: ["es", "cjs", "iife", "umd"],
-      fileName: (format) => {
-        return `index.${format === 'es' ? 'mjs' : 'cjs'}`;
+      fileName: (format, entryName) => {
+        // For multi-entry ESM/CJS builds, emit `index.*` and `typing.*`
+        const base = entryName ?? 'index';
+        return `${base}.${format === 'es' ? 'mjs' : 'cjs'}`;
       }
     },
     rollupOptions: {
       external: [],
-      input: {
-        index: path.resolve(__dirname, 'src/index.ts')
-      },
+      input: IS_UMD_BUILD_MODE
+        ? { index: path.resolve(__dirname, 'src/index.ts') }
+        : {
+            index: path.resolve(__dirname, 'src/index.ts'),
+            typing: path.resolve(__dirname, 'src/typing.ts')
+          },
       output: !IS_UMD_BUILD_MODE
         ? [
             {

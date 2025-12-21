@@ -1,11 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
+import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
-  handleTypingInputEvent,
-  SCRIPT_LIST,
-  type ScriptListType
-} from 'lipilekhika';
+  handleTypingInputEvent
+} from 'lipilekhika/typing';
 
 export default function ReactComp() {
   const [textareaText, setTextareaText] = useState('');
