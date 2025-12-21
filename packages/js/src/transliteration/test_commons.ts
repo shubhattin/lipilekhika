@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { script_and_lang_list_type } from '../utils/lang_list';
-import { createTypingContext } from '..';
+import { createTypingContext } from '../typing';
 
 export const TestDataTypeSchema = z.object({
   index: z.number(),

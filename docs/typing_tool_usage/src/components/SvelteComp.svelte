@@ -1,11 +1,10 @@
 <script lang="ts">
+  import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
   import {
     createTypingContext,
     clearTypingContextOnKeyDown,
-    handleTypingInputEvent,
-    SCRIPT_LIST,
-    type ScriptListType
-  } from 'lipilekhika';
+    handleTypingInputEvent
+  } from 'lipilekhika/typing';
 
   let textarea_text = $state('');
   let input_text = $state('');

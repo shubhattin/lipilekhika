@@ -71,8 +71,8 @@ import RootLayout from '../RootLayout.astro';
       lipilekhika.preloadScriptData(selectedScript),
       lipilekhika.preloadScriptData('Normal')
     ]).then(() => {
-      textareaCtx = lipilekhika.createTypingContext(selectedScript);
-      inputCtx = lipilekhika.createTypingContext(selectedScript);
+      textareaCtx = lipilekhika.typing.createTypingContext(selectedScript);
+      inputCtx = lipilekhika.typing.createTypingContext(selectedScript);
     });
 
     async function resetContexts(nextScript) {
@@ -80,8 +80,8 @@ import RootLayout from '../RootLayout.astro';
       textareaCtx.clearContext();
       inputCtx.clearContext();
       await lipilekhika.preloadScriptData(selectedScript);
-      textareaCtx = lipilekhika.createTypingContext(selectedScript);
-      inputCtx = lipilekhika.createTypingContext(selectedScript);
+      textareaCtx = lipilekhika.typing.createTypingContext(selectedScript);
+      inputCtx = lipilekhika.typing.createTypingContext(selectedScript);
     }
 
     select.addEventListener('change', (e) => {
@@ -90,21 +90,23 @@ import RootLayout from '../RootLayout.astro';
     });
 
     textarea.addEventListener('input', async (e) => {
-      await lipilekhika.handleTypingInputEvent(textareaCtx, e, (newValue) => {
+      await lipilekhika.typing.handleTypingInputEvent(textareaCtx, e, (newValue) => {
         textarea.value = newValue;
       });
     });
     textarea.addEventListener('blur', () => textareaCtx.clearContext());
     textarea.addEventListener('keydown', (e) =>
-      lipilekhika.clearTypingContextOnKeyDown(e, textareaCtx)
+      lipilekhika.typing.clearTypingContextOnKeyDown(e, textareaCtx)
     );
 
     input.addEventListener('input', async (e) => {
-      await lipilekhika.handleTypingInputEvent(inputCtx, e, (newValue) => {
+      await lipilekhika.typing.handleTypingInputEvent(inputCtx, e, (newValue) => {
         input.value = newValue;
       });
     });
     input.addEventListener('blur', () => inputCtx.clearContext());
-    input.addEventListener('keydown', (e) => lipilekhika.clearTypingContextOnKeyDown(e, inputCtx));
+    input.addEventListener('keydown', (e) =>
+      lipilekhika.typing.clearTypingContextOnKeyDown(e, inputCtx)
+    );
   </script>
 </RootLayout>

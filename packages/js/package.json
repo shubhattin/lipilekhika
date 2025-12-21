@@ -1,6 +1,6 @@
 {
   "name": "lipilekhika",
-  "version": "0.0.0-alpha.22",
+  "version": "0.0.0-alpha.3",
   "type": "module",
   "license": "MIT",
   "repository": "https://github.com/shubhattin/lipilekhika/tree/main/packages/js",
@@ -16,6 +16,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
+    },
+    "./typing": {
+      "types": "./dist/typing.d.ts",
+      "import": "./dist/esm/typing.mjs",
+      "require": "./dist/cjs/typing.cjs"
     }
   },
   "files": [

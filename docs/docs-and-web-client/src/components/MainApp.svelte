@@ -5,12 +5,10 @@
     preloadScriptData,
     getAllOptions,
     SCRIPT_LIST,
-    createTypingContext,
-    handleTypingInputEvent,
-    clearTypingContextOnKeyDown,
     type ScriptListType,
     type TransliterationOptions
   } from '../../../../packages/js/src/index';
+  import { createTypingContext, handleTypingInputEvent, clearTypingContextOnKeyDown } from '../../../../packages/js/src/typing';
   // ^ import directly for real time development
   import { slide } from 'svelte/transition';
   import prettyMs from 'pretty-ms';

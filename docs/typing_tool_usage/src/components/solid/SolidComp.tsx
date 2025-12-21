@@ -1,11 +1,10 @@
 import { createSignal, createMemo, createEffect } from 'solid-js';
+import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
-  handleTypingInputEvent,
-  SCRIPT_LIST,
-  type ScriptListType
-} from 'lipilekhika';
+  handleTypingInputEvent
+} from 'lipilekhika/typing';
 
 export default function SolidComp() {
   const [textareaText, setTextareaText] = createSignal('');
