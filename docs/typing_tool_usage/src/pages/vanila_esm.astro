@@ -5,11 +5,6 @@ import RootLayout from '../RootLayout.astro';
 <RootLayout title="Vanilla ESM Typing Tool Usage Example">
   <div class="mx-auto max-w-[700px] p-8 font-sans">
     <div class="mb-10 text-center">
-      <div class="mb-4">
-        <a href="/" class="text-sm text-slate-400 underline-offset-4 hover:underline">
-          ← Back to examples
-        </a>
-      </div>
       <h1 class="mb-2 text-xl font-bold tracking-tight text-slate-200">Vanilla (ESM)</h1>
       <p class="text-[0.95rem] text-slate-400">Lipi Lekhika Typing Tool Usage Example</p>
     </div>
@@ -53,12 +48,12 @@ import RootLayout from '../RootLayout.astro';
     </div>
 
     <script type="module" is:inline>
+      import { SCRIPT_LIST } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
       import {
         createTypingContext,
         clearTypingContextOnKeyDown,
-        handleTypingInputEvent,
-        SCRIPT_LIST
-      } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
+        handleTypingInputEvent
+      } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/typing.mjs';
 
       const select = document.getElementById('script-select');
       const textarea = document.getElementById('textarea');
