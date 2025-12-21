@@ -17,7 +17,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: IS_UMD_BUILD_MODE
-        ? path.resolve(__dirname, 'src/index.ts')
+        ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
@@ -33,7 +33,7 @@ export default defineConfig({
     rollupOptions: {
       external: [],
       input: IS_UMD_BUILD_MODE
-        ? { index: path.resolve(__dirname, 'src/index.ts') }
+        ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')

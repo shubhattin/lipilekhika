@@ -14,8 +14,6 @@ import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list'
 import type { ScriptLangType } from './types';
 
 export * from './types';
-// And also expose a stable namespace for UMD builds:
-export * as typing from './typing';
 
 export {
   /**
