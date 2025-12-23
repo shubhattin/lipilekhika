@@ -31,6 +31,31 @@ export type CommonListTypeAttributes = {
   prevent_auto_matching?: boolean;
 };
 
+/**
+ * Custom Structure which will be used for typing mode, _`normal_to_all:use_typing_keys`_
+ * and _`all_to_normal:preserve_specific_chars`_
+ *
+ * Eg. :- U -> uu, oo, I -> ii, ee
+ */
+export type InputTypingListDataType =
+  | {
+      /** This is Normal key for which duplicates have to be defined */
+      ref_krama_key: KramaKeysLabelType;
+      duplicates: string[];
+    }
+  | {
+      /** This is the specific text which has to be mapped.
+       *
+       * Eg. :- Tamil and Malayalam :- 10, 100 and 1000 |
+       * Malayalam :- Specific versions of a new characters (Chillu versions nz, N, rz, l, lz and k)
+       */
+      specific_text: string;
+      /** This is the custom normal mapping that will be used for reverse mapping also
+       * as for this no equivalent krama key mapping exists
+       */
+      custom_normal_key: string;
+    };
+
 export type InputBrahmicScriptType = {
   script_name: script_list_type;
   script_id: number;
@@ -88,31 +113,7 @@ export type InputBrahmicScriptType = {
    - vyanjana -> consonants
    - anya -> other
   */
-  /**
-   * Custom Structure which will be used for typing mode, _`normal_to_all:use_typing_keys`_
-   * and _`all_to_normal:preserve_specific_chars`_
-   *
-   * Eg. :- U -> uu, oo, I -> ii, ee
-   */
-  typing_list: (
-    | {
-        /** This is Normal key for which duplicates have to be defined */
-        ref_krama_key: KramaKeysLabelType;
-        duplicates: string[];
-      }
-    | {
-        /** This is the specific text which has to be mapped.
-         *
-         * Eg. :- Tamil and Malayalam :- 10, 100 and 1000 |
-         * Malayalam :- Specific versions of a new characters (Chillu versions nz, N, rz, l, lz and k)
-         */
-        specific_text: string;
-        /** This is the custom normal mapping that will be used for reverse mapping also
-         * as for this no equivalent krama key mapping exists
-         */
-        custom_normal_key: string;
-      }
-  )[];
+  typing_list: InputTypingListDataType[];
 };
 
 export type InputOtherScriptType = {
@@ -129,6 +130,7 @@ export type InputOtherScriptType = {
     /** `type` is kind of redundant here as other scripts don't have a concept of svara and vyanjana */
     type?: 'anya';
   })[];
+  typing_list: InputTypingListDataType[];
 };
 
 export type InputScriptInfoType = InputBrahmicScriptType | InputOtherScriptType;

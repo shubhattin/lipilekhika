@@ -33,7 +33,9 @@ async function make_script_data() {
 
   // Load all script data files from input_data directory
   const inputDataDir = path.resolve('./src/make_script_data/input_data');
-  const files = fs.readdirSync(inputDataDir).filter((file) => file.endsWith('.ts'));
+  const files = fs
+    .readdirSync(inputDataDir)
+    .filter((file) => file.endsWith('.ts') && !file.startsWith('_'));
   const script_data_list: InputScriptInfoType[] = [];
   for (const file of files) {
     const filePath = path.resolve(inputDataDir, file);

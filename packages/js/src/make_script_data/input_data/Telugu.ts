@@ -1,5 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
 
 const Telugu: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -7,6 +8,7 @@ const Telugu: InputBrahmicScriptType = {
   script_id: script_list_obj['Telugu'],
   halant: '్',
   schwa_property: false,
+  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     '0': '౦',
     '1': '౧',

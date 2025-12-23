@@ -1,5 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
 
 const Modi: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -8,6 +9,7 @@ const Modi: InputBrahmicScriptType = {
   non_bmp_script: true,
   halant: '𑘿',
   schwa_property: false,
+  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     '0': '𑙐',
     '1': '𑙑',

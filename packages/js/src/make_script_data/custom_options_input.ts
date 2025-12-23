@@ -199,12 +199,22 @@ export const CustomOptionsInput: InputCustomOptionsType = {
    *
    * This mode uses duplicate alternatives for typing + typing script specific characters
    */
-  'normal_to_normal:use_typing_chars': {
+  'normal_to_all:use_typing_chars': {
     from_script_name: ['Normal'],
     to_script_type: 'all',
     // ^ 'all` is the typing script target
     check_in: 'output',
     // ^ only a label, does not mean anything for this options
+    rules: []
+  },
+  /**
+   * Duplicate alternatives will be mapped to their base forms and
+   * script specific charcaters will use the custom normal key
+   */
+  'all_to_normal:preserve_specific_chars': {
+    from_script_type: 'all',
+    to_script_name: ['Normal'],
+    check_in: 'output',
     rules: []
   }
 };

@@ -1,5 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
 
 const Odia: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -8,6 +9,7 @@ const Odia: InputBrahmicScriptType = {
   halant: '୍',
   nuqta: '଼',
   schwa_property: true,
+  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     '0': '୦',
     '1': '୧',

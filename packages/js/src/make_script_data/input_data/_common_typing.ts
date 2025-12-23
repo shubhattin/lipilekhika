@@ -1,0 +1,26 @@
+import type { InputTypingListDataType } from '../input_script_data_schema';
+
+export const COMMON_SCRIPT_TYPING_DATA = [
+  // duplicates
+
+  // mAtrA
+  {
+    ref_krama_key: 'A-svara',
+    // as in normal svara and mAtrA forms so we dont have to add for it seperately
+    duplicates: ['aa']
+  },
+  {
+    ref_krama_key: 'I-svara',
+    duplicates: ['ii', 'ee']
+  },
+  {
+    ref_krama_key: 'U-svara',
+    duplicates: ['uu', 'oo']
+  },
+
+  // vyanjana and anya
+  {
+    ref_krama_key: 'jz',
+    duplicates: ['z']
+  }
+] as InputTypingListDataType[];
