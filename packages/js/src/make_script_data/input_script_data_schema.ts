@@ -32,7 +32,7 @@ export type CommonListTypeAttributes = {
 };
 
 /**
- * Custom Structure which will be used for typing mode, _`normal_to_all:use_typing_keys`_
+ * Custom Structure which will be used for typing mode, _`normal_to_all:use_typing_chars`_
  * and _`all_to_normal:preserve_specific_chars`_
  *
  * Eg. :- U -> uu, oo, I -> ii, ee

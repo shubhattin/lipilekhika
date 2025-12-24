@@ -1,0 +1,10 @@
+- index: 0
+  text: kaa kii kee koo kuu koo zO zo
+  output: का की के को कू कू जो जो
+  script: Devanagari
+  todo: true
+- index: 1
+  text: xAtrAbala
+  output: क्षात्रबल
+  script: Devanagari
+  todo: true

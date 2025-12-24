@@ -7,15 +7,20 @@ import {
 } from './transliteration/transliterate';
 import type { ScriptLangType } from './types';
 
+const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
 /**
  * Creates a stateful isolated context for character by character input typing.
  * This is the main function which returns the `diff`, different realtime schems can be implemented using this.
  *
  * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
  * @param typing_lang - The script/language to type in
+ * @param auto_context_clear_time_ms - The time in milliseconds after which the context will be cleared automatically @default 4500ms
  * @returns A closed over context object with the following methods:
  */
-export function createTypingContext(typing_lang: ScriptLangType) {
+export function createTypingContext(
+  typing_lang: ScriptLangType,
+  auto_context_clear_time_ms_?: number
+) {
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
@@ -23,6 +28,10 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 
   let curr_input = '';
   let curr_output = '';
+
+  const auto_context_clear_time_ms =
+    auto_context_clear_time_ms_ ?? DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
+  let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
   let to_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -61,6 +70,10 @@ export function createTypingContext(typing_lang: ScriptLangType) {
         'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'
       );
     }
+    const curr_time_ms = Date.now();
+    if (last_time_ms && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
+      clearContext();
+    }
     let char_key = key?.[0] ?? '';
     curr_input += char_key;
     let prev_output = curr_output;
@@ -70,7 +83,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
       normalized_typing_lang!,
       from_script_data,
       to_script_data,
-      trans_options,
+      { ...trans_options, 'normal_to_all:use_typing_chars': true },
       custom_rules,
       { typing_mode: true }
     );
@@ -90,6 +103,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     let diff_add_text = output.substring(common_index);
     let to_delete_chars_count = prev_output.length - common_index;
 
+    last_time_ms = Date.now();
     return {
       /** These number of characters need to be deleted from the current "app" input state */
       to_delete_chars_count,

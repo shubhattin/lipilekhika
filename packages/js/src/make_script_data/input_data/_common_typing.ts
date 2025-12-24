@@ -6,7 +6,7 @@ export const COMMON_SCRIPT_TYPING_DATA = [
   // mAtrA
   {
     ref_krama_key: 'A-svara',
-    // as in normal svara and mAtrA forms so we dont have to add for it seperately
+    // as in normal svara and mAtrA forms so we dont have to add for it separately
     duplicates: ['aa']
   },
   {

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import YAML from 'yaml';
 import * as fs from 'node:fs';
 import type { script_and_lang_list_type } from '../utils/lang_list';
+import { z } from 'zod';
 
 const INPUT_FOLDERS = [
   path.join(__dirname, '../../../../test_data/transliteration/auto-nor-brahmic'),
@@ -29,3 +30,47 @@ describe('Emulate Typing', () => {
     }
   }
 });
+
+const typing_test_data_schema = z.object({
+  index: z.number(),
+  text: z.string(),
+  output: z.string(),
+  script: z.string(),
+  todo: z.boolean().optional()
+});
+
+const TEST_DATA_FOLDER = path.join(__dirname, '../../../../test_data/typing');
+
+describe('Typing Mode', () => {
+  const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
+  for (const yamlFile of yamlFiles) {
+    const testData = typing_test_data_schema
+      .array()
+      .parse(YAML.parse(fs.readFileSync(yamlFile, 'utf-8')));
+    describe(`${yamlFile.split('.')[0]}`, () => {
+      for (const test of testData) {
+        it(`${test.index} - ${test.script}`, async () => {
+          if (test.todo) return;
+          const result = await emulateTyping(test.text, test.script as script_and_lang_list_type);
+          expect(result).toBe(test.output);
+        });
+      }
+    });
+  }
+});
+
+const listYamlFiles = (directory: string): string[] => {
+  const collected: string[] = [];
+  const entries = fs.readdirSync(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.resolve(directory, entry.name);
+    if (entry.isDirectory() && entry.name !== 'context') {
+      collected.push(...listYamlFiles(fullPath));
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith('.yaml')) {
+      collected.push(fullPath);
+    }
+  }
+  return collected;
+};
