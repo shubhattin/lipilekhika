@@ -51,6 +51,11 @@ type CommonScriptData = {
   /** Custom Script Characters not present in the common krama key data
    *
    * This will be a sorted array.
+   *
+   * For list_ref the element should also be a duplicate in the target script.
+   * Check in text_to_krama_map if not display a warning.
+   * And for backreferencing in the list use the krama_ref of the base form.
+   * Eg :- Malayalam k1 is a duplicate of k, so in back_ref use k's krama_ref
    */
   custom_script_chars_arr: [
     text: string,

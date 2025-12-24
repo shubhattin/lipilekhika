@@ -45,11 +45,13 @@ async function make_script_data() {
   // precalculating normal output data as will be needed for typing data of other scripts
   const NormalInputData = script_data_list.find((item) => item.script_name === 'Normal');
   const NormalOutputData = get_out_scrit_data(NormalInputData!);
-  const jsonOutput = JSON.stringify(NormalOutputData, null, 2).replace(
-    /\\\\u([0-9a-fA-F]{4})/g,
-    '\\u$1'
-  );
-  fs.writeFileSync(path.resolve(OUT_FOLDER, `Normal.json`), jsonOutput);
+  {
+    const jsonOutput = JSON.stringify(NormalOutputData, null, 2).replace(
+      /\\\\u([0-9a-fA-F]{4})/g,
+      '\\u$1'
+    );
+    fs.writeFileSync(path.resolve(OUT_FOLDER, `Normal.json`), jsonOutput);
+  }
   for (const input_script_data of script_data_list) {
     if (input_script_data.script_name === 'Normal') continue;
     const res = get_out_scrit_data(input_script_data);

@@ -20,8 +20,9 @@ describe('Emulate Typing', () => {
       );
       describe(`⌨️ ${yamlFile.split('.')[0]}`, () => {
         for (const test of testData) {
-          if (test.todo || test.from !== 'Normal' || test.to === 'Normal') continue;
-          it(`${test.index} - ${test.to}`, async () => {
+          if (test.from !== 'Normal' || test.to === 'Normal') continue;
+          const testFn = test.todo ? it.skip : it;
+          testFn(`${test.index} - ${test.to}`, async () => {
             const result = await emulateTyping(test.input, test.to as script_and_lang_list_type);
             expect(result).toBe(test.output);
           });
@@ -49,8 +50,8 @@ describe('Typing Mode', () => {
       .parse(YAML.parse(fs.readFileSync(yamlFile, 'utf-8')));
     describe(`${yamlFile.split('.')[0]}`, () => {
       for (const test of testData) {
-        it(`${test.index} - ${test.script}`, async () => {
-          if (test.todo) return;
+        const testFn = test.todo ? it.skip : it;
+        testFn(`${test.index} - ${test.script}`, async () => {
           const result = await emulateTyping(test.text, test.script as script_and_lang_list_type);
           expect(result).toBe(test.output);
         });
