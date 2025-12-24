@@ -36,6 +36,8 @@ type CommonScriptData = {
   /**
    * This map is a alternate map to be used instead of Normal's `text_to_krama_map` for typing mode.
    * It contains references to both `list` (for `type` info) and also to `custom_script_chars`
+   *
+   * This will be a sorted array
    */
   typing_text_to_krama_map: [
     text: string,
@@ -46,7 +48,10 @@ type CommonScriptData = {
       custom_ref?: number | null;
     }
   ][];
-  /** Custom Script Characters not present in the common krama key data */
+  /** Custom Script Characters not present in the common krama key data
+   *
+   * This will be a sorted array.
+   */
   custom_script_chars_arr: [
     text: string,
     /** This will be used to deterime the type of the custom script character
