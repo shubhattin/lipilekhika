@@ -7,6 +7,8 @@ import type { OutputScriptData } from './output_script_data_schema';
 import {
   KramaKeysArray,
   KramaKeysIndexB,
+  KramaLabelsArray,
+  KramaLabelsIndexB,
   resolveKramaKeysExtendedType,
   type KramaKeysExtendedType,
   type KramaKeysType
@@ -17,7 +19,7 @@ import {
   sortArray
 } from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
-import { toUnicodeEscapes } from '../tools/kry';
+import { deepCopy, toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 import { type OptionsType, CustomOptionsInput } from './custom_options_input';
@@ -44,7 +46,7 @@ async function make_script_data() {
   }
   // precalculating normal output data as will be needed for typing data of other scripts
   const NormalInputData = script_data_list.find((item) => item.script_name === 'Normal');
-  const NormalOutputData = get_out_scrit_data(NormalInputData!);
+  const NormalOutputData = get_out_script_data(NormalInputData!);
   {
     const jsonOutput = JSON.stringify(NormalOutputData, null, 2).replace(
       /\\\\u([0-9a-fA-F]{4})/g,
@@ -54,13 +56,16 @@ async function make_script_data() {
   }
   for (const input_script_data of script_data_list) {
     if (input_script_data.script_name === 'Normal') continue;
-    const res = get_out_scrit_data(input_script_data);
+    const res = get_out_script_data(input_script_data, NormalOutputData!);
     const jsonOutput = JSON.stringify(res, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
     fs.writeFileSync(path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`), jsonOutput);
   }
 }
 
-function get_out_scrit_data(input_script_data: InputScriptInfoType) {
+function get_out_script_data(
+  input_script_data: InputScriptInfoType,
+  NormalOutputData?: OutputScriptData
+) {
   let res: OutputScriptData;
   if (input_script_data.script_type === 'brahmic') {
     res = {
@@ -100,8 +105,11 @@ function get_out_scrit_data(input_script_data: InputScriptInfoType) {
   function add_to_text_to_krama_map(
     text: string,
     val: number[],
-    fallback_list_ref?: number | null
+    fallback_list_ref?: number | null,
+    add_in: 'text_to_krama_map' | 'typing_text_to_krama_map' = 'text_to_krama_map'
   ) {
+    const add_in_map =
+      add_in === 'text_to_krama_map' ? res.text_to_krama_map : res.typing_text_to_krama_map;
     // if (input_script_data.script_name === 'Siddham' && text.length === 2) {
     //   console.log(text, text.split(''), val, fallback_list_ref);
     // }
@@ -114,7 +122,7 @@ function get_out_scrit_data(input_script_data: InputScriptInfoType) {
       const next_codePoint = text.codePointAt(i + 1);
       const next_char =
         next_codePoint !== undefined ? String.fromCodePoint(next_codePoint) : undefined;
-      const existing_entry_index = res.text_to_krama_map.findIndex((item) => item[0] === text_char);
+      const existing_entry_index = add_in_map.findIndex((item) => item[0] === text_char);
       // if next_char is surroage lead then ignore it
       if (
         next_codePoint !== undefined &&
@@ -125,9 +133,9 @@ function get_out_scrit_data(input_script_data: InputScriptInfoType) {
         continue;
       }
       if (existing_entry_index !== -1) {
-        const current_next = res.text_to_krama_map[existing_entry_index][1].next;
+        const current_next = add_in_map[existing_entry_index][1].next;
         if (next_char)
-          res.text_to_krama_map[existing_entry_index][1].next =
+          add_in_map[existing_entry_index][1].next =
             current_next !== null && current_next !== undefined
               ? current_next.indexOf(next_char) === -1
                 ? // if the next char is not in the current next, then add it to the current next
@@ -137,19 +145,26 @@ function get_out_scrit_data(input_script_data: InputScriptInfoType) {
               : [next_char];
         // mapping the krama index
         if (i === text.length - 1) {
-          res.text_to_krama_map[existing_entry_index][1].krama = val;
-          if (fallback_list_ref !== undefined && fallback_list_ref !== null)
-            res.text_to_krama_map[existing_entry_index][1].fallback_list_ref = fallback_list_ref;
+          add_in_map[existing_entry_index][1].krama = val;
+          if (
+            fallback_list_ref !== undefined &&
+            fallback_list_ref !== null &&
+            add_in === 'text_to_krama_map'
+          )
+            add_in_map[existing_entry_index][1].fallback_list_ref = fallback_list_ref;
         }
         continue;
       }
-      res.text_to_krama_map.push([text_char, { ...(next_char ? { next: [next_char] } : {}) }]);
+      add_in_map.push([text_char, { ...(next_char ? { next: [next_char] } : {}) }]);
       // mapping the krama index
       if (i === text.length - 1) {
-        res.text_to_krama_map[res.text_to_krama_map.length - 1][1].krama = val;
-        if (fallback_list_ref !== undefined && fallback_list_ref !== null)
-          res.text_to_krama_map[res.text_to_krama_map.length - 1][1].fallback_list_ref =
-            fallback_list_ref;
+        add_in_map[add_in_map.length - 1][1].krama = val;
+        if (
+          fallback_list_ref !== undefined &&
+          fallback_list_ref !== null &&
+          add_in === 'text_to_krama_map'
+        )
+          add_in_map[add_in_map.length - 1][1].fallback_list_ref = fallback_list_ref;
       }
     }
   }
@@ -339,6 +354,70 @@ function get_out_scrit_data(input_script_data: InputScriptInfoType) {
       // final character addition
       if (!existsing_text_map_item) add_to_text_to_krama_map(text, [i]);
     }
+  }
+
+  if (input_script_data.script_name !== 'Normal' && NormalOutputData) {
+    // typing data genertion
+
+    // Step 1: Extract all the script specific typing data from the input script data
+    for (const item of input_script_data.typing_list) {
+      if (item.type !== 'custom_script_char') continue;
+      // search for a exisitng type reference in the text_to_krama_map and a list ref (arr[2])
+      // arr[1] will be added after the `typing_text_to_krama_map` is sorted
+      let current_list_ref_index: number | null = null;
+      {
+        const text_to_krama_item = res.text_to_krama_map.find((v) => v[0] === item.specific_text);
+        if (text_to_krama_item) {
+          const krama_key_item = res.krama_text_arr[text_to_krama_item[1].krama?.[0] ?? -1];
+          if (
+            krama_key_item &&
+            krama_key_item[1] &&
+            res.list[krama_key_item[1]]?.type === 'vyanjana'
+          ) {
+            current_list_ref_index = krama_key_item[1];
+          }
+        }
+      }
+      res.custom_script_chars_arr.push([item.specific_text, current_list_ref_index, null]);
+    }
+    // sort the array
+    res.custom_script_chars_arr = sortArray(res.custom_script_chars_arr, {
+      accessor: (arr, i) => arr[i][0]
+    });
+
+    // Step 2: Add all alternative types and reference for custom_script_chars_arr
+    res.typing_text_to_krama_map = deepCopy(NormalOutputData.text_to_krama_map);
+    for (const item of input_script_data.typing_list) {
+      if (item.type === 'duplicates') {
+        const ref_krama_key_index = binarySearchLowerWithIndex(
+          KramaLabelsArray,
+          KramaLabelsIndexB,
+          item.ref_krama_key
+        );
+        for (const duplicate_text of item.duplicates) {
+          add_to_text_to_krama_map(
+            duplicate_text,
+            [ref_krama_key_index],
+            undefined,
+            'typing_text_to_krama_map'
+          );
+        }
+      } else if (item.type === 'custom_script_char') {
+        const custom_script_char_index = res.custom_script_chars_arr.findIndex(
+          (v) => v[0] === item.specific_text
+        );
+        add_to_text_to_krama_map(
+          item.specific_text,
+          [custom_script_char_index],
+          undefined,
+          'typing_text_to_krama_map'
+        );
+      }
+    }
+    // sort the array
+    res.typing_text_to_krama_map = sortArray(res.typing_text_to_krama_map, {
+      accessor: (arr, i) => arr[i][0]
+    });
   }
 
   // Part 5: Optmizing the text_to_krama_map

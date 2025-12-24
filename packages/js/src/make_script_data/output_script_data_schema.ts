@@ -45,7 +45,9 @@ type CommonScriptData = {
       next?: string[] | null;
       krama?: number[] | null;
       /** Reference to a custom script character of that script */
-      custom_ref?: number | null;
+      custom_back_ref?: number | null;
+      /** This will not be actually there, but there for type compatibility */
+      fallback_list_ref?: number | null;
     }
   ][];
   /** Custom Script Characters not present in the common krama key data

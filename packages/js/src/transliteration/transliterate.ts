@@ -418,6 +418,13 @@ export const transliterate_text_core = (
     typing_mode
   };
 
+  // use a custom map when Normal -> All in typing mode (or when a explicit option)
+  const from_text_to_krama_map =
+    (trans_options['normal_to_all:use_typing_chars'] || typing_mode) &&
+    from_script_name === 'Normal'
+      ? to_script_data.typing_text_to_krama_map
+      : from_script_data.text_to_krama_map;
+
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
    */
@@ -490,18 +497,14 @@ export const transliterate_text_core = (
                 ? cursor.slice(ignore_ta_ext_sup_num_text_index + 1, end_index)
                 : '')
             : cursor.slice(text_index, end_index);
-        const potential_match_index = binarySearchLower(
-          from_script_data.text_to_krama_map,
-          char_to_search,
-          {
-            accessor: (arr, i) => arr[i][0]
-          }
-        );
+        const potential_match_index = binarySearchLower(from_text_to_krama_map, char_to_search, {
+          accessor: (arr, i) => arr[i][0]
+        });
         if (potential_match_index === -1) {
           text_to_krama_item_index = -1;
           break;
         }
-        const potential_match = from_script_data.text_to_krama_map[potential_match_index];
+        const potential_match = from_text_to_krama_map[potential_match_index];
 
         // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -643,9 +646,7 @@ export const transliterate_text_core = (
     }
 
     const text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null =
-      text_to_krama_item_index !== -1
-        ? from_script_data.text_to_krama_map[text_to_krama_item_index]
-        : null;
+      text_to_krama_item_index !== -1 ? from_text_to_krama_map[text_to_krama_item_index] : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
       const index_delete_length =
@@ -680,6 +681,7 @@ export const transliterate_text_core = (
           ) {
             let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
+              !trans_options['normal_to_all:use_typing_chars'] &&
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null
             ) {

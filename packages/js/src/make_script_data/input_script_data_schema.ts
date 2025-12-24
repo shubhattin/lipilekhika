@@ -39,11 +39,13 @@ export type CommonListTypeAttributes = {
  */
 export type InputTypingListDataType =
   | {
+      type: 'duplicates';
       /** This is Normal key for which duplicates have to be defined */
       ref_krama_key: KramaKeysLabelType;
       duplicates: string[];
     }
   | {
+      type: 'custom_script_char';
       /** This is the specific text which has to be mapped.
        *
        * Eg. :- Tamil and Malayalam :- 10, 100 and 1000 |

@@ -61,7 +61,6 @@ describe('Transliteration', () => {
           }
         );
         if (test_data_item.reversible) {
-          const testFn = test_data_item.todo ? it.skip : it;
           testFn(
             `${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`,
             async () => {
