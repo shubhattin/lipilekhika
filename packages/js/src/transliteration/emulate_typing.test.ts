@@ -48,7 +48,7 @@ describe('Typing Mode', () => {
     const testData = typing_test_data_schema
       .array()
       .parse(YAML.parse(fs.readFileSync(yamlFile, 'utf-8')));
-    describe(`${yamlFile.split('.')[0]}`, () => {
+    describe(`${path.basename(yamlFile, '.yaml')}`, () => {
       for (const test of testData) {
         const testFn = test.todo ? it.skip : it;
         testFn(`${test.index} - ${test.script}`, async () => {

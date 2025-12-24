@@ -8,7 +8,6 @@ const Malayalam: InputBrahmicScriptType = {
   script_id: script_list_obj['Malayalam'],
   halant: '്',
   schwa_property: false,
-  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     '0': '൦',
     '1': '൧',
@@ -34,6 +33,55 @@ const Malayalam: InputBrahmicScriptType = {
     virama: '।',
     double_virama: '॥'
   },
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    {
+      type: 'custom_script_char',
+      specific_text: '൰',
+      custom_normal_key: '.10'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '൱',
+      custom_normal_key: '.100'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '൲',
+      custom_normal_key: '.1000'
+    },
+    // Chillu versions of k, N, r, l, L
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൿ',
+      custom_normal_key: '.k'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൺ',
+      custom_normal_key: '.N'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൻ',
+      custom_normal_key: '.n'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ർ',
+      custom_normal_key: '.r'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൽ',
+      custom_normal_key: '.l'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൾ',
+      custom_normal_key: '.L'
+    }
+  ],
   list: [
     {
       text: 'ഓം',

@@ -158,10 +158,21 @@ function get_out_script_data(
       const new_addition: OutputScriptData['text_to_krama_map'][number] = [text_char, {}];
       if (next_char) new_addition[1].next = [next_char];
       if (add_in === 'typing_text_to_krama_map' && i !== text.length - 1) {
-        const krama_key_index = NormalOutputData.krama_text_arr.findIndex(
+        const krama_key_index = NormalOutputData?.krama_text_arr.findIndex(
           (item) => item[0] === text_char
         );
-        if (krama_key_index !== -1) new_addition[1].krama = [krama_key_index];
+        if (krama_key_index && krama_key_index !== -1) new_addition[1].krama = [krama_key_index];
+        else {
+          // calculate index for individual characters
+          const krama_key_index_list = text_char.split('').map((char) => {
+            return binarySearchLowerWithIndex(
+              KramaKeysArray,
+              KramaKeysIndexB,
+              resolveKramaKeysExtendedType(char as KramaKeysExtendedType)
+            );
+          });
+          new_addition[1].krama = krama_key_index_list;
+        }
       }
       add_in_map.push(new_addition);
       // mapping the krama index
@@ -415,17 +426,29 @@ function get_out_script_data(
           (v) => v[0] === item.specific_text
         );
         add_to_text_to_krama_map(
-          item.specific_text,
+          item.custom_normal_key,
           [custom_script_char_index],
           undefined,
           'typing_text_to_krama_map'
         );
+        delete res.typing_text_to_krama_map[res.typing_text_to_krama_map.length - 1][1].krama;
+        res.typing_text_to_krama_map[res.typing_text_to_krama_map.length - 1][1].custom_back_ref =
+          custom_script_char_index;
       }
     }
     // sort the array
     res.typing_text_to_krama_map = sortArray(res.typing_text_to_krama_map, {
       accessor: (arr, i) => arr[i][0]
     });
+
+    // Step 3: Reference back the custom normal key mapping to the typing_text_to_krama_map
+    for (let i = 0; i < res.custom_script_chars_arr.length; i++) {
+      const item = res.custom_script_chars_arr[i];
+      const custom_text_index = res.typing_text_to_krama_map.findIndex((v) => v[0] === item[0]);
+      if (custom_text_index && custom_text_index !== -1) {
+        res.custom_script_chars_arr[i][2] = custom_text_index;
+      }
+    }
   }
 
   // Part 5: Optmizing the text_to_krama_map

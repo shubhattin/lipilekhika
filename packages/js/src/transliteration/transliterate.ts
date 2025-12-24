@@ -369,6 +369,7 @@ export const transliterate_text_core = (
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
+  if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
 
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
@@ -645,7 +646,12 @@ export const transliterate_text_core = (
       }
     }
 
-    const text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null =
+    const text_to_krama_item:
+      | (
+          | OutputScriptData['text_to_krama_map'][number]
+          | OutputScriptData['typing_text_to_krama_map'][number]
+        )
+      | null =
       text_to_krama_item_index !== -1 ? from_text_to_krama_map[text_to_krama_item_index] : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
@@ -661,6 +667,25 @@ export const transliterate_text_core = (
       const matched_len_units = text_to_krama_item[0].length - index_delete_length;
       cursor.advance(matched_len_units);
       text_index = cursor.pos;
+      // console.log(text_to_krama_item);
+      if (
+        trans_options['normal_to_all:use_typing_chars'] &&
+        'custom_back_ref' in text_to_krama_item[1] &&
+        text_to_krama_item[1].custom_back_ref !== undefined &&
+        text_to_krama_item[1].custom_back_ref !== null
+      ) {
+        const custom_script_char_item =
+          to_script_data.custom_script_chars_arr[text_to_krama_item[1].custom_back_ref];
+        result.emit(custom_script_char_item[0]);
+        prev_context_cleanup(
+          ctx,
+          [text_to_krama_item[0], to_script_data.list[custom_script_char_item[1] ?? -1] ?? null],
+          {
+            next: text_to_krama_item[1].next ?? undefined
+          }
+        );
+        continue;
+      }
       // we have to componsate for the superscript number's length
       if (
         text_to_krama_item[1].krama !== null &&

@@ -1,0 +1,21 @@
+- index: 0
+  text: kaa kii kee koo kuu zO zo
+  output: का की की कू कू ज़ो ज़ो
+  script: Devanagari
+# - index: 1
+#   text: xAtrAbala
+#   output: क्षात्रबल
+#   script: Devanagari
+#   todo: true
+- index: 2
+  text: tamizh par1r1i En1n1a
+  output: தமிழ் பற்றி ஏன்ன
+  script: Tamil
+- index: 3
+  text: .10 .100 .1000
+  output: ௰ ௱ ௲
+  script: Tamil
+- index: 4
+  text: .10 .100 .1000 .ka .Na .na .ra .la .La
+  output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ
+  script: Malayalam

@@ -9,7 +9,6 @@ const Tamil_Extended: InputBrahmicScriptType = {
   script_id: script_list_obj['Tamil-Extended'],
   halant: HALANT,
   schwa_property: false,
-  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     '0': '௦',
     '1': '௧',
@@ -37,6 +36,24 @@ const Tamil_Extended: InputBrahmicScriptType = {
     virama: '।',
     double_virama: '॥'
   },
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    {
+      type: 'custom_script_char',
+      specific_text: '௰',
+      custom_normal_key: '.10'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '௱',
+      custom_normal_key: '.100'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '௲',
+      custom_normal_key: '.1000'
+    }
+  ],
   list: [
     {
       text: 'ௐ',

@@ -53,6 +53,7 @@ export function createTypingContext(
 
   /** Cleares all internal states and contexts */
   function clearContext() {
+    last_time_ms = null;
     curr_input = '';
     curr_output = '';
   }
@@ -83,7 +84,7 @@ export function createTypingContext(
       normalized_typing_lang!,
       from_script_data,
       to_script_data,
-      { ...trans_options, 'normal_to_all:use_typing_chars': true },
+      trans_options,
       custom_rules,
       { typing_mode: true }
     );
