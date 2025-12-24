@@ -33,6 +33,31 @@ type CommonScriptData = {
     krama_ref: number[];
     type: NonNullable<NonNullable<InputOtherScriptType['list']>[number]['type']>;
   }[];
+  /**
+   * This map is a alternate map to be used instead of Normal's `text_to_krama_map` for typing mode.
+   * It contains references to both `list` (for `type` info) and also to `custom_script_chars`
+   */
+  typing_text_to_krama_map: [
+    text: string,
+    {
+      next?: string[] | null;
+      krama?: number[] | null;
+      /** Reference to a custom script character of that script */
+      custom_ref?: number | null;
+    }
+  ][];
+  /** Custom Script Characters not present in the common krama key data */
+  custom_script_chars_arr: [
+    text: string,
+    /** This will be used to deterime the type of the custom script character
+     * eg:- Malayalam chillu ka is a vyanjana  */
+    list_ref: number | null,
+    /** This will be used to get the Normal text key of the custom script character.
+     *
+     * This is needed here as there is no equivalent of it present in the krama data
+     */
+    custom_ref: number | null
+  ][];
 };
 
 export type OutputBrahmicScriptData = Pick<

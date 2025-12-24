@@ -55,7 +55,9 @@ async function make_script_data() {
         text_to_krama_map: [],
         list: [],
         krama_text_arr: [],
-        krama_text_arr_index: []
+        krama_text_arr_index: [],
+        typing_text_to_krama_map: [],
+        custom_script_chars_arr: []
       };
     } else {
       res = {
@@ -66,7 +68,9 @@ async function make_script_data() {
         text_to_krama_map: [],
         list: [],
         krama_text_arr: [],
-        krama_text_arr_index: []
+        krama_text_arr_index: [],
+        typing_text_to_krama_map: [],
+        custom_script_chars_arr: []
       };
     }
     // initialize krama key map as an empty starting array
