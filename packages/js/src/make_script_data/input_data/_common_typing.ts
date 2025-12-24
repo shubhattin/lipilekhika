@@ -26,5 +26,20 @@ export const COMMON_SCRIPT_TYPING_DATA = [
     type: 'duplicates',
     ref_krama_key: 'jz',
     duplicates: ['z']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'rz',
+    duplicates: ['r1']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'nz',
+    duplicates: ['n1']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'Lz',
+    duplicates: ['zh']
   }
-] as InputTypingListDataType[];
+] satisfies InputTypingListDataType[];

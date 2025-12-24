@@ -155,7 +155,15 @@ function get_out_script_data(
         }
         continue;
       }
-      add_in_map.push([text_char, { ...(next_char ? { next: [next_char] } : {}) }]);
+      const new_addition: OutputScriptData['text_to_krama_map'][number] = [text_char, {}];
+      if (next_char) new_addition[1].next = [next_char];
+      if (add_in === 'typing_text_to_krama_map' && i !== text.length - 1) {
+        const krama_key_index = NormalOutputData.krama_text_arr.findIndex(
+          (item) => item[0] === text_char
+        );
+        if (krama_key_index !== -1) new_addition[1].krama = [krama_key_index];
+      }
+      add_in_map.push(new_addition);
       // mapping the krama index
       if (i === text.length - 1) {
         add_in_map[add_in_map.length - 1][1].krama = val;

@@ -6,4 +6,7 @@
   context: 1
 - index: 2
   text: khe
+  context: 2
+- index: 3
+  text: khee
   context: 0
