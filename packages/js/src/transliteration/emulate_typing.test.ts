@@ -5,6 +5,7 @@ import YAML from 'yaml';
 import * as fs from 'node:fs';
 import type { script_and_lang_list_type } from '../utils/lang_list';
 import { z } from 'zod';
+import { transliterate } from '../index';
 
 const INPUT_FOLDERS = [
   path.join(__dirname, '../../../../test_data/transliteration/auto-nor-brahmic'),
@@ -37,6 +38,7 @@ const typing_test_data_schema = z.object({
   text: z.string(),
   output: z.string(),
   script: z.string(),
+  preserve_check: z.boolean().optional(),
   todo: z.boolean().optional()
 });
 
@@ -44,17 +46,32 @@ const TEST_DATA_FOLDER = path.join(__dirname, '../../../../test_data/typing');
 
 describe('Typing Mode', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
-  for (const yamlFile of yamlFiles) {
+  for (const file of yamlFiles) {
     const testData = typing_test_data_schema
       .array()
-      .parse(YAML.parse(fs.readFileSync(yamlFile, 'utf-8')));
-    describe(`${path.basename(yamlFile, '.yaml')}`, () => {
+      .parse(YAML.parse(fs.readFileSync(file, 'utf-8')));
+    describe(`${path.basename(file, '.yaml')}`, () => {
       for (const test of testData) {
         const testFn = test.todo ? it.skip : it;
         testFn(`${test.index} - ${test.script}`, async () => {
           const result = await emulateTyping(test.text, test.script as script_and_lang_list_type);
           expect(result).toBe(test.output);
         });
+        if (test.preserve_check) {
+          testFn(`${test.index} - ${test.script} - preserve check`, async () => {
+            const result1 = await emulateTyping(
+              test.text,
+              test.script as script_and_lang_list_type
+            );
+            const result = await transliterate(
+              result1,
+              test.script as script_and_lang_list_type,
+              'Normal',
+              { 'all_to_normal:preserve_specific_chars': true }
+            );
+            expect(result).toBe(test.text);
+          });
+        }
       }
     });
   }

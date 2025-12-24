@@ -161,7 +161,13 @@ function get_out_script_data(
         const krama_key_index = NormalOutputData?.krama_text_arr.findIndex(
           (item) => item[0] === text_char
         );
-        if (krama_key_index && krama_key_index !== -1) new_addition[1].krama = [krama_key_index];
+        if (
+          krama_key_index !== undefined &&
+          krama_key_index !== null &&
+          krama_key_index !== null &&
+          krama_key_index !== -1
+        )
+          new_addition[1].krama = [krama_key_index];
         else {
           // calculate index for individual characters
           const krama_key_index_list = text_char.split('').map((char) => {
@@ -445,7 +451,11 @@ function get_out_script_data(
     for (let i = 0; i < res.custom_script_chars_arr.length; i++) {
       const item = res.custom_script_chars_arr[i];
       const custom_text_index = res.typing_text_to_krama_map.findIndex((v) => v[0] === item[0]);
-      if (custom_text_index && custom_text_index !== -1) {
+      if (
+        custom_text_index !== undefined &&
+        custom_text_index !== null &&
+        custom_text_index !== -1
+      ) {
         res.custom_script_chars_arr[i][2] = custom_text_index;
       }
     }

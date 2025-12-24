@@ -14,7 +14,9 @@
   text: .10 .100 .1000
   output: ௰ ௱ ௲
   script: Tamil
+  preserve_check: true
 - index: 4
   text: .10 .100 .1000 .ka .Na .na .ra .la .La
   output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ
   script: Malayalam
+  preserve_check: true
