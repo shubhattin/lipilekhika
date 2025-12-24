@@ -15,6 +15,7 @@ import {
   kramaIndexOfText,
   matchPrevKramaSequence,
   replaceWithPieces,
+  applyTypingInputAliases,
   emitPiecesWithTaExtSuperscriptReorder,
   isTaExtSuperscriptTail,
   isScriptTamilExt,
@@ -371,6 +372,9 @@ export const transliterate_text_core = (
   }
   if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
 
+  if (typing_mode && from_script_name === 'Normal') {
+    text = applyTypingInputAliases(text);
+  }
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
   const result = string_builder();

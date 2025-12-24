@@ -30,6 +30,18 @@ export const kramaIndexOfText = (script_data: OutputScriptData, text: string): n
   );
 };
 
+/**
+ * Applying custom typing alias rules
+ *
+ * Eg. x -> kSh
+ */
+export const applyTypingInputAliases = (text: string): string => {
+  if (!text) return text;
+  // ITRANS-style shortcut: x -> kSh (क्ष)
+  if (text.indexOf('x') === -1) return text;
+  return text.replaceAll('x', 'kSh');
+};
+
 export const string_builder = () => {
   let result: string[] = [];
 

@@ -7,7 +7,6 @@ const Romanized: InputOtherScriptType = {
   script_id: script_list_obj['Romanized'],
   script_type: 'other',
   schwa_character: 'a',
-  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     ॐ: 'āūṁ',
     अ: 'a',
@@ -130,6 +129,7 @@ const Romanized: InputOtherScriptType = {
     '।': '.',
     '॥': '..'
   },
+  typing_list: [...COMMON_SCRIPT_TYPING_DATA],
   list: [
     {
       text: 'C',
