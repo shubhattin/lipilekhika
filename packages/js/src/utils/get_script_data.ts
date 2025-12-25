@@ -7,13 +7,11 @@ import {
 
 const IS_UMD_BUILD_MODE = get_is_umd_build_mode_macro();
 
-const UMD_SCRIPT_DATA_PROMISE_CACHE: {
-  [script_name in script_list_type]?: Promise<OutputScriptData>;
-} = {};
+const UMD_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<OutputScriptData>>> =
+  {};
 
-const ESM_SCRIPT_DATA_PROMISE_CACHE: {
-  [script_name in script_list_type]?: Promise<OutputScriptData>;
-} = {};
+const ESM_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<OutputScriptData>>> =
+  {};
 
 /**
  * Gets the script data for a given script name

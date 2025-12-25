@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { script_and_lang_list_type } from '../utils/lang_list';
 import { createTypingContext } from '../typing';
+import { VEDIC_SVARAS, TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS } from './helpers';
 
 export const TestDataTypeSchema = z.object({
   index: z.number(),
@@ -31,3 +32,12 @@ export async function emulateTyping(
   }
   return result;
 }
+
+export const patch_old_tamil_extended_vedic_text = (text: string) => {
+  for (const svara of VEDIC_SVARAS) {
+    for (const num of TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS) {
+      text = text.replaceAll(num + svara, svara + num);
+    }
+  }
+  return text;
+};

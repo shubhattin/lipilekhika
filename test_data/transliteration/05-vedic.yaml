@@ -1,0 +1,10 @@
+- index: 0
+  input: गे॒ के॒ घे॑ झे᳚ भु᳛
+  output: கே॒³ கே॒ கே॑⁴ ஜே᳚² பு᳛⁴
+  from: Devanagari
+  to: Tamil-Extended
+- index: 1
+  input: gE↓ kE↓
+  output: கே॒³ கே॒
+  from: Normal
+  to: Tamil-Extended

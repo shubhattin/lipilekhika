@@ -121,9 +121,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     if (context_length > 0) {
       curr_output = output;
     } else if (context_length === 0) {
-      last_time_ms = null;
-      curr_input = '';
-      curr_output = '';
+      clearContext();
     }
 
     // calculate the diff

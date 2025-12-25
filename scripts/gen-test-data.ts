@@ -337,9 +337,9 @@ async function main() {
   ]);
 }
 
-const _NON_REVERSIBLE_SCRIPT_IGNORE_MAP: {
-  [script in script_list_type]?: KramaKeysLabelType[];
-} = {
+const _NON_REVERSIBLE_SCRIPT_IGNORE_MAP: Partial<
+  Record<script_list_type, KramaKeysLabelType[]>
+> = {
   Siddham: ["L"],
   Telugu: ["Dhz", "Dz"],
   Bengali: ["v"],
@@ -380,8 +380,6 @@ const NON_REVERSIBLE_SCRIPT_IGNORE_MAP = Object.fromEntries(
     script,
     arr.map((item) => resolveKramaKeysExtendedType(item)),
   ])
-) as {
-  [script in script_list_type]?: string[];
-};
+) as Partial<Record<script_list_type, string[]>>;
 
 main();

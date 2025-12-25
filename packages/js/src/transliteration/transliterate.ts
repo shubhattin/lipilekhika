@@ -19,13 +19,12 @@ import {
   emitPiecesWithReorder,
   isTaExtSuperscriptTail,
   isScriptTamilExt,
+  isVedicSvaraTail,
   type prev_context_array_type
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
-export type CustomOptionType = {
-  [key in CustomOptionList]?: boolean;
-};
+export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 
 type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
@@ -166,7 +165,13 @@ function prev_context_cleanup(
   // custom typing mode context clear logic
   // only clear context if there are no next characters or if its last extra call
   let to_clear_context = false;
-  if (typing_mode && (next === undefined || next.length === 0) && !last_extra_call) {
+  if (
+    typing_mode &&
+    (next === undefined || next.length === 0) &&
+    !last_extra_call &&
+    // the case below is to enable typing of #an, #s (Vedic svara chihnas too)
+    !(isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar()))
+  ) {
     to_clear_context = true;
     // do not clear the context only if case where the current added element is a vyanjana
     if (item[1]?.type === 'vyanjana') to_clear_context = false;
@@ -399,7 +404,7 @@ export const transliterate_text_core = (
   if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
 
   if (typing_mode && from_script_name === 'Normal') {
-    text = applyTypingInputAliases(text);
+    text = applyTypingInputAliases(text, to_script_name);
   }
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
@@ -847,6 +852,14 @@ export const transliterate_text_core = (
             isTaExtSuperscriptTail(result.lastChar())
           ) {
             emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
+          } else if (
+            isScriptTamilExt(to_script_name) &&
+            isVedicSvaraTail(result_pieces_to_add.at(-1)?.at(-1) ?? '') &&
+            isTaExtSuperscriptTail(result.lastChar())
+          ) {
+            const last = result.popLastChar();
+            result.emitPieces(result_pieces_to_add);
+            result.emit(last ?? '');
           } else {
             result.emitPieces(result_pieces_to_add);
           }
@@ -912,6 +925,14 @@ export const transliterate_text_core = (
         isTaExtSuperscriptTail(result.lastChar())
       ) {
         emitPiecesWithReorder(result, [to_add_text], to_script_data.halant!, true);
+      } else if (
+        isScriptTamilExt(to_script_name) &&
+        isVedicSvaraTail(to_add_text) &&
+        isTaExtSuperscriptTail(result.lastChar())
+      ) {
+        const last = result.popLastChar();
+        result.emit(to_add_text);
+        result.emit(last ?? '');
       } else {
         result.emit(to_add_text);
       }
