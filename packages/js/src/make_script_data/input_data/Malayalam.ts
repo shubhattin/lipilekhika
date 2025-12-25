@@ -39,8 +39,7 @@ const Malayalam: InputBrahmicScriptType = {
   },
   typing_list: [
     ...COMMON_SCRIPT_TYPING_DATA,
-    // ...COMMON_NUMBER_TYPING_DATA,
-    // ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_NUMBER_TYPING_DATA,
     {
       type: 'custom_script_char',
       specific_text: '൰',
@@ -86,7 +85,8 @@ const Malayalam: InputBrahmicScriptType = {
       type: 'custom_script_char',
       specific_text: 'ൾ',
       custom_normal_key: '.L'
-    }
+    },
+    ...COMMON_SVARA_MATRA_TYPING_DATA
   ],
   list: [
     {

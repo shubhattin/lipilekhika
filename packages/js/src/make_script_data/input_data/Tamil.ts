@@ -41,8 +41,8 @@ const Tamil: InputBrahmicScriptType = {
   },
   typing_list: [
     ...COMMON_SCRIPT_TYPING_DATA,
-    // ...COMMON_NUMBER_TYPING_DATA,
-    // ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_NUMBER_TYPING_DATA,
     {
       type: 'custom_script_char',
       specific_text: '௰',
