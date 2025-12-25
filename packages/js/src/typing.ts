@@ -8,19 +8,30 @@ import {
 import type { ScriptLangType } from './types';
 
 const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
+const DEFAULT_USE_NATIVE_NUMERALS = true;
+type TypingContextOptions = {
+  /** The time in milliseconds after which the context will be cleared automatically
+   * @default 4500ms
+   */
+  autoContextTClearTimeMs?: number;
+  /** Use native numerals in transliteration/typing
+   * @default true
+   */
+  useNativeNumerals?: boolean;
+};
+
 /**
  * Creates a stateful isolated context for character by character input typing.
  * This is the main function which returns the `diff`, different realtime schems can be implemented using this.
  *
  * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
  * @param typing_lang - The script/language to type in
- * @param auto_context_clear_time_ms - The time in milliseconds after which the context will be cleared automatically @default 4500ms
+ * @param options - The options for the typing context
  * @returns A closed over context object with the following methods:
  */
-export function createTypingContext(
-  typing_lang: ScriptLangType,
-  auto_context_clear_time_ms_?: number
-) {
+export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
+  const { autoContextTClearTimeMs } = options ?? {};
+  let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
@@ -29,8 +40,7 @@ export function createTypingContext(
   let curr_input = '';
   let curr_output = '';
 
-  const auto_context_clear_time_ms =
-    auto_context_clear_time_ms_ ?? DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
+  const auto_context_clear_time_ms = autoContextTClearTimeMs ?? DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
   let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -86,11 +96,12 @@ export function createTypingContext(
       to_script_data,
       trans_options,
       custom_rules,
-      { typing_mode: true }
+      { typing_mode: true, useNativeNumerals: use_native_numerals }
     );
     if (context_length > 0) {
       curr_output = output;
     } else if (context_length === 0) {
+      last_time_ms = null;
       curr_input = '';
       curr_output = '';
     }
@@ -117,7 +128,10 @@ export function createTypingContext(
     /** Await once, then use `takeKeyInputSync` for best typing latency. */
     ready,
     clearContext,
-    takeKeyInput
+    takeKeyInput,
+    updateUseNativeNumerals: (useNativeNumerals: boolean) => {
+      use_native_numerals = useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+    }
   };
 }
 

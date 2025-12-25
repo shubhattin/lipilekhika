@@ -20,3 +20,19 @@
   output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ ൿെ
   script: Malayalam
   preserve_check: true
+  # Numerals
+- index: 5
+  text: 10 23
+  output: १० २३
+  script: Devanagari
+  preserve_check: true
+  options:
+    # default behavior is to use native numerals
+    # useNativeNumerals: true
+- index: 6
+  text: 10 23 kE liE
+  output: 10 23 के लिए
+  script: Devanagari
+  preserve_check: true
+  options:
+    useNativeNumerals: false

@@ -39,7 +39,8 @@ const typing_test_data_schema = z.object({
   output: z.string(),
   script: z.string(),
   preserve_check: z.boolean().optional(),
-  todo: z.boolean().optional()
+  todo: z.boolean().optional(),
+  options: z.record(z.string(), z.any()).optional().nullable()
 });
 
 const TEST_DATA_FOLDER = path.join(__dirname, '../../../../test_data/typing');
@@ -54,14 +55,19 @@ describe('Typing Mode', () => {
       for (const test of testData) {
         const testFn = test.todo ? it.skip : it;
         testFn(`${test.index} - ${test.script}`, async () => {
-          const result = await emulateTyping(test.text, test.script as script_and_lang_list_type);
+          const result = await emulateTyping(
+            test.text,
+            test.script as script_and_lang_list_type,
+            test.options ?? undefined
+          );
           expect(result).toBe(test.output);
         });
         if (test.preserve_check) {
           testFn(`${test.index} - ${test.script} - preserve check`, async () => {
             const result1 = await emulateTyping(
               test.text,
-              test.script as script_and_lang_list_type
+              test.script as script_and_lang_list_type,
+              test.options ?? undefined
             );
             const result = await transliterate(
               result1,

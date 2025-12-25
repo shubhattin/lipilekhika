@@ -69,7 +69,7 @@ type out_DirectReplaceRule = Pick<DirectReplaceRule, 'type'> & {
 // Using the krama key index instead of the krama key directly to have support for multiple scripts at a time
 // As same corresponding key values will have identical indexes across scripts
 /** This is final type that will be actually used by the transliterator */
-export type OptionsType = Record<
+export type TransOptionsType = Record<
   `${string}:${string}`,
   Omit<CustomOptionsRecordType, 'rules'> & {
     rules: (CommonRuleTypeAttributes & (out_ReplacePrevKramaKeysRule | out_DirectReplaceRule))[];

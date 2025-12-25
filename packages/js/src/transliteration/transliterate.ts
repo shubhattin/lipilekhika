@@ -6,7 +6,7 @@ import {
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 import custom_options_json from '../custom_options.json';
-import type { OptionsType } from '../make_script_data/custom_options_input';
+import type { TransOptionsType } from '../make_script_data/custom_options_input';
 import {
   make_input_cursor,
   kramaTextOrEmpty,
@@ -27,7 +27,7 @@ export type CustomOptionType = {
   [key in CustomOptionList]?: boolean;
 };
 
-type CustomRulesType = OptionsType[keyof OptionsType]['rules'];
+type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
@@ -252,11 +252,13 @@ export const get_active_custom_options = (
   if (!input_options) return {};
   const active_custom_options: CustomOptionType = {};
   for (const [key, enabled] of Object.entries(input_options ?? {})) {
-    if (!enabled || !(key in custom_options_json)) continue;
+    if (!(key in custom_options_json)) continue;
     const option_info = custom_options_json[
       key as CustomOptionList
-    ] as OptionsType[keyof OptionsType];
-    if (
+    ] as TransOptionsType[keyof TransOptionsType];
+    if (option_info.from_script_type === 'all' && option_info.to_script_type === 'all') {
+      active_custom_options[key as CustomOptionList] = enabled;
+    } else if (
       (option_info.from_script_type !== undefined &&
         (option_info.from_script_type === 'all' ||
           option_info.from_script_type === from_script_data.script_type)) ||
@@ -268,12 +270,12 @@ export const get_active_custom_options = (
         (option_info.to_script_type === 'all' ||
           option_info.to_script_type === to_script_data.script_type)
       ) {
-        active_custom_options[key as CustomOptionList] = true;
+        active_custom_options[key as CustomOptionList] = enabled;
       } else if (
         option_info.to_script_name !== undefined &&
         option_info.to_script_name.includes(to_script_data.script_name)
       ) {
-        active_custom_options[key as CustomOptionList] = true;
+        active_custom_options[key as CustomOptionList] = enabled;
       }
     }
   }
@@ -291,23 +293,25 @@ export const resolve_transliteration_rules = (
     to_script_data,
     transliteration_input_options
   );
-  const custom_rules = Object.keys(trans_options).flatMap(
-    (key) =>
-      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  const custom_rules = Object.keys(trans_options).flatMap((key) =>
+    trans_options[key as CustomOptionList] === true
+      ? (custom_options_json[key as CustomOptionList]
+          .rules as TransOptionsType[keyof TransOptionsType]['rules'])
+      : []
   );
   return { trans_options, custom_rules };
 };
 
 const get_rule_replace_text = (
-  rule: OptionsType[keyof OptionsType]['rules'][number],
+  rule: TransOptionsType[keyof TransOptionsType]['rules'][number],
   script_data: OutputScriptData
 ) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
 export const apply_custom_replace_rules = (
   text: string,
   script_data: OutputScriptData,
-  rules: OptionsType[keyof OptionsType]['rules'],
-  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
+  rules: TransOptionsType[keyof TransOptionsType]['rules'],
+  allowed_input_rule_type: TransOptionsType[keyof TransOptionsType]['rules'][number]['check_in']
 ) => {
   if (rules.length === 0) return text;
   for (const rule of rules) {
@@ -348,6 +352,15 @@ type TransliterateCtx = {
   typing_mode: boolean;
 };
 
+const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
+
+type CustomOptionsType = {
+  /** This enables typing mode, returns a context length which will be used to clear the external context */
+  typing_mode?: boolean;
+  /** Use native numerals in transliteration/typing */
+  useNativeNumerals?: boolean;
+};
+
 /**
  * Synchronous version for low latency use cases
  *
@@ -361,11 +374,9 @@ export const transliterate_text_core = (
   to_script_data: OutputScriptData,
   trans_options: CustomOptionType,
   custom_rules: CustomRulesType,
-  options?: {
-    /** This enables typing mode, returns a context length which will be used to clear the external context */
-    typing_mode?: boolean;
-  }
+  options?: CustomOptionsType
 ) => {
+  const use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS_MODE;
   const typing_mode = options?.typing_mode ?? false;
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
@@ -462,6 +473,13 @@ export const transliterate_text_core = (
         prev_context.clear();
       }
       result.emit(char);
+      continue;
+    }
+
+    if (char.match(/^\d$/) && !use_native_numerals) {
+      result.emit(char);
+      cursor.advance(char_width);
+      prev_context_cleanup(ctx, [char, null]);
       continue;
     }
 
@@ -909,10 +927,7 @@ export const transliterate_text = async (
   from_script_name: script_list_type,
   to_script_name: script_list_type,
   transliteration_input_options?: CustomOptionType,
-  options?: {
-    /** This enables typing mode, returns a context length which will be used to clear the external context */
-    typing_mode?: boolean;
-  }
+  options?: CustomOptionsType
 ) => {
   const typing_mode = options?.typing_mode ?? false;
   if (typing_mode && from_script_name !== 'Normal') {
