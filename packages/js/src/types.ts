@@ -22,3 +22,7 @@ export type ScriptAndLangListType = script_and_lang_list_type;
  * Supported script/language identifier types
  */
 export type ScriptLangType = script_input_name_type;
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};

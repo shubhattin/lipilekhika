@@ -23,9 +23,7 @@ import {
 } from './helpers';
 
 export type CustomOptionList = keyof typeof custom_options_json;
-export type CustomOptionType = {
-  [key in CustomOptionList]?: boolean;
-};
+export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 
 type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
