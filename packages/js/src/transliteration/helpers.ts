@@ -30,18 +30,6 @@ export const kramaIndexOfText = (script_data: OutputScriptData, text: string): n
   );
 };
 
-/**
- * Applying custom typing alias rules
- *
- * Eg. x -> kSh
- */
-export const applyTypingInputAliases = (text: string): string => {
-  if (!text) return text;
-  // ITRANS-style shortcut: x -> kSh (क्ष)
-  if (text.indexOf('x') === -1) return text;
-  return text.replaceAll('x', 'kSh');
-};
-
 export const string_builder = () => {
   let result: string[] = [];
 
@@ -309,4 +297,26 @@ export const emitPiecesWithReorder = (
   } else {
     result.withLastCharMovedAfter(pieces, []);
   }
+};
+
+const VEDIC_SVARAS_TYPING_SYMBOLS = ['#an', '#sss', '#ss', '#s'];
+const VEDIC_SVARAS_NORMAL_SYMBOLS = ['↓', '↑↑↑', '↑↑', '↑'];
+/**
+ * Applying custom typing alias rules
+ *
+ * Eg. x -> kSh,
+ * Handling Vedic Svara input in tamil Extended
+ */
+export const applyTypingInputAliases = (text: string, to_script_name: script_list_type): string => {
+  if (!text) return text;
+  // ITRANS-style shortcut: x -> kSh (क्ष)
+  if (text.indexOf('x') !== -1) text = text.replaceAll('x', 'kSh');
+  if (to_script_name === 'Tamil-Extended')
+    for (let i = 0; i < VEDIC_SVARAS_TYPING_SYMBOLS.length; i++) {
+      const symbol = VEDIC_SVARAS_TYPING_SYMBOLS[i];
+      if (text.indexOf(symbol) !== -1) {
+        text = text.replaceAll(symbol, VEDIC_SVARAS_NORMAL_SYMBOLS[i]);
+      }
+    }
+  return text;
 };

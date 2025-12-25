@@ -165,7 +165,13 @@ function prev_context_cleanup(
   // custom typing mode context clear logic
   // only clear context if there are no next characters or if its last extra call
   let to_clear_context = false;
-  if (typing_mode && (next === undefined || next.length === 0) && !last_extra_call) {
+  if (
+    typing_mode &&
+    (next === undefined || next.length === 0) &&
+    !last_extra_call &&
+    // the case below is to enable typing of #an, #s (Vedic svara chihnas too)
+    !(isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar()))
+  ) {
     to_clear_context = true;
     // do not clear the context only if case where the current added element is a vyanjana
     if (item[1]?.type === 'vyanjana') to_clear_context = false;
@@ -398,7 +404,7 @@ export const transliterate_text_core = (
   if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
 
   if (typing_mode && from_script_name === 'Normal') {
-    text = applyTypingInputAliases(text);
+    text = applyTypingInputAliases(text, to_script_name);
   }
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 

@@ -68,6 +68,6 @@
   script: Devanagari
 # Tamil-Extended + Vedic Symbols Typing
 - index: 12
-  text: gE#an kE#an
-  output: கே॒³ கே॒
+  text: gE#an kE#an ghE#s jhE#ss bhu#sss
+  output: கே॒³ கே॒ கே॑⁴ ஜே᳚² பு᳛⁴
   script: Tamil-Extended
