@@ -9,6 +9,8 @@ import type { ScriptLangType } from './types';
 
 const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
 const DEFAULT_USE_NATIVE_NUMERALS = true;
+const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
+
 type TypingContextOptions = {
   /** The time in milliseconds after which the context will be cleared automatically
    * @default 4500ms
@@ -18,6 +20,15 @@ type TypingContextOptions = {
    * @default true
    */
   useNativeNumerals?: boolean;
+  /** Include inherent vowels(schwa character) in transliteration/typing
+   *
+   * `true` : `k` -> `क` (Eg. Hindi, Bengali, Gujarati, etc.)
+   *
+   * `false` : `k` -> `क्` (Default Behavior in transliteration. Eg. Sanskrit, Telugu, Tamil, Kannada, etc)
+   *
+   * @default false
+   */
+  includeInherentVowel?: boolean;
 };
 
 /**
@@ -32,6 +43,7 @@ type TypingContextOptions = {
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
   const { autoContextTClearTimeMs } = options ?? {};
   let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+  let include_inherent_vowel = options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
@@ -96,7 +108,11 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       to_script_data,
       trans_options,
       custom_rules,
-      { typing_mode: true, useNativeNumerals: use_native_numerals }
+      {
+        typing_mode: true,
+        useNativeNumerals: use_native_numerals,
+        includeInherentVowel: include_inherent_vowel
+      }
     );
     if (context_length > 0) {
       curr_output = output;
@@ -131,6 +147,9 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     takeKeyInput,
     updateUseNativeNumerals: (useNativeNumerals: boolean) => {
       use_native_numerals = useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+    },
+    updateIncludeInherentVowel: (includeInherentVowel: boolean) => {
+      include_inherent_vowel = includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
     }
   };
 }

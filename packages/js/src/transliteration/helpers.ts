@@ -281,10 +281,11 @@ export const isScriptTamilExt = (script_name: script_list_type): boolean => {
  *
  * Caller is responsible for deciding when reordering is semantically correct.
  */
-export const emitPiecesWithTaExtSuperscriptReorder = (
+export const emitPiecesWithReorder = (
   result: ReturnType<typeof string_builder>,
   pieces: string[],
   halant: string,
+  /** Tamil Extended Superscript Specific Reorder option */
   should_reorder: boolean
 ) => {
   if (pieces.length === 0) return;

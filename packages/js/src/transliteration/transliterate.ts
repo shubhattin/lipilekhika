@@ -16,7 +16,7 @@ import {
   matchPrevKramaSequence,
   replaceWithPieces,
   applyTypingInputAliases,
-  emitPiecesWithTaExtSuperscriptReorder,
+  emitPiecesWithReorder,
   isTaExtSuperscriptTail,
   isScriptTamilExt,
   type prev_context_array_type
@@ -59,7 +59,8 @@ function prev_context_cleanup(
     prev_context,
     BRAHMIC_HALANT,
     BRAHMIC_NUQTA,
-    typing_mode
+    typing_mode,
+    include_inherent_vowel
   } = ctx;
   const { next, last_extra_call } = additional ?? {};
   let result_str_concat_status = false;
@@ -123,34 +124,39 @@ function prev_context_cleanup(
           : item[0]!;
       // const linked_mAtrA = item[0]!;
       if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
+        emitPiecesWithReorder(result, [linked_mAtrA], to_script_data.halant!, true);
       } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [linked_mAtrA],
-          to_script_data.halant!,
-          false
-        );
+        emitPiecesWithReorder(result, [linked_mAtrA], to_script_data.halant!, false);
       }
       result_str_concat_status = true;
     } else if (
+      // default transliteration behavior (without schwa deletion)
+      !include_inherent_vowel &&
       prev_context.typeAt(-1) === 'vyanjana' &&
       !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
     ) {
       if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          true
-        );
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
       } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          false
-        );
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
+        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
+          result.rewriteAt(-1, result.lastPiece() + '\u200d');
+        }
+      }
+    } else if (
+      // if to include inherent vowel then check when to add that skipped halant
+      include_inherent_vowel &&
+      item &&
+      item[1]?.type === 'vyanjana' &&
+      (prev_context.typeAt(-1) === 'vyanjana' ||
+        (BRAHMIC_NUQTA &&
+          prev_context.typeAt(-2) === 'vyanjana' &&
+          prev_context.textAt(-1) === BRAHMIC_NUQTA))
+    ) {
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
+      } else {
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
         if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
           result.rewriteAt(-1, result.lastPiece() + '\u200d');
         }
@@ -350,15 +356,22 @@ type TransliterateCtx = {
   BRAHMIC_NUQTA: string | null;
   BRAHMIC_HALANT: string | null;
   typing_mode: boolean;
+  include_inherent_vowel: boolean;
 };
 
 const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
+const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE = false;
 
+/** These options are not available on the main `transliterate` function of the `index.ts` */
 type CustomOptionsType = {
   /** This enables typing mode, returns a context length which will be used to clear the external context */
   typing_mode?: boolean;
   /** Use native numerals in transliteration/typing */
   useNativeNumerals?: boolean;
+  /** Include inherent vowels(schwa character) in transliteration/typing
+   * @default false
+   */
+  includeInherentVowel?: boolean;
 };
 
 /**
@@ -378,6 +391,8 @@ export const transliterate_text_core = (
 ) => {
   const use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS_MODE;
   const typing_mode = options?.typing_mode ?? false;
+  const include_inherent_vowel =
+    options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL_MODE;
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
@@ -431,7 +446,8 @@ export const transliterate_text_core = (
     PREV_CONTEXT_IN_USE,
     BRAHMIC_NUQTA,
     BRAHMIC_HALANT,
-    typing_mode
+    typing_mode,
+    include_inherent_vowel
   };
 
   // use a custom map when Normal -> All in typing mode (or when a explicit option)
@@ -720,15 +736,17 @@ export const transliterate_text_core = (
         text_to_krama_item[1].custom_back_ref !== null
       ) {
         const custom_script_char_item =
-          to_script_data.custom_script_chars_arr[text_to_krama_item[1].custom_back_ref];
-        result.emit(custom_script_char_item[0]);
-        prev_context_cleanup(
-          ctx,
-          [text_to_krama_item[0], to_script_data.list[custom_script_char_item[1] ?? -1] ?? null],
-          {
-            next: text_to_krama_item[1].next ?? undefined
-          }
-        );
+          to_script_data.custom_script_chars_arr[text_to_krama_item[1].custom_back_ref] ?? null;
+        if (custom_options_json !== null) {
+          result.emit(custom_script_char_item[0]);
+          prev_context_cleanup(
+            ctx,
+            [text_to_krama_item[0], to_script_data.list[custom_script_char_item[1] ?? -1] ?? null],
+            {
+              next: text_to_krama_item[1].next ?? undefined
+            }
+          );
+        }
         continue;
       }
       // we have to componsate for the superscript number's length
@@ -828,12 +846,7 @@ export const transliterate_text_core = (
               result_text === to_script_data.halant) &&
             isTaExtSuperscriptTail(result.lastChar())
           ) {
-            emitPiecesWithTaExtSuperscriptReorder(
-              result,
-              result_pieces_to_add,
-              to_script_data.halant!,
-              true
-            );
+            emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
           } else {
             result.emitPieces(result_pieces_to_add);
           }
@@ -898,7 +911,7 @@ export const transliterate_text_core = (
           to_add_text === to_script_data.halant) &&
         isTaExtSuperscriptTail(result.lastChar())
       ) {
-        emitPiecesWithTaExtSuperscriptReorder(result, [to_add_text], to_script_data.halant!, true);
+        emitPiecesWithReorder(result, [to_add_text], to_script_data.halant!, true);
       } else {
         result.emit(to_add_text);
       }

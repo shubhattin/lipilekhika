@@ -36,3 +36,24 @@
   preserve_check: true
   options:
     useNativeNumerals: false
+# Schwa Deletion
+- index: 7
+  text: kI kU k
+  output: की कू क्
+  script: Devanagari
+  preserve_check: true
+  options:
+    # default behavior is to delete the inherent vowel
+    includeInherentVowel: false
+- index: 8
+  text: k ka kE pakkE
+  output: क क के पक्के
+  script: Devanagari
+  options:
+    includeInherentVowel: true
+- index: 9
+  text: gh ba bhagghE
+  output: க⁴ ப³ ப⁴க்³கே⁴
+  script: Tamil-Extended
+  options:
+    includeInherentVowel: true
