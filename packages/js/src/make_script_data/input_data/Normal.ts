@@ -1,11 +1,13 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputOtherScriptType } from '../input_script_data_schema';
+import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
 
 const Normal: InputOtherScriptType = {
   script_name: 'Normal',
   script_id: script_list_obj['Normal'],
   script_type: 'other',
   schwa_character: 'a',
+  typing_list: COMMON_SCRIPT_TYPING_DATA,
   manual_krama_text_map: {
     ॐ: 'AUM',
     अ: 'a',
@@ -110,9 +112,9 @@ const Normal: InputOtherScriptType = {
     ष: 'Sh',
     // 4 vedic accent symbols
     anudAttA: '↓',
-    'udAtta-1': '↑',
-    'udAtta-2': '↑↑',
-    'udAtta-3': '↑↑↑',
+    'svarita-1': '↑',
+    'svarita-2': '↑↑',
+    'svarita-3': '↑↑↑',
     '०': '0',
     '१': '1',
     '२': '2',

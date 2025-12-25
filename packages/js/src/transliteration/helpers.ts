@@ -30,6 +30,18 @@ export const kramaIndexOfText = (script_data: OutputScriptData, text: string): n
   );
 };
 
+/**
+ * Applying custom typing alias rules
+ *
+ * Eg. x -> kSh
+ */
+export const applyTypingInputAliases = (text: string): string => {
+  if (!text) return text;
+  // ITRANS-style shortcut: x -> kSh (क्ष)
+  if (text.indexOf('x') === -1) return text;
+  return text.replaceAll('x', 'kSh');
+};
+
 export const string_builder = () => {
   let result: string[] = [];
 
@@ -269,10 +281,11 @@ export const isScriptTamilExt = (script_name: script_list_type): boolean => {
  *
  * Caller is responsible for deciding when reordering is semantically correct.
  */
-export const emitPiecesWithTaExtSuperscriptReorder = (
+export const emitPiecesWithReorder = (
   result: ReturnType<typeof string_builder>,
   pieces: string[],
   halant: string,
+  /** Tamil Extended Superscript Specific Reorder option */
   should_reorder: boolean
 ) => {
   if (pieces.length === 0) return;

@@ -1,5 +1,11 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import {
+  COMMON_NUMBER_TYPING_DATA,
+  COMMON_SCRIPT_TYPING_DATA,
+  COMMON_SVARA_MATRA_TYPING_DATA,
+  COMMON_VEDIC_SANSKRIT_SYMBOLS
+} from './_common_typing';
 
 const Sharada: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -9,6 +15,12 @@ const Sharada: InputBrahmicScriptType = {
   halant: '𑇀',
   nuqta: '𑇊',
   schwa_property: false,
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    ...COMMON_NUMBER_TYPING_DATA,
+    ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_VEDIC_SANSKRIT_SYMBOLS
+  ],
   manual_krama_text_map: {
     '0': '𑇐',
     '1': '𑇑',
@@ -29,9 +41,9 @@ const Sharada: InputBrahmicScriptType = {
     halant: '𑇀',
     nuqta: '𑇊',
     anudAttA: '↓',
-    'udAtta-1': '↑',
-    'udAtta-2': '↑↑',
-    'udAtta-3': '↑↑↑',
+    'svarita-1': '↑',
+    'svarita-2': '↑↑',
+    'svarita-3': '↑↑↑',
     virama: '𑇅',
     double_virama: '𑇆'
   },

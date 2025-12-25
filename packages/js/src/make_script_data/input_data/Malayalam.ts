@@ -1,5 +1,11 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import {
+  COMMON_NUMBER_TYPING_DATA,
+  COMMON_SCRIPT_TYPING_DATA,
+  COMMON_SVARA_MATRA_TYPING_DATA,
+  COMMON_VEDIC_SANSKRIT_SYMBOLS
+} from './_common_typing';
 
 const Malayalam: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -26,12 +32,64 @@ const Malayalam: InputBrahmicScriptType = {
     avagraha: 'ഽ',
     halant: '്',
     anudAttA: '॒',
-    'udAtta-1': '॑',
-    'udAtta-2': '᳚',
-    'udAtta-3': '᳛',
+    'svarita-1': '॑',
+    'svarita-2': '᳚',
+    'svarita-3': '᳛',
     virama: '।',
     double_virama: '॥'
   },
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    ...COMMON_NUMBER_TYPING_DATA,
+    {
+      type: 'custom_script_char',
+      specific_text: '൰',
+      custom_normal_key: '.10'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '൱',
+      custom_normal_key: '.100'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: '൲',
+      custom_normal_key: '.1000'
+    },
+    // Chillu versions of k, N, r, l, L
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൿ',
+      custom_normal_key: '.k'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൺ',
+      custom_normal_key: '.N'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൻ',
+      custom_normal_key: '.n'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ർ',
+      custom_normal_key: '.r'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൽ',
+      custom_normal_key: '.l'
+    },
+    {
+      type: 'custom_script_char',
+      specific_text: 'ൾ',
+      custom_normal_key: '.L'
+    },
+    ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_VEDIC_SANSKRIT_SYMBOLS
+  ],
   list: [
     {
       text: 'ഓം',

@@ -6,7 +6,7 @@ import {
 import { getScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 import custom_options_json from '../custom_options.json';
-import type { OptionsType } from '../make_script_data/custom_options_input';
+import type { TransOptionsType } from '../make_script_data/custom_options_input';
 import {
   make_input_cursor,
   kramaTextOrEmpty,
@@ -15,7 +15,8 @@ import {
   kramaIndexOfText,
   matchPrevKramaSequence,
   replaceWithPieces,
-  emitPiecesWithTaExtSuperscriptReorder,
+  applyTypingInputAliases,
+  emitPiecesWithReorder,
   isTaExtSuperscriptTail,
   isScriptTamilExt,
   type prev_context_array_type
@@ -26,7 +27,7 @@ export type CustomOptionType = {
   [key in CustomOptionList]?: boolean;
 };
 
-type CustomRulesType = OptionsType[keyof OptionsType]['rules'];
+type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
 /** These Characters can be skipped/ignore while transliterating the input text */
 const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
@@ -58,7 +59,8 @@ function prev_context_cleanup(
     prev_context,
     BRAHMIC_HALANT,
     BRAHMIC_NUQTA,
-    typing_mode
+    typing_mode,
+    include_inherent_vowel
   } = ctx;
   const { next, last_extra_call } = additional ?? {};
   let result_str_concat_status = false;
@@ -122,34 +124,39 @@ function prev_context_cleanup(
           : item[0]!;
       // const linked_mAtrA = item[0]!;
       if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(result, [linked_mAtrA], to_script_data.halant!, true);
+        emitPiecesWithReorder(result, [linked_mAtrA], to_script_data.halant!, true);
       } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [linked_mAtrA],
-          to_script_data.halant!,
-          false
-        );
+        emitPiecesWithReorder(result, [linked_mAtrA], to_script_data.halant!, false);
       }
       result_str_concat_status = true;
     } else if (
+      // default transliteration behavior (without schwa deletion)
+      !include_inherent_vowel &&
       prev_context.typeAt(-1) === 'vyanjana' &&
       !(item[0] === BRAHMIC_HALANT || item[1]?.type === 'mAtrA')
     ) {
       if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          true
-        );
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
       } else {
-        emitPiecesWithTaExtSuperscriptReorder(
-          result,
-          [BRAHMIC_HALANT!],
-          to_script_data.halant!,
-          false
-        );
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
+        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
+          result.rewriteAt(-1, result.lastPiece() + '\u200d');
+        }
+      }
+    } else if (
+      // if to include inherent vowel then check when to add that skipped halant
+      include_inherent_vowel &&
+      item &&
+      item[1]?.type === 'vyanjana' &&
+      (prev_context.typeAt(-1) === 'vyanjana' ||
+        (BRAHMIC_NUQTA &&
+          prev_context.typeAt(-2) === 'vyanjana' &&
+          prev_context.textAt(-1) === BRAHMIC_NUQTA))
+    ) {
+      if (isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar())) {
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
+      } else {
+        emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
         if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
           result.rewriteAt(-1, result.lastPiece() + '\u200d');
         }
@@ -251,11 +258,13 @@ export const get_active_custom_options = (
   if (!input_options) return {};
   const active_custom_options: CustomOptionType = {};
   for (const [key, enabled] of Object.entries(input_options ?? {})) {
-    if (!enabled || !(key in custom_options_json)) continue;
+    if (!(key in custom_options_json)) continue;
     const option_info = custom_options_json[
       key as CustomOptionList
-    ] as OptionsType[keyof OptionsType];
-    if (
+    ] as TransOptionsType[keyof TransOptionsType];
+    if (option_info.from_script_type === 'all' && option_info.to_script_type === 'all') {
+      active_custom_options[key as CustomOptionList] = enabled;
+    } else if (
       (option_info.from_script_type !== undefined &&
         (option_info.from_script_type === 'all' ||
           option_info.from_script_type === from_script_data.script_type)) ||
@@ -267,12 +276,12 @@ export const get_active_custom_options = (
         (option_info.to_script_type === 'all' ||
           option_info.to_script_type === to_script_data.script_type)
       ) {
-        active_custom_options[key as CustomOptionList] = true;
+        active_custom_options[key as CustomOptionList] = enabled;
       } else if (
         option_info.to_script_name !== undefined &&
         option_info.to_script_name.includes(to_script_data.script_name)
       ) {
-        active_custom_options[key as CustomOptionList] = true;
+        active_custom_options[key as CustomOptionList] = enabled;
       }
     }
   }
@@ -290,23 +299,25 @@ export const resolve_transliteration_rules = (
     to_script_data,
     transliteration_input_options
   );
-  const custom_rules = Object.keys(trans_options).flatMap(
-    (key) =>
-      custom_options_json[key as CustomOptionList].rules as OptionsType[keyof OptionsType]['rules']
+  const custom_rules = Object.keys(trans_options).flatMap((key) =>
+    trans_options[key as CustomOptionList] === true
+      ? (custom_options_json[key as CustomOptionList]
+          .rules as TransOptionsType[keyof TransOptionsType]['rules'])
+      : []
   );
   return { trans_options, custom_rules };
 };
 
 const get_rule_replace_text = (
-  rule: OptionsType[keyof OptionsType]['rules'][number],
+  rule: TransOptionsType[keyof TransOptionsType]['rules'][number],
   script_data: OutputScriptData
 ) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
 export const apply_custom_replace_rules = (
   text: string,
   script_data: OutputScriptData,
-  rules: OptionsType[keyof OptionsType]['rules'],
-  allowed_input_rule_type: OptionsType[keyof OptionsType]['rules'][number]['check_in']
+  rules: TransOptionsType[keyof TransOptionsType]['rules'],
+  allowed_input_rule_type: TransOptionsType[keyof TransOptionsType]['rules'][number]['check_in']
 ) => {
   if (rules.length === 0) return text;
   for (const rule of rules) {
@@ -345,6 +356,22 @@ type TransliterateCtx = {
   BRAHMIC_NUQTA: string | null;
   BRAHMIC_HALANT: string | null;
   typing_mode: boolean;
+  include_inherent_vowel: boolean;
+};
+
+const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
+const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE = false;
+
+/** These options are not available on the main `transliterate` function of the `index.ts` */
+type CustomOptionsType = {
+  /** This enables typing mode, returns a context length which will be used to clear the external context */
+  typing_mode?: boolean;
+  /** Use native numerals in transliteration/typing */
+  useNativeNumerals?: boolean;
+  /** Include inherent vowels(schwa character) in transliteration/typing
+   * @default false
+   */
+  includeInherentVowel?: boolean;
 };
 
 /**
@@ -360,16 +387,20 @@ export const transliterate_text_core = (
   to_script_data: OutputScriptData,
   trans_options: CustomOptionType,
   custom_rules: CustomRulesType,
-  options?: {
-    /** This enables typing mode, returns a context length which will be used to clear the external context */
-    typing_mode?: boolean;
-  }
+  options?: CustomOptionsType
 ) => {
+  const use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS_MODE;
   const typing_mode = options?.typing_mode ?? false;
+  const include_inherent_vowel =
+    options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL_MODE;
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
+  if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
 
+  if (typing_mode && from_script_name === 'Normal') {
+    text = applyTypingInputAliases(text);
+  }
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
   const result = string_builder();
@@ -415,8 +446,16 @@ export const transliterate_text_core = (
     PREV_CONTEXT_IN_USE,
     BRAHMIC_NUQTA,
     BRAHMIC_HALANT,
-    typing_mode
+    typing_mode,
+    include_inherent_vowel
   };
+
+  // use a custom map when Normal -> All in typing mode (or when a explicit option)
+  const from_text_to_krama_map =
+    (trans_options['normal_to_all:use_typing_chars'] || typing_mode) &&
+    from_script_name === 'Normal'
+      ? to_script_data.typing_text_to_krama_map
+      : from_script_data.text_to_krama_map;
 
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
@@ -451,6 +490,36 @@ export const transliterate_text_core = (
       }
       result.emit(char);
       continue;
+    }
+
+    if (char.match(/^\d$/) && !use_native_numerals) {
+      result.emit(char);
+      cursor.advance(char_width);
+      prev_context_cleanup(ctx, [char, null]);
+      continue;
+    }
+
+    // In Preserve mode, first check if the character is a custom script character
+    if (trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal') {
+      const custom_script_index = binarySearchLower(
+        from_script_data.custom_script_chars_arr,
+        char,
+        {
+          accessor: (arr, i) => arr[i][0]
+        }
+      );
+      if (custom_script_index !== -1) {
+        const custom_script_item = from_script_data.custom_script_chars_arr[custom_script_index];
+        prev_context_cleanup(ctx, [
+          custom_script_item[0],
+          from_script_data.list[custom_script_item[1] ?? -1] ?? null
+        ]);
+        const normal_text =
+          from_script_data.typing_text_to_krama_map[custom_script_item[2] ?? -1]?.[0];
+        result.emit(normal_text ?? '');
+        cursor.advance(custom_script_item[0].length);
+        continue;
+      }
     }
 
     // Step 1: Search for the character in the text_to_krama_map
@@ -490,18 +559,14 @@ export const transliterate_text_core = (
                 ? cursor.slice(ignore_ta_ext_sup_num_text_index + 1, end_index)
                 : '')
             : cursor.slice(text_index, end_index);
-        const potential_match_index = binarySearchLower(
-          from_script_data.text_to_krama_map,
-          char_to_search,
-          {
-            accessor: (arr, i) => arr[i][0]
-          }
-        );
+        const potential_match_index = binarySearchLower(from_text_to_krama_map, char_to_search, {
+          accessor: (arr, i) => arr[i][0]
+        });
         if (potential_match_index === -1) {
           text_to_krama_item_index = -1;
           break;
         }
-        const potential_match = from_script_data.text_to_krama_map[potential_match_index];
+        const potential_match = from_text_to_krama_map[potential_match_index];
 
         // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -642,10 +707,13 @@ export const transliterate_text_core = (
       }
     }
 
-    const text_to_krama_item: OutputScriptData['text_to_krama_map'][number] | null =
-      text_to_krama_item_index !== -1
-        ? from_script_data.text_to_krama_map[text_to_krama_item_index]
-        : null;
+    const text_to_krama_item:
+      | (
+          | OutputScriptData['text_to_krama_map'][number]
+          | OutputScriptData['typing_text_to_krama_map'][number]
+        )
+      | null =
+      text_to_krama_item_index !== -1 ? from_text_to_krama_map[text_to_krama_item_index] : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
       const index_delete_length =
@@ -660,6 +728,27 @@ export const transliterate_text_core = (
       const matched_len_units = text_to_krama_item[0].length - index_delete_length;
       cursor.advance(matched_len_units);
       text_index = cursor.pos;
+      // console.log(text_to_krama_item);
+      if (
+        trans_options['normal_to_all:use_typing_chars'] &&
+        'custom_back_ref' in text_to_krama_item[1] &&
+        text_to_krama_item[1].custom_back_ref !== undefined &&
+        text_to_krama_item[1].custom_back_ref !== null
+      ) {
+        const custom_script_char_item =
+          to_script_data.custom_script_chars_arr[text_to_krama_item[1].custom_back_ref] ?? null;
+        if (custom_options_json !== null) {
+          result.emit(custom_script_char_item[0]);
+          prev_context_cleanup(
+            ctx,
+            [text_to_krama_item[0], to_script_data.list[custom_script_char_item[1] ?? -1] ?? null],
+            {
+              next: text_to_krama_item[1].next ?? undefined
+            }
+          );
+        }
+        continue;
+      }
       // we have to componsate for the superscript number's length
       if (
         text_to_krama_item[1].krama !== null &&
@@ -680,6 +769,7 @@ export const transliterate_text_core = (
           ) {
             let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
+              !trans_options['normal_to_all:use_typing_chars'] &&
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null
             ) {
@@ -756,12 +846,7 @@ export const transliterate_text_core = (
               result_text === to_script_data.halant) &&
             isTaExtSuperscriptTail(result.lastChar())
           ) {
-            emitPiecesWithTaExtSuperscriptReorder(
-              result,
-              result_pieces_to_add,
-              to_script_data.halant!,
-              true
-            );
+            emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
           } else {
             result.emitPieces(result_pieces_to_add);
           }
@@ -826,7 +911,7 @@ export const transliterate_text_core = (
           to_add_text === to_script_data.halant) &&
         isTaExtSuperscriptTail(result.lastChar())
       ) {
-        emitPiecesWithTaExtSuperscriptReorder(result, [to_add_text], to_script_data.halant!, true);
+        emitPiecesWithReorder(result, [to_add_text], to_script_data.halant!, true);
       } else {
         result.emit(to_add_text);
       }
@@ -855,10 +940,7 @@ export const transliterate_text = async (
   from_script_name: script_list_type,
   to_script_name: script_list_type,
   transliteration_input_options?: CustomOptionType,
-  options?: {
-    /** This enables typing mode, returns a context length which will be used to clear the external context */
-    typing_mode?: boolean;
-  }
+  options?: CustomOptionsType
 ) => {
   const typing_mode = options?.typing_mode ?? false;
   if (typing_mode && from_script_name !== 'Normal') {

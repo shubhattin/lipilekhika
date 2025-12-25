@@ -7,15 +7,47 @@ import {
 } from './transliteration/transliterate';
 import type { ScriptLangType } from './types';
 
+const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
+/** Default values for the typing context options */
+export const DEFAULT_USE_NATIVE_NUMERALS = true;
+/** Default value for the include inherent vowel option.
+ * By default avoids schwa deletion
+ */
+export const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
+
+type TypingContextOptions = {
+  /** The time in milliseconds after which the context will be cleared automatically
+   * @default 4500ms
+   */
+  autoContextTClearTimeMs?: number;
+  /** Use native numerals in transliteration/typing
+   * @default true
+   */
+  useNativeNumerals?: boolean;
+  /** Include inherent vowels(schwa character) in transliteration/typing
+   *
+   * `true` : `k` -> `क` (Eg. Hindi, Bengali, Gujarati, etc.)
+   *
+   * `false` : `k` -> `क्` (Default Behavior in transliteration. Eg. Sanskrit, Telugu, Tamil, Kannada, etc)
+   *
+   * @default false
+   */
+  includeInherentVowel?: boolean;
+};
+
 /**
  * Creates a stateful isolated context for character by character input typing.
  * This is the main function which returns the `diff`, different realtime schems can be implemented using this.
  *
  * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
  * @param typing_lang - The script/language to type in
+ * @param options - The options for the typing context
  * @returns A closed over context object with the following methods:
  */
-export function createTypingContext(typing_lang: ScriptLangType) {
+export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
+  const { autoContextTClearTimeMs } = options ?? {};
+  let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+  let include_inherent_vowel = options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
@@ -23,6 +55,9 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 
   let curr_input = '';
   let curr_output = '';
+
+  const auto_context_clear_time_ms = autoContextTClearTimeMs ?? DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
+  let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
   let to_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -44,6 +79,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
 
   /** Cleares all internal states and contexts */
   function clearContext() {
+    last_time_ms = null;
     curr_input = '';
     curr_output = '';
   }
@@ -61,6 +97,10 @@ export function createTypingContext(typing_lang: ScriptLangType) {
         'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'
       );
     }
+    const curr_time_ms = Date.now();
+    if (last_time_ms && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
+      clearContext();
+    }
     let char_key = key?.[0] ?? '';
     curr_input += char_key;
     let prev_output = curr_output;
@@ -72,11 +112,16 @@ export function createTypingContext(typing_lang: ScriptLangType) {
       to_script_data,
       trans_options,
       custom_rules,
-      { typing_mode: true }
+      {
+        typing_mode: true,
+        useNativeNumerals: use_native_numerals,
+        includeInherentVowel: include_inherent_vowel
+      }
     );
     if (context_length > 0) {
       curr_output = output;
     } else if (context_length === 0) {
+      last_time_ms = null;
       curr_input = '';
       curr_output = '';
     }
@@ -90,6 +135,7 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     let diff_add_text = output.substring(common_index);
     let to_delete_chars_count = prev_output.length - common_index;
 
+    last_time_ms = Date.now();
     return {
       /** These number of characters need to be deleted from the current "app" input state */
       to_delete_chars_count,
@@ -102,7 +148,13 @@ export function createTypingContext(typing_lang: ScriptLangType) {
     /** Await once, then use `takeKeyInputSync` for best typing latency. */
     ready,
     clearContext,
-    takeKeyInput
+    takeKeyInput,
+    updateUseNativeNumerals: (useNativeNumerals: boolean) => {
+      use_native_numerals = useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+    },
+    updateIncludeInherentVowel: (includeInherentVowel: boolean) => {
+      include_inherent_vowel = includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
+    }
   };
 }
 

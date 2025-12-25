@@ -33,6 +33,43 @@ type CommonScriptData = {
     krama_ref: number[];
     type: NonNullable<NonNullable<InputOtherScriptType['list']>[number]['type']>;
   }[];
+  /**
+   * This map is a alternate map to be used instead of Normal's `text_to_krama_map` for typing mode.
+   * It contains references to both `list` (for `type` info) and also to `custom_script_chars`
+   *
+   * This will be a sorted array
+   */
+  typing_text_to_krama_map: [
+    text: string,
+    {
+      next?: string[] | null;
+      krama?: number[] | null;
+      /** Reference to a custom script character of that script */
+      custom_back_ref?: number | null;
+      /** This will not be actually there, but there for type compatibility */
+      fallback_list_ref?: number | null;
+    }
+  ][];
+  /** Custom Script Characters not present in the common krama key data
+   *
+   * This will be a sorted array.
+   *
+   * For list_ref the element should also be a duplicate in the target script.
+   * Check in text_to_krama_map if not display a warning.
+   * And for backreferencing in the list use the krama_ref of the base form.
+   * Eg :- Malayalam k1 is a duplicate of k, so in back_ref use k's krama_ref
+   */
+  custom_script_chars_arr: [
+    text: string,
+    /** This will be used to deterime the type of the custom script character
+     * eg:- Malayalam chillu ka is a vyanjana  */
+    list_ref: number | null,
+    /** This will be used to get the Normal text key of the custom script character.
+     *
+     * This is needed here as there is no equivalent of it present in the krama data
+     */
+    custom_ref: number | null
+  ][];
 };
 
 export type OutputBrahmicScriptData = Pick<

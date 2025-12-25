@@ -46,34 +46,40 @@ describe('Transliteration', () => {
           test_data_item.to as script_input_name_type,
           test_data_item.options
         );
-        it(`${test_data_item.index} : ${test_data_item.from} → ${test_data_item.to}`, async () => {
-          const errorMessage =
-            `Transliteration failed:\n` +
-            `  From: ${test_data_item.from}\n` +
-            `  To: ${test_data_item.to}\n` +
-            `  Input: "${test_data_item.input}"\n` +
-            `  Expected: "${test_data_item.output}"\n` +
-            `  Actual: "${result}"`;
-          if (!test_data_item.todo) expect(result, errorMessage).toBe(test_data_item.output);
-        });
+        const testFn = test_data_item.todo ? it.skip : it;
+        testFn(
+          `${test_data_item.index} : ${test_data_item.from} → ${test_data_item.to}`,
+          async () => {
+            const errorMessage =
+              `Transliteration failed:\n` +
+              `  From: ${test_data_item.from}\n` +
+              `  To: ${test_data_item.to}\n` +
+              `  Input: "${test_data_item.input}"\n` +
+              `  Expected: "${test_data_item.output}"\n` +
+              `  Actual: "${result}"`;
+            expect(result, errorMessage).toBe(test_data_item.output);
+          }
+        );
         if (test_data_item.reversible) {
-          it(`${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`, async () => {
-            const result_reversed = await transliterate(
-              result,
-              test_data_item.to as script_input_name_type,
-              test_data_item.from as script_input_name_type,
-              test_data_item.options
-            );
-            const errorMessage_reversed =
-              `Reversed Transliteration failed:\n` +
-              `  From: ${test_data_item.to}\n` +
-              `  To: ${test_data_item.from}\n` +
-              `  Input: "${result}"\n` +
-              `  Original Input: "${test_data_item.input}"\n` +
-              `  Reversed Output: "${result_reversed}"`;
-            if (!test_data_item.todo)
+          testFn(
+            `${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`,
+            async () => {
+              const result_reversed = await transliterate(
+                result,
+                test_data_item.to as script_input_name_type,
+                test_data_item.from as script_input_name_type,
+                test_data_item.options
+              );
+              const errorMessage_reversed =
+                `Reversed Transliteration failed:\n` +
+                `  From: ${test_data_item.to}\n` +
+                `  To: ${test_data_item.from}\n` +
+                `  Input: "${result}"\n` +
+                `  Original Input: "${test_data_item.input}"\n` +
+                `  Reversed Output: "${result_reversed}"`;
               expect(result_reversed, errorMessage_reversed).toBe(test_data_item.input);
-          });
+            }
+          );
         }
       }
     });

@@ -13,8 +13,13 @@ export const TestDataTypeSchema = z.object({
   options: z.record(z.string(), z.boolean()).optional()
 });
 
-export async function emulateTyping(text: string, typing_lang: script_and_lang_list_type) {
-  const ctx = createTypingContext(typing_lang);
+type Options = Parameters<typeof createTypingContext>[1];
+export async function emulateTyping(
+  text: string,
+  typing_lang: script_and_lang_list_type,
+  options?: Options
+) {
+  const ctx = createTypingContext(typing_lang, options);
   await ctx.ready;
   let result = '';
   for (const char of text) {

@@ -1,6 +1,3 @@
-// ALWAYS BE CAREFUL BEFORE CHANGING LANG JSON
-// AS CHNAGE IN PRE-EXISTING LANG IDS WOULD CAUSE DATA MISMATCHs
-
 import langs from './langs.json';
 const { script_list, lang_list } = langs;
 

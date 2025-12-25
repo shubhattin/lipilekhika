@@ -1,0 +1,68 @@
+- index: 0
+  text: kaa kii kee koo kuu zO zo
+  output: का की की कू कू ज़ो ज़ो
+  script: Devanagari
+- index: 1
+  text: xAtrabala
+  output: क्षात्रबल
+  script: Devanagari
+- index: 2
+  text: tamizh par1r1i En1n1a
+  output: தமிழ் பற்றி ஏன்ன
+  script: Tamil
+- index: 3
+  text: .10 .100 .1000
+  output: ௰ ௱ ௲
+  script: Tamil
+  preserve_check: true
+- index: 4
+  text: .10 .100 .1000 .ka .Na .na .ra .la .La .ke
+  output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ ൿെ
+  script: Malayalam
+  preserve_check: true
+  # Numerals
+- index: 5
+  text: 10 23
+  output: १० २३
+  script: Devanagari
+  preserve_check: true
+  options:
+    # default behavior is to use native numerals
+    # useNativeNumerals: true
+- index: 6
+  text: 10 23 kE liE
+  output: 10 23 के लिए
+  script: Devanagari
+  preserve_check: true
+  options:
+    useNativeNumerals: false
+# Schwa Deletion
+- index: 7
+  text: kI kU k
+  output: की कू क्
+  script: Devanagari
+  preserve_check: true
+  options:
+    # default behavior is to delete the inherent vowel
+    includeInherentVowel: false
+- index: 8
+  text: k ka kE pakkE
+  output: क क के पक्के
+  script: Devanagari
+  options:
+    includeInherentVowel: true
+- index: 9
+  text: gh ba bhagghE
+  output: க⁴ ப³ ப⁴க்³கே⁴
+  script: Tamil-Extended
+  options:
+    includeInherentVowel: true
+- index: 10
+  text: ka#an ka#s ka#ss ka#sss
+  output: क॒ क॑ क᳚ क᳛
+  script: Devanagari
+# Context Clear
+- index: 11
+  text: kqe qq
+  output: क्ए q
+  script: Devanagari
