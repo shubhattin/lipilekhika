@@ -270,6 +270,11 @@ export const isTaExtSuperscriptTail = (ch: string | undefined): boolean => {
   );
 };
 
+export const VEDIC_SVARAS = ['॒', '॑', '᳚', '᳛'] as const;
+export const isVedicSvaraTail = (ch: string | undefined): boolean => {
+  return !!ch && VEDIC_SVARAS.indexOf(ch as (typeof VEDIC_SVARAS)[number]) !== -1;
+};
+
 export const isScriptTamilExt = (script_name: script_list_type): boolean => {
   return script_name === 'Tamil-Extended';
 };

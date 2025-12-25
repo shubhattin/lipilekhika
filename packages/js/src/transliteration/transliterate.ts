@@ -19,6 +19,7 @@ import {
   emitPiecesWithReorder,
   isTaExtSuperscriptTail,
   isScriptTamilExt,
+  isVedicSvaraTail,
   type prev_context_array_type
 } from './helpers';
 
@@ -845,6 +846,14 @@ export const transliterate_text_core = (
             isTaExtSuperscriptTail(result.lastChar())
           ) {
             emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
+          } else if (
+            isScriptTamilExt(to_script_name) &&
+            isVedicSvaraTail(result_pieces_to_add.at(-1)?.at(-1) ?? '') &&
+            isTaExtSuperscriptTail(result.lastChar())
+          ) {
+            const last = result.popLastChar();
+            result.emitPieces(result_pieces_to_add);
+            result.emit(last ?? '');
           } else {
             result.emitPieces(result_pieces_to_add);
           }
@@ -910,6 +919,14 @@ export const transliterate_text_core = (
         isTaExtSuperscriptTail(result.lastChar())
       ) {
         emitPiecesWithReorder(result, [to_add_text], to_script_data.halant!, true);
+      } else if (
+        isScriptTamilExt(to_script_name) &&
+        isVedicSvaraTail(to_add_text) &&
+        isTaExtSuperscriptTail(result.lastChar())
+      ) {
+        const last = result.popLastChar();
+        result.emit(to_add_text);
+        result.emit(last ?? '');
       } else {
         result.emit(to_add_text);
       }
