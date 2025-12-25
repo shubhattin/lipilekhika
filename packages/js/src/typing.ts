@@ -36,13 +36,26 @@ type TypingContextOptions = {
 };
 
 /**
- * Creates a stateful isolated context for character by character input typing.
- * This is the main function which returns the `diff`, different realtime schems can be implemented using this.
+ * Create a stateful typing context for character-by-character transliteration into a target script.
  *
- * **Note** :- Script Data is loaded in background but it would still be good to await `ready` before using the context.
- * @param typing_lang - The script/language to type in
- * @param options - The options for the typing context
- * @returns A closed over context object with the following methods:
+ * The returned context maintains short-term input/output state so callers can feed single characters
+ * and receive the minimal edit (number of characters to delete and text to insert) required to
+ * update a host input field. Script data and transliteration rules are loaded in the background;
+ * await `ready` before calling `takeKeyInput`.
+ *
+ * @param typing_lang - Target script/language name (will be normalized; invalid names throw)
+ * @param options - Optional settings:
+ *   - autoContextTClearTimeMs: milliseconds of inactivity after which the typing context is cleared (default: 4500)
+ *   - useNativeNumerals: whether to use native numerals in output (default: true)
+ *   - includeInherentVowel: whether to include inherent vowel markers where applicable (default: false)
+ * @returns An object with these methods:
+ *   - ready: Promise<void> that resolves once script data and rules are loaded
+ *   - clearContext(): void — clears internal input/output context and timing
+ *   - takeKeyInput(key: string): { to_delete_chars_count: number; diff_add_text: string } — process a single character and return the edit diff
+ *   - updateUseNativeNumerals(useNativeNumerals: boolean): void — update numeral handling
+ *   - updateIncludeInherentVowel(includeInherentVowel: boolean): void — update inherent vowel handling
+ * @throws Error if `typing_lang` is not a valid/recognizable script name
+ * @throws Error if `takeKeyInput` is called before `ready` has resolved
  */
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
   const { autoContextTClearTimeMs } = options ?? {};
@@ -77,7 +90,11 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     custom_rules = resolved.custom_rules;
   })();
 
-  /** Cleares all internal states and contexts */
+  /**
+   * Reset the typing context to an initial empty state.
+   *
+   * Clears stored input and output buffers and resets the last input timestamp.
+   */
   function clearContext() {
     last_time_ms = null;
     curr_input = '';
@@ -87,9 +104,12 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   // so we have reorganized the code be synchronous
 
   /**
-   * Accepts character by character input and returns the diff
-   * @param key  The key to take input for
-   * @returns The diff of the previous and current output
+   * Process a single character key into the typing context, update internal state, and compute the editable diff.
+   *
+   * @param key - The input key (only the first character is used) to feed into the typing context.
+   * @returns An object with:
+   *  - `to_delete_chars_count`: the number of characters to delete from the current application input,
+   *  - `diff_add_text`: the characters to insert into the current application input.
    */
   function takeKeyInput(key: string) {
     if (!from_script_data || !to_script_data) {

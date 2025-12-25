@@ -14,6 +14,14 @@ export const TestDataTypeSchema = z.object({
 });
 
 type Options = Parameters<typeof createTypingContext>[1];
+/**
+ * Simulates typing a string using a typing context for the specified script/language.
+ *
+ * @param text - Input characters to feed to the typing context in order
+ * @param typing_lang - Script and language selector used to create the typing context
+ * @param options - Optional configuration forwarded to create the typing context
+ * @returns The resulting string after applying the typing context's additions and deletions for each input character
+ */
 export async function emulateTyping(
   text: string,
   typing_lang: script_and_lang_list_type,

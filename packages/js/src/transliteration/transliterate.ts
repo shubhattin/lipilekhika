@@ -39,7 +39,14 @@ const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as c
 const MAX_CONTEXT_LENGTH = 3;
 
 /**
- * @return flag to indicate if the result concat has to be done as it already is concatenated here.
+ * Finalize and clean previous-context state after processing an input item, emitting any required script-specific pieces.
+ *
+ * @param ctx - The transliteration runtime context containing script data, result builder, options, and prev_context.
+ * @param item - The previous-context entry corresponding to the current input item.
+ * @param additional - Optional metadata:
+ *   - next: upcoming input characters (if available)
+ *   - last_extra_call: whether this is the final cleanup call for typing-mode end-of-input
+ * @returns `true` if this call already concatenated the required output piece into `ctx.result` (so no further concatenation is needed), `false` otherwise.
  */
 function prev_context_cleanup(
   ctx: TransliterateCtx,

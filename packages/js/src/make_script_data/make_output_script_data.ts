@@ -28,6 +28,11 @@ const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
 const CUSTOM_OPTIONS_OUT_FOLDER = path.resolve('./src/custom_options.json');
 
+/**
+ * Generate script data JSON files and write them to the output folder.
+ *
+ * Recreates the output directory, loads input script modules from src/make_script_data/input_data (excluding files that start with '_'), uses get_out_script_data to build each script's output data (precomputing the Normal script), and writes Normal.json and one JSON file per input script into the configured output folder.
+ */
 async function make_script_data() {
   // reset output folder
   if (fs.existsSync(OUT_FOLDER)) fs.rmSync(OUT_FOLDER, { recursive: true });
@@ -62,6 +67,14 @@ async function make_script_data() {
   }
 }
 
+/**
+ * Build the normalized output data structure for a script, including krama text array, text→krama mappings, list entries, typing mappings, and related indices.
+ *
+ * The returned object contains all fields required by downstream consumers: script metadata, krama_text_arr and its search index, text_to_krama_map (optimized and sorted), list entries with krama references, typing_text_to_krama_map and custom_script_chars_arr for typing mode, plus development-only diagnostic augmentations when running in dev mode.
+ *
+ * @param input_script_data - The source script definition (texts, manual mappings, list and typing_list) to convert into OutputScriptData.
+ * @param NormalOutputData - Optional precomputed OutputScriptData for the "Normal" script; when provided and the input script is not "Normal", it is used to generate and augment typing-specific mappings.
+ * @returns The constructed OutputScriptData for the provided script.
 function get_out_script_data(
   input_script_data: InputScriptInfoType,
   NormalOutputData?: OutputScriptData
@@ -579,6 +592,11 @@ function get_out_script_data(
   return res;
 }
 
+/**
+ * Constructs transformer options by converting symbolic krama key references into Krama index positions and writes the resulting JSON to the custom options output file.
+ *
+ * Rules of type `replace_prev_krama_keys` and `direct_replace` are transformed so their key arrays are replaced with numeric indices resolved against the global Krama key arrays; rule-level `check_in` and `use_replace` inherit from the option group when not specified. The final TransOptionsType object is serialized and written to CUSTOM_OPTIONS_OUT_FOLDER.
+ */
 async function make_custom_option_json() {
   const output: TransOptionsType = {};
   for (const [key, value] of Object.entries(CustomOptionsInput)) {
