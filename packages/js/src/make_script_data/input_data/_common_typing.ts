@@ -212,6 +212,11 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = [
 ] satisfies InputTypingListDataType[];
 
 export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
+  {
+    type: 'custom_script_char',
+    specific_text: '#',
+    custom_normal_key: '#'
+  },
   // allows typing of vedic sanskrit symbols in normal script
   {
     type: 'duplicates',
@@ -236,11 +241,6 @@ export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
 ] satisfies InputTypingListDataType[];
 
 export const DEVANAGARI_SPECIFIC_VEDIC_SANSKRIT_SYMBOLS = [
-  {
-    type: 'custom_script_char',
-    specific_text: '#',
-    custom_normal_key: '#'
-  },
   {
     type: 'custom_script_char',
     specific_text: '꣠',
