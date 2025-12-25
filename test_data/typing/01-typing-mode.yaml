@@ -66,3 +66,8 @@
   text: kqe qq
   output: क्ए q
   script: Devanagari
+# Tamil-Extended + Vedic Symbols Typing
+- index: 12
+  text: gE#an kE#an
+  output: கே॒³ கே॒
+  script: Tamil-Extended

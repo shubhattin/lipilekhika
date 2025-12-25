@@ -57,7 +57,7 @@
 
       conversionTime = prettyMs(timeTaken);
       console.log(`Conversion took: ${conversionTime}`);
-      console.log(result);
+      // console.log(result);
       outputText = result;
 
       if (timeoutId !== undefined) {

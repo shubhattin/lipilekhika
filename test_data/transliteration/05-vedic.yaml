@@ -1,0 +1,5 @@
+- index: 0
+  input: गे॒ के॒
+  output: கே॒³ கே॒
+  from: Devanagari
+  to: Tamil-Extended
