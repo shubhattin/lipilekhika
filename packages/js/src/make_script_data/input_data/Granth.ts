@@ -1,6 +1,10 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
-import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
+import {
+  COMMON_NUMBER_TYPING_DATA,
+  COMMON_SCRIPT_TYPING_DATA,
+  COMMON_SVARA_MATRA_TYPING_DATA
+} from './_common_typing';
 
 const Granth: InputBrahmicScriptType = {
   script_type: 'brahmic',
@@ -10,7 +14,11 @@ const Granth: InputBrahmicScriptType = {
   halant: '𑍍',
   nuqta: '𑌼',
   schwa_property: false,
-  typing_list: COMMON_SCRIPT_TYPING_DATA,
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    ...COMMON_NUMBER_TYPING_DATA,
+    ...COMMON_SVARA_MATRA_TYPING_DATA
+  ],
   manual_krama_text_map: {
     '0': '௦',
     '1': '௧',

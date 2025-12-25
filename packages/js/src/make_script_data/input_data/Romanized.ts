@@ -1,6 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputOtherScriptType } from '../input_script_data_schema';
-import { COMMON_SCRIPT_TYPING_DATA } from './_common_typing';
+import { COMMON_SCRIPT_TYPING_DATA, COMMON_SVARA_MATRA_TYPING_DATA } from './_common_typing';
 
 const Romanized: InputOtherScriptType = {
   script_name: 'Romanized',
@@ -129,7 +129,7 @@ const Romanized: InputOtherScriptType = {
     '।': '.',
     '॥': '..'
   },
-  typing_list: [...COMMON_SCRIPT_TYPING_DATA],
+  typing_list: [...COMMON_SCRIPT_TYPING_DATA, ...COMMON_SVARA_MATRA_TYPING_DATA],
   list: [
     {
       text: 'C',
