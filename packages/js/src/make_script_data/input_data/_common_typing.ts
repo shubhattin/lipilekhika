@@ -1,6 +1,26 @@
 import type { InputTypingListDataType } from '../input_script_data_schema';
 
 export const COMMON_SCRIPT_TYPING_DATA = [
+  // context clear
+  // pressing q will clear the context
+  // to type q use qq
+  {
+    type: 'custom_script_char',
+    specific_text: '',
+    custom_normal_key: 'q'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: 'q',
+    custom_normal_key: 'qq'
+  },
+  {
+    // zero width joiner
+    type: 'custom_script_char',
+    specific_text: '\u200d',
+    custom_normal_key: '.q'
+  },
+
   // mAtrA
   {
     type: 'duplicates',

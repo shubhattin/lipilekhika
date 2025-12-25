@@ -61,3 +61,8 @@
   text: ka#an ka#s ka#ss ka#sss
   output: क॒ क॑ क᳚ क᳛
   script: Devanagari
+# Context Clear
+- index: 11
+  text: kqe qq
+  output: क्ए q
+  script: Devanagari
