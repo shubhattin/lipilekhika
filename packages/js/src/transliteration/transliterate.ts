@@ -465,6 +465,29 @@ export const transliterate_text_core = (
       continue;
     }
 
+    // In Preserve mode, first check if the character is a custom script character
+    if (trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal') {
+      const custom_script_index = binarySearchLower(
+        from_script_data.custom_script_chars_arr,
+        char,
+        {
+          accessor: (arr, i) => arr[i][0]
+        }
+      );
+      if (custom_script_index !== -1) {
+        const custom_script_item = from_script_data.custom_script_chars_arr[custom_script_index];
+        prev_context_cleanup(ctx, [
+          custom_script_item[0],
+          from_script_data.list[custom_script_item[1] ?? -1] ?? null
+        ]);
+        const normal_text =
+          from_script_data.typing_text_to_krama_map[custom_script_item[2] ?? -1]?.[0];
+        result.emit(normal_text ?? '');
+        cursor.advance(custom_script_item[0].length);
+        continue;
+      }
+    }
+
     // Step 1: Search for the character in the text_to_krama_map
     let text_to_krama_item_index = -1;
     {

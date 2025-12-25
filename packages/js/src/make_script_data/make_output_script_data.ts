@@ -450,13 +450,16 @@ function get_out_script_data(
     // Step 3: Reference back the custom normal key mapping to the typing_text_to_krama_map
     for (let i = 0; i < res.custom_script_chars_arr.length; i++) {
       const item = res.custom_script_chars_arr[i];
-      const custom_text_index = res.typing_text_to_krama_map.findIndex((v) => v[0] === item[0]);
-      if (
-        custom_text_index !== undefined &&
-        custom_text_index !== null &&
-        custom_text_index !== -1
-      ) {
-        res.custom_script_chars_arr[i][2] = custom_text_index;
+      const corresponding_normal_text_index = input_script_data.typing_list.findIndex(
+        (v) => v.type === 'custom_script_char' && v.specific_text === item[0]
+      );
+      const corresponding_normal_text =
+        input_script_data.typing_list[corresponding_normal_text_index];
+      if (corresponding_normal_text && corresponding_normal_text.type === 'custom_script_char') {
+        const normal_text_index = res.typing_text_to_krama_map.findIndex(
+          (v) => v[0] === corresponding_normal_text.custom_normal_key
+        );
+        res.custom_script_chars_arr[i][2] = normal_text_index;
       }
     }
   }
