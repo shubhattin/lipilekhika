@@ -73,3 +73,15 @@
   output: ද්‍වයම්‍
   options:
     "all_to_sinhala:use_conjuct_enabling_halant": true
+- index: 8
+  from: Devanagari
+  to: Tamil-Extended
+  input: गङ्गा
+  output: க³ங்கா³
+- index: 9
+  from: Devanagari
+  to: Tamil-Extended
+  input: गङ्गा
+  output: க³ஂகா³
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra": true

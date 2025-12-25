@@ -36,7 +36,7 @@ export async function emulateTyping(
 export const patch_old_tamil_extended_vedic_text = (text: string) => {
   for (const svara of VEDIC_SVARAS) {
     for (const num of TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS) {
-      text = text.replace(num + svara, svara + num);
+      text = text.replaceAll(num + svara, svara + num);
     }
   }
   return text;
