@@ -22,6 +22,11 @@ export const COMMON_SCRIPT_TYPING_DATA = [
   // vyanjana and anya
   {
     type: 'duplicates',
+    ref_krama_key: 'phz',
+    duplicates: ['f']
+  },
+  {
+    type: 'duplicates',
     ref_krama_key: 'jz',
     duplicates: ['z']
   },
@@ -46,6 +51,17 @@ export const COMMON_SCRIPT_TYPING_DATA = [
     type: 'duplicates',
     ref_krama_key: 'halant',
     duplicates: ['.h']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'saMkShepachihna',
+    duplicates: ['Q']
+  },
+  {
+    // allow typing Q with QQ
+    type: 'custom_script_char',
+    specific_text: 'Q',
+    custom_normal_key: 'QQ'
   }
 ] satisfies InputTypingListDataType[];
 
@@ -192,5 +208,142 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = [
     type: 'duplicates',
     ref_krama_key: 'LRR-mAtrA',
     duplicates: ['.LRR']
+  }
+] satisfies InputTypingListDataType[];
+
+export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
+  // allows typing of vedic sanskrit symbols in normal script
+  {
+    type: 'duplicates',
+    ref_krama_key: 'anudAttA',
+    duplicates: ['#an']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'svarita-3',
+    duplicates: ['#sss']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'svarita-2',
+    duplicates: ['#ss']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'svarita-1',
+    duplicates: ['#s']
+  }
+] satisfies InputTypingListDataType[];
+
+export const DEVANAGARI_SPECIFIC_VEDIC_SANSKRIT_SYMBOLS = [
+  {
+    type: 'custom_script_char',
+    specific_text: '#',
+    custom_normal_key: '#'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣠',
+    custom_normal_key: '#0'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣡',
+    custom_normal_key: '#1'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣢',
+    custom_normal_key: '#2'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣣',
+    custom_normal_key: '#3'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣤',
+    custom_normal_key: '#4'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣥',
+    custom_normal_key: '#5'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣦',
+    custom_normal_key: '#6'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣧',
+    custom_normal_key: '#7'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣨',
+    custom_normal_key: '#8'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣩',
+    custom_normal_key: '#9'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣱',
+    custom_normal_key: "#'"
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: 'ꣳ',
+    custom_normal_key: '#M'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: 'ꣲ',
+    custom_normal_key: '#M1'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣫',
+    custom_normal_key: '#u'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣬',
+    custom_normal_key: '#k'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣭',
+    custom_normal_key: '#n'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣮',
+    custom_normal_key: '#p'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣯',
+    custom_normal_key: '#r'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: '꣰',
+    custom_normal_key: '#v'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: 'ᳵ',
+    custom_normal_key: '#H'
+  },
+  {
+    type: 'custom_script_char',
+    specific_text: 'ᳶ',
+    custom_normal_key: '#H1'
   }
 ] satisfies InputTypingListDataType[];

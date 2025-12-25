@@ -57,3 +57,7 @@
   script: Tamil-Extended
   options:
     includeInherentVowel: true
+- index: 10
+  text: ka#an ka#s ka#ss ka#sss
+  output: क॒ क॑ क᳚ क᳛
+  script: Devanagari
