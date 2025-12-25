@@ -8,7 +8,13 @@
     type ScriptListType,
     type TransliterationOptions
   } from '../../../../packages/js/src/index';
-  import { createTypingContext, handleTypingInputEvent, clearTypingContextOnKeyDown } from '../../../../packages/js/src/typing';
+  import {
+    createTypingContext,
+    handleTypingInputEvent,
+    clearTypingContextOnKeyDown,
+    DEFAULT_USE_NATIVE_NUMERALS,
+    DEFAULT_INCLUDE_INHERENT_VOWEL
+  } from '../../../../packages/js/src/typing';
   // ^ import directly for real time development
   import { slide } from 'svelte/transition';
   import prettyMs from 'pretty-ms';
@@ -18,7 +24,8 @@
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import { Separator } from '$lib/components/ui/separator';
-  import { KeyboardIcon } from 'lucide-svelte';
+  import * as Popover from '$lib/components/ui/popover';
+  import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_FROM: ScriptListType = 'Devanagari';
@@ -35,6 +42,8 @@
   let timeoutId: NodeJS.Timeout | undefined;
 
   let typing_enabled = $state(true);
+  let useNativeNumerals = $state(DEFAULT_USE_NATIVE_NUMERALS);
+  let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
   let from_input_typing_context = $derived(createTypingContext(fromScript));
 
@@ -81,6 +90,14 @@
       options = Object.fromEntries(all_options.map((v) => [v, false]));
       availableOptions = all_options;
     });
+  });
+
+  $effect(() => {
+    from_input_typing_context.updateUseNativeNumerals(useNativeNumerals);
+  });
+
+  $effect(() => {
+    from_input_typing_context.updateIncludeInherentVowel(includeInherentVowel);
   });
 
   onMount(() => {
@@ -214,6 +231,51 @@
                 <KeyboardIcon class="h-7 w-10" />
                 <Switch bind:checked={typing_enabled} />
               </label>
+              <Popover.Root>
+                <Popover.Trigger>
+                  <Button variant="ghost" size="icon" class="h-8 w-8">
+                    <SettingsIcon class="h-4 w-4" />
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content class="w-80">
+                  <div class="space-y-4">
+                    <h4 class="font-medium leading-none">Typing Options</h4>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between gap-4">
+                        <label
+                          for="use-native-numerals"
+                          class="flex flex-col gap-1 text-sm"
+                        >
+                          <span class="font-medium">Use Native Numerals</span>
+                          <span class="text-xs text-muted-foreground"
+                            >Convert numbers to script numerals</span
+                          >
+                        </label>
+                        <Switch
+                          id="use-native-numerals"
+                          bind:checked={useNativeNumerals}
+                        />
+                      </div>
+                      <Separator />
+                      <div class="flex items-center justify-between gap-4">
+                        <label
+                          for="include-inherent-vowel"
+                          class="flex flex-col gap-1 text-sm"
+                        >
+                          <span class="font-medium">Include Inherent Vowel</span>
+                          <span class="text-xs text-muted-foreground"
+                            >Add inherent vowel (schwa) to consonants</span
+                          >
+                        </label>
+                        <Switch
+                          id="include-inherent-vowel"
+                          bind:checked={includeInherentVowel}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Popover.Content>
+              </Popover.Root>
             </div>
           </div>
           <Textarea

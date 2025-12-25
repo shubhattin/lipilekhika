@@ -8,8 +8,12 @@ import {
 import type { ScriptLangType } from './types';
 
 const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
-const DEFAULT_USE_NATIVE_NUMERALS = true;
-const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
+/** Default values for the typing context options */
+export const DEFAULT_USE_NATIVE_NUMERALS = true;
+/** Default value for the include inherent vowel option.
+ * By default avoids schwa deletion
+ */
+export const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
 
 type TypingContextOptions = {
   /** The time in milliseconds after which the context will be cleared automatically

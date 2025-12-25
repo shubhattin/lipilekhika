@@ -34,12 +34,18 @@ export const COMMON_SCRIPT_TYPING_DATA = [
     type: 'duplicates',
     ref_krama_key: 'nz',
     duplicates: ['n1']
-  }, // duplicates
-
+  },
   {
     type: 'duplicates',
     ref_krama_key: 'Lz',
     duplicates: ['zh']
+  },
+
+  // anya
+  {
+    type: 'duplicates',
+    ref_krama_key: 'halant',
+    duplicates: ['.h']
   }
 ] satisfies InputTypingListDataType[];
 
