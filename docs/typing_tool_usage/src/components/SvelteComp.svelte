@@ -3,7 +3,7 @@
   import {
     createTypingContext,
     clearTypingContextOnKeyDown,
-    handleTypingInputEvent
+    handleTypingBeforeInputEvent
   } from 'lipilekhika/typing';
 
   let textarea_text = $state('');
@@ -47,8 +47,8 @@
     <textarea
       placeholder="Start typing here..."
       value={textarea_text}
-      oninput={(e) =>
-        handleTypingInputEvent(
+      onbeforeinput={(e) =>
+        handleTypingBeforeInputEvent(
           textarea_typing_context,
           e,
           (new_value) => (textarea_text = new_value)
@@ -64,8 +64,8 @@
       placeholder="Type here..."
       type="text"
       value={input_text}
-      oninput={(e) =>
-        handleTypingInputEvent(input_typing_context, e, (new_value) => (input_text = new_value))}
+      onbeforeinput={(e) =>
+        handleTypingBeforeInputEvent(input_typing_context, e, (new_value) => (input_text = new_value))}
       onblur={() => input_typing_context.clearContext()}
       onkeydown={(e) => clearTypingContextOnKeyDown(e, input_typing_context)}
       class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
