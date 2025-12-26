@@ -56,7 +56,7 @@
       const timeTaken = endTime - startTime;
 
       conversionTime = prettyMs(timeTaken);
-      console.log(`Conversion took: ${conversionTime}`);
+      // console.log(`Conversion took: ${conversionTime}`);
       // console.log([inputText, result]);
       outputText = result;
 
