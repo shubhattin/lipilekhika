@@ -7,7 +7,7 @@ import {
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
-  handleTypingInputEvent
+ handleTypingBeforeInputEvent 
 } from 'lipilekhika/typing';
 
 const textareaText = ref('');
@@ -51,9 +51,9 @@ watchEffect(() => {
       <textarea
         placeholder="Start typing here..."
         :value="textareaText"
-        @input="
+        @beforeinput="
           (e) =>
-            handleTypingInputEvent(
+            handleTypingBeforeInputEvent(
               textareaTypingContext,
               e,
               (newValue) => (textareaText = newValue)
@@ -70,9 +70,9 @@ watchEffect(() => {
         type="text"
         placeholder="Type here..."
         :value="inputText"
-        @input="
+        @beforeinput="
           (e) =>
-            handleTypingInputEvent(
+            handleTypingBeforeInputEvent(
               inputTypingContext,
               e,
               (newValue) => (inputText = newValue)

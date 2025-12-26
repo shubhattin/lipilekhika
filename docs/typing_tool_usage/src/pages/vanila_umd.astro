@@ -89,8 +89,8 @@ import RootLayout from '../RootLayout.astro';
       if (typeof next === 'string' && next.length > 0) resetContexts(next);
     });
 
-    textarea.addEventListener('input', async (e) => {
-      await lipilekhika.typing.handleTypingInputEvent(textareaCtx, e, (newValue) => {
+    textarea.addEventListener('beforeinput', async (e) => {
+      await lipilekhika.typing.handleTypingBeforeInputEvent(textareaCtx, e, (newValue) => {
         textarea.value = newValue;
       });
     });
@@ -99,8 +99,8 @@ import RootLayout from '../RootLayout.astro';
       lipilekhika.typing.clearTypingContextOnKeyDown(e, textareaCtx)
     );
 
-    input.addEventListener('input', async (e) => {
-      await lipilekhika.typing.handleTypingInputEvent(inputCtx, e, (newValue) => {
+    input.addEventListener('beforeinput', async (e) => {
+      await lipilekhika.typing.handleTypingBeforeInputEvent(inputCtx, e, (newValue) => {
         input.value = newValue;
       });
     });

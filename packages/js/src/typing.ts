@@ -157,74 +157,82 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
 }
 
 /**
- * Handles input events for transliteration typing in `input` and `textarea` elements
+ * @deprecated This function is deprecated.
+ * Prefer using `handleTypingBeforeInputEvent` instead, which handles transliteration typing via the native `beforeinput` event in both React and Svelte.
+ *
+ * Handles input events for transliteration typing in `input` and `textarea` elements.
+ *
+ * Use this function with **React** only if the `onbeforeinput` approach does not work.
  *
  * @param typingContext - The typing context created for the element
  * @param event - Input Event
  * @param onValueChange - Optional callback function invoked when the value changes
+ * @param enabled_ - Optional flag to enable/disable transliteration (defaults to true)
  */
-// export async function handleTypingInputEvent(
-//   typingContext: ReturnType<typeof createTypingContext>,
-//   event: any,
-//   onValueChange?: (updatedValue: string) => void,
-//   enabled_?: boolean
-// ) {
-//   const enabled = enabled_ ?? true;
-//   if (!enabled) {
-//     onValueChange?.(event.currentTarget.value);
-//     return;
-//   }
-//   // react synthetic event handling
-//   const isReactSyntheticEvent = 'nativeEvent' in event;
-//   const isInputEvent = isReactSyntheticEvent
-//     ? typeof InputEvent !== 'undefined' &&
-//       event?.nativeEvent instanceof InputEvent &&
-//       event.nativeEvent.data !== null
-//     : typeof InputEvent !== 'undefined' && event instanceof InputEvent && event.data !== null;
-//   const inputElement = isReactSyntheticEvent ? event.nativeEvent.target : event.currentTarget;
-//   if (isInputEvent) {
-//     if (isReactSyntheticEvent && onValueChange) {
-//       // extra step required in react
-//       onValueChange(event.currentTarget.value);
-//     }
-//     await typingContext.ready;
+export async function handleTypingInputEvent(
+  typingContext: ReturnType<typeof createTypingContext>,
+  event: any,
+  onValueChange?: (updatedValue: string) => void,
+  enabled_?: boolean
+) {
+  const enabled = enabled_ ?? true;
+  if (!enabled) {
+    onValueChange?.(event?.currentTarget?.value);
+    return;
+  }
 
-//     const inputData = isReactSyntheticEvent ? event.nativeEvent.data : event.data;
-//     const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
-//     const currentValue = inputElement.value;
-//     const cursorPosition = (inputElement.selectionStart ?? 0) + 1;
+  const nativeEvent: any = event?.nativeEvent ?? event;
+  const isReactSyntheticEvent = 'nativeEvent' in event;
+  const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
+    nativeEvent?.target) as any;
 
-//     // Split the text into three parts: before cursor, changed part, and after cursor
-//     const deleteStartPosition = cursorPosition - to_delete_chars_count - 2;
-//     const textBeforeCursor = currentValue.substring(0, deleteStartPosition);
-//     const transliteratedText = diff_add_text;
+  if (!nativeEvent || !inputElement) return;
 
-//     let textAfterCursor = '';
-//     const isAtEnd = currentValue.length + 1 === cursorPosition;
-//     const isNotAtEnd = currentValue.length + 1 !== cursorPosition;
+  // Don’t interfere with IME/composition; this breaks mobile/IME typing.
+  if (nativeEvent.isComposing) return;
 
-//     if (isAtEnd) {
-//       textAfterCursor = currentValue.substring(cursorPosition + 1);
-//     } else if (isNotAtEnd) {
-//       textAfterCursor = currentValue.substring(cursorPosition - 1);
-//     }
+  // Only handle actual single-character insertions.
+  // For deletes/paste/etc, let the browser handle it and clear context.
+  if (nativeEvent.inputType !== 'insertText') {
+    onValueChange?.(inputElement.value);
+    typingContext.clearContext();
+    return;
+  }
 
-//     const newCursorPosition = textBeforeCursor.length + transliteratedText.length;
-//     const updatedValue = textBeforeCursor + transliteratedText + textAfterCursor;
+  const inputData: unknown = nativeEvent.data;
+  if (typeof inputData !== 'string' || inputData.length !== 1) {
+    onValueChange?.(inputElement.value);
+    typingContext.clearContext();
+    return;
+  }
 
-//     // Update the input element
-//     inputElement.value = updatedValue;
-//     inputElement.focus();
-//     inputElement.selectionStart = newCursorPosition;
-//     inputElement.selectionEnd = newCursorPosition;
+  // If there is a selection, we don’t have a clean incremental diff story yet.
+  // Let the browser replace the selection and reset the typing context.
+  const selectionStart = inputElement.selectionStart ?? 0;
+  const selectionEnd = inputElement.selectionEnd ?? selectionStart;
+  if (selectionStart !== selectionEnd) {
+    onValueChange?.(inputElement.value);
+    typingContext.clearContext();
+    return;
+  }
 
-//     onValueChange?.(updatedValue);
-//   } else {
-//     // Handle non-character events (delete, backspace, paste, etc.)
-//     onValueChange?.(inputElement.value);
-//     typingContext.clearContext();
-//   }
-// }
+  if (isReactSyntheticEvent && onValueChange) {
+    // Extra step required in React for controlled inputs: first acknowledge the browser's edit.
+    onValueChange(event.currentTarget.value);
+  }
+
+  await typingContext.ready;
+
+  const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
+
+  // In the `input` event, the browser has already inserted `inputData` at the caret.
+  // Replace: [ ... (previous context) + inserted raw char ] with transliterated diff.
+  const replaceEnd = selectionStart;
+  const replaceStart = Math.max(0, replaceEnd - to_delete_chars_count - inputData.length);
+  inputElement.setRangeText(diff_add_text, replaceStart, replaceEnd, 'end');
+
+  onValueChange?.(inputElement.value);
+}
 
 /**
  * Handles `beforeinput` events for transliteration typing in `input` and `textarea` elements.
@@ -254,7 +262,8 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  const nativeEvent: any = event?.nativeEvent ?? event;
+  const isReactSyntheticEvent = 'nativeEvent' in event;
+  const nativeEvent: any = isReactSyntheticEvent ? event.nativeEvent : event;
   const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
     nativeEvent?.target) as any;
 
@@ -265,7 +274,11 @@ export async function handleTypingBeforeInputEvent(
 
   // Only handle actual text insertions. Let the browser do everything else.
   // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
-  if (nativeEvent.inputType !== 'insertText') return;
+  if (
+    (!nativeEvent.inputType || nativeEvent.inputType !== 'insertText') &&
+    (!nativeEvent.type || nativeEvent.type !== 'textInput')
+  )
+    return;
   const inputData: unknown = nativeEvent.data;
   if (typeof inputData !== 'string' || inputData.length === 0) return;
 
@@ -278,10 +291,10 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  await typingContext.ready;
-
   // Suppress the default browser insertion.
   nativeEvent.preventDefault?.();
+
+  await typingContext.ready;
 
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 
@@ -315,7 +328,11 @@ const CONTEXT_CLEAR_KEYS = new Set([
  * @param ctx - The typing context
  * @returns True if the keydown event should clear the typing context, false otherwise
  */
-export function clearTypingContextOnKeyDown(e: any, ctx: ReturnType<typeof createTypingContext>) {
+export function clearTypingContextOnKeyDown(
+  event: any,
+  ctx: ReturnType<typeof createTypingContext>
+) {
+  const e = event?.nativeEvent ?? event;
   if (e instanceof KeyboardEvent) {
     // Mobile virtual keyboards and IME/composition frequently report keys like
     // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.

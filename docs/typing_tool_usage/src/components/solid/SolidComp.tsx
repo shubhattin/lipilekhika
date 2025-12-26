@@ -3,7 +3,7 @@ import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
-  handleTypingInputEvent
+  handleTypingBeforeInputEvent
 } from 'lipilekhika/typing';
 
 export default function SolidComp() {
@@ -53,8 +53,8 @@ export default function SolidComp() {
         <textarea
           placeholder="Start typing here..."
           value={textareaText()}
-          onInput={(e) =>
-            handleTypingInputEvent(textareaTypingContext(), e, (newValue) =>
+          onBeforeInput={(e) =>
+            handleTypingBeforeInputEvent(textareaTypingContext(), e, (newValue) =>
               setTextareaText(newValue)
             )
           }
@@ -69,8 +69,10 @@ export default function SolidComp() {
           type="text"
           placeholder="Type here..."
           value={inputText()}
-          onInput={(e) =>
-            handleTypingInputEvent(inputTypingContext(), e, (newValue) => setInputText(newValue))
+          onBeforeInput={(e) =>
+            handleTypingBeforeInputEvent(inputTypingContext(), e, (newValue) =>
+              setInputText(newValue)
+            )
           }
           onBlur={() => inputTypingContext().clearContext()}
           onKeyDown={(e) => clearTypingContextOnKeyDown(e, inputTypingContext())}
