@@ -58,7 +58,7 @@
   options:
     includeInherentVowel: true
 - index: 10
-  text: ka#an ka#s ka#ss ka#sss
+  text: ka_ ka' ka'' ka'''
   output: क॒ क॑ क᳚ क᳛
   script: Devanagari
 # Context Clear
@@ -68,6 +68,6 @@
   script: Devanagari
 # Tamil-Extended + Vedic Symbols Typing
 - index: 12
-  text: gE#an kE#an ghE#s jhE#ss bhu#sss
+  text: gE_ kE_ ghE' jhE'' bhu'''
   output: கே॒³ கே॒ கே॑⁴ ஜே᳚² பு᳛⁴
   script: Tamil-Extended

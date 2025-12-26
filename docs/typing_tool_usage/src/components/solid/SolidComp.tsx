@@ -53,6 +53,7 @@ export default function SolidComp() {
         <textarea
           placeholder="Start typing here..."
           value={textareaText()}
+          onInput={(e) => setTextareaText(e.currentTarget.value)}
           onBeforeInput={(e) =>
             handleTypingBeforeInputEvent(textareaTypingContext(), e, (newValue) =>
               setTextareaText(newValue)
@@ -69,6 +70,7 @@ export default function SolidComp() {
           type="text"
           placeholder="Type here..."
           value={inputText()}
+          onInput={(e) => setInputText(e.currentTarget.value)}
           onBeforeInput={(e) =>
             handleTypingBeforeInputEvent(inputTypingContext(), e, (newValue) =>
               setInputText(newValue)

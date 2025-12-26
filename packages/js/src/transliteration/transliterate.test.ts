@@ -28,6 +28,7 @@ const listYamlFiles = (directory: string): string[] => {
   return collected;
 };
 
+const NORMAL_PATCHES = [['~', "''"]] as const;
 describe('Transliteration', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
   for (const filePath of yamlFiles) {
@@ -41,12 +42,23 @@ describe('Transliteration', () => {
       for (const test_data_item of test_data) {
         preloadScriptData(test_data_item.from as script_input_name_type);
         preloadScriptData(test_data_item.to as script_input_name_type);
+        let input1 = test_data_item.input;
+        if (test_data_item.from === 'Normal' || test_data_item.from === 'Romanized') {
+          for (const patch of NORMAL_PATCHES) {
+            input1 = input1.replaceAll(patch[1], patch[0]);
+          }
+        }
         let result = await transliterate(
-          test_data_item.input,
+          input1,
           test_data_item.from as script_input_name_type,
           test_data_item.to as script_input_name_type,
           test_data_item.options
         );
+        if (['Normal', 'Romanized'].includes(test_data_item.to)) {
+          for (const patch of NORMAL_PATCHES) {
+            result = result.replaceAll(patch[0], patch[1]);
+          }
+        }
         if (
           fileName.startsWith('auto') &&
           test_data_item.to === 'Tamil-Extended' &&
@@ -74,12 +86,22 @@ describe('Transliteration', () => {
           testFn(
             `${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`,
             async () => {
-              const result_reversed = await transliterate(
+              if (['Normal', 'Romanized'].includes(test_data_item.to)) {
+                for (const patch of NORMAL_PATCHES) {
+                  result = result.replaceAll(patch[1], patch[0]);
+                }
+              }
+              let result_reversed = await transliterate(
                 result,
                 test_data_item.to as script_input_name_type,
                 test_data_item.from as script_input_name_type,
                 test_data_item.options
               );
+              if (test_data_item.from === 'Normal') {
+                for (const patch of NORMAL_PATCHES) {
+                  result_reversed = result_reversed.replaceAll(patch[0], patch[1]);
+                }
+              }
               const errorMessage_reversed =
                 `Reversed Transliteration failed:\n` +
                 `  From: ${test_data_item.to}\n` +

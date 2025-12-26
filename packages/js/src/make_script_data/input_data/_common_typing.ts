@@ -232,31 +232,26 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = [
 ] satisfies InputTypingListDataType[];
 
 export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
-  {
-    type: 'custom_script_char',
-    specific_text: '#',
-    custom_normal_key: '#'
-  },
   // allows typing of vedic sanskrit symbols in normal script
   {
     type: 'duplicates',
     ref_krama_key: 'anudAttA',
-    duplicates: ['#an']
+    duplicates: ['_']
   },
   {
     type: 'duplicates',
     ref_krama_key: 'svarita-3',
-    duplicates: ['#sss']
+    duplicates: ["'''"]
   },
   {
     type: 'duplicates',
     ref_krama_key: 'svarita-2',
-    duplicates: ['#ss']
+    duplicates: ["''"]
   },
   {
     type: 'duplicates',
     ref_krama_key: 'svarita-1',
-    duplicates: ['#s']
+    duplicates: ["'"]
   }
 ] satisfies InputTypingListDataType[];
 

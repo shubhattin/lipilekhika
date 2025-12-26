@@ -46,7 +46,7 @@
   <div class="mb-7">
     <textarea
       placeholder="Start typing here..."
-      value={textarea_text}
+      bind:value={textarea_text}
       onbeforeinput={(e) =>
         handleTypingBeforeInputEvent(
           textarea_typing_context,
@@ -63,7 +63,7 @@
     <input
       placeholder="Type here..."
       type="text"
-      value={input_text}
+      bind:value={input_text}
       onbeforeinput={(e) =>
         handleTypingBeforeInputEvent(input_typing_context, e, (new_value) => (input_text = new_value))}
       onblur={() => input_typing_context.clearContext()}
