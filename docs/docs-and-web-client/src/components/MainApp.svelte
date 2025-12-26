@@ -57,7 +57,7 @@
 
       conversionTime = prettyMs(timeTaken);
       console.log(`Conversion took: ${conversionTime}`);
-      // console.log(result);
+      // console.log([inputText, result]);
       outputText = result;
 
       if (timeoutId !== undefined) {
@@ -282,7 +282,7 @@
             id="source-text"
             class="min-h-[180px] resize-none"
             placeholder="Enter text to transliterate..."
-            value={inputText}
+            bind:value={inputText}
             onbeforeinput={(e) =>
               handleTypingBeforeInputEvent(from_input_typing_context, e, (new_value) => (inputText = new_value), typing_enabled)}
             onblur={() => from_input_typing_context.clearContext()}

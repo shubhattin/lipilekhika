@@ -8,3 +8,13 @@
   output: கே॒³ கே॒
   from: Normal
   to: Tamil-Extended
+- index: 2
+  input: கே॒³ கே॒ கே॑⁴ ஜே᳚² பு᳛⁴
+  output: गे॒ के॒ घे॑ झे᳚ भु᳛
+  from: Tamil-Extended
+  to: Devanagari
+- index: 3
+  input: கே॒³ கே॒
+  output: gE↓ kE↓
+  from: Tamil-Extended
+  to: Normal
