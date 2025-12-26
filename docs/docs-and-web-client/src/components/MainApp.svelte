@@ -10,7 +10,7 @@
   } from '../../../../packages/js/src/index';
   import {
     createTypingContext,
-    handleTypingInputEvent,
+    handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown,
     DEFAULT_USE_NATIVE_NUMERALS,
     DEFAULT_INCLUDE_INHERENT_VOWEL
@@ -283,13 +283,8 @@
             class="min-h-[180px] resize-none"
             placeholder="Enter text to transliterate..."
             value={inputText}
-            oninput={(e) =>
-              handleTypingInputEvent(
-                from_input_typing_context,
-                e,
-                (new_value) => (inputText = new_value),
-                typing_enabled
-              )}
+            onbeforeinput={(e) =>
+              handleTypingBeforeInputEvent(from_input_typing_context, e, (new_value) => (inputText = new_value), typing_enabled)}
             onblur={() => from_input_typing_context.clearContext()}
             onkeydown={(e) => {
               // Toggle typing on Alt+X
