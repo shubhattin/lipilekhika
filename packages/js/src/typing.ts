@@ -177,7 +177,7 @@ export async function handleTypingInputEvent(
 ) {
   const enabled = enabled_ ?? true;
   if (!enabled) {
-    onValueChange?.(event.currentTarget.value);
+    onValueChange?.(event?.currentTarget?.value);
     return;
   }
 
@@ -275,9 +275,8 @@ export async function handleTypingBeforeInputEvent(
   // Only handle actual text insertions. Let the browser do everything else.
   // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
   if (
-    !isReactSyntheticEvent
-      ? !nativeEvent.inputType || nativeEvent.inputType !== 'insertText'
-      : !nativeEvent.type || nativeEvent.type !== 'textInput'
+    (!nativeEvent.inputType || nativeEvent.inputType !== 'insertText') &&
+    (!nativeEvent.type || nativeEvent.type !== 'textInput')
   )
     return;
   const inputData: unknown = nativeEvent.data;
@@ -292,10 +291,10 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  await typingContext.ready;
-
   // Suppress the default browser insertion.
   nativeEvent.preventDefault?.();
+
+  await typingContext.ready;
 
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 

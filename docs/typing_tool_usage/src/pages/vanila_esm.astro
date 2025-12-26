@@ -52,7 +52,7 @@ import RootLayout from '../RootLayout.astro';
       import {
         createTypingContext,
         clearTypingContextOnKeyDown,
-        handleTypingInputEvent
+        handleTypingBeforeInputEvent
       } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/typing.mjs';
 
       const select = document.getElementById('script-select');
@@ -87,7 +87,7 @@ import RootLayout from '../RootLayout.astro';
       });
 
       textarea.addEventListener('beforeinput', async (e) => {
-        await handleTypingInputEvent(textareaCtx, e, (newValue) => {
+        await handleTypingBeforeInputEvent(textareaCtx, e, (newValue) => {
           textarea.value = newValue;
         });
       });
@@ -95,7 +95,7 @@ import RootLayout from '../RootLayout.astro';
       textarea.addEventListener('keydown', (e) => clearTypingContextOnKeyDown(e, textareaCtx));
 
       input.addEventListener('beforeinput', async (e) => {
-        await handleTypingInputEvent(inputCtx, e, (newValue) => {
+        await handleTypingBeforeInputEvent(inputCtx, e, (newValue) => {
           input.value = newValue;
         });
       });

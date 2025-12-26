@@ -90,7 +90,7 @@ import RootLayout from '../RootLayout.astro';
     });
 
     textarea.addEventListener('beforeinput', async (e) => {
-      await lipilekhika.typing.handleTypingInputEvent(textareaCtx, e, (newValue) => {
+      await lipilekhika.typing.handleTypingBeforeInputEvent(textareaCtx, e, (newValue) => {
         textarea.value = newValue;
       });
     });
@@ -100,7 +100,7 @@ import RootLayout from '../RootLayout.astro';
     );
 
     input.addEventListener('beforeinput', async (e) => {
-      await lipilekhika.typing.handleTypingInputEvent(inputCtx, e, (newValue) => {
+      await lipilekhika.typing.handleTypingBeforeInputEvent(inputCtx, e, (newValue) => {
         input.value = newValue;
       });
     });
