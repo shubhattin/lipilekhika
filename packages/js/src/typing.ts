@@ -328,7 +328,11 @@ const CONTEXT_CLEAR_KEYS = new Set([
  * @param ctx - The typing context
  * @returns True if the keydown event should clear the typing context, false otherwise
  */
-export function clearTypingContextOnKeyDown(e: any, ctx: ReturnType<typeof createTypingContext>) {
+export function clearTypingContextOnKeyDown(
+  event: any,
+  ctx: ReturnType<typeof createTypingContext>
+) {
+  const e = event?.nativeEvent ?? event;
   if (e instanceof KeyboardEvent) {
     // Mobile virtual keyboards and IME/composition frequently report keys like
     // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.
