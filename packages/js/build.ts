@@ -84,5 +84,6 @@ https://cdn.jsdelivr.net/npm/lipilekhika
 https://cdn.jsdelivr.net/npm/lipilekhika@latest
 https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs
 https://cdn.jsdelivr.net/npm/lipilekhika@latest/dist/esm/index.mjs
-
+https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/typing.mjs
+https://cdn.jsdelivr.net/npm/lipilekhika@latest/dist/esm/typing.mjs
 */

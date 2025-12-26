@@ -1,9 +1,12 @@
 {
   "name": "lipilekhika",
-  "version": "0.0.0-alpha.3",
+  "version": "0.0.1-beta.3",
   "type": "module",
   "license": "MIT",
-  "repository": "https://github.com/shubhattin/lipilekhika/tree/main/packages/js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shubhattin/lipilekhika.git"
+  },
   "sideEffects": false,
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
