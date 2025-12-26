@@ -86,7 +86,7 @@ import RootLayout from '../RootLayout.astro';
         if (typeof next === 'string' && next.length > 0) resetContexts(next);
       });
 
-      textarea.addEventListener('input', async (e) => {
+      textarea.addEventListener('beforeinput', async (e) => {
         await handleTypingInputEvent(textareaCtx, e, (newValue) => {
           textarea.value = newValue;
         });
@@ -94,7 +94,7 @@ import RootLayout from '../RootLayout.astro';
       textarea.addEventListener('blur', () => textareaCtx.clearContext());
       textarea.addEventListener('keydown', (e) => clearTypingContextOnKeyDown(e, textareaCtx));
 
-      input.addEventListener('input', async (e) => {
+      input.addEventListener('beforeinput', async (e) => {
         await handleTypingInputEvent(inputCtx, e, (newValue) => {
           input.value = newValue;
         });
