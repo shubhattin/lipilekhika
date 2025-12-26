@@ -50,7 +50,7 @@ watchEffect(() => {
     <div class="mb-7">
       <textarea
         placeholder="Start typing here..."
-        :value="textareaText"
+        v-model="textareaText"
         @beforeinput="
           (e) =>
             handleTypingBeforeInputEvent(
@@ -69,7 +69,7 @@ watchEffect(() => {
       <input
         type="text"
         placeholder="Type here..."
-        :value="inputText"
+        v-model="inputText"
         @beforeinput="
           (e) =>
             handleTypingBeforeInputEvent(
