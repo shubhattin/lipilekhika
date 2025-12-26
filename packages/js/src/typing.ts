@@ -157,9 +157,12 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
 }
 
 /**
- * Handles input events for transliteration typing in `input` and `textarea` elements
+ * @deprecated This function is deprecated.
+ * Prefer using `handleTypingBeforeInputEvent` instead, which handles transliteration typing via the native `beforeinput` event in both React and Svelte.
  *
- * Use this function with **React** if the `onbeforeinput` one does not work
+ * Handles input events for transliteration typing in `input` and `textarea` elements.
+ *
+ * Use this function with **React** only if the `onbeforeinput` approach does not work.
  *
  * @param typingContext - The typing context created for the element
  * @param event - Input Event
@@ -179,7 +182,7 @@ export async function handleTypingInputEvent(
   }
 
   const nativeEvent: any = event?.nativeEvent ?? event;
-  const isReactSyntheticEvent = event?.nativeEvent != null;
+  const isReactSyntheticEvent = 'nativeEvent' in event;
   const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
     nativeEvent?.target) as any;
 
@@ -259,7 +262,8 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  const nativeEvent: any = event?.nativeEvent ?? event;
+  const isReactSyntheticEvent = 'nativeEvent' in event;
+  const nativeEvent: any = isReactSyntheticEvent ? event.nativeEvent : event;
   const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
     nativeEvent?.target) as any;
 
@@ -270,7 +274,12 @@ export async function handleTypingBeforeInputEvent(
 
   // Only handle actual text insertions. Let the browser do everything else.
   // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
-  if (nativeEvent.inputType !== 'insertText') return;
+  if (
+    !isReactSyntheticEvent
+      ? !nativeEvent.inputType || nativeEvent.inputType !== 'insertText'
+      : !nativeEvent.type || nativeEvent.type !== 'textInput'
+  )
+    return;
   const inputData: unknown = nativeEvent.data;
   if (typeof inputData !== 'string' || inputData.length === 0) return;
 

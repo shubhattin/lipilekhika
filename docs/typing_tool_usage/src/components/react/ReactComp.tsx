@@ -3,7 +3,7 @@ import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
 import {
   createTypingContext,
   clearTypingContextOnKeyDown,
-  handleTypingInputEvent
+  handleTypingBeforeInputEvent
 } from 'lipilekhika/typing';
 
 export default function ReactComp() {
@@ -56,8 +56,9 @@ export default function ReactComp() {
         <textarea
           placeholder="Start typing here..."
           value={textareaText}
-          onInput={(e) =>
-            handleTypingInputEvent(textareaTypingContext, e, (newValue) =>
+          onChange={(e) => setTextareaText(e.currentTarget.value)}
+          onBeforeInput={(e) =>
+            handleTypingBeforeInputEvent(textareaTypingContext, e, (newValue) =>
               setTextareaText(newValue)
             )
           }
@@ -72,8 +73,11 @@ export default function ReactComp() {
           type="text"
           placeholder="Type here..."
           value={inputText}
-          onInput={(e) =>
-            handleTypingInputEvent(inputTypingContext, e, (newValue) => setInputText(newValue))
+          onChange={(e) => setInputText(e.currentTarget.value)}
+          onBeforeInput={(e) =>
+            handleTypingBeforeInputEvent(inputTypingContext, e, (newValue) =>
+              setInputText(newValue)
+            )
           }
           onBlur={() => inputTypingContext.clearContext()}
           onKeyDown={(e) => clearTypingContextOnKeyDown(e, inputTypingContext)}
