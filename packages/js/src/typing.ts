@@ -282,6 +282,14 @@ export async function handleTypingBeforeInputEvent(
   const inputData: unknown = nativeEvent.data;
   if (typeof inputData !== 'string' || inputData.length === 0) return;
 
+  // Only intercept real single-character typing.
+  // In some environments (notably React), paste can surface as a `textInput` event
+  // with multi-character `data`. Preventing default in that case breaks Ctrl+V.
+  if (inputData.length !== 1) {
+    typingContext.clearContext();
+    return;
+  }
+
   // If there is a selection, we don’t have a clean incremental diff story yet.
   // Let the browser replace the selection and reset the typing context.
   const selectionStart = inputElement.selectionStart ?? 0;
