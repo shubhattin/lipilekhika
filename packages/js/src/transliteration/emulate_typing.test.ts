@@ -13,7 +13,7 @@ const INPUT_FOLDERS = [
   path.join(__dirname, '../../../../test_data/transliteration/auto-nor-other')
 ];
 
-const NORMAL_PATCHES = [['~', "''"]] as const;
+const NORMAL_PATCHES = [['`', "''"]] as const;
 
 describe('Emulate Typing', () => {
   for (const folder of INPUT_FOLDERS) {

@@ -28,7 +28,7 @@ const listYamlFiles = (directory: string): string[] => {
   return collected;
 };
 
-const NORMAL_PATCHES = [['~', "''"]] as const;
+const NORMAL_PATCHES = [['`', "''"]] as const;
 describe('Transliteration', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);
   for (const filePath of yamlFiles) {

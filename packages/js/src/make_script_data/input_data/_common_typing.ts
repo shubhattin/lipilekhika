@@ -74,6 +74,11 @@ export const COMMON_SCRIPT_TYPING_DATA = [
   },
   {
     type: 'duplicates',
+    ref_krama_key: 'avagraha',
+    duplicates: [';']
+  },
+  {
+    type: 'duplicates',
     ref_krama_key: 'saMkShepachihna',
     duplicates: ['Q']
   },
