@@ -7,6 +7,7 @@ sidebar:
 
 import { Steps } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
+import { LinkCard } from '@astrojs/starlight/components';
 
 For Browser environment Lipi Lekhika includes a premade plugin for low latency realtime typing.
 Only supported for `textarea` and `input` elements.
@@ -40,6 +41,17 @@ Only supported for `textarea` and `input` elements.
    clearTypingContextOnKeyDown(event, ctx);
    ```
 </Steps>
+
+<LinkCard 
+   title="Custom Typing Options" 
+   description="Overview of typing customizations available in Lipi Lekhika"
+   href="/reference/realtime_typing#custom-typing-options" 
+/>
+<LinkCard 
+   title="Supported Scripts and Languages"
+   href="/reference/supported_scripts"
+   description="List of all supported Scripts for Typing"
+/>
 
 ## Implementation Example
 
