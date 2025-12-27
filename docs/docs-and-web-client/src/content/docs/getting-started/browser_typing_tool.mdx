@@ -1,0 +1,145 @@
+---
+title: Browser Typing Tool
+description: Detailed Guide on implementing Realtime typing
+sidebar:
+  order: 3
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+For Browser environment Lipi Lekhika includes a premade plugin for low latency realtime typing.
+Only supported for `textarea` and `input` elements.
+
+
+<Steps>
+
+1. Import the relevant functions from the package
+   ```ts
+   import { 
+    createTypingContext, 
+    clearTypingContextOnKeyDown, 
+    handleTypingBeforeInputEvent
+   } from 'lipilekhika/typing';
+   ```
+
+2. Create a typing context with the desired typing script and custom options
+   ```ts
+    const ctx = createTypingContext('Telugu');
+   ```
+3. Call `handleTypingBeforeInputEvent` and pass the `onbeforeinput` event and the typing_context. 
+   The callback is optional and will be called with the updated value of the input element.
+   ```ts
+   handleTypingBeforeInputEvent(ctx, event, callback, options?);
+   ```
+4. Add UI and IO related Context Cleanup events. `onblur` handles focus of the input element and
+   `onkeydown` handles keydown events (e.g. Arrow Keys, Esc, Etc).
+   ```ts
+   ctx.clearContext(); // onblur
+   // onkeydown
+   clearTypingContextOnKeyDown(event, ctx);
+   ```
+</Steps>
+
+## Implementation Example
+
+You can view all examples in live environment [here](/typing_tool_examples)
+
+### React
+
+- [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/components/react/ReactComp.tsx)
+- [Demo Page](/typing_tool_examples/react)
+
+```tsx
+  <textarea
+    value={text}
+    onChange={(e) => setText(e.target.value)}
+    onBeforeInput={(e) => handleTypingBeforeInputEvent(ctx, e, (newValue) => setText(newValue))}
+    onBlur={() => ctx.clearContext()}
+    onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx)}
+  />
+```
+
+<Aside>
+   In some cases `useMemo` the `ctx` context could be lazily evaluated.
+   Which would delay prefetching of Script Data needed for typing.
+   To avoid this, you can eagerly await `context.ready` to ensure the script data is prefetched.
+   ```tsx
+   useEffect(() => {
+     ctx.ready;
+   }, [ctx]);
+   ```
+</Aside>
+
+### Vue
+
+- [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/components/VueComp.vue)
+- [Demo Page](/typing_tool_examples/vue)
+
+```vue
+<input
+  v-model="text"
+  @beforeinput="(e) => handleTypingBeforeInputEvent(ctx, e, (newValue) => (text = newValue))"
+  @blur="() => ctx.clearContext()"
+  @keydown="(e) => clearTypingContextOnKeyDown(e, ctx)"
+></input>
+```
+
+In Vue you can eagerly await using 
+```ts
+watchEffect(() => {
+  ctx.value.ready;
+});
+```
+
+### Svelte
+
+- [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/components/SvelteComp.svelte)
+- [Demo Page](/typing_tool_examples/svelte)
+
+```svelte
+<textarea
+  bind:value={text}
+  onbeforeinput={(e) => handleTypingBeforeInputEvent(ctx, e, (newValue) => (text = newValue))}
+  onblur={() => ctx.clearContext()}
+  onkeydown={(e) => clearTypingContextOnKeyDown(e, ctx)}
+></textarea>
+```
+
+In Svelte you can eagerly await using 
+```ts
+$effect(() => {
+  ctx.ready;
+});
+```
+
+### Solid
+
+- [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/components/solid/SolidComp.tsx)
+- [Demo Page](/typing_tool_examples/solid)
+
+```tsx
+<textarea
+  value={text()}
+  onInput={(e) => setText(e.currentTarget.value)}
+  onBeforeInput={(e) => handleTypingBeforeInputEvent(ctx(), e, (newValue) => setText(newValue))}
+  onBlur={() => ctx().clearContext()}
+  onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx())}
+></textarea>
+```
+
+In Solid you can eagerly await using 
+```ts
+createEffect(() => {
+  ctx().ready;
+});
+```
+
+### Browser UMD and ESM Usage
+
+In Vanilla JS approach you will have to bind the events manually yourself.
+
+- **UMD** - [Code Exaample](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_umd.astro), 
+  [Demo Page](/typing_tool_examples/vanila_umd)
+- **ESM** - [Code Exaample](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_esm.astro), 
+  [Demo Page](/typing_tool_examples/vanila_esm)
