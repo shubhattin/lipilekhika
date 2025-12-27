@@ -1,0 +1,41 @@
+---
+title: Realtime Typing
+description: Reference Guide to implement Realtime typing
+---
+
+Lipi Lekhika also has a mechanism to implement realtime typing. It is based on the core transliteration functionality. On every the algorithm compares with the previus output and returns a diff.
+That diff contains the text to add and characters to delete. The API is same in all languages. The only difference is in naming conventions (snake_case or camelCase).
+All the packages (JS, Python, Go and Rust) have embedded types and Documentation to provide realtime docs and type support in your editor.
+The algorithm automatically manages the input history context internally to optimize the typing latency.
+
+## createTypingContext
+
+```ts
+import { createTypingContext } from 'lipilekhika/typing';
+const ctx = createTypingContext('Devanagari');
+```
+
+Returns a closure which has these these methods:
+
+- `ready` : Awaits once, then use `takeKeyInput` for best typing latency.
+- `clearContext` : Cleares all internal states and contexts
+- `takeKeyInput` : Accepts character by character input and returns the diff
+- `updateUseNativeNumerals` : Updates the use of native numerals in transliteration/typing
+- `updateIncludeInherentVowel` : Updates the include inherent vowel in transliteration/typing
+
+### Custom Typing Options
+
+You can also pass custom options. Below are default values usage
+
+```ts
+import { createTypingContext } from 'lipilekhika/typing';
+const ctx = createTypingContext('Devanagari', {
+  autoContextClearTimeMs: 4500,
+  useNativeNumerals: true, // use native numerals. Example: 10 -> १०
+  includeInherentVowel: false // no inherent vowel by default. Example: k -> क्
+});
+```
+
+- **`autoContextClearTimeMs`** : The time in milliseconds after which the context will be cleared automatically
+- **`useNativeNumerals`** : Use native numerals in typing
+- **`includeInherentVowel`** : Include inherent vowel in typing. This is the [schwa deletion](https://en.wikipedia.org/wiki/Schwa_deletion_in_Indo-Aryan_languages) property.
