@@ -117,9 +117,9 @@ const Romanized: InputOtherScriptType = {
     ष: 'ṣ',
     // 4 vedic accent symbols
     anudAttA: '↓',
-    'svarita-1': '↑',
-    'svarita-2': '↑↑',
-    'svarita-3': '↑↑↑',
+    'udAtta-1': '↑',
+    'udAtta-2': '↑↑',
+    'udAtta-3': '↑↑↑',
     '०': '0',
     '१': '1',
     '२': '2',
@@ -132,7 +132,7 @@ const Romanized: InputOtherScriptType = {
     '९': '9',
     '।': '.',
     '॥': '..',
-    avagraha: '~'
+    avagraha: '`'
   },
   typing_list: [
     ...COMMON_SCRIPT_TYPING_DATA,

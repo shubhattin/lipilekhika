@@ -41,9 +41,9 @@ const Granth: InputBrahmicScriptType = {
     halant: '𑍍',
     nuqta: '𑌼',
     anudAttA: '↓',
-    'svarita-1': '↑',
-    'svarita-2': '↑↑',
-    'svarita-3': '↑↑↑',
+    'udAtta-1': '↑',
+    'udAtta-2': '↑↑',
+    'udAtta-3': '↑↑↑',
     virama: '।',
     double_virama: '॥'
   },

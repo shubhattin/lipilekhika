@@ -71,3 +71,8 @@
   text: gE_ kE_ ghE' jhE'' bhu'''
   output: கே॒³ கே॒ கே॑⁴ ஜே᳚² பு᳛⁴
   script: Tamil-Extended
+# Avagraha Typing
+- index: 13
+  text: kAlE`smin kAlE;smin
+  output: कालेऽस्मिन् कालेऽस्मिन्
+  script: Devanagari

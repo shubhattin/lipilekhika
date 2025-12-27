@@ -29,7 +29,7 @@ export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
 /** These Characters can be skipped/ignore while transliterating the input text */
-const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', ';', '!', '@', '?', '%'] as const;
+const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', '~', '!', '@', '?', '%'] as const;
 
 /**
  * Mostly used is -1 for prev context.
