@@ -112,9 +112,9 @@ const Normal: InputOtherScriptType = {
     ष: 'Sh',
     // 4 vedic accent symbols
     anudAttA: '↓',
-    'svarita-1': '↑',
-    'svarita-2': '↑↑',
-    'svarita-3': '↑↑↑',
+    'udAtta-1': '↑',
+    'udAtta-2': '↑↑',
+    'udAtta-3': '↑↑↑',
     '०': '0',
     '१': '1',
     '२': '2',

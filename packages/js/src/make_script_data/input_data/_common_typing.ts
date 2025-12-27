@@ -245,17 +245,17 @@ export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
   },
   {
     type: 'duplicates',
-    ref_krama_key: 'svarita-3',
+    ref_krama_key: 'udAtta-3',
     duplicates: ["'''"]
   },
   {
     type: 'duplicates',
-    ref_krama_key: 'svarita-2',
+    ref_krama_key: 'udAtta-2',
     duplicates: ["''"]
   },
   {
     type: 'duplicates',
-    ref_krama_key: 'svarita-1',
+    ref_krama_key: 'udAtta-1',
     duplicates: ["'"]
   }
 ] satisfies InputTypingListDataType[];
