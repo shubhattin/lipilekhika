@@ -138,7 +138,10 @@ function prev_context_cleanup(
         emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
       } else {
         emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
-        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
+        if (
+          to_script_name === 'Sinhala' &&
+          options['all_to_sinhala:use_conjunct_enabling_halant']
+        ) {
           result.rewriteAt(-1, result.lastPiece() + '\u200d');
         }
       }
@@ -156,7 +159,10 @@ function prev_context_cleanup(
         emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, true);
       } else {
         emitPiecesWithReorder(result, [BRAHMIC_HALANT!], to_script_data.halant!, false);
-        if (to_script_name === 'Sinhala' && options['all_to_sinhala:use_conjuct_enabling_halant']) {
+        if (
+          to_script_name === 'Sinhala' &&
+          options['all_to_sinhala:use_conjunct_enabling_halant']
+        ) {
           result.rewriteAt(-1, result.lastPiece() + '\u200d');
         }
       }

@@ -9,7 +9,7 @@ import { Steps } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
 import { LinkCard } from '@astrojs/starlight/components';
 
-For Browser environment Lipi Lekhika includes a premade plugin for low latency realtime typing.
+For Browser environment Lipi Lekhika includes a premade plugin for low-latency realtime typing.
 Only supported for `textarea` and `input` elements.
 
 
@@ -34,7 +34,7 @@ Only supported for `textarea` and `input` elements.
    ```ts
    handleTypingBeforeInputEvent(ctx, event, callback, options?);
    ```
-4. Add UI and IO related Context Cleanup events. `onblur` handles focus of the input element and
+4. Add UI and I/O-Related Context Cleanup events. `onblur` handles focus of the input element and
    `onkeydown` handles keydown events (e.g. Arrow Keys, Esc, Etc).
    ```ts
    ctx.clearContext(); // onblur
@@ -74,9 +74,9 @@ You can view all examples in live environment [here](/typing_tool_examples)
 ```
 
 <Aside>
-   In some cases `useMemo` the `ctx` context could be lazily evaluated.
-   Which would delay prefetching of Script Data needed for typing.
-   To avoid this, you can eagerly await `context.ready` to ensure the script data is prefetched.
+   In some cases, if you create the `ctx` context using `useMemo`, it may be lazily evaluated.
+   This can delay the prefetching of script data needed for typing.
+   To avoid this, you can eagerly await `ctx.ready` to ensure the script data is loaded in advance.
    ```tsx
    useEffect(() => {
      ctx.ready;
@@ -152,7 +152,7 @@ createEffect(() => {
 
 In Vanilla JS approach you will have to bind the events manually yourself.
 
-- **UMD** - [Code Exaample](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_umd.astro), 
+- **UMD** - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_umd.astro), 
   [Demo Page](/typing_tool_examples/vanila_umd)
-- **ESM** - [Code Exaample](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_esm.astro), 
+- **ESM** - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_esm.astro), 
   [Demo Page](/typing_tool_examples/vanila_esm)

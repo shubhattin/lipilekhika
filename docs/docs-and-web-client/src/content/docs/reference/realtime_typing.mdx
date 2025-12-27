@@ -7,8 +7,6 @@ sidebar:
 
 Lipi Lekhika also has a mechanism to implement realtime typing. It is based on the core transliteration functionality. On every the algorithm compares with the previus output and returns a diff.
 That diff contains the text to add and characters to delete. The API is same in all languages. The only difference is in naming conventions (snake_case or camelCase).
-All the packages (JS, Python, Go and Rust) have embedded types and Documentation to provide realtime docs and type support in your editor.
-The algorithm automatically manages the input history context internally to optimize the typing latency.
 
 ## createTypingContext
 
@@ -17,11 +15,11 @@ import { createTypingContext } from 'lipilekhika/typing';
 const ctx = createTypingContext('Devanagari');
 ```
 
-A new context should be created for a new typing script.Returns a closure which has these these methods:
+A new context should be created for a new typing script.Returns a closure which has these methods:
 
-- `ready` : Awaits once, then use `takeKeyInput` for best typing latency.
-- `clearContext` : Cleares all internal states and contexts
-- `takeKeyInput` : Accepts character by character input and returns the diff
+- `ready` : Await once, then use `takeKeyInput` for best typing latency.
+- `clearContext` : Clears all internal states and contexts
+- `takeKeyInput` : Accepts character-by-character input and returns the diff
 - `updateUseNativeNumerals` : Updates the use of native numerals in transliteration/typing
 - `updateIncludeInherentVowel` : Updates the include inherent vowel in transliteration/typing
 

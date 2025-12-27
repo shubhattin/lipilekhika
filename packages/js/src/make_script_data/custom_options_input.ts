@@ -109,7 +109,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
    *
    * Example: kAGkShate(Devanagari) -> kAMkShate(Telugu)
    */
-  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra': {
+  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': {
     from_script_type: 'brahmic',
     to_script_type: 'brahmic',
     check_in: 'input',
@@ -152,7 +152,7 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     ]
   },
   /** Use conjunct(saMyuktAkShara) enabling halant (halant + \u200d) */
-  'all_to_sinhala:use_conjuct_enabling_halant': {
+  'all_to_sinhala:use_conjunct_enabling_halant': {
     from_script_type: 'all',
     to_script_name: ['Sinhala'],
     check_in: 'output',
