@@ -6,19 +6,16 @@
     handleTypingBeforeInputEvent
   } from 'lipilekhika/typing';
 
-  let textarea_text = $state('');
-  let input_text = $state('');
+  let text = $state('');
 
-  let selected_script = $state<ScriptListType>('Devanagari');
+  let script = $state<ScriptListType>('Devanagari');
 
-  let textarea_typing_context = $derived(createTypingContext(selected_script));
-  let input_typing_context = $derived(createTypingContext(selected_script));
+  let ctx = $derived(createTypingContext(script));
 
   // Eagerly access contexts to trigger background preloading
   // to avoid lazy evaluation of `$derived`
   $effect(() => {
-    textarea_typing_context.ready;
-    input_typing_context.ready;
+    ctx.ready;
   });
 </script>
 
@@ -34,7 +31,7 @@
     >
     <select
       id="script-select"
-      bind:value={selected_script}
+      bind:value={script}
       class="w-full cursor-pointer appearance-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 pr-10 text-base text-slate-200 transition-all duration-200 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
     >
       {#each SCRIPT_LIST as script}
@@ -46,29 +43,11 @@
   <div class="mb-7">
     <textarea
       placeholder="Start typing here..."
-      bind:value={textarea_text}
-      onbeforeinput={(e) =>
-        handleTypingBeforeInputEvent(
-          textarea_typing_context,
-          e,
-          (new_value) => (textarea_text = new_value)
-        )}
-      onblur={() => textarea_typing_context.clearContext()}
-      onkeydown={(e) => clearTypingContextOnKeyDown(e, textarea_typing_context)}
+      bind:value={text}
+      onbeforeinput={(e) => handleTypingBeforeInputEvent(ctx, e, (new_value) => (text = new_value))}
+      onblur={() => ctx.clearContext()}
+      onkeydown={(e) => clearTypingContextOnKeyDown(e, ctx)}
       class="min-h-[150px] w-full resize-y rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base leading-relaxed text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
     ></textarea>
-  </div>
-
-  <div class="mb-7">
-    <input
-      placeholder="Type here..."
-      type="text"
-      bind:value={input_text}
-      onbeforeinput={(e) =>
-        handleTypingBeforeInputEvent(input_typing_context, e, (new_value) => (input_text = new_value))}
-      onblur={() => input_typing_context.clearContext()}
-      onkeydown={(e) => clearTypingContextOnKeyDown(e, input_typing_context)}
-      class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-    />
   </div>
 </div>

@@ -1,16 +1,19 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
+import starlightThemeNext from 'starlight-theme-next';
 
+import MacroPlugin from 'unplugin-macros/vite';
 import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
-  base: '/lipilekhika/',
+  trailingSlash: 'never',
   integrations: [
     starlight({
-      title: 'Docs with Tailwind',
+      plugins: [starlightThemeNext()],
+      title: 'Lipi Lekhika Docs',
+      tagline: 'Type Indian Languages with Full Speed and Accuracy',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' }
       ],
@@ -19,14 +22,11 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Guides',
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: 'Example Guide', slug: 'guides/example' }
-          ]
+          label: 'Getting Started',
+          autogenerate: { directory: 'getting-started' }
         },
         {
-          label: 'Reference',
+          label: 'API Reference',
           autogenerate: { directory: 'reference' }
         }
       ],
@@ -35,6 +35,6 @@ export default defineConfig({
     svelte()
   ],
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss(), MacroPlugin()]
   }
 });

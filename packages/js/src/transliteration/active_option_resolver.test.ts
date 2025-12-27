@@ -18,7 +18,7 @@ const COMBINATIONS: [script_list_type, script_list_type, CustomOptionType, Custo
     {
       'all_to_normal:remove_virAma_and_double_virAma': true,
       'all_to_normal:replace_avagraha_with_a': true,
-      'all_to_sinhala:use_conjuct_enabling_halant': true
+      'all_to_sinhala:use_conjunct_enabling_halant': true
     },
     ['all_to_normal:remove_virAma_and_double_virAma', 'all_to_normal:replace_avagraha_with_a']
   ],
@@ -34,16 +34,16 @@ const COMBINATIONS: [script_list_type, script_list_type, CustomOptionType, Custo
     'Devanagari',
     'Telugu',
     {
-      'brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra': true,
-      'all_to_sinhala:use_conjuct_enabling_halant': true
+      'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true,
+      'all_to_sinhala:use_conjunct_enabling_halant': true
     },
-    ['brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra']
+    ['brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra']
   ],
   [
     'Romanized',
     'Tamil',
     {
-      'brahmic_to_brahmic:replace_pancham_varga_varna_with_anuvsvAra': true
+      'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
     },
     []
   ],
@@ -53,26 +53,26 @@ const COMBINATIONS: [script_list_type, script_list_type, CustomOptionType, Custo
     'Normal',
     'Sinhala',
     {
-      'all_to_sinhala:use_conjuct_enabling_halant': true
+      'all_to_sinhala:use_conjunct_enabling_halant': true
     },
-    ['all_to_sinhala:use_conjuct_enabling_halant']
+    ['all_to_sinhala:use_conjunct_enabling_halant']
   ],
   [
     'Romanized',
     'Sinhala',
     {
-      'all_to_sinhala:use_conjuct_enabling_halant': true
+      'all_to_sinhala:use_conjunct_enabling_halant': true
     },
-    ['all_to_sinhala:use_conjuct_enabling_halant']
+    ['all_to_sinhala:use_conjunct_enabling_halant']
   ],
   [
     'Telugu',
     'Sinhala',
     {
-      'all_to_sinhala:use_conjuct_enabling_halant': true,
+      'all_to_sinhala:use_conjunct_enabling_halant': true,
       'all_to_normal:remove_virAma_and_double_virAma': true
     },
-    ['all_to_sinhala:use_conjuct_enabling_halant']
+    ['all_to_sinhala:use_conjunct_enabling_halant']
   ]
 ];
 

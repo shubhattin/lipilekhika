@@ -38,15 +38,6 @@ import RootLayout from '../RootLayout.astro';
       ></textarea>
     </div>
 
-    <div class="mb-7">
-      <input
-        id="input"
-        type="text"
-        placeholder="Type here..."
-        class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-      />
-    </div>
-
     <script type="module" is:inline>
       import { SCRIPT_LIST } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
       import {
@@ -57,7 +48,6 @@ import RootLayout from '../RootLayout.astro';
 
       const select = document.getElementById('script-select');
       const textarea = document.getElementById('textarea');
-      const input = document.getElementById('input');
 
       // Populate scripts
       for (const script of SCRIPT_LIST) {
@@ -70,15 +60,12 @@ import RootLayout from '../RootLayout.astro';
       let selectedScript = 'Devanagari';
       select.value = selectedScript;
 
-      let textareaCtx = createTypingContext(selectedScript);
-      let inputCtx = createTypingContext(selectedScript);
+      let ctx = createTypingContext(selectedScript);
 
       function resetContexts(nextScript) {
         selectedScript = nextScript;
-        textareaCtx.clearContext();
-        inputCtx.clearContext();
-        textareaCtx = createTypingContext(selectedScript);
-        inputCtx = createTypingContext(selectedScript);
+        ctx.clearContext();
+        ctx = createTypingContext(selectedScript);
       }
 
       select.addEventListener('change', (e) => {
@@ -87,20 +74,12 @@ import RootLayout from '../RootLayout.astro';
       });
 
       textarea.addEventListener('beforeinput', async (e) => {
-        await handleTypingBeforeInputEvent(textareaCtx, e, (newValue) => {
+        await handleTypingBeforeInputEvent(ctx, e, (newValue) => {
           textarea.value = newValue;
         });
       });
-      textarea.addEventListener('blur', () => textareaCtx.clearContext());
-      textarea.addEventListener('keydown', (e) => clearTypingContextOnKeyDown(e, textareaCtx));
-
-      input.addEventListener('beforeinput', async (e) => {
-        await handleTypingBeforeInputEvent(inputCtx, e, (newValue) => {
-          input.value = newValue;
-        });
-      });
-      input.addEventListener('blur', () => inputCtx.clearContext());
-      input.addEventListener('keydown', (e) => clearTypingContextOnKeyDown(e, inputCtx));
+      textarea.addEventListener('blur', () => ctx.clearContext());
+      textarea.addEventListener('keydown', (e) => clearTypingContextOnKeyDown(e, ctx));
     </script>
   </div>
 </RootLayout>

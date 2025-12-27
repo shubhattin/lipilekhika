@@ -7,7 +7,8 @@ import {
 } from './transliteration/transliterate';
 import type { ScriptLangType } from './types';
 
-const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
+/** Default time in milliseconds after which the context will be cleared automatically */
+export const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
 /** Default values for the typing context options */
 export const DEFAULT_USE_NATIVE_NUMERALS = true;
 /** Default value for the include inherent vowel option.

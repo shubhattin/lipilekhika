@@ -7,18 +7,15 @@ import {
 } from 'lipilekhika/typing';
 
 export default function SolidComp() {
-  const [textareaText, setTextareaText] = createSignal('');
-  const [inputText, setInputText] = createSignal('');
-  const [selectedScript, setSelectedScript] = createSignal<ScriptListType>('Devanagari');
+  const [text, setText] = createSignal('');
+  const [script, setScript] = createSignal<ScriptListType>('Devanagari');
 
-  const textareaTypingContext = createMemo(() => createTypingContext(selectedScript()));
-  const inputTypingContext = createMemo(() => createTypingContext(selectedScript()));
+  const ctx = createMemo(() => createTypingContext(script()));
 
   // Eagerly access contexts to trigger background preloading
   // to avoid lazy evaluation of `createMemo`
   createEffect(() => {
-    textareaTypingContext().ready;
-    inputTypingContext().ready;
+    ctx().ready;
   });
 
   return (
@@ -37,8 +34,8 @@ export default function SolidComp() {
         </label>
         <select
           id="script-select"
-          value={selectedScript()}
-          onChange={(e) => setSelectedScript(e.target.value as ScriptListType)}
+          value={script()}
+          onChange={(e) => setScript(e.target.value as ScriptListType)}
           class="w-full cursor-pointer appearance-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 pr-10 text-base text-slate-200 transition-all duration-200 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
         >
           {SCRIPT_LIST.map((script) => (
@@ -52,34 +49,15 @@ export default function SolidComp() {
       <div class="mb-7">
         <textarea
           placeholder="Start typing here..."
-          value={textareaText()}
-          onInput={(e) => setTextareaText(e.currentTarget.value)}
+          value={text()}
+          onInput={(e) => setText(e.currentTarget.value)}
           onBeforeInput={(e) =>
-            handleTypingBeforeInputEvent(textareaTypingContext(), e, (newValue) =>
-              setTextareaText(newValue)
-            )
+            handleTypingBeforeInputEvent(ctx(), e, (newValue) => setText(newValue))
           }
-          onBlur={() => textareaTypingContext().clearContext()}
-          onKeyDown={(e) => clearTypingContextOnKeyDown(e, textareaTypingContext())}
+          onBlur={() => ctx().clearContext()}
+          onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx())}
           class="min-h-[150px] w-full resize-y rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base leading-relaxed text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
         ></textarea>
-      </div>
-
-      <div class="mb-7">
-        <input
-          type="text"
-          placeholder="Type here..."
-          value={inputText()}
-          onInput={(e) => setInputText(e.currentTarget.value)}
-          onBeforeInput={(e) =>
-            handleTypingBeforeInputEvent(inputTypingContext(), e, (newValue) =>
-              setInputText(newValue)
-            )
-          }
-          onBlur={() => inputTypingContext().clearContext()}
-          onKeyDown={(e) => clearTypingContextOnKeyDown(e, inputTypingContext())}
-          class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-        />
       </div>
     </div>
   );

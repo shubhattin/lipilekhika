@@ -1,0 +1,51 @@
+---
+title: Transliteration Options
+description: A detailed Overview of the available custom transliteration options
+sidebar:
+  order: 1
+---
+
+Lipi Lekhika provides several built-in transliteration options to handle script-specific transformations.
+
+## Available Options
+
+### `all_to_normal:replace_pancham_varga_varna_with_n`
+
+Replaces ङ (G) and ञ (J) with 'n' when followed by ka-varga or cha-varga consonants for more natural Latin output.
+
+| Input | Output |
+|-------|--------|
+| raJjitam | ranjitam |
+| raGgam | rangam |
+
+### `brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra`
+
+Replaces 5th varga consonants (ङ्, ञ्, ण्, न्, म्) with anusvāra (ं) when followed by consonants of the same varga.
+
+| Input (Devanagari) | Output (Telugu) |
+|--------------------|-----------------|
+| काङ्क्षते | కాంక్షతే |
+
+### `all_to_sinhala:use_conjunct_enabling_halant`
+
+Uses conjunct-enabling halant (්‍) for Sinhala output to properly form conjunct consonants.
+
+### `all_to_normal:remove_virAma_and_double_virAma`
+
+Removes virāma (।) and pūrṇa virāma (॥) punctuation from Normal/Romanized output.
+
+### `all_to_normal:replace_avagraha_with_a`
+
+Replaces avagraha (ऽ) with 'a' in Normal/Romanized output.
+
+| Input | Output |
+|-------|--------|
+| ko'pi | koapi |
+
+### `normal_to_all:use_typing_chars`
+
+Enables typing mode characters including duplicate alternatives and script-specific characters. Automatically enabled in typing mode.
+
+### `all_to_normal:preserve_specific_chars`
+
+Maps duplicate alternatives to base forms and uses custom normal keys for script-specific characters.

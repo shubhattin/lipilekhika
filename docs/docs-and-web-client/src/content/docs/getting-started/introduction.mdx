@@ -1,0 +1,72 @@
+---
+title: Introduction
+description: Lipi Lekhika a simple, fast and open source transliteration tool
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import DevangariTyping from '$components/examples/DevangariTyping.svelte';
+
+Lipi Lekhika is a transliteration tool for Indian [Brahmic Scripts](https://en.wikipedia.org/wiki/Brahmic_scripts).
+Supports all the **Modern Indian Scripts** including Devangari, Bengali, Kannada, Gujarati, Telugu, Tamil, Malayalam, Odia, Assamese, Gurumukhi and Sinhala. There are also two special output targets _Normal_ and _Romanized_.
+[Full List of Supported Scripts](/reference/supported_scripts)
+
+**Romanized** is a standard based on [IAST](https://en.wikipedia.org/wiki/International_Alphabet_of_Sanskrit_Transliteration) and [ISO 15919](https://en.wikipedia.org/wiki/ISO_15919). **Normal** is an opinionated standard inspired by [ITRANS](https://en.wikipedia.org/wiki/ITRANS) and [Harvard-Kyoto](https://en.wikipedia.org/wiki/Harvard-Kyoto).
+
+## Transliteration
+
+You can convert text from one script to another with a simple interface customizable interface.
+Support is also available for [Custom Transliteration Options](/reference/custom_trans_options).
+
+<Tabs>
+  <TabItem label="Devangari">
+    <strong>ॐ श्री परमात्मने नमः</strong>
+  </TabItem>
+  <TabItem label="Telugu">
+    <strong>ఓం శ్రీ పరమాత్మనే నమః</strong>
+  </TabItem>
+  <TabItem label="Gujarati">
+    <strong>ૐ શ્રી પરમાત્મને નમઃ</strong>
+  </TabItem>
+  <TabItem label="Normal">
+    <strong>AUM shrI paramAtmanE namaH</strong>
+  </TabItem>
+  <TabItem label="Romanized">
+    <strong>āūṁ śrī paramātmanē namaḥ</strong>
+  </TabItem>
+</Tabs>
+
+## Typing Tool
+
+Lipi Lekhika comes a simple, fast and accurate typing tool for Indian Languages. It enables and empowers you to type in Indian Languages with **full speed and accuracy**.
+It employs a predictable and intuitive approach for mapping keys in Indian Scripts.
+[Realtime Typing Reference](/reference/realtime_typing)
+
+<DevangariTyping client:idle />
+
+## Vedic Sanskrit
+
+Almost all modern Indian Scripts support Vedic Sanskrit Accent Symbols. Lipi Lekhika comes with robust **typing** and **transliteration** support for Vedic Sanskrit.
+
+<Tabs>
+  <TabItem label="Devangari">ॐ स॒ह ना॑ववतु । स॒ह नौ॑ भुनक्तु ।</TabItem>
+  <TabItem label="Kannada">ಓಂ ಸ॒ಹ ನಾ॑ವವತು । ಸ॒ಹ ನೌ॑ ಭುನಕ್ತು ।</TabItem>
+  <TabItem label="Bengali">ওঁ স॒হ না॑ববতু । স॒হ নৌ॑ ভুনক্তু ।</TabItem>
+  <TabItem label="Tamil Extended">ௐ ஸ॒ஹ நா॑வவது । ஸ॒ஹ நௌ॑ பு⁴நக்து ।</TabItem>
+</Tabs>
+
+## Ancient Brahmic Scripts
+
+Lipi Lekhika also supports **[Brahmi](https://en.wikipedia.org/wiki/Brahmi_script), [Grantha](https://en.wikipedia.org/wiki/Grantha_script), [Modi](https://en.wikipedia.org/wiki/Modi_script), [Sharada](https://en.wikipedia.org/wiki/Sharada_script) and [Siddham](https://en.wikipedia.org/wiki/Siddha%E1%B9%83_script)**. Example of **नमस्कारम्** in these scripts is shown below.
+
+- **Brahmi** :- 𑀦𑀫𑀲𑁆𑀓𑀸𑀭𑀫𑁆
+- **Grantha** :- 𑌨𑌮𑌸𑍍𑌕𑌾𑌰𑌮𑍍
+- **Modi** :- 𑘡𑘦𑘭𑘿𑘎𑘰𑘨𑘦𑘿
+- **Sharada** :- 𑆤𑆩𑆱𑇀𑆑𑆳𑆫𑆩𑇀
+- **Siddham** :- 𑖡𑖦𑖭𑖿𑖎𑖯𑖨𑖦𑖿
+
+## Multiple Programming Language Support
+
+Lipi Lekhika package is available for [JavaScript](https://www.npmjs.com/package/lipilekhika), [Python](https://pypi.org/project/lipilekhika/), [Go](#) and [Rust](https://crates.io/crates/lipilekhika).
+These Packages support Script Transliteration and offer utilities for implementing a typing tool based on the core transliteration engine.

@@ -10,18 +10,15 @@ import {
  handleTypingBeforeInputEvent 
 } from 'lipilekhika/typing';
 
-const textareaText = ref('');
-const inputText = ref('');
-const selectedScript = ref<ScriptListType>('Devanagari');
+const text = ref('');
+const script = ref<ScriptListType>('Devanagari');
 
-const textareaTypingContext = computed(() => createTypingContext(selectedScript.value));
-const inputTypingContext = computed(() => createTypingContext(selectedScript.value));
+const ctx = computed(() => createTypingContext(script.value));
 
 // Eagerly access contexts to trigger background preloading
 // to avoid lazy evaluation of `computed`
 watchEffect(() => {
-  textareaTypingContext.value.ready;
-  inputTypingContext.value.ready;
+  ctx.value.ready;
 });
 </script>
 
@@ -38,7 +35,7 @@ watchEffect(() => {
       >
       <select
         id="script-select"
-        v-model="selectedScript"
+        v-model="script"
         class="w-full cursor-pointer appearance-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 pr-10 text-base text-slate-200 transition-all duration-200 hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
       >
         <option v-for="script in SCRIPT_LIST" :key="script" :value="script">
@@ -50,38 +47,19 @@ watchEffect(() => {
     <div class="mb-7">
       <textarea
         placeholder="Start typing here..."
-        v-model="textareaText"
+        v-model="text"
         @beforeinput="
           (e) =>
             handleTypingBeforeInputEvent(
-              textareaTypingContext,
+              ctx,
               e,
-              (newValue) => (textareaText = newValue)
+              (newValue) => (text = newValue)
             )
         "
-        @blur="() => textareaTypingContext.clearContext()"
-        @keydown="(e) => clearTypingContextOnKeyDown(e, textareaTypingContext)"
+        @blur="() => ctx.clearContext()"
+        @keydown="(e) => clearTypingContextOnKeyDown(e, ctx)"
         class="min-h-[150px] w-full resize-y rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base leading-relaxed text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
       ></textarea>
-    </div>
-
-    <div class="mb-7">
-      <input
-        type="text"
-        placeholder="Type here..."
-        v-model="inputText"
-        @beforeinput="
-          (e) =>
-            handleTypingBeforeInputEvent(
-              inputTypingContext,
-              e,
-              (newValue) => (inputText = newValue)
-            )
-        "
-        @blur="() => inputTypingContext.clearContext()"
-        @keydown="(e) => clearTypingContextOnKeyDown(e, inputTypingContext)"
-        class="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-      />
     </div>
   </div>
 </template>
