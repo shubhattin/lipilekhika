@@ -10,7 +10,8 @@ export default defineConfig({
   base: '/lipilekhika/',
   integrations: [
     starlight({
-      title: 'Docs with Tailwind',
+      title: 'Lipi Lekhika Docs',
+      tagline: 'Type Indian Languages with Full Speed and Accuracy',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' }
       ],
@@ -19,14 +20,11 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Guides',
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: 'Example Guide', slug: 'guides/example' }
-          ]
+          label: 'Getting Started',
+          items: [{ label: 'Example Guide', slug: 'guides/example' }]
         },
         {
-          label: 'Reference',
+          label: 'API Reference',
           autogenerate: { directory: 'reference' }
         }
       ],
