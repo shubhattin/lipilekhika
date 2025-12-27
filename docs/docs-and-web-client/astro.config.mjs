@@ -3,11 +3,13 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import starlightThemeNext from 'starlight-theme-next';
 
+import MacroPlugin from 'unplugin-macros/vite';
 import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
   base: '/lipilekhika/',
+  trailingSlash: 'never',
   integrations: [
     starlight({
       plugins: [starlightThemeNext()],
@@ -34,6 +36,6 @@ export default defineConfig({
     svelte()
   ],
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss(), MacroPlugin()]
   }
 });

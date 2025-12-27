@@ -1,0 +1,92 @@
+---
+title: JavaScript
+description: Lipi Lekhika usage in JavaScript/TypeScript
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import { LinkCard } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import { PACKAGE_CURRENT_VERSION } from '~/tools/macros';
+
+Lipi Lekhika offers a typesafe, tree shakable package for JavaScript/TypeScript. It has support for all major javascript packaging formats namely **ESM**, **CommonJS** and **UMD**.
+
+## Installation
+
+<Tabs>
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm install lipilekhika
+    ```
+  </TabItem>
+  <TabItem label="pnpm" icon="pnpm">
+   ```bash
+   pnpm add lipilekhika
+   ```
+  </TabItem>
+  <TabItem label="bun" icon="bun">
+    ```bash 
+    bun add lipilekhika
+    ```
+  </TabItem>
+  <TabItem label="yarn" icon="seti:yarn">
+    ```bash
+    yarn add lipilekhika
+    ```
+  </TabItem>
+</Tabs>
+
+## Usage
+
+For transliteration use the `transliterate` function. It returns a `Promise<string>`.
+
+```ts
+import { transliterate } from 'lipilekhika';
+
+const result = await transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari');
+console.log(result); // न जायते म्रियते वा
+```
+
+- For commonjs you can use the `require('lipilekhika')` syntax.
+- The Script/Language names are type safe so you will get editor support for autocompletion for names(including aliases).
+- You can also pass in **custom transliteration options** to the `transliterate` as the fourth argument to the function.
+
+<LinkCard 
+   title="Custom Transliteration Options" 
+   href="/reference/custom_trans_options" 
+   description="A detailed Overview of the available custom transliteration options"
+/>
+<LinkCard 
+   title="Supported Scripts and Languages"
+   href="/reference/script_and_lang_list"
+   description="List of all supported scripts/languages and their aliases"
+/>
+
+## Using Without a Package Manager
+
+You can also the package directly in the browser using the ESM and UMD Packages
+
+### ESM in Browser
+
+```html
+<script type="module">
+  import { transliterate } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
+  transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
+    .then((text) => console.log(text));
+</script>
+```
+
+### UMD in Browser
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/lipilekhika"></script>
+<script>
+  lipilekhika.transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
+    .then((text) => console.log(text));
+</script>
+```
+<Aside type="caution">
+  The links above point to the latest version of the package. You should use it with a specific version number to avoid breaking changes. Current version is **{PACKAGE_CURRENT_VERSION}**.
+  - **UMD** :- <a href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}>{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}</a>
+  - **ESM** :- <a href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}>{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}</a>
+</Aside>
