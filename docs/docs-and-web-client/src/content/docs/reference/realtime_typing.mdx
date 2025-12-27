@@ -17,7 +17,7 @@ import { createTypingContext } from 'lipilekhika/typing';
 const ctx = createTypingContext('Devanagari');
 ```
 
-Returns a closure which has these these methods:
+A new context should be created for a new typing script.Returns a closure which has these these methods:
 
 - `ready` : Awaits once, then use `takeKeyInput` for best typing latency.
 - `clearContext` : Cleares all internal states and contexts
