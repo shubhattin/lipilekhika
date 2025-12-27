@@ -1,7 +1,7 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
+import starlightThemeNext from 'starlight-theme-next';
 
 import svelte from '@astrojs/svelte';
 
@@ -10,6 +10,7 @@ export default defineConfig({
   base: '/lipilekhika/',
   integrations: [
     starlight({
+      plugins: [starlightThemeNext()],
       title: 'Lipi Lekhika Docs',
       tagline: 'Type Indian Languages with Full Speed and Accuracy',
       social: [
@@ -21,7 +22,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Getting Started',
-          items: [{ label: 'Example Guide', slug: 'guides/example' }]
+          autogenerate: { directory: 'getting-started' }
         },
         {
           label: 'API Reference',

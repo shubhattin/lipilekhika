@@ -239,38 +239,26 @@
                 </Popover.Trigger>
                 <Popover.Content class="w-80">
                   <div class="space-y-4">
-                    <h4 class="font-medium leading-none">Typing Options</h4>
+                    <h4 class="leading-none font-medium">Typing Options</h4>
                     <div class="space-y-3">
                       <div class="flex items-center justify-between gap-4">
-                        <label
-                          for="use-native-numerals"
-                          class="flex flex-col gap-1 text-sm"
-                        >
+                        <label for="use-native-numerals" class="flex flex-col gap-1 text-sm">
                           <span class="font-medium">Use Native Numerals</span>
                           <span class="text-xs text-muted-foreground"
                             >Convert numbers to script numerals</span
                           >
                         </label>
-                        <Switch
-                          id="use-native-numerals"
-                          bind:checked={useNativeNumerals}
-                        />
+                        <Switch id="use-native-numerals" bind:checked={useNativeNumerals} />
                       </div>
                       <Separator />
                       <div class="flex items-center justify-between gap-4">
-                        <label
-                          for="include-inherent-vowel"
-                          class="flex flex-col gap-1 text-sm"
-                        >
+                        <label for="include-inherent-vowel" class="flex flex-col gap-1 text-sm">
                           <span class="font-medium">Include Inherent Vowel</span>
                           <span class="text-xs text-muted-foreground"
                             >Add inherent vowel (schwa) to consonants</span
                           >
                         </label>
-                        <Switch
-                          id="include-inherent-vowel"
-                          bind:checked={includeInherentVowel}
-                        />
+                        <Switch id="include-inherent-vowel" bind:checked={includeInherentVowel} />
                       </div>
                     </div>
                   </div>
@@ -284,7 +272,12 @@
             placeholder="Enter text to transliterate..."
             bind:value={inputText}
             onbeforeinput={(e) =>
-              handleTypingBeforeInputEvent(from_input_typing_context, e, (new_value) => (inputText = new_value), typing_enabled)}
+              handleTypingBeforeInputEvent(
+                from_input_typing_context,
+                e,
+                (new_value) => (inputText = new_value),
+                typing_enabled
+              )}
             onblur={() => from_input_typing_context.clearContext()}
             onkeydown={(e) => {
               // Toggle typing on Alt+X
