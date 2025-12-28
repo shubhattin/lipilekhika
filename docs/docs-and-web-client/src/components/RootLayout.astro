@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-import VtBotStarlight from 'astro-vtbot/components/starlight/Base.astro';
-import PosthogInit from './PosthogInit.svelte';
+import { ClientRouter } from 'astro:transitions';
+import Posthog from './Posthog.astro';
 
 type Props = {
   title: string;
@@ -40,12 +40,12 @@ const shareImageInfo = {
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={shareImageInfo.url} />
-
-    <VtBotStarlight />
+    
+    <ClientRouter />
+    <Posthog />
   </head>
   <body class="dark bg-background">
     <slot />
-    <PosthogInit client:idle />
     <script is:inline>
       (() => {
         const storageKey = 'lipilekhika-theme'; // 'light' | 'dark' | unset (system)

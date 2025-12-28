@@ -13,8 +13,7 @@
       <div>
         <h2 class="text-xl font-semibold tracking-tight">Packages</h2>
         <p class="mt-2 text-sm text-muted-foreground">
-          Lipi Lekhika is being built across multiple languages. JavaScript/TypeScript is available
-          today.
+          Lipi Lekhika is being built across multiple languages. JavaScript is available today.
         </p>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
@@ -29,7 +28,7 @@
                 <Icon src={FaBrandsJs} className="size-5" />
               </span>
               <div class="min-w-0">
-                <p class="leading-tight font-medium">JavaScript / TypeScript</p>
+                <p class="leading-tight font-medium">JavaScript</p>
                 <p class="text-xs text-muted-foreground">npm package • available</p>
               </div>
             </div>
@@ -110,7 +109,7 @@
         </div>
 
         <p class="mt-4 text-xs text-muted-foreground">
-          Tip: in JavaScript/TypeScript you can import typing helpers from <span class="font-mono"
+          Tip: in JavaScript you can import typing helpers from <span class="font-mono"
             >lipilekhika/typing</span
           >.
         </p>
