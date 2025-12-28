@@ -11,6 +11,32 @@
 
 Lipi Lekhika is a comprehensive transliteration tool designed for Indian [Brahmic Scripts](https://en.wikipedia.org/wiki/Brahmic_scripts). It enables seamless conversion between different Indian scripts and provides powerful realtime typing capabilities for Indian languages.
 
+
+## 📦 Packages
+
+Lipi Lekhika is available for multiple programming languages:
+
+### JavaScript
+
+[![npm version](https://img.shields.io/npm/v/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
+[![npm downloads](https://img.shields.io/npm/dm/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
+
+- **NPM Package**: [`lipilekhika`](https://www.npmjs.com/package/lipilekhika)
+- **Repository README**: [packages/js/README.md](./packages/js/README.md)
+- **Documentation**: [JavaScript Guide](https://lipilekhika.in/getting-started/javascript)
+
+<!-- ### Python
+
+🚧 **Coming Soon** - Python package is currently in development
+
+- **Repository**: [packages/python](./packages/python) -->
+
+### Other Languages
+
+Support for **Rust**, **Python** and **Go** is planned for future releases.
+
+---
+
 ### Supported Scripts
 
 Lipi Lekhika supports all **modern Indian scripts** including:
@@ -46,31 +72,6 @@ Two special output formats are available:
 - **Normal** - An intuitive standard inspired by [ITRANS](https://en.wikipedia.org/wiki/ITRANS) and [Harvard-Kyoto](https://en.wikipedia.org/wiki/Harvard-Kyoto)
 
 📖 **[Full List of Supported Scripts](https://lipilekhika.in/reference/supported_scripts)**
-
----
-
-## 📦 Packages
-
-Lipi Lekhika is available for multiple programming languages:
-
-### JavaScript / TypeScript
-
-[![npm version](https://img.shields.io/npm/v/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
-[![npm downloads](https://img.shields.io/npm/dm/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
-
-- **NPM Package**: [`lipilekhika`](https://www.npmjs.com/package/lipilekhika)
-- **Repository README**: [packages/js/README.md](./packages/js/README.md)
-- **Documentation**: [JavaScript Guide](https://lipilekhika.in/getting-started/javascript)
-
-<!-- ### Python
-
-🚧 **Coming Soon** - Python package is currently in development
-
-- **Repository**: [packages/python](./packages/python) -->
-
-### Other Languages
-
-Support for **Rust**, **Python** and **Go** is planned for future releases.
 
 ---
 
