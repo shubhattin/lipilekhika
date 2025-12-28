@@ -1,0 +1,210 @@
+---
+import { Languages, Keyboard, BookOpen, ScrollText, Settings, Sparkles } from 'lucide-svelte';
+
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
+  {
+    icon: 'languages',
+    title: 'Bidirectional Transliteration',
+    description:
+      'Convert text seamlessly between any supported Indian script with high accuracy. Supports all modern and ancient Brahmic scripts.'
+  },
+  {
+    icon: 'keyboard',
+    title: 'Realtime Typing',
+    description:
+      'Fast, accurate, and predictable typing tool with intuitive key mappings. Low-latency character rendering for smooth typing.'
+  },
+  {
+    icon: 'book-open',
+    title: 'Vedic Sanskrit Support',
+    description:
+      'Comprehensive support for Vedic Sanskrit with accent symbols (स्वर). Robust typing and transliteration for sacred texts.'
+  },
+  {
+    icon: 'scroll-text',
+    title: 'Ancient Scripts',
+    description:
+      'Support for historical scripts including Brahmi, Grantha, Modi, Sharada, and Siddham for academic and research use.'
+  },
+  {
+    icon: 'settings',
+    title: 'Custom Options',
+    description:
+      'Fine-tune transliteration with native numerals, inherent vowel control, and script-specific transformations.'
+  },
+  {
+    icon: 'sparkles',
+    title: 'Developer Friendly',
+    description:
+      'Type-safe APIs with autocomplete, tree-shakable packages, zero dependencies, and comprehensive documentation.'
+  }
+];
+---
+
+<section class="py-16 sm:py-24">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="text-center mb-12 sm:mb-16">
+      <h2
+        class="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+      >
+        Features
+      </h2>
+      <p class="mt-3 text-muted-foreground max-w-2xl mx-auto">
+        Everything you need for Indian script transliteration and typing
+      </p>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        features.map((feature, index) => (
+          <div
+            class="group relative rounded-xl border border-border/50 bg-card/50 p-6 transition-all duration-300 hover:border-primary/30 hover:bg-card hover:shadow-lg hover:shadow-primary/5"
+            style={`animation-delay: ${index * 100}ms`}
+          >
+            <div class="mb-4 inline-flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              {feature.icon === 'languages' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m5 8 6 6" />
+                  <path d="m4 14 6-6 2-3" />
+                  <path d="M2 5h12" />
+                  <path d="M7 2h1" />
+                  <path d="m22 22-5-10-5 10" />
+                  <path d="M14 18h6" />
+                </svg>
+              )}
+              {feature.icon === 'keyboard' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M10 8h.01" />
+                  <path d="M12 12h.01" />
+                  <path d="M14 8h.01" />
+                  <path d="M16 12h.01" />
+                  <path d="M18 8h.01" />
+                  <path d="M6 8h.01" />
+                  <path d="M7 16h10" />
+                  <path d="M8 12h.01" />
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                </svg>
+              )}
+              {feature.icon === 'book-open' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 7v14" />
+                  <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+                </svg>
+              )}
+              {feature.icon === 'scroll-text' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 12h-5" />
+                  <path d="M15 8h-5" />
+                  <path d="M19 17V5a2 2 0 0 0-2-2H4" />
+                  <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" />
+                </svg>
+              )}
+              {feature.icon === 'settings' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+              {feature.icon === 'sparkles' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+                  <path d="M20 3v4" />
+                  <path d="M22 5h-4" />
+                  <path d="M4 17v2" />
+                  <path d="M5 18H3" />
+                </svg>
+              )}
+            </div>
+            <h3 class="mb-2 font-semibold text-foreground">{feature.title}</h3>
+            <p class="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .grid > div {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+  }
+</style>
+
