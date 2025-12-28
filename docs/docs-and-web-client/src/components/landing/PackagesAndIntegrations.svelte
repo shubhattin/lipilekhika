@@ -1,9 +1,15 @@
 <script lang="ts">
   import { Icon } from 'svelte-icons-pack';
-  import { FaBrandsJs, FaBrandsRust, FaBrandsReact, FaBrandsVuejs } from 'svelte-icons-pack/fa';
-  import { AiOutlinePython } from 'svelte-icons-pack/ai';
-  import { RiLogosSvelteFill } from 'svelte-icons-pack/ri';
-  import { TrOutlineBrandSolidjs } from 'svelte-icons-pack/tr';
+  import {
+    RustIcon,
+    SvelteIcon,
+    GoIcon,
+    JavaScriptIcon,
+    PythonIcon,
+    ReactIcon,
+    SolidIcon,
+    VueIcon
+  } from '~/tools/icons';
 </script>
 
 <section class="border-t border-border/40 bg-muted/10 py-14">
@@ -21,11 +27,13 @@
             href="https://www.npmjs.com/package/lipilekhika"
             target="_blank"
             rel="noopener noreferrer"
-            class="group rounded-xl border border-border/60 bg-background/60 p-4 transition-colors hover:bg-background"
+            class="group rounded-xl border border-border/60 bg-background/60 p-4 transition-colors hover:border-border hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <div class="flex items-center gap-3">
-              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
-                <Icon src={FaBrandsJs} className="size-5" />
+              <span
+                class="inline-flex size-9 items-center justify-center rounded-lg bg-background transition-colors group-hover:bg-accent/60"
+              >
+                <Icon src={JavaScriptIcon} className="size-9" />
               </span>
               <div class="min-w-0">
                 <p class="leading-tight font-medium">JavaScript</p>
@@ -33,41 +41,42 @@
               </div>
             </div>
           </a>
-
-          <div class="rounded-xl border border-border/60 bg-background/40 p-4">
+          <div
+            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+          >
             <div class="flex items-center gap-3">
               <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
-                <Icon src={AiOutlinePython} className="size-5" />
-              </span>
-              <div class="min-w-0">
-                <p class="leading-tight font-medium">Python</p>
-                <p class="text-xs text-muted-foreground">coming soon</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-xl border border-border/60 bg-background/40 p-4">
-            <div class="flex items-center gap-3">
-              <span
-                class="inline-flex size-9 items-center justify-center rounded-lg bg-background text-sm font-semibold"
-              >
-                Go
-              </span>
-              <div class="min-w-0">
-                <p class="leading-tight font-medium">Go</p>
-                <p class="text-xs text-muted-foreground">coming soon</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-xl border border-border/60 bg-background/40 p-4">
-            <div class="flex items-center gap-3">
-              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
-                <Icon src={FaBrandsRust} className="size-5" />
+                <Icon src={RustIcon} className="size-12 -mt-1" />
               </span>
               <div class="min-w-0">
                 <p class="leading-tight font-medium">Rust</p>
-                <p class="text-xs text-muted-foreground">active development</p>
+                <p class="text-xs text-muted-foreground">upcoming</p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+          >
+            <div class="flex items-center gap-3">
+              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
+                <Icon src={GoIcon} className="size-12" />
+              </span>
+              <div class="min-w-0">
+                <p class="leading-tight font-medium">Go</p>
+                <p class="text-xs text-muted-foreground">planned</p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+          >
+            <div class="flex items-center gap-3">
+              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
+                <Icon src={PythonIcon} className="size-12" />
+              </span>
+              <div class="min-w-0">
+                <p class="leading-tight font-medium">Python</p>
+                <p class="text-xs text-muted-foreground">planned</p>
               </div>
             </div>
           </div>
@@ -82,30 +91,50 @@
         </p>
 
         <div class="mt-5 flex flex-wrap gap-2.5">
-          <span
-            class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm"
+          <a
+            href="/getting-started/browser_typing_tool/#react"
+            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Icon src={FaBrandsReact} className="size-4" />
-            React
-          </span>
-          <span
-            class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm"
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+            >
+              <Icon src={ReactIcon} className="size-5" />
+              React
+            </span>
+          </a>
+          <a
+            href="/getting-started/browser_typing_tool/#svelte"
+            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Icon src={RiLogosSvelteFill} className="size-4" />
-            Svelte
-          </span>
-          <span
-            class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm"
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+            >
+              <Icon src={SvelteIcon} className="size-5" />
+              Svelte
+            </span>
+          </a>
+          <a
+            href="/getting-started/browser_typing_tool/#solid"
+            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Icon src={TrOutlineBrandSolidjs} className="size-4" />
-            SolidJS
-          </span>
-          <span
-            class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm"
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+            >
+              <Icon src={SolidIcon} className="size-5" />
+              SolidJS
+            </span>
+          </a>
+          <a
+            href="/getting-started/browser_typing_tool/#vue"
+            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <Icon src={FaBrandsVuejs} className="size-4" />
-            VueJS
-          </span>
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+            >
+              <Icon src={VueIcon} className="size-5" />
+              VueJS
+            </span>
+          </a>
         </div>
 
         <p class="mt-4 text-xs text-muted-foreground">
