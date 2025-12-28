@@ -14,7 +14,8 @@ export default defineConfig({
       title: 'Lipi Lekhika Docs',
       tagline: 'Type Indian Languages with Full Speed and Accuracy',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' }
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/lipilekhika' }
       ],
       components: {
         Head: './src/components/starlight/Head.astro'

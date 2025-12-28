@@ -1,4 +1,4 @@
-# Lipi Lekhika 📝
+# Lipi Lekhika
 
 [![npm version](https://img.shields.io/npm/v/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
 [![JS Package CI](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml/badge.svg)](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml)
@@ -41,7 +41,9 @@ const result = await transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari
 console.log(result); // न जायते म्रियते वा
 ```
 
-### With Custom  Transliteration Options
+### With Custom Transliteration Options
+
+Full list of available [Custom Transliteraton Options](https://lipilekhika.in/reference/custom_trans_options/)
 
 ```ts
 import { transliterate } from 'lipilekhika';
@@ -49,9 +51,10 @@ import { transliterate } from 'lipilekhika';
 const result = await transliterate(
   'గంగా',
   'Devanagari',
-  'Telugu',
+  'Gujarati',
   { 'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true }
 );
+// result :- ગંગા (instead ગઙ્ગા)
 ```
 
 ## 📚 Core API
@@ -124,6 +127,8 @@ import {
 } from 'lipilekhika/typing';
 ```
 
+📖 [**Browser Typing Tool Guide**](https://lipilekhika.in/getting-started/browser_typing_tool)
+
 ### `createTypingContext(script, options?)`
 
 Creates a typing context for realtime transliteration.
@@ -168,8 +173,6 @@ const ctx = createTypingContext('Telugu');
   onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx)}
 />
 ```
-
-📖 [**Browser Typing Tool Guide**](https://lipilekhika.in/getting-started/browser_typing_tool)
 
 ## 🌐 CDN Usage (No Build Step)
 
