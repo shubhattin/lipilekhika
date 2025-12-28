@@ -9,6 +9,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  
+env:
+  PUBLIC_POSTHOG_KEY: ${{  vars.PUBLIC_POSTHOG_KEY }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
