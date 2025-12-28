@@ -1,8 +1,10 @@
 ---
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
 import VtbotStarlight from 'astro-vtbot/components/starlight/Base.astro';
+import PosthogInit from '../PosthogInit.svelte';
 ---
 
 <VtbotStarlight>
   <StarlightHead><slot /></StarlightHead>
+  <PosthogInit client:idle />
 </VtbotStarlight>

@@ -10,6 +10,7 @@ import svelte from '@astrojs/svelte';
 export default defineConfig({
   integrations: [
     starlight({
+      favicon: './public/favicon.ico',
       plugins: [starlightThemeNext()],
       title: 'Lipi Lekhika Docs',
       tagline: 'Type Indian Languages with Full Speed and Accuracy',

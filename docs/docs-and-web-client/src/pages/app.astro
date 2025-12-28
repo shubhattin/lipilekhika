@@ -1,19 +1,9 @@
 ---
 import Main from '../components/MainApp.svelte';
 import '../styles/global.css';
-import VtBotStarlight from 'astro-vtbot/components/starlight/Base.astro';
+import RootLayout from '../components/RootLayout.astro';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>Lipi Lekhika App</title>
-    <VtBotStarlight />
-  </head>
-  <body class="dark bg-background">
-    <Main client:load />
-  </body>
-</html>
+<RootLayout title="Lipi Lekhika App">
+  <Main client:load />
+</RootLayout>

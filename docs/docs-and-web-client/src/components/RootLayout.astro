@@ -1,0 +1,50 @@
+---
+import '../styles/global.css';
+import VtBotStarlight from 'astro-vtbot/components/starlight/Base.astro';
+import PosthogInit from './PosthogInit.svelte';
+
+type Props = {
+  title: string;
+  description?: string;
+  type?: 'website' | 'app';
+};
+
+const { title, description, type }: Props = Astro.props;
+
+const shareImageInfo = {
+  url: 'https://cdn.jsdelivr.net/gh/shubhattin/padavali@latest/src/images/banner/project_banner.jpg',
+  width: 1200,
+  height: 630
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+
+    <!-- OpenGraph Meta Tags -->
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:site_name" content="Lipilekhika" />
+    <meta property="og:image" content={shareImageInfo.url} />
+    <meta property="og:image:width" content={shareImageInfo.width.toString()} />
+    <meta property="og:image:height" content={shareImageInfo.height.toString()} />
+    <meta property="og:type" content={type ?? 'website'} />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={shareImageInfo.url} />
+
+    <VtBotStarlight />
+  </head>
+  <body class="dark bg-background">
+    <slot />
+    <PosthogInit client:idle />
+  </body>
+</html>
