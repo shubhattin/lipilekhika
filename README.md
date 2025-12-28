@@ -181,4 +181,8 @@ Contributions are welcome! Whether it's bug reports, feature requests, or code c
 - **NPM Package**: [npmjs.com/package/lipilekhika](https://www.npmjs.com/package/lipilekhika)
 - **Documentation**: [lipilekhika.in](https://lipilekhika.in/getting-started/introduction/)
 
+### Old Lipi Lekhika
 
+- **Github Archive** : [shubhattin/old_lipi_lekhika_archive](https://github.com/shubhattin/old_lipi_lekhika_archive)
+- **Old Web App** : [Old Lipi Lekhika](https://lipilekhika.in/old/)
+- **Old Windows and Android App Binaries**: [Old Binaries Release](https://github.com/shubhattin/lipilekhika/releases/tag/old)
