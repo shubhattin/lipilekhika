@@ -1,8 +1,13 @@
 ---
 import StarlightHead from '@astrojs/starlight/components/Head.astro';
 import VtbotStarlight from 'astro-vtbot/components/starlight/Base.astro';
+import Posthog from '../Posthog.astro';
 ---
 
 <VtbotStarlight>
-  <StarlightHead><slot /></StarlightHead>
+  <StarlightHead>
+    <slot />
+  </StarlightHead>
 </VtbotStarlight>
+
+<Posthog />

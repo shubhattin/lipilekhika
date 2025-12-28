@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev --host",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "unzip -oq others/old_lipi_lekhika.zip -d ./public/old/ && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write ."
@@ -20,6 +20,7 @@
     "pretty-ms": "^9.3.0",
     "sharp": "^0.34.5",
     "svelte": "^5.46.0",
+    "svelte-icons-pack": "^3.1.3",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   },

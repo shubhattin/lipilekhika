@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Posthog from './Posthog.astro';
+
+type Props = {
+  title: string;
+  description?: string;
+};
+
+const { title, description }: Props = Astro.props;
+
+const shareImageInfo = {
+  url: 'https://cdn.jsdelivr.net/gh/shubhattin/lipilekhika/docs/docs-and-web-client/others/project_banner.jpg',
+  width: 1200,
+  height: 630
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+
+    <!-- OpenGraph Meta Tags -->
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:site_name" content="Lipilekhika" />
+    <meta property="og:image" content={shareImageInfo.url} />
+    <meta property="og:image:width" content={shareImageInfo.width.toString()} />
+    <meta property="og:image:height" content={shareImageInfo.height.toString()} />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={shareImageInfo.url} />
+    <script is:inline>
+      (() => {
+        const storageKey = 'lipilekhika-theme'; // 'light' | 'dark' | unset (system)
+        let stored = null;
+        try {
+          stored = localStorage.getItem(storageKey);
+        } catch {}
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false;
+        const shouldUseDark = stored === 'dark' || (stored !== 'light' && prefersDark);
+        const setDark = (enabled) => {
+          document.documentElement.classList.toggle('dark', enabled);
+          document.body?.classList.toggle('dark', enabled);
+        };
+        setDark(shouldUseDark);
+        if (!document.body) {
+          window.addEventListener('DOMContentLoaded', () => setDark(shouldUseDark), {
+            once: true
+          });
+        }
+      })();
+    </script>
+    <ClientRouter />
+    <Posthog />
+  </head>
+  <body class="dark bg-background">
+    <slot />
+  </body>
+</html>

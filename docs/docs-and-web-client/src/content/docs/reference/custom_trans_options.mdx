@@ -40,12 +40,12 @@ Replaces avagraha (ऽ) with 'a' in Normal/Romanized output.
 
 | Input | Output |
 |-------|--------|
-| ko'pi | koapi |
+| ko`pi | koapi |
 
 ### `normal_to_all:use_typing_chars`
 
-Enables typing mode characters including duplicate alternatives and script-specific characters. Automatically enabled in typing mode.
+Enables typing mode characters including duplicate alternatives and script-specific characters. Equivalent to typing mode using `createTypingContext` function.
 
 ### `all_to_normal:preserve_specific_chars`
 
-Maps duplicate alternatives to base forms and uses custom normal keys for script-specific characters.
+Preserves script-specific characters when converting to Normal script. Can be useful for studying script specific characters.

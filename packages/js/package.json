@@ -3,9 +3,11 @@
   "version": "0.0.1-beta.3",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://lipilekhika.in/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shubhattin/lipilekhika.git"
+    "url": "git+https://github.com/shubhattin/lipilekhika.git",
+    "directory": "packages/js"
   },
   "sideEffects": false,
   "main": "./dist/cjs/index.cjs",
