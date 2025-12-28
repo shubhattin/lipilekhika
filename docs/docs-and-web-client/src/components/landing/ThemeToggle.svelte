@@ -41,11 +41,14 @@
   }
 
   $effect(() => {
+    if (typeof window === 'undefined') return;
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     if (stored === 'light' || stored === 'dark') {
       currentTheme = stored;
+      applyTheme(currentTheme);
     } else {
       currentTheme = 'system';
+      applyTheme(currentTheme);
     }
   });
 </script>

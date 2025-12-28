@@ -27,7 +27,7 @@
             href="https://www.npmjs.com/package/lipilekhika"
             target="_blank"
             rel="noopener noreferrer"
-            class="group rounded-xl border border-border/60 bg-background/60 p-4 transition-colors hover:border-border hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            class="group rounded-xl border border-border/60 bg-background/60 p-4 transition-colors hover:border-border hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <div class="flex items-center gap-3">
               <span
@@ -93,7 +93,7 @@
         <div class="mt-5 flex flex-wrap gap-2.5">
           <a
             href="/getting-started/browser_typing_tool/#react"
-            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
               class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
@@ -104,7 +104,7 @@
           </a>
           <a
             href="/getting-started/browser_typing_tool/#svelte"
-            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
               class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
@@ -115,7 +115,7 @@
           </a>
           <a
             href="/getting-started/browser_typing_tool/#solid"
-            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
               class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
@@ -126,7 +126,7 @@
           </a>
           <a
             href="/getting-started/browser_typing_tool/#vue"
-            class="group rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
               class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"

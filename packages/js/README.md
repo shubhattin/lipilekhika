@@ -43,7 +43,7 @@ console.log(result); // न जायते म्रियते वा
 
 ### With Custom Transliteration Options
 
-Full list of available [Custom Transliteraton Options](https://lipilekhika.in/reference/custom_trans_options/)
+Full list of available [Custom Transliteration Options](https://lipilekhika.in/reference/custom_trans_options/)
 
 ```ts
 import { transliterate } from 'lipilekhika';

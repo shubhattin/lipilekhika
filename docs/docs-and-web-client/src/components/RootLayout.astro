@@ -6,10 +6,9 @@ import Posthog from './Posthog.astro';
 type Props = {
   title: string;
   description?: string;
-  type?: 'website' | 'app';
 };
 
-const { title, description, type }: Props = Astro.props;
+const { title, description }: Props = Astro.props;
 
 const shareImageInfo = {
   url: 'https://cdn.jsdelivr.net/gh/shubhattin/lipilekhika/docs/docs-and-web-client/others/project_banner.jpg',
@@ -33,19 +32,13 @@ const shareImageInfo = {
     <meta property="og:image" content={shareImageInfo.url} />
     <meta property="og:image:width" content={shareImageInfo.width.toString()} />
     <meta property="og:image:height" content={shareImageInfo.height.toString()} />
-    <meta property="og:type" content={type ?? 'website'} />
+    <meta property="og:type" content="website" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={shareImageInfo.url} />
-
-    <ClientRouter />
-    <Posthog />
-  </head>
-  <body class="dark bg-background">
-    <slot />
     <script is:inline>
       (() => {
         const storageKey = 'lipilekhika-theme'; // 'light' | 'dark' | unset (system)
@@ -67,5 +60,10 @@ const shareImageInfo = {
         }
       })();
     </script>
+    <ClientRouter />
+    <Posthog />
+  </head>
+  <body class="dark bg-background">
+    <slot />
   </body>
 </html>
