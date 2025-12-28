@@ -53,10 +53,15 @@
 <Popover.Root bind:open>
   <Popover.Trigger>
     {#snippet child({ props })}
-      <Button {...props} variant="ghost" size="icon" class="text-foreground/80 hover:text-foreground">
-        <Sun class="size-5 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+      <Button
+        {...props}
+        variant="ghost"
+        size="icon"
+        class="text-foreground/80 hover:text-foreground"
+      >
+        <Sun class="size-5 scale-100 rotate-0 transition-transform dark:scale-0 dark:-rotate-90" />
         <Moon
-          class="absolute size-5 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100"
+          class="absolute size-5 scale-0 rotate-90 transition-transform dark:scale-100 dark:rotate-0"
         />
         <span class="sr-only">Toggle theme</span>
       </Button>
@@ -67,7 +72,7 @@
       {@const Icon = theme.icon}
       <button
         onclick={() => setTheme(theme.value)}
-        class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+        class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <Icon class="size-4" />
         <span class="flex-1 text-left">{theme.label}</span>
@@ -78,4 +83,3 @@
     {/each}
   </Popover.Content>
 </Popover.Root>
-

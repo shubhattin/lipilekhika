@@ -20,11 +20,11 @@
 
 <div class="space-y-3">
   <div class="flex items-center gap-2">
-    <span class="text-xs text-muted-foreground shrink-0 font-semibold">Script:</span>
+    <span class="shrink-0 text-xs font-semibold text-muted-foreground">Script:</span>
     <Select.Root type="single" bind:value={script}>
       <Select.Trigger
         id="homepage-typing-script"
-        class="h-8 flex-1 bg-background/50 border-border/50 text-sm"
+        class="h-8 flex-1 border-border/50 bg-background/50 text-sm"
       >
         {script}
       </Select.Trigger>
@@ -38,7 +38,7 @@
 
   <Textarea
     placeholder={`Start typing to see realtime transliteration in ${script}...`}
-    class="min-h-24 resize-none bg-background/50 border-border/50 text-base placeholder:text-muted-foreground/60 focus:bg-background transition-colors"
+    class="min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background"
     bind:value={textarea_text}
     onbeforeinput={(e) =>
       handleTypingBeforeInputEvent(

@@ -3,6 +3,7 @@ import RootLayout from '$components/RootLayout.astro';
 import Header from '$components/landing/Header.svelte';
 import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
+import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
 import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelte';
 ---
 
@@ -16,7 +17,7 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
 
     <!-- Hero Section -->
     <section
-      class="relative flex min-h-[90vh] flex-col items-center justify-center px-4 pt-14 overflow-hidden"
+      class="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-14"
     >
       <!-- Background gradient effects -->
       <div
@@ -33,38 +34,40 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
           <!-- Copy / CTAs -->
           <div class="text-center lg:text-left">
             <p
-              class="mx-auto lg:mx-0 inline-flex items-center rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm"
+              class="mx-auto inline-flex items-center rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm lg:mx-0"
             >
               Lipi Lekhika • Realtime Typing + Transliteration
             </p>
 
-            <h1
-              class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-5xl"
-            >
+            <h1 class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-5xl">
               Type &amp; Convert Indian scripts with full speed and accuracy.
             </h1>
 
-            <p
-              class="mt-4 text-base text-muted-foreground sm:text-lg max-w-2xl mx-auto lg:mx-0"
-            >
-              Built for modern and ancient Brahmic scripts — including Vedic accents — with a fast, predictable typing
-              experience.
+            <p class="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg lg:mx-0">
+              Built for modern and ancient Brahmic scripts — including Vedic accents — with a fast,
+              predictable typing experience.
             </p>
 
             <div
-              class="mt-7 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
+              class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
             >
               <a
                 href="/app"
-                class="group inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
+                class="group relative inline-flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 px-6 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-900/40 active:scale-100 sm:w-auto"
               >
-                <Rocket class="size-4" />
-                Open App
-                <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
+                <div
+                  class="absolute inset-0 bg-linear-to-br from-blue-500/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                </div>
+                <Rocket class="relative size-4" />
+                <span class="relative">Open App</span>
+                <ArrowRight
+                  class="relative size-4 transition-transform group-hover:translate-x-1"
+                />
               </a>
               <a
                 href="/getting-started/introduction"
-                class="group inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground hover:-translate-y-0.5"
+                class="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
               >
                 <BookOpen class="size-4" />
                 Documentation
@@ -73,7 +76,7 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
                 href="https://github.com/shubhattin/lipilekhika"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-border bg-background/50 px-6 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground hover:-translate-y-0.5"
+                class="group hidden h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md sm:inline-flex sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
               >
                 <Github class="size-4" />
                 GitHub
@@ -82,9 +85,9 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
           </div>
 
           <!-- Try it out -->
-          <div class="lg:justify-self-end w-full max-w-xl mx-auto lg:mx-0">
+          <div class="mx-auto w-full max-w-xl lg:mx-0 lg:justify-self-end">
             <div
-              class="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm p-4 shadow-xl shadow-black/5"
+              class="rounded-xl border border-border/60 bg-card/60 p-4 shadow-xl shadow-black/5 backdrop-blur-sm"
             >
               <div class="mb-3 flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -93,14 +96,14 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
                 </div>
                 <a
                   href="/app"
-                  class="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  class="text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Open full app
                 </a>
               </div>
               <HomePageTyping client:load />
             </div>
-            <p class="mt-3 text-xs text-muted-foreground text-center lg:text-left">
+            <p class="mt-3 text-center text-xs text-muted-foreground lg:text-left">
               Tip: change the script and type in the box — it updates instantly.
             </p>
           </div>
@@ -111,22 +114,21 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
     <!-- Supported Scripts Banner -->
     <section class="border-y border-border/40 bg-muted/30 py-8">
       <div class="mx-auto max-w-6xl px-4 sm:px-6">
-        <p class="text-center text-sm font-medium text-muted-foreground mb-4">Supported Scripts</p>
+        <p class="mb-4 text-center text-sm font-medium text-muted-foreground">Supported Scripts</p>
         <div class="flex flex-wrap justify-center gap-3 text-lg sm:text-xl">
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">देवनागरी</span
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">देवनागरी</span
           >
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">తెలుగు</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">বাংলা</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">தமிழ்</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">ಕನ್ನಡ</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">ગુજરાતી</span
-          >
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">മലയാളം</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">ਗੁਰਮੁਖੀ</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">ଓଡ଼ିଆ</span>
-          <span class="px-3 py-1 rounded-md bg-background/50 border border-border/50">සිංහල</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">తెలుగు</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">বাংলা</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">தமிழ்</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ಕನ್ನಡ</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ગુજરાતી</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">മലയാളം</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ਗੁਰਮੁਖੀ</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ଓଡ଼ିଆ</span>
+          <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">සිංහල</span>
         </div>
-        <p class="text-center text-xs text-muted-foreground mt-4">
+        <p class="mt-4 text-center text-xs text-muted-foreground">
           + Ancient scripts: Brahmi, Grantha, Modi, Sharada, Siddham
         </p>
       </div>
@@ -135,10 +137,12 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
     <!-- Features Section -->
     <Features />
 
+    <PackagesAndIntegrations />
+
     <!-- Footer -->
     <footer class="border-t border-border/40 py-8">
       <div class="mx-auto max-w-6xl px-4 sm:px-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div class="flex items-center gap-2 text-sm text-muted-foreground">
             <img src="/main.png" alt="Lipi Lekhika" class="size-5" />
             <span>Lipi Lekhika</span>
@@ -148,18 +152,18 @@ import { BookOpen, Rocket, ArrowRight, ExternalLink, Github } from 'lucide-svelt
               href="https://github.com/shubhattin/lipilekhika"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+              class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
             >
               GitHub
               <ExternalLink class="size-3" />
             </a>
             <a
               href="/getting-started/introduction"
-              class="text-muted-foreground hover:text-foreground transition-colors"
+              class="text-muted-foreground transition-colors hover:text-foreground"
             >
               Docs
             </a>
-            <a href="/app" class="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/app" class="text-muted-foreground transition-colors hover:text-foreground">
               App
             </a>
           </div>
