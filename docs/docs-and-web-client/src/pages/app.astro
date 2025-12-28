@@ -1,9 +1,12 @@
 ---
-import Main from '../components/MainApp.svelte';
-import '../styles/global.css';
-import RootLayout from '../components/RootLayout.astro';
+import Main from '$components/MainApp.svelte';
+import RootLayout from '$components/RootLayout.astro';
 ---
 
-<RootLayout title="Lipi Lekhika App">
+<RootLayout
+  title="Lipi Lekhika App"
+  description="Lipi Lekhika App Online | Type Indian Languages with full Speed and Accuracy"
+  type="app"
+>
   <Main client:load />
 </RootLayout>

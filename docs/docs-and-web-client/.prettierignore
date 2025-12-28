@@ -8,5 +8,6 @@ pnpm-lock.yaml
 bun.lock
 
 tmp
+public/old
 
 *.mdx

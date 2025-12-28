@@ -46,5 +46,26 @@ const shareImageInfo = {
   <body class="dark bg-background">
     <slot />
     <PosthogInit client:idle />
+    <script is:inline>
+      (() => {
+        const storageKey = 'lipilekhika-theme'; // 'light' | 'dark' | unset (system)
+        let stored = null;
+        try {
+          stored = localStorage.getItem(storageKey);
+        } catch {}
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false;
+        const shouldUseDark = stored === 'dark' || (stored !== 'light' && prefersDark);
+        const setDark = (enabled) => {
+          document.documentElement.classList.toggle('dark', enabled);
+          document.body?.classList.toggle('dark', enabled);
+        };
+        setDark(shouldUseDark);
+        if (!document.body) {
+          window.addEventListener('DOMContentLoaded', () => setDark(shouldUseDark), {
+            once: true
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
