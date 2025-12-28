@@ -64,6 +64,21 @@ console.log(result); // न जायते म्रियते वा
    description="List of all supported scripts/languages and their aliases"
 />
 
+### Other Exports
+
+The package also exports the following constants and utilities:
+
+- **`SCRIPT_LIST`** — Array of all supported script names
+- **`LANG_LIST`** — Array of all supported language names mapped to scripts
+- **`ALL_LANG_SCRIPT_LIST`** — Combined list of all supported scripts and languages
+- **`preloadScriptData(name)`** — Function to preload script data (useful for browsers to avoid fetch latency)
+
+**TypeScript Types:**
+
+- **`TransliterationOptions`** — Type for custom transliteration options
+- **`ScriptListType`** / **`LangListType`** — Types for script and language lists
+- **`ScriptLangType`** — Type for script/language identifiers (with aliases)
+
 ## Using Without a Package Manager
 
 You can also use the package directly in the browser using the ESM and UMD Packages

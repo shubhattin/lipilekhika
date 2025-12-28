@@ -19,7 +19,7 @@ export type LangListType = lang_list_type;
 export type ScriptAndLangListType = script_and_lang_list_type;
 
 /**
- * Supported script/language identifier types
+ * Supported script/language identifier types (aliases allowed)
  */
 export type ScriptLangType = script_input_name_type;
 
