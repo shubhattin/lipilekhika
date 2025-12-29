@@ -1,0 +1,43 @@
+name: Release NPM Package
+
+on:
+  push:
+    tags:
+      - 'js-lib@v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#js-lib@v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun        
+      - name: Build Package
+        run: |
+          cd packages/js
+          bun install
+          bun run build
+          bun test --only-failures
+
+      - name: Publish to npm
+        run: npm publish
