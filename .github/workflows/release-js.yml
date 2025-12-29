@@ -40,9 +40,11 @@ jobs:
         run: |
           cd packages/js
           bun install
-          bun run build
           bun test --only-failures
-      # Test before publishing to npm
+          bun run build
+        # Test before publishing to npm
 
       - name: Publish to npm
-        run: npm publish
+        run: |
+          cd packages/js
+          npm publish
