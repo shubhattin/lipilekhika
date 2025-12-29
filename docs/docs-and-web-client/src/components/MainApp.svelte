@@ -26,6 +26,8 @@
   import { Separator } from '$lib/components/ui/separator';
   import * as Popover from '$lib/components/ui/popover';
   import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
+  import { Icon } from 'svelte-icons-pack';
+  import { BiHelpCircle } from 'svelte-icons-pack/bi';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_FROM: ScriptListType = 'Devanagari';
@@ -46,6 +48,8 @@
   let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
   let from_input_typing_context = $derived(createTypingContext(fromScript));
+
+  let typing_modal_open = $state(false);
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -217,14 +221,25 @@
       <div class="grid gap-6 md:grid-cols-2">
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <label
-              for="source-text"
-              class="text-sm font-medium tracking-wide text-muted-foreground"
-            >
-              Source text
-            </label>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-muted-foreground"
+              <label
+                for="source-text"
+                class="text-sm font-medium tracking-wide text-muted-foreground"
+              >
+                Source text
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => (typing_modal_open = true)}
+              >
+                <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+                <span class="sr-only">Typing Help</span>
+              </Button>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="hidden text-xs text-muted-foreground sm:inline-block"
                 >Use <span class="font-bold">Alt+x</span> to toggle</span
               >
               <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
@@ -321,3 +336,9 @@
     </form>
   </div>
 </div>
+
+{#if typing_modal_open}
+  {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
+    <TypingHelper bind:open={typing_modal_open} script={fromScript} />
+  {/await}
+{/if}
