@@ -1,9 +1,9 @@
 {
   "name": "lipilekhika",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://lipilekhika.in/",
+  "homepage": "https://lipilekhika.in",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shubhattin/lipilekhika.git"
