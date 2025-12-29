@@ -362,3 +362,117 @@ export function clearTypingContextOnKeyDown(
   }
   return false;
 }
+
+type ListType = 'svara' | 'vyanjana' | 'anya' | 'mAtrA';
+
+/**
+ * Functions to get the krama array for a script.
+ *
+ * It can be used to compare the krama array of two scripts.
+ * Especially useful for brahmic scripts, as they have a direct correlation
+ *
+ * @returns The krama array with corresponding type for the script
+ */
+export async function getScriptKramaData(script: ScriptLangType) {
+  const normalized_typing_lang = getNormalizedScriptName(script);
+  if (!normalized_typing_lang || normalized_typing_lang === 'Normal') {
+    throw new Error(`Invalid script name: ${script}`);
+  }
+  const script_data = await getScriptData(normalized_typing_lang);
+  const data: [text: string, type: ListType][] = script_data.krama_text_arr.map((val) => [
+    val[0],
+    script_data.list[val[1] ?? -1]?.type ?? 'anya'
+  ]);
+  return data;
+}
+
+/**
+ * Returns the typing data map for a script.
+ * @param script - The script to get the typing data map for
+ * @returns The typing data map for the script
+ */
+export async function getScriptTypingDataMap(script: ScriptLangType) {
+  const normalized_typing_lang = getNormalizedScriptName(script);
+  if (!normalized_typing_lang || normalized_typing_lang === 'Normal') {
+    throw new Error(`Invalid script name: ${script}`);
+  }
+  const script_data = await getScriptData(normalized_typing_lang);
+  type Item = [text: string, type: ListType, mappings: string[]];
+  const mergeDuplicateTextMappings = (items: Item[]) => {
+    // Merge items that end up with the same displayed text (and type), and keep mappings unique.
+    // We do this at the end so we don't disturb index-based mapping during population.
+    const keyToIndex = new Map<string, number>();
+    const mappingSets: Set<string>[] = [];
+    const out: Item[] = [];
+
+    for (const [text, type, mappings] of items) {
+      const key = `${text}\u0000${type}`;
+      const existingIndex = keyToIndex.get(key);
+
+      if (existingIndex === undefined) {
+        const uniq: string[] = [];
+        const set = new Set<string>();
+        for (const m of mappings) {
+          if (!set.has(m)) {
+            set.add(m);
+            uniq.push(m);
+          }
+        }
+        out.push([text, type, uniq]);
+        keyToIndex.set(key, out.length - 1);
+        mappingSets.push(set);
+      } else {
+        const set = mappingSets[existingIndex];
+        const targetMappings = out[existingIndex][2];
+        for (const m of mappings) {
+          if (!set.has(m)) {
+            set.add(m);
+            targetMappings.push(m);
+          }
+        }
+      }
+    }
+
+    // Drop items that have no typing mappings.
+    return out.filter(([, , mappings]) => mappings.length > 0);
+  };
+  const res: {
+    common_krama_map: Item[];
+    /** Contains mappings for script specific characters.
+     * uplicate key mappings are handled in the common_krama_map.
+     */
+    script_specific_krama_map: Item[];
+  } = {
+    common_krama_map: script_data.krama_text_arr.map((v) => [
+      v[0],
+      script_data.list[v[1] ?? -1]?.type ?? 'anya',
+      []
+    ]),
+    script_specific_krama_map: script_data.custom_script_chars_arr.map((val) => [
+      val[0],
+      script_data.list[val[1] ?? -1]?.type ?? 'anya',
+      []
+    ])
+  };
+
+  for (let i = 0; i < script_data.typing_text_to_krama_map.length; i++) {
+    const item = script_data.typing_text_to_krama_map[i];
+    const normal_text_map = item[0];
+    if (normal_text_map === '') continue;
+
+    if (item[1] && item[1].custom_back_ref) {
+      res.script_specific_krama_map[item[1].custom_back_ref][2].push(normal_text_map);
+    } else if (item[1] && item[1].krama && item[1].krama.length === 1) {
+      // ignore the ones whose length is greater than 1 (as they usually are intermediate typing states)
+      const krama_index = item[1].krama[0] ?? -1;
+      if (krama_index !== -1) {
+        res.common_krama_map[krama_index][2].push(normal_text_map);
+      }
+    }
+  }
+
+  res.common_krama_map = mergeDuplicateTextMappings(res.common_krama_map);
+  res.script_specific_krama_map = mergeDuplicateTextMappings(res.script_specific_krama_map);
+
+  return res;
+}

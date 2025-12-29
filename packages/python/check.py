@@ -5,6 +5,7 @@ import sys
 
 
 def main():
+    # use ruff for linting
     result = subprocess.run(["uvx", "ty", "check"])
     sys.exit(result.returncode)
 
