@@ -137,7 +137,152 @@ const Romanized: InputOtherScriptType = {
   typing_list: [
     ...COMMON_SCRIPT_TYPING_DATA,
     ...COMMON_SVARA_MATRA_TYPING_DATA,
-    ...COMMON_VEDIC_SANSKRIT_SYMBOLS
+    ...COMMON_VEDIC_SANSKRIT_SYMBOLS,
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'A^',
+      specific_text: 'Ā'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'I^',
+      specific_text: 'Ī'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'U^',
+      specific_text: 'Ū'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'E^',
+      specific_text: 'Ē'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'aiI^',
+      specific_text: 'Ê'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'O^',
+      specific_text: 'Ō'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'auU^',
+      specific_text: 'Ô'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'R^',
+      specific_text: 'R̥'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'RR^',
+      specific_text: 'R̥̄'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'LR^',
+      specific_text: 'L̥'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'LRR^',
+      specific_text: 'L̥̄'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'M^',
+      specific_text: 'Ṁ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'MM^',
+      specific_text: 'M̐'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'H^',
+      specific_text: 'Ḥ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'G^',
+      specific_text: 'Ṅ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'J^',
+      specific_text: 'Ñ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'nz^',
+      specific_text: 'Ṉ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'T^',
+      specific_text: 'Ṭ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Th^',
+      specific_text: 'Ṭh'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'D^',
+      specific_text: 'Ḍ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Dz^',
+      specific_text: 'Ṛ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Dh^',
+      specific_text: 'Ḍh'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Dhz^',
+      specific_text: 'Ṛh'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'N^',
+      specific_text: 'Ṇ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'rz^',
+      specific_text: 'Ṟ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'L^',
+      specific_text: 'Ḷ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Lz^',
+      specific_text: 'Ḻ'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'sh^',
+      specific_text: 'Ś'
+    },
+    {
+      type: 'custom_script_char',
+      custom_normal_key: 'Sh^',
+      specific_text: 'Ṣ'
+    }
   ],
   list: [
     {
@@ -224,7 +369,7 @@ const Romanized: InputOtherScriptType = {
     },
     {
       text: 'ṅ',
-      text_krama: ['N'],
+      text_krama: ['G'],
       duplicates: ['Ṅ']
     },
     {
