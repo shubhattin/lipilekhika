@@ -6,8 +6,8 @@ on:
       - 'js-lib@v*'
 
 permissions:
+  id-token: write  # Required for OIDC
   contents: read
-  id-token: write
 
 jobs:
   publish:
@@ -16,13 +16,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Extract version
-        id: version
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-          VERSION="${TAG#js-lib@v}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
         uses: actions/setup-node@v4
