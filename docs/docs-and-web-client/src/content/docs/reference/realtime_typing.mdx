@@ -5,6 +5,8 @@ sidebar:
   order: 3
 ---
 
+import { Badge } from '@astrojs/starlight/components';
+
 Lipi Lekhika also has a mechanism to implement realtime typing. It is based on the core transliteration functionality. On every the algorithm compares with the previus output and returns a diff.
 That diff contains the text to add and characters to delete. The API is same in all languages. The only difference is in naming conventions (snake_case or camelCase).
 
@@ -39,3 +41,52 @@ const ctx = createTypingContext('Devanagari', {
 - **`autoContextClearTimeMs`** : The time in milliseconds after which the context will be cleared automatically
 - **`useNativeNumerals`** : Use native numerals in typing
 - **`includeInherentVowel`** : Include inherent vowel in typing. This is the [schwa deletion](https://en.wikipedia.org/wiki/Schwa_deletion_in_Indo-Aryan_languages) property.
+
+## Additional Typing Utilities
+
+### getScriptKramaData
+
+Returns the sequential character array (krama) for a script with type information. Especially useful for Brahmic scripts, as they have a direct correlation in their character ordering.
+
+```ts
+import { getScriptKramaData } from 'lipilekhika/typing';
+
+const kramaData = await getScriptKramaData('Devanagari');
+// Returns: [text: string, type: 'svara' | 'vyanjana' | 'anya' | 'mAtrA'][]
+// Example: [['अ', 'svara'], ['आ', 'svara'], ['क', 'vyanjana'], ...]
+```
+
+This function can be used to compare character sets across scripts:
+
+```ts
+const [devanagariKrama, teluguKrama] = await Promise.all([
+  getScriptKramaData('Devanagari'),
+  getScriptKramaData('Telugu')
+]);
+
+// Compare corresponding characters
+console.log(devanagariKrama[0]); // ['अ', 'svara']
+console.log(teluguKrama[0]);     // ['అ', 'svara']
+```
+
+### getScriptTypingDataMap
+
+Returns detailed typing mappings for a script, including keyboard shortcuts for each character.
+
+```ts
+import { getScriptTypingDataMap } from 'lipilekhika/typing';
+
+const typingMap = await getScriptTypingDataMap('Telugu');
+
+// Returns an object with:
+// - common_krama_map: Common characters with keyboard mappings
+// - script_specific_krama_map: Script-specific characters with mappings
+// Each entry is a tuple: [character, type, [keyboard_mappings]]
+```
+
+This function is primarily useful for:
+- Building typing helper/reference UIs
+- Showing keyboard shortcuts to users
+- Creating visual typing guides
+
+<Badge text="Note" variant="note" /> : Both functions exclude the `Normal` script and will throw an error if called with it.

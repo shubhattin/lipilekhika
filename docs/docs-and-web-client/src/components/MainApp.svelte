@@ -25,7 +25,9 @@
   import { Textarea } from '$lib/components/ui/textarea';
   import { Separator } from '$lib/components/ui/separator';
   import * as Popover from '$lib/components/ui/popover';
-  import { KeyboardIcon, MoonIcon, SettingsIcon, SunIcon } from 'lucide-svelte';
+  import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
+  import { Icon } from 'svelte-icons-pack';
+  import { BiHelpCircle } from 'svelte-icons-pack/bi';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_FROM: ScriptListType = 'Devanagari';
@@ -47,29 +49,7 @@
 
   let from_input_typing_context = $derived(createTypingContext(fromScript));
 
-  const THEME_STORAGE_KEY = 'lipilekhika-theme'; // 'light' | 'dark' | unset (system)
-  let themeMode = $state<'light' | 'dark' | 'system'>('system');
-
-  const applyTheme = (mode: typeof themeMode) => {
-    if (typeof document === 'undefined') return;
-    const prefersDark =
-      typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
-    const shouldUseDark = mode === 'dark' || (mode === 'system' && !!prefersDark);
-    document.documentElement.classList.toggle('dark', shouldUseDark);
-  };
-
-  const persistTheme = (mode: typeof themeMode) => {
-    if (typeof localStorage === 'undefined') return;
-    if (mode === 'system') localStorage.removeItem(THEME_STORAGE_KEY);
-    else localStorage.setItem(THEME_STORAGE_KEY, mode);
-  };
-
-  const toggleTheme = () => {
-    const next = themeMode === 'dark' ? 'light' : 'dark';
-    themeMode = next;
-    persistTheme(next);
-    applyTheme(next);
-  };
+  let typing_modal_open = $state(false);
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -127,19 +107,6 @@
   onMount(() => {
     preloadScriptData(fromScript);
     preloadScriptData(toScript);
-
-    // Initialize theme from storage (falls back to system)
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    themeMode = stored === 'dark' ? 'dark' : stored === 'light' ? 'light' : 'system';
-    applyTheme(themeMode);
-
-    // If user hasn't pinned a theme, follow system changes
-    const mql = window.matchMedia?.('(prefers-color-scheme: dark)');
-    const onChange = () => {
-      if (themeMode === 'system') applyTheme('system');
-    };
-    mql?.addEventListener?.('change', onChange);
-    return () => mql?.removeEventListener?.('change', onChange);
   });
 </script>
 
@@ -149,22 +116,6 @@
       class="space-y-8 rounded-xl border border-border bg-card p-8 shadow-2xl"
       onsubmit={handleSubmit}
     >
-      <div class="flex items-center justify-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          class="h-9 w-9"
-          aria-label="Toggle theme"
-          onclick={toggleTheme}
-        >
-          {#if themeMode === 'dark'}
-            <SunIcon class="h-4 w-4" />
-          {:else}
-            <MoonIcon class="h-4 w-4" />
-          {/if}
-        </Button>
-      </div>
       <!-- Script Selection Row -->
       <div class="flex flex-col items-stretch gap-4 sm:grid sm:grid-cols-3 sm:items-end sm:gap-6">
         <!-- From Script Select -->
@@ -270,14 +221,25 @@
       <div class="grid gap-6 md:grid-cols-2">
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <label
-              for="source-text"
-              class="text-sm font-medium tracking-wide text-muted-foreground"
-            >
-              Source text
-            </label>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-muted-foreground"
+              <label
+                for="source-text"
+                class="text-sm font-medium tracking-wide text-muted-foreground"
+              >
+                Source text
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => (typing_modal_open = true)}
+              >
+                <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+                <span class="sr-only">Typing Help</span>
+              </Button>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="hidden text-xs text-muted-foreground sm:inline-block"
                 >Use <span class="font-bold">Alt+x</span> to toggle</span
               >
               <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
@@ -374,3 +336,9 @@
     </form>
   </div>
 </div>
+
+{#if typing_modal_open}
+  {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
+    <TypingHelper bind:open={typing_modal_open} script={fromScript} />
+  {/await}
+{/if}

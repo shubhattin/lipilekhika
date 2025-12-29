@@ -24,7 +24,7 @@
         rel="noopener noreferrer"
         class="text-foreground/80 hover:text-foreground"
       >
-        <Icon src={SiNpm} className="size-5" />
+        <Icon src={SiNpm} className="size-4 sm:size-5" />
         <span class="sr-only">NPM</span>
       </Button>
       <Button
@@ -35,7 +35,7 @@
         rel="noopener noreferrer"
         class="text-foreground/80 hover:text-foreground"
       >
-        <Icon src={BsGithub} className="size-5" />
+        <Icon src={BsGithub} className="size-4 sm:size-5" />
         <span class="sr-only">GitHub</span>
       </Button>
       <ThemeToggle />

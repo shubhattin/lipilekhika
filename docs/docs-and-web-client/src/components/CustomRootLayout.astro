@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import Posthog from './Posthog.astro';
+import Header from './landing/Header.svelte';
+import { ExternalLink } from 'lucide-svelte';
 
 type Props = {
   title: string;
@@ -24,7 +26,7 @@ const shareImageInfo = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
-     <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
     <!-- OpenGraph Meta Tags -->
@@ -66,6 +68,42 @@ const shareImageInfo = {
     <Posthog />
   </head>
   <body class="dark bg-background">
-    <slot />
+    <div class="min-h-screen">
+      <Header client:idle transition:persist />
+
+      <slot />
+
+      <!-- Footer -->
+      <footer class="border-t border-border/40 py-8">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground">
+              <img src="/main.png" alt="Lipi Lekhika" class="size-5" />
+              <span>Lipi Lekhika</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm">
+              <a
+                href="https://github.com/shubhattin/lipilekhika"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                GitHub
+                <ExternalLink class="size-3" />
+              </a>
+              <a
+                href="/getting-started/introduction"
+                class="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Docs
+              </a>
+              <a href="/app" class="text-muted-foreground transition-colors hover:text-foreground">
+                App
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>

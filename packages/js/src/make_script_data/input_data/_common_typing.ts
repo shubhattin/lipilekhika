@@ -263,6 +263,11 @@ export const COMMON_VEDIC_SANSKRIT_SYMBOLS = [
 export const DEVANAGARI_SPECIFIC_VEDIC_SANSKRIT_SYMBOLS = [
   {
     type: 'custom_script_char',
+    specific_text: '#',
+    custom_normal_key: '#'
+  },
+  {
+    type: 'custom_script_char',
     specific_text: '꣠',
     custom_normal_key: '#0'
   },

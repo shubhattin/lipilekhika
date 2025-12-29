@@ -123,7 +123,9 @@ For browser environments with `<textarea>` and `<input>` elements:
 import {
   createTypingContext,
   handleTypingBeforeInputEvent,
-  clearTypingContextOnKeyDown
+  clearTypingContextOnKeyDown,
+  getScriptKramaData,
+  getScriptTypingDataMap
 } from 'lipilekhika/typing';
 ```
 
@@ -173,6 +175,29 @@ const ctx = createTypingContext('Telugu');
   onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx)}
 />
 ```
+
+### Additional Typing Utilities
+
+#### `getScriptKramaData(script)`
+
+Returns the sequential character array (krama) for a script. Useful for comparing character sets across Brahmic scripts.
+
+```ts
+const kramaData = await getScriptKramaData('Devanagari');
+// Returns: [['अ', 'svara'], ['आ', 'svara'], ['क', 'vyanjana'], ...]
+```
+
+#### `getScriptTypingDataMap(script)`
+
+Returns detailed typing mappings for a script, including keyboard shortcuts.
+
+```ts
+const typingMap = await getScriptTypingDataMap('Telugu');
+// Returns: { common_krama_map: [...], script_specific_krama_map: [...] }
+// Useful for building typing helper UIs
+```
+
+📖 [**Realtime Typing Reference**](https://lipilekhika.in/reference/realtime_typing)
 
 ## 🌐 CDN Usage (No Build Step)
 
