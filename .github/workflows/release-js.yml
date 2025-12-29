@@ -32,12 +32,17 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun        
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
       - name: Build Package
         run: |
           cd packages/js
           bun install
           bun run build
           bun test --only-failures
+      # Test before publishing to npm
 
       - name: Publish to npm
         run: npm publish
