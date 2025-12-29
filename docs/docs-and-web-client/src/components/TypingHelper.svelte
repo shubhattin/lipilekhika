@@ -10,10 +10,13 @@
 
   import { Keyboard, Map as MapIcon, ArrowLeftRight } from 'lucide-svelte';
 
-  let { open = $bindable(), script } = $props<{
+  let { open = $bindable(), script: script_input } = $props<{
     open: boolean;
     script: ScriptListType;
   }>();
+
+  // svelte-ignore state_referenced_locally
+  let script = $state<ScriptListType>(script_input);
 
   let script_to_compare = $state<ScriptListType | undefined>('Romanized');
 
@@ -55,6 +58,20 @@
       </div>
 
       <div class="min-h-0 flex-1 overflow-hidden p-5 sm:p-6">
+        <div class="mb-4 flex items-center justify-center gap-x-2">
+          <span class="text-sm text-muted-foreground">Select Script</span>
+          <Select.Root type="single" bind:value={script}>
+            <Select.Trigger class="w-full sm:w-64">
+              {script}
+            </Select.Trigger>
+            <Select.Content>
+              {#each SCRIPT_LIST.filter((s) => s !== 'Normal') as s (s)}
+                <Select.Item value={s} label={s} />
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        </div>
+
         <Tabs.Root value="typing-map" class="flex h-full min-h-0 flex-col">
           <Tabs.List class="grid w-full grid-cols-2">
             <Tabs.Trigger value="typing-map" class="gap-2">
@@ -68,7 +85,29 @@
           </Tabs.List>
 
           <Tabs.Content value="typing-map" class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
-            {#await script_typing_map_promise then script_typing_map}
+            {#await script_typing_map_promise}
+              <section class="space-y-6" aria-label="Loading typing map">
+                {#each ['Svara', 'Vyanjana', 'Other', 'Script-specific Characters'] as title (title)}
+                  <div>
+                    <div class="mb-2 flex items-center justify-between gap-2">
+                      <Skeleton class="h-6 w-40" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                      {#each Array.from({ length: 12 }) as _, idx (title + idx)}
+                        <div class="rounded-md border border-border bg-card p-2">
+                          <Skeleton class="h-6 w-14" />
+                          <div class="mt-2 flex flex-wrap gap-1">
+                            <Skeleton class="h-4 w-10 opacity-70" />
+                            <Skeleton class="h-4 w-12 opacity-60" />
+                            <Skeleton class="h-4 w-14 opacity-50" />
+                          </div>
+                        </div>
+                      {/each}
+                    </div>
+                  </div>
+                {/each}
+              </section>
+            {:then script_typing_map}
               {@const common = script_typing_map.common_krama_map as Item[]}
               {@const specific = script_typing_map.script_specific_krama_map as Item[]}
               {@const svaraItems = filterCategory(common, 'svara')}
