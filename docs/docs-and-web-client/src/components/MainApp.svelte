@@ -31,7 +31,7 @@
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_FROM: ScriptListType = 'Devanagari';
-  const DEFAULT_TO: ScriptListType = 'Normal';
+  const DEFAULT_TO: ScriptListType = 'Romanized';
 
   let fromScript = $state<ScriptListType>(DEFAULT_FROM);
   let toScript = $state<ScriptListType>(DEFAULT_TO);
@@ -105,8 +105,14 @@
   });
 
   onMount(() => {
-    preloadScriptData(fromScript);
-    preloadScriptData(toScript);
+    const prom = [preloadScriptData(fromScript), preloadScriptData(toScript)];
+    if ((globalThis as any).lipi_tmp_text) {
+      inputText = (globalThis as any).lipi_tmp_text;
+      (globalThis as any).lipi_tmp_text = '';
+      Promise.allSettled(prom).then(() => {
+        handleSubmit(new SubmitEvent('submit'));
+      });
+    }
   });
 </script>
 

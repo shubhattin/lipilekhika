@@ -7,6 +7,7 @@
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
   } from '../../../../../packages/js/src/typing';
+  import Button from '$lib/components/ui/button/button.svelte';
 
   let script = $state<ScriptListType>('Devanagari');
   let textarea_text = $state('');
@@ -49,4 +50,12 @@
     onblur={() => textarea_typing_context.clearContext()}
     onkeydown={(e) => clearTypingContextOnKeyDown(e, textarea_typing_context)}
   />
+  <a
+    href="/app"
+    onclick={(e) => {
+      (globalThis as any).lipi_tmp_text = textarea_text;
+      // works with view transition to preserve the state
+    }}
+    class="w-full text-xs text-muted-foreground hover:text-foreground">Convert text in App</a
+  >
 </div>
