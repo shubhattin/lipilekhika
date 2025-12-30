@@ -1,5 +1,5 @@
 ---
-import CustomRootLayout from '$components/CustomRootLayout.astro';
+import RootLayout from '$components/RootLayout.astro';
 import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
@@ -7,7 +7,7 @@ import ScriptTrans from '$components/landing/ScriptTrans.svelte';
 import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
 ---
 
-<CustomRootLayout
+<RootLayout
   title="Lipi Lekhika - Indian Script Transliteration"
   description="A powerful, fast, and open-source transliteration tool for Indian Brahmic Scripts. Type and convert between Devanagari, Telugu, Tamil, Bengali, and more."
 >
@@ -123,4 +123,4 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
   <Features />
 
   <PackagesAndIntegrations />
-</CustomRootLayout>
+</RootLayout>

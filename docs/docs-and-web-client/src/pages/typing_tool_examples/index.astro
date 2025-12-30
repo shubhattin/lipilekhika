@@ -1,13 +1,13 @@
 ---
-import RootLayout from '../RootLayout.astro';
+import RootLayout from '$components/typing_examples/ExampleRootLayout.astro';
 
 const frameworks = [
-  { name: 'Svelte', path: './svelte', color: 'from-orange-500 to-red-500' },
-  { name: 'React', path: './react', color: 'from-cyan-500 to-blue-500' },
-  { name: 'Vue', path: './vue', color: 'from-green-500 to-emerald-500' },
-  { name: 'SolidJS', path: './solidjs', color: 'from-blue-500 to-indigo-500' },
-  { name: 'Vanilla ESM', path: './vanila_esm', color: 'from-yellow-500 to-amber-500' },
-  { name: 'Vanilla UMD', path: './vanila_umd', color: 'from-purple-500 to-pink-500' }
+  { name: 'Svelte', path: 'svelte', color: 'from-orange-500 to-red-500' },
+  { name: 'React', path: 'react', color: 'from-cyan-500 to-blue-500' },
+  { name: 'Vue', path: 'vue', color: 'from-green-500 to-emerald-500' },
+  { name: 'SolidJS', path: 'solidjs', color: 'from-blue-500 to-indigo-500' },
+  { name: 'Vanilla ESM', path: 'vanila_esm', color: 'from-yellow-500 to-amber-500' },
+  { name: 'Vanilla UMD', path: 'vanila_umd', color: 'from-purple-500 to-pink-500' }
 ];
 ---
 
@@ -27,7 +27,7 @@ const frameworks = [
       {
         frameworks.map((framework) => (
           <a
-            href={`${framework.path}`}
+            href={`/typing_tool_examples/${framework.path}`}
             class="group block rounded-xl border border-slate-700 bg-slate-800/50 p-8 transition-all duration-300 hover:border-slate-600 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/50"
           >
             <div class="flex items-center justify-between">

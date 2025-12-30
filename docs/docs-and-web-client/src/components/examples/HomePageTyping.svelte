@@ -4,7 +4,7 @@
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
-  } from '$lipilekhika/typing';
+  } from 'lipilekhika/typing';
   import { getFontClass } from '$components/script/font_list';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
   import { Icon } from 'svelte-icons-pack';
