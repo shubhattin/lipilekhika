@@ -1,8 +1,4 @@
-import {
-  type ScriptLangType,
-  type ScriptListType,
-  getNormalizedScriptName
-} from '$lipilekhika/index';
+import { type ScriptLangType, type ScriptListType, getNormalizedScriptName } from 'lipilekhika';
 
 export const SCRIPT_AVATAR_MAP: Record<ScriptListType, string> = {
   Devanagari: 'अ',

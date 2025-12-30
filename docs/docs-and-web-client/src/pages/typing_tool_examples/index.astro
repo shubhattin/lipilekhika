@@ -1,0 +1,67 @@
+---
+import RootLayout from '$components/typing_examples/ExampleRootLayout.astro';
+
+const frameworks = [
+  { name: 'Svelte', path: './svelte', color: 'from-orange-500 to-red-500' },
+  { name: 'React', path: './react', color: 'from-cyan-500 to-blue-500' },
+  { name: 'Vue', path: './vue', color: 'from-green-500 to-emerald-500' },
+  { name: 'SolidJS', path: './solidjs', color: 'from-blue-500 to-indigo-500' },
+  { name: 'Vanilla ESM', path: './vanila_esm', color: 'from-yellow-500 to-amber-500' },
+  { name: 'Vanilla UMD', path: './vanila_umd', color: 'from-purple-500 to-pink-500' }
+];
+---
+
+<RootLayout title="Lipi Lekhika Typing Tool - Framework Examples">
+  <div class="mx-auto max-w-4xl p-8">
+    <div class="mb-12 text-center">
+      <h1 class="mb-4 text-4xl font-bold tracking-tight text-slate-100">
+        Lipi Lekhika Typing Tool
+      </h1>
+      <p class="text-lg text-slate-400">
+        Interactive examples demonstrating typing tool usage across different frameworks and vanilla
+        JavaScript
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        frameworks.map((framework) => (
+          <a
+            href={`${framework.path}`}
+            class="group block rounded-xl border border-slate-700 bg-slate-800/50 p-8 transition-all duration-300 hover:border-slate-600 hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-900/50"
+          >
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-bold text-slate-100">{framework.name}</h2>
+              <svg
+                class="h-6 w-6 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </div>
+            <div class={`mt-4 h-1 w-16 rounded-full bg-linear-to-r ${framework.color}`} />
+            <p class="mt-4 text-sm text-slate-400">
+              See how to integrate the typing tool in {framework.name}
+            </p>
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="mt-12 rounded-xl border border-slate-700 bg-slate-800/30 p-6">
+      <h3 class="mb-3 text-lg font-semibold text-slate-200">About</h3>
+      <p class="text-sm leading-relaxed text-slate-400">
+        This site demonstrates the <span class="font-mono text-slate-300">lipilekhika</span>{' '}
+        typing tool library integration across popular JavaScript frameworks and vanilla JavaScript (ESM/UMD).
+        Each example shows how to implement script-based input handling with proper context management.
+      </p>
+    </div>
+  </div>
+</RootLayout>

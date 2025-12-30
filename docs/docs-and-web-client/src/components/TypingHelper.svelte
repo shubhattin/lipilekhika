@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type ScriptListType, SCRIPT_LIST } from '$lipilekhika/index';
-  import { getScriptKramaData, getScriptTypingDataMap } from '$lipilekhika/typing';
+  import { type ScriptListType, SCRIPT_LIST } from 'lipilekhika';
+  import { getScriptKramaData, getScriptTypingDataMap } from 'lipilekhika/typing';
 
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Select from '$lib/components/ui/select';

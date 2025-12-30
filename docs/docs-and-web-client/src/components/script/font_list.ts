@@ -1,8 +1,4 @@
-import {
-  type ScriptLangType,
-  type ScriptListType,
-  getNormalizedScriptName
-} from '$lipilekhika/index';
+import { type ScriptLangType, type ScriptListType, getNormalizedScriptName } from 'lipilekhika';
 
 const FONT_LIST: Record<ScriptListType, string> = {
   Devanagari: 'font-devanagari',

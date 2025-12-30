@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import type { ScriptListType } from '$lipilekhika/index';
+import type { ScriptListType } from 'lipilekhika';
 
 /** Shared state for input text
  *

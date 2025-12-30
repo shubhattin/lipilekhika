@@ -6,6 +6,10 @@ import starlightThemeNext from 'starlight-theme-next';
 import MacroPlugin from 'unplugin-macros/vite';
 import svelte from '@astrojs/svelte';
 
+import react from '@astrojs/react';
+import vue from '@astrojs/vue';
+import solidJs from '@astrojs/solid-js';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://lipilekhika.in',
@@ -37,7 +41,14 @@ export default defineConfig({
       ],
       customCss: ['./src/styles/global.css']
     }),
-    svelte()
+    svelte(),
+    react({
+      include: ['**/react/*']
+    }),
+    solidJs({
+      include: ['**/solid/*']
+    }),
+    vue()
   ],
   vite: {
     plugins: [tailwindcss(), MacroPlugin()]

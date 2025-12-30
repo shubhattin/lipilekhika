@@ -7,14 +7,14 @@
     SCRIPT_LIST,
     type ScriptListType,
     type TransliterationOptions
-  } from '$lipilekhika/index';
+  } from 'lipilekhika';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown,
     DEFAULT_USE_NATIVE_NUMERALS,
     DEFAULT_INCLUDE_INHERENT_VOWEL
-  } from '$lipilekhika/typing';
+  } from 'lipilekhika/typing';
   // ^ import directly for real time development
   import { getFontClass } from '$components/script/font_list';
   import prettyMs from 'pretty-ms';

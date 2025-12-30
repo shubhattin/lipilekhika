@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Select from '$lib/components/ui/select';
   import * as Avatar from '$lib/components/ui/avatar';
-  import { type ScriptListType } from '$lipilekhika/index';
+  import { type ScriptListType } from 'lipilekhika';
   import { getScriptAvatar } from '$components/script/script_avatar';
 
   let {
@@ -46,9 +46,7 @@
 </script>
 
 <Select.Root type="single" bind:value={script}>
-  <Select.Trigger
-    class="h-8 w-48 gap-x-0 space-x-0 border-border/50 bg-background/50 text-sm"
-  >
+  <Select.Trigger class="h-8 w-48 gap-x-0 space-x-0 border-border/50 bg-background/50 text-sm">
     <Avatar.Root>
       <Avatar.Fallback>{getScriptAvatar(script)}</Avatar.Fallback>
     </Avatar.Root>
