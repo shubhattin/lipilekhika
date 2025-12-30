@@ -1,33 +1,39 @@
 <script lang="ts">
   import { Textarea } from '$lib/components/ui/textarea';
   import * as Select from '$lib/components/ui/select';
-  import { SCRIPT_LIST, type ScriptListType } from '../../../../../packages/js/src/index';
+  import { SCRIPT_LIST, type ScriptListType } from '$lipilekhika/index';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
-  } from '../../../../../packages/js/src/typing';
-  import Button from '$lib/components/ui/button/button.svelte';
+  } from '$lipilekhika/typing';
+  import { input_text_atom, typing_script_atom } from '~/components/landing/state';
 
-  let script = $state<ScriptListType>('Devanagari');
-  let textarea_text = $state('');
-
-  let textarea_typing_context = $derived(createTypingContext(script));
+  let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
   $effect(() => {
     textarea_typing_context.ready;
   });
 </script>
 
+<div class="mb-3 flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <img src="/main.png" alt="Lipi Lekhika" class="size-5" />
+    <p class="text-sm font-semibold text-foreground">Try typing</p>
+  </div>
+  <a href="/app" class="text-xs text-muted-foreground transition-colors hover:text-foreground">
+    Open full app
+  </a>
+</div>
 <div class="space-y-3">
   <div class="flex items-center gap-2">
     <span class="shrink-0 text-xs font-semibold text-muted-foreground">Script:</span>
-    <Select.Root type="single" bind:value={script}>
+    <Select.Root type="single" bind:value={$typing_script_atom}>
       <Select.Trigger
         id="homepage-typing-script"
         class="h-8 flex-1 border-border/50 bg-background/50 text-sm"
       >
-        {script}
+        {$typing_script_atom}
       </Select.Trigger>
       <Select.Content class="max-h-60">
         {#each SCRIPT_LIST as s (s)}
@@ -38,24 +44,17 @@
   </div>
 
   <Textarea
-    placeholder={`Start typing to see realtime transliteration in ${script}...`}
+    placeholder={`Start typing to see realtime transliteration in ${$typing_script_atom}...`}
     class="min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background"
-    bind:value={textarea_text}
+    bind:value={$input_text_atom}
     onbeforeinput={(e) =>
-      handleTypingBeforeInputEvent(
-        textarea_typing_context,
-        e,
-        (newValue) => (textarea_text = newValue)
+      handleTypingBeforeInputEvent(textarea_typing_context, e, (newValue) =>
+        input_text_atom.set(newValue)
       )}
     onblur={() => textarea_typing_context.clearContext()}
     onkeydown={(e) => clearTypingContextOnKeyDown(e, textarea_typing_context)}
   />
-  <a
-    href="/app"
-    onclick={(e) => {
-      (globalThis as any).lipi_tmp_text = textarea_text;
-      // works with view transition to preserve the state
-    }}
-    class="w-full text-xs text-muted-foreground hover:text-foreground">Convert text in App</a
+  <a href="/app" class="w-full text-xs text-muted-foreground hover:text-foreground"
+    >Convert text in App</a
   >
 </div>
