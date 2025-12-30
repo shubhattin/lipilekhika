@@ -91,10 +91,7 @@
                 </span>
                 <Popover.Root>
                   <Popover.Trigger>
-                    <Button
-                      variant="ghost"
-                      class="size-5"
-                    >
+                    <Button variant="ghost" class="size-5">
                       <InfoIcon class="size-4" />
                     </Button>
                   </Popover.Trigger>

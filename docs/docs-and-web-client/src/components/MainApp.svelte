@@ -16,7 +16,7 @@
     DEFAULT_INCLUDE_INHERENT_VOWEL
   } from '$lipilekhika/typing';
   // ^ import directly for real time development
-  import { slide } from 'svelte/transition';
+  import { getFontClass } from '$components/script/font_list';
   import prettyMs from 'pretty-ms';
 
   import { Button } from '$lib/components/ui/button';
@@ -215,7 +215,7 @@
           </div>
           <Textarea
             id="source-text"
-            class="min-h-[180px] resize-none"
+            class={'min-h-[180px] resize-none ' + getFontClass($typing_script_atom)}
             placeholder="Enter text to transliterate..."
             bind:value={$input_text_atom}
             onbeforeinput={(e) =>
@@ -254,7 +254,7 @@
           </div>
           <Textarea
             id="output-text"
-            class="min-h-[180px] resize-none bg-muted/30"
+            class={'min-h-[180px] resize-none bg-muted/30 ' + getFontClass(toScript)}
             value={outputText}
             readonly
           />

@@ -5,6 +5,7 @@
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
   } from '$lipilekhika/typing';
+  import { getFontClass } from '$components/script/font_list';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
@@ -41,7 +42,8 @@
 
   <Textarea
     placeholder={`Start typing to see realtime transliteration in ${$typing_script_atom}...`}
-    class="min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background"
+    class={'min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background ' +
+      getFontClass($typing_script_atom)}
     bind:value={$input_text_atom}
     onbeforeinput={(e) =>
       handleTypingBeforeInputEvent(textarea_typing_context, e, (newValue) =>
