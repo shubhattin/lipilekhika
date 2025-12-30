@@ -28,7 +28,7 @@
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
-  import ScriptSeleector from './script/ScriptSeleector.svelte';
+  import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];

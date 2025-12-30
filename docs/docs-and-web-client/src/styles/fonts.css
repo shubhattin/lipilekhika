@@ -11,11 +11,25 @@
 @import '@fontsource/noto-sans-oriya';
 @import '@fontsource/noto-sans-sinhala';
 @import '@fontsource/noto-sans-gurmukhi';
-@import '@fontsource/noto-sans-brahmi';
+/* @import '@fontsource/noto-sans-brahmi'; */
 @import '@fontsource/noto-sans-grantha';
 @import '@fontsource/noto-sans-modi';
-@import '@fontsource/noto-sans-sharada';
+/* @import '@fontsource/noto-sans-sharada'; */
 @import '@fontsource/noto-sans-siddham';
+
+@font-face {
+  font-family: 'Satisar Sharada';
+  src: url('./fonts/SatisarSharada.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Segoi UI Historic';
+  src: url('./fonts/SegoiUIHistoric.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
 
 /* ===== Base / Romanized ===== */
 .font-normal,
@@ -75,7 +89,7 @@
 
 /* ===== Historic / Classical Scripts ===== */
 .font-brahmi {
-  font-family: 'Noto Sans Brahmi', sans-serif;
+  font-family: 'Segoi UI Historic', sans-serif;
 }
 
 .font-grantha {
@@ -87,7 +101,7 @@
 }
 
 .font-sharada {
-  font-family: 'Noto Sans Sharada', sans-serif;
+  font-family: 'Satisar Sharada', sans-serif;
 }
 
 .font-siddham {

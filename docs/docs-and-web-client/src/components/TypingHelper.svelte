@@ -9,7 +9,7 @@
   import { Skeleton } from '$lib/components/ui/skeleton';
 
   import { Keyboard, Map as MapIcon, ArrowLeftRight } from 'lucide-svelte';
-  import ScriptSeleector from './script/ScriptSeleector.svelte';
+  import ScriptSeleector from './script/ScriptSelector.svelte';
 
   let { open = $bindable(), script: script_input } = $props<{
     open: boolean;

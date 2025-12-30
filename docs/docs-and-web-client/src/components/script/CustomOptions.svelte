@@ -87,7 +87,7 @@
                   bind:checked={options[option as keyof TransliterationOptions]}
                 />
                 <span class="block max-w-40 truncate text-xs sm:max-w-full" title={option}>
-                  {CUSTOM_OPTION_DESCRIPTION[option as CustomOptionList][0]}
+                  {CUSTOM_OPTION_DESCRIPTION[option as CustomOptionList]?.[0] ?? option}
                 </span>
                 <Popover.Root>
                   <Popover.Trigger>
@@ -97,7 +97,8 @@
                   </Popover.Trigger>
                   <Popover.Content class="w-80">
                     <p class="text-sm">
-                      {CUSTOM_OPTION_DESCRIPTION[option as CustomOptionList][1]}
+                      {CUSTOM_OPTION_DESCRIPTION[option as CustomOptionList]?.[1] ??
+                        'No description available.'}
                     </p>
                   </Popover.Content>
                 </Popover.Root>

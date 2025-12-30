@@ -10,7 +10,7 @@
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import Button from '$lib/components/ui/button/button.svelte';
-  import ScriptSeleector from '$components/script/ScriptSeleector.svelte';
+  import ScriptSeleector from '$components/script/ScriptSelector.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
