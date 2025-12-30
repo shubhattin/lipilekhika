@@ -14,6 +14,8 @@
     "@astrojs/starlight": "^0.37.1",
     "@astrojs/starlight-tailwind": "^4.0.2",
     "@astrojs/svelte": "^7.2.4",
+    "@fontsource/noto-sans": "^5.2.10",
+    "@fontsource/noto-serif": "^5.2.9",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.6",
     "lucide-svelte": "^0.562.0",
