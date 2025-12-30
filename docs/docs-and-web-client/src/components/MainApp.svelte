@@ -20,7 +20,6 @@
   import prettyMs from 'pretty-ms';
 
   import { Button } from '$lib/components/ui/button';
-  import * as Select from '$lib/components/ui/select';
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import { Separator } from '$lib/components/ui/separator';
@@ -28,7 +27,8 @@
   import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
-  import { input_text_atom, typing_script_atom } from '$components/landing/state';
+  import { input_text_atom, typing_script_atom } from '$components/script/state';
+  import ScriptSeleector from './script/ScriptSeleector.svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_TO: ScriptListType = 'Romanized';
@@ -121,16 +121,7 @@
         <!-- From Script Select -->
         <div class="flex flex-col gap-2.5">
           <span class="text-sm font-medium tracking-wide text-muted-foreground">From script</span>
-          <Select.Root type="single" bind:value={$typing_script_atom}>
-            <Select.Trigger class="w-full">
-              {$typing_script_atom}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPTS as script (script)}
-                <Select.Item value={script} label={script} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script={$typing_script_atom} />
         </div>
 
         <!-- Swap Button -->
@@ -150,16 +141,7 @@
         <!-- To Script Select -->
         <div class="flex flex-col gap-2.5">
           <span class="text-sm font-medium tracking-wide text-muted-foreground">To script</span>
-          <Select.Root type="single" bind:value={toScript}>
-            <Select.Trigger class="w-full">
-              {toScript}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPTS as script (script)}
-                <Select.Item value={script} label={script} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script={toScript} />
         </div>
       </div>
 

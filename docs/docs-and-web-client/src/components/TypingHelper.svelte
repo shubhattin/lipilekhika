@@ -9,6 +9,7 @@
   import { Skeleton } from '$lib/components/ui/skeleton';
 
   import { Keyboard, Map as MapIcon, ArrowLeftRight } from 'lucide-svelte';
+  import ScriptSeleector from './script/ScriptSeleector.svelte';
 
   let { open = $bindable(), script: script_input } = $props<{
     open: boolean;
@@ -60,16 +61,7 @@
       <div class="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
         <div class="mb-4 flex items-center justify-center gap-x-2">
           <span class="text-sm text-muted-foreground">Select Script</span>
-          <Select.Root type="single" bind:value={script}>
-            <Select.Trigger class="w-44">
-              {script}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPT_LIST.filter((s) => s !== 'Normal') as s (s)}
-                <Select.Item value={s} label={s} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script />
         </div>
 
         <Tabs.Root value="typing-map" class="flex h-full min-h-0 flex-col">

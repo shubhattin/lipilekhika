@@ -1,16 +1,15 @@
 <script lang="ts">
   import { Textarea } from '$lib/components/ui/textarea';
-  import * as Select from '$lib/components/ui/select';
-  import { SCRIPT_LIST, type ScriptListType } from '$lipilekhika/index';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
   } from '$lipilekhika/typing';
-  import { input_text_atom, typing_script_atom } from '~/components/landing/state';
+  import { input_text_atom, typing_script_atom } from '$components/script/state';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import Button from '$lib/components/ui/button/button.svelte';
+  import ScriptSeleector from '$components/script/ScriptSeleector.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
@@ -33,19 +32,7 @@
 <div class="space-y-3">
   <div class="flex items-center gap-2">
     <span class="shrink-0 text-xs font-semibold text-muted-foreground">Script:</span>
-    <Select.Root type="single" bind:value={$typing_script_atom}>
-      <Select.Trigger
-        id="homepage-typing-script"
-        class="h-8 w-48 border-border/50 bg-background/50 text-sm"
-      >
-        {$typing_script_atom}
-      </Select.Trigger>
-      <Select.Content class="max-h-60">
-        {#each SCRIPT_LIST as s (s)}
-          <Select.Item value={s} label={s} />
-        {/each}
-      </Select.Content>
-    </Select.Root>
+    <ScriptSeleector bind:script={$typing_script_atom} />
     <Button variant="ghost" size="icon" class="size-8" onclick={() => (typing_modal_open = true)}>
       <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
       <span class="sr-only">Typing Help</span>

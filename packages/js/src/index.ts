@@ -25,7 +25,9 @@ export {
    */
   LANG_LIST,
   /** Lists of all Supported Script/Language */
-  ALL_LANG_SCRIPT_LIST
+  ALL_LANG_SCRIPT_LIST,
+  /** Get Normalized Script Name */
+  getNormalizedScriptName
 };
 /**
  * Preloads the script data. Useful for browsers as avoids the fetch latency
