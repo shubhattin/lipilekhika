@@ -139,6 +139,11 @@ const Normal: InputOtherScriptType = {
       text: 'Ch',
       text_krama: ['Ch'],
       duplicates: ['chh']
+    },
+    {
+      text: 'Sh',
+      text_krama: ['Sh'],
+      duplicates: ['shh']
     }
   ]
 };
