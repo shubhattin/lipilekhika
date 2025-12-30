@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type ScriptListType, SCRIPT_LIST } from '../../../../packages/js/src/index';
-  import { getScriptKramaData, getScriptTypingDataMap } from '../../../../packages/js/src/typing';
+  import { type ScriptListType, SCRIPT_LIST } from '$lipilekhika/index';
+  import { getScriptKramaData, getScriptTypingDataMap } from '$lipilekhika/typing';
 
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Select from '$lib/components/ui/select';
@@ -57,11 +57,11 @@
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-hidden p-5 sm:p-6">
+      <div class="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
         <div class="mb-4 flex items-center justify-center gap-x-2">
           <span class="text-sm text-muted-foreground">Select Script</span>
           <Select.Root type="single" bind:value={script}>
-            <Select.Trigger class="w-full sm:w-64">
+            <Select.Trigger class="w-44">
               {script}
             </Select.Trigger>
             <Select.Content>
@@ -84,7 +84,7 @@
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="typing-map" class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
+          <Tabs.Content value="typing-map" class="mt-4 flex-1 pr-1">
             {#await script_typing_map_promise}
               <section class="space-y-6" aria-label="Loading typing map">
                 {#each ['Svara', 'Vyanjana', 'Other', 'Script-specific Characters'] as title (title)}
@@ -234,7 +234,7 @@
             {/await}
           </Tabs.Content>
 
-          <Tabs.Content value="compare-scripts" class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
+          <Tabs.Content value="compare-scripts" class="mt-4 flex-1 pr-1">
             <div class="space-y-4">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="text-sm text-muted-foreground">

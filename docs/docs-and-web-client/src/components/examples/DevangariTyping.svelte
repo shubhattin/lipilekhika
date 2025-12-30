@@ -4,7 +4,7 @@
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown
-  } from '../../../../../packages/js/src/typing';
+  } from '$lipilekhika/typing';
 
   const DEFAULT_SCRIPT = 'Devanagari';
   let textarea_text = $state('');

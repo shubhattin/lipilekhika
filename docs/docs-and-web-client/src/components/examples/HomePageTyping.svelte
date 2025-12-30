@@ -8,8 +8,13 @@
     clearTypingContextOnKeyDown
   } from '$lipilekhika/typing';
   import { input_text_atom, typing_script_atom } from '~/components/landing/state';
+  import { Icon } from 'svelte-icons-pack';
+  import { BiHelpCircle } from 'svelte-icons-pack/bi';
+  import Button from '$lib/components/ui/button/button.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
+
+  let typing_modal_open = $state(false);
 
   $effect(() => {
     textarea_typing_context.ready;
@@ -31,7 +36,7 @@
     <Select.Root type="single" bind:value={$typing_script_atom}>
       <Select.Trigger
         id="homepage-typing-script"
-        class="h-8 flex-1 border-border/50 bg-background/50 text-sm"
+        class="h-8 w-48 border-border/50 bg-background/50 text-sm"
       >
         {$typing_script_atom}
       </Select.Trigger>
@@ -41,6 +46,10 @@
         {/each}
       </Select.Content>
     </Select.Root>
+    <Button variant="ghost" size="icon" class="size-8" onclick={() => (typing_modal_open = true)}>
+      <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+      <span class="sr-only">Typing Help</span>
+    </Button>
   </div>
 
   <Textarea
@@ -58,3 +67,9 @@
     >Convert text in App</a
   >
 </div>
+
+{#if typing_modal_open}
+  {#await import('../TypingHelper.svelte') then { default: TypingHelper }}
+    <TypingHelper bind:open={typing_modal_open} script={$typing_script_atom} />
+  {/await}
+{/if}
