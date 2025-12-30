@@ -3,6 +3,7 @@ import CustomRootLayout from '$components/CustomRootLayout.astro';
 import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
+import ScriptTrans from '$components/landing/ScriptTrans.svelte';
 import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
 ---
 
@@ -84,16 +85,20 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
           >
             <HomePageTyping client:load />
           </div>
-          <p class="mt-3 text-center text-xs text-muted-foreground lg:text-left">
-            Tip: change the script and type in the box — it updates instantly.
-          </p>
         </div>
       </div>
     </div>
+    <section class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div class="flex justify-center">
+        <div class="w-full max-w-xl text-center">
+          <ScriptTrans client:load />
+        </div>
+      </div>
+    </section>
   </section>
 
   <!-- Supported Scripts Banner -->
-  <section class="border-y border-border/40 bg-muted/30 py-8">
+  <section class="border-y border-border/40 bg-muted/30 py-8 pt-4">
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
       <p class="mb-4 text-center text-sm font-medium text-muted-foreground">Supported Scripts</p>
       <div class="flex flex-wrap justify-center gap-3 text-lg sm:text-xl">

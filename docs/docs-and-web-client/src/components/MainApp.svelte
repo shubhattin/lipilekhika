@@ -27,6 +27,7 @@
   import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
+  import { BsCopy } from 'svelte-icons-pack/bs';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
@@ -85,6 +86,14 @@
     toScript = currentFrom;
     $input_text_atom = currentOutputText;
     outputText = currentInputText;
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
   };
 
   $effect(() => {
@@ -160,6 +169,16 @@
               >
                 Source text
               </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => copyToClipboard($input_text_atom)}
+                title="Copy source text"
+              >
+                <Icon src={BsCopy} className="size-4" />
+                <span class="sr-only">Copy source text</span>
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -240,12 +259,24 @@
 
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <label
-              for="output-text"
-              class="text-sm font-medium tracking-wide text-muted-foreground"
-            >
-              Converted output
-            </label>
+            <div class="flex items-center gap-2">
+              <label
+                for="output-text"
+                class="text-sm font-medium tracking-wide text-muted-foreground"
+              >
+                Converted output
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => copyToClipboard(outputText)}
+                title="Copy output text"
+              >
+                <Icon src={BsCopy} className="size-4" />
+                <span class="sr-only">Copy output text</span>
+              </Button>
+            </div>
             {#if conversionTime}
               <span class="text-xs font-medium text-green-600 dark:text-green-400"
                 >⏱ {conversionTime}</span
