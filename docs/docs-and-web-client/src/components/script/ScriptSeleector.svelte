@@ -4,9 +4,11 @@
   import { type ScriptListType } from '$lipilekhika/index';
   import { getScriptAvatar } from '$components/script/script_avatar';
 
-  let { script = $bindable() } = $props<{
+  let {
+    script = $bindable()
+  }: {
     script: ScriptListType;
-  }>();
+  } = $props();
 
   const CATEGORIES = {
     modern: 'Modern Indian Scripts',

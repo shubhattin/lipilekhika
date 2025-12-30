@@ -29,6 +29,7 @@
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
   import ScriptSeleector from './script/ScriptSeleector.svelte';
+  import CustomOptions from './script/CustomOptions.svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_TO: ScriptListType = 'Romanized';
@@ -36,7 +37,6 @@
   let toScript = $state<ScriptListType>(DEFAULT_TO);
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
-  let showOptions = $state(false);
   let availableOptions = $state<string[]>([]);
   let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
@@ -147,57 +147,7 @@
 
       <Separator />
 
-      <!-- Options Section -->
-      <div class="rounded-lg border border-border bg-card/50">
-        <button
-          type="button"
-          class="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-accent/50"
-          onclick={() => (showOptions = !showOptions)}
-        >
-          <span class="text-sm font-medium tracking-wide text-foreground">
-            Transliteration Options
-          </span>
-          <svg
-            class="h-5 w-5 text-muted-foreground transition-transform duration-200"
-            class:rotate-180={showOptions}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
-        </button>
-
-        {#if showOptions}
-          <div class="border-t border-border px-5 py-4" transition:slide>
-            {#if availableOptions.length === 0}
-              <p class="text-sm text-muted-foreground">
-                No options available for this combination.
-              </p>
-            {:else}
-              <div class="space-y-4">
-                {#each availableOptions as option (option)}
-                  <div class="flex items-center justify-between gap-4">
-                    <label
-                      for={option}
-                      class="flex cursor-pointer items-center gap-x-2 text-sm text-foreground sm:gap-x-4"
-                    >
-                      <Switch
-                        id={option}
-                        bind:checked={options[option as keyof TransliterationOptions]}
-                      />
-                      <span class="block max-w-40 truncate text-xs sm:max-w-full" title={option}>
-                        {option.split(':')[1]}
-                      </span>
-                    </label>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-          </div>
-        {/if}
-      </div>
+      <CustomOptions {availableOptions} bind:options />
 
       <!-- Text Areas -->
       <div class="grid gap-6 md:grid-cols-2">
