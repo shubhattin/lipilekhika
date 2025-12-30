@@ -295,6 +295,11 @@ const Romanized: InputOtherScriptType = {
       text_krama: ['Ch'],
       duplicates: ['chh']
     },
+    {
+      text: 'Sh',
+      text_krama: ['Sh'],
+      duplicates: ['shh']
+    },
 
     // define duplicates for all Capital Letter Versions of the Letters
     {

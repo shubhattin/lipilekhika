@@ -473,8 +473,12 @@ function get_out_script_data(
     const text_krama_ref = text_krama_item[1].krama;
     const text_index = binarySearchLowerWithIndex(KramaKeysArray, KramaKeysIndexB, text);
     if (
-      text_index !== -1 &&
-      (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0)
+      (text === 'c' &&
+        ['Normal', 'Romanized'].includes(input_script_data.script_name) &&
+        text_index === -1) ||
+      // ^ custom condition for duplicate ch (c intermediate state handled)
+      (text_index !== -1 &&
+        (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0))
     ) {
       text_krama_item[1].krama = [text_index];
     }
