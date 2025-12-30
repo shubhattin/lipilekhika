@@ -11,3 +11,4 @@ tmp
 public/old
 
 *.mdx
+src/components/Posthog.astro

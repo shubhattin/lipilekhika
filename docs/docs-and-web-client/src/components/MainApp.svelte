@@ -7,20 +7,19 @@
     SCRIPT_LIST,
     type ScriptListType,
     type TransliterationOptions
-  } from '../../../../packages/js/src/index';
+  } from '$lipilekhika/index';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
     clearTypingContextOnKeyDown,
     DEFAULT_USE_NATIVE_NUMERALS,
     DEFAULT_INCLUDE_INHERENT_VOWEL
-  } from '../../../../packages/js/src/typing';
+  } from '$lipilekhika/typing';
   // ^ import directly for real time development
-  import { slide } from 'svelte/transition';
+  import { getFontClass } from '$components/script/font_list';
   import prettyMs from 'pretty-ms';
 
   import { Button } from '$lib/components/ui/button';
-  import * as Select from '$lib/components/ui/select';
   import { Switch } from '$lib/components/ui/switch';
   import { Textarea } from '$lib/components/ui/textarea';
   import { Separator } from '$lib/components/ui/separator';
@@ -28,17 +27,17 @@
   import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
+  import { BsCopy } from 'svelte-icons-pack/bs';
+  import { input_text_atom, typing_script_atom } from '$components/script/state';
+  import ScriptSeleector from './script/ScriptSelector.svelte';
+  import CustomOptions from './script/CustomOptions.svelte';
 
   const SCRIPTS = SCRIPT_LIST as ScriptListType[];
-  const DEFAULT_FROM: ScriptListType = 'Devanagari';
   const DEFAULT_TO: ScriptListType = 'Romanized';
 
-  let fromScript = $state<ScriptListType>(DEFAULT_FROM);
   let toScript = $state<ScriptListType>(DEFAULT_TO);
-  let inputText = $state('');
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
-  let showOptions = $state(false);
   let availableOptions = $state<string[]>([]);
   let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
@@ -47,7 +46,7 @@
   let useNativeNumerals = $state(DEFAULT_USE_NATIVE_NUMERALS);
   let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
-  let from_input_typing_context = $derived(createTypingContext(fromScript));
+  let from_input_typing_context = $derived(createTypingContext($typing_script_atom));
 
   let typing_modal_open = $state(false);
 
@@ -55,7 +54,7 @@
     event.preventDefault();
     try {
       const startTime = performance.now();
-      const result = await transliterate(inputText, fromScript, toScript, options);
+      const result = await transliterate($input_text_atom, $typing_script_atom, toScript, options);
       const endTime = performance.now();
       const timeTaken = endTime - startTime;
 
@@ -79,18 +78,26 @@
   };
 
   const handleSwap = () => {
-    const currentFrom = fromScript;
+    const currentFrom = $typing_script_atom;
     const currentTo = toScript;
-    const currentInputText = inputText;
+    const currentInputText = $input_text_atom;
     const currentOutputText = outputText;
-    fromScript = currentTo;
+    $typing_script_atom = currentTo;
     toScript = currentFrom;
-    inputText = currentOutputText;
+    $input_text_atom = currentOutputText;
     outputText = currentInputText;
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   $effect(() => {
-    getAllOptions(fromScript, toScript).then((all_options) => {
+    getAllOptions($typing_script_atom, toScript).then((all_options) => {
       options = Object.fromEntries(all_options.map((v) => [v, false]));
       availableOptions = all_options;
     });
@@ -105,14 +112,10 @@
   });
 
   onMount(() => {
-    const prom = [preloadScriptData(fromScript), preloadScriptData(toScript)];
-    if ((globalThis as any).lipi_tmp_text) {
-      inputText = (globalThis as any).lipi_tmp_text;
-      (globalThis as any).lipi_tmp_text = '';
-      Promise.allSettled(prom).then(() => {
-        handleSubmit(new SubmitEvent('submit'));
-      });
-    }
+    const prom = [preloadScriptData($typing_script_atom), preloadScriptData(toScript)];
+    Promise.allSettled(prom).then(() => {
+      handleSubmit(new SubmitEvent('submit'));
+    });
   });
 </script>
 
@@ -127,16 +130,7 @@
         <!-- From Script Select -->
         <div class="flex flex-col gap-2.5">
           <span class="text-sm font-medium tracking-wide text-muted-foreground">From script</span>
-          <Select.Root type="single" bind:value={fromScript}>
-            <Select.Trigger class="w-full">
-              {fromScript}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPTS as script (script)}
-                <Select.Item value={script} label={script} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script={$typing_script_atom} />
         </div>
 
         <!-- Swap Button -->
@@ -156,72 +150,13 @@
         <!-- To Script Select -->
         <div class="flex flex-col gap-2.5">
           <span class="text-sm font-medium tracking-wide text-muted-foreground">To script</span>
-          <Select.Root type="single" bind:value={toScript}>
-            <Select.Trigger class="w-full">
-              {toScript}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPTS as script (script)}
-                <Select.Item value={script} label={script} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script={toScript} />
         </div>
       </div>
 
       <Separator />
 
-      <!-- Options Section -->
-      <div class="rounded-lg border border-border bg-card/50">
-        <button
-          type="button"
-          class="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-accent/50"
-          onclick={() => (showOptions = !showOptions)}
-        >
-          <span class="text-sm font-medium tracking-wide text-foreground">
-            Transliteration Options
-          </span>
-          <svg
-            class="h-5 w-5 text-muted-foreground transition-transform duration-200"
-            class:rotate-180={showOptions}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
-        </button>
-
-        {#if showOptions}
-          <div class="border-t border-border px-5 py-4" transition:slide>
-            {#if availableOptions.length === 0}
-              <p class="text-sm text-muted-foreground">
-                No options available for this combination.
-              </p>
-            {:else}
-              <div class="space-y-4">
-                {#each availableOptions as option (option)}
-                  <div class="flex items-center justify-between gap-4">
-                    <label
-                      for={option}
-                      class="flex cursor-pointer items-center gap-x-2 text-sm text-foreground sm:gap-x-4"
-                    >
-                      <Switch
-                        id={option}
-                        bind:checked={options[option as keyof TransliterationOptions]}
-                      />
-                      <span class="block max-w-40 truncate text-xs sm:max-w-full" title={option}>
-                        {option.split(':')[1]}
-                      </span>
-                    </label>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-          </div>
-        {/if}
-      </div>
+      <CustomOptions {availableOptions} bind:options />
 
       <!-- Text Areas -->
       <div class="grid gap-6 md:grid-cols-2">
@@ -234,6 +169,16 @@
               >
                 Source text
               </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => copyToClipboard($input_text_atom)}
+                title="Copy source text"
+              >
+                <Icon src={BsCopy} className="size-4" />
+                <span class="sr-only">Copy source text</span>
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -289,14 +234,14 @@
           </div>
           <Textarea
             id="source-text"
-            class="min-h-[180px] resize-none"
+            class={'min-h-[180px] resize-none ' + getFontClass($typing_script_atom)}
             placeholder="Enter text to transliterate..."
-            bind:value={inputText}
+            bind:value={$input_text_atom}
             onbeforeinput={(e) =>
               handleTypingBeforeInputEvent(
                 from_input_typing_context,
                 e,
-                (new_value) => (inputText = new_value),
+                (new_value) => ($input_text_atom = new_value),
                 typing_enabled
               )}
             onblur={() => from_input_typing_context.clearContext()}
@@ -314,12 +259,24 @@
 
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <label
-              for="output-text"
-              class="text-sm font-medium tracking-wide text-muted-foreground"
-            >
-              Converted output
-            </label>
+            <div class="flex items-center gap-2">
+              <label
+                for="output-text"
+                class="text-sm font-medium tracking-wide text-muted-foreground"
+              >
+                Converted output
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                onclick={() => copyToClipboard(outputText)}
+                title="Copy output text"
+              >
+                <Icon src={BsCopy} className="size-4" />
+                <span class="sr-only">Copy output text</span>
+              </Button>
+            </div>
             {#if conversionTime}
               <span class="text-xs font-medium text-green-600 dark:text-green-400"
                 >⏱ {conversionTime}</span
@@ -328,7 +285,7 @@
           </div>
           <Textarea
             id="output-text"
-            class="min-h-[180px] resize-none bg-muted/30"
+            class={'min-h-[180px] resize-none bg-muted/30 ' + getFontClass(toScript)}
             value={outputText}
             readonly
           />
@@ -345,6 +302,6 @@
 
 {#if typing_modal_open}
   {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
-    <TypingHelper bind:open={typing_modal_open} script={fromScript} />
+    <TypingHelper bind:open={typing_modal_open} script={$typing_script_atom} />
   {/await}
 {/if}

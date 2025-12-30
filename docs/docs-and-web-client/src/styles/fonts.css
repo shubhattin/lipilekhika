@@ -1,0 +1,109 @@
+/* ===== Imports ===== */
+@import '@fontsource/noto-sans';
+@import '@fontsource/noto-sans-devanagari';
+@import '@fontsource/noto-sans-telugu';
+@import '@fontsource/noto-sans-tamil';
+@import '@fontsource/noto-sans-tamil-supplement';
+@import '@fontsource/noto-sans-bengali';
+@import '@fontsource/noto-sans-kannada';
+@import '@fontsource/noto-sans-gujarati';
+@import '@fontsource/noto-sans-malayalam';
+@import '@fontsource/noto-sans-oriya';
+@import '@fontsource/noto-sans-sinhala';
+@import '@fontsource/noto-sans-gurmukhi';
+/* @import '@fontsource/noto-sans-brahmi'; */
+@import '@fontsource/noto-sans-grantha';
+@import '@fontsource/noto-sans-modi';
+/* @import '@fontsource/noto-sans-sharada'; */
+@import '@fontsource/noto-sans-siddham';
+
+@font-face {
+  font-family: 'Satisar Sharada';
+  src: url('./fonts/SatisarSharada.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Segoi UI Historic';
+  src: url('./fonts/SegoiUIHistoric.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ===== Base / Romanized ===== */
+.font-normal,
+.font-romanized {
+  font-family: 'Noto Sans', system-ui, sans-serif;
+}
+
+/* ===== Indic Scripts ===== */
+.font-devanagari {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}
+
+.font-telugu {
+  font-family: 'Noto Sans Telugu', sans-serif;
+}
+
+.font-tamil {
+  font-family: 'Noto Sans Tamil', sans-serif;
+}
+
+.font-tamil-extended {
+  font-family: 'Noto Sans Tamil Supplement', sans-serif;
+}
+
+.font-bengali {
+  font-family: 'Noto Sans Bengali', sans-serif;
+}
+
+.font-assamese {
+  /* Assamese shares the Bengali font */
+  font-family: 'Noto Sans Bengali', sans-serif;
+}
+
+.font-kannada {
+  font-family: 'Noto Sans Kannada', sans-serif;
+}
+
+.font-gujarati {
+  font-family: 'Noto Sans Gujarati', sans-serif;
+}
+
+.font-malayalam {
+  font-family: 'Noto Sans Malayalam', sans-serif;
+}
+
+.font-odia {
+  font-family: 'Noto Sans Oriya', sans-serif;
+}
+
+.font-sinhala {
+  font-family: 'Noto Sans Sinhala', sans-serif;
+}
+
+.font-gurmukhi {
+  font-family: 'Noto Sans Gurmukhi', sans-serif;
+}
+
+/* ===== Historic / Classical Scripts ===== */
+.font-brahmi {
+  font-family: 'Segoi UI Historic', sans-serif;
+}
+
+.font-grantha {
+  font-family: 'Noto Sans Grantha', sans-serif;
+}
+
+.font-modi {
+  font-family: 'Noto Sans Modi', sans-serif;
+}
+
+.font-sharada {
+  font-family: 'Satisar Sharada', sans-serif;
+}
+
+.font-siddham {
+  font-family: 'Noto Sans Siddham', sans-serif;
+}

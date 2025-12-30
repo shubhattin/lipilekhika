@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type ScriptListType, SCRIPT_LIST } from '../../../../packages/js/src/index';
-  import { getScriptKramaData, getScriptTypingDataMap } from '../../../../packages/js/src/typing';
+  import { type ScriptListType, SCRIPT_LIST } from '$lipilekhika/index';
+  import { getScriptKramaData, getScriptTypingDataMap } from '$lipilekhika/typing';
 
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Select from '$lib/components/ui/select';
@@ -9,6 +9,7 @@
   import { Skeleton } from '$lib/components/ui/skeleton';
 
   import { Keyboard, Map as MapIcon, ArrowLeftRight } from 'lucide-svelte';
+  import ScriptSeleector from './script/ScriptSelector.svelte';
 
   let { open = $bindable(), script: script_input } = $props<{
     open: boolean;
@@ -57,19 +58,10 @@
         </div>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-hidden p-5 sm:p-6">
+      <div class="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
         <div class="mb-4 flex items-center justify-center gap-x-2">
           <span class="text-sm text-muted-foreground">Select Script</span>
-          <Select.Root type="single" bind:value={script}>
-            <Select.Trigger class="w-full sm:w-64">
-              {script}
-            </Select.Trigger>
-            <Select.Content>
-              {#each SCRIPT_LIST.filter((s) => s !== 'Normal') as s (s)}
-                <Select.Item value={s} label={s} />
-              {/each}
-            </Select.Content>
-          </Select.Root>
+          <ScriptSeleector bind:script />
         </div>
 
         <Tabs.Root value="typing-map" class="flex h-full min-h-0 flex-col">
@@ -84,7 +76,7 @@
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="typing-map" class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
+          <Tabs.Content value="typing-map" class="mt-4 flex-1 pr-1">
             {#await script_typing_map_promise}
               <section class="space-y-6" aria-label="Loading typing map">
                 {#each ['Svara', 'Vyanjana', 'Other', 'Script-specific Characters'] as title (title)}
@@ -234,7 +226,7 @@
             {/await}
           </Tabs.Content>
 
-          <Tabs.Content value="compare-scripts" class="mt-4 min-h-0 flex-1 overflow-auto pr-1">
+          <Tabs.Content value="compare-scripts" class="mt-4 flex-1 pr-1">
             <div class="space-y-4">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="text-sm text-muted-foreground">
