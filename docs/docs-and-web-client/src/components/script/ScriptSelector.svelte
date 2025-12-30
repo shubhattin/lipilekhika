@@ -47,7 +47,6 @@
 
 <Select.Root type="single" bind:value={script}>
   <Select.Trigger
-    id="homepage-typing-script"
     class="h-8 w-48 gap-x-0 space-x-0 border-border/50 bg-background/50 text-sm"
   >
     <Avatar.Root>
