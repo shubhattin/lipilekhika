@@ -76,3 +76,8 @@
   text: kAlE`smin kAlE;smin
   output: कालेऽस्मिन् कालेऽस्मिन्
   script: Devanagari
+# ch typing
+- index: 14
+  text: chaa chhe CA ChE
+  output: चा छे चा छे
+  script: Devanagari
