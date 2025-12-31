@@ -7,7 +7,7 @@
 
   const BASE_TEXT = 'नमो नमः';
   const OTHERS = ['నమో నమః', 'নমো নমঃ', 'નમો નમઃ', 'ନମୋ ନମଃ', 'നമോ നമഃ', 'நமோ நமஃ', 'ನಮೋ ನಮಃ'];
-  const CHANGE_INTERVAL = 3000;
+  const CHANGE_INTERVAL = 3200;
   const TRANSITION_DURATION = 300;
 
   let currentIndex = 0;
