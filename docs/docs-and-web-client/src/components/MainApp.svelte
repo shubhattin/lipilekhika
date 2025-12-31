@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import {
     transliterate,
     preloadScriptData,
@@ -115,6 +115,26 @@
     const prom = [preloadScriptData($typing_script_atom), preloadScriptData(toScript)];
     Promise.allSettled(prom).then(() => {
       handleSubmit(new SubmitEvent('submit'));
+    });
+  });
+
+  $effect(() => {
+    toScript;
+    $state.snapshot(options);
+    // on change of any of the above, re-run the handleSubmit
+    untrack(() => {
+      handleSubmit(new SubmitEvent('submit'));
+    });
+  });
+
+  let auto_convert = $state(true);
+
+  $effect(() => {
+    $input_text_atom;
+    untrack(() => {
+      if (auto_convert) {
+        handleSubmit(new SubmitEvent('submit'));
+      }
     });
   });
 </script>
