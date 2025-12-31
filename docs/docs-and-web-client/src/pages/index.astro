@@ -30,7 +30,7 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
         <!-- Copy / CTAs -->
         <div class="text-center lg:text-left">
           <p
-            class="mx-auto inline-flex items-center rounded-full border border-border/60 bg-background/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm lg:mx-0"
+            class="mx-auto inline-flex items-center rounded-full border border-border/60 bg-linear-to-r from-white/90 via-slate-50/90 to-white/90 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm shadow-slate-200/80 backdrop-blur-sm lg:mx-0 dark:bg-background/40 dark:bg-none dark:shadow-none"
           >
             Lipi Lekhika • Realtime Typing + Transliteration
           </p>
@@ -61,7 +61,7 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
             </a>
             <a
               href="/getting-started/introduction"
-              class="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              class="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
             >
               <BookOpen class="size-4" />
               Documentation
@@ -70,7 +70,7 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
               href="https://github.com/shubhattin/lipilekhika"
               target="_blank"
               rel="noopener noreferrer"
-              class="group hidden h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md sm:inline-flex sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-600"
+              class="group hidden h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] sm:inline-flex sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
             >
               <Github class="size-4" />
               GitHub
@@ -98,20 +98,52 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
   </section>
 
   <!-- Supported Scripts Banner -->
-  <section class="border-y border-border/40 bg-muted/30 py-8 pt-4">
+  <section
+    class="border-y border-border/40 bg-linear-to-b from-muted/40 via-background to-background py-8 pt-4"
+  >
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
       <p class="mb-4 text-center text-sm font-medium text-muted-foreground">Supported Scripts</p>
       <div class="flex flex-wrap justify-center gap-3 text-lg sm:text-xl">
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">देवनागरी</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">తెలుగు</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">বাংলা</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">தமிழ்</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ಕನ್ನಡ</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ગુજરાતી</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">മലയാളം</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ਗੁਰਮੁਖੀ</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">ଓଡ଼ିଆ</span>
-        <span class="rounded-md border border-border/50 bg-background/50 px-3 py-1">සිංහල</span>
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >देवनागरी</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >తెలుగు</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >বাংলা</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >தமிழ்</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >ಕನ್ನಡ</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >ગુજરાતી</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >മലയാളം</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >ਗੁਰਮੁਖੀ</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >ଓଡ଼ିଆ</span
+        >
+        <span
+          class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+          >සිංහල</span
+        >
       </div>
       <p class="mt-4 text-center text-xs text-muted-foreground">
         + Ancient scripts: Brahmi, Grantha, Modi, Sharada, Siddham

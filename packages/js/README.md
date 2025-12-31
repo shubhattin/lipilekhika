@@ -235,6 +235,7 @@ For detailed documentation, examples, and guides:
 
 ## 🔗 Links
 
+- [Changelog](./CHANGELOG.md)
 - [GitHub Repository](https://github.com/shubhattin/lipilekhika)
 - [npm Package](https://www.npmjs.com/package/lipilekhika)
 - [Homepage](https://lipilekhika.in)

@@ -1,8 +1,8 @@
 - index: 0
   from: Devanagari
   to: Normal
-  input: रञ्जितरङ्ग
-  output: ranjitaranga
+  input: रञ्जितरङ्ग ज्ञित
+  output: ranjitaranga jnita
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
   reversible: false

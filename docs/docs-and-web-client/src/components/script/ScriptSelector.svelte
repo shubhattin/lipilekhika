@@ -56,8 +56,8 @@
     {#each Object.entries(CATEGORIES) as [category, name]}
       <Select.Group>
         <Select.Label>{name}</Select.Label>
-        {#each Object.entries(scripts).filter(([script, cat]) => cat === category) as [script_]}
-          <Select.Item value={script_}>
+        {#each Object.entries(scripts).filter(([, cat]) => cat === category) as [script_]}
+          <Select.Item value={script_} label={script_} aria-label={script_}>
             <Avatar.Root>
               <Avatar.Fallback>{getScriptAvatar(script_ as ScriptListType)}</Avatar.Fallback>
             </Avatar.Root>

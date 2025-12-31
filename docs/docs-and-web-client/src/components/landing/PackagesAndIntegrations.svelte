@@ -12,7 +12,9 @@
   } from '~/tools/icons';
 </script>
 
-<section class="border-t border-border/40 bg-muted/10 py-14">
+<section
+  class="border-t border-border/40 bg-linear-to-b from-muted/20 via-background to-background py-14"
+>
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
     <div class="grid gap-10 lg:grid-cols-2 lg:gap-12">
       <!-- Packages -->
@@ -27,7 +29,7 @@
             href="https://www.npmjs.com/package/lipilekhika"
             target="_blank"
             rel="noopener noreferrer"
-            class="group rounded-xl border border-border/60 bg-background/60 p-4 transition-colors hover:border-border hover:bg-accent/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+            class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:bg-background/60 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
             <div class="flex items-center gap-3">
               <span
@@ -42,7 +44,7 @@
             </div>
           </a>
           <div
-            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+            class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
             <div class="flex items-center gap-3">
               <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
@@ -55,7 +57,7 @@
             </div>
           </div>
           <div
-            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+            class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
             <div class="flex items-center gap-3">
               <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
@@ -68,7 +70,7 @@
             </div>
           </div>
           <div
-            class="rounded-xl border border-border/60 bg-background/40 p-4 transition-colors hover:border-border hover:bg-accent/20"
+            class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
             <div class="flex items-center gap-3">
               <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
@@ -96,7 +98,7 @@
             class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
-              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-linear-to-b from-white to-slate-50 px-3 py-1 text-sm shadow-sm shadow-slate-200/80 transition-all group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground group-hover:shadow-md dark:bg-background/60 dark:bg-none dark:shadow-none"
             >
               <Icon src={ReactIcon} className="size-5" />
               React
@@ -107,7 +109,7 @@
             class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
-              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-linear-to-b from-white to-slate-50 px-3 py-1 text-sm shadow-sm shadow-slate-200/80 transition-all group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground group-hover:shadow-md dark:bg-background/60 dark:bg-none dark:shadow-none"
             >
               <Icon src={SvelteIcon} className="size-5" />
               Svelte
@@ -118,7 +120,7 @@
             class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
-              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-linear-to-b from-white to-slate-50 px-3 py-1 text-sm shadow-sm shadow-slate-200/80 transition-all group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground group-hover:shadow-md dark:bg-background/60 dark:bg-none dark:shadow-none"
             >
               <Icon src={SolidIcon} className="size-5" />
               SolidJS
@@ -129,7 +131,7 @@
             class="group rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
           >
             <span
-              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-colors group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground"
+              class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-linear-to-b from-white to-slate-50 px-3 py-1 text-sm shadow-sm shadow-slate-200/80 transition-all group-hover:border-border group-hover:bg-accent group-hover:text-accent-foreground group-hover:shadow-md dark:bg-background/60 dark:bg-none dark:shadow-none"
             >
               <Icon src={VueIcon} className="size-5" />
               VueJS

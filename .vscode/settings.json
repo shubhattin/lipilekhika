@@ -1,6 +1,3 @@
 {
-  "python.languageServer": "None",
-  "extensions.experimental.affinity": {
-    "asvetliakov.vscode-neovim": 1
-  }
+  "python.languageServer": "None"
 }
