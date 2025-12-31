@@ -42,6 +42,11 @@ export const COMMON_SCRIPT_TYPING_DATA = [
   // vyanjana and anya
   {
     type: 'duplicates',
+    ref_krama_key: 'J',
+    duplicates: ['Y']
+  },
+  {
+    type: 'duplicates',
     ref_krama_key: 'phz',
     duplicates: ['f']
   },

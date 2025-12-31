@@ -15,7 +15,9 @@ type ReplacePrevKramaKeysRule = {
   type: 'replace_prev_krama_keys';
   prev: KramaKeysExtendedType[];
   following: KramaKeysExtendedType[];
-  /** will be combined to a single string */
+  /** will be combined to a single string.
+   * Replaces the previous
+   */
   replace_with: KramaKeysExtendedType[];
 };
 type DirectReplaceRule = {
@@ -78,7 +80,7 @@ export type TransOptionsType = Record<
 
 export const CustomOptionsInput: InputCustomOptionsType = {
   /**
-   * Replace G and J when preceded by ka varga or cha varga vyanjanas.
+   * Replace G and J with n
    * Its more natural to read
    *
    * Example: raJjitiam -> ranjitam, raGgam -> rangam
@@ -89,17 +91,25 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     check_in: 'output',
     rules: [
       // ka varga
+      // {
+      //   type: 'replace_prev_krama_keys',
+      //   prev: ['G'],
+      //   following: VARGAS.ka,
+      //   replace_with: ['n']
+      // },
+      // // cha varga
+      // {
+      //   type: 'replace_prev_krama_keys',
+      //   prev: ['J'],
+      //   following: VARGAS.cha,
+      //   replace_with: ['n']
+      // },
+
+      // We can also directly replace G and J with n
+      // Also accommodates for ज्ञ (jJ -> jn)
       {
-        type: 'replace_prev_krama_keys',
-        prev: ['G'],
-        following: VARGAS.ka,
-        replace_with: ['n']
-      },
-      // cha varga
-      {
-        type: 'replace_prev_krama_keys',
-        prev: ['J'],
-        following: VARGAS.cha,
+        type: 'direct_replace',
+        to_replace: [['G'], ['J']],
         replace_with: ['n']
       }
     ]

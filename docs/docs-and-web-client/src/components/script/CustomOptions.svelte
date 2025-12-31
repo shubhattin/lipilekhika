@@ -37,7 +37,7 @@
     ],
     'all_to_normal:replace_pancham_varga_varna_with_n': [
       'Replace Pancham Varga Varna with n',
-      "Replaces ङ (G) and ञ (J) with 'n' when followed by ka-varga or cha-varga consonants for more natural Latin output."
+      "Replaces ङ (G) and ञ (J) with 'n' for more natural output."
     ],
     'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': [
       'Replace Pancham Varga Varna with Anusvāra',
