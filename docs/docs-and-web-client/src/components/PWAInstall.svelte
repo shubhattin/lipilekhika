@@ -89,9 +89,7 @@
     >
       <div class="space-y-1">
         <div class="text-sm font-semibold">Install Lipi Lekhika</div>
-        <div class="text-xs text-muted-foreground">
-          Get a faster, app-like experience
-        </div>
+        <div class="text-xs text-muted-foreground">Get a faster, app-like experience</div>
       </div>
       <div class="flex items-center gap-2">
         <Button size="sm" onclick={triggerInstall}>Install</Button>
