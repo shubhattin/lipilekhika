@@ -476,3 +476,72 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
 
   return res;
 }
+
+/*
+
+Old Approach without `setRangeText`
+
+async function handleTypingInputEvent(
+  typingContext: ReturnType<typeof createTypingContext>,
+  event: any,
+  onValueChange?: (updatedValue: string) => void,
+  enabled_?: boolean
+) {
+  const enabled = enabled_ ?? true;
+  if (!enabled) {
+    onValueChange?.(event.currentTarget.value);
+    return;
+  }
+  // react synthetic event handling
+  const isReactSyntheticEvent = 'nativeEvent' in event;
+  const isInputEvent = isReactSyntheticEvent
+    ? typeof InputEvent !== 'undefined' &&
+      event?.nativeEvent instanceof InputEvent &&
+      event.nativeEvent.data !== null
+    : typeof InputEvent !== 'undefined' && event instanceof InputEvent && event.data !== null;
+  const inputElement = isReactSyntheticEvent ? event.nativeEvent.target : event.currentTarget;
+  if (isInputEvent) {
+    if (isReactSyntheticEvent && onValueChange) {
+      // extra step required in react
+      onValueChange(event.currentTarget.value);
+    }
+    await typingContext.ready;
+
+    const inputData = isReactSyntheticEvent ? event.nativeEvent.data : event.data;
+    const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
+    const currentValue = inputElement.value;
+    const cursorPosition = (inputElement.selectionStart ?? 0) + 1;
+
+    // Split the text into three parts: before cursor, changed part, and after cursor
+    const deleteStartPosition = cursorPosition - to_delete_chars_count - 2;
+    const textBeforeCursor = currentValue.substring(0, deleteStartPosition);
+    const transliteratedText = diff_add_text;
+
+    let textAfterCursor = '';
+    const isAtEnd = currentValue.length + 1 === cursorPosition;
+    const isNotAtEnd = currentValue.length + 1 !== cursorPosition;
+
+    if (isAtEnd) {
+      textAfterCursor = currentValue.substring(cursorPosition + 1);
+    } else if (isNotAtEnd) {
+      textAfterCursor = currentValue.substring(cursorPosition - 1);
+    }
+
+    const newCursorPosition = textBeforeCursor.length + transliteratedText.length;
+    const updatedValue = textBeforeCursor + transliteratedText + textAfterCursor;
+
+    // Update the input element
+    inputElement.value = updatedValue;
+    inputElement.focus();
+    inputElement.selectionStart = newCursorPosition;
+    inputElement.selectionEnd = newCursorPosition;
+
+    onValueChange?.(updatedValue);
+  } else {
+    // Handle non-character events (delete, backspace, paste, etc.)
+    onValueChange?.(inputElement.value);
+    typingContext.clearContext();
+  }
+}
+
+*/
