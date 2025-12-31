@@ -32,6 +32,7 @@
   import CustomOptions from './script/CustomOptions.svelte';
   import { SiConvertio } from 'svelte-icons-pack/si';
   import Label from '$lib/components/ui/label/label.svelte';
+  import PWAInstall from './PWAInstall.svelte';
 
   const DEFAULT_TO: ScriptListType = 'Romanized';
 
@@ -244,7 +245,7 @@
             </div>
             <Textarea
               id="source-text"
-              class={'min-h-[200px] resize-none overflow-auto field-sizing-fixed sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
+              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
                 getFontClass($typing_script_atom)}
               placeholder="Enter text to transliterate..."
               bind:value={$input_text_atom}
@@ -325,7 +326,7 @@
             </div>
             <Textarea
               id="output-text"
-              class={'min-h-[200px] resize-none overflow-auto field-sizing-fixed bg-muted/30 sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
+              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
                 getFontClass(toScript)}
               value={outputText}
               readonly
@@ -336,6 +337,9 @@
 
       <CustomOptions {availableOptions} bind:options />
     </form>
+    <div class="mt-8">
+      <PWAInstall />
+    </div>
   </div>
 
   {#if typing_modal_open}

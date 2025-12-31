@@ -12,7 +12,9 @@
   } from '~/tools/icons';
 </script>
 
-<section class="border-t border-border/40 bg-linear-to-b from-muted/20 via-background to-background py-14">
+<section
+  class="border-t border-border/40 bg-linear-to-b from-muted/20 via-background to-background py-14"
+>
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
     <div class="grid gap-10 lg:grid-cols-2 lg:gap-12">
       <!-- Packages -->

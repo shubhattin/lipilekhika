@@ -1,0 +1,28 @@
+{
+  "name": "Lipi Lekhika - Type Indian Languages with Full Speed and Accuracy",
+  "short_name": "Lipi Lekhika",
+  "description": "Lipi Lekhika is a tool that helps you type Indian languages with full speed and accuracy",
+  "theme_color": "#181e20",
+  "background_color": "#181e20",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "/app",
+  "scope": "/",
+  "id": "/app",
+  "display_override": ["standalone", "minimal-ui"],
+  "categories": ["education", "tool", "typing", "transliteration"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "img/icon_128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
