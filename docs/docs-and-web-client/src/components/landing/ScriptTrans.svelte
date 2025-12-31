@@ -6,8 +6,8 @@
   import { cubicOut } from 'svelte/easing';
 
   const BASE_TEXT = 'नमो नमः';
-  const OTHERS = ['నమో నమః', 'নমো নমঃ', 'નમો નમઃ', 'ନମୋ ନମଃ', 'നമോ നമഃ', 'ನಮೋ ನಮಃ'];
-  const CHANGE_INTERVAL = 3500;
+  const OTHERS = ['నమో నమః', 'নমো নমঃ', 'નમો નમઃ', 'ନମୋ ନମଃ', 'നമോ നമഃ', 'நமோ நமஃ', 'ನಮೋ ನಮಃ'];
+  const CHANGE_INTERVAL = 3000;
   const TRANSITION_DURATION = 300;
 
   let currentIndex = 0;
@@ -33,7 +33,8 @@
     </span>
 
     <span
-      class="relative inline-block h-[2.25em] w-24 overflow-hidden font-semibold tracking-tight text-foreground"
+      class={'relative inline-block h-[2.25em] w-24 overflow-hidden font-semibold tracking-tight text-foreground sm:w-28 ' +
+        ('நமோ நமஃ' === OTHERS[currentIndex] ? 'scale-90' : '')}
       aria-live="polite"
     >
       {#key currentIndex}

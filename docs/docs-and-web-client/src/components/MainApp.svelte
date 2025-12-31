@@ -4,7 +4,6 @@
     transliterate,
     preloadScriptData,
     getAllOptions,
-    SCRIPT_LIST,
     type ScriptListType,
     type TransliterationOptions
   } from 'lipilekhika';
@@ -32,7 +31,6 @@
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
 
-  const SCRIPTS = SCRIPT_LIST as ScriptListType[];
   const DEFAULT_TO: ScriptListType = 'Romanized';
 
   let toScript = $state<ScriptListType>(DEFAULT_TO);
