@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- add `w` as typing time alternative for `v`
+
 ## js-lib@v1.0.1
 
 - 272e6349eebf47f68db34c5dc6ee9d91bb16ae9b
