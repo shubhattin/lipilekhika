@@ -1,3 +1,4 @@
 {
-  "python.languageServer": "None"
+  "python.languageServer": "None",
+  "rust-analyzer.linkedProjects": ["packages/rust/Cargo.toml"]
 }
