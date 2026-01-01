@@ -655,11 +655,42 @@ async function make_custom_option_json() {
   fs.writeFileSync(CUSTOM_OPTIONS_OUT_FOLDER, jsonOutput);
 }
 
+function copy_script_data_json() {
+  const LIST: {
+    target: string;
+    minify: boolean;
+  }[] = [
+    {
+      target: '../rust/src/data',
+      minify: true
+    }
+  ];
+
+  for (const { target, minify } of LIST) {
+    fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
+    if (minify) {
+      minify_json_file(target + '/custom_options.json');
+      fs.readdirSync(target + '/script_data').forEach((file) => {
+        minify_json_file(target + '/script_data/' + file);
+      });
+      minify_json_file(target + '/script_data/Normal.json');
+    }
+  }
+}
+
+function minify_json_file(file: string) {
+  const content = fs.readFileSync(file, 'utf-8');
+  const minified = JSON.stringify(JSON.parse(content));
+  fs.writeFileSync(file, minified, 'utf-8');
+}
+
 make_script_data()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
     try {
       execSync('npx prettier --write ./src/script_data');
+      copy_script_data_json();
     } catch (e) {
       console.error(chalk.red('✖  Error formatting script data'), e);
     }
