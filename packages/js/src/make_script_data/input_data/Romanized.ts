@@ -75,7 +75,7 @@ const Romanized: InputOtherScriptType = {
     ॻ: 'g',
     घ: 'gh',
     ङ: 'ṅ',
-    च: 'C',
+    च: 'ch',
     छ: 'Ch',
     ज: 'j',
     ज़: 'jz',
@@ -288,7 +288,7 @@ const Romanized: InputOtherScriptType = {
     {
       text: 'C',
       text_krama: ['C'],
-      duplicates: ['ch']
+      duplicates: ['C']
     },
     {
       text: 'Ch',

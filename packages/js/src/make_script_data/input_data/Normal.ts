@@ -70,7 +70,7 @@ const Normal: InputOtherScriptType = {
     ॻ: 'g',
     घ: 'gh',
     ङ: 'G',
-    च: 'C',
+    च: 'ch',
     छ: 'Ch',
     ज: 'j',
     ज़: 'jz',
@@ -133,7 +133,7 @@ const Normal: InputOtherScriptType = {
     {
       text: 'C',
       text_krama: ['C'],
-      duplicates: ['ch']
+      duplicates: ['C']
     },
     {
       text: 'Ch',
