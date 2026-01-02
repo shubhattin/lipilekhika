@@ -1,10 +1,11 @@
-use crate::script_data::custom_options;
+use crate::script_data::{ScriptData, get_custom_options_map};
 
 pub mod script_data;
 
 fn main() {
-    let data = custom_options::get_custom_options_map();
+    let custom_option = get_custom_options_map();
+    let data = ScriptData::get_script_data("Devanagari");
 
-    // println!("{:?}", data)   ;
-    println!("{:?}", data)
+    println!("{:?}", custom_option);
+    println!("{:?}", data);
 }

@@ -674,7 +674,6 @@ function copy_script_data_json() {
       fs.readdirSync(target + '/script_data').forEach((file) => {
         minify_json_file(target + '/script_data/' + file);
       });
-      minify_json_file(target + '/script_data/Normal.json');
     }
   }
 }

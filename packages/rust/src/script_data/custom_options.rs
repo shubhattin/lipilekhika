@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fs;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -49,7 +48,7 @@ pub struct CustomOptions {
 pub type CustomOptionMap = HashMap<String, CustomOptions>;
 
 pub fn get_custom_options_map() -> CustomOptionMap {
-    let file_str = fs::read_to_string("src/data/custom_options.json").expect("File not found");
+    let file_str = include_str!("../../src/data/custom_options.json");
 
     let data = serde_json::from_str::<CustomOptionMap>(&file_str).expect("JSON Parse Error");
 

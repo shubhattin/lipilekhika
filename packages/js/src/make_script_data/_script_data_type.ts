@@ -5,7 +5,7 @@ import { SCRIPT_LIST } from '../utils/lang_list';
 const commonScriptDataSchema = z.strictObject({
   /**  [krama_key: string, list_arr_ref: number | null] */
   krama_text_arr: z.tuple([z.string(), z.int().nullable()]).array(),
-  krama_text_arr_index: z.number().array(),
+  krama_text_arr_index: z.int().array(),
   text_to_krama_map: z
     .tuple([
       z.string(), // text
