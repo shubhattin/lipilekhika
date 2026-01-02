@@ -50,7 +50,7 @@ const ALTERNATES = [
 
 export type alternate_script_type = (typeof ALTERNATES)[number];
 
-const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_type> = {
+export const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_type> = {
   dev: 'Devanagari',
   te: 'Telugu',
   tel: 'Telugu',
