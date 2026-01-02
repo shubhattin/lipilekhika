@@ -1,2 +1,56 @@
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs;
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ScriptTypeEnum {
+    Brahmic,
+    Other,
+    All,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CheckInEnum {
+    Input,
+    Output,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type")]
+pub enum Rules {
+    #[serde(rename = "replace_prev_krama_keys")]
+    ReplacePrevKramaKeys {
+        prev: Vec<i16>,
+        following: Vec<i16>,
+        replace_with: Vec<i16>,
+        check_in: Option<CheckInEnum>,
+    },
+    #[serde(rename = "direct_replace")]
+    DirectReplace {
+        to_replace: Vec<Vec<i16>>,
+        replace_with: Vec<i16>,
+        replace_text: Option<String>,
+        check_in: Option<CheckInEnum>,
+    },
+}
+#[derive(Debug, Deserialize)]
+pub struct CustomOptions {
+    pub from_script_name: Option<Vec<String>>,
+    pub from_script_type: Option<ScriptTypeEnum>,
+    pub to_script_name: Option<Vec<String>>,
+    pub to_script_type: Option<ScriptTypeEnum>,
+    pub check_in: Option<CheckInEnum>,
+    pub rules: Vec<Rules>,
+}
+
+pub type CustomOptionMap = HashMap<String, CustomOptions>;
+
+pub fn get_custom_options_map() -> CustomOptionMap {
+    let file_str = fs::read_to_string("src/data/custom_options.json").expect("File not found");
+
+    let data = serde_json::from_str::<CustomOptionMap>(&file_str).expect("JSON Parse Error");
+
+    return data;
+}

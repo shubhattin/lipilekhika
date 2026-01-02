@@ -76,7 +76,7 @@ pub enum ScriptData {
     Other {
         #[serde(flatten)]
         common_script_attr: CommonScriptAttr,
-        schwa_property: Option<bool>,
+        schwa_character: String,
     },
 }
 

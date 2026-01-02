@@ -2,14 +2,14 @@ import z from 'zod';
 import { SCRIPT_LIST } from '../utils/lang_list';
 // import type { OutputScriptData } from './output_script_data_schema';
 
-const commonScriptDataSchema = z.object({
+const commonScriptDataSchema = z.strictObject({
   /**  [krama_key: string, list_arr_ref: number | null] */
   krama_text_arr: z.tuple([z.string(), z.int().nullable()]).array(),
   krama_text_arr_index: z.number().array(),
   text_to_krama_map: z
     .tuple([
       z.string(), // text
-      z.object({
+      z.strictObject({
         next: z.string().array().nullable().optional(),
         krama: z.int().array().nullable().optional(),
         fallback_list_ref: z.int().nullable().optional()
@@ -17,7 +17,7 @@ const commonScriptDataSchema = z.object({
     ])
     .array(),
   list: z
-    .object({
+    .strictObject({
       krama_ref: z.int().array(),
       type: z.literal('anya')
     })
@@ -25,7 +25,7 @@ const commonScriptDataSchema = z.object({
   typing_text_to_krama_map: z
     .tuple([
       z.string(), // text
-      z.object({
+      z.strictObject({
         next: z.string().array().nullable().optional(),
         krama: z.int().array().nullable().optional(),
         custom_back_ref: z.int().nullable().optional(),
@@ -45,12 +45,13 @@ const commonScriptDataSchema = z.object({
   script_name: z.enum(SCRIPT_LIST),
   script_id: z.int(),
   script_type: z.enum(['brahmic', 'other']),
-  schwa_property: z.boolean().optional()
+  schwa_character: z.string()
 });
 
 const brahmicScriptDataSchema = commonScriptDataSchema
   .omit({
-    list: true
+    list: true,
+    schwa_character: true
   })
   .extend({
     halant: z.string(),
@@ -59,11 +60,11 @@ const brahmicScriptDataSchema = commonScriptDataSchema
 
     list: z
       .discriminatedUnion('type', [
-        z.object({
+        z.strictObject({
           type: z.enum(['anya', 'vyanjana', 'mAtrA']),
           krama_ref: z.int().array()
         }),
-        z.object({
+        z.strictObject({
           type: z.literal('svara'),
           krama_ref: z.int().array(),
           mAtrA_krama_ref: z.int().array().nullable().optional()
