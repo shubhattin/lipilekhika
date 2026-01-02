@@ -1,6 +1,12 @@
 use rust_embed::RustEmbed;
 use serde::Deserialize;
 
+use std::collections::HashMap;
+use std::sync::OnceLock;
+
+/// currently for simplicity using a single cache for all script data
+static SCRIPT_DATA_CACHE: OnceLock<HashMap<String, ScriptData>> = OnceLock::new();
+
 #[derive(RustEmbed)]
 #[folder = "src/data/script_data/"]
 struct ScriptAssets;
@@ -97,19 +103,37 @@ impl ScriptData {
             } => &common_script_attr,
         }
     }
-    pub fn get_script_data(script: &str) -> Self {
-        let filename = format!("{}.json", script);
+    fn load_all() -> HashMap<String, ScriptData> {
+        let mut map = HashMap::new();
 
-        let asset =
-            ScriptAssets::get(&filename).unwrap_or_else(|| panic!("Script `{}` not found", script));
+        for file in ScriptAssets::iter() {
+            let name = file.as_ref();
 
-        let json = std::str::from_utf8(asset.data.as_ref()).expect("Invalid UTF-8");
+            if !name.ends_with(".json") {
+                continue;
+            }
 
-        let data = serde_json::from_str::<ScriptData>(json).expect("JSON Parse Error");
+            let script_name = name.trim_end_matches(".json");
 
-        // the program will panic if there file not or some json errors
-        // this part will be ensured in tests
-        return data;
+            let asset =
+                ScriptAssets::get(name).unwrap_or_else(|| panic!("Asset `{}` missing", name));
+
+            let json = std::str::from_utf8(asset.data.as_ref()).expect("Invalid UTF-8");
+
+            let data = serde_json::from_str::<ScriptData>(json)
+                .unwrap_or_else(|e| panic!("Parse error in {}: {}", name, e));
+
+            map.insert(script_name.to_string(), data);
+        }
+
+        map
+    }
+    pub fn get_script_data(script: &str) -> &'static ScriptData {
+        let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
+
+        cache
+            .get(script)
+            .unwrap_or_else(|| panic!("Script `{}` not found", script))
     }
 }
 

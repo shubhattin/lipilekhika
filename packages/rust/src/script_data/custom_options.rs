@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::sync::OnceLock;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -47,12 +48,13 @@ pub struct CustomOptions {
 
 pub type CustomOptionMap = HashMap<String, CustomOptions>;
 
-pub fn get_custom_options_map() -> CustomOptionMap {
-    let file_str = include_str!("../../src/data/custom_options.json");
+static CUSTOM_OPTIONS_CACHE: OnceLock<CustomOptionMap> = OnceLock::new();
 
-    let data = serde_json::from_str::<CustomOptionMap>(&file_str).expect("JSON Parse Error");
-
-    return data;
+pub fn get_custom_options_map() -> &'static CustomOptionMap {
+    CUSTOM_OPTIONS_CACHE.get_or_init(|| {
+        let file_str = include_str!("../../src/data/custom_options.json");
+        serde_json::from_str::<CustomOptionMap>(file_str).expect("JSON Parse Error")
+    })
 }
 
 #[cfg(test)]
