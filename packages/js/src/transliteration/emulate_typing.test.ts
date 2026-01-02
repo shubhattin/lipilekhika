@@ -13,8 +13,6 @@ const INPUT_FOLDERS = [
   path.join(__dirname, '../../../../test_data/transliteration/auto-nor-other')
 ];
 
-const NORMAL_PATCHES = [['`', "''"]] as const;
-
 describe('Emulate Typing', () => {
   for (const folder of INPUT_FOLDERS) {
     const yamlFiles = fs.readdirSync(folder).filter((file) => file.endsWith('.yaml'));
@@ -28,9 +26,6 @@ describe('Emulate Typing', () => {
           const testFn = test.todo ? it.skip : it;
           testFn(`${test.index} - ${test.to}`, async () => {
             let input = test.input;
-            for (const patch of NORMAL_PATCHES) {
-              input = input.replaceAll(patch[1], patch[0]);
-            }
             let result = await emulateTyping(input, test.to as script_and_lang_list_type);
             const errorMessage =
               `Emulate Typing failed:\n` +
@@ -39,11 +34,7 @@ describe('Emulate Typing', () => {
               `  Input: "${input}"\n` +
               `  Expected: "${test.output}"\n` +
               `  Actual: "${result}"`;
-            if (test.to === 'Romanized') {
-              for (const patch of NORMAL_PATCHES) {
-                result = result.replaceAll(patch[0], patch[1]);
-              }
-            }
+
             if (
               !(
                 yamlFile.startsWith('auto') &&

@@ -659,6 +659,9 @@ const _lipi_parivartak = async (val, from, to) => {
   from = normalize_lang_code(from);
   to = normalize_lang_code(to);
   let out = LipiLekhikA._parivartak(val, from, to);
+  if (["Normal", "Romanized"].includes(to)) {
+    out = out.replaceAll("''", "`");
+  }
   return out;
 };
 
