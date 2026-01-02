@@ -10,6 +10,7 @@ pub struct CommonScriptAttr {
     pub text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
+    list: Vec<List>,
 }
 
 /// This  will be used both for transliteration and typing.
@@ -22,6 +23,42 @@ pub struct TextToKramaMap {
     pub fallback_list_ref: Option<Vec<i16>>,
     /// only in `typing_text_to_krama_map`
     pub custom_back_ref: Option<i16>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum List {
+    #[serde(rename = "anya")]
+    Anya { krama_ref: Vec<i16> },
+    #[serde(rename = "vyanjana")]
+    Vyanjana { krama_ref: Vec<i16> },
+    #[serde(rename = "mAtrA")]
+    Matra { krama_ref: Vec<i16> },
+    #[serde(rename = "svara")]
+    Svara {
+        krama_ref: Vec<i16>,
+        #[serde(rename = "mAtrA_krama_ref")]
+        matra_krama_ref: Option<Vec<i16>>,
+    },
+}
+
+impl List {
+    pub fn get_krama_ref(&self) -> &Vec<i16> {
+        match self {
+            List::Anya { krama_ref }
+            | List::Vyanjana { krama_ref }
+            | List::Matra { krama_ref }
+            | List::Svara { krama_ref, .. } => krama_ref,
+        }
+    }
+    pub fn get_matra_krama_ref(&self) -> &Option<Vec<i16>> {
+        match self {
+            List::Svara {
+                matra_krama_ref, ..
+            } => matra_krama_ref,
+            _ => &None,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -63,6 +100,6 @@ fn main() {
 
     let data = serde_json::from_str::<ScriptData>(&file_str).expect("JSON Parse failed");
 
-    println!("{:?}", data);
-    println!("{}", data.get_common_attr().script_id)
+    // println!("{:?}", data);
+    println!("{:?}", data.get_common_attr().list)
 }
