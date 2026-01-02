@@ -1,5 +1,9 @@
+use rust_embed::RustEmbed;
 use serde::Deserialize;
-use std::fs;
+
+#[derive(RustEmbed)]
+#[folder = "src/data/script_data/"]
+struct ScriptAssets;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -94,10 +98,14 @@ impl ScriptData {
         }
     }
     pub fn get_script_data(script: &str) -> Self {
-        let file_str = fs::read_to_string(format!("src/data/script_data/{}.json", script))
-            .expect("File not found");
+        let filename = format!("{}.json", script);
 
-        let data = serde_json::from_str::<ScriptData>(&file_str).expect("JSON Parse Error");
+        let asset =
+            ScriptAssets::get(&filename).unwrap_or_else(|| panic!("Script `{}` not found", script));
+
+        let json = std::str::from_utf8(asset.data.as_ref()).expect("Invalid UTF-8");
+
+        let data = serde_json::from_str::<ScriptData>(json).expect("JSON Parse Error");
 
         // the program will panic if there file not or some json errors
         // this part will be ensured in tests
