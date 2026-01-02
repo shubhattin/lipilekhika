@@ -3,6 +3,9 @@
 ## Unreleased
 
 - add `w` as typing time alternative for `v`
+- **च** and **छ**
+  - Main :- `ch` and `Ch`
+  - Duplicates(Typing+Transliteration) :- `C` and `chh`
 
 ## js-lib@v1.0.1
 

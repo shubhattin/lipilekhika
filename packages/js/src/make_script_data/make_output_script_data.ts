@@ -145,7 +145,18 @@ function get_out_script_data(
               : [next_char];
         // mapping the krama index
         if (i === text.length - 1) {
-          add_in_map[existing_entry_index][1].krama = val;
+          if (
+            !(
+              (
+                (add_in_map[existing_entry_index][1].krama?.length ?? 0) >= 1 &&
+                !(add_in_map[existing_entry_index][1].krama ?? []).some((v) => v === -1) &&
+                val.some((v) => v === -1)
+              )
+              // custom fix to prevent resetting of C to -1 (in Normal) when a valid link exists for C
+            )
+          ) {
+            add_in_map[existing_entry_index][1].krama = val;
+          }
           if (
             fallback_list_ref !== undefined &&
             fallback_list_ref !== null &&
