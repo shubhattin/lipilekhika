@@ -177,8 +177,7 @@ const sanskrit_other_brahmic_scripts = async () => {
         await old_lipi_parivartak(dot_free_input, FROM_SCRIPT, "Normal")
       )
         .replaceAll(/\.(?=\d)/g, "")
-        .replaceAll("chh", "Ch")
-        .replaceAll("ch", "C");
+        .replaceAll("chh", "Ch");
       if (!sans_to_normal_done) {
         norm_to_brahmic_data.push({
           index: index1++,
@@ -223,7 +222,6 @@ const sanskrit_other_brahmic_scripts = async () => {
         const REPLACEMENTS: [string | RegExp, string][] = [
           [/\.(?=\d)/g, ""],
           ["chh", "Ch"],
-          ["ch", "C"],
           ["#s", "↑"],
           ["#an", "↓"],
         ];
@@ -290,7 +288,6 @@ const sanskrit_non_brahmic_scripts = async () => {
         non_brahmic_script === "Normal"
       ) {
         output = output.replaceAll("chh", "Ch");
-        output = output.replaceAll("ch", "C");
       }
       sans_other_data.push({
         index: index++,

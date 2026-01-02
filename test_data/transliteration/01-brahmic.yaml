@@ -44,7 +44,7 @@
     निश्शेषात्मानमेनं गुरुपवनपुराधीशमेवाश्रयामः ॥२॥
   output: |
     EvaMdurlabhyavastunyapi sulabhatayA hastalabdhE yadanyat 
-    tanvA vACA dhiyA vA bhajati bata janaH kShudrataiva sphuTEyam .
+    tanvA vAchA dhiyA vA bhajati bata janaH kShudrataiva sphuTEyam .
     EtE tAvadvayaM tu sthirataramanasA vishvapIDzApahatyai
     nishshEShAtmAnamEnaM gurupavanapurAdhIshamEvAshrayAmaH ..2..
   reversible: true
@@ -72,6 +72,6 @@
 - index: 7
   from: Normal
   to: Devanagari
-  input: kL kLR
-  output: क्ळ् कॢ
-  reversible: true
+  input: kL kLR CA chA
+  output: क्ळ् कॢ चा चा
+  reversible: false
