@@ -2,6 +2,7 @@ use serde::Deserialize;
 use std::fs;
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CommonScriptAttr {
     pub script_name: String,
     pub script_id: u8,
@@ -17,6 +18,7 @@ pub struct CommonScriptAttr {
 ///
 /// Common struct for both `text_to_krama_map` and `typing_text_to_krama_map`
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct TextToKramaMap {
     pub next: Option<Vec<String>>,
     pub krama: Option<Vec<i16>>,

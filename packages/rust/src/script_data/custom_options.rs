@@ -36,6 +36,7 @@ pub enum Rules {
     },
 }
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CustomOptions {
     pub from_script_name: Option<Vec<String>>,
     pub from_script_type: Option<ScriptTypeEnum>,
@@ -53,4 +54,14 @@ pub fn get_custom_options_map() -> CustomOptionMap {
     let data = serde_json::from_str::<CustomOptionMap>(&file_str).expect("JSON Parse Error");
 
     return data;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn all_script_data_json_files_must_parse() {
+        let _ = get_custom_options_map();
+    }
 }
