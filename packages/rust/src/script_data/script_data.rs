@@ -128,6 +128,10 @@ impl ScriptData {
 
         map
     }
+    /// this method assumes that the script name is already normalized,
+    /// if not then it will panic.
+    ///
+    /// Normalize script before calling this
     pub fn get_script_data(script: &str) -> &'static ScriptData {
         let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
 

@@ -9,6 +9,7 @@ import {
 
 const ALTERNATES = [
   /* Script Alternates */
+  'de', // Devanagari
   'dev', // Devanagari
   'te', // Telugu
   'tel', // Telugu
@@ -51,6 +52,7 @@ const ALTERNATES = [
 export type alternate_script_type = (typeof ALTERNATES)[number];
 
 export const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_type> = {
+  de: 'Devanagari',
   dev: 'Devanagari',
   te: 'Telugu',
   tel: 'Telugu',
