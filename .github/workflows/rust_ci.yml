@@ -1,0 +1,64 @@
+name: Rust Package CI
+
+on:
+  - push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # JS Script Data Generation
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun make-script-data
+      # Rust Build
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Build
+        run: cargo build --release
+      
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      # JS Script Data Generation
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Test and Coverage
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+      # Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Test
+        run: cargo test
