@@ -19,7 +19,7 @@ impl ScriptData {
         }
     }
 
-    pub fn krama_index_of_index(&self, text: &str) -> Option<usize> {
+    pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
         binary_search_lower_with_index(
             &self.get_common_attr().krama_text_arr,
             &self.get_common_attr().krama_text_arr_index,
@@ -31,13 +31,13 @@ impl ScriptData {
 }
 
 /// custom struct to construct output string
-pub struct StringBuilder {
+pub struct ResultStringBuilder {
     result: Vec<String>,
 }
 
-impl StringBuilder {
-    pub fn new() -> StringBuilder {
-        StringBuilder { result: Vec::new() }
+impl ResultStringBuilder {
+    pub fn new() -> ResultStringBuilder {
+        ResultStringBuilder { result: Vec::new() }
     }
     pub fn emit(&mut self, text: String) {
         if text.is_empty() {
@@ -111,7 +111,7 @@ impl StringBuilder {
     }
 
     /// index can be -ve
-    pub fn peek_at(&self, index: isize) -> Option<CursorCp> {
+    pub fn peek_at(&self, index: isize) -> Option<InputCursor> {
         let len = self.result.len() as isize;
         if len == 0 {
             return None;
@@ -128,7 +128,7 @@ impl StringBuilder {
         let item = self.result.get(i as usize);
         match item {
             Some(item) => {
-                return Some(CursorCp {
+                return Some(InputCursor {
                     ch: item.to_string(),
                 });
             }
@@ -159,14 +159,14 @@ impl StringBuilder {
 
 type PrevContextItem = (Option<String>, Option<List>);
 
-pub struct PrevCtxBuilder {
+pub struct PrevContextBuilder {
     arr: Vec<PrevContextItem>,
     max_len: usize,
 }
 
-impl PrevCtxBuilder {
-    pub fn new(max_len: usize) -> PrevCtxBuilder {
-        PrevCtxBuilder {
+impl PrevContextBuilder {
+    pub fn new(max_len: usize) -> PrevContextBuilder {
+        PrevContextBuilder {
             arr: Vec::new(),
             max_len,
         }
@@ -244,37 +244,37 @@ impl PrevCtxBuilder {
     }
 }
 
-pub struct InputCursor {
+pub struct InputTextCursor {
     text: String,
     pos: usize,
 }
 
-pub struct CursorCp {
+pub struct InputCursor {
     pub ch: String,
     // no cp(codepoint) or width needed here in rust
 }
 
-impl InputCursor {
-    pub fn new(text: String) -> InputCursor {
-        InputCursor { text, pos: 0 }
+impl InputTextCursor {
+    pub fn new(text: String) -> InputTextCursor {
+        InputTextCursor { text, pos: 0 }
     }
 
     pub fn pos(&self) -> usize {
         self.pos
     }
 
-    pub fn peek_at(&self, index_units: usize) -> Option<CursorCp> {
+    pub fn peek_at(&self, index_units: usize) -> Option<InputCursor> {
         self.text
             .chars()
             .nth(index_units)
-            .and_then(|ch| Some(CursorCp { ch: ch.to_string() }))
+            .and_then(|ch| Some(InputCursor { ch: ch.to_string() }))
     }
 
-    pub fn peek(&self) -> Option<CursorCp> {
+    pub fn peek(&self) -> Option<InputCursor> {
         self.peek_at(self.pos)
     }
 
-    pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<CursorCp> {
+    pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<InputCursor> {
         self.peek_at(self.pos + offset_units)
     }
 
@@ -293,70 +293,65 @@ impl InputCursor {
     }
 }
 
-/// Result type for `match_prev_krama_sequence` (mirrors TS `{ matched, matchedLen }`).
+/// Result type for `match_prev_krama_sequence`
 pub struct MatchPrevKramaSequenceResult {
     pub matched: bool,
     pub matched_len: usize,
 }
 
-/// Port of TS `matchPrevKramaSequence`.
-///
-/// `peek_at` is typically `|i| result.peek_at(i)` where `result` is a `StringBuilder`.
-pub fn match_prev_krama_sequence<F>(
-    peek_at: F,
-    anchor_index: isize,
-    prev: &[usize],
-    script_data: &ScriptData,
-) -> MatchPrevKramaSequenceResult
-where
-    F: Fn(isize) -> Option<CursorCp>,
-{
-    for i in 0..prev.len() {
-        let expected_krama_index = prev[prev.len() - 1 - i];
-        let info = match peek_at(anchor_index - i as isize) {
-            Some(v) => v,
-            None => {
-                return MatchPrevKramaSequenceResult {
-                    matched: false,
-                    matched_len: 0,
-                };
-            }
-        };
+impl ScriptData {
+    pub fn match_prev_krama_sequence<F>(
+        &self,
+        peek_at: F,
+        anchor_index: isize,
+        prev: &[usize], // indices(number) array
+    ) -> MatchPrevKramaSequenceResult
+    where
+        F: Fn(isize) -> Option<InputCursor>,
+    {
+        for i in 0..prev.len() {
+            let expected_krama_index = prev[prev.len() - 1 - i];
+            let info = match peek_at(anchor_index - i as isize) {
+                Some(v) => v,
+                None => {
+                    return MatchPrevKramaSequenceResult {
+                        matched: false,
+                        matched_len: 0,
+                    };
+                }
+            };
 
-        let got_krama_index = script_data.krama_index_of_index(&info.ch);
-        match got_krama_index {
-            Some(got) if got == expected_krama_index => {}
-            _ => {
-                return MatchPrevKramaSequenceResult {
-                    matched: false,
-                    matched_len: 0,
-                };
+            let got_krama_index = self.krama_index_of_text(&info.ch);
+            // a method check for in cases where a nullable is there
+            // to check something like !ch || ch.name
+            // in rust we cannot check for both nullability(single possible) and non-nullable
+            // attribute at the same time. In rust a variable wont change on the same expression
+            match got_krama_index {
+                Some(got) if got == expected_krama_index => {}
+                _ => {
+                    return MatchPrevKramaSequenceResult {
+                        matched: false,
+                        matched_len: 0,
+                    };
+                }
             }
+        }
+
+        MatchPrevKramaSequenceResult {
+            matched: true,
+            matched_len: prev.len(),
         }
     }
 
-    MatchPrevKramaSequenceResult {
-        matched: true,
-        matched_len: prev.len(),
+    pub fn replace_with_pieces(&self, replace_with: &[i16]) -> Vec<String> {
+        replace_with
+            .iter()
+            .map(|&k| self.krama_text_or_empty(k as usize))
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string())
+            .collect()
     }
 }
-
-/// Port of TS `replaceWithPieces`.
-pub fn replace_with_pieces(replace_with: &[i16], script_data: &ScriptData) -> Vec<String> {
-    replace_with
-        .iter()
-        .map(|&k| {
-            if k < 0 {
-                ""
-            } else {
-                script_data.krama_text_or_empty(k as usize)
-            }
-        })
-        .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
-        .collect()
-}
-
 pub const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS: [char; 3] = ['²', '³', '⁴'];
 
 pub fn is_ta_ext_superscript_tail(ch: Option<char>) -> bool {
@@ -382,41 +377,41 @@ macro_rules! is_script_tamil_ext {
     };
 }
 
-/// Port of TS `emitPiecesWithReorder`.
-pub fn emit_pieces_with_reorder(
-    result: &mut StringBuilder,
-    pieces: Vec<String>,
-    halant: &str,
-    should_reorder: bool,
-) {
-    if pieces.is_empty() {
-        return;
-    }
-    if !should_reorder {
-        result.emit_pieces(pieces);
-        return;
-    }
+impl ResultStringBuilder {
+    pub fn emit_pieces_with_reorder(
+        &mut self,
+        pieces: Vec<String>,
+        halant: &str,
+        should_reorder: bool,
+    ) {
+        if pieces.is_empty() {
+            return;
+        }
+        if !should_reorder {
+            self.emit_pieces(pieces);
+            return;
+        }
 
-    let first_piece = pieces.first().map(|s| s.as_str()).unwrap_or("");
-    if first_piece.starts_with(halant) {
-        let rest_first = first_piece.strip_prefix(halant).unwrap_or("");
-        let mut after_pieces: Vec<String> = Vec::new();
-        if !rest_first.is_empty() {
-            after_pieces.push(rest_first.to_string());
+        let first_piece = pieces.first().map(|s| s.as_str()).unwrap_or("");
+        if first_piece.starts_with(halant) {
+            let rest_first = first_piece.strip_prefix(halant).unwrap_or("");
+            let mut after_pieces: Vec<String> = Vec::new();
+            if !rest_first.is_empty() {
+                after_pieces.push(rest_first.to_string());
+            }
+            for p in pieces.into_iter().skip(1) {
+                after_pieces.push(p);
+            }
+            self.with_last_char_moved_after(vec![halant.to_string()], after_pieces);
+        } else {
+            self.with_last_char_moved_after(pieces, vec![]);
         }
-        for p in pieces.into_iter().skip(1) {
-            after_pieces.push(p);
-        }
-        result.with_last_char_moved_after(vec![halant.to_string()], after_pieces);
-    } else {
-        result.with_last_char_moved_after(pieces, vec![]);
     }
 }
 
 const VEDIC_SVARAS_TYPING_SYMBOLS: [&str; 4] = ["_", "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS: [&str; 4] = ["↓", "↑↑↑", "↑↑", "↑"];
 
-/// Port of TS `applyTypingInputAliases`.
 pub fn apply_typing_input_aliases(mut text: String, to_script_name: &str) -> String {
     if text.is_empty() {
         return text;

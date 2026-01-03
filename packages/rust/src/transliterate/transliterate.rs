@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use crate::script_data::{CheckInEnum, List, Rule, ScriptData, ScriptTypeEnum};
 use crate::transliterate::helpers::{
-    InputCursor, PrevCtxBuilder, StringBuilder, emit_pieces_with_reorder,
-    is_ta_ext_superscript_tail, match_prev_krama_sequence, replace_with_pieces,
+    InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
 };
 use crate::utils::binary_search::binary_search_lower;
 
@@ -19,9 +18,9 @@ struct TransliterateCtx<'a> {
     to_script_data: &'a ScriptData,
     trans_options: &'a HashMap<String, bool>,
     custom_rules: &'a Vec<Rule>,
-    cursor: &'a mut InputCursor,
-    result: &'a mut StringBuilder,
-    prev_context: &'a mut PrevCtxBuilder,
+    cursor: &'a mut InputTextCursor,
+    result: &'a mut ResultStringBuilder,
+    prev_context: &'a mut PrevContextBuilder,
     prev_context_in_use: bool,
     brahmic_halant: Option<String>,
     brahmic_nuqta: Option<String>,
@@ -139,8 +138,7 @@ impl<'a> TransliterateCtx<'a> {
                 };
 
                 if let ScriptData::Brahmic { halant, .. } = self.to_script_data {
-                    emit_pieces_with_reorder(
-                        self.result,
+                    self.result.emit_pieces_with_reorder(
                         vec![linked_matra],
                         halant,
                         crate::is_script_tamil_ext!(self.to_script_name)
@@ -160,8 +158,7 @@ impl<'a> TransliterateCtx<'a> {
                 {
                     let should_reorder = crate::is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
-                    emit_pieces_with_reorder(
-                        self.result,
+                    self.result.emit_pieces_with_reorder(
                         vec![out_halant.to_string()],
                         halant,
                         should_reorder,
@@ -191,8 +188,7 @@ impl<'a> TransliterateCtx<'a> {
                 {
                     let should_reorder = crate::is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
-                    emit_pieces_with_reorder(
-                        self.result,
+                    self.result.emit_pieces_with_reorder(
                         vec![out_halant.to_string()],
                         halant,
                         should_reorder,
@@ -267,7 +263,7 @@ impl<'a> TransliterateCtx<'a> {
                         if current_text_index < 0 || text_index < 0 {
                             continue;
                         }
-                        let prev_match = match_prev_krama_sequence(
+                        let prev_match = self.from_script_data.match_prev_krama_sequence(
                             |i| {
                                 if i < 0 {
                                     None
@@ -277,7 +273,6 @@ impl<'a> TransliterateCtx<'a> {
                             },
                             current_text_index,
                             &prev_usize,
-                            self.from_script_data,
                         );
 
                         if prev_match.matched {
@@ -285,12 +280,12 @@ impl<'a> TransliterateCtx<'a> {
                             if let Some(next_char_info) = next_char_info {
                                 if let Some(next_idx) = self
                                     .from_script_data
-                                    .krama_index_of_index(&next_char_info.ch)
+                                    .krama_index_of_text(&next_char_info.ch)
                                 {
                                     let next_i16 = next_idx as i16;
                                     if following.contains(&next_i16) {
                                         let pieces =
-                                            replace_with_pieces(replace_with, self.to_script_data);
+                                            self.to_script_data.replace_with_pieces(replace_with);
                                         self.result
                                             .rewrite_tail_pieces(prev_match.matched_len, pieces);
                                     }
@@ -305,20 +300,19 @@ impl<'a> TransliterateCtx<'a> {
                         };
 
                         if let Some(following_idx) =
-                            self.to_script_data.krama_index_of_index(&last_piece)
+                            self.to_script_data.krama_index_of_text(&last_piece)
                         {
                             if !following.contains(&(following_idx as i16)) {
                                 continue;
                             }
-                            let prev_match = match_prev_krama_sequence(
+                            let prev_match = self.to_script_data.match_prev_krama_sequence(
                                 |i| self.result.peek_at(i),
                                 -2,
                                 &prev_usize,
-                                self.to_script_data,
                             );
                             if prev_match.matched {
                                 let mut pieces =
-                                    replace_with_pieces(replace_with, self.to_script_data);
+                                    self.to_script_data.replace_with_pieces(replace_with);
                                 pieces.push(last_piece);
                                 self.result
                                     .rewrite_tail_pieces(prev_match.matched_len + 1, pieces);
@@ -344,11 +338,10 @@ impl<'a> TransliterateCtx<'a> {
                             Some(v) => v,
                             None => continue,
                         };
-                        let matched = match_prev_krama_sequence(
+                        let matched = lookup_data.match_prev_krama_sequence(
                             |i| self.result.peek_at(i),
                             -1,
                             &sg_usize,
-                            lookup_data,
                         );
                         if !matched.matched {
                             continue;
@@ -357,7 +350,7 @@ impl<'a> TransliterateCtx<'a> {
                             self.result
                                 .rewrite_tail_pieces(matched.matched_len, vec![text.clone()]);
                         } else {
-                            let pieces = replace_with_pieces(replace_with, lookup_data);
+                            let pieces = lookup_data.replace_with_pieces(replace_with);
                             self.result.rewrite_tail_pieces(matched.matched_len, pieces);
                         }
                         break;
@@ -696,9 +689,9 @@ pub fn transliterate_text_core(
     text = apply_custom_replace_rules(text, from_script_data, custom_rules, CheckInEnum::Input);
 
     let text_len_units = utf16_len(&text);
-    let mut cursor = InputCursor::new(text);
-    let mut result = StringBuilder::new();
-    let mut prev_context = PrevCtxBuilder::new(MAX_CONTEXT_LENGTH as usize);
+    let mut cursor = InputTextCursor::new(text);
+    let mut result = ResultStringBuilder::new();
+    let mut prev_context = PrevContextBuilder::new(MAX_CONTEXT_LENGTH as usize);
     let custom_rules_vec: Vec<Rule> = custom_rules.to_vec();
 
     let prev_context_in_use = (matches!(from_script_data, ScriptData::Brahmic { .. })
@@ -1073,7 +1066,7 @@ pub fn transliterate_text_core(
                                 };
                                 let result_text = pieces.concat();
                                 if last_type == Some("mAtrA") || result_text == *halant {
-                                    emit_pieces_with_reorder(ctx.result, pieces, halant, true);
+                                    ctx.result.emit_pieces_with_reorder(pieces, halant, true);
                                 } else {
                                     ctx.result.emit_pieces(pieces);
                                 }
@@ -1110,7 +1103,7 @@ pub fn transliterate_text_core(
 
         // Step 2: Search in krama_text_arr
         let char_to_search = ch.clone();
-        let idx = from_script_data.krama_index_of_index(&char_to_search);
+        let idx = from_script_data.krama_index_of_text(&char_to_search);
         let Some(index) = idx else {
             if ctx.prev_context_in_use {
                 let _ = ctx.prev_context_cleanup(
@@ -1174,7 +1167,8 @@ pub fn transliterate_text_core(
                         .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
                         .map(|l| TransliterateCtx::list_type_str(l));
                     if list_type == Some("mAtrA") || to_add_text == *halant {
-                        emit_pieces_with_reorder(ctx.result, vec![to_add_text], halant, true);
+                        ctx.result
+                            .emit_pieces_with_reorder(vec![to_add_text], halant, true);
                     } else {
                         ctx.result.emit(to_add_text);
                     }
