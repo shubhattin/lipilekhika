@@ -1,5 +1,6 @@
 use crate::script_data::{List, ScriptData};
 use crate::utils::binary_search::binary_search_lower_with_index;
+use crate::utils::strings::char_substring;
 
 // pub fn krama_index_of_text()
 
@@ -32,12 +33,6 @@ impl ScriptData {
 /// custom struct to construct output string
 pub struct StringBuilder {
     result: Vec<String>,
-}
-pub struct CursorCp {
-    pub cp: isize,
-    pub ch: String,
-    /// Width in UTF-16 code units (matches JS `string.length` semantics).
-    pub width: usize,
 }
 
 impl StringBuilder {
@@ -74,10 +69,13 @@ impl StringBuilder {
                     // handling the panic case
                     return None;
                 }
-                let ch = lp.pop()?; // safe to unwrap as length is not 0
+                let ch = lp.pop();
                 // ^ slice(0, -1) done with pop inself
-                self.result[result_len - 1] = lp;
-                return Some(ch.to_string());
+                if let Some(ch) = ch {
+                    self.result[result_len - 1] = lp;
+                    return Some(ch.to_string());
+                }
+                return None;
             }
             None => None,
         }
@@ -131,9 +129,7 @@ impl StringBuilder {
         match item {
             Some(item) => {
                 return Some(CursorCp {
-                    cp: index,
                     ch: item.to_string(),
-                    width: item.encode_utf16().count(),
                 });
             }
             None => None,
@@ -169,7 +165,6 @@ pub struct PrevCtxBuilder {
 }
 
 impl PrevCtxBuilder {
-    /// Create a new previous-context builder with the given maximum length.
     pub fn new(max_len: usize) -> PrevCtxBuilder {
         PrevCtxBuilder {
             arr: Vec::new(),
@@ -177,18 +172,16 @@ impl PrevCtxBuilder {
         }
     }
 
-    /// Clear all stored context.
     pub fn clear(&mut self) {
         self.arr.clear();
     }
 
-    /// Current context length.
     pub fn length(&self) -> usize {
         self.arr.len()
     }
 
-    /// Helper to convert a possibly-negative index (like JS `Array.at`) into a valid index.
-    fn resolve_index(&self, i: isize) -> Option<usize> {
+    /// resolves negativee index for the `arr`
+    fn resolve_arr_index(&self, i: isize) -> Option<usize> {
         if self.arr.is_empty() {
             return None;
         }
@@ -204,53 +197,36 @@ impl PrevCtxBuilder {
         }
     }
 
-    /// Get the raw context item at the given index (supports negative indices).
     pub fn at(&self, i: isize) -> Option<&PrevContextItem> {
-        let idx = self.resolve_index(i)?;
-        self.arr.get(idx)
+        match self.resolve_arr_index(i) {
+            None => None,
+            Some(idx) => self.arr.get(idx),
+        }
     }
 
-    /// Get the last context item (if any).
     pub fn last(&self) -> Option<&PrevContextItem> {
         self.arr.last()
     }
 
-    /// Text of the last context item.
     pub fn last_text(&self) -> Option<&str> {
         self.last().and_then(|(text_opt, _)| text_opt.as_deref())
     }
 
-    /// Type string of the given `List` variant (mirrors TS `'vyanjana' | 'mAtrA' | 'anya' | 'svara'`).
-    fn list_type_str(list: &List) -> &'static str {
-        match list {
-            List::Anya { .. } => "anya",
-            List::Vyanjana { .. } => "vyanjana",
-            List::Matra { .. } => "mAtrA",
-            List::Svara { .. } => "svara",
-        }
+    pub fn last_type(&self) -> Option<&List> {
+        self.last().and_then(|(_, list_opt)| list_opt.as_ref())
     }
 
-    /// Type (`"vyanjana"`, `"mAtrA"`, `"anya"`, `"svara"`) of the last context item, if any.
-    pub fn last_type(&self) -> Option<&'static str> {
-        self.last()
-            .and_then(|(_, list_opt)| list_opt.as_ref())
-            .map(Self::list_type_str)
+    pub fn type_at(&self, i: isize) -> Option<&List> {
+        self.at(i).and_then(|(_, list_opt)| list_opt.as_ref())
     }
 
-    /// Type at a given index (supports negative indices).
-    pub fn type_at(&self, i: isize) -> Option<&'static str> {
-        self.at(i)
-            .and_then(|(_, list_opt)| list_opt.as_ref())
-            .map(Self::list_type_str)
-    }
-
-    /// Text at a given index (supports negative indices).
+    /// Text at a given index (supports -ve indices).
     pub fn text_at(&self, i: isize) -> Option<&str> {
         self.at(i).and_then(|(text_opt, _)| text_opt.as_deref())
     }
 
     /// Check if the last context item has the given type.
-    pub fn is_last_type(&self, t: &str) -> bool {
+    pub fn is_last_type(&self, t: &List) -> bool {
         self.last_type() == Some(t)
     }
 
@@ -262,47 +238,20 @@ impl PrevCtxBuilder {
         }
         self.arr.push(item);
         if self.arr.len() > self.max_len {
-            // Remove oldest
+            // Remove oldest, similar to shift
             self.arr.remove(0);
         }
     }
-
-    /// For debugging / inspection.
-    pub fn as_slice(&self) -> &[PrevContextItem] {
-        &self.arr
-    }
 }
 
-/// Convert a UTF-16 code unit index (JS string indexing) to a UTF-8 byte index (Rust string slicing).
-/// Returns `None` if the index is not on a scalar boundary or is out of range.
-fn utf16_index_to_byte_index(s: &str, unit_index: usize) -> Option<usize> {
-    if unit_index == 0 {
-        return Some(0);
-    }
-
-    let mut units_seen: usize = 0;
-    for (byte_i, ch) in s.char_indices() {
-        if units_seen == unit_index {
-            return Some(byte_i);
-        }
-        units_seen += ch.len_utf16();
-        if units_seen > unit_index {
-            // unit_index points inside a surrogate pair in JS terms; caller shouldn't do this.
-            return None;
-        }
-    }
-
-    if units_seen == unit_index {
-        Some(s.len())
-    } else {
-        None
-    }
-}
-
-/// Port of TS `make_input_cursor(text)` (tracks position in UTF-16 code units).
 pub struct InputCursor {
     text: String,
-    pos: usize, // UTF-16 code unit index
+    pos: usize,
+}
+
+pub struct CursorCp {
+    pub ch: String,
+    // no cp(codepoint) or width needed here in rust
 }
 
 impl InputCursor {
@@ -314,44 +263,33 @@ impl InputCursor {
         self.pos
     }
 
-    /// Equivalent to TS `peekAt(index)`.
     pub fn peek_at(&self, index_units: usize) -> Option<CursorCp> {
-        let byte_i = utf16_index_to_byte_index(&self.text, index_units)?;
-        if byte_i >= self.text.len() {
-            return None;
-        }
-        let ch = self.text[byte_i..].chars().next()?;
-        let width = ch.len_utf16();
-        Some(CursorCp {
-            cp: ch as u32 as isize,
-            ch: ch.to_string(),
-            width,
-        })
+        self.text
+            .chars()
+            .nth(index_units)
+            .and_then(|ch| Some(CursorCp { ch: ch.to_string() }))
     }
 
-    /// Equivalent to TS `peek()`.
     pub fn peek(&self) -> Option<CursorCp> {
         self.peek_at(self.pos)
     }
 
-    /// Equivalent to TS `peekAtOffsetUnits(offsetUnits)`.
     pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<CursorCp> {
         self.peek_at(self.pos + offset_units)
     }
 
-    /// Equivalent to TS `advance(units)`.
+    /// units here is for char (and not bytes)
+    /// in TS version `units` is byte index for utf-16 encoding used by js
+    /// rust stores as utf-8 but has methods to access nth char or substring (char_substring)
     pub fn advance(&mut self, units: usize) {
         self.pos += units;
     }
 
-    /// Equivalent to TS `slice(from, to)` / `substring(from, to)` (indices are UTF-16 code units).
-    pub fn slice(&self, from_units: usize, to_units: usize) -> Option<String> {
-        let start = utf16_index_to_byte_index(&self.text, from_units)?;
-        let end = utf16_index_to_byte_index(&self.text, to_units)?;
+    pub fn slice(&self, start: usize, end: usize) -> Option<String> {
         if start > end || end > self.text.len() {
             return None;
         }
-        Some(self.text[start..end].to_string())
+        Some(char_substring(&self.text, start, end).to_string())
     }
 }
 

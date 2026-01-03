@@ -3,8 +3,7 @@ use lipilekhika::transliterate;
 fn main() {
     let _out =
         transliterate("libhi", "Normal", "Tamil-Extended", None).expect("Erro in transliration");
-    let mut s = String::from("123456"); // Unicode!
+    let s = String::from("क्लेRust"); // Unicode!
 
-    s.pop();
-    println!("{:?}", s);
+    println!("{}", &s);
 }

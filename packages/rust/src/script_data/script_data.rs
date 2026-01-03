@@ -37,7 +37,7 @@ pub struct TextToKramaMap {
     pub custom_back_ref: Option<i16>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 #[serde(tag = "type")]
 pub enum List {
     #[serde(rename = "anya")]
@@ -52,6 +52,21 @@ pub enum List {
         #[serde(rename = "mAtrA_krama_ref")]
         matra_krama_ref: Option<Vec<i16>>,
     },
+}
+
+impl List {
+    pub fn is_anya(&self) -> bool {
+        matches!(self, List::Anya { .. })
+    }
+    pub fn is_vyanjana(&self) -> bool {
+        matches!(self, List::Vyanjana { .. })
+    }
+    pub fn is_matra(&self) -> bool {
+        matches!(self, List::Matra { .. })
+    }
+    pub fn is_svara(&self) -> bool {
+        matches!(self, List::Svara { .. })
+    }
 }
 
 impl List {
