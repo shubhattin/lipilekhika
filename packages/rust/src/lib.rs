@@ -3,9 +3,9 @@ use std::collections::HashMap;
 pub mod script_data;
 pub mod transliterate;
 pub mod utils;
-
 use crate::script_data::get_normalized_script_name;
 use crate::transliterate::transliterate_text;
+use wasm_bindgen::prelude::*;
 
 /// Transliterates `text` from `from` to `to`.
 ///
@@ -39,6 +39,22 @@ pub fn transliterate(
     Ok(result.output)
 }
 
+#[wasm_bindgen]
+pub fn transliterate_wasm(
+    text: &str,
+    from: &str,
+    to: &str,
+    options_json: Option<String>,
+) -> Result<String, JsValue> {
+    // Parse options from JSON string (or `null`)
+    let options: Option<HashMap<String, bool>> = options_json
+        .as_deref()
+        .map(serde_json::from_str)
+        .transpose()
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    crate::transliterate(text, from, to, options.as_ref()).map_err(|e| JsValue::from_str(&e))
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -189,13 +205,9 @@ mod tests {
         }
     }
 
-    fn plural(n: usize, singular: &'static str, plural: &'static str) -> &'static str {
-        if n == 1 {
-            singular
-        } else {
-            plural
-        }
-    }
+    // fn plural(n: usize, singular: &'static str, plural: &'static str) -> &'static str {
+    //     if n == 1 { singular } else { plural }
+    // }
 
     fn print_summary_line(label: &str, value: String) {
         println!(
@@ -356,7 +368,11 @@ mod tests {
         let mut failed_files: Vec<(String, FileStats)> = Vec::new();
 
         for file in files {
-            let rel_s = file.strip_prefix(&root).unwrap_or(&file).display().to_string();
+            let rel_s = file
+                .strip_prefix(&root)
+                .unwrap_or(&file)
+                .display()
+                .to_string();
             let (stats, failures) = run_yaml_file(&file, &root);
             overall.total_cases += stats.total_cases;
             overall.todo_cases += stats.todo_cases;
@@ -392,7 +408,11 @@ mod tests {
         println!("{}", "Transliteration".bold());
 
         let test_files_value = if failed_file_count == 0 {
-            format!("{} ({})", format!("{} passed", file_count).green(), file_count)
+            format!(
+                "{} ({})",
+                format!("{} passed", file_count).green(),
+                file_count
+            )
         } else {
             format!(
                 "{} ({}), {} ({})",
@@ -405,7 +425,11 @@ mod tests {
         print_summary_line("Test Files", test_files_value);
 
         let tests_value = if overall.failures_total == 0 {
-            format!("{} ({})", format!("{} passed", total_passed).green(), total_asserts)
+            format!(
+                "{} ({})",
+                format!("{} passed", total_passed).green(),
+                total_asserts
+            )
         } else {
             format!(
                 "{} ({}), {} ({})",
