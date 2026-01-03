@@ -33,7 +33,6 @@ impl ScriptData {
 pub struct StringBuilder {
     result: Vec<String>,
 }
-
 pub struct CursorCp {
     pub cp: isize,
     pub ch: String,
@@ -62,42 +61,30 @@ impl StringBuilder {
     }
     pub fn last_char(&self) -> Option<char> {
         match self.last_piece() {
-            None => None,
             Some(v) => v.chars().last(),
+            None => None,
         }
     }
-
     pub fn pop_last_char(&mut self) -> Option<String> {
-        let len = self.result.len();
-        if len == 0 {
-            return None;
-        }
-
-        let last_index = len - 1;
-        let mut should_pop_piece = false;
-
-        let ch = {
-            let last_piece = &mut self.result[last_index];
-            let popped = last_piece.pop();
-            if let Some(_) = popped {
-                if last_piece.is_empty() {
-                    should_pop_piece = true;
+        let result_len = self.result.len();
+        let lp = self.last_piece();
+        match lp {
+            Some(mut lp) => {
+                if lp.len() == 0 {
+                    // handling the panic case
+                    return None;
                 }
+                let ch = lp.pop()?; // safe to unwrap as length is not 0
+                // ^ slice(0, -1) done with pop inself
+                self.result[result_len - 1] = lp;
+                return Some(ch.to_string());
             }
-            popped
-        };
-
-        if should_pop_piece {
-            // safe: last_index was the last element
-            self.result.pop();
+            None => None,
         }
-
-        ch.map(|c| c.to_string())
     }
-
     pub fn rewrite_tail_pieces(&mut self, count: usize, new_pieces: Vec<String>) {
         let len = self.result.len();
-        let start = len.saturating_sub(count);
+        let start = len.saturating_sub(count); // -count but safe
         self.result.truncate(start);
         for p in new_pieces {
             if !p.is_empty() {
@@ -125,6 +112,7 @@ impl StringBuilder {
         }
     }
 
+    /// index can be -ve
     pub fn peek_at(&self, index: isize) -> Option<CursorCp> {
         let len = self.result.len() as isize;
         if len == 0 {
@@ -133,19 +121,23 @@ impl StringBuilder {
 
         let mut i = index;
         if i < 0 {
+            // handle negative indexes
             i = len + i;
-        }
-        if i < 0 || i >= len {
+        } else if i < 0 || i >= len {
             return None;
         }
 
-        let item = self.result.get(i as usize)?.clone();
-        let width = item.encode_utf16().count();
-        Some(CursorCp {
-            cp: index,
-            ch: item,
-            width,
-        })
+        let item = self.result.get(i as usize);
+        match item {
+            Some(item) => {
+                return Some(CursorCp {
+                    cp: index,
+                    ch: item.to_string(),
+                    width: item.encode_utf16().count(),
+                });
+            }
+            None => None,
+        }
     }
 
     pub fn rewrite_at(&mut self, index: isize, new_piece: String) {
@@ -157,8 +149,7 @@ impl StringBuilder {
         let mut i = index;
         if i < 0 {
             i = len + i;
-        }
-        if i < 0 || i >= len {
+        } else if i < 0 || i >= len {
             return;
         }
 

@@ -61,8 +61,7 @@ export const string_builder = () => {
     if (!lp) return undefined;
     const ch = lp.at(-1);
     const rest = lp.slice(0, -1);
-    if (rest) result[result.length - 1] = rest;
-    else result.pop();
+    result[result.length - 1] = rest;
     return ch;
   }
 
