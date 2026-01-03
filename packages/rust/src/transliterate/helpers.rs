@@ -1,5 +1,5 @@
-use crate::ScriptData;
-use crate::binary_search::binary_search_lower_with_index;
+use crate::script_data::{List, ScriptData};
+use crate::utils::binary_search::binary_search_lower_with_index;
 
 // pub fn krama_index_of_text()
 
@@ -167,6 +167,118 @@ impl StringBuilder {
 
     pub fn to_string(&self) -> String {
         self.result.concat()
+    }
+}
+
+type PrevContextItem = (Option<String>, Option<List>);
+
+pub struct PrevCtxBuilder {
+    arr: Vec<PrevContextItem>,
+    max_len: usize,
+}
+
+impl PrevCtxBuilder {
+    /// Create a new previous-context builder with the given maximum length.
+    pub fn new(max_len: usize) -> PrevCtxBuilder {
+        PrevCtxBuilder {
+            arr: Vec::new(),
+            max_len,
+        }
+    }
+
+    /// Clear all stored context.
+    pub fn clear(&mut self) {
+        self.arr.clear();
+    }
+
+    /// Current context length.
+    pub fn length(&self) -> usize {
+        self.arr.len()
+    }
+
+    /// Helper to convert a possibly-negative index (like JS `Array.at`) into a valid index.
+    fn resolve_index(&self, i: isize) -> Option<usize> {
+        if self.arr.is_empty() {
+            return None;
+        }
+        let len = self.arr.len() as isize;
+        let mut idx = i;
+        if idx < 0 {
+            idx = len + idx;
+        }
+        if idx < 0 || idx >= len {
+            None
+        } else {
+            Some(idx as usize)
+        }
+    }
+
+    /// Get the raw context item at the given index (supports negative indices).
+    pub fn at(&self, i: isize) -> Option<&PrevContextItem> {
+        let idx = self.resolve_index(i)?;
+        self.arr.get(idx)
+    }
+
+    /// Get the last context item (if any).
+    pub fn last(&self) -> Option<&PrevContextItem> {
+        self.arr.last()
+    }
+
+    /// Text of the last context item.
+    pub fn last_text(&self) -> Option<&str> {
+        self.last().and_then(|(text_opt, _)| text_opt.as_deref())
+    }
+
+    /// Type string of the given `List` variant (mirrors TS `'vyanjana' | 'mAtrA' | 'anya' | 'svara'`).
+    fn list_type_str(list: &List) -> &'static str {
+        match list {
+            List::Anya { .. } => "anya",
+            List::Vyanjana { .. } => "vyanjana",
+            List::Matra { .. } => "mAtrA",
+            List::Svara { .. } => "svara",
+        }
+    }
+
+    /// Type (`"vyanjana"`, `"mAtrA"`, `"anya"`, `"svara"`) of the last context item, if any.
+    pub fn last_type(&self) -> Option<&'static str> {
+        self.last()
+            .and_then(|(_, list_opt)| list_opt.as_ref())
+            .map(Self::list_type_str)
+    }
+
+    /// Type at a given index (supports negative indices).
+    pub fn type_at(&self, i: isize) -> Option<&'static str> {
+        self.at(i)
+            .and_then(|(_, list_opt)| list_opt.as_ref())
+            .map(Self::list_type_str)
+    }
+
+    /// Text at a given index (supports negative indices).
+    pub fn text_at(&self, i: isize) -> Option<&str> {
+        self.at(i).and_then(|(text_opt, _)| text_opt.as_deref())
+    }
+
+    /// Check if the last context item has the given type.
+    pub fn is_last_type(&self, t: &str) -> bool {
+        self.last_type() == Some(t)
+    }
+
+    /// Push a new context item, enforcing `max_len` and skipping empty/None text.
+    pub fn push(&mut self, item: PrevContextItem) {
+        let text_ok = item.0.as_ref().map(|s| !s.is_empty()).unwrap_or(false);
+        if !text_ok {
+            return;
+        }
+        self.arr.push(item);
+        if self.arr.len() > self.max_len {
+            // Remove oldest
+            self.arr.remove(0);
+        }
+    }
+
+    /// For debugging / inspection.
+    pub fn as_slice(&self) -> &[PrevContextItem] {
+        &self.arr
     }
 }
 

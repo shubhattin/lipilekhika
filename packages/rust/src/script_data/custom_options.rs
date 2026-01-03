@@ -2,7 +2,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum ScriptTypeEnum {
     Brahmic,
@@ -10,18 +10,20 @@ pub enum ScriptTypeEnum {
     All,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum CheckInEnum {
     Input,
     Output,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(tag = "type")]
-pub enum Rules {
+pub enum Rule {
     #[serde(rename = "replace_prev_krama_keys")]
     ReplacePrevKramaKeys {
+        #[serde(default)]
+        use_replace: Option<bool>,
         prev: Vec<i16>,
         following: Vec<i16>,
         replace_with: Vec<i16>,
@@ -29,13 +31,15 @@ pub enum Rules {
     },
     #[serde(rename = "direct_replace")]
     DirectReplace {
+        #[serde(default)]
+        use_replace: Option<bool>,
         to_replace: Vec<Vec<i16>>,
         replace_with: Vec<i16>,
         replace_text: Option<String>,
         check_in: Option<CheckInEnum>,
     },
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct CustomOptions {
     pub from_script_name: Option<Vec<String>>,
@@ -43,7 +47,7 @@ pub struct CustomOptions {
     pub to_script_name: Option<Vec<String>>,
     pub to_script_type: Option<ScriptTypeEnum>,
     pub check_in: Option<CheckInEnum>,
-    pub rules: Vec<Rules>,
+    pub rules: Vec<Rule>,
 }
 
 pub type CustomOptionMap = HashMap<String, CustomOptions>;

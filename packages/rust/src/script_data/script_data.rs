@@ -37,7 +37,7 @@ pub struct TextToKramaMap {
     pub custom_back_ref: Option<i16>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum List {
     #[serde(rename = "anya")]
