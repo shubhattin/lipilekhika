@@ -1,4 +1,6 @@
 {
   "python.languageServer": "None",
-  "rust-analyzer.linkedProjects": ["packages/rust/Cargo.toml"]
+  "rust-analyzer.linkedProjects": ["packages/rust/Cargo.toml"],
+  "rust-analyzer.inlayHints.typeHints.enable": false,
+  "rust-analyzer.inlayHints.parameterHints.enable": false
 }

@@ -17,7 +17,7 @@ pub struct CommonScriptAttr {
     pub script_name: String,
     pub script_id: u8,
     pub krama_text_arr: Vec<(String, Option<i16>)>,
-    pub krama_text_arr_index: Vec<i16>,
+    pub krama_text_arr_index: Vec<usize>,
     pub text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
