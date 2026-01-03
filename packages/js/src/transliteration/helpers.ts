@@ -299,7 +299,7 @@ export const emitPiecesWithReorder = (
   }
 };
 
-const VEDIC_SVARAS_TYPING_SYMBOLS = ['#an', '#sss', '#ss', '#s'];
+const VEDIC_SVARAS_TYPING_SYMBOLS = ['_', "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS = ['↓', '↑↑↑', '↑↑', '↑'];
 /**
  * Applying custom typing alias rules
