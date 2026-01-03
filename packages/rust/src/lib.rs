@@ -228,7 +228,7 @@ mod tests {
 
         let yaml_text = fs::read_to_string(file_path)
             .unwrap_or_else(|e| panic!("Failed reading YAML file `{}`: {e}", rel.display()));
-        let cases: Vec<TransliterationTestCase> = serde_yaml::from_str(&yaml_text)
+        let cases: Vec<TransliterationTestCase> = serde_yaml_ng::from_str(&yaml_text)
             .unwrap_or_else(|e| panic!("Failed parsing YAML file `{}`: {e}", rel.display()));
 
         let mut stats = FileStats::default();
