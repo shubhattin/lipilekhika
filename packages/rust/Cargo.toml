@@ -1,6 +1,6 @@
 [package]
 name = "lipilekhika"
-version = "0.0.0"
+version = "0.0.0-alpha.1"
 edition = "2024"
 
 [dependencies]

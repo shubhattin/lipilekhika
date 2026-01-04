@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-
-pub mod script_data;
-pub mod transliterate;
-pub mod utils;
 use crate::script_data::get_normalized_script_name;
 use crate::transliterate::transliterate_text;
+use std::collections::HashMap;
+
+mod script_data;
+mod transliterate;
+mod utils;
 
 /// Transliterates `text` from `from` to `to`.
 ///

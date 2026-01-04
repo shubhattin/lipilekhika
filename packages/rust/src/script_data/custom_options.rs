@@ -46,6 +46,7 @@ pub struct CustomOptions {
     pub from_script_type: Option<ScriptTypeEnum>,
     pub to_script_name: Option<Vec<String>>,
     pub to_script_type: Option<ScriptTypeEnum>,
+    #[allow(dead_code)]
     pub check_in: CheckInEnum,
     pub rules: Vec<Rule>,
 }

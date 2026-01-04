@@ -14,7 +14,9 @@ struct ScriptAssets;
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CommonScriptAttr {
+    #[allow(dead_code)]
     pub script_name: String,
+    #[allow(dead_code)]
     pub script_id: u8,
     pub krama_text_arr: Vec<(String, Option<i16>)>,
     pub krama_text_arr_index: Vec<usize>,
@@ -54,20 +56,19 @@ pub enum List {
     },
 }
 
-impl List {
-    pub fn is_anya(&self) -> bool {
-        matches!(self, List::Anya { .. })
-    }
-    pub fn is_vyanjana(&self) -> bool {
-        matches!(self, List::Vyanjana { .. })
-    }
-    pub fn is_matra(&self) -> bool {
-        matches!(self, List::Matra { .. })
-    }
-    pub fn is_svara(&self) -> bool {
-        matches!(self, List::Svara { .. })
-    }
-}
+pub const MATRA_TYPE: List = List::Matra {
+    krama_ref: Vec::new(),
+};
+pub const ANYA_TYPE: List = List::Anya {
+    krama_ref: Vec::new(),
+};
+pub const VYANJANA_TYPE: List = List::Vyanjana {
+    krama_ref: Vec::new(),
+};
+pub const SVARA_TYPE: List = List::Svara {
+    krama_ref: Vec::new(),
+    matra_krama_ref: Vec::new(),
+};
 
 impl List {
     pub fn get_krama_ref(&self) -> &Vec<i16> {
@@ -95,6 +96,7 @@ pub enum ScriptData {
     Brahmic {
         #[serde(flatten)]
         common_script_attr: CommonScriptAttr,
+        #[allow(dead_code)]
         schwa_property: bool,
         halant: String,
         nuqta: Option<String>,
@@ -103,6 +105,7 @@ pub enum ScriptData {
     Other {
         #[serde(flatten)]
         common_script_attr: CommonScriptAttr,
+        #[allow(dead_code)]
         schwa_character: String,
     },
 }

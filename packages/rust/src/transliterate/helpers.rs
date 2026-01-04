@@ -180,7 +180,7 @@ impl PrevContextBuilder {
         self.arr.len()
     }
 
-    /// resolves negativee index for the `arr`
+    /// resolves negative index for the `arr`
     fn resolve_arr_index(&self, i: isize) -> Option<usize> {
         if self.arr.is_empty() {
             return None;
@@ -286,7 +286,8 @@ impl InputTextCursor {
     }
 
     pub fn slice(&self, start: usize, end: usize) -> Option<String> {
-        if start > end || end > self.text.len() {
+        let char_count = self.text.chars().count();
+        if start > end || end > char_count {
             return None;
         }
         Some(char_substring(&self.text, start, end).to_string())

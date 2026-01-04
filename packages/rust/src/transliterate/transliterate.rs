@@ -123,12 +123,12 @@ impl<'a> TransliterateCtx<'a> {
                     Some(List::Svara {
                         matra_krama_ref, ..
                     }) => {
-                        let idx = matra_krama_ref.first().copied().unwrap_or(-1);
-                        if idx < 0 {
+                        let idx = matra_krama_ref.first().unwrap_or(&-1);
+                        if *idx < 0 {
                             "".to_string()
                         } else {
                             self.to_script_data
-                                .krama_text_or_empty(idx as usize)
+                                .krama_text_or_empty(*idx as usize)
                                 .to_string()
                         }
                     }
@@ -629,6 +629,7 @@ impl Default for TransliterationOptions {
 #[derive(Debug, Clone)]
 pub struct TransliterationOutput {
     pub output: String,
+    #[allow(dead_code)]
     pub context_length: usize,
 }
 
