@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::is_script_tamil_ext;
-use crate::script_data::{CheckInEnum, List, Rule, ScriptData, ScriptTypeEnum};
+use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::transliterate::helpers::{
     InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
 };
@@ -23,8 +23,8 @@ struct TransliterateCtx<'a> {
     result: &'a mut ResultStringBuilder,
     prev_context: &'a mut PrevContextBuilder,
     prev_context_in_use: bool,
-    brahmic_halant: Option<String>,
-    brahmic_nuqta: Option<String>,
+    brahmic_halant: &'a Option<String>,
+    brahmic_nuqta: &'a Option<String>,
     typing_mode: bool,
     include_inherent_vowels: bool,
 }
@@ -39,19 +39,6 @@ impl<'a> TransliterateCtx<'a> {
         }
     }
 
-    fn i16_vec_to_usize_vec(v: &[i16]) -> Option<Vec<usize>> {
-        let mut out = Vec::with_capacity(v.len());
-        for &n in v {
-            if n < 0 {
-                return None;
-            }
-            out.push(n as usize);
-        }
-        Some(out)
-    }
-
-    /// Port of JS `prev_context_cleanup`.
-    ///
     /// Returns `true` when the current write already handled concatenation/reordering.
     fn prev_context_cleanup(
         &mut self,
@@ -238,11 +225,29 @@ impl<'a> TransliterateCtx<'a> {
         result_str_concat_status
     }
 
-    /// Port of JS `apply_custom_rules`.
-    fn apply_custom_rules(&mut self, text_index: isize, delta: isize) {
+    fn i16_vec_to_usize_vec(v: &[i16]) -> Option<Vec<usize>> {
+        let mut out = Vec::with_capacity(v.len());
+        for &n in v {
+            if n < 0 {
+                return None;
+            }
+            out.push(n as usize);
+        }
+        Some(out)
+    }
+    fn apply_custom_trans_rules(&mut self, text_index: isize, delta: isize) {
         let current_text_index = text_index + delta;
 
         for rule in self.custom_rules.iter() {
+            match rule {
+                Rule::DirectReplace { use_replace, .. }
+                | Rule::ReplacePrevKramaKeys { use_replace, .. } => {
+                    if use_replace == &Some(true) {
+                        continue;
+                    }
+                }
+            }
+
             match rule {
                 Rule::ReplacePrevKramaKeys {
                     prev,
@@ -251,26 +256,20 @@ impl<'a> TransliterateCtx<'a> {
                     check_in,
                     ..
                 } => {
-                    let prev_usize = match Self::i16_vec_to_usize_vec(prev) {
+                    let prev_arr_as_usize = match Self::i16_vec_to_usize_vec(prev) {
                         Some(v) => v,
                         None => continue,
                     };
 
-                    let is_input = !matches!(check_in, Some(CheckInEnum::Output));
-                    if is_input {
+                    let is_check_in_input = !matches!(check_in, Some(CheckInEnum::Output));
+                    if is_check_in_input {
                         if current_text_index < 0 || text_index < 0 {
                             continue;
                         }
                         let prev_match = self.from_script_data.match_prev_krama_sequence(
-                            |i| {
-                                if i < 0 {
-                                    None
-                                } else {
-                                    self.cursor.peek_at(i as usize)
-                                }
-                            },
+                            |i| self.cursor.peek_at(i as usize),
                             current_text_index,
-                            &prev_usize,
+                            &prev_arr_as_usize,
                         );
 
                         if prev_match.matched {
@@ -306,12 +305,12 @@ impl<'a> TransliterateCtx<'a> {
                             let prev_match = self.to_script_data.match_prev_krama_sequence(
                                 |i| self.result.peek_at(i),
                                 -2,
-                                &prev_usize,
+                                &prev_arr_as_usize,
                             );
                             if prev_match.matched {
                                 let mut pieces =
                                     self.to_script_data.replace_with_pieces(replace_with);
-                                pieces.push(last_piece);
+                                pieces.push(last_piece); // instead [...pices, last_piece]
                                 self.result
                                     .rewrite_tail_pieces(prev_match.matched_len + 1, &pieces);
                             }
@@ -344,9 +343,9 @@ impl<'a> TransliterateCtx<'a> {
                         if !matched.matched {
                             continue;
                         }
-                        if let Some(text) = replace_text {
+                        if let Some(replace_text) = replace_text {
                             self.result
-                                .rewrite_tail_pieces(matched.matched_len, &[text.clone()]);
+                                .rewrite_tail_pieces(matched.matched_len, &[replace_text.clone()]);
                         } else {
                             let pieces = lookup_data.replace_with_pieces(replace_with);
                             self.result
@@ -360,41 +359,26 @@ impl<'a> TransliterateCtx<'a> {
     }
 }
 
-const DEFAULT_USE_NATIVE_NUMERALS_MODE: bool = true;
-const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE: bool = false;
-
-// struct CustomOptionsType {
-//     typing_mode: Option<bool>,
-//     use_native_numerals: Option<bool>,
-//     include_inherent_vowel: Option<bool>,
-// }
-
-#[derive(Debug, Clone)]
-pub struct ResolvedTransliterationRules {
-    pub trans_options: HashMap<String, bool>,
-    pub custom_rules: Vec<Rule>,
-}
-
-fn script_type_of(script_data: &ScriptData) -> crate::script_data::ScriptTypeEnum {
+/// maps the ScriptData type to Custom Option Script Type
+fn custom_option_script_type_of(
+    script_data: &ScriptData,
+) -> crate::script_data::CustomOptionScriptTypeEnum {
     match script_data {
-        ScriptData::Brahmic { .. } => crate::script_data::ScriptTypeEnum::Brahmic,
-        ScriptData::Other { .. } => crate::script_data::ScriptTypeEnum::Other,
+        ScriptData::Brahmic { .. } => crate::script_data::CustomOptionScriptTypeEnum::Brahmic,
+        ScriptData::Other { .. } => crate::script_data::CustomOptionScriptTypeEnum::Other,
     }
 }
-
-fn script_type_matches(expected: ScriptTypeEnum, actual: ScriptTypeEnum) -> bool {
+/// also consider the all case for matching
+fn custom_option_script_type_matches(
+    expected: CustomOptionScriptTypeEnum,
+    actual: CustomOptionScriptTypeEnum,
+) -> bool {
     match expected {
-        ScriptTypeEnum::All => true,
+        CustomOptionScriptTypeEnum::All => true,
         _ => expected == actual,
     }
 }
-
-/// Port of TS `get_active_custom_options`.
-///
-/// Filters input option flags by script-type/name constraints from `custom_options.json`.
-pub fn get_active_custom_options(
-    from_script_name: &str,
-    to_script_name: &str,
+fn get_active_custom_options(
     from_script_data: &ScriptData,
     to_script_data: &ScriptData,
     input_options: Option<&HashMap<String, bool>>,
@@ -403,73 +387,68 @@ pub fn get_active_custom_options(
         return HashMap::new();
     };
 
+    let from_script_name = &from_script_data.get_common_attr().script_name;
+    let to_script_name = &to_script_data.get_common_attr().script_name;
     let custom_options_map = crate::script_data::get_custom_options_map();
     let mut active: HashMap<String, bool> = HashMap::new();
 
-    let from_type = script_type_of(from_script_data);
-    let to_type = script_type_of(to_script_data);
+    let from_type = custom_option_script_type_of(from_script_data);
+    let to_type = custom_option_script_type_of(to_script_data);
 
     for (key, enabled) in input_options.iter() {
         let Some(option_info) = custom_options_map.get(key) else {
             continue;
         };
 
-        let from_all =
-            option_info.from_script_type.as_ref() == Some(&crate::script_data::ScriptTypeEnum::All);
-        let to_all =
-            option_info.to_script_type.as_ref() == Some(&crate::script_data::ScriptTypeEnum::All);
+        let from_all = option_info.from_script_type.as_ref()
+            == Some(&crate::script_data::CustomOptionScriptTypeEnum::All);
+        let to_all = option_info.to_script_type.as_ref()
+            == Some(&crate::script_data::CustomOptionScriptTypeEnum::All);
         if from_all && to_all {
             active.insert(key.clone(), *enabled);
-            continue;
-        }
-
-        let from_matches = (option_info
+        } else if (option_info
             .from_script_type
             .as_ref()
-            .map(|t| script_type_matches(*t, from_type))
+            .map(|t| custom_option_script_type_matches(*t, from_type))
             .unwrap_or(false))
             || (option_info
                 .from_script_name
                 .as_ref()
                 .map(|names| names.iter().any(|n| n == from_script_name))
-                .unwrap_or(false));
-
-        if !from_matches {
-            continue;
-        }
-
-        let to_matches = (option_info
-            .to_script_type
-            .as_ref()
-            .map(|t| script_type_matches(*t, to_type))
-            .unwrap_or(false))
-            || (option_info
-                .to_script_name
+                .unwrap_or(false))
+        // ^ from matches
+        {
+            let to_matches = (option_info
+                .to_script_type
                 .as_ref()
-                .map(|names| names.iter().any(|n| n == to_script_name))
-                .unwrap_or(false));
-
-        if to_matches {
-            active.insert(key.clone(), *enabled);
+                .map(|t| custom_option_script_type_matches(*t, to_type))
+                .unwrap_or(false))
+                || (option_info
+                    .to_script_name
+                    .as_ref()
+                    .map(|names| names.iter().any(|n| n == to_script_name))
+                    .unwrap_or(false));
+            if to_matches {
+                active.insert(key.clone(), *enabled);
+            }
         }
     }
 
     active
 }
 
-/// Port of TS `resolve_transliteration_rules`.
-///
+#[derive(Debug, Clone)]
+pub struct ResolvedTransliterationRules {
+    pub trans_options: HashMap<String, bool>,
+    pub custom_rules: Vec<Rule>,
+}
 /// Resolves active options once and flattens enabled rules into a single list.
 pub fn resolve_transliteration_rules(
-    from_script_name: &str,
-    to_script_name: &str,
     from_script_data: &ScriptData,
     to_script_data: &ScriptData,
     transliteration_input_options: Option<&HashMap<String, bool>>,
 ) -> ResolvedTransliterationRules {
     let trans_options = get_active_custom_options(
-        from_script_name,
-        to_script_name,
         from_script_data,
         to_script_data,
         transliteration_input_options,
@@ -479,7 +458,7 @@ pub fn resolve_transliteration_rules(
     let mut custom_rules: Vec<Rule> = Vec::new();
 
     for (key, enabled) in trans_options.iter() {
-        if *enabled != true {
+        if !*enabled {
             continue;
         }
         if let Some(opt) = custom_options_map.get(key) {
@@ -493,7 +472,25 @@ pub fn resolve_transliteration_rules(
     }
 }
 
-fn rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
+impl Rule {
+    // helper check function
+    fn check_should_use_replace(&self, allowed: CheckInEnum) -> bool {
+        match self {
+            Rule::ReplacePrevKramaKeys {
+                use_replace,
+                check_in,
+                ..
+            }
+            | Rule::DirectReplace {
+                use_replace,
+                check_in,
+                ..
+            } => use_replace == &Some(true) && check_in == &Some(allowed),
+        }
+    }
+}
+
+fn get_rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
     match rule {
         Rule::ReplacePrevKramaKeys { replace_with, .. }
         | Rule::DirectReplace { replace_with, .. } => replace_with
@@ -509,26 +506,8 @@ fn rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
             .join(""),
     }
 }
-
-fn should_use_replace(rule: &Rule, allowed: CheckInEnum) -> bool {
-    match rule {
-        Rule::ReplacePrevKramaKeys {
-            use_replace,
-            check_in,
-            ..
-        }
-        | Rule::DirectReplace {
-            use_replace,
-            check_in,
-            ..
-        } => use_replace == &Some(true) && check_in == &Some(allowed),
-    }
-}
-
-/// Port of TS `apply_custom_replace_rules`.
-///
 /// Only applies rules marked with `use_replace=true` (fast replaceAll pass).
-pub fn apply_custom_replace_rules(
+fn apply_custom_replace_rules(
     mut text: String,
     script_data: &ScriptData,
     rules: &[Rule],
@@ -539,7 +518,7 @@ pub fn apply_custom_replace_rules(
     }
 
     for rule in rules.iter() {
-        if !should_use_replace(rule, allowed_input_rule_type) {
+        if !rule.check_should_use_replace(allowed_input_rule_type) {
             continue;
         }
 
@@ -549,30 +528,21 @@ pub fn apply_custom_replace_rules(
             } => {
                 let prev_string = prev
                     .iter()
-                    .map(|&p| {
-                        if p < 0 {
-                            ""
-                        } else {
-                            script_data.krama_text_or_empty(p as usize)
-                        }
-                    })
+                    .map(|&p| script_data.krama_text_or_empty(p as usize))
                     .collect::<Vec<&str>>()
                     .join("");
 
-                let repl_text = rule_replace_text(rule, script_data);
+                let repl_text = get_rule_replace_text(rule, script_data);
 
                 for &follow_krama_index in following.iter() {
-                    if follow_krama_index < 0 {
-                        continue;
-                    }
-                    let follow_string =
+                    let follow_krama_string =
                         script_data.krama_text_or_empty(follow_krama_index as usize);
-                    if follow_string.is_empty() {
+                    if follow_krama_string.is_empty() {
                         continue;
                     }
 
-                    let search = format!("{}{}", prev_string, follow_string);
-                    let replace = format!("{}{}", repl_text, follow_string);
+                    let search = format!("{}{}", prev_string, follow_krama_string);
+                    let replace = format!("{}{}", repl_text, follow_krama_string);
                     text = text.replace(&search, &replace);
                 }
             }
@@ -583,18 +553,12 @@ pub fn apply_custom_replace_rules(
             } => {
                 let replace_with = replace_text
                     .clone()
-                    .unwrap_or_else(|| rule_replace_text(rule, script_data));
+                    .unwrap_or_else(|| get_rule_replace_text(rule, script_data));
 
                 for grp in to_replace.iter() {
                     let to_replace_string = grp
                         .iter()
-                        .map(|&k| {
-                            if k < 0 {
-                                ""
-                            } else {
-                                script_data.krama_text_or_empty(k as usize)
-                            }
-                        })
+                        .map(|&k| script_data.krama_text_or_empty(k as usize))
                         .collect::<Vec<&str>>()
                         .join("");
 
@@ -608,6 +572,15 @@ pub fn apply_custom_replace_rules(
 
     text
 }
+
+const DEFAULT_USE_NATIVE_NUMERALS_MODE: bool = true;
+const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE: bool = false;
+
+// struct CustomOptionsType {
+//     typing_mode: Option<bool>,
+//     use_native_numerals: Option<bool>,
+//     include_inherent_vowel: Option<bool>,
+// }
 
 #[derive(Debug, Clone, Copy)]
 pub struct TransliterationOptions {
@@ -735,8 +708,8 @@ pub fn transliterate_text_core(
         result: &mut result,
         prev_context: &mut prev_context,
         prev_context_in_use,
-        brahmic_halant,
-        brahmic_nuqta,
+        brahmic_halant: &brahmic_halant,
+        brahmic_nuqta: &brahmic_nuqta,
         typing_mode: opts.typing_mode,
         include_inherent_vowels: opts.include_inherent_vowel,
     };
@@ -1078,7 +1051,7 @@ pub fn transliterate_text_core(
                         }
                     }
 
-                    ctx.apply_custom_rules(
+                    ctx.apply_custom_trans_rules(
                         ctx.cursor.pos() as isize,
                         -(matched_len_units as isize),
                     );
@@ -1180,7 +1153,7 @@ pub fn transliterate_text_core(
             }
         }
 
-        ctx.apply_custom_rules(ctx.cursor.pos() as isize, -1);
+        ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1);
     }
 
     if ctx.prev_context_in_use {
@@ -1212,13 +1185,7 @@ pub fn transliterate_text(
     let from_data = ScriptData::get_script_data(&from_norm);
     let to_data = ScriptData::get_script_data(&to_norm);
 
-    let resolved = resolve_transliteration_rules(
-        &from_norm,
-        &to_norm,
-        from_data,
-        to_data,
-        transliteration_input_options,
-    );
+    let resolved = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
 
     transliterate_text_core(
         text,

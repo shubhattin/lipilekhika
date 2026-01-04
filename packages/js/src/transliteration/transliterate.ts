@@ -192,7 +192,7 @@ function prev_context_cleanup(
   return result_str_concat_status;
 }
 
-function apply_custom_rules(ctx: TransliterateCtx, text_index: number, delta: number) {
+function apply_custom_trans_rules(ctx: TransliterateCtx, text_index: number, delta: number) {
   const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
   const current_text_index = text_index + delta;
 
@@ -342,11 +342,12 @@ export const apply_custom_replace_rules = (
         text = text.replaceAll(prev_string + follow_krama_string, replace_string);
       }
     } else if (rule.type === 'direct_replace') {
-      const to_replace_strings = rule.to_replace.map((to_replace) =>
-        to_replace.map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item)).join('')
-      );
-      for (let to_replace_string of to_replace_strings) {
-        text = text.replaceAll(to_replace_string, get_rule_replace_text(rule, script_data));
+      const replace_with = rule.replace_text ?? get_rule_replace_text(rule, script_data);
+      for (let grp of rule.to_replace) {
+        const to_replace_string = grp
+          .map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item))
+          .join('');
+        text = text.replaceAll(to_replace_string, replace_with);
       }
     }
   }
@@ -911,7 +912,7 @@ export const transliterate_text_core = (
             result.emitPieces(normalized_result_pieces_to_add);
           }
         }
-        apply_custom_rules(ctx, text_index, -matched_len_units);
+        apply_custom_trans_rules(ctx, text_index, -matched_len_units);
         continue;
       } else if (
         text_to_krama_item[1].krama !== null &&
@@ -984,7 +985,7 @@ export const transliterate_text_core = (
         result.emit(to_add_text);
       }
     }
-    apply_custom_rules(ctx, text_index, -char_width);
+    apply_custom_trans_rules(ctx, text_index, -char_width);
   }
   if (PREV_CONTEXT_IN_USE)
     // calling with last extra index flag

@@ -56,16 +56,17 @@ pub enum List {
     },
 }
 
-pub const MATRA_TYPE: List = List::Matra {
+// for checking equiality more convenitently rather than using matches!
+pub const MATRA_LIST_TYPE: List = List::Matra {
     krama_ref: Vec::new(),
 };
-pub const ANYA_TYPE: List = List::Anya {
+pub const ANYA_LIST_TYPE: List = List::Anya {
     krama_ref: Vec::new(),
 };
-pub const VYANJANA_TYPE: List = List::Vyanjana {
+pub const VYANJANA_LIST_TYPE: List = List::Vyanjana {
     krama_ref: Vec::new(),
 };
-pub const SVARA_TYPE: List = List::Svara {
+pub const SVARA_LIST_TYPE: List = List::Svara {
     krama_ref: Vec::new(),
     matra_krama_ref: Vec::new(),
 };

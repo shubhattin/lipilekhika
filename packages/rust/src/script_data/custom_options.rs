@@ -4,7 +4,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
-pub enum ScriptTypeEnum {
+pub enum CustomOptionScriptTypeEnum {
     Brahmic,
     Other,
     All,
@@ -43,9 +43,9 @@ pub enum Rule {
 #[serde(deny_unknown_fields)]
 pub struct CustomOptions {
     pub from_script_name: Option<Vec<String>>,
-    pub from_script_type: Option<ScriptTypeEnum>,
+    pub from_script_type: Option<CustomOptionScriptTypeEnum>,
     pub to_script_name: Option<Vec<String>>,
-    pub to_script_type: Option<ScriptTypeEnum>,
+    pub to_script_type: Option<CustomOptionScriptTypeEnum>,
     #[allow(dead_code)]
     pub check_in: CheckInEnum,
     pub rules: Vec<Rule>,
