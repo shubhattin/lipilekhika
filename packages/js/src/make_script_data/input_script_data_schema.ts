@@ -77,7 +77,7 @@ export type InputBrahmicScriptType = {
    * This will help us more strictly specify what to process and what not to.
    * In future this will be a mandatory field and ?
    */
-  ranges?: [[number, number][]];
+  // ranges?: [[number, number][]];
   halant: string;
   nuqta?: string;
   /**
