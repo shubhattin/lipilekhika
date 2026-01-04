@@ -7,6 +7,7 @@ use crate::script_data::{
 };
 use crate::transliterate::helpers::{
   self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
+  is_vedic_svara_tail,
 };
 use crate::utils::binary_search::binary_search_lower;
 
@@ -736,15 +737,19 @@ pub fn transliterate_text_core(
       && to_script_name == "Normal"
     {
       let custom_arr = &from_script_data.get_common_attr().custom_script_chars_arr;
-      let target = ch.as_str();
-      let idx = binary_search_lower(custom_arr, &target, |a, i| a[i].0.as_str(), |a, b| a.cmp(b));
+      let idx = binary_search_lower(
+        custom_arr,
+        &ch.as_str(),
+        |a, i| a[i].0.as_str(),
+        |a, b| a.cmp(b),
+      );
       if let Some(custom_idx) = idx {
         let (custom_text, list_ref_opt, back_ref_opt) =
           &from_script_data.get_common_attr().custom_script_chars_arr[custom_idx];
         let list_item = list_ref_opt
           .and_then(|i| from_script_data.get_common_attr().list.get(i as usize))
           .cloned();
-        let _ = ctx.prev_context_cleanup(Some((Some(custom_text.clone()), list_item)), None, None);
+        ctx.prev_context_cleanup(Some((Some(custom_text.clone()), list_item)), None, None);
 
         let normal_text = back_ref_opt
           .and_then(|i| {
@@ -756,51 +761,69 @@ pub fn transliterate_text_core(
           .map(|(s, _)| s.clone())
           .unwrap_or_default();
         ctx.result.emit(normal_text);
-        ctx.cursor.advance(utf16_len(custom_text));
+        ctx.cursor.advance(custom_text.chars().count());
         continue;
       }
     }
 
     // Step 1: match text_to_krama_map / typing_text_to_krama_map
-    let mut text_to_krama_item_index: Option<usize> = None;
+    let mut text_to_krama_item_index: Option<usize>;
     {
-      let scan_units: usize = 0;
+      let mut scan_units: usize = 0;
       let mut last_valid_vowel_match_index: Option<usize> = None;
       let check_vowel_retraction = ctx.prev_context_in_use
         && matches!(from_script_data, ScriptData::Other { .. })
         && matches!(to_script_data, ScriptData::Brahmic { .. })
-        && (matches!(ctx.prev_context.type_at(-1), Some(List::Vyanjana { .. }))
+        && (ctx.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
           || (ctx.brahmic_nuqta.is_some()
-            && matches!(ctx.prev_context.type_at(-2), Some(List::Vyanjana { .. }))
+            && ctx.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
             && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta.as_deref()));
 
       loop {
         let next = ctx.cursor.peek_at(text_index + scan_units);
-        let next_char = next.as_ref().map(|c| c.ch.clone()).unwrap_or_default();
+        let next_char = next
+          .as_ref()
+          .map(|c| c.ch.clone())
+          .unwrap_or("".to_string());
 
         if ignore_ta_ext_sup_num_text_index != -1
           && !next_char.is_empty()
           && is_ta_ext_superscript_tail(next_char.chars().next())
         {
-          // scan_units += next.as_ref().map(|c| c.width).unwrap_or(0);
+          scan_units += next.as_ref().map(|c| c.ch.chars().count()).unwrap_or(0);
         }
 
         let end_index = text_index + scan_units;
-        let char_to_search = match ctx.cursor.slice(text_index, end_index) {
-          Some(v) => v,
-          None => String::new(),
+        let char_to_search = if ignore_ta_ext_sup_num_text_index != -1 {
+          let a = ctx
+            .cursor
+            .slice(text_index, ignore_ta_ext_sup_num_text_index as usize)
+            .unwrap_or(String::new());
+          let b = if end_index > (ignore_ta_ext_sup_num_text_index as usize) {
+            ctx
+              .cursor
+              .slice((ignore_ta_ext_sup_num_text_index as usize) + 1, end_index)
+              .unwrap_or("".to_string())
+          } else {
+            "".to_string()
+          };
+          format!("{}{}", a, b)
+        } else {
+          ctx
+            .cursor
+            .slice(text_index, end_index)
+            .unwrap_or("".to_string())
         };
 
-        let target = char_to_search.as_str();
         let potential_match_index = binary_search_lower(
           from_text_to_krama_map,
-          &target,
+          &char_to_search.as_str(),
           |a, i| a[i].0.as_str(),
           |a, b| a.cmp(b),
         );
 
         let Some(potential_match_index) = potential_match_index else {
-          // text_to_krama_item_index = None;
+          text_to_krama_item_index = None;
           break;
         };
         let potential_match = &from_text_to_krama_map[potential_match_index];
@@ -809,18 +832,17 @@ pub fn transliterate_text_core(
         if check_vowel_retraction {
           if let Some(krama) = &potential_match.1.krama {
             if !krama.is_empty() {
-              let first = krama[0];
-              if first >= 0 {
+              let krama_id = krama[0];
+              if krama_id >= 0 {
                 let list_idx = to_script_data
                   .get_common_attr()
                   .krama_text_arr
-                  .get(first as usize)
+                  .get(krama_id as usize)
                   .and_then(|(_, li)| *li);
-                let list_type = list_idx
-                  .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
-                  .map(|l| list_type_str(l));
-                let is_single_vowel =
-                  krama.len() == 1 && list_type.is_some_and(|t| t == "svara" || t == "mAtrA");
+                let list_type =
+                  list_idx.and_then(|li| to_script_data.get_common_attr().list.get(li as usize));
+                let is_single_vowel = krama.len() == 1
+                  && list_type.is_some_and(|t| t == &SVARA_LIST_TYPE || t == &MATRA_LIST_TYPE);
                 if is_single_vowel {
                   last_valid_vowel_match_index = Some(potential_match_index);
                 } else if last_valid_vowel_match_index.is_some() {
@@ -834,14 +856,184 @@ pub fn transliterate_text_core(
 
         // extend match if `next` allows it
         if let Some(next_list) = &potential_match.1.next {
-          if !next_char.is_empty()
-            && next_char.chars().next().is_some_and(|c| {
-              next_list.iter().any(|s| s.chars().next() == Some(c))
-                || next_list.iter().any(|s| s == &next_char)
-            })
-          {
-            // scan_units += next.as_ref().map(|c| c.width).unwrap_or(0);
-            continue;
+          if !next_list.is_empty() {
+            let nth_next = ctx.cursor.peek_at(end_index);
+            let nth_next_character = nth_next.as_ref().map(|c| c.ch.clone());
+
+            // Tamil-Extended special handling (superscript numbers after matra/halant)
+            if is_script_tamil_ext!(from_script_name)
+              && matches!(from_script_data, ScriptData::Brahmic { .. })
+            {
+              let nth_next_units = nth_next.as_ref().map(|c| utf16_len(&c.ch)).unwrap_or(0);
+              let n_1_th_next = if nth_next.is_some() {
+                ctx.cursor.peek_at(end_index + nth_next_units)
+              } else {
+                None
+              };
+              let n_1_th_next_character = n_1_th_next.as_ref().map(|c| c.ch.clone());
+
+              // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+              let n_1_th_units = n_1_th_next.as_ref().map(|c| utf16_len(&c.ch)).unwrap_or(0);
+              let n_2_th_next = if nth_next.is_some() && n_1_th_next.is_some() {
+                ctx
+                  .cursor
+                  .peek_at(end_index + nth_next_units + n_1_th_units)
+              } else {
+                None
+              };
+              let n_2_th_next_character = n_2_th_next.as_ref().map(|c| c.ch.clone());
+
+              // NOTE: mirror TS: for these Tamil-Extended fixes, always search on the canonical
+              // `from_script_data.text_to_krama_map` (not the typing map).
+              let canonical_map = &from_script_data.get_common_attr().text_to_krama_map;
+
+              // Case: matra/halant + superscript tail (superscript is in next list)
+              if ignore_ta_ext_sup_num_text_index == -1
+                && n_1_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
+                && n_1_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+              {
+                let sup = n_1_th_next_character.clone().unwrap_or_default();
+                let char_index = binary_search_lower(
+                  canonical_map,
+                  &format!("{}{}", char_to_search, sup).as_str(),
+                  |a, i| a[i].0.as_str(),
+                  |a, b| a.cmp(b),
+                );
+                let nth_char_text_index = nth_next_character
+                  .as_ref()
+                  .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
+
+                if let (Some(char_index), Some(nth_char_text_index)) =
+                  (char_index, nth_char_text_index)
+                {
+                  text_to_krama_item_index = Some(char_index);
+
+                  let nth_char_type = from_script_data
+                    .get_common_attr()
+                    .krama_text_arr
+                    .get(nth_char_text_index)
+                    .and_then(|(_, li)| *li)
+                    .and_then(|li| from_script_data.get_common_attr().list.get(li as usize))
+                    .map(|l| list_type_str(l));
+
+                  if let ScriptData::Brahmic { halant, .. } = from_script_data {
+                    if nth_next_character.as_deref() == Some(halant)
+                      || nth_char_type == Some("mAtrA")
+                    {
+                      ignore_ta_ext_sup_num_text_index = (end_index + nth_next_units) as isize;
+                      break;
+                    }
+                  }
+                }
+              }
+              // Case: matra + matra + superscript tail (superscript is in next list; special for gO = g + E + A)
+              else if ignore_ta_ext_sup_num_text_index == -1
+                && n_2_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
+                && n_2_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+              {
+                let sup = n_2_th_next_character.clone().unwrap_or_default();
+                let char_index = binary_search_lower(
+                  canonical_map,
+                  &format!("{}{}", char_to_search, sup).as_str(),
+                  |a, i| a[i].0.as_str(),
+                  |a, b| a.cmp(b),
+                );
+                let nth_char_text_index = nth_next_character
+                  .as_ref()
+                  .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
+                let n_1_th_char_text_index = n_1_th_next_character
+                  .as_ref()
+                  .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
+
+                if let (Some(char_index), Some(nth_char_text_index), Some(n_1_th_char_text_index)) =
+                  (char_index, nth_char_text_index, n_1_th_char_text_index)
+                {
+                  text_to_krama_item_index = Some(char_index);
+
+                  let nth_char_type = from_script_data
+                    .get_common_attr()
+                    .krama_text_arr
+                    .get(nth_char_text_index)
+                    .and_then(|(_, li)| *li)
+                    .and_then(|li| from_script_data.get_common_attr().list.get(li as usize))
+                    .map(|l| list_type_str(l));
+                  let n_1_th_char_type = from_script_data
+                    .get_common_attr()
+                    .krama_text_arr
+                    .get(n_1_th_char_text_index)
+                    .and_then(|(_, li)| *li)
+                    .and_then(|li| from_script_data.get_common_attr().list.get(li as usize))
+                    .map(|l| list_type_str(l));
+
+                  if nth_char_type == Some("mAtrA") && n_1_th_char_type == Some("mAtrA") {
+                    ignore_ta_ext_sup_num_text_index =
+                      (end_index + nth_next_units + n_1_th_units) as isize;
+                    break;
+                  }
+                }
+              }
+
+              // Handle case: mAtrA + Vedic mark + superscript (n_2_th is superscript, n_1_th is Vedic)
+              if ignore_ta_ext_sup_num_text_index == -1
+                && nth_next_character.as_ref().is_some()
+                && n_1_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| is_vedic_svara_tail(s.chars().next()))
+                && n_2_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
+                && n_2_th_next_character
+                  .as_ref()
+                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+              {
+                let nth_char_text_index = nth_next_character
+                  .as_ref()
+                  .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
+
+                if let Some(nth_char_text_index) = nth_char_text_index {
+                  let nth_char_type = from_script_data
+                    .get_common_attr()
+                    .krama_text_arr
+                    .get(nth_char_text_index)
+                    .and_then(|(_, li)| *li)
+                    .and_then(|li| from_script_data.get_common_attr().list.get(li as usize))
+                    .map(|l| list_type_str(l));
+
+                  // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
+                  if nth_char_type == Some("mAtrA") {
+                    let sup = n_2_th_next_character.clone().unwrap_or_default();
+                    let char_index = binary_search_lower(
+                      canonical_map,
+                      &format!("{}{}", char_to_search, sup).as_str(),
+                      |a, i| a[i].0.as_str(),
+                      |a, b| a.cmp(b),
+                    );
+                    if let Some(char_index) = char_index {
+                      text_to_krama_item_index = Some(char_index);
+                      ignore_ta_ext_sup_num_text_index =
+                        (end_index + nth_next_units + n_1_th_units) as isize;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            // Generic: if the next character is in the next list, extend scan and continue
+            if let Some(nth_next_character) = nth_next_character {
+              if next_list.iter().any(|x| x == &nth_next_character) {
+                scan_units += nth_next.as_ref().map(|c| c.ch.chars().count()).unwrap_or(0);
+                continue;
+              }
+            }
           }
         }
 
@@ -852,12 +1044,34 @@ pub fn transliterate_text_core(
 
     if let Some(map_idx) = text_to_krama_item_index {
       let (matched_text, map) = &from_text_to_krama_map[map_idx];
-
-      let matched_len_units = utf16_len(matched_text);
+      let is_type_vyanjana = match &map.krama {
+        Some(krama) => {
+          match from_script_data
+            .get_common_attr()
+            .list
+            .get(match krama.get(0) {
+              Some(idx) => *idx,
+              _ => -1,
+            } as usize)
+          {
+            Some(v) => v == &VYANJANA_LIST_TYPE,
+            _ => false,
+          }
+        }
+        _ => false,
+      };
+      let index_delete_length = if ignore_ta_ext_sup_num_text_index != -1
+        && matched_text.chars().count() > 1
+        && is_type_vyanjana
+        && is_ta_ext_superscript_tail(matched_text.chars().last())
+      {
+        1
+      } else {
+        0
+      };
+      let matched_len_units = matched_text.chars().count() - index_delete_length;
       ctx.cursor.advance(matched_len_units);
 
-      // Typing-map: emit the referenced custom script character directly.
-      // (Port of TS `custom_back_ref` branch.)
       if *trans_opt(&trans_options, "normal_to_all:use_typing_chars") {
         if let Some(custom_back_ref) = map.custom_back_ref {
           if custom_back_ref >= 0 {
@@ -884,8 +1098,7 @@ pub fn transliterate_text_core(
 
       // If krama exists and has at least one non -1, emit directly
       if let Some(krama) = &map.krama {
-        let has_non_neg = krama.iter().any(|&k| k != -1);
-        if has_non_neg {
+        if krama.iter().any(|&k| k != -1) {
           let mut pieces: Vec<String> = Vec::new();
           for &k in krama.iter() {
             if k < 0 {
@@ -1015,17 +1228,17 @@ pub fn transliterate_text_core(
 
           ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -(matched_len_units as isize));
           continue;
-        }
-
-        // typing-mode special case when krama contains -1 entries: emit raw match
-        if opts.typing_mode && krama.iter().any(|&k| k == -1) {
-          ctx.result.emit(matched_text.clone());
-          let _ = ctx.prev_context_cleanup(
-            Some((Some(matched_text.clone()), None)),
-            map.next.as_deref(),
-            None,
-          );
-          continue;
+        } else {
+          // typing-mode special case when krama contains -1 entries: emit raw match
+          if opts.typing_mode && krama.iter().any(|&k| k == -1) {
+            ctx.result.emit(matched_text.clone());
+            let _ = ctx.prev_context_cleanup(
+              Some((Some(matched_text.clone()), None)),
+              map.next.as_deref(),
+              None,
+            );
+            continue;
+          }
         }
       }
     } else {

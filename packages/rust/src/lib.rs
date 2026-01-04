@@ -387,60 +387,6 @@ mod tests {
     let failed_file_count = failed_files.len();
     let passed_file_count = file_count.saturating_sub(failed_file_count);
 
-    println!();
-    println!("{}", "Transliteration".bold());
-
-    let test_files_value = if failed_file_count == 0 {
-      format!(
-        "{} ({})",
-        format!("{} passed", file_count).green(),
-        file_count
-      )
-    } else {
-      format!(
-        "{} ({}), {} ({})",
-        format!("{} passed", passed_file_count).green(),
-        file_count,
-        format!("{} failed", failed_file_count).red(),
-        file_count
-      )
-    };
-    print_summary_line("Test Files", test_files_value);
-
-    let tests_value = if overall.failures_total == 0 {
-      format!(
-        "{} ({})",
-        format!("{} passed", total_passed).green(),
-        total_asserts
-      )
-    } else {
-      format!(
-        "{} ({}), {} ({})",
-        format!("{} passed", total_passed).green(),
-        total_asserts,
-        format!("{} failed", overall.failures_total).red(),
-        total_asserts
-      )
-    };
-    print_summary_line("Tests", tests_value);
-
-    if total_skipped > 0 {
-      print_summary_line(
-        "Skipped",
-        format!(
-          "{} (todo: {}, auto-vedic: {})",
-          total_skipped.to_string().yellow(),
-          overall.todo_cases.to_string().yellow(),
-          overall.auto_vedic_skipped.to_string().yellow()
-        ),
-      );
-    }
-
-    print_summary_line(
-      "Duration",
-      format!("{:.2?}", started.elapsed()).dimmed().to_string(),
-    );
-
     if !failed_files.is_empty() {
       println!();
       for (file_rel, stats) in &failed_files {
@@ -461,6 +407,61 @@ mod tests {
         );
       }
     }
+    {
+      println!();
+      println!("{}", "Transliteration".bold());
+
+      let test_files_value = if failed_file_count == 0 {
+        format!(
+          "{} ({})",
+          format!("{} passed", file_count).green(),
+          file_count
+        )
+      } else {
+        format!(
+          "{} ({}), {} ({})",
+          format!("{} passed", passed_file_count).green(),
+          file_count,
+          format!("{} failed", failed_file_count).red(),
+          file_count
+        )
+      };
+      print_summary_line("Test Files", test_files_value);
+
+      let tests_value = if overall.failures_total == 0 {
+        format!(
+          "{} ({})",
+          format!("{} passed", total_passed).green(),
+          total_asserts
+        )
+      } else {
+        format!(
+          "{} ({}), {} ({})",
+          format!("{} passed", total_passed).green(),
+          total_asserts,
+          format!("{} failed", overall.failures_total).red(),
+          total_asserts
+        )
+      };
+      print_summary_line("Tests", tests_value);
+
+      if total_skipped > 0 {
+        print_summary_line(
+          "Skipped",
+          format!(
+            "{} (todo: {}, auto-vedic: {})",
+            total_skipped.to_string().yellow(),
+            overall.todo_cases.to_string().yellow(),
+            overall.auto_vedic_skipped.to_string().yellow()
+          ),
+        );
+      }
+
+      print_summary_line(
+        "Duration",
+        format!("{:.2?}", started.elapsed()).dimmed().to_string(),
+      );
+    }
 
     if overall.failures_total > 0 {
       let mut msg = String::new();
@@ -479,10 +480,10 @@ mod tests {
             msg.push_str("   Transliteration failed:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));
-            msg.push_str(&format!("     Input: {:?}\n", f.input));
+            msg.push_str(&format!("     Input: \"{}\"\n", f.input));
             if let (Some(expected), Some(actual)) = (&f.expected, &f.actual) {
-              msg.push_str(&format!("     Expected: {:?}\n", expected));
-              msg.push_str(&format!("     Actual: {:?}\n", actual));
+              msg.push_str(&format!("     Expected: \"{}\"\n", expected));
+              msg.push_str(&format!("     Actual: \"{}\"\n", actual));
             }
           }
           FailureKind::ReverseMismatch => {
@@ -490,17 +491,17 @@ mod tests {
             msg.push_str("   Reversed Transliteration failed:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));
-            msg.push_str(&format!("     Input: {:?}\n", f.input));
+            msg.push_str(&format!("     Input: \"{}\"\n", f.input));
             if let (Some(expected), Some(actual)) = (&f.expected, &f.actual) {
-              msg.push_str(&format!("     Original Input: {:?}\n", expected));
-              msg.push_str(&format!("     Reversed Output: {:?}\n", actual));
+              msg.push_str(&format!("     Original Input: \"{}\"\n", expected));
+              msg.push_str(&format!("     Reversed Output: \"{}\"\n", actual));
             }
           }
           FailureKind::ForwardError => {
             msg.push_str("   Transliteration error:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));
-            msg.push_str(&format!("     Input: {:?}\n", f.input));
+            msg.push_str(&format!("     Input: \"{}\"\n", f.input));
             if let Some(error) = &f.error {
               msg.push_str(&format!("     Error: {}\n", error));
             }
@@ -509,7 +510,7 @@ mod tests {
             msg.push_str("   Reverse transliteration error:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));
-            msg.push_str(&format!("     Input: {:?}\n", f.input));
+            msg.push_str(&format!("     Input: \"{}\"\n", f.input));
             if let Some(error) = &f.error {
               msg.push_str(&format!("     Error: {}\n", error));
             }
@@ -517,7 +518,19 @@ mod tests {
         }
       }
 
-      panic!("{msg}");
+      use std::fs::OpenOptions;
+      use std::io::Write;
+
+      if let Ok(mut file) = OpenOptions::new()
+        .create(true)
+        .append(false)
+        .write(true)
+        .truncate(true)
+        .open("test_log.txt")
+      {
+        let _ = file.write_all(msg.as_bytes());
+      }
+      panic!("failed");
     }
   }
 }
