@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::is_script_tamil_ext;
 use crate::script_data::{CheckInEnum, List, Rule, ScriptData, ScriptTypeEnum};
 use crate::transliterate::helpers::{
     InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
@@ -139,9 +140,9 @@ impl<'a> TransliterateCtx<'a> {
 
                 if let ScriptData::Brahmic { halant, .. } = self.to_script_data {
                     self.result.emit_pieces_with_reorder(
-                        vec![linked_matra],
+                        &[linked_matra],
                         halant,
-                        crate::is_script_tamil_ext!(self.to_script_name)
+                        is_script_tamil_ext!(self.to_script_name)
                             && is_ta_ext_superscript_tail(self.result.last_char()),
                     );
                     result_str_concat_status = true;
@@ -156,10 +157,10 @@ impl<'a> TransliterateCtx<'a> {
                 if let (Some(out_halant), ScriptData::Brahmic { halant, .. }) =
                     (brahmic_halant, self.to_script_data)
                 {
-                    let should_reorder = crate::is_script_tamil_ext!(self.to_script_name)
+                    let should_reorder = is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
                     self.result.emit_pieces_with_reorder(
-                        vec![out_halant.to_string()],
+                        &[out_halant.to_string()],
                         halant,
                         should_reorder,
                     );
@@ -186,10 +187,10 @@ impl<'a> TransliterateCtx<'a> {
                 if let (Some(out_halant), ScriptData::Brahmic { halant, .. }) =
                     (brahmic_halant, self.to_script_data)
                 {
-                    let should_reorder = crate::is_script_tamil_ext!(self.to_script_name)
+                    let should_reorder = is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
                     self.result.emit_pieces_with_reorder(
-                        vec![out_halant.to_string()],
+                        &[out_halant.to_string()],
                         halant,
                         should_reorder,
                     );
@@ -216,7 +217,7 @@ impl<'a> TransliterateCtx<'a> {
             && next.map(|n| n.is_empty()).unwrap_or(true)
             && !last_extra_call
             // the case below is to enable typing of #an, #s (Vedic svara chihnas too)
-            && !(crate::is_script_tamil_ext!(self.to_script_name)
+            && !(is_script_tamil_ext!(self.to_script_name)
                 && is_ta_ext_superscript_tail(self.result.last_char()))
         {
             to_clear_context = true;
@@ -287,7 +288,7 @@ impl<'a> TransliterateCtx<'a> {
                                         let pieces =
                                             self.to_script_data.replace_with_pieces(replace_with);
                                         self.result
-                                            .rewrite_tail_pieces(prev_match.matched_len, pieces);
+                                            .rewrite_tail_pieces(prev_match.matched_len, &pieces);
                                     }
                                 }
                             }
@@ -315,7 +316,7 @@ impl<'a> TransliterateCtx<'a> {
                                     self.to_script_data.replace_with_pieces(replace_with);
                                 pieces.push(last_piece);
                                 self.result
-                                    .rewrite_tail_pieces(prev_match.matched_len + 1, pieces);
+                                    .rewrite_tail_pieces(prev_match.matched_len + 1, &pieces);
                             }
                         }
                     }
@@ -348,10 +349,11 @@ impl<'a> TransliterateCtx<'a> {
                         }
                         if let Some(text) = replace_text {
                             self.result
-                                .rewrite_tail_pieces(matched.matched_len, vec![text.clone()]);
+                                .rewrite_tail_pieces(matched.matched_len, &[text.clone()]);
                         } else {
                             let pieces = lookup_data.replace_with_pieces(replace_with);
-                            self.result.rewrite_tail_pieces(matched.matched_len, pieces);
+                            self.result
+                                .rewrite_tail_pieces(matched.matched_len, &pieces);
                         }
                         break;
                     }
@@ -1045,7 +1047,7 @@ pub fn transliterate_text_core(
                     if !result_concat_status {
                         // Tamil-Extended output reorder (matra/halant after superscript)
                         if let ScriptData::Brahmic { halant, .. } = to_script_data {
-                            if crate::is_script_tamil_ext!(to_script_name)
+                            if is_script_tamil_ext!(to_script_name)
                                 && is_ta_ext_superscript_tail(ctx.result.last_char())
                             {
                                 // heuristic: if last piece is matra or halant, reorder
@@ -1066,15 +1068,15 @@ pub fn transliterate_text_core(
                                 };
                                 let result_text = pieces.concat();
                                 if last_type == Some("mAtrA") || result_text == *halant {
-                                    ctx.result.emit_pieces_with_reorder(pieces, halant, true);
+                                    ctx.result.emit_pieces_with_reorder(&pieces, halant, true);
                                 } else {
-                                    ctx.result.emit_pieces(pieces);
+                                    ctx.result.emit_pieces(&pieces);
                                 }
                             } else {
-                                ctx.result.emit_pieces(pieces);
+                                ctx.result.emit_pieces(&pieces);
                             }
                         } else {
-                            ctx.result.emit_pieces(pieces);
+                            ctx.result.emit_pieces(&pieces);
                         }
                     }
 
@@ -1156,7 +1158,7 @@ pub fn transliterate_text_core(
         if !result_concat_status {
             let to_add_text = to_script_data.krama_text_or_empty(index).to_string();
             if let ScriptData::Brahmic { halant, .. } = to_script_data {
-                if crate::is_script_tamil_ext!(to_script_name)
+                if is_script_tamil_ext!(to_script_name)
                     && is_ta_ext_superscript_tail(ctx.result.last_char())
                 {
                     let list_type = to_script_data
@@ -1168,7 +1170,7 @@ pub fn transliterate_text_core(
                         .map(|l| TransliterateCtx::list_type_str(l));
                     if list_type == Some("mAtrA") || to_add_text == *halant {
                         ctx.result
-                            .emit_pieces_with_reorder(vec![to_add_text], halant, true);
+                            .emit_pieces_with_reorder(&[to_add_text], halant, true);
                     } else {
                         ctx.result.emit(to_add_text);
                     }

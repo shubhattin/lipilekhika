@@ -45,9 +45,9 @@ impl ResultStringBuilder {
         }
         self.result.push(text);
     }
-    pub fn emit_pieces(&mut self, pieces: Vec<String>) {
+    pub fn emit_pieces(&mut self, pieces: &[String]) {
         for p in pieces {
-            self.emit(p);
+            self.emit(p.to_owned());
         }
     }
     pub fn last_piece(&self) -> Option<String> {
@@ -80,21 +80,21 @@ impl ResultStringBuilder {
             None => None,
         }
     }
-    pub fn rewrite_tail_pieces(&mut self, count: usize, new_pieces: Vec<String>) {
+    pub fn rewrite_tail_pieces(&mut self, count: usize, new_pieces: &[String]) {
         let len = self.result.len();
         let start = len.saturating_sub(count); // -count but safe
         self.result.truncate(start);
         for p in new_pieces {
             if !p.is_empty() {
-                self.result.push(p);
+                self.result.push(p.to_owned());
             }
         }
     }
 
     pub fn with_last_char_moved_after(
         &mut self,
-        before_pieces: Vec<String>,
-        after_pieces: Vec<String>,
+        before_pieces: &[String],
+        after_pieces: &[String],
     ) {
         let ch = self.pop_last_char();
         match ch {
@@ -380,7 +380,7 @@ macro_rules! is_script_tamil_ext {
 impl ResultStringBuilder {
     pub fn emit_pieces_with_reorder(
         &mut self,
-        pieces: Vec<String>,
+        pieces: &[String],
         halant: &str,
         should_reorder: bool,
     ) {
@@ -400,11 +400,11 @@ impl ResultStringBuilder {
                 after_pieces.push(rest_first.to_string());
             }
             for p in pieces.into_iter().skip(1) {
-                after_pieces.push(p);
+                after_pieces.push(p.to_owned());
             }
-            self.with_last_char_moved_after(vec![halant.to_string()], after_pieces);
+            self.with_last_char_moved_after(&[halant.to_string()], &after_pieces);
         } else {
-            self.with_last_char_moved_after(pieces, vec![]);
+            self.with_last_char_moved_after(pieces, &[]);
         }
     }
 }

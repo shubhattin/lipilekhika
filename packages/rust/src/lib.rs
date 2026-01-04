@@ -5,7 +5,6 @@ pub mod transliterate;
 pub mod utils;
 use crate::script_data::get_normalized_script_name;
 use crate::transliterate::transliterate_text;
-use wasm_bindgen::prelude::*;
 
 /// Transliterates `text` from `from` to `to`.
 ///
@@ -39,22 +38,6 @@ pub fn transliterate(
     Ok(result.output)
 }
 
-#[wasm_bindgen]
-pub fn transliterate_wasm(
-    text: &str,
-    from: &str,
-    to: &str,
-    options_json: Option<String>,
-) -> Result<String, JsValue> {
-    // Parse options from JSON string (or `null`)
-    let options: Option<HashMap<String, bool>> = options_json
-        .as_deref()
-        .map(serde_json::from_str)
-        .transpose()
-        .map_err(|e| JsValue::from_str(&e.to_string()))?;
-
-    crate::transliterate(text, from, to, options.as_ref()).map_err(|e| JsValue::from_str(&e))
-}
 #[cfg(test)]
 mod tests {
     use super::*;
