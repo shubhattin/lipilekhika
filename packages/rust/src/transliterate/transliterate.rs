@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use crate::is_script_tamil_ext;
-use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
+use crate::script_data::{
+    ANYA_LIST_TYPE, CheckInEnum, CustomOptionScriptTypeEnum, List, MATRA_LIST_TYPE, Rule,
+    SVARA_LIST_TYPE, ScriptData, VYANJANA_LIST_TYPE,
+};
 use crate::transliterate::helpers::{
     InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
 };
@@ -29,42 +32,36 @@ struct TransliterateCtx<'a> {
     include_inherent_vowels: bool,
 }
 
-impl<'a> TransliterateCtx<'a> {
-    fn list_type_str(list: &List) -> &'static str {
-        match list {
-            List::Anya { .. } => "anya",
-            List::Vyanjana { .. } => "vyanjana",
-            List::Matra { .. } => "mAtrA",
-            List::Svara { .. } => "svara",
-        }
-    }
+type PrevContextItem = (Option<String>, Option<List>);
 
+impl<'a> TransliterateCtx<'a> {
     /// Returns `true` when the current write already handled concatenation/reordering.
     fn prev_context_cleanup(
         &mut self,
-        item: Option<(Option<String>, Option<List>)>,
+        item: Option<PrevContextItem>,
         next: Option<&[String]>,
-        last_extra_call: bool,
+        last_extra_call: Option<bool>,
     ) -> bool {
+        let last_extra_call = match last_extra_call {
+            None => false,
+            Some(v) => v,
+        };
         let mut result_str_concat_status = false;
 
         let brahmic_halant = self.brahmic_halant.as_deref();
         let brahmic_nuqta = self.brahmic_nuqta.as_deref();
 
-        let item_text = item.as_ref().and_then(|(t, _)| t.as_deref());
-        // let item_type = item.as_ref();
+        let item_text = item.as_ref().and_then(|(t, _)| t.as_deref()); // [0]
+        let item_type = item.as_ref().and_then(|(_, t)| t.as_ref()); // [1]
 
         // custom cleanup logic/cases
-        if (brahmic_nuqta.is_some()
-            && matches!(self.prev_context.type_at(-3), Some(List::Vyanjana { .. }))
+        if ((brahmic_nuqta.is_some()
+            && self.prev_context.type_at(-3) == Some(&VYANJANA_LIST_TYPE)
             && self.prev_context.text_at(-2) == brahmic_nuqta
-            && !matches!(self.prev_context.type_at(-1), Some(List::Matra { .. })))
-            || (matches!(self.prev_context.type_at(-2), Some(List::Vyanjana { .. }))
-                && !matches!(self.prev_context.type_at(-1), Some(List::Matra { .. })))
-                && (
-                    item.is_none()
-                    // || !matches!(item_type, Some(List::Anya { .. }))
-                )
+            && self.prev_context.type_at(-1) == Some(&MATRA_LIST_TYPE))
+            || (self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
+                && self.prev_context.type_at(-1) == Some(&MATRA_LIST_TYPE)))
+            && (item.is_none() || item_type == Some(&ANYA_LIST_TYPE))
         {
             self.prev_context.clear();
         }
@@ -73,52 +70,45 @@ impl<'a> TransliterateCtx<'a> {
             && matches!(self.to_script_data, ScriptData::Other { .. })
         {
             // custom logic when converting from brahmic to other
-            // if item_text != brahmic_halant
-            //     && (if crate::is_script_tamil_ext!(self.from_script_name) {
-            //         match (item_text, brahmic_halant) {
-            //             (Some(s), Some(h)) if !s.is_empty() => s.chars().next() != h.chars().next(),
-            //             _ => true,
-            //         }
-            //     } else {
-            //         true
-            //     })
-            //     && (brahmic_nuqta.is_none() || item_text != brahmic_nuqta)
-            //     && (matches!(self.prev_context.type_at(-1), Some(List::Vyanjana { .. }))
-            //         || (brahmic_nuqta.is_some()
-            //             && matches!(self.prev_context.type_at(-2), Some(List::Vyanjana { .. }))
-            //             && self.prev_context.text_at(-1) == brahmic_nuqta))
-            //     && ((item_type != Some("mAtrA") && item_text != brahmic_halant)
-            //         || item_type == Some("anya")
-            //         || item.is_none())
-            // {
-            //     if let ScriptData::Other {
-            //         schwa_character, ..
-            //     } = self.to_script_data
-            //     {
-            //         self.result.emit(schwa_character.clone());
-            //     }
-            // }
+            if item_text != brahmic_halant
+                && (if is_script_tamil_ext!(self.from_script_name) {
+                    match (item_text, brahmic_halant) {
+                        (Some(s), Some(h)) if !s.is_empty() => s.chars().next() != h.chars().next(), // here same as nth(0)
+                        _ => true,
+                    }
+                } else {
+                    true
+                })
+                && (brahmic_nuqta.is_none() || item_text != brahmic_nuqta)
+                && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
+                    || (brahmic_nuqta.is_some()
+                        && self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
+                        && self.prev_context.text_at(-1) == brahmic_nuqta))
+                && ((item_type != Some(&MATRA_LIST_TYPE) && item_text != brahmic_halant)
+                    || item_type == Some(&ANYA_LIST_TYPE)
+                    || item.is_none())
+            {
+                if let ScriptData::Other {
+                    schwa_character, ..
+                } = self.to_script_data
+                {
+                    self.result.emit(schwa_character.clone());
+                }
+            }
         } else if matches!(self.from_script_data, ScriptData::Other { .. })
             && matches!(self.to_script_data, ScriptData::Brahmic { .. })
         {
             // custom logic when converting from other to brahmic
-            if matches!(
-                self.prev_context.type_at(-1),
-                Some(List::Vyanjana { .. }) // && (item_type == Some("mAtrA") || item_type == Some("svara")
-            ) {
-                let linked_matra: String = match item.as_ref().and_then(|(_, l)| l.as_ref()) {
+            if self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
+                && (item_type == Some(&MATRA_LIST_TYPE) || item_type == Some(&SVARA_LIST_TYPE))
+            {
+                let linked_matra: String = match item_type {
                     Some(List::Svara {
                         matra_krama_ref, ..
-                    }) => {
-                        let idx = matra_krama_ref.first().unwrap_or(&-1);
-                        if *idx < 0 {
-                            "".to_string()
-                        } else {
-                            self.to_script_data
-                                .krama_text_or_empty(*idx as usize)
-                                .to_string()
-                        }
-                    }
+                    }) => self
+                        .to_script_data
+                        .krama_text_or_empty(*matra_krama_ref.first().unwrap_or(&-1) as usize)
+                        .to_string(),
                     _ => item_text.unwrap_or("").to_string(),
                 };
 
@@ -132,20 +122,21 @@ impl<'a> TransliterateCtx<'a> {
                     result_str_concat_status = true;
                 }
             } else if !self.include_inherent_vowels
-                && matches!(self.prev_context.type_at(-1), Some(List::Vyanjana { .. }))
-                && !(
-                    item_text == brahmic_halant
-                    // || matches!(item_type, Some(List::Matra { .. }
-                )
+                && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE))
+                && !(item_text == brahmic_halant || item_type == Some(&MATRA_LIST_TYPE))
             {
-                if let (Some(out_halant), ScriptData::Brahmic { halant, .. }) =
-                    (brahmic_halant, self.to_script_data)
+                if let (
+                    Some(brahmic_halant),
+                    ScriptData::Brahmic {
+                        halant: to_halant, ..
+                    },
+                ) = (brahmic_halant, self.to_script_data)
                 {
                     let should_reorder = is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
                     self.result.emit_pieces_with_reorder(
-                        &[out_halant.to_string()],
-                        halant,
+                        &[brahmic_halant.to_string()],
+                        to_halant,
                         should_reorder,
                     );
 
@@ -162,20 +153,25 @@ impl<'a> TransliterateCtx<'a> {
                     }
                 }
             } else if self.include_inherent_vowels
-                // && item_type == Some("vyanjana")
-                && (matches!(self.prev_context.type_at(-1), Some(List::Vyanjana { .. }))
+                && item.is_some()
+                && item_type == Some(&VYANJANA_LIST_TYPE)
+                && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
                     || (brahmic_nuqta.is_some()
-                        && matches!(self.prev_context.type_at(-2), Some(List::Vyanjana { .. }))
+                        && self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
                         && self.prev_context.text_at(-1) == brahmic_nuqta))
             {
-                if let (Some(out_halant), ScriptData::Brahmic { halant, .. }) =
-                    (brahmic_halant, self.to_script_data)
+                if let (
+                    Some(brahmic_halant),
+                    ScriptData::Brahmic {
+                        halant: to_halant, ..
+                    },
+                ) = (brahmic_halant, self.to_script_data)
                 {
                     let should_reorder = is_script_tamil_ext!(self.to_script_name)
                         && is_ta_ext_superscript_tail(self.result.last_char());
                     self.result.emit_pieces_with_reorder(
-                        &[out_halant.to_string()],
-                        halant,
+                        &[brahmic_halant.to_string()],
+                        to_halant,
                         should_reorder,
                     );
 
@@ -200,15 +196,15 @@ impl<'a> TransliterateCtx<'a> {
         if self.typing_mode
             && next.map(|n| n.is_empty()).unwrap_or(true)
             && !last_extra_call
-            // the case below is to enable typing of #an, #s (Vedic svara chihnas too)
+            // the case below is to enable typing of _, ' (Vedic svara chihnas too)
             && !(is_script_tamil_ext!(self.to_script_name)
                 && is_ta_ext_superscript_tail(self.result.last_char()))
         {
             to_clear_context = true;
             // do not clear the context only if case where the current added element is a vyanjana
-            // if item_type == Some("vyanjana") {
-            //     to_clear_context = false;
-            // }
+            if item_type == Some(&VYANJANA_LIST_TYPE) {
+                to_clear_context = false;
+            }
             if to_clear_context {
                 self.prev_context.clear();
             }
@@ -217,8 +213,8 @@ impl<'a> TransliterateCtx<'a> {
         // addition and shifting
         // in typing it should not be the last extra call
         if (!self.typing_mode) || (!last_extra_call && !to_clear_context) {
-            if let Some(it) = item {
-                self.prev_context.push(it);
+            if let Some(item) = item {
+                self.prev_context.push(item);
             }
         }
 
@@ -576,6 +572,15 @@ fn apply_custom_replace_rules(
 const DEFAULT_USE_NATIVE_NUMERALS_MODE: bool = true;
 const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE: bool = false;
 
+fn list_type_str(list: &List) -> &'static str {
+    match list {
+        List::Anya { .. } => "anya",
+        List::Vyanjana { .. } => "vyanjana",
+        List::Matra { .. } => "mAtrA",
+        List::Svara { .. } => "svara",
+    }
+}
+
 // struct CustomOptionsType {
 //     typing_mode: Option<bool>,
 //     use_native_numerals: Option<bool>,
@@ -736,7 +741,7 @@ pub fn transliterate_text_core(
         if CHARS_TO_SKIP.contains(&ch_char) {
             ctx.cursor.advance(1);
             if ctx.prev_context_in_use {
-                let _ = ctx.prev_context_cleanup(Some((Some(" ".to_string()), None)), None, false);
+                let _ = ctx.prev_context_cleanup(Some((Some(" ".to_string()), None)), None, None);
                 ctx.prev_context.clear();
             }
             ctx.result.emit(ch);
@@ -747,7 +752,7 @@ pub fn transliterate_text_core(
         if is_single_ascii_digit(&ch) && !opts.use_native_numerals {
             ctx.result.emit(ch.clone());
             ctx.cursor.advance(1);
-            let _ = ctx.prev_context_cleanup(Some((Some(ch), None)), None, false);
+            let _ = ctx.prev_context_cleanup(Some((Some(ch), None)), None, None);
             continue;
         }
 
@@ -768,7 +773,7 @@ pub fn transliterate_text_core(
                 let _ = ctx.prev_context_cleanup(
                     Some((Some(custom_text.clone()), list_item)),
                     None,
-                    false,
+                    None,
                 );
 
                 let normal_text = back_ref_opt
@@ -845,7 +850,7 @@ pub fn transliterate_text_core(
                                     .and_then(|li| {
                                         to_script_data.get_common_attr().list.get(li as usize)
                                     })
-                                    .map(|l| TransliterateCtx::list_type_str(l));
+                                    .map(|l| list_type_str(l));
                                 let is_single_vowel = krama.len() == 1
                                     && list_type.is_some_and(|t| t == "svara" || t == "mAtrA");
                                 if is_single_vowel {
@@ -903,7 +908,7 @@ pub fn transliterate_text_core(
                             let _ = ctx.prev_context_cleanup(
                                 Some((Some(matched_text.clone()), list_item)),
                                 map.next.as_deref(),
-                                false,
+                                None,
                             );
                             continue;
                         }
@@ -965,7 +970,7 @@ pub fn transliterate_text_core(
                             result_concat_status = ctx.prev_context_cleanup(
                                 Some((Some(matched_text.clone()), item)),
                                 None,
-                                false,
+                                None,
                             );
                         } else if matches!(to_script_data, ScriptData::Brahmic { .. })
                             && matches!(from_script_data, ScriptData::Other { .. })
@@ -1001,7 +1006,7 @@ pub fn transliterate_text_core(
                             result_concat_status = ctx.prev_context_cleanup(
                                 Some((Some(matched_text.clone()), item)),
                                 next_list,
-                                false,
+                                None,
                             );
                         } else if opts.typing_mode
                             && from_script_name == "Normal"
@@ -1010,7 +1015,7 @@ pub fn transliterate_text_core(
                             result_concat_status = ctx.prev_context_cleanup(
                                 Some((Some(matched_text.clone()), None)),
                                 map.next.as_deref(),
-                                false,
+                                None,
                             );
                         }
                     }
@@ -1033,7 +1038,7 @@ pub fn transliterate_text_core(
                                         .and_then(|li| {
                                             to_script_data.get_common_attr().list.get(li as usize)
                                         })
-                                        .map(|l| TransliterateCtx::list_type_str(l))
+                                        .map(|l| list_type_str(l))
                                 } else {
                                     None
                                 };
@@ -1064,7 +1069,7 @@ pub fn transliterate_text_core(
                     let _ = ctx.prev_context_cleanup(
                         Some((Some(matched_text.clone()), None)),
                         map.next.as_deref(),
-                        false,
+                        None,
                     );
                     continue;
                 }
@@ -1082,7 +1087,7 @@ pub fn transliterate_text_core(
                 let _ = ctx.prev_context_cleanup(
                     Some((Some(char_to_search.clone()), None)),
                     None,
-                    false,
+                    None,
                 );
                 ctx.prev_context.clear();
             }
@@ -1123,7 +1128,7 @@ pub fn transliterate_text_core(
                 }
             };
             result_concat_status =
-                ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, false);
+                ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
         }
 
         if !result_concat_status {
@@ -1138,7 +1143,7 @@ pub fn transliterate_text_core(
                         .get(index)
                         .and_then(|(_, li)| *li)
                         .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
-                        .map(|l| TransliterateCtx::list_type_str(l));
+                        .map(|l| list_type_str(l));
                     if list_type == Some("mAtrA") || to_add_text == *halant {
                         ctx.result
                             .emit_pieces_with_reorder(&[to_add_text], halant, true);
@@ -1157,7 +1162,7 @@ pub fn transliterate_text_core(
     }
 
     if ctx.prev_context_in_use {
-        let _ = ctx.prev_context_cleanup(None, None, true);
+        let _ = ctx.prev_context_cleanup(None, None, Some(true));
     }
 
     let mut output = ctx.result.to_string();

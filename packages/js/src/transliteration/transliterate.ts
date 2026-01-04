@@ -175,7 +175,7 @@ function prev_context_cleanup(
     typing_mode &&
     (next === undefined || next.length === 0) &&
     !last_extra_call &&
-    // the case below is to enable typing of #an, #s (Vedic svara chihnas too)
+    // the case below is to enable typing of _, ' (Vedic svara chihnas too)
     !(isScriptTamilExt(to_script_name) && isTaExtSuperscriptTail(result.lastChar()))
   ) {
     to_clear_context = true;
