@@ -263,6 +263,7 @@ function get_out_script_data(
           resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
         )
       );
+      // @ts-ignore
       res.list.push({
         // @ts-ignore
         ...(IS_DEV_MODE ? { text: item.text } : {}),

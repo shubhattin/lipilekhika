@@ -12,7 +12,7 @@ export const CustomOptionsSchema = z.record(
     from_script_type: ScriptTypeEnum.optional(),
     to_script_name: z.enum(SCRIPT_LIST).array().optional(),
     to_script_type: ScriptTypeEnum.optional(),
-    check_in: CheckInEnum.optional(),
+    check_in: CheckInEnum,
     rules: z
       .discriminatedUnion('type', [
         z.strictObject({

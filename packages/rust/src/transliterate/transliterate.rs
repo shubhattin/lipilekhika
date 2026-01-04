@@ -123,10 +123,7 @@ impl<'a> TransliterateCtx<'a> {
                     Some(List::Svara {
                         matra_krama_ref, ..
                     }) => {
-                        let idx = matra_krama_ref
-                            .as_ref()
-                            .and_then(|v| v.first().copied())
-                            .unwrap_or(-1);
+                        let idx = matra_krama_ref.first().copied().unwrap_or(-1);
                         if idx < 0 {
                             "".to_string()
                         } else {

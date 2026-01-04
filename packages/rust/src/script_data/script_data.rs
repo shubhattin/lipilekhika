@@ -50,7 +50,7 @@ pub enum List {
     Svara {
         krama_ref: Vec<i16>,
         #[serde(rename = "mAtrA_krama_ref")]
-        matra_krama_ref: Option<Vec<i16>>,
+        matra_krama_ref: Vec<i16>,
     },
 }
 
@@ -78,12 +78,12 @@ impl List {
             | List::Svara { krama_ref, .. } => krama_ref,
         }
     }
-    pub fn get_matra_krama_ref(&self) -> &Option<Vec<i16>> {
+    pub fn get_matra_krama_ref(&self) -> Option<Vec<i16>> {
         match self {
             List::Svara {
                 matra_krama_ref, ..
-            } => matra_krama_ref,
-            _ => &None,
+            } => Some(matra_krama_ref.to_owned()),
+            _ => None,
         }
     }
 }

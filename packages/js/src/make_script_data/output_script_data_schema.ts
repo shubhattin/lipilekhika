@@ -84,7 +84,7 @@ export type OutputBrahmicScriptData = Pick<
           }
         | {
             type: 'svara';
-            mAtrA_krama_ref?: number[] | null;
+            mAtrA_krama_ref: number[];
             // ^ needed in other -> brahmic conversion
           }
       ))[];

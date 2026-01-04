@@ -67,7 +67,9 @@ const brahmicScriptDataSchema = commonScriptDataSchema
         z.strictObject({
           type: z.literal('svara'),
           krama_ref: z.int().array(),
-          mAtrA_krama_ref: z.int().array().nullable().optional()
+          // if there is krama_ref for svara in brahmic type then there also will
+          // be mAtrA ref
+          mAtrA_krama_ref: z.int().array()
         })
       ])
       .array()
