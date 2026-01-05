@@ -80,14 +80,14 @@ impl List {
       | List::Svara { krama_ref, .. } => krama_ref,
     }
   }
-  pub fn get_matra_krama_ref(&self) -> Option<Vec<i16>> {
-    match self {
-      List::Svara {
-        matra_krama_ref, ..
-      } => Some(matra_krama_ref.to_owned()),
-      _ => None,
-    }
-  }
+  // pub fn get_matra_krama_ref(&self) -> Option<Vec<i16>> {
+  //   match self {
+  //     List::Svara {
+  //       matra_krama_ref, ..
+  //     } => Some(matra_krama_ref.to_owned()),
+  //     _ => None,
+  //   }
+  // }
 }
 
 #[derive(Debug, Deserialize)]

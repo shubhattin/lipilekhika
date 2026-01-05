@@ -5,15 +5,22 @@ use crate::utils::strings::char_substring;
 // pub fn krama_index_of_text()
 
 impl ScriptData {
-  pub fn krama_text_or_null(&self, idx: usize) -> Option<&str> {
-    match &self.get_common_attr().krama_text_arr.get(idx) {
+  #[allow(dead_code)]
+  pub fn krama_text_or_null(&self, idx: i16) -> Option<&str> {
+    if idx < 0 {
+      return None;
+    }
+    match &self.get_common_attr().krama_text_arr.get(idx as usize) {
       Some(item) => Some(&item.0),
       None => None,
     }
   }
 
-  pub fn krama_text_or_empty(&self, idx: usize) -> &str {
-    match &self.get_common_attr().krama_text_arr.get(idx) {
+  pub fn krama_text_or_empty(&self, idx: i16) -> &str {
+    if idx < 0 {
+      return &"";
+    }
+    match &self.get_common_attr().krama_text_arr.get(idx as usize) {
       Some(item) => &item.0,
       None => &"",
     }
@@ -344,7 +351,7 @@ impl ScriptData {
   pub fn replace_with_pieces(&self, replace_with: &[i16]) -> Vec<String> {
     replace_with
       .iter()
-      .map(|&k| self.krama_text_or_empty(k as usize))
+      .map(|&k| self.krama_text_or_empty(k))
       .filter(|s| !s.is_empty())
       .map(|s| s.to_string())
       .collect()
