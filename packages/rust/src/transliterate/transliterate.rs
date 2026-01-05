@@ -69,30 +69,37 @@ impl<'a> TransliterateCtx<'a> {
     if matches!(self.from_script_data, ScriptData::Brahmic { .. })
       && matches!(self.to_script_data, ScriptData::Other { .. })
     {
-      // custom logic when converting from brahmic to other
-      if item_text != brahmic_halant
-        && (if is_script_tamil_ext!(self.from_script_name) {
-          match (item_text, brahmic_halant) {
-            (Some(s), Some(h)) if !s.is_empty() => s.chars().next() != h.chars().next(), // here same as nth(0)
-            _ => true,
-          }
-        } else {
-          true
-        })
-        && (brahmic_nuqta.is_none() || item_text != brahmic_nuqta)
+      let ta_ext_case = if is_script_tamil_ext!(self.from_script_name) {
+        item_text.and_then(|k| k.chars().nth(0))
+          != self
+            .brahmic_halant
+            .as_deref()
+            .and_then(|k| k.chars().next())
+      } else {
+        true
+      };
+      // vyanjana + nuqta
+      let vyanjana_case = (self.brahmic_nuqta.is_none()
+        || item_text != self.brahmic_nuqta.as_deref())
         && (self
           .prev_context
           .type_at(-1)
           .is_some_and(|k| k.is_vyanjana())
-          || (brahmic_nuqta.is_some()
+          || (self.brahmic_halant.is_some()
             && self
               .prev_context
               .type_at(-2)
               .is_some_and(|k| k.is_vyanjana())
-            && self.prev_context.text_at(-1) == brahmic_nuqta))
-        && ((item_type.is_some_and(|k| k.is_matra()) && item_text != brahmic_halant)
-          || item_type.is_some_and(|k| k.is_anya())
-          || item.is_none())
+            && self.prev_context.text_at(-1) == brahmic_nuqta.as_deref()));
+      let to_anya_or_null = (!item_type.is_some_and(|k| k.is_matra())
+        && item_text != brahmic_halant.as_deref())
+        || item_type.is_some_and(|k| k.is_anya())
+        || item_type.is_none();
+      // custom logic when converting from brahmic to other
+      if item_text != self.brahmic_halant.as_deref()
+        && ta_ext_case
+        && vyanjana_case
+        && to_anya_or_null
       {
         if let ScriptData::Other {
           schwa_character, ..
