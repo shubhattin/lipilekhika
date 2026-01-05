@@ -104,7 +104,6 @@ impl<'a> TransliterateCtx<'a> {
     } else if matches!(self.from_script_data, ScriptData::Other { .. })
       && matches!(self.to_script_data, ScriptData::Brahmic { .. })
     {
-      // println!("2. {:?}", self.prev_context.type_at(-1));
       // custom logic when converting from other to brahmic
       if self
         .prev_context
@@ -794,7 +793,7 @@ pub fn transliterate_text_core(
             && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta.as_deref()));
 
       loop {
-        let next = ctx.cursor.peek_at(text_index + scan_units);
+        let next = ctx.cursor.peek_at(text_index + scan_units + 1);
         let next_char = next
           .as_ref()
           .map(|c| c.ch.clone())
@@ -807,7 +806,7 @@ pub fn transliterate_text_core(
           scan_units += next.as_ref().map(|c| c.ch.chars().count()).unwrap_or(0);
         }
 
-        let end_index = text_index + scan_units;
+        let end_index = text_index + scan_units + 1;
         let char_to_search = if ignore_ta_ext_sup_num_text_index != -1 {
           let a = ctx
             .cursor
