@@ -206,15 +206,15 @@ impl PrevContextBuilder {
       Some(idx) => self.arr.get(idx),
     }
   }
-
+  #[allow(dead_code)]
   pub fn last(&self) -> Option<&PrevContextItem> {
     self.arr.last()
   }
-
+  #[allow(dead_code)]
   pub fn last_text(&self) -> Option<&str> {
     self.last().and_then(|(text_opt, _)| text_opt.as_deref())
   }
-
+  #[allow(dead_code)]
   pub fn last_type(&self) -> Option<&List> {
     self.last().and_then(|(_, list_opt)| list_opt.as_ref())
   }
@@ -229,6 +229,7 @@ impl PrevContextBuilder {
   }
 
   /// Check if the last context item has the given type.
+  #[allow(dead_code)]
   pub fn is_last_type(&self, t: &List) -> bool {
     self.last_type() == Some(t)
   }
@@ -278,6 +279,7 @@ impl<'a> InputTextCursor<'a> {
     self.peek_at(self.pos)
   }
 
+  #[allow(dead_code)]
   pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<InputCursor> {
     self.peek_at(self.pos + offset_units)
   }

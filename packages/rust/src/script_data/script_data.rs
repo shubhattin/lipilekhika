@@ -56,21 +56,6 @@ pub enum List {
   },
 }
 
-// for checking equiality more convenitently rather than using matches!
-pub const MATRA_LIST_TYPE: List = List::Matra {
-  krama_ref: Vec::new(),
-};
-pub const ANYA_LIST_TYPE: List = List::Anya {
-  krama_ref: Vec::new(),
-};
-pub const VYANJANA_LIST_TYPE: List = List::Vyanjana {
-  krama_ref: Vec::new(),
-};
-pub const SVARA_LIST_TYPE: List = List::Svara {
-  krama_ref: Vec::new(),
-  matra_krama_ref: Vec::new(),
-};
-
 impl List {
   pub fn get_krama_ref(&self) -> &Vec<i16> {
     match self {
@@ -79,6 +64,18 @@ impl List {
       | List::Matra { krama_ref }
       | List::Svara { krama_ref, .. } => krama_ref,
     }
+  }
+  pub fn is_svara(&self) -> bool {
+    matches!(self, List::Svara { .. })
+  }
+  pub fn is_matra(&self) -> bool {
+    matches!(self, List::Matra { .. })
+  }
+  pub fn is_vyanjana(&self) -> bool {
+    matches!(self, List::Vyanjana { .. })
+  }
+  pub fn is_anya(&self) -> bool {
+    matches!(self, List::Anya { .. })
   }
   // pub fn get_matra_krama_ref(&self) -> Option<Vec<i16>> {
   //   match self {

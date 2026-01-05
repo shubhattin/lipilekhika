@@ -1,11 +1,11 @@
 use lipilekhika::transliterate;
 
 fn main() {
-  let _out = transliterate("libhi", "Normal", "Devanagari", None).expect("Erro in transliration");
-  let s = String::from("क्लेRust"); // Unicode!
+  let _out = transliterate("ke", "Normal", "Devanagari", None).expect("Erro in transliration");
   _write(&_out).unwrap();
 
-  println!("{}", s);
+  // let s = String::from("क्लेRust"); // Unicode!
+  // println!("{}", s);
 }
 
 fn _write(content: &str) -> std::io::Result<()> {

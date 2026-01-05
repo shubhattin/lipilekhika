@@ -1,10 +1,7 @@
 use std::collections::HashMap;
 
 use crate::is_script_tamil_ext;
-use crate::script_data::{
-  ANYA_LIST_TYPE, CheckInEnum, CustomOptionScriptTypeEnum, List, MATRA_LIST_TYPE, Rule,
-  SVARA_LIST_TYPE, ScriptData, VYANJANA_LIST_TYPE,
-};
+use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::transliterate::helpers::{
   self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
   is_vedic_svara_tail,
@@ -18,7 +15,7 @@ struct TransliterateCtx<'a> {
   from_script_data: &'a ScriptData,
   to_script_data: &'a ScriptData,
   trans_options: &'a HashMap<String, bool>,
-  custom_rules: &'a Vec<Rule>,
+  custom_rules: &'a [Rule],
   cursor: &'a mut InputTextCursor<'a>,
   result: &'a mut ResultStringBuilder,
   prev_context: &'a mut PrevContextBuilder,
@@ -53,12 +50,18 @@ impl<'a> TransliterateCtx<'a> {
 
     // custom cleanup logic/cases
     if ((brahmic_nuqta.is_some()
-      && self.prev_context.type_at(-3) == Some(&VYANJANA_LIST_TYPE)
+      && self
+        .prev_context
+        .type_at(-3)
+        .is_some_and(|k| k.is_vyanjana())
       && self.prev_context.text_at(-2) == brahmic_nuqta
-      && self.prev_context.type_at(-1) == Some(&MATRA_LIST_TYPE))
-      || (self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
-        && self.prev_context.type_at(-1) == Some(&MATRA_LIST_TYPE)))
-      && (item.is_none() || item_type == Some(&ANYA_LIST_TYPE))
+      && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra()))
+      || (self
+        .prev_context
+        .type_at(-2)
+        .is_some_and(|k| k.is_vyanjana())
+        && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra())))
+      && (item.is_none() || item_type.is_some_and(|k| k.is_anya()))
     {
       self.prev_context.clear();
     }
@@ -77,12 +80,18 @@ impl<'a> TransliterateCtx<'a> {
           true
         })
         && (brahmic_nuqta.is_none() || item_text != brahmic_nuqta)
-        && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
+        && (self
+          .prev_context
+          .type_at(-1)
+          .is_some_and(|k| k.is_vyanjana())
           || (brahmic_nuqta.is_some()
-            && self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
+            && self
+              .prev_context
+              .type_at(-2)
+              .is_some_and(|k| k.is_vyanjana())
             && self.prev_context.text_at(-1) == brahmic_nuqta))
-        && ((item_type != Some(&MATRA_LIST_TYPE) && item_text != brahmic_halant)
-          || item_type == Some(&ANYA_LIST_TYPE)
+        && ((item_type.is_some_and(|k| k.is_matra()) && item_text != brahmic_halant)
+          || item_type.is_some_and(|k| k.is_anya())
           || item.is_none())
       {
         if let ScriptData::Other {
@@ -95,9 +104,13 @@ impl<'a> TransliterateCtx<'a> {
     } else if matches!(self.from_script_data, ScriptData::Other { .. })
       && matches!(self.to_script_data, ScriptData::Brahmic { .. })
     {
+      // println!("2. {:?}", self.prev_context.type_at(-1));
       // custom logic when converting from other to brahmic
-      if self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
-        && (item_type == Some(&MATRA_LIST_TYPE) || item_type == Some(&SVARA_LIST_TYPE))
+      if self
+        .prev_context
+        .type_at(-1)
+        .is_some_and(|k| k.is_vyanjana())
+        && (item_type.is_some_and(|k| k.is_matra()) || item_type.is_some_and(|k| k.is_svara()))
       {
         let linked_matra: String = match item_type {
           Some(List::Svara {
@@ -119,8 +132,11 @@ impl<'a> TransliterateCtx<'a> {
           result_str_concat_status = true;
         }
       } else if !self.include_inherent_vowels
-        && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE))
-        && !(item_text == brahmic_halant || item_type == Some(&MATRA_LIST_TYPE))
+        && (self
+          .prev_context
+          .type_at(-1)
+          .is_some_and(|k| k.is_vyanjana()))
+        && !(item_text == brahmic_halant || item_type.is_some_and(|k| k.is_matra()))
       {
         if let (
           Some(brahmic_halant),
@@ -152,10 +168,16 @@ impl<'a> TransliterateCtx<'a> {
         }
       } else if self.include_inherent_vowels
         && item.is_some()
-        && item_type == Some(&VYANJANA_LIST_TYPE)
-        && (self.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
+        && item_type.is_some_and(|k| k.is_vyanjana())
+        && (self
+          .prev_context
+          .type_at(-1)
+          .is_some_and(|k| k.is_vyanjana())
           || (brahmic_nuqta.is_some()
-            && self.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
+            && self
+              .prev_context
+              .type_at(-2)
+              .is_some_and(|k| k.is_vyanjana())
             && self.prev_context.text_at(-1) == brahmic_nuqta))
       {
         if let (
@@ -201,7 +223,7 @@ impl<'a> TransliterateCtx<'a> {
     {
       to_clear_context = true;
       // do not clear the context only if case where the current added element is a vyanjana
-      if item_type == Some(&VYANJANA_LIST_TYPE) {
+      if item_type.is_some_and(|k| k.is_vyanjana()) {
         to_clear_context = false;
       }
       if to_clear_context {
@@ -670,7 +692,7 @@ pub fn transliterate_text_core(
     from_script_data,
     to_script_data,
     trans_options: &trans_options,
-    custom_rules: &custom_rules.to_vec(),
+    custom_rules,
     cursor: &mut cursor,
     result: &mut result,
     prev_context: &mut prev_context,
@@ -689,6 +711,7 @@ pub fn transliterate_text_core(
       None => break,
     };
     let ch = cur.ch;
+    // println!("{} - {:?}", ctx.cursor.pos(), ch);
 
     if ignore_ta_ext_sup_num_text_index != -1
       && (text_index as isize) >= ignore_ta_ext_sup_num_text_index
@@ -759,9 +782,15 @@ pub fn transliterate_text_core(
       let check_vowel_retraction = ctx.prev_context_in_use
         && matches!(from_script_data, ScriptData::Other { .. })
         && matches!(to_script_data, ScriptData::Brahmic { .. })
-        && (ctx.prev_context.type_at(-1) == Some(&VYANJANA_LIST_TYPE)
+        && (ctx
+          .prev_context
+          .type_at(-1)
+          .is_some_and(|k| k.is_vyanjana())
           || (ctx.brahmic_nuqta.is_some()
-            && ctx.prev_context.type_at(-2) == Some(&VYANJANA_LIST_TYPE)
+            && ctx
+              .prev_context
+              .type_at(-2)
+              .is_some_and(|k| k.is_vyanjana())
             && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta.as_deref()));
 
       loop {
@@ -826,8 +855,8 @@ pub fn transliterate_text_core(
                   .and_then(|(_, li)| *li);
                 let list_type =
                   list_idx.and_then(|li| to_script_data.get_common_attr().list.get(li as usize));
-                let is_single_vowel = krama.len() == 1
-                  && list_type.is_some_and(|t| t == &SVARA_LIST_TYPE || t == &MATRA_LIST_TYPE);
+                let is_single_vowel =
+                  krama.len() == 1 && list_type.is_some_and(|t| t.is_svara() || t.is_matra());
                 if is_single_vowel {
                   last_valid_vowel_match_index = Some(potential_match_index);
                 } else if last_valid_vowel_match_index.is_some() {
@@ -900,7 +929,7 @@ pub fn transliterate_text_core(
 
                   if let ScriptData::Brahmic { halant, .. } = from_script_data {
                     if nth_next_character.as_deref() == Some(halant)
-                      || nth_char_type == Some(&MATRA_LIST_TYPE)
+                      || nth_char_type.is_some_and(|k| k.is_matra())
                     {
                       ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
                       break;
@@ -949,8 +978,8 @@ pub fn transliterate_text_core(
                     .and_then(|(_, li)| *li)
                     .and_then(|li| from_script_data.get_common_attr().list.get(li as usize));
 
-                  if nth_char_type == Some(&SVARA_LIST_TYPE)
-                    && n_1_th_char_type == Some(&MATRA_LIST_TYPE)
+                  if nth_char_type.is_some_and(|k| k.is_svara())
+                    && n_1_th_char_type.is_some_and(|k| k.is_matra())
                   {
                     ignore_ta_ext_sup_num_text_index = (end_index + 1 + 1) as isize;
                     break;
@@ -984,7 +1013,7 @@ pub fn transliterate_text_core(
                     .and_then(|li| from_script_data.get_common_attr().list.get(li as usize));
 
                   // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
-                  if nth_char_type == Some(&MATRA_LIST_TYPE) {
+                  if nth_char_type.is_some_and(|k| k.is_matra()) {
                     let sup = n_2_th_next_character.clone().unwrap_or_default();
                     let char_index = binary_search_lower(
                       canonical_map,
@@ -1029,7 +1058,7 @@ pub fn transliterate_text_core(
               _ => -1,
             } as usize)
           {
-            Some(v) => v == &VYANJANA_LIST_TYPE,
+            Some(v) => v.is_vyanjana(),
             _ => false,
           }
         }
@@ -1131,8 +1160,12 @@ pub fn transliterate_text_core(
                   })
                   .collect::<Vec<Option<List>>>();
                   if is_script_tamil_ext!(from_script_name)
-                    && list_refs.iter().any(|k| *k == Some(MATRA_LIST_TYPE))
-                    && list_refs.iter().any(|k| *k == Some(VYANJANA_LIST_TYPE))
+                    && list_refs
+                      .iter()
+                      .any(|k| k.as_ref().is_some_and(|k| k.is_matra()))
+                    && list_refs
+                      .iter()
+                      .any(|k| k.as_ref().is_some_and(|k| k.is_vyanjana()))
                   {
                     if let Some(first) = list_refs.get(0) {
                       item = Some(List::Anya {
@@ -1235,10 +1268,11 @@ pub fn transliterate_text_core(
                 if pieces.concat() == *to_halant
                   || match &map.krama {
                     Some(krama) => match krama.last() {
-                      Some(last_i) => {
-                        to_script_data.get_common_attr().list.get(*last_i as usize)
-                          == Some(&MATRA_LIST_TYPE)
-                      }
+                      Some(last_i) => to_script_data
+                        .get_common_attr()
+                        .list
+                        .get(*last_i as usize)
+                        .is_some_and(|k| k.is_matra()),
                       None => false,
                     },
                     None => false,
@@ -1345,9 +1379,11 @@ pub fn transliterate_text_core(
           if pieces.concat() == *to_halant
             || match to_script_data.get_common_attr().krama_text_arr.get(index) {
               Some(krama) => match krama.1 {
-                Some(i) => {
-                  to_script_data.get_common_attr().list.get(i as usize) == Some(&MATRA_LIST_TYPE)
-                }
+                Some(i) => to_script_data
+                  .get_common_attr()
+                  .list
+                  .get(i as usize)
+                  .is_some_and(|k| k.is_matra()),
                 None => false,
               },
               None => false,
