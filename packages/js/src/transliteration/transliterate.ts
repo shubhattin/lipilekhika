@@ -831,7 +831,7 @@ export const transliterate_text_core = (
             else {
               const list_refs = text_to_krama_item[1].krama.map(
                 (krama_index) =>
-                  from_script_data.list[from_script_data.krama_text_arr[krama_index][1] ?? -1]
+                  from_script_data.list[from_script_data.krama_text_arr[krama_index]?.[1] ?? -1]
               );
               // if mixture of vyanjana and mAtrA then return the first item as anya type
               if (
@@ -890,9 +890,9 @@ export const transliterate_text_core = (
           if (
             to_script_data.script_type === 'brahmic' &&
             isScriptTamilExt(to_script_name) &&
+            isTaExtSuperscriptTail(result.lastChar()) &&
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
-              result_text === to_script_data.halant) &&
-            isTaExtSuperscriptTail(result.lastChar())
+              result_text === to_script_data.halant)
           ) {
             emitPiecesWithReorder(
               result,
@@ -902,8 +902,8 @@ export const transliterate_text_core = (
             );
           } else if (
             isScriptTamilExt(to_script_name) &&
-            isVedicSvaraTail(normalized_result_pieces_to_add.at(-1)?.at(-1) ?? '') &&
-            isTaExtSuperscriptTail(result.lastChar())
+            isTaExtSuperscriptTail(result.lastChar()) &&
+            isVedicSvaraTail(normalized_result_pieces_to_add.at(-1)?.at(-1) ?? '')
           ) {
             const last = result.popLastChar();
             result.emitPieces(normalized_result_pieces_to_add);

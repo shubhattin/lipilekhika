@@ -698,7 +698,7 @@ pub fn transliterate_text_core(
 
   let chars_len = &text.chars().count();
   while ctx.cursor.pos() < *chars_len {
-    let text_index = ctx.cursor.pos();
+    let mut text_index = ctx.cursor.pos();
     let cur = match ctx.cursor.peek() {
       Some(v) => v,
       None => break,
@@ -1041,9 +1041,9 @@ pub fn transliterate_text_core(
         break;
       }
     }
-
-    if let Some(map_idx) = text_to_krama_item_index {
-      let (matched_text, map) = &from_text_to_krama_map[map_idx];
+    let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
+    if let Some(text_to_krama_item) = text_to_krama_item {
+      let (matched_text, map) = text_to_krama_item;
       let is_type_vyanjana = match &map.krama {
         Some(krama) => {
           match from_script_data
@@ -1085,7 +1085,7 @@ pub fn transliterate_text_core(
                 .1
                 .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
                 .cloned();
-              let _ = ctx.prev_context_cleanup(
+              ctx.prev_context_cleanup(
                 Some((Some(matched_text.clone()), list_item)),
                 map.next.as_deref(),
                 None,
@@ -1119,60 +1119,120 @@ pub fn transliterate_text_core(
               && matches!(to_script_data, ScriptData::Other { .. })
             {
               // pick a brahmic list item (from-script) if available
-              let item = map
-                .fallback_list_ref
-                .and_then(|i| {
-                  if !trans_opt(&trans_options, "normal_to_all:use_typing_chars") {
-                    from_script_data
-                      .get_common_attr()
-                      .list
-                      .get(i as usize)
-                      .cloned()
-                  } else {
-                    None
-                  }
-                })
-                .or_else(|| {
-                  let first_krama = krama.iter().find(|&&k| k >= 0).copied()?;
-                  let list_idx = from_script_data
-                    .get_common_attr()
-                    .krama_text_arr
-                    .get(first_krama as usize)
-                    .and_then(|(_, li)| *li)?;
+              let mut item = map.fallback_list_ref.and_then(|i| {
+                if !trans_opt(&trans_options, "normal_to_all:use_typing_chars") {
                   from_script_data
                     .get_common_attr()
                     .list
-                    .get(list_idx as usize)
+                    .get(i as usize)
                     .cloned()
-                });
+                } else {
+                  None
+                }
+              });
+              if item.is_none()
+                && match &map.krama {
+                  None => true,
+                  Some(krama) => krama.is_empty(),
+                }
+              {
+                item = None;
+              } else if item.is_none() {
+                if let Some(krama) = &map.krama {
+                  let list_refs = (krama
+                    .iter()
+                    .map(|x| {
+                      from_script_data
+                        .get_common_attr()
+                        .krama_text_arr
+                        .get(*x as usize)
+                        .and_then(|k| k.1)
+                        .unwrap_or(-1)
+                    })
+                    .collect::<Vec<i16>>())
+                  .iter()
+                  .map(|list_ref| {
+                    from_script_data
+                      .get_common_attr()
+                      .list
+                      .get(*list_ref as usize)
+                      .clone()
+                      .map(|k| k.clone())
+                  })
+                  .collect::<Vec<Option<List>>>();
+                  if is_script_tamil_ext!(from_script_name)
+                    && list_refs.iter().any(|k| *k == Some(MATRA_LIST_TYPE))
+                    && list_refs.iter().any(|k| *k == Some(VYANJANA_LIST_TYPE))
+                  {
+                    if let Some(first) = list_refs.get(0) {
+                      item = Some(List::Anya {
+                        krama_ref: first
+                          .clone()
+                          .map(|x| x.get_krama_ref().clone())
+                          .unwrap_or(Vec::new()),
+                      });
+                    }
+                  } else if is_script_tamil_ext!(from_script_name)
+                    && list_refs.len() > 1
+                    && list_refs.iter().any(|k| k.is_none())
+                  {
+                    if let Some(last) = list_refs.last() {
+                      match last {
+                        None => {
+                          item = None;
+                        }
+                        Some(v) => {
+                          item = Some(v.clone());
+                        }
+                      }
+                    }
+                  } else {
+                    // first
+                    if let Some(first) = list_refs.first() {
+                      match first {
+                        None => {
+                          item = None;
+                        }
+                        Some(v) => {
+                          item = Some(v.clone());
+                        }
+                      }
+                    }
+                  }
+                }
+              }
 
               result_concat_status =
                 ctx.prev_context_cleanup(Some((Some(matched_text.clone()), item)), None, None);
             } else if matches!(to_script_data, ScriptData::Brahmic { .. })
               && matches!(from_script_data, ScriptData::Other { .. })
             {
-              let item = map
-                .fallback_list_ref
-                .and_then(|i| {
-                  to_script_data
-                    .get_common_attr()
-                    .list
-                    .get(i as usize)
-                    .cloned()
-                })
-                .or_else(|| {
-                  let first_krama = krama.iter().find(|&&k| k >= 0).copied()?;
-                  let list_idx = to_script_data
-                    .get_common_attr()
-                    .krama_text_arr
-                    .get(first_krama as usize)
-                    .and_then(|(_, li)| *li)?;
-                  to_script_data
-                    .get_common_attr()
-                    .list
-                    .get(list_idx as usize)
-                    .cloned()
-                });
+              let item: Option<List>;
+              if let Some(f) = map.fallback_list_ref {
+                item = to_script_data
+                  .get_common_attr()
+                  .list
+                  .get(f as usize)
+                  .cloned();
+              } else {
+                item = if krama.is_empty() {
+                  None
+                } else {
+                  krama
+                    .first()
+                    .and_then(|k| {
+                      to_script_data
+                        .get_common_attr()
+                        .krama_text_arr
+                        .get(*k as usize)
+                    })
+                    .and_then(|k| match k.1 {
+                      Some(i) => to_script_data.get_common_attr().list.get(i as usize),
+                      None => None,
+                    })
+                    .map(|k| k.to_owned())
+                };
+              }
 
               let next_list = if opts.typing_mode && from_script_name == "Normal" {
                 map.next.as_deref()
@@ -1195,26 +1255,32 @@ pub fn transliterate_text_core(
 
           if !result_concat_status {
             // Tamil-Extended output reorder (matra/halant after superscript)
-            if let ScriptData::Brahmic { halant, .. } = to_script_data {
+            if let ScriptData::Brahmic {
+              halant: to_halant, ..
+            } = to_script_data
+            {
               if is_script_tamil_ext!(to_script_name)
                 && is_ta_ext_superscript_tail(ctx.result.last_char())
               {
-                // heuristic: if last piece is matra or halant, reorder
-                let last_k = krama.iter().rev().find(|&&k| k >= 0).copied().unwrap_or(-1);
-                let last_type = if last_k >= 0 {
-                  to_script_data
-                    .get_common_attr()
-                    .krama_text_arr
-                    .get(last_k as usize)
-                    .and_then(|(_, li)| *li)
-                    .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
-                    .map(|l| list_type_str(l))
-                } else {
-                  None
-                };
-                let result_text = pieces.concat();
-                if last_type == Some("mAtrA") || result_text == *halant {
-                  ctx.result.emit_pieces_with_reorder(&pieces, halant, true);
+                if pieces.concat() == *to_halant
+                  || match &map.krama {
+                    Some(krama) => match krama.last() {
+                      Some(last_i) => {
+                        to_script_data.get_common_attr().list.get(*last_i as usize)
+                          == Some(&MATRA_LIST_TYPE)
+                      }
+                      None => false,
+                    },
+                    None => false,
+                  }
+                {
+                  ctx
+                    .result
+                    .emit_pieces_with_reorder(&pieces, to_halant, true);
+                } else if is_vedic_svara_tail(pieces.last().and_then(|k| k.chars().last())) {
+                  ctx.result.emit_pieces(&pieces);
+                  let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+                  ctx.result.emit(last);
                 } else {
                   ctx.result.emit_pieces(&pieces);
                 }
@@ -1228,30 +1294,33 @@ pub fn transliterate_text_core(
 
           ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -(matched_len_units as isize));
           continue;
-        } else {
-          // typing-mode special case when krama contains -1 entries: emit raw match
-          if opts.typing_mode && krama.iter().any(|&k| k == -1) {
-            ctx.result.emit(matched_text.clone());
-            let _ = ctx.prev_context_cleanup(
+        } else
+        // typing-mode special case when krama contains -1 entries: emit raw match
+        if krama.iter().any(|&k| k == -1) {
+          ctx.result.emit(matched_text.clone());
+          if opts.typing_mode {
+            ctx.prev_context_cleanup(
               Some((Some(matched_text.clone()), None)),
               map.next.as_deref(),
               None,
             );
-            continue;
           }
+          continue;
         }
       }
     } else {
-      // no step-1 match; advance one character
       ctx.cursor.advance(1);
+      text_index = ctx.cursor.pos();
     }
 
     // Step 2: Search in krama_text_arr
-    let char_to_search = ch.clone();
+    let char_to_search = text_to_krama_item
+      .map(|k| k.0.clone())
+      .unwrap_or(ch.clone());
     let idx = from_script_data.krama_index_of_text(&char_to_search);
     let Some(index) = idx else {
       if ctx.prev_context_in_use {
-        let _ = ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
+        ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
         ctx.prev_context.clear();
       }
       ctx.result.emit(char_to_search);
@@ -1260,65 +1329,75 @@ pub fn transliterate_text_core(
 
     let mut result_concat_status = false;
     if ctx.prev_context_in_use {
-      let item = match from_script_data {
-        ScriptData::Brahmic { .. } => {
-          let list_idx = from_script_data
+      if matches!(from_script_data, ScriptData::Brahmic { .. }) {
+        let list_idx = from_script_data
+          .get_common_attr()
+          .krama_text_arr
+          .get(index)
+          .and_then(|(_, li)| *li);
+        let item = list_idx.and_then(|li| {
+          from_script_data
             .get_common_attr()
-            .krama_text_arr
-            .get(index)
-            .and_then(|(_, li)| *li);
-          list_idx.and_then(|li| {
-            from_script_data
-              .get_common_attr()
-              .list
-              .get(li as usize)
-              .cloned()
-          })
-        }
-        ScriptData::Other { .. } => {
-          let list_idx = to_script_data
+            .list
+            .get(li as usize)
+            .cloned()
+        });
+        result_concat_status =
+          ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
+      } else if matches!(to_script_data, ScriptData::Brahmic { .. }) {
+        let list_idx = to_script_data
+          .get_common_attr()
+          .krama_text_arr
+          .get(index)
+          .and_then(|(_, li)| *li);
+        let item = list_idx.and_then(|li| {
+          to_script_data
             .get_common_attr()
-            .krama_text_arr
-            .get(index)
-            .and_then(|(_, li)| *li);
-          list_idx.and_then(|li| {
-            to_script_data
-              .get_common_attr()
-              .list
-              .get(li as usize)
-              .cloned()
-          })
-        }
-      };
-      result_concat_status =
-        ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
+            .list
+            .get(li as usize)
+            .cloned()
+        });
+        result_concat_status =
+          ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
+      }
     }
 
     if !result_concat_status {
       let to_add_text = to_script_data.krama_text_or_empty(index).to_string();
-      if let ScriptData::Brahmic { halant, .. } = to_script_data {
+      let pieces = [to_add_text.to_owned()];
+      if let ScriptData::Brahmic {
+        halant: to_halant, ..
+      } = to_script_data
+      {
         if is_script_tamil_ext!(to_script_name)
           && is_ta_ext_superscript_tail(ctx.result.last_char())
         {
-          let list_type = to_script_data
-            .get_common_attr()
-            .krama_text_arr
-            .get(index)
-            .and_then(|(_, li)| *li)
-            .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
-            .map(|l| list_type_str(l));
-          if list_type == Some("mAtrA") || to_add_text == *halant {
+          if pieces.concat() == *to_halant
+            || match to_script_data.get_common_attr().krama_text_arr.get(index) {
+              Some(krama) => match krama.1 {
+                Some(i) => {
+                  to_script_data.get_common_attr().list.get(i as usize) == Some(&MATRA_LIST_TYPE)
+                }
+                None => false,
+              },
+              None => false,
+            }
+          {
             ctx
               .result
-              .emit_pieces_with_reorder(&[to_add_text], halant, true);
+              .emit_pieces_with_reorder(&pieces, to_halant, true);
+          } else if is_vedic_svara_tail(pieces.last().and_then(|k| k.chars().last())) {
+            ctx.result.emit_pieces(&pieces);
+            let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+            ctx.result.emit(last);
           } else {
-            ctx.result.emit(to_add_text);
+            ctx.result.emit_pieces(&pieces);
           }
         } else {
-          ctx.result.emit(to_add_text);
+          ctx.result.emit_pieces(&pieces);
         }
       } else {
-        ctx.result.emit(to_add_text);
+        ctx.result.emit_pieces(&pieces);
       }
     }
 
