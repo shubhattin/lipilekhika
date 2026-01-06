@@ -108,9 +108,9 @@ async function benchmark() {
 }
 
 async function preload_data() {
-  SCRIPT_LIST.forEach(async (script) => {
+  for (const script of SCRIPT_LIST) {
     await preloadScriptData(script);
-  });
+  }
 }
 
 benchmark();
