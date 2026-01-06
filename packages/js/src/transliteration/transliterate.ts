@@ -561,7 +561,10 @@ export const transliterate_text_core = (
         ) {
           scan_units += next?.width ?? 0;
         }
-        const end_index = text_index + search_base_units + scan_units;
+        let end_index = text_index + search_base_units + scan_units;
+        // to fix cases where non-bmp fail lookup
+        // this is issue there in rust btw
+        end_index += (cursor.peekAt(end_index - 1)?.width ?? 0) == 2 ? 1 : 0;
         const char_to_search =
           // usage example: க்⁴ரு² -> ghR
           ignore_ta_ext_sup_num_text_index !== -1
@@ -838,7 +841,6 @@ export const transliterate_text_core = (
                 item = list_refs[0];
               }
             }
-
             result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           } else if (
             to_script_data.script_type === 'brahmic' &&

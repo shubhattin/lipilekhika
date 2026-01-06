@@ -113,19 +113,24 @@ const Siddham: InputBrahmicScriptType = {
     },
     {
       text: '𑖈',
-      mAtrA: HALANT + '𑖩𑖿𑖨𑖰',
+      mAtrA: '𑖴',
+      // mAtrA: HALANT + '𑖩𑖿𑖨𑖰',
       text_krama: ['LR-svara'],
       mAtrA_text_krama: ['LR-mAtrA'],
       type: 'svara'
     },
     {
       text: '𑖉',
-      mAtrA: HALANT + '𑖩𑖿𑖨𑖱',
+      mAtrA: '𑖵',
+      // mAtrA: HALANT + '𑖩𑖿𑖨𑖱',
       text_krama: ['LRR-svara'],
       mAtrA_text_krama: ['LRR-mAtrA'],
       type: 'svara',
       prevent_auto_matching: true
     },
+    // Note :- LR and LRR svara symbols are defined but mAtrA are missing
+    // so we use R and RR mAtrA as a fallback here as HALANT + variant is causing issues
+    // it should be resolvable in the future if needed
     {
       text: '𑖊',
       mAtrA: '𑖸',
