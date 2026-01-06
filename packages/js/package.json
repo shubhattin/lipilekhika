@@ -45,7 +45,8 @@
     "coverage": "vitest run --coverage",
     "format": "prettier --write .",
     "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
-    "publish:cli": "bun run build && npm publish"
+    "publish:cli": "bun run build && npm publish",
+    "bench": "vite-node src/scripts/benchmark.ts"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.55.2",

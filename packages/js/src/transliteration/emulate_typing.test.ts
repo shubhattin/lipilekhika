@@ -1,10 +1,9 @@
 import path from 'path';
-import { emulateTyping, TestDataTypeSchema } from './test_commons';
+import { emulateTyping, TestDataTypeSchema, typing_test_data_schema } from './test_commons';
 import { describe, expect, it } from 'vitest';
 import YAML from 'yaml';
 import * as fs from 'node:fs';
 import type { script_and_lang_list_type } from '../utils/lang_list';
-import { z } from 'zod';
 import { transliterate } from '../index';
 import { VEDIC_SVARAS } from './helpers';
 
@@ -49,16 +48,6 @@ describe('Emulate Typing', () => {
       });
     }
   }
-});
-
-const typing_test_data_schema = z.object({
-  index: z.number(),
-  text: z.string(),
-  output: z.string(),
-  script: z.string(),
-  preserve_check: z.boolean().optional(),
-  todo: z.boolean().optional(),
-  options: z.record(z.string(), z.any()).optional().nullable()
 });
 
 const TEST_DATA_FOLDER = path.join(__dirname, '../../../../test_data/typing');

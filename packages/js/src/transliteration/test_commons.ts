@@ -14,6 +14,16 @@ export const TestDataTypeSchema = z.object({
   options: z.record(z.string(), z.boolean()).optional()
 });
 
+export const typing_test_data_schema = z.object({
+  index: z.number(),
+  text: z.string(),
+  output: z.string(),
+  script: z.string(),
+  preserve_check: z.boolean().optional(),
+  todo: z.boolean().optional(),
+  options: z.record(z.string(), z.any()).optional().nullable()
+});
+
 type Options = Parameters<typeof createTypingContext>[1];
 export async function emulateTyping(
   text: string,

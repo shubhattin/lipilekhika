@@ -65,4 +65,4 @@ jobs:
       - name: Test
         run: |
             cd packages/rust 
-            cargo test
+            cargo test --release
