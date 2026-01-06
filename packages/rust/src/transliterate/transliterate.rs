@@ -937,7 +937,8 @@ pub fn transliterate_text_core(
                     if nth_next_character.as_deref() == Some(halant)
                       || nth_char_type.is_some_and(|k| k.is_matra())
                     {
-                      ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
+                      ignore_ta_ext_sup_num_text_index =
+                        (end_index + nth_next_character.iter().len()) as isize;
                       break;
                     }
                   }
@@ -984,10 +985,13 @@ pub fn transliterate_text_core(
                     .and_then(|(_, li)| *li)
                     .and_then(|li| from_script_data.get_common_attr().list.get(li as usize));
 
-                  if nth_char_type.is_some_and(|k| k.is_svara())
+                  if nth_char_type.is_some_and(|k| k.is_matra())
                     && n_1_th_char_type.is_some_and(|k| k.is_matra())
                   {
-                    ignore_ta_ext_sup_num_text_index = (end_index + 1 + 1) as isize;
+                    ignore_ta_ext_sup_num_text_index = (end_index
+                      + nth_next_character.iter().len()
+                      + n_1_th_next_character.iter().len())
+                      as isize;
                     break;
                   }
                 }
@@ -1029,7 +1033,10 @@ pub fn transliterate_text_core(
                     );
                     if let Some(char_index) = char_index {
                       text_to_krama_item_index = Some(char_index);
-                      ignore_ta_ext_sup_num_text_index = (end_index + 1 + 1) as isize;
+                      ignore_ta_ext_sup_num_text_index = (end_index
+                        + nth_next_character.iter().len()
+                        + n_1_th_next_character.iter().len())
+                        as isize;
                       break;
                     }
                   }
@@ -1054,22 +1061,20 @@ pub fn transliterate_text_core(
     let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
     if let Some(text_to_krama_item) = text_to_krama_item {
       let (matched_text, map) = text_to_krama_item;
-      let is_type_vyanjana = match &map.krama {
-        Some(krama) => {
-          match from_script_data
+      let is_type_vyanjana = map
+        .krama
+        .as_ref()
+        .and_then(|k| k.get(0))
+        .and_then(|ki| {
+          ctx
+            .from_script_data
             .get_common_attr()
-            .list
-            .get(match krama.get(0) {
-              Some(idx) => *idx,
-              _ => -1,
-            } as usize)
-          {
-            Some(v) => v.is_vyanjana(),
-            _ => false,
-          }
-        }
-        _ => false,
-      };
+            .krama_text_arr
+            .get(*ki as usize)
+        })
+        .and_then(|(_, li)| li.as_ref())
+        .and_then(|li| from_script_data.get_common_attr().list.get(*li as usize))
+        .is_some_and(|l| l.is_vyanjana());
       let index_delete_length = if ignore_ta_ext_sup_num_text_index != -1
         && matched_text.chars().count() > 1
         && is_type_vyanjana

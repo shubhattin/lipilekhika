@@ -637,13 +637,9 @@ export const transliterate_text_core = (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const nth_char_text_index = binarySearchLowerWithIndex(
-                from_script_data.krama_text_arr,
-                from_script_data.krama_text_arr_index,
-                nth_next_character ?? '',
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
+              const nth_char_text_index = kramaIndexOfText(
+                from_script_data,
+                nth_next_character ?? ''
               );
               if (char_index !== -1 && nth_char_text_index !== -1) {
                 text_to_krama_item_index = char_index;
@@ -669,21 +665,13 @@ export const transliterate_text_core = (
                   accessor: (arr, i) => arr[i][0]
                 }
               );
-              const nth_char_text_index = binarySearchLowerWithIndex(
-                from_script_data.krama_text_arr,
-                from_script_data.krama_text_arr_index,
-                nth_next_character ?? '',
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
+              const nth_char_text_index = kramaIndexOfText(
+                from_script_data,
+                nth_next_character ?? ''
               );
-              const n_1_th_char_text_index = binarySearchLowerWithIndex(
-                from_script_data.krama_text_arr,
-                from_script_data.krama_text_arr_index,
-                n_1_th_next_character ?? '',
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
+              const n_1_th_char_text_index = kramaIndexOfText(
+                from_script_data,
+                n_1_th_next_character ?? ''
               );
               // special case for some mAtrAs like gO = g + E + A
               if (

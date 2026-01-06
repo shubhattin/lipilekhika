@@ -179,7 +179,7 @@ mod tests {
     error: Option<String>,
   }
 
-  const MAX_FAILURES_TO_STORE: usize = 50;
+  const MAX_FAILURES_TO_STORE: usize = 400;
   const SUMMARY_LABEL_WIDTH: usize = 12;
 
   fn push_failure(failures: &mut Vec<Failure>, failure: Failure) {
