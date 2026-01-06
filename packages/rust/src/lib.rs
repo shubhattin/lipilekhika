@@ -6,6 +6,9 @@ mod script_data;
 mod transliterate;
 mod utils;
 
+// will be publically exported
+pub mod typing;
+
 /// Transliterates `text` from `from` to `to`.
 ///
 /// - `from` / `to` can be script or language names/aliases (normalized via `get_normalized_script_name`)
@@ -463,6 +466,33 @@ mod tests {
       );
     }
 
+    // Always write a one-line summary to a log file so it's visible even when tests succeed.
+    let summary = {
+      let total_asserts = overall.forward_asserts + overall.reverse_asserts;
+      let total_passed = overall.forward_passed + overall.reverse_passed;
+      let total_skipped = overall.todo_cases + overall.auto_vedic_skipped;
+      format!(
+        "Transliteration: files_total={}, files_passed={}, files_failed={}, tests_total={}, tests_passed={}, tests_failed={}, tests_skipped={}",
+        file_count,
+        passed_file_count,
+        failed_file_count,
+        total_asserts,
+        total_passed,
+        overall.failures_total,
+        total_skipped
+      )
+    };
+
+    let _ = std::fs::create_dir_all("test_log");
+    if let Ok(mut file) = std::fs::OpenOptions::new()
+      .create(true)
+      .write(true)
+      .truncate(true)
+      .open("test_log/transliteration_summary.txt")
+    {
+      let _ = writeln!(file, "{}", summary);
+    }
+
     if overall.failures_total > 0 {
       let mut msg = String::new();
       msg.push_str(&format!(
@@ -521,12 +551,13 @@ mod tests {
       use std::fs::OpenOptions;
       use std::io::Write;
 
+      let _ = std::fs::create_dir_all("test_log");
       if let Ok(mut file) = OpenOptions::new()
         .create(true)
         .append(false)
         .write(true)
         .truncate(true)
-        .open("test_log.txt")
+        .open("test_log/transliteration.txt")
       {
         let _ = file.write_all(msg.as_bytes());
       }
