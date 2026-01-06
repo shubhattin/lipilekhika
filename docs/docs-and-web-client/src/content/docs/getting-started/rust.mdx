@@ -1,0 +1,247 @@
+---
+title: Rust
+description: Lipi Lekhika usage in Rust
+sidebar:
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import { LinkCard } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+Lipi Lekhika offers a high-performance, type-safe transliteration library for Rust. All script data is embedded at compile time for zero runtime overhead.
+
+<Aside type="caution">
+  **Beta Release** — This crate is under active development. While the core APIs are stabilizing, some features may still change before the 1.0 release.
+</Aside>
+
+## Installation
+
+The recommended way to install is using `cargo add`:
+
+```bash
+cargo add lipilekhika
+```
+
+## Basic Usage
+
+### Transliteration
+
+The `transliterate` function is the primary API for converting text between scripts. It returns a `Result<String, String>`.
+
+```rust
+use lipilekhika::transliterate;
+
+fn main() {
+    let result = transliterate(
+        "na jAyatE mriyatE vA",
+        "Normal",
+        "Devanagari",
+        None
+    ).unwrap();
+    
+    println!("{}", result); // न जायते म्रियते वा
+}
+```
+
+**Parameters:**
+- `text: &str` — Text to transliterate
+- `from: &str` — Source script/language name
+- `to: &str` — Target script/language name  
+- `trans_options: Option<&HashMap<String, bool>>` — Optional custom transliteration options
+
+**Returns:** `Result<String, String>` — Transliterated text or error message
+
+### With Custom Transliteration Options
+
+You can pass custom options as the fourth argument to fine-tune transliteration behavior:
+
+```rust
+use lipilekhika::transliterate;
+use std::collections::HashMap;
+
+fn main() {
+    let mut options = HashMap::new();
+    options.insert(
+        "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra".to_string(),
+        true
+    );
+    
+    let result = transliterate(
+        "గంగా",
+        "Telugu",
+        "Gujarati",
+        Some(&options)
+    ).unwrap();
+    
+    println!("{}", result); // ગંગા (instead of ગઙ્ગા)
+}
+```
+
+<LinkCard 
+   title="Custom Transliteration Options" 
+   href="/reference/custom_trans_options" 
+   description="A detailed overview of all available custom transliteration options"
+/>
+<LinkCard 
+   title="Supported Scripts and Languages"
+   href="/reference/supported_scripts"
+   description="List of all supported scripts/languages and their aliases"
+/>
+
+## Typing Module
+
+The `typing` module provides stateful context for real-time character-by-character input processing.
+
+### Basic Typing Example
+
+```rust
+use lipilekhika::typing::{TypingContext, TypingContextOptions};
+
+fn main() {
+    // Create a typing context for Devanagari
+    let mut ctx = TypingContext::new("Devanagari", None).unwrap();
+    
+    // Process character-by-character input
+    let diff = ctx.take_key_input("n").unwrap();
+    println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
+    
+    let diff = ctx.take_key_input("a").unwrap();
+    println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
+    
+    // Clear context when needed
+    ctx.clear_context();
+}
+```
+
+### Typing Context Options
+
+Customize typing behavior with `TypingContextOptions`:
+
+```rust
+use lipilekhika::typing::{TypingContext, TypingContextOptions};
+
+fn main() {
+    let options = TypingContextOptions {
+        auto_context_clear_time_ms: 5000,  // Auto-clear after 5 seconds
+        use_native_numerals: true,          // Use script-native numerals
+        include_inherent_vowel: false,      // Don't include inherent vowel
+    };
+    
+    let mut ctx = TypingContext::new("Telugu", Some(options)).unwrap();
+    
+    // Use the context...
+}
+```
+
+**Options:**
+- `auto_context_clear_time_ms: u64` — Timeout for auto-clearing context (default: `4500`)
+- `use_native_numerals: bool` — Use script-native numerals instead of ASCII (default: `true`)
+- `include_inherent_vowel: bool` — Include inherent vowel/schwa character (default: `false`)
+  - `true`: `k` → `क` (for Hindi, Bengali, Gujarati, etc.)
+  - `false`: `k` → `क्` (for Sanskrit, Telugu, Tamil, Kannada, etc.)
+
+### API Reference
+
+#### `TypingContext`
+
+Main struct for managing typing state.
+
+**Methods:**
+- `new(typing_lang: &str, options: Option<TypingContextOptions>) -> Result<Self, String>` — Create new context
+- `take_key_input(&mut self, key: &str) -> Result<TypingDiff, String>` — Process single character input
+- `clear_context(&mut self)` — Clear internal state
+
+#### `TypingDiff`
+
+Result type returned by `take_key_input`:
+
+```rust
+pub struct TypingDiff {
+    pub to_delete_chars_count: usize,  // Characters to delete from current state
+    pub diff_add_text: String,          // Text to insert
+}
+```
+
+This diff-based approach allows efficient UI updates by only modifying what changed.
+
+<LinkCard 
+   title="Realtime Typing Reference" 
+   href="/reference/realtime_typing" 
+   description="Environment-agnostic guide to implementing real-time typing"
+/>
+
+## Example: Building a CLI Tool
+
+Here's a complete example of a simple CLI transliteration tool:
+
+```rust
+use lipilekhika::transliterate;
+use std::io::{self, Write};
+
+fn main() {
+    println!("Lipi Lekhika Transliterator");
+    println!("Enter text (or 'quit' to exit):");
+    
+    loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
+        
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        let input = input.trim();
+        
+        if input == "quit" {
+            break;
+        }
+        
+        match transliterate(input, "Normal", "Devanagari", None) {
+            Ok(result) => println!("   {}", result),
+            Err(e) => eprintln!("Error: {}", e),
+        }
+    }
+}
+```
+
+## Performance Considerations
+
+- **Embedded Data**: All script data is embedded at compile time using `rust-embed`, eliminating runtime file I/O
+- **Static Lifetime**: Script data is cached with `'static` lifetime for zero-cost access
+- **Zero Allocations**: The transliteration core minimizes allocations where possible
+- **Type Safety**: Rust's type system prevents common runtime errors
+
+## Error Handling
+
+The library uses `Result<T, String>` for error handling. Common errors include:
+
+- Invalid script/language names
+- Unsupported script combinations (rare)
+
+Always handle errors appropriately:
+
+```rust
+match transliterate("text", "InvalidScript", "Devanagari", None) {
+    Ok(result) => println!("Success: {}", result),
+    Err(e) => eprintln!("Error: {}", e),
+}
+```
+
+## Additional Resources
+
+<LinkCard 
+   title="Crates.io Package" 
+   href="https://crates.io/crates/lipilekhika"
+   description="View package on crates.io"
+/>
+<LinkCard 
+   title="GitHub Repository" 
+   href="https://github.com/shubhattin/lipilekhika/tree/main/packages/rust"
+   description="Source code and examples"
+/>
+
+## Next Steps
+
+- Explore [custom transliteration options](/reference/custom_trans_options) for fine-tuned control
+- Check out [supported scripts](/reference/supported_scripts) to see all available scripts
+- Review [real-time typing reference](/reference/realtime_typing) for advanced typing implementations

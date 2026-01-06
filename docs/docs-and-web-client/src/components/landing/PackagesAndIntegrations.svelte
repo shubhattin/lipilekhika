@@ -43,19 +43,28 @@
               </div>
             </div>
           </a>
-          <div
-            class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
+          <a
+            href="https://crates.io/crates/lipilekhika"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:bg-background/60 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
-            <div class="flex items-center gap-3">
-              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
-                <Icon src={RustIcon} className="size-12 -mt-1" />
-              </span>
-              <div class="min-w-0">
-                <p class="leading-tight font-medium">Rust</p>
-                <p class="text-xs text-muted-foreground">upcoming</p>
+            <div
+              class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
+            >
+              <div class="flex items-center gap-3">
+                <span
+                  class="inline-flex size-9 items-center justify-center rounded-lg bg-background"
+                >
+                  <Icon src={RustIcon} className="size-12 -mt-1" />
+                </span>
+                <div class="min-w-0">
+                  <p class="leading-tight font-medium">Rust</p>
+                  <p class="text-xs text-muted-foreground">crate available</p>
+                </div>
               </div>
             </div>
-          </div>
+          </a>
           <div
             class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >

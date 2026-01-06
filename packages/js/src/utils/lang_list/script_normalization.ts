@@ -14,7 +14,8 @@ const ALTERNATES = [
   'te', // Telugu
   'tel', // Telugu
   'tam', // Tamil
-  'tam-ex', // Tamil-Extended
+  'tam-ext', // Tamil-Extended
+  'ta-ext', // Tamil-Extended
   'ben', // Bengali
   'be', // Bengali
   'ka', // Kannada
@@ -57,7 +58,8 @@ export const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_
   te: 'Telugu',
   tel: 'Telugu',
   tam: 'Tamil',
-  'tam-ex': 'Tamil-Extended',
+  'tam-ext': 'Tamil-Extended',
+  'ta-ext': 'Tamil-Extended',
   ben: 'Bengali',
   be: 'Bengali',
   ka: 'Kannada',

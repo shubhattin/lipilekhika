@@ -405,7 +405,7 @@ fn criterion_benchmark(c: &mut Criterion) {
 criterion_group! {
     name = benches;
     config = Criterion::default()
-        .sample_size(10);
+        .sample_size(30);
     targets = criterion_benchmark
 }
 criterion_main!(benches);
