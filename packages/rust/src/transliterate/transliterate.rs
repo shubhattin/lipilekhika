@@ -1292,9 +1292,13 @@ pub fn transliterate_text_core(
                   ctx
                     .result
                     .emit_pieces_with_reorder(&pieces, to_halant, true);
-                } else if is_vedic_svara_tail(pieces.last().and_then(|k| k.chars().last())) {
-                  ctx.result.emit_pieces(&pieces);
+                } else if pieces
+                  .last()
+                  .and_then(|k| k.chars().last())
+                  .is_some_and(|s| is_vedic_svara_tail(Some(s)))
+                {
                   let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+                  ctx.result.emit_pieces(&pieces);
                   ctx.result.emit(last);
                 } else {
                   ctx.result.emit_pieces(&pieces);
@@ -1403,9 +1407,13 @@ pub fn transliterate_text_core(
             ctx
               .result
               .emit_pieces_with_reorder(&pieces, to_halant, true);
-          } else if is_vedic_svara_tail(pieces.last().and_then(|k| k.chars().last())) {
-            ctx.result.emit_pieces(&pieces);
+          } else if pieces
+            .last()
+            .and_then(|k| k.chars().last())
+            .is_some_and(|s| is_vedic_svara_tail(Some(s)))
+          {
             let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+            ctx.result.emit_pieces(&pieces);
             ctx.result.emit(last);
           } else {
             ctx.result.emit_pieces(&pieces);
