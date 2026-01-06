@@ -23,6 +23,8 @@ import { deepCopy, toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 import { type TransOptionsType, CustomOptionsInput } from './custom_options_input';
+import { ALTERNATE_TO_SCRIPT_MAP } from '../utils/lang_list/script_normalization';
+import { lang_list_obj, script_list_obj, LANG_SCRIPT_MAP } from '../utils/lang_list';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
@@ -261,6 +263,7 @@ function get_out_script_data(
           resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
         )
       );
+      // @ts-ignore
       res.list.push({
         // @ts-ignore
         ...(IS_DEV_MODE ? { text: item.text } : {}),
@@ -666,11 +669,52 @@ async function make_custom_option_json() {
   fs.writeFileSync(CUSTOM_OPTIONS_OUT_FOLDER, jsonOutput);
 }
 
+function copy_script_data_json() {
+  const LIST: {
+    target: string;
+    minify: boolean;
+  }[] = [
+    {
+      target: '../rust/src/data',
+      minify: true
+    }
+  ];
+
+  for (const { target, minify } of LIST) {
+    if (fs.existsSync(path.resolve(target))) fs.rmSync(path.resolve(target), { recursive: true });
+    fs.mkdirSync(path.resolve(target + '/script_data'), { recursive: true });
+    fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
+    const script_list_data = {
+      scripts: script_list_obj,
+      langs: lang_list_obj,
+      lang_script_map: LANG_SCRIPT_MAP,
+      script_alternates_map: ALTERNATE_TO_SCRIPT_MAP
+    };
+    if (minify) {
+      minify_json_file(target + '/custom_options.json');
+      fs.readdirSync(target + '/script_data').forEach((file) => {
+        minify_json_file(target + '/script_data/' + file);
+      });
+      fs.writeFileSync(target + '/script_list.json', JSON.stringify(script_list_data));
+    } else {
+      fs.writeFileSync(target + '/script_list.json', JSON.stringify(script_list_data, null, 2));
+    }
+  }
+}
+
+function minify_json_file(file: string) {
+  const content = fs.readFileSync(file, 'utf-8');
+  const minified = JSON.stringify(JSON.parse(content));
+  fs.writeFileSync(file, minified, 'utf-8');
+}
+
 make_script_data()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
     try {
       execSync('npx prettier --write ./src/script_data');
+      copy_script_data_json();
     } catch (e) {
       console.error(chalk.red('✖  Error formatting script data'), e);
     }
