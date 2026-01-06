@@ -12,7 +12,7 @@ pub mod typing;
 /// Transliterates `text` from `from` to `to`.
 ///
 /// - `from` / `to` can be script or language names/aliases (normalized via `get_normalized_script_name`)
-/// - `trans_options` are the custom transliteration options (same keys as JS)
+/// - `trans_options` are the custom transliteration options
 ///
 /// Returns the transliterated text, or an error string if script names are invalid.
 pub fn transliterate(
@@ -144,7 +144,6 @@ mod tests {
   }
 
   fn contains_vedic_svara(s: &str) -> bool {
-    // Keep parity with JS `VEDIC_SVARAS`.
     const VEDIC_SVARAS: [&str; 4] = ["॒", "॑", "᳚", "᳛"];
     VEDIC_SVARAS.iter().any(|sv| s.contains(sv))
   }
@@ -252,7 +251,6 @@ mod tests {
         }
       };
 
-      // JS parity: skip known-bad vedic svara tails in old auto tests (if present).
       if file_name.starts_with("auto")
         && case.to == "Tamil-Extended"
         && contains_vedic_svara(&result)
@@ -506,7 +504,6 @@ mod tests {
 
         match f.kind {
           FailureKind::ForwardMismatch => {
-            // Match JS `Transliteration failed` style.
             msg.push_str("   Transliteration failed:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));
@@ -517,7 +514,6 @@ mod tests {
             }
           }
           FailureKind::ReverseMismatch => {
-            // Match JS `Reversed Transliteration failed` style.
             msg.push_str("   Reversed Transliteration failed:\n");
             msg.push_str(&format!("     From: {}\n", f.from));
             msg.push_str(&format!("     To: {}\n", f.to));

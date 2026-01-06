@@ -21,14 +21,14 @@ pub struct TypingContextOptions {
   /// Defaults to [`DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS`].
   pub auto_context_clear_time_ms: u64,
   /// Use native numerals in transliteration/typing.
-  /// Defaults to [`DEFAULT_USE_NATIVE_NUMERALS`].
+  /// Defaults to `DEFAULT_USE_NATIVE_NUMERALS`
   pub use_native_numerals: bool,
   /// Include inherent vowels (schwa character) in transliteration/typing.
   ///
   /// - `true`: `k` -> `क` (Eg. Hindi, Bengali, Gujarati, etc.)
   /// - `false`: `k` -> `क्` (Default behavior in transliteration. Eg. Sanskrit, Telugu, Tamil, Kannada, etc.)
   ///
-  /// Defaults to [`DEFAULT_INCLUDE_INHERENT_VOWEL`].
+  /// Defaults to `DEFAULT_INCLUDE_INHERENT_VOWEL`
   pub include_inherent_vowel: bool,
 }
 
@@ -53,7 +53,6 @@ pub struct TypingDiff {
 
 /// Stateful isolated context for character-by-character input typing.
 ///
-/// This mirrors the behavior of the JS `createTypingContext` helper, but is fully
 /// synchronous and uses Rust's internal script data cache.
 #[derive(Debug)]
 pub struct TypingContext {
@@ -85,7 +84,6 @@ impl TypingContext {
     let normalized_typing_lang = get_normalized_script_name(typing_lang)
       .ok_or_else(|| format!("Invalid script name: {}", typing_lang))?;
 
-    // Match JS behavior: from "Normal" to the target script.
     let from_script_data = ScriptData::get_script_data("Normal");
     let to_script_data = ScriptData::get_script_data(&normalized_typing_lang);
 
@@ -184,7 +182,6 @@ impl TypingContext {
   }
 }
 
-/// Convenience free function mirroring the JS `createTypingContext`.
 pub fn create_typing_context(
   typing_lang: &str,
   options: Option<TypingContextOptions>,
@@ -213,7 +210,6 @@ fn compute_diff(prev_output: &str, output: &str) -> (usize, String) {
 
 /// Helper used in tests to emulate per-key typing and accumulate the final output.
 ///
-/// Mirrors the JS `emulateTyping` helper.
 pub fn emulate_typing(
   text: &str,
   typing_lang: &str,
@@ -391,7 +387,6 @@ mod tests {
             case.from, case.to, case.input, case.output, result
           );
 
-          // JS parity: skip known-bad vedic svara tails in old auto tests (if present).
           if file_name.starts_with("auto")
             && case.to == "Tamil-Extended"
             && VEDIC_SVARAS.iter().any(|sv| result.contains(*sv))
