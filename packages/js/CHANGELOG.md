@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## js-lib@v1.0.2
 
 - add `w` as typing time alternative for `v`
 - **च** and **छ**
   - Main :- `ch` and `Ch`
   - Duplicates(Typing+Transliteration) :- `C` and `chh`
+- Some other fixes
 
 ## js-lib@v1.0.1
 

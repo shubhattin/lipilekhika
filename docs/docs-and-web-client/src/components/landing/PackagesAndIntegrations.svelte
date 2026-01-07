@@ -8,7 +8,8 @@
     PythonIcon,
     ReactIcon,
     SolidIcon,
-    VueIcon
+    VueIcon,
+    WasmIcon
   } from '~/tools/icons';
 </script>
 
@@ -49,19 +50,13 @@
             rel="noopener noreferrer"
             class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:bg-background/60 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
-            <div
-              class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
-            >
-              <div class="flex items-center gap-3">
-                <span
-                  class="inline-flex size-9 items-center justify-center rounded-lg bg-background"
-                >
-                  <Icon src={RustIcon} className="size-12 -mt-1" />
-                </span>
-                <div class="min-w-0">
-                  <p class="leading-tight font-medium">Rust</p>
-                  <p class="text-xs text-muted-foreground">crate available</p>
-                </div>
+            <div class="flex items-center gap-3">
+              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
+                <Icon src={RustIcon} className="size-12 -mt-1" />
+              </span>
+              <div class="min-w-0">
+                <p class="leading-tight font-medium">Rust</p>
+                <p class="text-xs text-muted-foreground">crate available</p>
               </div>
             </div>
           </a>
@@ -148,11 +143,37 @@
           </a>
         </div>
 
-        <p class="mt-4 text-xs text-muted-foreground">
+        <!-- <p class="mt-4 text-xs text-muted-foreground">
           Tip: in JavaScript you can import typing helpers from <span class="font-mono"
             >lipilekhika/typing</span
           >.
-        </p>
+        </p> -->
+        <!-- WebAssembly -->
+        <div class="mt-6">
+          <h2 class="text-xl font-semibold tracking-tight">WebAssembly</h2>
+          <p class="mt-2 text-sm text-muted-foreground">
+            The transliteration module can be accessed using a Rust powered wasm module.
+            It will be available as a part of npm js library.
+          </p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <a
+              href="https://www.npmjs.com/package/lipilekhika"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:bg-background/60 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
+            >
+              <div class="flex items-center gap-3">
+                <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
+                  <Icon src={WasmIcon} className="size-13" />
+                </span>
+                <div class="min-w-0">
+                  <p class="leading-tight font-medium">WebAssembly</p>
+                  <p class="text-xs text-muted-foreground">comming soon</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

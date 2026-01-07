@@ -1,9 +1,10 @@
 {
   "name": "lipilekhika",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "homepage": "https://lipilekhika.in",
+  "description": "A transliteration library for Indian Brahmic scripts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shubhattin/lipilekhika.git"

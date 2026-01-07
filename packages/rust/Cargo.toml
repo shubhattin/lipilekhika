@@ -1,6 +1,15 @@
 [package]
 name = "lipilekhika"
-version = "0.0.1-beta.1"
+license = "MIT"
+description = "A transliteration library for Indian Brahmic scripts"
+homepage="https://lipilekhika.in"
+repository = "https://github.com/shubhattin/lipilekhika"
+documentation = "https://lipilekhika.in/getting-started/rust"
+keywords = ["indic-scripts", "transliteration"]
+categories = ["encoding", "text-processing"]
+
+
+version = "0.0.1-beta.2"
 edition = "2024"
 
 [dependencies]
@@ -20,3 +29,10 @@ crate-type = ["rlib"]
 name = "benchmark"
 path = "src/benches/benchmark.rs"
 harness = false
+
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "LICENSE*",
+    "README*"
+]
