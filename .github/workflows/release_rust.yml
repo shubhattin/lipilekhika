@@ -1,0 +1,57 @@
+name: Release Rust Package
+
+on:
+  push:
+    tags:
+      - 'rust-lib@v*'
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # JS Step
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Make Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            packages/rust/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Test and Build Rust Package
+        run: |
+            cd packages/rust 
+            cargo test --release
+            cargo build --release
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+            cd packages/rust
+            sed -i '/^src\/data\// s/^/#/' .gitignore
+            cargo publish
