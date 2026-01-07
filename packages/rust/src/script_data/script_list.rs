@@ -96,7 +96,7 @@ mod tests {
     );
     assert_eq!(get_normalized_script_name("tam"), Some("Tamil".to_string()));
     assert_eq!(
-      get_normalized_script_name("tam-ex"),
+      get_normalized_script_name("tam-ext"),
       Some("Tamil-Extended".to_string())
     );
     assert_eq!(
@@ -172,7 +172,7 @@ mod tests {
       Some("Telugu".to_string())
     );
     assert_eq!(
-      get_normalized_script_name("TAM-EX"),
+      get_normalized_script_name("TAM-EXT"),
       Some("Tamil-Extended".to_string())
     );
   }
@@ -412,15 +412,15 @@ mod tests {
   fn test_edge_cases() {
     // Acronyms with dashes
     assert_eq!(
-      get_normalized_script_name("tam-ex"),
+      get_normalized_script_name("tam-ext"),
       Some("Tamil-Extended".to_string())
     );
     assert_eq!(
-      get_normalized_script_name("TAM-EX"),
+      get_normalized_script_name("TAM-EXT"),
       Some("Tamil-Extended".to_string())
     );
     assert_eq!(
-      get_normalized_script_name("Tam-Ex"),
+      get_normalized_script_name("Tam-Ext"),
       Some("Tamil-Extended".to_string())
     );
 
