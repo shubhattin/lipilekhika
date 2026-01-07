@@ -46,8 +46,8 @@ jobs:
       - name: Test and Build Rust Package
         run: |
             cd packages/rust 
-            cargo test --release
             cargo build --release
+            cargo test --release
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

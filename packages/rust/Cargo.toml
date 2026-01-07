@@ -9,7 +9,7 @@ keywords = ["indic-scripts", "transliteration"]
 categories = ["encoding", "text-processing"]
 
 
-version = "0.0.1-beta.2"
+version = "0.0.1-beta.3"
 edition = "2024"
 
 [dependencies]
