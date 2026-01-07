@@ -2,6 +2,7 @@ use crate::script_data::get_normalized_script_name;
 use crate::transliterate::transliterate_text;
 use std::collections::HashMap;
 
+mod macros;
 mod script_data;
 mod transliterate;
 mod utils;

@@ -1,12 +1,11 @@
-use std::collections::HashMap;
-
-use crate::is_script_tamil_ext;
+use crate::macros::is_script_tamil_ext;
 use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::transliterate::helpers::{
   self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
   is_vedic_svara_tail,
 };
 use crate::utils::binary_search::binary_search_lower;
+use std::collections::HashMap;
 
 struct TransliterateCtx<'a> {
   #[allow(dead_code)]

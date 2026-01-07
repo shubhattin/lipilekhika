@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write  # Required for OIDC
-  contents: read
+  contents: write  # Required for uploading to releases
 
 jobs:
   publish:
@@ -55,3 +55,79 @@ jobs:
             cd packages/rust
             sed -i '/^src\/data\// s/^/#/' .gitignore
             cargo publish
+
+  build-binaries:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_name: lipiparivartak
+            asset_name: lipiparivartak-linux-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary_name: lipiparivartak
+            asset_name: lipiparivartak-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary_name: lipiparivartak
+            asset_name: lipiparivartak-macos-aarch64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_name: lipiparivartak.exe
+            asset_name: lipiparivartak-windows-x86_64.exe
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # JS Step
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Make Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            packages/rust/target
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-
+
+      - name: Build binary
+        run: |
+          cd packages/rust
+          cargo build --release --bin lipiparivartak --target ${{ matrix.target }}
+
+      - name: Rename binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mv packages/rust/target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+
+      - name: Rename binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mv packages/rust/target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+
+      - name: Upload binary to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }} --clobber

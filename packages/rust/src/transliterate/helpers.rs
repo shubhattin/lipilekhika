@@ -1,7 +1,7 @@
+use crate::macros::is_script_tamil_ext;
 use crate::script_data::{List, ScriptData};
 use crate::utils::binary_search::binary_search_lower_with_index;
 use crate::utils::strings::char_substring;
-
 // pub fn krama_index_of_text()
 
 impl ScriptData {
@@ -375,13 +375,6 @@ pub fn is_vedic_svara_tail(ch: Option<char>) -> bool {
     Some(c) => VEDIC_SVARAS.contains(&c),
     None => false,
   }
-}
-
-#[macro_export]
-macro_rules! is_script_tamil_ext {
-  ($var:expr) => {
-    $var == "Tamil-Extended"
-  };
 }
 
 impl ResultStringBuilder {
