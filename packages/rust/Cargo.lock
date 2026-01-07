@@ -380,7 +380,7 @@ checksum = "37c93d8daa9d8a012fd8ab92f088405fb202ea0b6ab73ee2482ae66af4f42091"
 
 [[package]]
 name = "lipilekhika"
-version = "0.0.1-beta.4"
+version = "0.0.1-beta.5"
 dependencies = [
  "clap",
  "criterion",

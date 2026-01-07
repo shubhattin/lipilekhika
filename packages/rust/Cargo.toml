@@ -8,8 +8,7 @@ documentation = "https://lipilekhika.in/getting-started/rust"
 keywords = ["indic-scripts", "transliteration"]
 categories = ["encoding", "text-processing"]
 
-
-version = "0.0.1-beta.4"
+version = "0.0.1-beta.5"
 edition = "2024"
 
 [dependencies]

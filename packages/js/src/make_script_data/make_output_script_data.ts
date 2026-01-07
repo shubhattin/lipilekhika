@@ -681,8 +681,9 @@ function copy_script_data_json() {
   ];
 
   for (const { target, minify } of LIST) {
-    if (fs.existsSync(path.resolve(target))) fs.rmSync(path.resolve(target), { recursive: true });
-    fs.mkdirSync(path.resolve(target + '/script_data'), { recursive: true });
+    if (fs.existsSync(path.resolve(target))) {
+      fs.rmSync(path.resolve(target), { recursive: true, force: true });
+    }
     fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
     fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
     const script_list_data = {

@@ -100,7 +100,8 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Cache cargo registry + build
+      - name: Cache cargo registry + build (Unix)
+        if: runner.os != 'Windows'
         uses: actions/cache@v4
         with:
           path: |
