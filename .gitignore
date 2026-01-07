@@ -1,4 +1,5 @@
 node_modules
+target
 
 **/a.ts
 **/a.js

@@ -9,8 +9,8 @@
 ## ✨ Features
 
 - 🔄 **Bidirectional Transliteration** - Convert between 15+ [Indian Brahmic scripts](https://en.wikipedia.org/wiki/Brahmic_scripts) including Devanagari, Bengali, Tamil, Telugu, and more
-- ⚡ **Real-time Typing** - Type in any Indian language using English keyboard with intelligent autocomplete
-- 🎯 **Highly Customizable** - Fine-tune transliteration with custom mapping options
+- ⚡ **Real-time Typing** - Type in any Indian language using English keyboard with a intuitive map
+- 🎯 **Highly Customizable** - Custom Transliteration and Typing Options
 - 🚀 **Blazing Fast** - Optimized for performance in JavaScript and Rust
 - 🌐 **Multi-platform** - Use in browser, Node.js, or as a Rust library
 - 📱 **Web App** - Try it instantly at [lipilekhika.in/app](https://lipilekhika.in/app)
