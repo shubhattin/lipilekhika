@@ -55,11 +55,12 @@ pub type CustomOptionMap = HashMap<String, CustomOptions>;
 
 static CUSTOM_OPTIONS_CACHE: OnceLock<CustomOptionMap> = OnceLock::new();
 
+mod generated {
+  include!(concat!(env!("OUT_DIR"), "/generated_custom_options.rs"));
+}
+
 pub fn get_custom_options_map() -> &'static CustomOptionMap {
-  CUSTOM_OPTIONS_CACHE.get_or_init(|| {
-    let file_str = include_str!("../data/custom_options.json");
-    serde_json::from_str::<CustomOptionMap>(file_str).expect("JSON Parse Error")
-  })
+  CUSTOM_OPTIONS_CACHE.get_or_init(generated::build_custom_options_map)
 }
 
 #[cfg(test)]

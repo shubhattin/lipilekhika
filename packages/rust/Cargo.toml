@@ -11,16 +11,19 @@ categories = ["encoding", "text-processing"]
 
 version = "0.0.1-beta.2"
 edition = "2024"
+build = "build.rs"
 
 [dependencies]
-rust-embed = "8.9.0"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.148"
 
 [dev-dependencies]
 owo-colors = "4.2.0"
 serde_yaml_ng= "0.10.0"
 criterion = { version = "0.5.1", default-features = true }
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.148"
 
 [lib]
 crate-type = ["rlib"]

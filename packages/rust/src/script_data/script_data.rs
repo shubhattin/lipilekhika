@@ -1,4 +1,3 @@
-use rust_embed::RustEmbed;
 use serde::Deserialize;
 
 use std::collections::HashMap;
@@ -7,9 +6,9 @@ use std::sync::OnceLock;
 /// currently for simplicity using a single cache for all script data
 static SCRIPT_DATA_CACHE: OnceLock<HashMap<String, ScriptData>> = OnceLock::new();
 
-#[derive(RustEmbed)]
-#[folder = "src/data/script_data/"]
-struct ScriptAssets;
+mod generated {
+  include!(concat!(env!("OUT_DIR"), "/generated_script_data.rs"));
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -120,28 +119,7 @@ impl ScriptData {
     }
   }
   fn load_all() -> HashMap<String, ScriptData> {
-    let mut map = HashMap::new();
-
-    for file in ScriptAssets::iter() {
-      let name = file.as_ref();
-
-      if !name.ends_with(".json") {
-        continue;
-      }
-
-      let script_name = name.trim_end_matches(".json");
-
-      let asset = ScriptAssets::get(name).unwrap_or_else(|| panic!("Asset `{}` missing", name));
-
-      let json = std::str::from_utf8(asset.data.as_ref()).expect("Invalid UTF-8");
-
-      let data = serde_json::from_str::<ScriptData>(json)
-        .unwrap_or_else(|e| panic!("Parse error in {}: {}", name, e));
-
-      map.insert(script_name.to_string(), data);
-    }
-
-    map
+    generated::build_all_script_data()
   }
   /// this method assumes that the script name is already normalized,
   /// if not then it will panic.

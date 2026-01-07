@@ -16,11 +16,12 @@ pub struct ScriptListData {
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
+mod generated {
+  include!(concat!(env!("OUT_DIR"), "/generated_script_list.rs"));
+}
+
 pub fn get_script_list_data() -> &'static ScriptListData {
-  SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
-    let file_str = include_str!("../data/script_list.json");
-    serde_json::from_str::<ScriptListData>(file_str).expect("JSON Parse Error")
-  })
+  SCRIPT_LIST_DATA_CACHE.get_or_init(generated::build_script_list_data)
 }
 
 fn capitalize_first_and_after_dash(input: &str) -> String {
