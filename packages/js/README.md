@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
 [![npm downloads](https://img.shields.io/npm/dm/lipilekhika.svg)](https://www.npmjs.com/package/lipilekhika)
-[![JS Package CI](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml/badge.svg)](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml)
+[![Tests](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml/badge.svg)](https://github.com/shubhattin/lipilekhika/actions/workflows/js_ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 📖 **[Documentation](https://lipilekhika.in/getting-started/javascript/)** • 🌐 **[Website](https://lipilekhika.in)** • 📝 **[Changelog](./CHANGELOG.md)**
