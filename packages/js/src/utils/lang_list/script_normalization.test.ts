@@ -8,7 +8,7 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('te')).toBe('Telugu');
       expect(getNormalizedScriptName('tel')).toBe('Telugu');
       expect(getNormalizedScriptName('tam')).toBe('Tamil');
-      expect(getNormalizedScriptName('tam-ex')).toBe('Tamil-Extended');
+      expect(getNormalizedScriptName('tam-ext')).toBe('Tamil-Extended');
       expect(getNormalizedScriptName('ben')).toBe('Bengali');
       expect(getNormalizedScriptName('be')).toBe('Bengali');
       expect(getNormalizedScriptName('ka')).toBe('Kannada');
@@ -36,7 +36,7 @@ describe('getNormalizedScriptName', () => {
       // @ts-ignore
       expect(getNormalizedScriptName('TEL')).toBe('Telugu');
       // @ts-ignore
-      expect(getNormalizedScriptName('TAM-EX')).toBe('Tamil-Extended');
+      expect(getNormalizedScriptName('TAM-EXT')).toBe('Tamil-Extended');
     });
   });
 
@@ -170,11 +170,11 @@ describe('getNormalizedScriptName', () => {
   describe('Edge cases', () => {
     it('should handle acronyms with dashes correctly', () => {
       // @ts-ignore
-      expect(getNormalizedScriptName('tam-ex')).toBe('Tamil-Extended');
+      expect(getNormalizedScriptName('tam-ext')).toBe('Tamil-Extended');
       // @ts-ignore
-      expect(getNormalizedScriptName('TAM-EX')).toBe('Tamil-Extended');
+      expect(getNormalizedScriptName('TAM-EXt')).toBe('Tamil-Extended');
       // @ts-ignore
-      expect(getNormalizedScriptName('Tam-Ex')).toBe('Tamil-Extended');
+      expect(getNormalizedScriptName('Tam-Ext')).toBe('Tamil-Extended');
     });
 
     it('should prioritize exact script matches over acronyms', () => {
