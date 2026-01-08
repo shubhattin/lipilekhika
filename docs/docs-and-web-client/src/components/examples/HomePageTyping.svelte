@@ -32,7 +32,12 @@
 
 <div class="mb-3 flex items-center justify-between">
   <div class="flex items-center gap-2">
-    <img src="/main.png" alt="Lipi Lekhika" class="size-5" />
+    <span
+      class="inline-block size-5 bg-contain bg-center bg-no-repeat"
+      style="background-image: url('/favicon.svg');"
+      aria-label="Lipi Lekhika"
+      role="img"
+    ></span>
     <p class="text-sm font-semibold text-foreground">Try typing</p>
   </div>
   <a href="/app" class="text-xs text-muted-foreground transition-colors hover:text-foreground">
