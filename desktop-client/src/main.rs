@@ -398,16 +398,17 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
   // 4. Try to convert to Unicode character and process through typing context
   if let Some(text) = vk_to_unicode(vk, scan) {
-    // Normalize to a single scalar and lowercase it before feeding TypingContext,
-    // mirroring the browser behaviour where rules are generally case-insensitive.
+    // Normalize to a single scalar before feeding TypingContext.
+    // Important: do NOT lowercase here. Uppercase characters (Shift/CapsLock)
+    // are meaningful for some typing schemes (e.g. A vs a), and the JS/web
+    // implementation passes the character through as-is.
     let mut chars = text.chars();
     if let Some(first) = chars.next() {
       if first.is_control() {
         return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
       }
 
-      // Lowercase so that Shift / CapsLock don't break transliteration rules
-      let key: String = first.to_lowercase().collect();
+      let key: String = first.to_string();
 
       // NOTE: Do NOT call SendInput while holding the context lock.
       // SendInput creates injected key events that re-enter this same hook, which can deadlock.
@@ -446,8 +447,8 @@ unsafe extern "system" fn low_level_keyboard_proc(
 }
 
 fn main() -> windows::core::Result<()> {
-  // Create TypingContext (default: Hindi — change as needed)
-  let context = create_typing_context("Hindi", None).expect("Failed to create typing context");
+  // Create TypingContext (default: Devanagari — change as needed)
+  let context = create_typing_context("Devanagari", None).expect("Failed to create typing context");
   {
     let mut guard = TYPING_CONTEXT.lock().unwrap();
     *guard = Some(context);
@@ -465,15 +466,10 @@ fn main() -> windows::core::Result<()> {
     MOUSE_HOOK = Some(mouse_hook);
 
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║           Lipilekhika Typing Hook Installed                  ║");
+    println!("║                    Lipilekhika Typing Hook                   ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
     println!("║  Toggle: Alt+X  (currently DISABLED)                         ║");
-    println!("║  Script: Hindi                                               ║");
-    println!("║                                                              ║");
-    println!("║  Features:                                                   ║");
-    println!("║  • Shift works for capitalization                            ║");
-    println!("║  • Ctrl+C/V/Z and other shortcuts work normally              ║");
-    println!("║  • Context clears on: click, navigation keys, Backspace      ║");
+    println!("║  Script: Devanagari                                          ║");
     println!("║                                                              ║");
     println!("║  Press Ctrl+C in this console to exit                        ║");
     println!("╚══════════════════════════════════════════════════════════════╝");
