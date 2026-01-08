@@ -39,7 +39,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            packages/rust/target
+            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -107,7 +107,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            packages/rust/target
+            target
           key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-cargo-
@@ -120,12 +120,12 @@ jobs:
       - name: Rename binary (Unix)
         if: runner.os != 'Windows'
         run: |
-          mv packages/rust/target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+          mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
 
       - name: Rename binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          mv packages/rust/target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+          mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
 
       - name: Upload binary to release
         env:
