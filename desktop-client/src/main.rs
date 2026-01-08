@@ -14,6 +14,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use windows::Win32::Foundation::{HINSTANCE, LPARAM, LRESULT, WPARAM};
+use windows::Win32::Graphics::Gdi::{
+  BeginPaint, DrawTextW, EndPaint, SetBkColor, SetTextColor, DT_CENTER, DT_SINGLELINE, DT_VCENTER,
+  PAINTSTRUCT,
+};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
   GetAsyncKeyState, GetKeyState, GetKeyboardLayout, GetKeyboardState, MapVirtualKeyW, SendInput,
@@ -22,9 +26,12 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
   VK_MENU, VK_RWIN, VK_SHIFT,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-  CallNextHookEx, DispatchMessageW, GetMessageW, SetWindowsHookExW, TranslateMessage,
-  UnhookWindowsHookEx, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT, LLKHF_ALTDOWN, MSG, WH_KEYBOARD_LL,
-  WH_MOUSE_LL,
+  CallNextHookEx, CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetClientRect,
+  GetMessageW, GetSystemMetrics, KillTimer, RegisterClassExW, SetLayeredWindowAttributes, SetTimer,
+  SetWindowsHookExW, ShowWindow, TranslateMessage, UnhookWindowsHookEx, HC_ACTION, HHOOK,
+  KBDLLHOOKSTRUCT, LLKHF_ALTDOWN, LWA_ALPHA, MSG, SM_CXSCREEN, SM_CYSCREEN, SW_SHOW,
+  WH_KEYBOARD_LL, WH_MOUSE_LL, WM_DESTROY, WM_PAINT, WM_TIMER, WNDCLASSEXW, WS_EX_LAYERED,
+  WS_EX_TOOLWINDOW, WS_EX_TOPMOST, WS_POPUP,
 };
 
 use lipilekhika::typing::{create_typing_context, TypingContext};
@@ -90,6 +97,18 @@ static mut KEYBOARD_HOOK: Option<HHOOK> = None;
 /// Global mouse hook handle
 static mut MOUSE_HOOK: Option<HHOOK> = None;
 
+/// Notification window class name
+static WINDOW_CLASS_NAME: &str = "LipilekhikaNotification";
+
+/// Notification window handle
+static mut NOTIFICATION_HWND: Option<windows::Win32::Foundation::HWND> = None;
+
+/// Current notification message
+static mut NOTIFICATION_MESSAGE: Option<String> = None;
+
+/// Whether the notification window class has been registered
+static mut WINDOW_CLASS_REGISTERED: bool = false;
+
 // ---- Helper functions ----
 
 /// Clear the typing context
@@ -98,6 +117,154 @@ fn clear_context() {
     if let Some(ctx) = guard.as_mut() {
       ctx.clear_context();
     }
+  }
+}
+
+/// Show a notification popup in the middle-top of the screen
+fn show_notification(message: &str) {
+  unsafe {
+    // Hide any existing notification
+    if let Some(hwnd) = NOTIFICATION_HWND {
+      let _ = KillTimer(hwnd, 1);
+      let _ = DestroyWindow(hwnd);
+      NOTIFICATION_HWND = None;
+    }
+
+    // Store the message
+    NOTIFICATION_MESSAGE = Some(message.to_string());
+
+    // Define class name
+    let class_name_wide: Vec<u16> = WINDOW_CLASS_NAME
+      .encode_utf16()
+      .chain(std::iter::once(0))
+      .collect();
+
+    // Register window class if not already done
+    if !WINDOW_CLASS_REGISTERED {
+      let mut wc = WNDCLASSEXW::default();
+      wc.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
+      wc.lpfnWndProc = Some(notification_window_proc);
+      wc.hInstance = windows::Win32::System::LibraryLoader::GetModuleHandleW(None)
+        .unwrap()
+        .into();
+      wc.lpszClassName = windows::core::PCWSTR(class_name_wide.as_ptr());
+
+      if RegisterClassExW(&wc) == 0 {
+        eprintln!("Failed to register window class");
+        return;
+      }
+
+      WINDOW_CLASS_REGISTERED = true;
+    }
+
+    // Get screen dimensions
+    let screen_width = GetSystemMetrics(SM_CXSCREEN);
+    let screen_height = GetSystemMetrics(SM_CYSCREEN);
+
+    // Calculate window position (middle-top)
+    let window_width = 300;
+    let window_height = 60;
+    let x = (screen_width - window_width) / 2;
+    let y = screen_height / 8; // Top quarter of screen
+
+    // Create window
+    let title_wide: Vec<u16> = "Lipilekhika"
+      .encode_utf16()
+      .chain(std::iter::once(0))
+      .collect();
+
+    let hwnd = CreateWindowExW(
+      WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TOOLWINDOW,
+      windows::core::PCWSTR(class_name_wide.as_ptr()),
+      windows::core::PCWSTR(title_wide.as_ptr()),
+      WS_POPUP,
+      x,
+      y,
+      window_width,
+      window_height,
+      None,
+      None,
+      windows::Win32::System::LibraryLoader::GetModuleHandleW(None).unwrap(),
+      None,
+    );
+
+    let hwnd = match hwnd {
+      Ok(hwnd) => hwnd,
+      Err(_) => {
+        eprintln!("Failed to create notification window");
+        return;
+      }
+    };
+
+    NOTIFICATION_HWND = Some(hwnd);
+
+    // Set window transparency
+    SetLayeredWindowAttributes(
+      hwnd,
+      windows::Win32::Foundation::COLORREF(0),
+      220, // Alpha value (0-255, 255 = opaque)
+      LWA_ALPHA,
+    )
+    .ok();
+
+    // Show window
+    let _ = ShowWindow(hwnd, SW_SHOW);
+
+    // Set timer to hide window after 1500ms
+    SetTimer(hwnd, 1, 1500, None);
+  }
+}
+
+/// Window procedure for the notification window
+unsafe extern "system" fn notification_window_proc(
+  hwnd: windows::Win32::Foundation::HWND,
+  msg: u32,
+  wparam: windows::Win32::Foundation::WPARAM,
+  lparam: windows::Win32::Foundation::LPARAM,
+) -> windows::Win32::Foundation::LRESULT {
+  match msg {
+    WM_PAINT => {
+      let mut ps = PAINTSTRUCT::default();
+      let hdc = BeginPaint(hwnd, &mut ps);
+
+      // Get the message from the static variable
+      if let Some(ref message_str) = NOTIFICATION_MESSAGE {
+        // Draw text
+        let text_color = SetTextColor(hdc, windows::Win32::Foundation::COLORREF(0x00FFFFFF));
+        let bk_color = SetBkColor(hdc, windows::Win32::Foundation::COLORREF(0x00000000));
+
+        let mut rect = windows::Win32::Foundation::RECT::default();
+        let _ = GetClientRect(hwnd, &mut rect);
+
+        let mut text_buffer = message_str.encode_utf16().collect::<Vec<_>>();
+        DrawTextW(
+          hdc,
+          &mut text_buffer,
+          &mut rect,
+          DT_CENTER | DT_VCENTER | DT_SINGLELINE,
+        );
+
+        SetTextColor(hdc, text_color);
+        SetBkColor(hdc, bk_color);
+      }
+
+      let _ = EndPaint(hwnd, &ps);
+      windows::Win32::Foundation::LRESULT(0)
+    }
+    WM_TIMER => {
+      // Timer fired, hide and destroy the window
+      let _ = KillTimer(hwnd, wparam.0 as usize);
+      let _ = DestroyWindow(hwnd);
+      NOTIFICATION_HWND = None;
+      NOTIFICATION_MESSAGE = None;
+      windows::Win32::Foundation::LRESULT(0)
+    }
+    WM_DESTROY => {
+      NOTIFICATION_HWND = None;
+      NOTIFICATION_MESSAGE = None;
+      windows::Win32::Foundation::LRESULT(0)
+    }
+    _ => DefWindowProcW(hwnd, msg, wparam, lparam),
   }
 }
 
@@ -350,9 +517,11 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
     if now_enabled {
       println!("[Typing Mode: ON] - Press Alt+X to disable");
+      show_notification("Typing Mode: ON");
     } else {
       println!("[Typing Mode: OFF] - Press Alt+X to enable");
       clear_context();
+      show_notification("Typing Mode: OFF");
     }
 
     // Suppress Alt+X so it doesn't reach apps
