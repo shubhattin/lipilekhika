@@ -1,5 +1,8 @@
-use crate::script_data::get_normalized_script_name;
+pub use crate::script_data::{get_all_option, get_normalized_script_name, get_script_list_data};
 use crate::transliterate::transliterate_text;
+pub use crate::typing::{
+  ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_typing_data_map,
+};
 use std::collections::HashMap;
 
 mod macros;
@@ -12,7 +15,7 @@ pub mod typing;
 
 /// Transliterates `text` from `from` to `to`.
 ///
-/// - `from` / `to` can be script or language names/aliases (normalized via `get_normalized_script_name`)
+/// - `from` / `to` can be script or language names/aliases
 /// - `trans_options` are the custom transliteration options
 ///
 /// Returns the transliterated text, or an error string if script names are invalid.

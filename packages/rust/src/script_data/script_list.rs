@@ -28,6 +28,7 @@ impl List {
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
+/// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
     let bytes = generated::SCRIPT_LIST_BYTES;
@@ -57,6 +58,7 @@ fn capitalize_first_and_after_dash(input: &str) -> String {
   result
 }
 
+/// Returns the normalized script/language name.
 pub fn get_normalized_script_name(script_name: &str) -> Option<String> {
   let data = get_script_list_data();
 
