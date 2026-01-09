@@ -6,7 +6,7 @@ homepage="https://lipilekhika.in"
 repository = "https://github.com/shubhattin/lipilekhika"
 documentation = "https://lipilekhika.in/getting-started/rust"
 keywords = ["indic-scripts", "transliteration"]
-categories = ["text-processing", "transliteration"]
+categories = ["text-processing", "localization"]
 
 version = "1.0.0"
 edition = "2024"
