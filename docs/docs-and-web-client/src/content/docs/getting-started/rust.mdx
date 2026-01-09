@@ -12,10 +12,6 @@ import { Aside } from '@astrojs/starlight/components';
 
 Lipi Lekhika offers a high-performance, type-safe transliteration library for Rust. All script data is embedded at compile time for zero runtime overhead.
 
-<Aside type="caution">
-  **Beta Release** — This crate is under active development. While the core APIs are stabilizing, some features may still change before the 1.0 release.
-</Aside>
-
 ## Installation
 
 The recommended way to install is using `cargo add`:
@@ -89,6 +85,134 @@ fn main() {
    href="/reference/supported_scripts"
    description="List of all supported scripts/languages and their aliases"
 />
+
+## Utility Functions
+
+### Getting Available Options
+
+Use `get_all_option` to discover which custom options are available for a specific script pair:
+
+```rust
+use lipilekhika::get_all_option;
+
+fn main() {
+    let options = get_all_option("Devanagari", "Telugu").unwrap();
+    
+    for option in options {
+        println!("Available option: {}", option);
+    }
+}
+```
+
+**Parameters:**
+- `from_script_name: &str` — Source script/language name
+- `to_script_name: &str` — Target script/language name
+
+**Returns:** `Result<Vec<String>, String>` — List of option keys or error message
+
+### Getting Typing Data
+
+Use `get_script_typing_data_map` to get typing mappings for a script (useful for building custom input methods):
+
+```rust
+use lipilekhika::get_script_typing_data_map;
+
+fn main() {
+    let typing_data = get_script_typing_data_map("Devanagari").unwrap();
+    
+    // Access common character mappings
+    for (text, list_type, mappings) in &typing_data.common_krama_map {
+        if !mappings.is_empty() {
+            println!("{} can be typed using: {:?}", text, mappings);
+        }
+    }
+    
+    // Access script-specific character mappings
+    for (text, list_type, mappings) in &typing_data.script_specific_krama_map {
+        if !mappings.is_empty() {
+            println!("{} (script-specific) can be typed using: {:?}", text, mappings);
+        }
+    }
+}
+```
+
+**Parameters:**
+- `script: &str` — Script/language name
+
+**Returns:** `Result<ScriptTypingDataMap, String>` — Typing data containing:
+- `common_krama_map` — Mappings for common characters
+- `script_specific_krama_map` — Mappings for script-specific characters
+
+Each mapping is a tuple of `(text: String, type: ListType, input_mappings: Vec<String>)`.
+
+## Typing Module
+
+For real-time character-by-character input, use the `typing` module which provides a stateful context for handling keyboard input.
+
+### Basic Typing Mode
+
+```rust
+use lipilekhika::typing::{TypingContext, TypingContextOptions};
+
+fn main() {
+    let mut ctx = TypingContext::new("Devanagari", None).unwrap();
+    
+    // Process character-by-character input
+    let diff = ctx.take_key_input("n").unwrap();
+    println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
+    // Output: Delete: 0, Add: 'न्'
+    
+    let diff = ctx.take_key_input("a").unwrap();
+    println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
+    // Output: Delete: 2, Add: 'न'
+    
+    // Clear context when needed
+    ctx.clear_context();
+}
+```
+
+### With Custom Options
+
+```rust
+use lipilekhika::typing::{TypingContext, TypingContextOptions};
+
+fn main() {
+    let options = TypingContextOptions {
+        auto_context_clear_time_ms: 3000,
+        use_native_numerals: true,
+        include_inherent_vowel: true, // For Hindi/Bengali style typing
+    };
+    
+    let mut ctx = TypingContext::new("Devanagari", Some(options)).unwrap();
+    
+    let diff = ctx.take_key_input("k").unwrap();
+    println!("{}", diff.diff_add_text); // क (with inherent vowel)
+}
+```
+
+### Typing Module Types
+
+- **`TypingContext`** — Stateful context for typing mode
+  - `new(typing_lang: &str, options: Option<TypingContextOptions>)` — Create new context
+  - `take_key_input(&mut self, key: &str)` — Process single character input
+  - `clear_context(&mut self)` — Clear internal state
+
+- **`TypingContextOptions`** — Configuration for typing behavior
+  - `auto_context_clear_time_ms: u64` — Auto-clear timeout (default: 4500ms)
+  - `use_native_numerals: bool` — Use script-native numerals (default: true)
+  - `include_inherent_vowel: bool` — Include inherent vowel/schwa (default: false)
+
+- **`TypingDiff`** — Result of processing a key input
+  - `to_delete_chars_count: usize` — Characters to delete from current state
+  - `diff_add_text: String` — Text to insert
+
+- **`ScriptTypingDataMap`** — Typing data for a script
+  - `common_krama_map: Vec<TypingDataMapItem>` — Common character mappings
+  - `script_specific_krama_map: Vec<TypingDataMapItem>` — Script-specific mappings
+
+- **`ListType`** — Character type enum: `Anya`, `Vyanjana`, `Matra`, `Svara`
+
+- **`TypingDataMapItem`** — Type alias for `(String, ListType, Vec<String>)`
 
 ## Performance Considerations
 
