@@ -16,9 +16,9 @@ export default defineConfig({
   integrations: [
     starlight({
       logo: {
-        src: '/public/main.png'
+        src: '/public/favicon.svg'
       },
-      favicon: 'favicon.ico',
+      favicon: 'favicon.svg',
       plugins: [starlightThemeNext()],
       title: 'Lipi Lekhika',
       tagline: 'Type Indian Languages with Full Speed and Accuracy',
