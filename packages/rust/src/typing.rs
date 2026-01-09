@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-use crate::script_data::{ScriptData, get_normalized_script_name};
+use crate::script_data::{List, ScriptData, get_normalized_script_name};
 use crate::transliterate::transliterate::{
   TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
 };
@@ -240,6 +240,162 @@ fn truncate_last_chars(s: &mut String, n: usize) {
       break;
     }
   }
+}
+
+/// Type of a character in a script's list.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ListType {
+  Anya,
+  Vyanjana,
+  Matra,
+  Svara,
+}
+
+impl ListType {
+  /// Converts a List variant to its ListType.
+  fn from_list(list: &List) -> Self {
+    match list {
+      List::Anya { .. } => ListType::Anya,
+      List::Vyanjana { .. } => ListType::Vyanjana,
+      List::Matra { .. } => ListType::Matra,
+      List::Svara { .. } => ListType::Svara,
+    }
+  }
+}
+
+/// An item in the typing data map containing the text, its type, and associated input mappings.
+pub type TypingDataMapItem = (String, ListType, Vec<String>);
+
+/// Result of [`get_script_typing_data_map`] containing typing data for a script.
+#[derive(Debug)]
+pub struct ScriptTypingDataMap {
+  /// Mappings for common characters across scripts (from krama_text_arr).
+  pub common_krama_map: Vec<TypingDataMapItem>,
+  /// Mappings for script-specific characters (from custom_script_chars_arr).
+  /// Duplicate key mappings are handled in the common_krama_map.
+  pub script_specific_krama_map: Vec<TypingDataMapItem>,
+}
+
+/// Returns the typing data map for a script.
+///
+/// - `script` - The script/language name to get the typing data map for.
+///
+/// Returns the typing data map for the script, containing mappings for
+/// both common characters and script-specific characters.
+///
+/// Returns an error if the script name is invalid or is 'Normal' (English).
+pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, String> {
+  let normalized_typing_lang =
+    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
+
+  if normalized_typing_lang == "Normal" {
+    return Err(format!("Invalid script name: {}", script));
+  }
+
+  let script_data = ScriptData::get_script_data(&normalized_typing_lang);
+  let common_attr = script_data.get_common_attr();
+
+  /// Merges items that end up with the same displayed text (and type),
+  /// and keeps mappings unique.
+  fn merge_duplicate_text_mappings(items: Vec<TypingDataMapItem>) -> Vec<TypingDataMapItem> {
+    use std::collections::{HashMap, HashSet};
+
+    let mut key_to_index: HashMap<(String, ListType), usize> = HashMap::new();
+    let mut mapping_sets: Vec<HashSet<String>> = Vec::new();
+    let mut out: Vec<TypingDataMapItem> = Vec::new();
+
+    for (text, list_type, mappings) in items {
+      let key = (text.clone(), list_type.clone());
+
+      if let Some(&existing_index) = key_to_index.get(&key) {
+        // Merge into existing item
+        let set = &mut mapping_sets[existing_index];
+        let target_mappings = &mut out[existing_index].2;
+        for m in mappings {
+          if set.insert(m.clone()) {
+            target_mappings.push(m);
+          }
+        }
+      } else {
+        // New item
+        let mut set = HashSet::new();
+        let mut uniq = Vec::new();
+        for m in mappings {
+          if set.insert(m.clone()) {
+            uniq.push(m);
+          }
+        }
+        key_to_index.insert(key, out.len());
+        out.push((text, list_type, uniq));
+        mapping_sets.push(set);
+      }
+    }
+
+    // Drop items that have no typing mappings
+    out
+      .into_iter()
+      .filter(|(_, _, mappings)| !mappings.is_empty())
+      .collect()
+  }
+
+  // Initialize common_krama_map from krama_text_arr
+  let mut common_krama_map: Vec<TypingDataMapItem> = common_attr
+    .krama_text_arr
+    .iter()
+    .map(|(text, list_index)| {
+      let list_type = list_index
+        .and_then(|idx| common_attr.list.get(idx as usize))
+        .map(ListType::from_list)
+        .unwrap_or(ListType::Anya);
+      (text.clone(), list_type, Vec::new())
+    })
+    .collect();
+
+  // Initialize script_specific_krama_map from custom_script_chars_arr
+  let mut script_specific_krama_map: Vec<TypingDataMapItem> = common_attr
+    .custom_script_chars_arr
+    .iter()
+    .map(|(text, list_index, _)| {
+      let list_type = list_index
+        .and_then(|idx| common_attr.list.get(idx as usize))
+        .map(ListType::from_list)
+        .unwrap_or(ListType::Anya);
+      (text.clone(), list_type, Vec::new())
+    })
+    .collect();
+
+  // Populate mappings from typing_text_to_krama_map
+  for (normal_text_map, item) in &common_attr.typing_text_to_krama_map {
+    if normal_text_map.is_empty() {
+      continue;
+    }
+
+    if let Some(custom_back_ref) = item.custom_back_ref {
+      // Add to script_specific_krama_map
+      if let Some(entry) = script_specific_krama_map.get_mut(custom_back_ref as usize) {
+        entry.2.push(normal_text_map.clone());
+      }
+    } else if let Some(ref krama) = item.krama {
+      // Ignore entries with length > 1 (intermediate typing states)
+      if krama.len() == 1 {
+        let krama_index = krama[0];
+        if krama_index >= 0 {
+          if let Some(entry) = common_krama_map.get_mut(krama_index as usize) {
+            entry.2.push(normal_text_map.clone());
+          }
+        }
+      }
+    }
+  }
+
+  // Merge duplicates
+  common_krama_map = merge_duplicate_text_mappings(common_krama_map);
+  script_specific_krama_map = merge_duplicate_text_mappings(script_specific_krama_map);
+
+  Ok(ScriptTypingDataMap {
+    common_krama_map,
+    script_specific_krama_map,
+  })
 }
 
 #[cfg(test)]
@@ -598,5 +754,60 @@ mod tests {
     {
       let _ = writeln!(file, "{}", summary);
     }
+  }
+
+  #[test]
+  fn test_get_script_typing_data_map_valid_script() {
+    let result = get_script_typing_data_map("Devanagari");
+    assert!(result.is_ok());
+    let data = result.unwrap();
+
+    // Should have some entries in both maps
+    assert!(!data.common_krama_map.is_empty());
+
+    // Verify structure: each item should be (text, type, mappings)
+    for (text, _list_type, _mappings) in &data.common_krama_map {
+      assert!(!text.is_empty());
+    }
+  }
+
+  #[test]
+  fn test_get_script_typing_data_map_normalized_names() {
+    // Test with acronym that should be normalized
+    let result = get_script_typing_data_map("dev");
+    assert!(result.is_ok());
+  }
+
+  #[test]
+  fn test_get_script_typing_data_map_invalid_script() {
+    let result = get_script_typing_data_map("InvalidScript");
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
+  }
+
+  #[test]
+  fn test_get_script_typing_data_map_normal_script() {
+    // Should reject Normal/English
+    let result = get_script_typing_data_map("Normal");
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "Invalid script name: Normal");
+  }
+
+  #[test]
+  fn test_get_script_typing_data_map_mappings_populated() {
+    let result = get_script_typing_data_map("Telugu");
+    assert!(result.is_ok());
+    let data = result.unwrap();
+
+    // At least some entries should have mappings populated
+    let has_mappings = data
+      .common_krama_map
+      .iter()
+      .any(|(_, _, mappings)| !mappings.is_empty());
+
+    assert!(
+      has_mappings,
+      "Expected at least some characters to have typing mappings"
+    );
   }
 }

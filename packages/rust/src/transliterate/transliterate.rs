@@ -397,7 +397,7 @@ fn custom_option_script_type_matches(
     _ => expected == actual,
   }
 }
-fn get_active_custom_options(
+pub fn get_active_custom_options(
   from_script_data: &ScriptData,
   to_script_data: &ScriptData,
   input_options: Option<&HashMap<String, bool>>,
