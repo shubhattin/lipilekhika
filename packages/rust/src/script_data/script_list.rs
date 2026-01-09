@@ -1,25 +1,14 @@
-use serde::Deserialize;
-use std::collections::HashMap;
 use std::sync::OnceLock;
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-
-pub struct ScriptListData {
-  pub scripts: HashMap<String, u8>,
-  pub langs: HashMap<String, u8>,
-  /// all langs are mapped to a script
-  pub lang_script_map: HashMap<String, String>,
-  /// contains aliases which map to script
-  pub script_alternates_map: HashMap<String, String>,
-}
+use super::ScriptListData;
+use super::generated;
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
-    let file_str = include_str!("../data/script_list.json");
-    serde_json::from_str::<ScriptListData>(file_str).expect("JSON Parse Error")
+    let bytes = generated::SCRIPT_LIST_BYTES;
+    bincode::deserialize(bytes).expect("bincode decode failed for script_list")
   })
 }
 
