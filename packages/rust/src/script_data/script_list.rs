@@ -1,25 +1,37 @@
-use serde::Deserialize;
-use std::collections::HashMap;
 use std::sync::OnceLock;
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+use super::generated;
+use super::schema::{List, ScriptListData};
 
-pub struct ScriptListData {
-  pub scripts: HashMap<String, u8>,
-  pub langs: HashMap<String, u8>,
-  /// all langs are mapped to a script
-  pub lang_script_map: HashMap<String, String>,
-  /// contains aliases which map to script
-  pub script_alternates_map: HashMap<String, String>,
+impl List {
+  pub fn get_krama_ref(&self) -> &Vec<i16> {
+    match self {
+      List::Anya { krama_ref }
+      | List::Vyanjana { krama_ref }
+      | List::Matra { krama_ref }
+      | List::Svara { krama_ref, .. } => krama_ref,
+    }
+  }
+  pub fn is_svara(&self) -> bool {
+    matches!(self, List::Svara { .. })
+  }
+  pub fn is_matra(&self) -> bool {
+    matches!(self, List::Matra { .. })
+  }
+  pub fn is_vyanjana(&self) -> bool {
+    matches!(self, List::Vyanjana { .. })
+  }
+  pub fn is_anya(&self) -> bool {
+    matches!(self, List::Anya { .. })
+  }
 }
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
-    let file_str = include_str!("../data/script_list.json");
-    serde_json::from_str::<ScriptListData>(file_str).expect("JSON Parse Error")
+    let bytes = generated::SCRIPT_LIST_BYTES;
+    bincode::deserialize(bytes).expect("bincode decode failed for script_list")
   })
 }
 

@@ -2,3 +2,4 @@
 members = [
     "packages/rust",
 ]
+resolver = "3"
