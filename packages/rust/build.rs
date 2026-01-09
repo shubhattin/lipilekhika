@@ -1,6 +1,12 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/*
+We are pre parsing the json, this eliminated the need for serde_json parser.
+serde is stil needed for bincode serialization.
+The resulting binary is smaller and faster to load.
+*/
+
 mod schema {
   // Re-use the exact same schema types as the library.
   include!("src/script_data/schema.rs");
