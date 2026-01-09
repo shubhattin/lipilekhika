@@ -1,7 +1,30 @@
 use std::sync::OnceLock;
 
-use super::ScriptListData;
 use super::generated;
+use super::schema::{List, ScriptListData};
+
+impl List {
+  pub fn get_krama_ref(&self) -> &Vec<i16> {
+    match self {
+      List::Anya { krama_ref }
+      | List::Vyanjana { krama_ref }
+      | List::Matra { krama_ref }
+      | List::Svara { krama_ref, .. } => krama_ref,
+    }
+  }
+  pub fn is_svara(&self) -> bool {
+    matches!(self, List::Svara { .. })
+  }
+  pub fn is_matra(&self) -> bool {
+    matches!(self, List::Matra { .. })
+  }
+  pub fn is_vyanjana(&self) -> bool {
+    matches!(self, List::Vyanjana { .. })
+  }
+  pub fn is_anya(&self) -> bool {
+    matches!(self, List::Anya { .. })
+  }
+}
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 

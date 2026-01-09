@@ -1,8 +1,21 @@
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
-use super::ScriptData;
 use super::generated;
+use super::schema::{CommonScriptAttr, ScriptData};
+
+impl ScriptData {
+  pub fn get_common_attr(&self) -> &CommonScriptAttr {
+    match self {
+      ScriptData::Brahmic {
+        common_script_attr, ..
+      }
+      | ScriptData::Other {
+        common_script_attr, ..
+      } => &common_script_attr,
+    }
+  }
+}
 
 /// currently for simplicity using a single cache for all script data
 static SCRIPT_DATA_CACHE: OnceLock<HashMap<String, ScriptData>> = OnceLock::new();

@@ -65,30 +65,6 @@ impl From<ListJson> for List {
   }
 }
 
-#[allow(dead_code)]
-impl List {
-  pub fn get_krama_ref(&self) -> &Vec<i16> {
-    match self {
-      List::Anya { krama_ref }
-      | List::Vyanjana { krama_ref }
-      | List::Matra { krama_ref }
-      | List::Svara { krama_ref, .. } => krama_ref,
-    }
-  }
-  pub fn is_svara(&self) -> bool {
-    matches!(self, List::Svara { .. })
-  }
-  pub fn is_matra(&self) -> bool {
-    matches!(self, List::Matra { .. })
-  }
-  pub fn is_vyanjana(&self) -> bool {
-    matches!(self, List::Vyanjana { .. })
-  }
-  pub fn is_anya(&self) -> bool {
-    matches!(self, List::Anya { .. })
-  }
-}
-
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CommonScriptAttrJson {
@@ -196,20 +172,6 @@ impl From<ScriptDataJson> for ScriptData {
         common_script_attr: common_script_attr.into(),
         schwa_character,
       },
-    }
-  }
-}
-
-#[allow(dead_code)]
-impl ScriptData {
-  pub fn get_common_attr(&self) -> &CommonScriptAttr {
-    match self {
-      ScriptData::Brahmic {
-        common_script_attr, ..
-      }
-      | ScriptData::Other {
-        common_script_attr, ..
-      } => &common_script_attr,
     }
   }
 }
