@@ -341,7 +341,7 @@ checksum = "c5a2d376baa530d1238d133232d15e239abad80d05838b4b59354e5268af431f"
 
 [[package]]
 name = "lipilekhika"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "bincode",
  "clap",
