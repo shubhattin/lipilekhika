@@ -72,11 +72,11 @@ fn parse_args() -> Result<(String, String, String), String> {
       // handle e.g. -tvalue or -t value
       if chars.len() >= 2 {
         let flag = chars[1];
-        let rest = &a[2..];
+        let rest = chars[2..].iter().collect::<String>();
         let value: String;
         if !rest.is_empty() {
           // combined like -tvalue
-          value = rest.to_string();
+          value = rest;
         } else {
           // value is next arg
           i += 1;
