@@ -664,6 +664,11 @@ const _lipi_parivartak = async (val, from, to) => {
     out = out.replaceAll(/C(?!h)/g, "ch");
     out = out.replaceAll("''", "`");
   }
+  if (to === "Romanized") {
+    out = out.replaceAll("ṛ", "r̤");
+    out = out.replaceAll("r̥̄", "ṝ");
+    out = out.replaceAll("r̥", "ṛ");
+  }
   return out;
 };
 
