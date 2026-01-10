@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (rust-lib@v1.0.2)
+## rust-lib@v1.0.2
 
  - *New Mappings* for Romanized
  - ऋ -> ṛ
