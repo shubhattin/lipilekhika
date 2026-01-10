@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.3)
+
+ - *New Mappings* for Romanized
+ - ऋ -> ṛ
+ - ढ़ ड़ -> r̤ha r̤a
+
 ## js-lib@v1.0.2
 
 - add `w` as typing time alternative for `v`
