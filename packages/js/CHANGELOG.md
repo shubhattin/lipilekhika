@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (js-lib@v1.0.3)
+## js-lib@v1.0.3
 
  - *New Mappings* for Romanized
  - ऋ -> ṛ
