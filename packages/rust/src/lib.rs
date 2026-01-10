@@ -1,3 +1,4 @@
+use crate::script_data::ScriptData;
 pub use crate::script_data::{get_all_option, get_normalized_script_name, get_script_list_data};
 use crate::transliterate::transliterate_text;
 pub use crate::typing::{
@@ -43,6 +44,17 @@ pub fn transliterate(
   )?;
 
   Ok(result.output)
+}
+
+/// Returns the schwa deletion characteristic of the script provided.
+pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, String> {
+  let normalized_script_name = get_normalized_script_name(script_name)
+    .ok_or_else(|| format!("Invalid script name: {}", script_name))?;
+  let script_data = ScriptData::get_script_data(&normalized_script_name);
+  match script_data {
+    ScriptData::Brahmic { schwa_property, .. } => Ok(Some(*schwa_property)),
+    ScriptData::Other { .. } => Ok(None),
+  }
 }
 
 #[cfg(test)]

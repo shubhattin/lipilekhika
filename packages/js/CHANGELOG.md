@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.4)
+ - added a new function `getSchwaStatusForScript` to get the schwa deletion characerstic of the script provided.
+
 ## js-lib@v1.0.3
 
  - *New Mappings* for Romanized
