@@ -1,6 +1,6 @@
-use lipilekhika::typing::{create_typing_context, TypingContext};
+use lipilekhika::typing::{TypingContext, create_typing_context};
 use std::{
-  sync::{atomic::AtomicBool, Arc, Mutex},
+  sync::{Arc, Mutex, atomic::AtomicBool},
   thread,
 };
 
@@ -23,7 +23,7 @@ fn main() {
 
   let state_clone = Arc::clone(&app_state);
   let handle = thread::spawn(move || {
-    // platform specifickeyboard handler thread
+    // latform-specific keyboard handler thread
     if let Err(err) = platform::run(state_clone) {
       eprintln!("{err}");
       std::process::exit(1);

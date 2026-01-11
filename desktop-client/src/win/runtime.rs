@@ -3,7 +3,7 @@ use std::sync::Arc;
 use windows::Win32::Foundation::HINSTANCE;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::WindowsAndMessaging::{
-  DispatchMessageW, GetMessageW, TranslateMessage, MSG,
+  DispatchMessageW, GetMessageW, MSG, TranslateMessage,
 };
 
 use super::WinAppState;
@@ -30,7 +30,15 @@ pub fn run(app_state: Arc<crate::AppState>) -> windows::core::Result<()> {
 
     // Message loop to keep process alive and allow hooks to run
     let mut msg = MSG::default();
-    while GetMessageW(&mut msg, None, 0, 0).into() {
+    loop {
+      let ret = GetMessageW(&mut msg, None, 0, 0);
+      if ret.0 == 0 {
+        break; // WM_QUIT received  
+      }
+      if ret.0 == -1 {
+        // Error occurred - could log or return error
+        break;
+      }
       let _ = TranslateMessage(&msg);
       DispatchMessageW(&msg);
     }

@@ -1,20 +1,20 @@
-use super::constants::*;
 use super::WinAppState;
+use super::constants::*;
 use std::cell::RefCell;
 use std::mem::size_of;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 
 use windows::Win32::Foundation::{HINSTANCE, LPARAM, LRESULT, WPARAM};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-  GetAsyncKeyState, GetKeyState, GetKeyboardLayout, GetKeyboardState, MapVirtualKeyW, SendInput,
-  ToUnicodeEx, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP,
-  KEYEVENTF_UNICODE, MAP_VIRTUAL_KEY_TYPE, VIRTUAL_KEY, VK_BACK, VK_CAPITAL, VK_CONTROL, VK_LWIN,
-  VK_MENU, VK_RWIN, VK_SHIFT,
+  GetAsyncKeyState, GetKeyState, GetKeyboardLayout, GetKeyboardState, INPUT, INPUT_0,
+  INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE,
+  MAP_VIRTUAL_KEY_TYPE, MapVirtualKeyW, SendInput, ToUnicodeEx, VIRTUAL_KEY, VK_BACK, VK_CAPITAL,
+  VK_CONTROL, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-  CallNextHookEx, SetWindowsHookExW, UnhookWindowsHookEx, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT,
-  LLKHF_ALTDOWN, WH_KEYBOARD_LL, WH_MOUSE_LL,
+  CallNextHookEx, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT, LLKHF_ALTDOWN, SetWindowsHookExW,
+  UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
 };
 
 thread_local! {
@@ -38,14 +38,16 @@ pub struct HookManager {
 
 impl HookManager {
   pub unsafe fn install(hinst: HINSTANCE) -> windows::core::Result<Self> {
-    let keyboard = SetWindowsHookExW(
-      WH_KEYBOARD_LL,
-      Some(low_level_keyboard_proc),
-      Some(hinst),
-      0,
-    )?;
-    let mouse = SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), Some(hinst), 0)?;
-    Ok(Self { keyboard, mouse })
+    unsafe {
+      let keyboard = SetWindowsHookExW(
+        WH_KEYBOARD_LL,
+        Some(low_level_keyboard_proc),
+        Some(hinst),
+        0,
+      )?;
+      let mouse = SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), Some(hinst), 0)?;
+      Ok(Self { keyboard, mouse })
+    }
   }
 }
 
@@ -274,7 +276,7 @@ unsafe extern "system" fn low_level_mouse_proc(
   }
 
   // Always pass mouse events through
-  CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
+  unsafe { CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam) }
 }
 
 /// Low-level keyboard hook procedure
@@ -283,131 +285,133 @@ unsafe extern "system" fn low_level_keyboard_proc(
   wparam: WPARAM,
   lparam: LPARAM,
 ) -> LRESULT {
-  if code != HC_ACTION as i32 {
-    return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-  }
-
-  let Some(result) = with_state(|state| {
-    let kb = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
-    let vk = kb.vkCode;
-    let scan = MapVirtualKeyW(vk, MAP_VIRTUAL_KEY_TYPE(0)); // MAPVK_VK_TO_VSC = 0
-
-    let msg = wparam.0 as u32;
-    let is_keydown = msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN;
-
-    // Important: ignore injected keys (we use SendInput which would otherwise re-enter this hook).
-    // If we don't do this (and if we hold locks while injecting), the hook can deadlock / stop working.
-    let is_injected = (kb.flags.0 & LLKHF_INJECTED_FLAG) != 0;
-    if is_injected {
+  unsafe {
+    if code != HC_ACTION as i32 {
       return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
-    // ---- Handle Alt+X toggle (works regardless of typing mode) ----
-    if is_keydown && vk == VK_X && (kb.flags.0 & LLKHF_ALTDOWN.0) != 0 {
-      let prev = state
-        .app_state
-        .typing_enabled
-        .fetch_xor(true, Ordering::SeqCst);
-      // ^ a xor 1 = !a
-      let now_enabled = !prev;
+    let Some(result) = with_state(|state| {
+      let kb = &*(lparam.0 as *const KBDLLHOOKSTRUCT);
+      let vk = kb.vkCode;
+      let scan = MapVirtualKeyW(vk, MAP_VIRTUAL_KEY_TYPE(0)); // MAPVK_VK_TO_VSC = 0
 
-      if now_enabled {
-        println!("[Typing Mode: ON] - Press Alt+X to disable");
-      } else {
-        println!("[Typing Mode: OFF] - Press Alt+X to enable");
-        clear_context(state);
+      let msg = wparam.0 as u32;
+      let is_keydown = msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN;
+
+      // Important: ignore injected keys (we use SendInput which would otherwise re-enter this hook).
+      // If we don't do this (and if we hold locks while injecting), the hook can deadlock / stop working.
+      let is_injected = (kb.flags.0 & LLKHF_INJECTED_FLAG) != 0;
+      if is_injected {
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
       }
 
-      // Suppress Alt+X so it doesn't reach apps
-      return LRESULT(1);
-    }
+      // ---- Handle Alt+X toggle (works regardless of typing mode) ----
+      if is_keydown && vk == VK_X && (kb.flags.0 & LLKHF_ALTDOWN.0) != 0 {
+        let prev = state
+          .app_state
+          .typing_enabled
+          .fetch_xor(true, Ordering::SeqCst);
+        // ^ a xor 1 = !a
+        let now_enabled = !prev;
 
-    // If typing mode is disabled, pass everything through
-    // like preventDefault in web
-    if !state.app_state.typing_enabled.load(Ordering::SeqCst) {
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // ---- Typing mode is enabled ----
-
-    // 1. Always pass through modifier-only keys (Shift, Ctrl, Alt, Win, Caps Lock, etc.)
-    //    These are needed for capitalization and shortcuts
-    if is_modifier_key(vk) {
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // Only process on keydown
-    if !is_keydown {
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // 2. Clear context and pass through for navigation/editing keys
-    if is_context_clear_key(vk) {
-      clear_context(state);
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // 3. Pass through shortcuts (Ctrl+anything, Win+anything, Alt+anything except Alt+X)
-    //    This allows Ctrl+C, Ctrl+V, Ctrl+Z, Win+D, Alt+Tab, etc. to work
-    if is_ctrl_or_win_pressed() {
-      clear_context(state);
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // Alt combinations (except Alt+X which is handled above)
-    if is_alt_pressed() {
-      clear_context(state);
-      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-    }
-
-    // 4. Try to convert to Unicode character and process through typing context
-    if let Some(text) = vk_to_unicode(vk, scan) {
-      // Normalize to a single scalar before feeding TypingContext.
-      // Important: do NOT lowercase here. Uppercase characters (Shift/CapsLock)
-      // are meaningful for some typing schemes (e.g. A vs a), and the JS/web
-      // implementation passes the character through as-is.
-      let mut chars = text.chars();
-      if let Some(first) = chars.next() {
-        if first.is_control() {
-          return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+        if now_enabled {
+          println!("[Typing Mode: ON] - Press Alt+X to disable");
+        } else {
+          println!("[Typing Mode: OFF] - Press Alt+X to enable");
+          clear_context(state);
         }
 
-        let key: String = first.to_string();
-
-        // NOTE: Do NOT call SendInput while holding the context lock.
-        // SendInput creates injected key events that re-enter this same hook, which can deadlock.
-        let diff = {
-          let mut guard = match state.app_state.typing_context.lock() {
-            Ok(g) => g,
-            Err(_) => return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam),
-          };
-          match guard.take_key_input(&key) {
-            Ok(d) => d,
-            Err(_e) => {
-              guard.clear_context();
-              return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-            }
-          }
-        };
-
-        // Now inject, with the lock released.
-        if diff.to_delete_chars_count > 0 {
-          send_backspaces(diff.to_delete_chars_count);
-        }
-        if !diff.diff_add_text.is_empty() {
-          send_unicode_text(&diff.diff_add_text);
-        }
-
-        // Suppress original key (we've already handled it)
+        // Suppress Alt+X so it doesn't reach apps
         return LRESULT(1);
       }
-    }
 
-    // Not handled — pass to next hook
-    CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
-  }) else {
-    return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-  };
+      // If typing mode is disabled, pass everything through
+      // like preventDefault in web
+      if !state.app_state.typing_enabled.load(Ordering::SeqCst) {
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
 
-  result
+      // ---- Typing mode is enabled ----
+
+      // 1. Always pass through modifier-only keys (Shift, Ctrl, Alt, Win, Caps Lock, etc.)
+      //    These are needed for capitalization and shortcuts
+      if is_modifier_key(vk) {
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // Only process on keydown
+      if !is_keydown {
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // 2. Clear context and pass through for navigation/editing keys
+      if is_context_clear_key(vk) {
+        clear_context(state);
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // 3. Pass through shortcuts (Ctrl+anything, Win+anything, Alt+anything except Alt+X)
+      //    This allows Ctrl+C, Ctrl+V, Ctrl+Z, Win+D, Alt+Tab, etc. to work
+      if is_ctrl_or_win_pressed() {
+        clear_context(state);
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // Alt combinations (except Alt+X which is handled above)
+      if is_alt_pressed() {
+        clear_context(state);
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // 4. Try to convert to Unicode character and process through typing context
+      if let Some(text) = vk_to_unicode(vk, scan) {
+        // Normalize to a single scalar before feeding TypingContext.
+        // Important: do NOT lowercase here. Uppercase characters (Shift/CapsLock)
+        // are meaningful for some typing schemes (e.g. A vs a), and the JS/web
+        // implementation passes the character through as-is.
+        let mut chars = text.chars();
+        if let Some(first) = chars.next() {
+          if first.is_control() {
+            return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+          }
+
+          let key: String = first.to_string();
+
+          // NOTE: Do NOT call SendInput while holding the context lock.
+          // SendInput creates injected key events that re-enter this same hook, which can deadlock.
+          let diff = {
+            let mut guard = match state.app_state.typing_context.lock() {
+              Ok(g) => g,
+              Err(_) => return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam),
+            };
+            match guard.take_key_input(&key) {
+              Ok(d) => d,
+              Err(_e) => {
+                guard.clear_context();
+                return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+              }
+            }
+          };
+
+          // Now inject, with the lock released.
+          if diff.to_delete_chars_count > 0 {
+            send_backspaces(diff.to_delete_chars_count);
+          }
+          if !diff.diff_add_text.is_empty() {
+            send_unicode_text(&diff.diff_add_text);
+          }
+
+          // Suppress original key (we've already handled it)
+          return LRESULT(1);
+        }
+      }
+
+      // Not handled — pass to next hook
+      CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
+    }) else {
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+    };
+
+    result
+  }
 }
