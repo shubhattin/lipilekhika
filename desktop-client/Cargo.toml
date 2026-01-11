@@ -2,7 +2,7 @@
 name = "lipilekhika-ui"
 version = "0.1.0"
 edition = "2021"
-publish=false
+publish = false
 
 [dependencies]
 lipilekhika = { path = "../packages/rust" }
