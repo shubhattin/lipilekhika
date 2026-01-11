@@ -38,8 +38,13 @@ pub struct HookManager {
 
 impl HookManager {
   pub unsafe fn install(hinst: HINSTANCE) -> windows::core::Result<Self> {
-    let keyboard = SetWindowsHookExW(WH_KEYBOARD_LL, Some(low_level_keyboard_proc), hinst, 0)?;
-    let mouse = SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), hinst, 0)?;
+    let keyboard = SetWindowsHookExW(
+      WH_KEYBOARD_LL,
+      Some(low_level_keyboard_proc),
+      Some(hinst),
+      0,
+    )?;
+    let mouse = SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), Some(hinst), 0)?;
     Ok(Self { keyboard, mouse })
   }
 }
@@ -73,7 +78,7 @@ fn is_modifier_key(vk: u32) -> bool {
       | VK_RWIN_KEY
       | VK_CAPS_LOCK
       | VK_NUMLOCK
-      | VK_SCROLL
+      | super::constants::VK_SCROLL
   )
 }
 
@@ -239,7 +244,7 @@ fn vk_to_unicode(vk: u32, scan: u32) -> Option<String> {
   let mut buf = [0u16; 8];
   let layout = unsafe { GetKeyboardLayout(0) };
 
-  let result = unsafe { ToUnicodeEx(vk, scan, &keystate, &mut buf, 0, layout) };
+  let result = unsafe { ToUnicodeEx(vk, scan, &keystate, &mut buf, 0, Some(layout)) };
 
   if result > 0 {
     let slice = &buf[..result as usize];
@@ -269,7 +274,7 @@ unsafe extern "system" fn low_level_mouse_proc(
   }
 
   // Always pass mouse events through
-  CallNextHookEx(HHOOK::default(), code, wparam, lparam)
+  CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
 }
 
 /// Low-level keyboard hook procedure
@@ -279,7 +284,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
   lparam: LPARAM,
 ) -> LRESULT {
   if code != HC_ACTION as i32 {
-    return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+    return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
   }
 
   let Some(result) = with_state(|state| {
@@ -294,7 +299,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
     // If we don't do this (and if we hold locks while injecting), the hook can deadlock / stop working.
     let is_injected = (kb.flags.0 & LLKHF_INJECTED_FLAG) != 0;
     if is_injected {
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // ---- Handle Alt+X toggle (works regardless of typing mode) ----
@@ -303,6 +308,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
         .app_state
         .typing_enabled
         .fetch_xor(true, Ordering::SeqCst);
+      // ^ a xor 1 = !a
       let now_enabled = !prev;
 
       if now_enabled {
@@ -317,8 +323,9 @@ unsafe extern "system" fn low_level_keyboard_proc(
     }
 
     // If typing mode is disabled, pass everything through
+    // like preventDefault in web
     if !state.app_state.typing_enabled.load(Ordering::SeqCst) {
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // ---- Typing mode is enabled ----
@@ -326,31 +333,31 @@ unsafe extern "system" fn low_level_keyboard_proc(
     // 1. Always pass through modifier-only keys (Shift, Ctrl, Alt, Win, Caps Lock, etc.)
     //    These are needed for capitalization and shortcuts
     if is_modifier_key(vk) {
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // Only process on keydown
     if !is_keydown {
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // 2. Clear context and pass through for navigation/editing keys
     if is_context_clear_key(vk) {
       clear_context(state);
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // 3. Pass through shortcuts (Ctrl+anything, Win+anything, Alt+anything except Alt+X)
     //    This allows Ctrl+C, Ctrl+V, Ctrl+Z, Win+D, Alt+Tab, etc. to work
     if is_ctrl_or_win_pressed() {
       clear_context(state);
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // Alt combinations (except Alt+X which is handled above)
     if is_alt_pressed() {
       clear_context(state);
-      return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+      return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
     }
 
     // 4. Try to convert to Unicode character and process through typing context
@@ -362,7 +369,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
       let mut chars = text.chars();
       if let Some(first) = chars.next() {
         if first.is_control() {
-          return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+          return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
         }
 
         let key: String = first.to_string();
@@ -372,13 +379,13 @@ unsafe extern "system" fn low_level_keyboard_proc(
         let diff = {
           let mut guard = match state.app_state.typing_context.lock() {
             Ok(g) => g,
-            Err(_) => return CallNextHookEx(HHOOK::default(), code, wparam, lparam),
+            Err(_) => return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam),
           };
           match guard.take_key_input(&key) {
             Ok(d) => d,
             Err(_e) => {
               guard.clear_context();
-              return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+              return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
             }
           }
         };
@@ -397,9 +404,9 @@ unsafe extern "system" fn low_level_keyboard_proc(
     }
 
     // Not handled — pass to next hook
-    CallNextHookEx(HHOOK::default(), code, wparam, lparam)
+    CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam)
   }) else {
-    return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
+    return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
   };
 
   result

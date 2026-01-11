@@ -6,10 +6,9 @@ publish = false
 
 [dependencies]
 lipilekhika = { path = "../packages/rust" }
-once_cell = "1.18"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.58", features = [
+windows = { version = "0.62.2", features = [
     "Win32_Foundation",
     "Win32_Graphics",
     "Win32_Graphics_Gdi",
