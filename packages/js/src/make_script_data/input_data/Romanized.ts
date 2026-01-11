@@ -49,10 +49,10 @@ const Romanized: InputOtherScriptType = {
     'ौ': 'au',
     ऑ: 'ô',
     'ॉ': 'ô',
-    ऋ: 'r̥',
-    'ृ': 'r̥',
-    ॠ: 'r̥̄',
-    'ॄ': 'r̥̄',
+    ऋ: 'ṛ',
+    'ृ': 'ṛ',
+    ॠ: 'ṝ',
+    'ॄ': 'ṝ',
     ऌ: 'l̥',
     'ॢ': 'l̥',
     ॡ: 'l̥̄',
@@ -91,10 +91,10 @@ const Romanized: InputOtherScriptType = {
     ट: 'ṭ',
     ठ: 'ṭh',
     ड: 'ḍ',
-    ड़: 'ṛ',
+    ड़: 'r̤',
     ॾ: 'ḍ',
     ढ: 'ḍh',
-    ढ़: 'ṛh',
+    ढ़: 'r̤h',
     ण: 'ṇ',
     प: 'p',
     फ: 'ph',
@@ -176,12 +176,12 @@ const Romanized: InputOtherScriptType = {
     {
       type: 'custom_script_char',
       custom_normal_key: 'R^',
-      specific_text: 'R̥'
+      specific_text: 'Ṛ'
     },
     {
       type: 'custom_script_char',
       custom_normal_key: 'RR^',
-      specific_text: 'R̥̄'
+      specific_text: 'Ṝ'
     },
     {
       type: 'custom_script_char',
@@ -241,7 +241,7 @@ const Romanized: InputOtherScriptType = {
     {
       type: 'custom_script_char',
       custom_normal_key: 'Dz^',
-      specific_text: 'Ṛ'
+      specific_text: 'R̤'
     },
     {
       type: 'custom_script_char',
@@ -251,7 +251,7 @@ const Romanized: InputOtherScriptType = {
     {
       type: 'custom_script_char',
       custom_normal_key: 'Dhz^',
-      specific_text: 'Ṛh'
+      specific_text: 'R̤h'
     },
     {
       type: 'custom_script_char',
@@ -338,14 +338,14 @@ const Romanized: InputOtherScriptType = {
       duplicates: ['Ô']
     },
     {
-      text: 'r̥',
+      text: 'ṛ',
       text_krama: ['R-svara', 'R-mAtrA'],
-      duplicates: ['R̥']
+      duplicates: ['Ṛ', 'r̥', 'R̥']
     },
     {
-      text: 'r̥̄',
+      text: 'ṝ',
       text_krama: ['RR-svara', 'RR-mAtrA'],
-      duplicates: ['R̥̄']
+      duplicates: ['Ṝ', 'r̥̄', 'R̥̄']
     },
     {
       text: 'l̥',
@@ -403,9 +403,9 @@ const Romanized: InputOtherScriptType = {
       duplicates: ['Ḍ']
     },
     {
-      text: 'ṛ',
+      text: 'r̤',
       text_krama: ['Dz'],
-      duplicates: ['Ṛ']
+      duplicates: ['R̤']
     },
     {
       text: 'ḍh',
@@ -413,9 +413,9 @@ const Romanized: InputOtherScriptType = {
       duplicates: ['Ḍh']
     },
     {
-      text: 'ṛh',
+      text: 'r̤h',
       text_krama: ['Dhz'],
-      duplicates: ['Ṛh']
+      duplicates: ['R̤h']
     },
     {
       text: 'ṇ',

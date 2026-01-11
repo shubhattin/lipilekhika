@@ -27,10 +27,15 @@ const shareImageInfo = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
-    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon_180x180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Lipi Lekhika" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <!-- OpenGraph Meta Tags -->
     <meta property="og:title" content={title} />
@@ -81,7 +86,11 @@ const shareImageInfo = {
         <div class="mx-auto max-w-6xl px-4 sm:px-6">
           <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-              <img src="/main.png" alt="Lipi Lekhika" class="size-5" />
+              <span
+                class="inline-block size-5 bg-contain bg-center bg-no-repeat"
+                style="background-image: url('/favicon.svg');"
+                aria-label="Lipi Lekhika"
+                role="img"></span>
               <span>Lipi Lekhika</span>
             </div>
             <div class="flex items-center gap-4 text-sm">

@@ -67,7 +67,7 @@ impl ResultStringBuilder {
       None => None,
     }
   }
-  pub fn pop_last_char(&mut self) -> Option<String> {
+  pub fn pop_last_char(&mut self) -> Option<char> {
     let result_len = self.result.len();
     let lp = self.last_piece();
     match lp {
@@ -80,7 +80,7 @@ impl ResultStringBuilder {
         // ^ slice(0, -1) done with pop inself
         if let Some(ch) = ch {
           self.result[result_len - 1] = lp;
-          return Some(ch.to_string());
+          return Some(ch);
         }
         return None;
       }
@@ -107,7 +107,7 @@ impl ResultStringBuilder {
       }
       Some(c) => {
         self.emit_pieces(before_pieces);
-        self.emit(c);
+        self.emit(c.to_string());
         self.emit_pieces(after_pieces);
       }
     }
@@ -132,7 +132,7 @@ impl ResultStringBuilder {
     match item {
       Some(item) => {
         return Some(InputCursor {
-          ch: item.to_string(),
+          ch: item.to_owned(),
         });
       }
       None => None,
@@ -296,7 +296,7 @@ impl<'a> InputTextCursor<'a> {
     if start > end || end > char_count {
       return None;
     }
-    Some(char_substring(&self.text, start, end).to_string())
+    Some(char_substring(&self.text, start, end).to_owned())
   }
 }
 
@@ -355,7 +355,7 @@ impl ScriptData {
       .iter()
       .map(|&k| self.krama_text_or_empty(k))
       .filter(|s| !s.is_empty())
-      .map(|s| s.to_string())
+      .map(|s| s.to_owned())
       .collect()
   }
 }
@@ -397,12 +397,12 @@ impl ResultStringBuilder {
       let rest_first = first_piece.strip_prefix(halant).unwrap_or("");
       let mut after_pieces: Vec<String> = Vec::new();
       if !rest_first.is_empty() {
-        after_pieces.push(rest_first.to_string());
+        after_pieces.push(rest_first.to_owned());
       }
       for p in pieces.into_iter().skip(1) {
         after_pieces.push(p.to_owned());
       }
-      self.with_last_char_moved_after(&[halant.to_string()], &after_pieces);
+      self.with_last_char_moved_after(&[halant.to_owned()], &after_pieces);
     } else {
       self.with_last_char_moved_after(pieces, &[]);
     }

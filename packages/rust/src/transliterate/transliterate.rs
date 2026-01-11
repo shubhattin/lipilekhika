@@ -123,8 +123,8 @@ impl<'a> TransliterateCtx<'a> {
           }) => self
             .to_script_data
             .krama_text_or_empty(*matra_krama_ref.first().unwrap_or(&-1))
-            .to_string(),
-          _ => item_text.unwrap_or("").to_string(),
+            .to_owned(),
+          _ => item_text.unwrap_or("").to_owned(),
         };
 
         if let ScriptData::Brahmic { halant, .. } = self.to_script_data {
@@ -153,7 +153,7 @@ impl<'a> TransliterateCtx<'a> {
           let should_reorder = is_script_tamil_ext!(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
           self.result.emit_pieces_with_reorder(
-            &[brahmic_halant.to_string()],
+            &[brahmic_halant.to_owned()],
             to_halant,
             should_reorder,
           );
@@ -195,7 +195,7 @@ impl<'a> TransliterateCtx<'a> {
           let should_reorder = is_script_tamil_ext!(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
           self.result.emit_pieces_with_reorder(
-            &[brahmic_halant.to_string()],
+            &[brahmic_halant.to_owned()],
             to_halant,
             should_reorder,
           );
@@ -397,7 +397,7 @@ fn custom_option_script_type_matches(
     _ => expected == actual,
   }
 }
-fn get_active_custom_options(
+pub fn get_active_custom_options(
   from_script_data: &ScriptData,
   to_script_data: &ScriptData,
   input_options: Option<&HashMap<String, bool>>,
@@ -644,7 +644,7 @@ pub fn transliterate_text_core(
   let opts = options.unwrap_or_default();
 
   if opts.typing_mode && from_script_name != "Normal" {
-    return Err("Typing mode is only supported with Normal script as the input".to_string());
+    return Err("Typing mode is only supported with Normal script as the input".to_owned());
   }
   if opts.typing_mode {
     trans_options.insert("normal_to_all:use_typing_chars".to_string(), true);
@@ -730,7 +730,7 @@ pub fn transliterate_text_core(
     if CHARS_TO_SKIP.contains(&ch.chars().next().unwrap_or('\0')) {
       ctx.cursor.advance(1);
       if ctx.prev_context_in_use {
-        ctx.prev_context_cleanup(Some((Some(" ".to_string()), None)), None, None);
+        ctx.prev_context_cleanup(Some((Some(" ".to_owned()), None)), None, None);
         ctx.prev_context.clear();
       }
       ctx.result.emit(ch);
@@ -1296,9 +1296,9 @@ pub fn transliterate_text_core(
                   .and_then(|k| k.chars().last())
                   .is_some_and(|s| is_vedic_svara_tail(Some(s)))
                 {
-                  let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+                  let last = ctx.result.pop_last_char().unwrap_or_default();
                   ctx.result.emit_pieces(&pieces);
-                  ctx.result.emit(last);
+                  ctx.result.emit(last.to_string());
                 } else {
                   ctx.result.emit_pieces(&pieces);
                 }
@@ -1411,9 +1411,9 @@ pub fn transliterate_text_core(
             .and_then(|k| k.chars().last())
             .is_some_and(|s| is_vedic_svara_tail(Some(s)))
           {
-            let last = ctx.result.pop_last_char().unwrap_or("".to_owned());
+            let last = ctx.result.pop_last_char().unwrap_or_default();
             ctx.result.emit_pieces(&pieces);
-            ctx.result.emit(last);
+            ctx.result.emit(last.to_string());
           } else {
             ctx.result.emit_pieces(&pieces);
           }

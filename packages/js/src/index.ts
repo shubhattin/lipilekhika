@@ -11,7 +11,7 @@ import {
 } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
-import type { ScriptLangType } from './types';
+import type { ScriptLangType, ScriptListType } from './types';
 
 export * from './types';
 
@@ -99,4 +99,20 @@ export async function getAllOptions(
       Object.fromEntries(Object.keys(custom_options_json).map((key) => [key, true]))
     )
   ) as CustomOptionList[];
+}
+
+/**
+ * This returns the schwa deletion characerstic of the script provided.
+ * It is the property in which a inherent vowel 'a' (अ) is added to
+ * the end of vyanjana (consonant) characters.
+ */
+export async function getSchwaStatusForScript(
+  script_name: ScriptListType
+): Promise<boolean | null> {
+  const script_data = await getScriptData(script_name);
+  if (script_data.script_type === 'brahmic') {
+    return script_data.schwa_property;
+  } else {
+    return null;
+  }
 }

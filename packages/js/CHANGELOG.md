@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.4)
+ - added a new function `getSchwaStatusForScript` to get the schwa deletion characerstic of the script provided.
+
+## js-lib@v1.0.3
+
+ - *New Mappings* for Romanized
+ - ऋ -> ṛ
+ - ढ़ ड़ -> r̤ha r̤a
+
 ## js-lib@v1.0.2
 
 - add `w` as typing time alternative for `v`

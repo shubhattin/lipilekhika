@@ -7,11 +7,7 @@
 [![Tests](https://github.com/shubhattin/lipilekhika/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/shubhattin/lipilekhika/actions/workflows/rust_ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-🌐 **[Website](https://lipilekhika.in)** • 📖 **[Documentation](https://lipilekhika.in/getting-started/rust)** • 🦀 **[Crates.io](https://crates.io/crates/lipilekhika)**
-
----
-
-⚠️ **Beta Release** — This crate is under active development. While the core APIs are stabilizing, some features may still change before the 1.0 release.
+🌐 **[Website](https://lipilekhika.in)** • 📖 **[Documentation](https://lipilekhika.in/getting-started/rust)** • 🦀 **[Crates.io](https://crates.io/crates/lipilekhika)** • 📝 **[Changelog](./CHANGELOG.md)**
 
 ---
 
@@ -20,7 +16,7 @@
 - 🔄 **Bidirectional Transliteration** — Convert between 15+ Indian Brahmic scripts
 - ⚡ **High Performance** — Zero-overhead abstractions and optimized algorithms
 - 🛡️ **Type Safe** — Leverages Rust's type system for safety and correctness
-- 🎯 **Customizable Options** — Fine-tune transliteration behavior
+- 🎯 **Customizable Options** — Fine-tune transliteration and typing behaviour
 - ⌨️ **Typing Mode** — Stateful context for real-time character-by-character input
 - 📦 **Embedded Script Data** — All script data bundled at compile time
 
@@ -28,13 +24,6 @@
 
 ```bash
 cargo add lipilekhika
-```
-
-Or manually add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-lipilekhika = "0.0.1-beta.1"
 ```
 
 ## 🚀 Quick Start
@@ -82,7 +71,7 @@ fn main() {
 
 ## 📚 API
 
-### Core Function
+### Core Functions
 
 #### `transliterate`
 
@@ -104,6 +93,38 @@ Transliterates text from one script to another.
 - `trans_options` — Optional custom transliteration options
 
 **Returns:** `Result<String, String>` — Transliterated text or error message
+
+#### `get_all_option`
+
+```rust
+pub fn get_all_option(
+    from_script_name: &str,
+    to_script_name: &str,
+) -> Result<Vec<String>, String>
+```
+
+Gets all available custom options for a script pair.
+
+**Parameters:**
+- `from_script_name` — Source script/language name
+- `to_script_name` — Target script/language name
+
+**Returns:** `Result<Vec<String>, String>` — List of option keys or error message
+
+#### `get_script_typing_data_map`
+
+```rust
+pub fn get_script_typing_data_map(
+    script: &str,
+) -> Result<ScriptTypingDataMap, String>
+```
+
+Gets typing data mappings for a script (for building custom input methods).
+
+**Parameters:**
+- `script` — Script/language name
+
+**Returns:** `Result<ScriptTypingDataMap, String>` — Typing data or error message
 
 ### Typing Module
 
@@ -142,6 +163,14 @@ fn main() {
 - **`TypingDiff`** — Result of processing a key input
   - `to_delete_chars_count: usize` — Characters to delete from current state
   - `diff_add_text: String` — Text to insert
+
+- **`ScriptTypingDataMap`** — Typing data for a script (from `get_script_typing_data_map`)
+  - `common_krama_map: Vec<TypingDataMapItem>` — Common character mappings
+  - `script_specific_krama_map: Vec<TypingDataMapItem>` — Script-specific mappings
+
+- **`ListType`** — Character type enum: `Anya`, `Vyanjana`, `Matra`, `Svara`
+
+- **`TypingDataMapItem`** — Type alias for `(String, ListType, Vec<String>)`
 
 ## 🎯 Supported Scripts
 

@@ -11,7 +11,12 @@
 >
   <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
     <a href="/" class="flex items-center gap-2.5 transition-opacity hover:opacity-80">
-      <img src="/main.png" alt="Lipi Lekhika Logo" class="size-8" />
+      <span
+        class="inline-block size-8 bg-contain bg-center bg-no-repeat"
+        style="background-image: url('/favicon.svg');"
+        aria-label="Lipi Lekhika"
+        role="img"
+      ></span>
       <span class="text-lg font-semibold tracking-tight">Lipi Lekhika</span>
     </a>
 
