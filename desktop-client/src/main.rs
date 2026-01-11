@@ -1,53 +1,32 @@
-#![cfg(windows)]
-
-use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex};
-
-use windows::Win32::Foundation::HINSTANCE;
-use windows::Win32::System::LibraryLoader::GetModuleHandleW;
-use windows::Win32::UI::WindowsAndMessaging::{
-  DispatchMessageW, GetMessageW, TranslateMessage, MSG,
+use lipilekhika::typing::{create_typing_context, TypingContext};
+use std::{
+  sync::{atomic::AtomicBool, Arc, Mutex},
+  thread,
 };
 
-use lipilekhika::typing::create_typing_context;
+mod platform;
 
-mod win;
+/// shared app state for both the platform specific hook code, UI, etc
+pub struct AppState {
+  pub typing_enabled: AtomicBool,
+  /// both typing script and typing options are stored in the typing context
+  pub typing_context: Mutex<TypingContext>,
+}
 
-fn main() -> windows::core::Result<()> {
-  // Create TypingContext (default: Devanagari — change as needed)
-  let context = create_typing_context("Devanagari", None).expect("Failed to create typing context");
-
-  let state = Arc::new(win::AppState {
+fn main() {
+  let typing_context =
+    create_typing_context("Devanagari", None).expect("Failed to create typing context");
+  let app_state = Arc::new(AppState {
+    typing_context: Mutex::new(typing_context),
     typing_enabled: AtomicBool::new(false),
-    typing_context: Mutex::new(context),
-    notifier: win::notification::Notifier::new(),
   });
 
-  // The low-level hook callbacks can't capture state, so we store `Arc<AppState>`
-  // in TLS for the installing thread.
-  win::hooks::set_state_for_current_thread(state);
-
-  unsafe {
-    let hinst: HINSTANCE = GetModuleHandleW(None)?.into();
-
-    let _hooks = win::hooks::HookManager::install(hinst)?;
-
-    println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║                    Lipilekhika Typing Hook                   ║");
-    println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  Toggle: Alt+X  (currently DISABLED)                         ║");
-    println!("║  Script: Devanagari                                          ║");
-    println!("║                                                              ║");
-    println!("║  Press Ctrl+C in this console to exit                        ║");
-    println!("╚══════════════════════════════════════════════════════════════╝");
-
-    // Message loop to keep process alive and allow hooks to run
-    let mut msg = MSG::default();
-    while GetMessageW(&mut msg, None, 0, 0).into() {
-      let _ = TranslateMessage(&msg);
-      DispatchMessageW(&msg);
+  let state_clone = Arc::clone(&app_state);
+  let handle = thread::spawn(move || {
+    if let Err(err) = platform::run(state_clone) {
+      eprintln!("{err}");
+      std::process::exit(1);
     }
-  }
-
-  Ok(())
+  });
+  handle.join().unwrap();
 }

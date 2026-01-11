@@ -1,5 +1,5 @@
 use super::constants::*;
-use super::AppState;
+use super::WinAppState;
 use std::cell::RefCell;
 use std::mem::size_of;
 use std::sync::atomic::Ordering;
@@ -18,16 +18,16 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 
 thread_local! {
-  static STATE: RefCell<Option<Arc<AppState>>> = RefCell::new(None);
+  static STATE: RefCell<Option<Arc<WinAppState>>> = RefCell::new(None);
 }
 
-pub fn set_state_for_current_thread(state: Arc<AppState>) {
+pub fn set_state_for_current_thread(state: Arc<WinAppState>) {
   STATE.with(|cell| {
     *cell.borrow_mut() = Some(state);
   });
 }
 
-fn with_state<R>(f: impl FnOnce(&Arc<AppState>) -> R) -> Option<R> {
+fn with_state<R>(f: impl FnOnce(&Arc<WinAppState>) -> R) -> Option<R> {
   STATE.with(|cell| cell.borrow().as_ref().map(f))
 }
 
@@ -53,8 +53,8 @@ impl Drop for HookManager {
   }
 }
 
-fn clear_context(state: &AppState) {
-  if let Ok(mut guard) = state.typing_context.lock() {
+fn clear_context(state: &WinAppState) {
+  if let Ok(mut guard) = state.app_state.typing_context.lock() {
     guard.clear_context();
   }
 }
@@ -261,7 +261,7 @@ unsafe extern "system" fn low_level_mouse_proc(
     // Clear context on any mouse button click (like onblur in web)
     if msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN || msg == WM_MBUTTONDOWN {
       let _ = with_state(|state| {
-        if state.typing_enabled.load(Ordering::SeqCst) {
+        if state.app_state.typing_enabled.load(Ordering::SeqCst) {
           clear_context(state);
         }
       });
@@ -299,16 +299,17 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
     // ---- Handle Alt+X toggle (works regardless of typing mode) ----
     if is_keydown && vk == VK_X && (kb.flags.0 & LLKHF_ALTDOWN.0) != 0 {
-      let prev = state.typing_enabled.fetch_xor(true, Ordering::SeqCst);
+      let prev = state
+        .app_state
+        .typing_enabled
+        .fetch_xor(true, Ordering::SeqCst);
       let now_enabled = !prev;
 
       if now_enabled {
         println!("[Typing Mode: ON] - Press Alt+X to disable");
-        state.notifier.show("Typing Mode: ON");
       } else {
         println!("[Typing Mode: OFF] - Press Alt+X to enable");
         clear_context(state);
-        state.notifier.show("Typing Mode: OFF");
       }
 
       // Suppress Alt+X so it doesn't reach apps
@@ -316,7 +317,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
     }
 
     // If typing mode is disabled, pass everything through
-    if !state.typing_enabled.load(Ordering::SeqCst) {
+    if !state.app_state.typing_enabled.load(Ordering::SeqCst) {
       return CallNextHookEx(HHOOK::default(), code, wparam, lparam);
     }
 
@@ -369,7 +370,7 @@ unsafe extern "system" fn low_level_keyboard_proc(
         // NOTE: Do NOT call SendInput while holding the context lock.
         // SendInput creates injected key events that re-enter this same hook, which can deadlock.
         let diff = {
-          let mut guard = match state.typing_context.lock() {
+          let mut guard = match state.app_state.typing_context.lock() {
             Ok(g) => g,
             Err(_) => return CallNextHookEx(HHOOK::default(), code, wparam, lparam),
           };

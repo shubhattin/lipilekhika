@@ -1,17 +1,18 @@
 pub mod constants;
 pub mod hooks;
-pub mod notification;
+pub mod runtime;
 
-use lipilekhika::typing::TypingContext;
-use std::sync::atomic::AtomicBool;
-use std::sync::Mutex;
+use std::sync::Arc;
 
-/// Shared application state accessed by the Windows hook callbacks.
+/// Windows-specific state that extends the common AppState with platform-specific
+/// functionality (e.g., notification system).
 ///
-/// The hook procedures cannot capture closures, so we store an `Arc<AppState>`
+/// The hook procedures cannot capture closures, so we store an `Arc<WinAppState>`
 /// in thread-local storage for the installing thread (see `win::hooks`).
-pub struct AppState {
-  pub typing_enabled: AtomicBool,
-  pub typing_context: Mutex<TypingContext>,
-  pub notifier: notification::Notifier,
+pub struct WinAppState {
+  pub app_state: Arc<crate::AppState>,
+}
+
+pub fn run(app_state: Arc<crate::AppState>) -> windows::core::Result<()> {
+  runtime::run(app_state)
 }
