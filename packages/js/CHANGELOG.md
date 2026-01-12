@@ -1,13 +1,17 @@
 # Changelog
 
 ## Unreleased (js-lib@v1.0.4)
- - added a new function `getSchwaStatusForScript` to get the schwa deletion characerstic of the script provided.
+
+- added a new function `getSchwaStatusForScript` to get the schwa deletion characerstic of the script provided.
+- added in typing module
+  - `getUseNativeNumerals`
+  - `getIncludeInherentVowel`
 
 ## js-lib@v1.0.3
 
- - *New Mappings* for Romanized
- - ऋ -> ṛ
- - ढ़ ड़ -> r̤ha r̤a
+- _New Mappings_ for Romanized
+- ऋ -> ṛ
+- ढ़ ड़ -> r̤ha r̤a
 
 ## js-lib@v1.0.2
 

@@ -153,7 +153,9 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     },
     updateIncludeInherentVowel: (includeInherentVowel: boolean) => {
       include_inherent_vowel = includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
-    }
+    },
+    getUseNativeNumerals: () => use_native_numerals,
+    getIncludeInherentVowel: () => include_inherent_vowel,
   };
 }
 
