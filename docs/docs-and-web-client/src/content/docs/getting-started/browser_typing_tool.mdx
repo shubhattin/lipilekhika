@@ -43,16 +43,25 @@ Only supported for `textarea` and `input` elements.
    ```
 </Steps>
 
-<LinkCard 
-   title="Custom Typing Options" 
+<LinkCard
+   title="Custom Typing Options"
    description="Overview of typing customizations available in Lipi Lekhika"
-   href="/reference/realtime_typing#custom-typing-options" 
+   href="/reference/realtime_typing#custom-typing-options"
 />
-<LinkCard 
+<LinkCard
    title="Supported Scripts and Languages"
    href="/reference/supported_scripts"
    description="List of all supported Scripts for Typing"
 />
+
+## Runtime Configuration
+
+After creating a typing context, you can dynamically update typing options:
+
+- **`ctx.updateUseNativeNumerals(boolean)`** - Enable/disable native numerals (e.g., १० instead of 10)
+- **`ctx.updateIncludeInherentVowel(boolean)`** - Enable/disable inherent vowel inclusion (schwa deletion)
+- **`ctx.getUseNativeNumerals()`** - Get current native numerals setting
+- **`ctx.getIncludeInherentVowel()`** - Get current inherent vowel setting
 
 ## Implementation Example
 

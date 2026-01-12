@@ -2,7 +2,7 @@
 name = "lipilekhika"
 license = "MIT"
 description = "A transliteration library for Indian Brahmic scripts"
-homepage="https://lipilekhika.in"
+homepage = "https://lipilekhika.in"
 repository = "https://github.com/shubhattin/lipilekhika"
 documentation = "https://lipilekhika.in/getting-started/rust"
 keywords = ["indic-scripts", "transliteration"]
@@ -18,7 +18,7 @@ clap = { version = "4.5.54", features = ["derive"] }
 
 [dev-dependencies]
 owo-colors = "4.2.0"
-serde_yaml_ng= "0.10.0"
+serde_yaml_ng = "0.10.0"
 criterion = { version = "0.5.1", default-features = true }
 
 [build-dependencies]
@@ -38,9 +38,4 @@ name = "benchmark"
 path = "src/benches/benchmark.rs"
 harness = false
 
-include = [
-    "src/**/*",
-    "Cargo.toml",
-    "LICENSE*",
-    "README*"
-]
+include = ["src/**/*", "Cargo.toml", "LICENSE*", "README*"]
