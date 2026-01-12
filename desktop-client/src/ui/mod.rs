@@ -1,5 +1,5 @@
 mod data;
-mod thread_recieve;
+mod thread_receive;
 mod ui;
 
 pub use ui::run;

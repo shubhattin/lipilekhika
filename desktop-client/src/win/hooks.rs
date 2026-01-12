@@ -322,13 +322,11 @@ unsafe extern "system" fn low_level_keyboard_proc(
         }
 
         // Notify UI (or other threads) that typing was toggled via keyboard shortcut.
-        let _ = state
-          .tx
-          .send(crate::ThreadMessage {
-            origin: crate::ThreadMessageOrigin::KeyboordHook,
-            msg: crate::ThreadMessageType::SetTypingEnabled(now_enabled),
-          })
-          .unwrap();
+        let _ = state.tx.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::SetTypingEnabled(now_enabled),
+        });
+        // .unwrap();
 
         // Suppress Alt+X so it doesn't reach apps
         return LRESULT(1);

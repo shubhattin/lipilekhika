@@ -30,8 +30,7 @@ pub fn run(
         break; // WM_QUIT received  
       }
       if ret.0 == -1 {
-        // Error occurred - could log or return error
-        break;
+        break; // error
       }
       let _ = TranslateMessage(&msg);
       DispatchMessageW(&msg);

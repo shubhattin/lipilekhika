@@ -24,7 +24,9 @@ pub struct ThreadMessage {
 }
 #[derive(Debug)]
 pub enum ThreadMessageOrigin {
-  KeyboordHook,
+  KeyboardHook,
+  UI,
+  Tray,
 }
 #[derive(Debug)]
 pub enum ThreadMessageType {

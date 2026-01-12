@@ -1,5 +1,5 @@
 use crate::ui::data::{Message, get_ordered_script_list};
-use crate::ui::thread_recieve::{ThreadRx, thread_message_stream};
+use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::Receiver;
 use iced::{
   Element, Subscription,
@@ -28,10 +28,11 @@ impl App {
       }
       Message::SetScript(script) => {
         self.script = Some(script);
-        let new_script_context =
-          create_typing_context(self.script.as_ref().unwrap(), None).unwrap();
-        let mut val = self.global_app_state.typing_context.lock().unwrap();
-        *val = new_script_context;
+        let new_script_context = create_typing_context(self.script.as_ref().unwrap(), None);
+        if let Ok(new_script_context) = new_script_context {
+          let mut val = self.global_app_state.typing_context.lock().unwrap();
+          *val = new_script_context;
+        }
       }
     }
   }
