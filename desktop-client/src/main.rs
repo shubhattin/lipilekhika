@@ -5,6 +5,7 @@ use std::{
 };
 
 mod platform;
+mod ui;
 
 /// shared app state for both the platform specific hook code, UI, etc
 pub struct AppState {
@@ -22,12 +23,15 @@ fn main() {
   });
 
   let state_clone = Arc::clone(&app_state);
-  let handle = thread::spawn(move || {
-    // latform-specific keyboard handler thread
+  let _handle = thread::spawn(move || {
+    // platform-specific keyboard handler thread
     if let Err(err) = platform::run(state_clone) {
       eprintln!("{err}");
       std::process::exit(1);
     }
   });
-  handle.join().unwrap();
+  // thread::spawn(|| {
+  // });
+  ui::run().unwrap();
+  // handle.join().unwrap();
 }
