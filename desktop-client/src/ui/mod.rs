@@ -3,11 +3,13 @@ use iced::{
   widget::{column, container, pick_list, row, toggler},
   window,
 };
-use lipilekhika::get_script_list_data;
+use lipilekhika::{get_script_list_data, typing::create_typing_context};
+use std::sync::{Arc, atomic::Ordering};
 
 struct App {
   typing_enabled: bool,
   script: Option<String>,
+  global_app_state: Arc<crate::AppState>,
 }
 
 #[derive(Clone)]
@@ -16,20 +18,23 @@ enum Message {
   SetScript(String),
 }
 
-impl Default for App {
-  fn default() -> Self {
-    Self {
-      typing_enabled: false,
-      script: Some("Devanagari".to_string()),
-    }
-  }
-}
-
 impl App {
   fn update(&mut self, message: Message) {
     match message {
-      Message::ToggleTypingMode(enabled) => self.typing_enabled = enabled,
-      Message::SetScript(script) => self.script = Some(script),
+      Message::ToggleTypingMode(enabled) => {
+        self.typing_enabled = enabled;
+        self
+          .global_app_state
+          .typing_enabled
+          .store(enabled, Ordering::SeqCst);
+      }
+      Message::SetScript(script) => {
+        self.script = Some(script);
+        let new_script_context =
+          create_typing_context(self.script.as_ref().unwrap(), None).unwrap();
+        let mut val = self.global_app_state.typing_context.lock().unwrap();
+        *val = new_script_context;
+      }
     }
   }
 
@@ -54,18 +59,26 @@ impl App {
   }
 }
 
-pub fn run() -> iced::Result {
+pub fn run(app_state: Arc<crate::AppState>) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
 
-  iced::application(|| App::default(), App::update, App::view)
-    .title("Lipi Lekhika")
-    .window(window::Settings {
-      icon: Some(icon),
-      resizable: false,
-      ..Default::default()
-    })
-    .centered()
-    .window_size((400, 200))
-    .run()
+  iced::application(
+    move || App {
+      global_app_state: Arc::clone(&app_state),
+      typing_enabled: false,
+      script: Some("Devanagari".to_string()),
+    },
+    App::update,
+    App::view,
+  )
+  .title("Lipi Lekhika")
+  .window(window::Settings {
+    icon: Some(icon),
+    resizable: false,
+    ..Default::default()
+  })
+  .centered()
+  .window_size((400, 200))
+  .run()
 }

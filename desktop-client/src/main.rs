@@ -23,15 +23,15 @@ fn main() {
   });
 
   let state_clone = Arc::clone(&app_state);
-  let _handle = thread::spawn(move || {
+  let _handle_hook = thread::spawn(move || {
     // platform-specific keyboard handler thread
     if let Err(err) = platform::run(state_clone) {
       eprintln!("{err}");
       std::process::exit(1);
     }
   });
-  // thread::spawn(|| {
-  // });
-  ui::run().unwrap();
-  // handle.join().unwrap();
+  // let _handle_ui = thread::spawn(|| {});
+  let state_clone = Arc::clone(&app_state);
+  ui::run(state_clone).unwrap();
+  // _handle_ui.join().unwrap();
 }
