@@ -1,5 +1,3 @@
 [workspace]
-members = [
-    "packages/rust",
-]
+members = ["desktop-client", "packages/rust"]
 resolver = "3"
