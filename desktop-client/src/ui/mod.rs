@@ -4,7 +4,7 @@ use iced::{
   window,
 };
 use lipilekhika::{get_script_list_data, typing::create_typing_context};
-use std::sync::{Arc, atomic::Ordering};
+use std::sync::{Arc, atomic::Ordering, mpsc::Receiver};
 
 struct App {
   typing_enabled: bool,
@@ -62,7 +62,7 @@ impl App {
   }
 }
 
-pub fn run(app_state: Arc<crate::AppState>) -> iced::Result {
+pub fn run(app_state: Arc<crate::AppState>, rx: Receiver<crate::ThreadMessage>) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
 

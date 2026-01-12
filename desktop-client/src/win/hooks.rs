@@ -315,11 +315,20 @@ unsafe extern "system" fn low_level_keyboard_proc(
         let now_enabled = !prev;
 
         if now_enabled {
-          println!("[Typing Mode: ON] - Press Alt+X to disable");
+          // println!("[Typing Mode: ON] - Press Alt+X to disable");
         } else {
-          println!("[Typing Mode: OFF] - Press Alt+X to enable");
+          // println!("[Typing Mode: OFF] - Press Alt+X to enable");
           clear_context(state);
         }
+
+        // Notify UI (or other threads) that typing was toggled via keyboard shortcut.
+        let _ = state
+          .tx
+          .send(crate::ThreadMessage {
+            origin: crate::ThreadMessageOrigin::KeyboordHook,
+            msg: crate::ThreadMessageType::SetTypingEnabled(now_enabled),
+          })
+          .unwrap();
 
         // Suppress Alt+X so it doesn't reach apps
         return LRESULT(1);

@@ -1,6 +1,6 @@
 use lipilekhika::typing::{TypingContext, create_typing_context};
 use std::{
-  sync::{Arc, Mutex, atomic::AtomicBool},
+  sync::{Arc, Mutex, atomic::AtomicBool, mpsc},
   thread,
 };
 
@@ -14,7 +14,25 @@ pub struct AppState {
   pub typing_context: Mutex<TypingContext>,
 }
 
+/// use to pass messages between threads
+/// hook -> ui
+#[derive(Debug)]
+pub struct ThreadMessage {
+  pub origin: ThreadMessageOrigin,
+  pub msg: ThreadMessageType,
+}
+#[derive(Debug)]
+pub enum ThreadMessageOrigin {
+  KeyboordHook,
+}
+#[derive(Debug)]
+pub enum ThreadMessageType {
+  SetTypingEnabled(bool),
+}
+
 fn main() {
+  let (tx, rx) = mpsc::channel::<ThreadMessage>();
+
   let typing_context =
     create_typing_context("Devanagari", None).expect("Failed to create typing context");
   let app_state = Arc::new(AppState {
@@ -23,15 +41,15 @@ fn main() {
   });
 
   let state_clone = Arc::clone(&app_state);
+  let tx_clone = tx.clone();
   let _handle_hook = thread::spawn(move || {
     // platform-specific keyboard handler thread
-    if let Err(err) = platform::run(state_clone) {
+    if let Err(err) = platform::run(state_clone, tx_clone) {
       eprintln!("{err}");
       std::process::exit(1);
     }
   });
-  // let _handle_ui = thread::spawn(|| {});
   let state_clone = Arc::clone(&app_state);
-  ui::run(state_clone).unwrap();
-  // _handle_ui.join().unwrap();
+  // starts the UI event loop
+  ui::run(state_clone, rx).unwrap();
 }
