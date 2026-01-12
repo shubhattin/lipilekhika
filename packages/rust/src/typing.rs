@@ -180,13 +180,14 @@ impl TypingContext {
   pub fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
     self.include_inherent_vowel = include_inherent_vowel;
   }
-}
 
-pub fn create_typing_context(
-  typing_lang: &str,
-  options: Option<TypingContextOptions>,
-) -> Result<TypingContext, String> {
-  TypingContext::new(typing_lang, options)
+  pub fn get_use_native_numerals(&self) -> bool {
+    self.use_native_numerals
+  }
+
+  pub fn get_include_inherent_vowel(&self) -> bool {
+    self.include_inherent_vowel
+  }
 }
 
 /// Compute the character-wise diff between previous and current outputs.
@@ -215,7 +216,7 @@ pub fn emulate_typing(
   typing_lang: &str,
   options: Option<TypingContextOptions>,
 ) -> Result<String, String> {
-  let mut ctx = create_typing_context(typing_lang, options)?;
+  let mut ctx = TypingContext::new(typing_lang, options)?;
   let mut result = String::new();
 
   for ch in text.chars() {

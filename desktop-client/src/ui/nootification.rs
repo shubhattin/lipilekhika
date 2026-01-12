@@ -63,7 +63,7 @@ pub fn view_notification<'a, Message: 'a>(message_text: &'a str) -> Element<'a, 
   container(
     center(
       text(message_text)
-        .size(18)
+        .size(20)
         .color(Color::WHITE)
         .align_x(Alignment::Center),
     )

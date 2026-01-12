@@ -18,4 +18,6 @@ pub enum Message {
   NotificationOpened(window::Id),
   CloseNotification(window::Id),
   WindowClosed(window::Id),
+  ToogleUseNativeNumerals(bool),
+  ToogleIncludeInherentVowel(bool),
 }

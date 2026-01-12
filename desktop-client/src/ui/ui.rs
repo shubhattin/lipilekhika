@@ -4,14 +4,13 @@ use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::Receiver;
 use iced::{
   Element, Subscription, Task,
-  widget::{column, container, pick_list, row, toggler},
+  widget::{checkbox, column, container, pick_list, row, toggler},
   window,
 };
-use lipilekhika::typing::create_typing_context;
+use lipilekhika::typing::TypingContext;
 use std::sync::{Arc, Mutex, atomic::Ordering};
 
 struct App {
-  typing_enabled: bool,
   script: Option<String>,
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
@@ -42,7 +41,6 @@ impl App {
     (
       Self {
         global_app_state: app_state,
-        typing_enabled: false,
         script: Some("Devanagari".to_string()),
         rx,
         main_window: main_id,
@@ -57,11 +55,28 @@ impl App {
   fn update(&mut self, message: Message) -> Task<Message> {
     match message {
       Message::ToggleTypingMode(enabled) => {
-        self.typing_enabled = enabled;
         self
           .global_app_state
           .typing_enabled
           .store(enabled, Ordering::SeqCst);
+        Task::none()
+      }
+      Message::ToogleUseNativeNumerals(use_native_numerals) => {
+        self
+          .global_app_state
+          .typing_context
+          .lock()
+          .unwrap()
+          .update_use_native_numerals(use_native_numerals);
+        Task::none()
+      }
+      Message::ToogleIncludeInherentVowel(include_inherent_vowel) => {
+        self
+          .global_app_state
+          .typing_context
+          .lock()
+          .unwrap()
+          .update_include_inherent_vowel(include_inherent_vowel);
         Task::none()
       }
       Message::TriggerTypingNotification(enabled) => {
@@ -97,7 +112,7 @@ impl App {
       }
       Message::SetScript(script) => {
         self.script = Some(script);
-        let new_script_context = create_typing_context(self.script.as_ref().unwrap(), None);
+        let new_script_context = TypingContext::new(self.script.as_ref().unwrap(), None);
         if let Ok(new_script_context) = new_script_context {
           let mut val = self.global_app_state.typing_context.lock().unwrap();
           *val = new_script_context;
@@ -145,13 +160,36 @@ impl App {
     } else {
       // Render main app view
       let scripts = get_ordered_script_list();
+      let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
+      let use_native_numerals = self
+        .global_app_state
+        .typing_context
+        .lock()
+        .unwrap()
+        .get_use_native_numerals();
+      let include_inherent_vowel = self
+        .global_app_state
+        .typing_context
+        .lock()
+        .unwrap()
+        .get_include_inherent_vowel();
       container(column![
         row![
-          toggler(self.typing_enabled)
+          toggler(typing_enabled)
             .label("Typing")
             .on_toggle(Message::ToggleTypingMode),
         ],
         row![pick_list(scripts, self.script.as_ref(), Message::SetScript)].padding([10, 0]),
+        row![
+          checkbox(use_native_numerals)
+            .on_toggle(Message::ToogleUseNativeNumerals)
+            .label("Native Numerals"),
+          checkbox(include_inherent_vowel)
+            .on_toggle(Message::ToogleIncludeInherentVowel)
+            .label("Inherent Vowel")
+        ]
+        .spacing(20)
+        .padding([10, 0]),
       ])
       .padding(10)
       .into()

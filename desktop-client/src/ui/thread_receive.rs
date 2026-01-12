@@ -54,11 +54,13 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
               if _out.is_err() {
                 break;
               }
-              let _out = output
-                .send(Message::TriggerTypingNotification(enabled))
-                .await;
-              if _out.is_err() {
-                break;
+              if matches!(msg.origin, crate::ThreadMessageOrigin::KeyboardHook) {
+                let _out = output
+                  .send(Message::TriggerTypingNotification(enabled))
+                  .await;
+                if _out.is_err() {
+                  break;
+                }
               }
             }
           },

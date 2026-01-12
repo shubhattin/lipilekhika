@@ -1,5 +1,8 @@
 use crossbeam_channel;
-use lipilekhika::typing::{TypingContext, create_typing_context};
+use lipilekhika::typing::{
+  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, DEFAULT_INCLUDE_INHERENT_VOWEL, DEFAULT_USE_NATIVE_NUMERALS,
+  TypingContext, TypingContextOptions,
+};
 use std::{
   sync::{Arc, Mutex, atomic::AtomicBool},
   thread,
@@ -36,8 +39,15 @@ pub enum ThreadMessageType {
 fn main() {
   let (tx, rx) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
-  let typing_context =
-    create_typing_context("Devanagari", None).expect("Failed to create typing context");
+  let typing_context = TypingContext::new(
+    "Devanagari",
+    Some(TypingContextOptions {
+      auto_context_clear_time_ms: DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+      use_native_numerals: DEFAULT_USE_NATIVE_NUMERALS,
+      include_inherent_vowel: DEFAULT_INCLUDE_INHERENT_VOWEL,
+    }),
+  )
+  .expect("Failed to create typing context");
   let app_state = Arc::new(AppState {
     typing_context: Mutex::new(typing_context),
     typing_enabled: AtomicBool::new(false),
