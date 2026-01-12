@@ -1,18 +1,41 @@
 use iced::{
-  Element,
+  Element, Subscription, stream,
   widget::{column, container, pick_list, row, toggler},
   window,
 };
+use iced_futures::BoxStream;
 use lipilekhika::{get_script_list_data, typing::create_typing_context};
-use std::sync::{Arc, atomic::Ordering, mpsc::Receiver};
+use std::{
+  any::TypeId,
+  hash::{Hash, Hasher},
+  sync::{Arc, Mutex, atomic::Ordering, mpsc::Receiver},
+};
+
+struct ThreadRx {
+  rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+}
+
+impl ThreadRx {
+  fn new(rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>) -> Self {
+    Self { rx }
+  }
+}
+
+impl Hash for ThreadRx {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    TypeId::of::<ThreadRx>().hash(state);
+    Arc::as_ptr(&self.rx).hash(state);
+  }
+}
 
 struct App {
   typing_enabled: bool,
   script: Option<String>,
   global_app_state: Arc<crate::AppState>,
+  rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Message {
   ToggleTypingMode(bool),
   SetScript(String),
@@ -27,8 +50,52 @@ fn get_ordered_script_list() -> Vec<String> {
   scripts.into_iter().map(|(key, _)| key).collect()
 }
 
+fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
+  let rx = Arc::clone(&data.rx);
+
+  Box::pin(stream::channel(
+    32,
+    move |mut output: iced::futures::channel::mpsc::Sender<Message>| async move {
+      use iced::futures::SinkExt;
+      use std::sync::mpsc::TryRecvError;
+
+      loop {
+        let thread_msg = {
+          let guard = match rx.lock() {
+            Ok(lock) => lock,
+            Err(_) => break,
+          };
+
+          match guard.try_recv() {
+            Ok(msg) => Some(msg),
+            Err(TryRecvError::Empty) => None,
+            Err(TryRecvError::Disconnected) => break,
+          }
+        };
+
+        match thread_msg {
+          Some(msg) => match msg.msg {
+            crate::ThreadMessageType::SetTypingEnabled(enabled) => {
+              let _out = output.send(Message::ToggleTypingMode(enabled)).await;
+              println!("enabled: {}, _out: {:?}", enabled, _out);
+              if _out.is_err() {
+                break;
+              }
+            }
+          },
+          None => {
+            // Async sleep to avoid busy-waiting and allow other tasks to run
+            smol::Timer::after(std::time::Duration::from_millis(10)).await;
+          }
+        }
+      }
+    },
+  ))
+}
+
 impl App {
   fn update(&mut self, message: Message) {
+    println!("message: {:?}", message);
     match message {
       Message::ToggleTypingMode(enabled) => {
         self.typing_enabled = enabled;
@@ -45,6 +112,10 @@ impl App {
         *val = new_script_context;
       }
     }
+  }
+
+  fn subscription(&self) -> Subscription<Message> {
+    Subscription::run_with(ThreadRx::new(Arc::clone(&self.rx)), thread_message_stream)
   }
 
   fn view(&self) -> Element<'_, Message> {
@@ -66,16 +137,20 @@ pub fn run(app_state: Arc<crate::AppState>, rx: Receiver<crate::ThreadMessage>) 
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
 
+  let rx = Arc::new(Mutex::new(rx));
+
   iced::application(
     move || App {
       global_app_state: Arc::clone(&app_state),
-      typing_enabled: false,
+      typing_enabled: app_state.typing_enabled.load(Ordering::SeqCst),
       script: Some("Devanagari".to_string()),
+      rx: Arc::clone(&rx),
     },
     App::update,
     App::view,
   )
   .title("Lipi Lekhika")
+  .subscription(App::subscription)
   .window(window::Settings {
     icon: Some(icon),
     resizable: false,
