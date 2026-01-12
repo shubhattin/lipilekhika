@@ -3,11 +3,10 @@
 mod win;
 
 use std::sync::Arc;
-use std::sync::mpsc::Sender;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: Sender<crate::ThreadMessage>,
+  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
   #[cfg(windows)]
   {

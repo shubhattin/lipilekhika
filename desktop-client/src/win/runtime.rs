@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use std::sync::mpsc::Sender;
 
 use windows::Win32::Foundation::HINSTANCE;
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
@@ -11,7 +10,7 @@ use super::WinAppState;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: Sender<crate::ThreadMessage>,
+  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
   let win_state = Arc::new(WinAppState { app_state, tx });
 

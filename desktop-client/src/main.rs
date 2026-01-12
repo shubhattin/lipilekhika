@@ -1,6 +1,7 @@
+use crossbeam_channel;
 use lipilekhika::typing::{TypingContext, create_typing_context};
 use std::{
-  sync::{Arc, Mutex, atomic::AtomicBool, mpsc},
+  sync::{Arc, Mutex, atomic::AtomicBool},
   thread,
 };
 
@@ -31,7 +32,7 @@ pub enum ThreadMessageType {
 }
 
 fn main() {
-  let (tx, rx) = mpsc::channel::<ThreadMessage>();
+  let (tx, rx) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
   let typing_context =
     create_typing_context("Devanagari", None).expect("Failed to create typing context");

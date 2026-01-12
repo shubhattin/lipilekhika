@@ -1,3 +1,4 @@
+use crossbeam_channel::Receiver;
 use iced::{
   Element, Subscription, stream,
   widget::{column, container, pick_list, row, toggler},
@@ -8,7 +9,7 @@ use lipilekhika::{get_script_list_data, typing::create_typing_context};
 use std::{
   any::TypeId,
   hash::{Hash, Hasher},
-  sync::{Arc, Mutex, atomic::Ordering, mpsc::Receiver},
+  sync::{Arc, Mutex, atomic::Ordering},
 };
 
 struct ThreadRx {
@@ -57,7 +58,6 @@ fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
     32,
     move |mut output: iced::futures::channel::mpsc::Sender<Message>| async move {
       use iced::futures::SinkExt;
-      use std::sync::mpsc::TryRecvError;
 
       loop {
         let thread_msg = {
@@ -68,8 +68,8 @@ fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
 
           match guard.try_recv() {
             Ok(msg) => Some(msg),
-            Err(TryRecvError::Empty) => None,
-            Err(TryRecvError::Disconnected) => break,
+            Err(crossbeam_channel::TryRecvError::Empty) => None,
+            Err(crossbeam_channel::TryRecvError::Disconnected) => break,
           }
         };
 
@@ -133,7 +133,10 @@ impl App {
   }
 }
 
-pub fn run(app_state: Arc<crate::AppState>, rx: Receiver<crate::ThreadMessage>) -> iced::Result {
+pub fn run(
+  app_state: Arc<crate::AppState>,
+  rx: crossbeam_channel::Receiver<crate::ThreadMessage>,
+) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
 
