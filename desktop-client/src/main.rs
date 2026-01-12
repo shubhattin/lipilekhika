@@ -1,3 +1,6 @@
+// Hide console window on Windows in release builds only
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use crossbeam_channel;
 use lipilekhika::typing::{
   DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, DEFAULT_INCLUDE_INHERENT_VOWEL, DEFAULT_USE_NATIVE_NUMERALS,

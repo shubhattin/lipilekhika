@@ -1,5 +1,5 @@
 mod data;
-mod nootification;
+mod notification;
 mod thread_receive;
 mod ui;
 

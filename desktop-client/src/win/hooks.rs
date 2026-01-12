@@ -259,6 +259,16 @@ fn vk_to_unicode(vk: u32, scan: u32) -> Option<String> {
     return Some(String::from_utf16_lossy(slice));
   }
 
+  // Handle dead key: when ToUnicodeEx returns -1, the dead key state remains in the
+  // keyboard layout's internal buffer. Call ToUnicodeEx again to consume/clear it,
+  // preventing the dead key from affecting the foreground application.
+  if result == -1 {
+    unsafe {
+      // Call again with the same parameters to clear the dead key buffer
+      let _ = ToUnicodeEx(vk, scan, &keystate, &mut buf, 0, Some(layout));
+    }
+  }
+
   None
 }
 
@@ -378,45 +388,58 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
       // 4. Try to convert to Unicode character and process through typing context
       if let Some(text) = vk_to_unicode(vk, scan) {
-        // Normalize to a single scalar before feeding TypingContext.
+        // vk_to_unicode may return multiple characters (ligatures, dead key combinations).
+        // Process all characters, not just the first one.
         // Important: do NOT lowercase here. Uppercase characters (Shift/CapsLock)
         // are meaningful for some typing schemes (e.g. A vs a), and the JS/web
         // implementation passes the character through as-is.
-        let mut chars = text.chars();
-        if let Some(first) = chars.next() {
-          if first.is_control() {
+
+        // Check if any character is a control character - if so, pass through
+        for ch in text.chars() {
+          if ch.is_control() {
             return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
           }
+        }
 
-          let key: String = first.to_string();
+        // NOTE: Do NOT call SendInput while holding the context lock.
+        // SendInput creates injected key events that re-enter this same hook, which can deadlock.
+        // Process all characters in a single locked section, accumulating diffs.
+        let (total_delete, combined_add) = {
+          let mut guard = match state.app_state.typing_context.lock() {
+            Ok(g) => g,
+            Err(_) => return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam),
+          };
 
-          // NOTE: Do NOT call SendInput while holding the context lock.
-          // SendInput creates injected key events that re-enter this same hook, which can deadlock.
-          let diff = {
-            let mut guard = match state.app_state.typing_context.lock() {
-              Ok(g) => g,
-              Err(_) => return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam),
-            };
+          let mut total_delete: usize = 0;
+          let mut combined_add = String::new();
+
+          for ch in text.chars() {
+            let key = ch.to_string();
             match guard.take_key_input(&key) {
-              Ok(d) => d,
+              Ok(diff) => {
+                total_delete += diff.to_delete_chars_count;
+                combined_add.push_str(&diff.diff_add_text);
+              }
               Err(_e) => {
                 guard.clear_context();
                 return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
               }
             }
-          };
-
-          // Now inject, with the lock released.
-          if diff.to_delete_chars_count > 0 {
-            send_backspaces(diff.to_delete_chars_count);
-          }
-          if !diff.diff_add_text.is_empty() {
-            send_unicode_text(&diff.diff_add_text);
           }
 
-          // Suppress original key (we've already handled it)
-          return LRESULT(1);
+          (total_delete, combined_add)
+        };
+
+        // Now inject, with the lock released.
+        if total_delete > 0 {
+          send_backspaces(total_delete);
         }
+        if !combined_add.is_empty() {
+          send_unicode_text(&combined_add);
+        }
+
+        // Suppress original key (we've already handled it)
+        return LRESULT(1);
       }
 
       // Not handled — pass to next hook

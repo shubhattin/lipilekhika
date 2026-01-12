@@ -1,5 +1,5 @@
 use crate::ui::data::{Message, get_ordered_script_list};
-use crate::ui::nootification::{self, NotificationConfig};
+use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::Receiver;
 use iced::{
@@ -95,11 +95,11 @@ impl App {
           Task::none()
         };
 
-        let (new_id, open_task) = nootification::open_notification_window();
+        let (new_id, open_task) = notification::open_notification_window();
         self.notification_window = Some(new_id);
 
         // Start timeout timer
-        let timeout_task = nootification::notification_timeout(
+        let timeout_task = notification::notification_timeout(
           &self.notification_config,
           Message::CloseNotification(new_id),
         );
@@ -156,7 +156,7 @@ impl App {
   fn view(&self, window_id: window::Id) -> Element<'_, Message> {
     if Some(window_id) == self.notification_window {
       // Render notification view
-      nootification::view_notification(&self.notification_message)
+      notification::view_notification(&self.notification_message)
     } else {
       // Render main app view
       let scripts = get_ordered_script_list();
