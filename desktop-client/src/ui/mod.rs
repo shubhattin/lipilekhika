@@ -18,6 +18,15 @@ enum Message {
   SetScript(String),
 }
 
+fn get_ordered_script_list() -> Vec<String> {
+  let _script_list = get_script_list_data();
+  let mut scripts: Vec<(String, u8)> = _script_list.scripts.clone().into_iter().collect();
+
+  scripts.sort_by(|a, b| a.1.cmp(&b.1));
+
+  scripts.into_iter().map(|(key, _)| key).collect()
+}
+
 impl App {
   fn update(&mut self, message: Message) {
     match message {
@@ -39,13 +48,7 @@ impl App {
   }
 
   fn view(&self) -> Element<'_, Message> {
-    let _script_list = get_script_list_data();
-    let scripts = _script_list
-      .scripts
-      .keys()
-      .map(|s| s.clone())
-      .collect::<Vec<String>>();
-
+    let scripts = get_ordered_script_list();
     container(column![
       row![
         toggler(self.typing_enabled)
