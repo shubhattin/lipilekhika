@@ -45,7 +45,13 @@ impl HookManager {
         Some(hinst),
         0,
       )?;
-      let mouse = SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), Some(hinst), 0)?;
+      let mouse = match SetWindowsHookExW(WH_MOUSE_LL, Some(low_level_mouse_proc), Some(hinst), 0) {
+        Ok(h) => h,
+        Err(e) => {
+          let _ = UnhookWindowsHookEx(keyboard);
+          return Err(e);
+        }
+      };
       Ok(Self { keyboard, mouse })
     }
   }

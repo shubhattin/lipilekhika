@@ -1,3 +1,4 @@
+use iced::window;
 use lipilekhika::get_script_list_data;
 
 pub fn get_ordered_script_list() -> Vec<String> {
@@ -13,4 +14,8 @@ pub fn get_ordered_script_list() -> Vec<String> {
 pub enum Message {
   ToggleTypingMode(bool),
   SetScript(String),
+  TriggerTypingNotification(bool),
+  NotificationOpened(window::Id),
+  CloseNotification(window::Id),
+  WindowClosed(window::Id),
 }

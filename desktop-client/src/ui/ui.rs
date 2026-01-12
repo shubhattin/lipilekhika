@@ -1,8 +1,9 @@
 use crate::ui::data::{Message, get_ordered_script_list};
+use crate::ui::nootification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::Receiver;
 use iced::{
-  Element, Subscription,
+  Element, Subscription, Task,
   widget::{column, container, pick_list, row, toggler},
   window,
 };
@@ -14,10 +15,46 @@ struct App {
   script: Option<String>,
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+  // Window tracking
+  main_window: window::Id,
+  // Notification state
+  notification_window: Option<window::Id>,
+  notification_message: String,
+  notification_config: NotificationConfig,
 }
 
 impl App {
-  fn update(&mut self, message: Message) {
+  fn new(
+    app_state: Arc<crate::AppState>,
+    rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+    icon: window::Icon,
+  ) -> (Self, Task<Message>) {
+    // Open main window since daemon mode doesn't create one automatically
+    let (main_id, main_open_task) = window::open(window::Settings {
+      icon: Some(icon),
+      resizable: false,
+      size: iced::Size::new(400.0, 200.0),
+      position: window::Position::Centered,
+      exit_on_close_request: false,
+      ..Default::default()
+    });
+
+    (
+      Self {
+        global_app_state: app_state,
+        typing_enabled: false,
+        script: Some("Devanagari".to_string()),
+        rx,
+        main_window: main_id,
+        notification_window: None,
+        notification_message: String::new(),
+        notification_config: NotificationConfig::default(),
+      },
+      main_open_task.discard(),
+    )
+  }
+
+  fn update(&mut self, message: Message) -> Task<Message> {
     match message {
       Message::ToggleTypingMode(enabled) => {
         self.typing_enabled = enabled;
@@ -25,6 +62,38 @@ impl App {
           .global_app_state
           .typing_enabled
           .store(enabled, Ordering::SeqCst);
+        Task::none()
+      }
+      Message::TriggerTypingNotification(enabled) => {
+        // Show notification based on typing state
+        let msg = if enabled {
+          "Typing : On".to_string()
+        } else {
+          "Typing : Off".to_string()
+        };
+        self.notification_message = msg.clone();
+
+        // Close existing notification if any, then open new one
+        let close_task = if let Some(old_id) = self.notification_window.take() {
+          window::close(old_id)
+        } else {
+          Task::none()
+        };
+
+        let (new_id, open_task) = nootification::open_notification_window();
+        self.notification_window = Some(new_id);
+
+        // Start timeout timer
+        let timeout_task = nootification::notification_timeout(
+          &self.notification_config,
+          Message::CloseNotification(new_id),
+        );
+
+        Task::batch([
+          close_task,
+          open_task.map(Message::NotificationOpened),
+          timeout_task,
+        ])
       }
       Message::SetScript(script) => {
         self.script = Some(script);
@@ -33,26 +102,69 @@ impl App {
           let mut val = self.global_app_state.typing_context.lock().unwrap();
           *val = new_script_context;
         }
+        Task::none()
+      }
+      Message::NotificationOpened(_id) => {
+        // Window is already tracked, nothing more to do
+        Task::none()
+      }
+      Message::CloseNotification(id) => {
+        if self.notification_window == Some(id) {
+          self.notification_window = None;
+          window::close(id)
+        } else {
+          Task::none()
+        }
+      }
+      Message::WindowClosed(id) => {
+        // Exit the daemon when the main window is closed
+        if id == self.main_window {
+          iced::exit()
+        } else {
+          // Clean up notification window if it was closed by user
+          if self.notification_window == Some(id) {
+            self.notification_window = None;
+          }
+          Task::none()
+        }
       }
     }
   }
 
   fn subscription(&self) -> Subscription<Message> {
-    Subscription::run_with(ThreadRx::new(Arc::clone(&self.rx)), thread_message_stream)
+    Subscription::batch([
+      Subscription::run_with(ThreadRx::new(Arc::clone(&self.rx)), thread_message_stream),
+      window::close_requests().map(Message::WindowClosed),
+    ])
   }
 
-  fn view(&self) -> Element<'_, Message> {
-    let scripts = get_ordered_script_list();
-    container(column![
-      row![
-        toggler(self.typing_enabled)
-          .label("Typing")
-          .on_toggle(Message::ToggleTypingMode),
-      ],
-      row![pick_list(scripts, self.script.as_ref(), Message::SetScript)].padding([10, 0]),
-    ])
-    .padding(10)
-    .into()
+  fn view(&self, window_id: window::Id) -> Element<'_, Message> {
+    if Some(window_id) == self.notification_window {
+      // Render notification view
+      nootification::view_notification(&self.notification_message)
+    } else {
+      // Render main app view
+      let scripts = get_ordered_script_list();
+      container(column![
+        row![
+          toggler(self.typing_enabled)
+            .label("Typing")
+            .on_toggle(Message::ToggleTypingMode),
+        ],
+        row![pick_list(scripts, self.script.as_ref(), Message::SetScript)].padding([10, 0]),
+      ])
+      .padding(10)
+      .into()
+    }
+  }
+
+  fn title(&self, _window_id: window::Id) -> String {
+    // No title for notification windows
+    if self.notification_window == Some(_window_id) {
+      String::new()
+    } else {
+      "Lipi Lekhika".to_string()
+    }
   }
 }
 
@@ -62,27 +174,14 @@ pub fn run(
 ) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
-
   let rx = Arc::new(Mutex::new(rx));
 
-  iced::application(
-    move || App {
-      global_app_state: Arc::clone(&app_state),
-      typing_enabled: app_state.typing_enabled.load(Ordering::SeqCst),
-      script: Some("Devanagari".to_string()),
-      rx: Arc::clone(&rx),
-    },
+  iced::daemon(
+    move || App::new(Arc::clone(&app_state), Arc::clone(&rx), icon.clone()),
     App::update,
     App::view,
   )
-  .title("Lipi Lekhika")
+  .title(App::title)
   .subscription(App::subscription)
-  .window(window::Settings {
-    icon: Some(icon),
-    resizable: false,
-    ..Default::default()
-  })
-  .centered()
-  .window_size((400, 200))
   .run()
 }
