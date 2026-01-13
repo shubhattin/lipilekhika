@@ -47,7 +47,13 @@ pub enum ThreadMessageType {
 }
 
 fn main() {
-  let (tx, rx) = crossbeam_channel::bounded::<ThreadMessage>(100);
+  // Create separate channels for UI and Tray
+  // Each component gets its own dedicated receiver to avoid message competition
+  // the non-mpsc model was causing some issues
+  // we are still sticking with crossbeam_channel for now
+  // it should be replacable with std::sync::mpsc
+  let (tx_ui, rx_ui) = crossbeam_channel::bounded::<ThreadMessage>(100);
+  let (tx_tray, rx_tray) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
   let typing_context = TypingContext::new(
     "Devanagari",
@@ -68,10 +74,11 @@ fn main() {
 
   // Start keyboard hook thread
   let state_clone = Arc::clone(&app_state);
-  let tx_clone = tx.clone();
+  let tx_ui_clone = tx_ui.clone();
+  let tx_tray_clone = tx_tray.clone();
   let _handle_hook = thread::spawn(move || {
     // platform-specific keyboard handler thread
-    if let Err(err) = platform::run(state_clone, tx_clone) {
+    if let Err(err) = platform::run(state_clone, tx_ui_clone, tx_tray_clone) {
       eprintln!("{err}");
       std::process::exit(1);
     }
@@ -80,13 +87,11 @@ fn main() {
   // Start tray icon thread
   let state_clone = Arc::clone(&app_state);
   let shutdown_clone = Arc::clone(&shutdown);
-  let tx_clone = tx.clone();
-  let rx_clone = rx.clone();
-  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone, tx_clone, rx_clone);
+  let tx_ui_clone = tx_ui.clone();
+  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone, tx_ui_clone, rx_tray);
 
   // starts the UI event loop
   let state_clone = Arc::clone(&app_state);
-  let tx_clone = tx.clone();
-  let rx_clone = rx.clone();
-  ui::run(state_clone, rx_clone, tx_clone).unwrap();
+  let tx_tray_clone = tx_tray.clone();
+  ui::run(state_clone, rx_ui, tx_tray_clone).unwrap();
 }

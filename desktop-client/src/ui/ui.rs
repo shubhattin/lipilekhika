@@ -54,18 +54,30 @@ impl App {
   }
 
   fn update(&mut self, message: Message) -> Task<Message> {
+    // println!("UI update: {:?}", message);
     match message {
       Message::RerenderUI => Task::none(),
       Message::SetScript(script) => {
-        let new_script_context = TypingContext::new(&script, None);
+        // Get current options before creating new context
+        let current_options = {
+          let ctx = self.global_app_state.typing_context.lock().unwrap();
+          Some(lipilekhika::typing::TypingContextOptions {
+            auto_context_clear_time_ms: lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+            use_native_numerals: ctx.get_use_native_numerals(),
+            include_inherent_vowel: ctx.get_include_inherent_vowel(),
+          })
+        };
+
+        let new_script_context = TypingContext::new(&script, current_options);
         if let Ok(new_script_context) = new_script_context {
-          let mut val = self.global_app_state.typing_context.lock().unwrap();
-          *val = new_script_context;
+          let mut ctx = self.global_app_state.typing_context.lock().unwrap();
+          *ctx = new_script_context;
+          drop(ctx);
+          let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+            origin: crate::ThreadMessageOrigin::UI,
+            msg: crate::ThreadMessageType::RerenderTray,
+          });
         }
-        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::UI,
-          msg: crate::ThreadMessageType::RerenderTray,
-        });
         Task::none()
       }
       Message::ToggleTypingMode(enabled) => {
@@ -179,10 +191,17 @@ impl App {
       // Render main app view
       let scripts = get_ordered_script_list();
       let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
-      let ctx = self.global_app_state.typing_context.lock().unwrap();
-      let use_native_numerals = ctx.get_use_native_numerals();
-      let include_inherent_vowel = ctx.get_include_inherent_vowel();
-      let curr_script = ctx.get_normalised_script();
+
+      // Read all values and IMMEDIATELY drop the lock before building the view
+      let (use_native_numerals, include_inherent_vowel, curr_script) = {
+        let ctx = self.global_app_state.typing_context.lock().unwrap();
+        (
+          ctx.get_use_native_numerals(),
+          ctx.get_include_inherent_vowel(),
+          ctx.get_normalised_script(),
+        )
+      }; // Lock is dropped here, before any UI rendering
+      // this avoids some potential deadlocks
 
       container(column![
         row![

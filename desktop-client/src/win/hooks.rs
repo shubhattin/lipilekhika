@@ -338,15 +338,15 @@ unsafe extern "system" fn low_level_keyboard_proc(
         }
 
         // Notify UI and tray to rerender based on latest app state
-        let _ = state.tx.send(crate::ThreadMessage {
+        let _ = state.tx_ui.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::KeyboardHook,
           msg: crate::ThreadMessageType::TriggerTypingNotification,
         });
-        let _ = state.tx.send(crate::ThreadMessage {
+        let _ = state.tx_ui.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::KeyboardHook,
           msg: crate::ThreadMessageType::RerenderUI,
         });
-        let _ = state.tx.send(crate::ThreadMessage {
+        let _ = state.tx_tray.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::KeyboardHook,
           msg: crate::ThreadMessageType::RerenderTray,
         });

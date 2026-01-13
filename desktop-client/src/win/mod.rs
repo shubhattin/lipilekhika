@@ -11,12 +11,16 @@ use std::sync::Arc;
 /// in thread-local storage for the installing thread (see `win::hooks`).
 pub struct WinAppState {
   pub app_state: Arc<crate::AppState>,
-  pub tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  /// Sender for UI messages (RerenderUI, TriggerTypingNotification)
+  pub tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
+  /// Sender for Tray messages (RerenderTray)
+  pub tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
 }
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
-  runtime::run(app_state, tx)
+  runtime::run(app_state, tx_ui, tx_tray)
 }

@@ -44,7 +44,7 @@ pub fn notification_timeout<Message: Clone + Send + 'static>(
 ) -> Task<Message> {
   let timeout = config.timeout;
   Task::future(async move {
-    smol::Timer::after(timeout).await;
+    async_std::task::sleep(timeout).await;
     on_timeout
   })
 }

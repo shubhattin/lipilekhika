@@ -1,4 +1,4 @@
-use crate::{ThreadMessageType, ui::data::Message};
+use crate::{ThreadMessageOrigin, ThreadMessageType, ui::data::Message};
 use crossbeam_channel::Receiver;
 use iced::stream;
 use iced_futures::BoxStream;
@@ -48,25 +48,29 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
         };
 
         match thread_msg {
-          Some(msg) if !matches!(msg.origin, crate::ThreadMessageOrigin::UI) => match msg.msg {
+          Some(msg) if !matches!(msg.origin, ThreadMessageOrigin::UI) => match msg.msg {
             ThreadMessageType::RerenderUI => {
+              // println!("RerenderUI");
               let _out = output.send(Message::RerenderUI).await;
               if _out.is_err() {
                 break;
               }
             }
             ThreadMessageType::TriggerTypingNotification => {
-              let _out = output.send(Message::TriggerTypingNotification).await;
-              if _out.is_err() {
-                break;
+              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook)
+                || matches!(msg.origin, ThreadMessageOrigin::Tray)
+              {
+                let _out = output.send(Message::TriggerTypingNotification).await;
+                if _out.is_err() {
+                  break;
+                }
               }
             }
             _ => {}
           },
-          Some(_) => {} // ignore UI messages
-          None => {
+          Some(_) | None => {
             // Async sleep to avoid busy-waiting and allow other tasks to run
-            smol::Timer::after(std::time::Duration::from_millis(10)).await;
+            async_std::task::sleep(std::time::Duration::from_millis(10)).await;
           }
         }
       }

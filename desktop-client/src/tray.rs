@@ -119,9 +119,11 @@ impl TrayManager {
   /// Generates a tooltip string based on current state
   fn generate_tooltip(app_state: &Arc<AppState>) -> String {
     let typing_enabled = app_state.typing_enabled.load(Ordering::SeqCst);
-    let ctx = app_state.typing_context.lock().unwrap();
-    let current_script = ctx.get_normalised_script();
-    drop(ctx);
+    let current_script = {
+      let ctx = app_state.typing_context.lock().unwrap();
+      // a better syntax as it auto drops the lock
+      ctx.get_normalised_script()
+    };
 
     format!(
       "Lipi Lekhika\nTyping: {}\nScript: {}",
@@ -136,9 +138,38 @@ impl TrayManager {
     self._tray_icon.set_tooltip(Some(&tooltip)).ok();
   }
 
+  /// Updates the tray menu to reflect current app state (called when receiving RerenderTray message)
+  pub fn update_ui(&mut self) {
+    let typing_enabled = self.app_state.typing_enabled.load(Ordering::SeqCst);
+
+    let (use_native_numerals, include_inherent_vowel, current_script) = {
+      let ctx = self.app_state.typing_context.lock().unwrap();
+      (
+        ctx.get_use_native_numerals(),
+        ctx.get_include_inherent_vowel(),
+        ctx.get_normalised_script(),
+      )
+    };
+
+    // Update checkbox states (without holding the lock)
+    self.typing_on_item.set_checked(typing_enabled);
+    self.native_numerals_item.set_checked(use_native_numerals);
+    self.inherent_vowel_item.set_checked(include_inherent_vowel);
+
+    // Update script checkmarks
+    for (item, name) in &self.script_items {
+      let is_selected = *name == current_script;
+      item.set_checked(is_selected);
+    }
+
+    self.update_tooltip();
+  }
+
   /// Handles menu events and updates the app state accordingly
-  pub fn handle_menu_event(&mut self, event: MenuEvent) -> bool {
+  /// Returns (should_quit, messages_to_send)
+  pub fn handle_menu_event(&mut self, event: MenuEvent) -> (bool, Vec<crate::ThreadMessageType>) {
     let event_id = event.id().0.clone();
+    let mut messages = Vec::new();
 
     match event_id.as_str() {
       MENU_ID_TYPING_ON => {
@@ -149,7 +180,10 @@ impl TrayManager {
           .store(new_state, Ordering::SeqCst);
         self.typing_on_item.set_checked(new_state);
         self.update_tooltip();
-        false
+        // Notify UI to rerender and show typing notification
+        messages.push(crate::ThreadMessageType::RerenderUI);
+        messages.push(crate::ThreadMessageType::TriggerTypingNotification);
+        (false, messages)
       }
       MENU_ID_NATIVE_NUMERALS => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -157,42 +191,58 @@ impl TrayManager {
         ctx.update_use_native_numerals(new_state);
         drop(ctx);
         self.native_numerals_item.set_checked(new_state);
-        false
+        // Notify UI to rerender
+        messages.push(crate::ThreadMessageType::RerenderUI);
+        (false, messages)
       }
       MENU_ID_INHERENT_VOWEL => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
         let new_state = !ctx.get_include_inherent_vowel();
         ctx.update_include_inherent_vowel(new_state);
-        drop(ctx);
         self.inherent_vowel_item.set_checked(new_state);
-        false
+        // Notify UI to rerender
+        messages.push(crate::ThreadMessageType::RerenderUI);
+        (false, messages)
       }
       MENU_ID_QUIT => {
         // Return true to signal application should quit
-        true
+        (true, messages)
       }
       _ => {
         // Check if it's a script selection
         if event_id.starts_with(MENU_ID_SCRIPT_PREFIX) {
           let script_name = event_id.trim_start_matches(MENU_ID_SCRIPT_PREFIX);
 
-          // Update the typing context to use the new script
-          let new_context = lipilekhika::typing::TypingContext::new(script_name, None);
-          if let Ok(new_ctx) = new_context {
-            let mut ctx = self.app_state.typing_context.lock().unwrap();
-            *ctx = new_ctx;
-            drop(ctx);
+          // record current options
+          let current_options = {
+            let ctx = self.app_state.typing_context.lock().unwrap();
+            Some(lipilekhika::typing::TypingContextOptions {
+              auto_context_clear_time_ms: lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+              use_native_numerals: ctx.get_use_native_numerals(),
+              include_inherent_vowel: ctx.get_include_inherent_vowel(),
+            })
+          };
 
-            // Update checkmarks on all script items
+          let new_context = lipilekhika::typing::TypingContext::new(script_name, current_options);
+          if let Ok(new_ctx) = new_context {
+            {
+              let mut ctx = self.app_state.typing_context.lock().unwrap();
+              *ctx = new_ctx;
+            }
+
+            // Update checkmarks on all script items (without holding lock)
             for (item, name) in &self.script_items {
               let is_selected = name == script_name;
               item.set_checked(is_selected);
             }
 
+            // update_tooltip() also locks typing_context, so must be called after dropping lock
             self.update_tooltip();
+            // Notify UI to rerender
+            messages.push(crate::ThreadMessageType::RerenderUI);
           }
         }
-        false
+        (false, messages)
       }
     }
   }
@@ -218,6 +268,17 @@ pub fn run_tray_thread(
     // Subscribe to menu events
     let menu_channel = MenuEvent::receiver();
 
+    // Helper closure to send messages
+    let send_messages = |tx: &crossbeam_channel::Sender<crate::ThreadMessage>,
+                         messages: Vec<crate::ThreadMessageType>| {
+      for msg_type in messages {
+        let _ = tx.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::Tray,
+          msg: msg_type,
+        });
+      }
+    };
+
     // On Windows, we need to run a Windows message loop for the tray icon to work
     #[cfg(target_os = "windows")]
     {
@@ -231,9 +292,26 @@ pub fn run_tray_thread(
           break;
         }
 
+        // Check for thread messages (RerenderTray)
+        while let Ok(thread_msg) = rx.try_recv() {
+          // Only process messages not originating from Tray
+          if !matches!(thread_msg.origin, crate::ThreadMessageOrigin::Tray) {
+            use crate::ThreadMessageType;
+
+            println!("Tray thread_msg: {:?}", thread_msg);
+            match thread_msg.msg {
+              ThreadMessageType::RerenderTray => {
+                tray_manager.update_ui();
+              }
+              _ => {} // Ignore other message types
+            }
+          }
+        }
+
         // Check for menu events (non-blocking)
         while let Ok(event) = menu_channel.try_recv() {
-          let should_quit = tray_manager.handle_menu_event(event);
+          let (should_quit, messages) = tray_manager.handle_menu_event(event);
+          send_messages(&tx, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);
@@ -262,9 +340,23 @@ pub fn run_tray_thread(
           break;
         }
 
+        // Check for thread messages (RerenderTray)
+        while let Ok(thread_msg) = rx.try_recv() {
+          // Only process messages not originating from Tray
+          if !matches!(thread_msg.origin, crate::ThreadMessageOrigin::Tray) {
+            match thread_msg.msg {
+              crate::ThreadMessageType::RerenderTray => {
+                tray_manager.update_ui();
+              }
+              _ => {} // Ignore other message types
+            }
+          }
+        }
+
         // Check for menu events (non-blocking with timeout)
         if let Ok(event) = menu_channel.recv_timeout(std::time::Duration::from_millis(100)) {
-          let should_quit = tray_manager.handle_menu_event(event);
+          let (should_quit, messages) = tray_manager.handle_menu_event(event);
+          send_messages(&tx, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);

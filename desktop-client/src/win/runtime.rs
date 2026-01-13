@@ -10,9 +10,14 @@ use super::WinAppState;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
-  let win_state = Arc::new(WinAppState { app_state, tx });
+  let win_state = Arc::new(WinAppState {
+    app_state,
+    tx_ui,
+    tx_tray,
+  });
 
   // The low-level hook callbacks can't capture state, so we store `Arc<WinAppState>`
   // in TLS for the installing thread.
