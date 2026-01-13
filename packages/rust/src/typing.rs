@@ -189,7 +189,8 @@ impl TypingContext {
     self.include_inherent_vowel
   }
 
-  pub fn get_curr_script(&self) -> String {
+  /// retuns normalized script name
+  pub fn get_normalised_script(&self) -> String {
     self.normalized_typing_lang.clone()
   }
 }

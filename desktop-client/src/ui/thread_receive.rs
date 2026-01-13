@@ -1,4 +1,4 @@
-use crate::ui::data::Message;
+use crate::{ThreadMessageType, ui::data::Message};
 use crossbeam_channel::Receiver;
 use iced::stream;
 use iced_futures::BoxStream;
@@ -48,22 +48,22 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
         };
 
         match thread_msg {
-          Some(msg) => match msg.msg {
-            crate::ThreadMessageType::SetTypingEnabled(enabled) => {
-              let _out = output.send(Message::ToggleTypingMode(enabled)).await;
+          Some(msg) if !matches!(msg.origin, crate::ThreadMessageOrigin::UI) => match msg.msg {
+            ThreadMessageType::RerenderUI => {
+              let _out = output.send(Message::RerenderUI).await;
               if _out.is_err() {
                 break;
               }
-              if matches!(msg.origin, crate::ThreadMessageOrigin::KeyboardHook) {
-                let _out = output
-                  .send(Message::TriggerTypingNotification(enabled))
-                  .await;
-                if _out.is_err() {
-                  break;
-                }
+            }
+            ThreadMessageType::TriggerTypingNotification => {
+              let _out = output.send(Message::TriggerTypingNotification).await;
+              if _out.is_err() {
+                break;
               }
             }
+            _ => {}
           },
+          Some(_) => {} // ignore UI messages
           None => {
             // Async sleep to avoid busy-waiting and allow other tasks to run
             smol::Timer::after(std::time::Duration::from_millis(10)).await;

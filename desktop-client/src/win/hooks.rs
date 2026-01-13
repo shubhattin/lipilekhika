@@ -337,12 +337,19 @@ unsafe extern "system" fn low_level_keyboard_proc(
           clear_context(state);
         }
 
-        // Notify UI (or other threads) that typing was toggled via keyboard shortcut.
+        // Notify UI and tray to rerender based on latest app state
         let _ = state.tx.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::SetTypingEnabled(now_enabled),
+          msg: crate::ThreadMessageType::TriggerTypingNotification,
         });
-        // .unwrap();
+        let _ = state.tx.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::RerenderUI,
+        });
+        let _ = state.tx.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
 
         // Suppress Alt+X so it doesn't reach apps
         return LRESULT(1);

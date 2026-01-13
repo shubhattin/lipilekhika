@@ -1,7 +1,7 @@
 use crate::ui::data::{Message, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, Sender};
 use iced::{
   Element, Subscription, Task,
   widget::{checkbox, column, container, pick_list, row, toggler},
@@ -13,6 +13,7 @@ use std::sync::{Arc, Mutex, atomic::Ordering};
 struct App {
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+  tx: Arc<Mutex<Sender<crate::ThreadMessage>>>,
   // Window tracking
   main_window: window::Id,
   // Notification state
@@ -25,6 +26,7 @@ impl App {
   fn new(
     app_state: Arc<crate::AppState>,
     rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+    tx: Arc<Mutex<Sender<crate::ThreadMessage>>>,
     icon: window::Icon,
   ) -> (Self, Task<Message>) {
     // Open main window since daemon mode doesn't create one automatically
@@ -41,6 +43,7 @@ impl App {
       Self {
         global_app_state: app_state,
         rx,
+        tx,
         main_window: main_id,
         notification_window: None,
         notification_message: String::new(),
@@ -52,11 +55,28 @@ impl App {
 
   fn update(&mut self, message: Message) -> Task<Message> {
     match message {
+      Message::RerenderUI => Task::none(),
+      Message::SetScript(script) => {
+        let new_script_context = TypingContext::new(&script, None);
+        if let Ok(new_script_context) = new_script_context {
+          let mut val = self.global_app_state.typing_context.lock().unwrap();
+          *val = new_script_context;
+        }
+        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
+        Task::none()
+      }
       Message::ToggleTypingMode(enabled) => {
         self
           .global_app_state
           .typing_enabled
           .store(enabled, Ordering::SeqCst);
+        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
         Task::none()
       }
       Message::ToogleUseNativeNumerals(use_native_numerals) => {
@@ -66,6 +86,10 @@ impl App {
           .lock()
           .unwrap()
           .update_use_native_numerals(use_native_numerals);
+        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
         Task::none()
       }
       Message::ToogleIncludeInherentVowel(include_inherent_vowel) => {
@@ -75,9 +99,14 @@ impl App {
           .lock()
           .unwrap()
           .update_include_inherent_vowel(include_inherent_vowel);
+        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
         Task::none()
       }
-      Message::TriggerTypingNotification(enabled) => {
+      Message::TriggerTypingNotification => {
+        let enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
         // Show notification based on typing state
         let msg = if enabled {
           "Typing : On".to_string()
@@ -107,14 +136,6 @@ impl App {
           open_task.map(Message::NotificationOpened),
           timeout_task,
         ])
-      }
-      Message::SetScript(script) => {
-        let new_script_context = TypingContext::new(&script, None);
-        if let Ok(new_script_context) = new_script_context {
-          let mut val = self.global_app_state.typing_context.lock().unwrap();
-          *val = new_script_context;
-        }
-        Task::none()
       }
       Message::NotificationOpened(_id) => {
         // Window is already tracked, nothing more to do
@@ -161,7 +182,7 @@ impl App {
       let ctx = self.global_app_state.typing_context.lock().unwrap();
       let use_native_numerals = ctx.get_use_native_numerals();
       let include_inherent_vowel = ctx.get_include_inherent_vowel();
-      let curr_script = ctx.get_curr_script();
+      let curr_script = ctx.get_normalised_script();
 
       container(column![
         row![
@@ -199,13 +220,22 @@ impl App {
 pub fn run(
   app_state: Arc<crate::AppState>,
   rx: crossbeam_channel::Receiver<crate::ThreadMessage>,
+  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
 ) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
   let rx = Arc::new(Mutex::new(rx));
+  let tx = Arc::new(Mutex::new(tx));
 
   iced::daemon(
-    move || App::new(Arc::clone(&app_state), Arc::clone(&rx), icon.clone()),
+    move || {
+      App::new(
+        Arc::clone(&app_state),
+        Arc::clone(&rx),
+        Arc::clone(&tx),
+        icon.clone(),
+      )
+    },
     App::update,
     App::view,
   )

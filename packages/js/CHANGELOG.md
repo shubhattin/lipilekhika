@@ -6,6 +6,7 @@
 - added in typing module
   - `getUseNativeNumerals`
   - `getIncludeInherentVowel`
+  - `getNormalizedScript`
 
 ## js-lib@v1.0.3
 

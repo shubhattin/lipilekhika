@@ -73,6 +73,6 @@ pub fn view_notification<'a, Message: 'a>(message_text: &'a str) -> Element<'a, 
   .style(notification_style)
   .width(Length::Fill)
   .height(Length::Fill)
-  .padding(10)
+  .padding(0)
   .into()
 }

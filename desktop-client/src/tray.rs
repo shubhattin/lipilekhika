@@ -40,7 +40,7 @@ impl TrayManager {
     let ctx = app_state.typing_context.lock().unwrap();
     let use_native_numerals = ctx.get_use_native_numerals();
     let include_inherent_vowel = ctx.get_include_inherent_vowel();
-    let current_script = ctx.get_curr_script();
+    let current_script = ctx.get_normalised_script();
     drop(ctx); // Release lock early
 
     // Create main menu
@@ -120,7 +120,7 @@ impl TrayManager {
   fn generate_tooltip(app_state: &Arc<AppState>) -> String {
     let typing_enabled = app_state.typing_enabled.load(Ordering::SeqCst);
     let ctx = app_state.typing_context.lock().unwrap();
-    let current_script = ctx.get_curr_script();
+    let current_script = ctx.get_normalised_script();
     drop(ctx);
 
     format!(
@@ -202,6 +202,8 @@ impl TrayManager {
 pub fn run_tray_thread(
   app_state: Arc<AppState>,
   shutdown: Arc<AtomicBool>,
+  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  rx: crossbeam_channel::Receiver<crate::ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
   std::thread::spawn(move || {
     // Create the tray icon

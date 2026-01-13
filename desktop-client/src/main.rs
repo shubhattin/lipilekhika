@@ -37,7 +37,13 @@ pub enum ThreadMessageOrigin {
 }
 #[derive(Debug)]
 pub enum ThreadMessageType {
-  SetTypingEnabled(bool),
+  /// as the values are present in `AppState` itself
+  /// we only send a signal to rerender based on latest app state from the ui
+  RerenderTray,
+  /// message to be sent to the ui to rerender and read updated value from app state
+  RerenderUI,
+  /// used to display typing notification when from hook or tray in ui
+  TriggerTypingNotification,
 }
 
 fn main() {
@@ -74,9 +80,13 @@ fn main() {
   // Start tray icon thread
   let state_clone = Arc::clone(&app_state);
   let shutdown_clone = Arc::clone(&shutdown);
-  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone);
+  let tx_clone = tx.clone();
+  let rx_clone = rx.clone();
+  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone, tx_clone, rx_clone);
 
-  let state_clone = Arc::clone(&app_state);
   // starts the UI event loop
-  ui::run(state_clone, rx).unwrap();
+  let state_clone = Arc::clone(&app_state);
+  let tx_clone = tx.clone();
+  let rx_clone = rx.clone();
+  ui::run(state_clone, rx_clone, tx_clone).unwrap();
 }
