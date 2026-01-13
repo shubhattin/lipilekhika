@@ -5,7 +5,7 @@ use crossbeam_channel::{Receiver, Sender};
 use iced::widget::button;
 use iced::{
   Element, Subscription, Task,
-  widget::{checkbox, column, container, pick_list, row, toggler},
+  widget::{checkbox, column, container, pick_list, row, text, toggler},
   window,
 };
 use lipilekhika::typing::TypingContext;
@@ -258,7 +258,9 @@ impl App {
           toggler(typing_enabled)
             .label("Typing")
             .on_toggle(Message::ToggleTypingMode),
-        ],
+          text!["ALt+X/C"].size(12)
+        ]
+        .spacing(20),
         row![pick_list(scripts, Some(curr_script), Message::SetScript)].padding([10, 0]),
         row![
           checkbox(use_native_numerals)
