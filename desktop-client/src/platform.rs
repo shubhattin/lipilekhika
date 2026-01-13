@@ -2,15 +2,18 @@
 #[path = "win/mod.rs"]
 mod win;
 
+use crossbeam_channel::Sender;
 use std::sync::Arc;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: Sender<crate::ThreadMessage>,
+  tx_tray: Sender<crate::ThreadMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
   #[cfg(windows)]
   {
-    return win::run(app_state, tx).map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+    return win::run(app_state, tx_ui, tx_tray)
+      .map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
   }
 
   #[cfg(not(windows))]

@@ -1,5 +1,5 @@
-// Hide console window on Windows in release builds only
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// ^ hides console in windows release builds
 
 use crossbeam_channel;
 use lipilekhika::typing::{
@@ -12,6 +12,7 @@ use std::{
 };
 
 mod platform;
+mod tray;
 mod ui;
 
 /// shared app state for both the platform specific hook code, UI, etc
@@ -22,7 +23,7 @@ pub struct AppState {
 }
 
 /// use to pass messages between threads
-/// hook -> ui
+/// hook -> ui + tray, ui -> tray, tray -> ui
 #[derive(Debug)]
 pub struct ThreadMessage {
   pub origin: ThreadMessageOrigin,
@@ -36,11 +37,25 @@ pub enum ThreadMessageOrigin {
 }
 #[derive(Debug)]
 pub enum ThreadMessageType {
-  SetTypingEnabled(bool),
+  /// as the values are present in `AppState` itself
+  /// we only send a signal to rerender based on latest app state from the ui
+  RerenderTray,
+  /// message to be sent to the ui to rerender and read updated value from app state
+  RerenderUI,
+  /// used to display typing notification when from hook or tray in ui
+  TriggerTypingNotification,
+  /// send from tray
+  MaximizeUI,
+  // Close app request from hook (shortcut)
+  CloseApp,
 }
 
 fn main() {
-  let (tx, rx) = crossbeam_channel::bounded::<ThreadMessage>(100);
+  // Create separate channels for UI and Tray
+  // Each component gets its own dedicated receiver to avoid message competition
+  // the non-mpsc model was causing some issues we are still sticking with crossbeam_channel for now
+  let (tx_ui, rx_ui) = crossbeam_channel::bounded::<ThreadMessage>(100);
+  let (tx_tray, rx_tray) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
   let typing_context = TypingContext::new(
     "Devanagari",
@@ -56,16 +71,29 @@ fn main() {
     typing_enabled: AtomicBool::new(false),
   });
 
+  // Shutdown flag for coordinating thread shutdown
+  let shutdown = Arc::new(AtomicBool::new(false));
+
+  // Start keyboard hook thread
   let state_clone = Arc::clone(&app_state);
-  let tx_clone = tx.clone();
+  let tx_ui_clone = tx_ui.clone();
+  let tx_tray_clone = tx_tray.clone();
   let _handle_hook = thread::spawn(move || {
     // platform-specific keyboard handler thread
-    if let Err(err) = platform::run(state_clone, tx_clone) {
+    if let Err(err) = platform::run(state_clone, tx_ui_clone, tx_tray_clone) {
       eprintln!("{err}");
       std::process::exit(1);
     }
   });
+
+  // Start tray icon thread
   let state_clone = Arc::clone(&app_state);
+  let shutdown_clone = Arc::clone(&shutdown);
+  let tx_ui_clone = tx_ui.clone();
+  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone, tx_ui_clone, rx_tray);
+
   // starts the UI event loop
-  ui::run(state_clone, rx).unwrap();
+  let state_clone = Arc::clone(&app_state);
+  let tx_tray_clone = tx_tray.clone();
+  ui::run(state_clone, rx_ui, tx_tray_clone).unwrap();
 }

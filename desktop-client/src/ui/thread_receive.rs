@@ -1,5 +1,5 @@
-use crate::ui::data::Message;
-use crossbeam_channel::Receiver;
+use crate::{ThreadMessageOrigin, ThreadMessageType, ui::data::Message};
+use crossbeam_channel::{Receiver, TryRecvError};
 use iced::stream;
 use iced_futures::BoxStream;
 use std::{
@@ -42,29 +42,49 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
 
           match guard.try_recv() {
             Ok(msg) => Some(msg),
-            Err(crossbeam_channel::TryRecvError::Empty) => None,
-            Err(crossbeam_channel::TryRecvError::Disconnected) => break,
+            Err(TryRecvError::Empty) => None,
+            Err(TryRecvError::Disconnected) => break,
           }
         };
 
         match thread_msg {
-          Some(msg) => match msg.msg {
-            crate::ThreadMessageType::SetTypingEnabled(enabled) => {
-              let _out = output.send(Message::ToggleTypingMode(enabled)).await;
+          Some(msg) if !matches!(msg.origin, ThreadMessageOrigin::UI) => match msg.msg {
+            ThreadMessageType::RerenderUI => {
+              // println!("RerenderUI");
+              let _out = output.send(Message::RerenderUI).await;
               if _out.is_err() {
                 break;
               }
-              if matches!(msg.origin, crate::ThreadMessageOrigin::KeyboardHook) {
-                let _out = output
-                  .send(Message::TriggerTypingNotification(enabled))
-                  .await;
+            }
+            ThreadMessageType::TriggerTypingNotification => {
+              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook)
+                || matches!(msg.origin, ThreadMessageOrigin::Tray)
+              {
+                let _out = output.send(Message::TriggerTypingNotification).await;
                 if _out.is_err() {
                   break;
                 }
               }
             }
+            ThreadMessageType::MaximizeUI => {
+              if matches!(msg.origin, ThreadMessageOrigin::Tray) {
+                let _out = output.send(Message::MaximizeUI).await;
+                if _out.is_err() {
+                  break;
+                }
+              }
+            }
+            ThreadMessageType::CloseApp => {
+              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook) {
+                let _out = output.send(Message::CloseApp).await;
+                if _out.is_err() {
+                  break;
+                }
+              }
+            }
+            _ => {}
           },
-          None => {
+          Some(_) | None => {
             // Async sleep to avoid busy-waiting and allow other tasks to run
             smol::Timer::after(std::time::Duration::from_millis(10)).await;
           }

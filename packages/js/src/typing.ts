@@ -156,6 +156,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     },
     getUseNativeNumerals: () => use_native_numerals,
     getIncludeInherentVowel: () => include_inherent_vowel,
+    getNormalizedScript: () => normalized_typing_lang,
   };
 }
 

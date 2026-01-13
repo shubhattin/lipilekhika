@@ -5,22 +5,27 @@ use iced::{
 };
 use std::time::Duration;
 
-/// Configuration for notification display
 #[derive(Clone, Debug)]
 pub struct NotificationConfig {
-  /// Duration to show notification before auto-closing (default: 3 seconds)
+  /// notification timeout
   pub timeout: Duration,
 }
 
 impl Default for NotificationConfig {
   fn default() -> Self {
     Self {
-      timeout: Duration::from_secs(3),
+      timeout: Duration::from_millis(1400),
     }
   }
 }
 
 pub fn open_notification_window() -> (window::Id, Task<window::Id>) {
+  #[cfg(target_os = "windows")]
+  let platform_specific = window::settings::PlatformSpecific {
+    skip_taskbar: true,
+    ..Default::default()
+  };
+
   let settings = window::Settings {
     decorations: false,
     resizable: false,
@@ -28,6 +33,8 @@ pub fn open_notification_window() -> (window::Id, Task<window::Id>) {
     size: iced::Size::new(150.0, 40.0),
     position: window::Position::SpecificWith(get_top_center_position),
     exit_on_close_request: false,
+    #[cfg(target_os = "windows")]
+    platform_specific,
     ..Default::default()
   };
 
@@ -73,6 +80,6 @@ pub fn view_notification<'a, Message: 'a>(message_text: &'a str) -> Element<'a, 
   .style(notification_style)
   .width(Length::Fill)
   .height(Length::Fill)
-  .padding(10)
+  .padding(0)
   .into()
 }

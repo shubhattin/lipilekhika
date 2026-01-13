@@ -321,8 +321,8 @@ unsafe extern "system" fn low_level_keyboard_proc(
         return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
       }
 
-      // ---- Handle Alt+X toggle (works regardless of typing mode) ----
-      if is_keydown && vk == VK_X && (kb.flags.0 & LLKHF_ALTDOWN.0) != 0 {
+      // ---- Handle Alt+X or Alt+C toggle (case insensitive, works regardless of typing mode) ----
+      if is_keydown && (vk == VK_X || vk == VK_C) && (kb.flags.0 & LLKHF_ALTDOWN.0) != 0 {
         let prev = state
           .app_state
           .typing_enabled
@@ -331,20 +331,39 @@ unsafe extern "system" fn low_level_keyboard_proc(
         let now_enabled = !prev;
 
         if now_enabled {
-          // println!("[Typing Mode: ON] - Press Alt+X to disable");
+          // println!("[Typing Mode: ON] - Press Alt+X/Alt+C to disable");
         } else {
-          // println!("[Typing Mode: OFF] - Press Alt+X to enable");
+          // println!("[Typing Mode: OFF] - Press Alt+X/Alt+C to enable");
           clear_context(state);
         }
 
-        // Notify UI (or other threads) that typing was toggled via keyboard shortcut.
-        let _ = state.tx.send(crate::ThreadMessage {
+        // Notify UI and tray to rerender based on latest app state
+        let _ = state.tx_ui.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::SetTypingEnabled(now_enabled),
+          msg: crate::ThreadMessageType::TriggerTypingNotification,
         });
-        // .unwrap();
+        let _ = state.tx_ui.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::RerenderUI,
+        });
+        let _ = state.tx_tray.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
 
-        // Suppress Alt+X so it doesn't reach apps
+        // Suppress Alt+X/Alt+C so it doesn't reach apps
+        return LRESULT(1);
+      }
+
+      // ---- Handle Win+Esc to close the app ----
+      if is_keydown && vk == VK_ESCAPE && is_ctrl_or_win_pressed() {
+        // Send close app message to UI
+        let _ = state.tx_ui.send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::KeyboardHook,
+          msg: crate::ThreadMessageType::CloseApp,
+        });
+
+        // Suppress Win+Esc so it doesn't reach apps
         return LRESULT(1);
       }
 

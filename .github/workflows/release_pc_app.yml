@@ -1,0 +1,57 @@
+name: Release PC App (Windows)
+
+on:
+  push:
+    tags:
+      - 'pc-app@*'
+
+permissions:
+  contents: write # Required for creating releases + uploading assets
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # JS Step (matches release_rust.yml)
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Make Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Rust (desktop-client)
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-pc-app-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pc-app-cargo-
+
+      - name: Build lipilekhika-ui (Windows)
+        run: |
+          cargo build --release -p lipilekhika-ui
+
+      - run: |
+          mv target/release/lipilekhika-ui.exe lipilekhika.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lipilekhika.exe
+          generate_release_notes: true

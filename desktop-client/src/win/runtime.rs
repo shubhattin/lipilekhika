@@ -1,3 +1,4 @@
+use crossbeam_channel::Sender;
 use std::sync::Arc;
 
 use windows::Win32::Foundation::HINSTANCE;
@@ -10,9 +11,14 @@ use super::WinAppState;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: Sender<crate::ThreadMessage>,
+  tx_tray: Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
-  let win_state = Arc::new(WinAppState { app_state, tx });
+  let win_state = Arc::new(WinAppState {
+    app_state,
+    tx_ui,
+    tx_tray,
+  });
 
   // The low-level hook callbacks can't capture state, so we store `Arc<WinAppState>`
   // in TLS for the installing thread.

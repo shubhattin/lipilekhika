@@ -2,7 +2,7 @@ use clap::Parser;
 use lipilekhika::transliterate;
 
 #[derive(Parser)]
-#[command(name = "lipiparivartak")]
+#[command(name = "parivartak")]
 #[command(about = "A CLI tool for transliterating text between Indian scripts")]
 struct Args {
   /// The text to transliterate

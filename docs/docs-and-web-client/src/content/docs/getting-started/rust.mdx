@@ -149,7 +149,7 @@ Each mapping is a tuple of `(text: String, type: ListType, input_mappings: Vec<S
 
 For real-time character-by-character input, use the `typing` module which provides a stateful context for handling keyboard input.
 
-### Basic Typing Mode
+### Basic Typing Context
 
 ```rust
 use lipilekhika::typing::{TypingContext, TypingContextOptions};
@@ -189,6 +189,15 @@ fn main() {
     println!("{}", diff.diff_add_text); // क (with inherent vowel)
 }
 ```
+
+### Runtime Configuration
+
+After creating a typing context, you can dynamically update typing options:
+- **`ctx.update_use_native_numerals(bool)`** - Enable/disable native numerals (e.g., १० instead of 10)  
+- **`ctx.update_include_inherent_vowel(bool)`** - Enable/disable inherent vowel inclusion (schwa deletion)  
+- **`ctx.get_use_native_numerals()`** - Get current native numerals setting
+- **`ctx.get_include_inherent_vowel()`** - Get current inherent vowel setting
+- **`ctx.get_normalized_script()`** - Get current normalized script name  
 
 ### Typing Module Types
 

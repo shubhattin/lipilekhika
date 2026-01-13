@@ -14,10 +14,17 @@ pub fn get_ordered_script_list() -> Vec<String> {
 pub enum Message {
   ToggleTypingMode(bool),
   SetScript(String),
-  TriggerTypingNotification(bool),
+  TriggerTypingNotification,
   NotificationOpened(window::Id),
   CloseNotification(window::Id),
   WindowClosed(window::Id),
+  WindowCloseRequested(window::Id),
   ToogleUseNativeNumerals(bool),
   ToogleIncludeInherentVowel(bool),
+  RerenderUI,
+  MinimizeBackground,
+  MaximizeUI,
+  CloseApp,
+  OpenAbout,
+  CloseAbout,
 }
