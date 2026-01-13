@@ -63,20 +63,20 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            binary_name: lipiparivartak
-            asset_name: lipiparivartak-linux-x86_64
+            binary_name: parivartak
+            asset_name: parivartak-linux-x86_64
           - os: macos-latest
             target: x86_64-apple-darwin
-            binary_name: lipiparivartak
-            asset_name: lipiparivartak-macos-x86_64
+            binary_name: parivartak
+            asset_name: parivartak-macos-x86_64
           - os: macos-latest
             target: aarch64-apple-darwin
-            binary_name: lipiparivartak
-            asset_name: lipiparivartak-macos-aarch64
+            binary_name: parivartak
+            asset_name: parivartak-macos-aarch64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            binary_name: lipiparivartak.exe
-            asset_name: lipiparivartak-windows-x86_64.exe
+            binary_name: parivartak.exe
+            asset_name: parivartak-windows-x86_64.exe
 
     steps:
       - name: Checkout repo
@@ -115,7 +115,7 @@ jobs:
       - name: Build binary
         run: |
           cd packages/rust
-          cargo build --release --bin lipiparivartak --target ${{ matrix.target }}
+          cargo build --release --bin parivartak --target ${{ matrix.target }}
 
       - name: Rename binary (Unix)
         if: runner.os != 'Windows'

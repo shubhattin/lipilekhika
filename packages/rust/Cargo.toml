@@ -30,8 +30,8 @@ bincode = "1.3.3"
 crate-type = ["rlib"]
 
 [[bin]]
-name = "lipiparivartak"
-path = "src/bin/lipiparivartak.rs"
+name = "parivartak"
+path = "src/bin/parivartak.rs"
 
 [[bench]]
 name = "benchmark"
