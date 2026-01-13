@@ -259,7 +259,7 @@ impl App {
         (
           ctx.get_use_native_numerals(),
           ctx.get_include_inherent_vowel(),
-          ctx.get_normalised_script(),
+          ctx.get_normalized_script(),
         )
         // auto drops lock
       };
@@ -269,7 +269,7 @@ impl App {
           toggler(typing_enabled)
             .label("Typing")
             .on_toggle(Message::ToggleTypingMode),
-          text!["ALt+X/C"].size(12)
+          text!["Alt+X/C"].size(12)
         ]
         .spacing(20),
         row![pick_list(scripts, Some(curr_script), Message::SetScript)].padding([10, 0]),

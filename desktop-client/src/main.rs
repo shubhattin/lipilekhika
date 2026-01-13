@@ -23,7 +23,7 @@ pub struct AppState {
 }
 
 /// use to pass messages between threads
-/// hook -> ui + tary, ui -> tray, tray -> ui
+/// hook -> ui + tray, ui -> tray, tray -> ui
 #[derive(Debug)]
 pub struct ThreadMessage {
   pub origin: ThreadMessageOrigin,

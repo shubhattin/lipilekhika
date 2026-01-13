@@ -70,7 +70,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalised_script(),
+        ctx.get_normalized_script(),
       )
     };
     let mut event_mapper = MenuEventMapper::new();
@@ -169,7 +169,7 @@ impl TrayManager {
     let current_script = {
       let ctx = app_state.typing_context.lock().unwrap();
       // ^ auto drops in this scope
-      ctx.get_normalised_script()
+      ctx.get_normalized_script()
     };
 
     format!(
@@ -192,7 +192,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalised_script(),
+        ctx.get_normalized_script(),
       )
     };
 
@@ -359,7 +359,8 @@ pub fn run_tray_thread(
           send_messages(&tx_ui, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
-            std::process::exit(0);
+            // std::process::exit(0);
+            break; // Let main thread handle graceful shutdown  
           }
         }
 

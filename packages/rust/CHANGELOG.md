@@ -2,7 +2,7 @@
 
 ## Unreleased (rust-lib@v1.0.3)
 
-- added a new function `get_schwa_status_for_script` to get the schwa deletion characerstic of the script provided.
+- added a new function `get_schwa_status_for_script` to get the schwa deletion characteristic of the script provided.
 - added
   - `get_use_native_numerals`
   - `get_include_inherent_vowel`
