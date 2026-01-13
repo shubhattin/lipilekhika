@@ -188,6 +188,10 @@ impl TypingContext {
   pub fn get_include_inherent_vowel(&self) -> bool {
     self.include_inherent_vowel
   }
+
+  pub fn get_curr_script(&self) -> String {
+    self.normalized_typing_lang.clone()
+  }
 }
 
 /// Compute the character-wise diff between previous and current outputs.

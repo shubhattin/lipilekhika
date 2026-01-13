@@ -11,7 +11,6 @@ use lipilekhika::typing::TypingContext;
 use std::sync::{Arc, Mutex, atomic::Ordering};
 
 struct App {
-  script: Option<String>,
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
   // Window tracking
@@ -41,7 +40,6 @@ impl App {
     (
       Self {
         global_app_state: app_state,
-        script: Some("Devanagari".to_string()),
         rx,
         main_window: main_id,
         notification_window: None,
@@ -111,8 +109,7 @@ impl App {
         ])
       }
       Message::SetScript(script) => {
-        self.script = Some(script);
-        let new_script_context = TypingContext::new(self.script.as_ref().unwrap(), None);
+        let new_script_context = TypingContext::new(&script, None);
         if let Ok(new_script_context) = new_script_context {
           let mut val = self.global_app_state.typing_context.lock().unwrap();
           *val = new_script_context;
@@ -161,25 +158,18 @@ impl App {
       // Render main app view
       let scripts = get_ordered_script_list();
       let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
-      let use_native_numerals = self
-        .global_app_state
-        .typing_context
-        .lock()
-        .unwrap()
-        .get_use_native_numerals();
-      let include_inherent_vowel = self
-        .global_app_state
-        .typing_context
-        .lock()
-        .unwrap()
-        .get_include_inherent_vowel();
+      let ctx = self.global_app_state.typing_context.lock().unwrap();
+      let use_native_numerals = ctx.get_use_native_numerals();
+      let include_inherent_vowel = ctx.get_include_inherent_vowel();
+      let curr_script = ctx.get_curr_script();
+
       container(column![
         row![
           toggler(typing_enabled)
             .label("Typing")
             .on_toggle(Message::ToggleTypingMode),
         ],
-        row![pick_list(scripts, self.script.as_ref(), Message::SetScript)].padding([10, 0]),
+        row![pick_list(scripts, Some(curr_script), Message::SetScript)].padding([10, 0]),
         row![
           checkbox(use_native_numerals)
             .on_toggle(Message::ToogleUseNativeNumerals)
