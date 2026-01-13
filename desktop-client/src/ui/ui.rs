@@ -2,7 +2,7 @@ use crate::ui::data::{Message, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::{Receiver, Sender};
-use iced::widget::button;
+use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
   Element, Subscription, Task,
   widget::{checkbox, column, container, pick_list, row, text, toggler},
@@ -23,6 +23,8 @@ struct App {
   notification_window: Option<window::Id>,
   notification_message: String,
   notification_config: NotificationConfig,
+  // About modal state
+  about_modal_open: bool,
 }
 
 impl App {
@@ -52,6 +54,7 @@ impl App {
         notification_window: None,
         notification_message: String::new(),
         notification_config: NotificationConfig::default(),
+        about_modal_open: false,
       },
       main_open_task.discard(),
     )
@@ -221,6 +224,14 @@ impl App {
         // Exit the application (triggered by Win+Esc shortcut)
         iced::exit()
       }
+      Message::OpenAbout => {
+        self.about_modal_open = true;
+        Task::none()
+      }
+      Message::CloseAbout => {
+        self.about_modal_open = false;
+        Task::none()
+      }
     }
   }
 
@@ -253,7 +264,7 @@ impl App {
         // auto drops lock
       };
 
-      container(column![
+      let main_content = container(column![
         row![
           toggler(typing_enabled)
             .label("Typing")
@@ -272,10 +283,48 @@ impl App {
         ]
         .spacing(20)
         .padding([10, 0]),
-        row![button("Background Minimize").on_press(Message::MinimizeBackground)].padding([10, 0]),
+        row![
+          button("Background Minimize").on_press(Message::MinimizeBackground),
+          button("About").on_press(Message::OpenAbout)
+        ]
+        .spacing(10)
+        .padding([10, 0]),
       ])
-      .padding(10)
-      .into()
+      .padding(10);
+
+      if self.about_modal_open {
+        let about_modal = container(
+          column![
+            text("Lipi Lekhika").size(24),
+            text(format!("Version: {}", env!("CARGO_PKG_VERSION"))).size(14),
+            container(text("A transliteration typing tool for Indic scripts.").size(12))
+              .padding([10, 0]),
+            button("Close").on_press(Message::CloseAbout)
+          ]
+          .spacing(10)
+          .align_x(iced::Alignment::Center),
+        )
+        .padding(20)
+        .style(|_| container::Style {
+          background: Some(iced::Background::Color(iced::Color::from_rgb(
+            0.15, 0.15, 0.18,
+          ))),
+          border: iced::Border {
+            color: iced::Color::from_rgb(0.3, 0.3, 0.35),
+            width: 1.0,
+            radius: 8.0.into(),
+          },
+          ..Default::default()
+        });
+
+        stack![
+          main_content,
+          mouse_area(center(opaque(about_modal))).on_press(Message::CloseAbout)
+        ]
+        .into()
+      } else {
+        main_content.into()
+      }
     }
   }
 

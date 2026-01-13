@@ -25,4 +25,6 @@ pub enum Message {
   MinimizeBackground,
   MaximizeUI,
   CloseApp,
+  OpenAbout,
+  CloseAbout,
 }
