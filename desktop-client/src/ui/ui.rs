@@ -1,7 +1,7 @@
 use crate::ui::data::{Message, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
-use crossbeam_channel::{Receiver, Sender, TryRecvError};
+use crossbeam_channel::{Receiver, Sender};
 use iced::{
   Element, Subscription, Task,
   widget::{checkbox, column, container, pick_list, row, toggler},

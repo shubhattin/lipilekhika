@@ -70,7 +70,7 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
           },
           Some(_) | None => {
             // Async sleep to avoid busy-waiting and allow other tasks to run
-            async_std::task::sleep(std::time::Duration::from_millis(10)).await;
+            smol::Timer::after(std::time::Duration::from_millis(10)).await;
           }
         }
       }
