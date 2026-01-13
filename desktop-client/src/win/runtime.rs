@@ -1,3 +1,4 @@
+use crossbeam_channel::Sender;
 use std::sync::Arc;
 
 use windows::Win32::Foundation::HINSTANCE;
@@ -10,8 +11,8 @@ use super::WinAppState;
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
-  tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: Sender<crate::ThreadMessage>,
+  tx_tray: Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
   let win_state = Arc::new(WinAppState {
     app_state,

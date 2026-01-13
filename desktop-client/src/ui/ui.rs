@@ -1,7 +1,7 @@
 use crate::ui::data::{Message, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, TryRecvError};
 use iced::{
   Element, Subscription, Task,
   widget::{checkbox, column, container, pick_list, row, toggler},
@@ -13,7 +13,7 @@ use std::sync::{Arc, Mutex, atomic::Ordering};
 struct App {
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
-  tx: Arc<Mutex<Sender<crate::ThreadMessage>>>,
+  tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
   // Window tracking
   main_window: window::Id,
   // Notification state
@@ -26,7 +26,7 @@ impl App {
   fn new(
     app_state: Arc<crate::AppState>,
     rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
-    tx: Arc<Mutex<Sender<crate::ThreadMessage>>>,
+    tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
     icon: window::Icon,
   ) -> (Self, Task<Message>) {
     // Open main window since daemon mode doesn't create one automatically
@@ -43,7 +43,7 @@ impl App {
       Self {
         global_app_state: app_state,
         rx,
-        tx,
+        tx_tray,
         main_window: main_id,
         notification_window: None,
         notification_message: String::new(),
@@ -73,7 +73,7 @@ impl App {
           let mut ctx = self.global_app_state.typing_context.lock().unwrap();
           *ctx = new_script_context;
           drop(ctx);
-          let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+          let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
             origin: crate::ThreadMessageOrigin::UI,
             msg: crate::ThreadMessageType::RerenderTray,
           });
@@ -85,7 +85,7 @@ impl App {
           .global_app_state
           .typing_enabled
           .store(enabled, Ordering::SeqCst);
-        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::UI,
           msg: crate::ThreadMessageType::RerenderTray,
         });
@@ -98,7 +98,7 @@ impl App {
           .lock()
           .unwrap()
           .update_use_native_numerals(use_native_numerals);
-        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::UI,
           msg: crate::ThreadMessageType::RerenderTray,
         });
@@ -111,7 +111,7 @@ impl App {
           .lock()
           .unwrap()
           .update_include_inherent_vowel(include_inherent_vowel);
-        let _ = self.tx.lock().unwrap().send(crate::ThreadMessage {
+        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::UI,
           msg: crate::ThreadMessageType::RerenderTray,
         });
@@ -238,20 +238,20 @@ impl App {
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  rx: crossbeam_channel::Receiver<crate::ThreadMessage>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
+  rx: Receiver<crate::ThreadMessage>,
+  tx_tray: Sender<crate::ThreadMessage>,
 ) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
   let rx = Arc::new(Mutex::new(rx));
-  let tx = Arc::new(Mutex::new(tx));
+  let tx_tray = Arc::new(Mutex::new(tx_tray));
 
   iced::daemon(
     move || {
       App::new(
         Arc::clone(&app_state),
         Arc::clone(&rx),
-        Arc::clone(&tx),
+        Arc::clone(&tx_tray),
         icon.clone(),
       )
     },

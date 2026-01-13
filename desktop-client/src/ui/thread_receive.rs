@@ -1,5 +1,5 @@
 use crate::{ThreadMessageOrigin, ThreadMessageType, ui::data::Message};
-use crossbeam_channel::Receiver;
+use crossbeam_channel::{Receiver, TryRecvError};
 use iced::stream;
 use iced_futures::BoxStream;
 use std::{
@@ -42,8 +42,8 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
 
           match guard.try_recv() {
             Ok(msg) => Some(msg),
-            Err(crossbeam_channel::TryRecvError::Empty) => None,
-            Err(crossbeam_channel::TryRecvError::Disconnected) => break,
+            Err(TryRecvError::Empty) => None,
+            Err(TryRecvError::Disconnected) => break,
           }
         };
 

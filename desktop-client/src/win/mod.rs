@@ -2,6 +2,7 @@ pub mod constants;
 pub mod hooks;
 pub mod runtime;
 
+use crossbeam_channel::Sender;
 use std::sync::Arc;
 
 /// Windows-specific state that extends the common AppState with platform-specific
@@ -12,15 +13,15 @@ use std::sync::Arc;
 pub struct WinAppState {
   pub app_state: Arc<crate::AppState>,
   /// Sender for UI messages (RerenderUI, TriggerTypingNotification)
-  pub tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
+  pub tx_ui: Sender<crate::ThreadMessage>,
   /// Sender for Tray messages (RerenderTray)
-  pub tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
+  pub tx_tray: Sender<crate::ThreadMessage>,
 }
 
 pub fn run(
   app_state: Arc<crate::AppState>,
-  tx_ui: crossbeam_channel::Sender<crate::ThreadMessage>,
-  tx_tray: crossbeam_channel::Sender<crate::ThreadMessage>,
+  tx_ui: Sender<crate::ThreadMessage>,
+  tx_tray: Sender<crate::ThreadMessage>,
 ) -> windows::core::Result<()> {
   runtime::run(app_state, tx_ui, tx_tray)
 }

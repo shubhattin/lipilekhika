@@ -1,4 +1,5 @@
 use crate::AppState;
+use crossbeam_channel::{Receiver, Sender};
 use lipilekhika::get_script_list_data;
 use std::collections::HashMap;
 use std::sync::{
@@ -306,8 +307,8 @@ impl TrayManager {
 pub fn run_tray_thread(
   app_state: Arc<AppState>,
   shutdown: Arc<AtomicBool>,
-  tx: crossbeam_channel::Sender<crate::ThreadMessage>,
-  rx: crossbeam_channel::Receiver<crate::ThreadMessage>,
+  tx_ui: Sender<crate::ThreadMessage>,
+  rx: Receiver<crate::ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
   std::thread::spawn(move || {
     // Create the tray icon
@@ -323,10 +324,10 @@ pub fn run_tray_thread(
     let menu_channel = MenuEvent::receiver();
 
     // Helper closure to send messages
-    let send_messages = |tx: &crossbeam_channel::Sender<crate::ThreadMessage>,
+    let send_messages = |tx_ui: &Sender<crate::ThreadMessage>,
                          messages: Vec<crate::ThreadMessageType>| {
       for msg_type in messages {
-        let _ = tx.send(crate::ThreadMessage {
+        let _ = tx_ui.send(crate::ThreadMessage {
           origin: crate::ThreadMessageOrigin::Tray,
           msg: msg_type,
         });
@@ -365,7 +366,7 @@ pub fn run_tray_thread(
         // Check for menu events (non-blocking)
         while let Ok(event) = menu_channel.try_recv() {
           let (should_quit, messages) = tray_manager.handle_menu_event(event);
-          send_messages(&tx, messages);
+          send_messages(&tx_ui, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);
@@ -410,7 +411,7 @@ pub fn run_tray_thread(
         // Check for menu events (non-blocking with timeout)
         if let Ok(event) = menu_channel.recv_timeout(std::time::Duration::from_millis(100)) {
           let (should_quit, messages) = tray_manager.handle_menu_event(event);
-          send_messages(&tx, messages);
+          send_messages(&tx_ui, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);
