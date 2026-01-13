@@ -24,4 +24,5 @@ pub enum Message {
   RerenderUI,
   MinimizeBackground,
   MaximizeUI,
+  CloseApp,
 }

@@ -74,6 +74,14 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
                 }
               }
             }
+            ThreadMessageType::CloseApp => {
+              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook) {
+                let _out = output.send(Message::CloseApp).await;
+                if _out.is_err() {
+                  break;
+                }
+              }
+            }
             _ => {}
           },
           Some(_) | None => {

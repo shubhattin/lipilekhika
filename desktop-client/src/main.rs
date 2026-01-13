@@ -46,6 +46,8 @@ pub enum ThreadMessageType {
   TriggerTypingNotification,
   /// send from tray
   MaximizeUI,
+  // Close app request from hook (shortcut)
+  CloseApp,
 }
 
 fn main() {

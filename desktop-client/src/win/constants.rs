@@ -15,6 +15,7 @@ pub const WM_MBUTTONDOWN: u32 = 0x0207;
 
 // Letters
 pub const VK_X: u32 = 0x58;
+pub const VK_C: u32 = 0x43;
 
 // Navigation & editing keys that should clear context
 pub const VK_LEFT: u32 = 0x25;

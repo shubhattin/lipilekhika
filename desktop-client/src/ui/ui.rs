@@ -217,6 +217,10 @@ impl App {
           Task::none()
         }
       }
+      Message::CloseApp => {
+        // Exit the application (triggered by Win+Esc shortcut)
+        iced::exit()
+      }
     }
   }
 
