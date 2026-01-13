@@ -5,10 +5,9 @@ use iced::{
 };
 use std::time::Duration;
 
-/// Configuration for notification display
 #[derive(Clone, Debug)]
 pub struct NotificationConfig {
-  /// Duration to show notification before auto-closing (default: 3 seconds)
+  /// notification timeout
   pub timeout: Duration,
 }
 

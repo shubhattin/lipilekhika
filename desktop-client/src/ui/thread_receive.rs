@@ -66,6 +66,14 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
                 }
               }
             }
+            ThreadMessageType::MaximizeUI => {
+              if matches!(msg.origin, ThreadMessageOrigin::Tray) {
+                let _out = output.send(Message::MaximizeUI).await;
+                if _out.is_err() {
+                  break;
+                }
+              }
+            }
             _ => {}
           },
           Some(_) | None => {

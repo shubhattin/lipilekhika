@@ -1,5 +1,5 @@
-// Hide console window on Windows in release builds only
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// ^ hides console in windows release builds
 
 use crossbeam_channel;
 use lipilekhika::typing::{
@@ -23,7 +23,7 @@ pub struct AppState {
 }
 
 /// use to pass messages between threads
-/// hook -> ui
+/// hook -> ui + tary, ui -> tray, tray -> ui
 #[derive(Debug)]
 pub struct ThreadMessage {
   pub origin: ThreadMessageOrigin,
@@ -44,14 +44,14 @@ pub enum ThreadMessageType {
   RerenderUI,
   /// used to display typing notification when from hook or tray in ui
   TriggerTypingNotification,
+  /// send from tray
+  MaximizeUI,
 }
 
 fn main() {
   // Create separate channels for UI and Tray
   // Each component gets its own dedicated receiver to avoid message competition
-  // the non-mpsc model was causing some issues
-  // we are still sticking with crossbeam_channel for now
-  // it should be replacable with std::sync::mpsc
+  // the non-mpsc model was causing some issues we are still sticking with crossbeam_channel for now
   let (tx_ui, rx_ui) = crossbeam_channel::bounded::<ThreadMessage>(100);
   let (tx_tray, rx_tray) = crossbeam_channel::bounded::<ThreadMessage>(100);
 

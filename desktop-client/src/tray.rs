@@ -7,42 +7,39 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
 };
 use tray_icon::{
-  Icon, TrayIcon, TrayIconBuilder,
+  Icon, TrayIcon, TrayIconBuilder, TrayIconEvent,
   menu::{CheckMenuItem, Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu},
 };
 
-/// Enum representing different menu events with associated data
 #[derive(Debug, Clone)]
 enum TrayMenuEvent {
   TypingOn,
   NativeNumerals,
   InherentVowel,
   Quit,
+  OpenApp,
   ScriptSelected(String),
 }
 
-/// Maps string menu IDs to structured menu events
 struct MenuEventMapper {
   id_to_event: HashMap<String, TrayMenuEvent>,
 }
-
 impl MenuEventMapper {
   fn new() -> Self {
     Self {
       id_to_event: HashMap::new(),
     }
   }
-
   fn register(&mut self, id: String, event: TrayMenuEvent) {
     self.id_to_event.insert(id, event);
   }
-
   fn get_event(&self, id: &str) -> Option<&TrayMenuEvent> {
     self.id_to_event.get(id)
   }
 }
 
-/// IDs for menu items - for identification in events
+/// menu item and event ids
+const MENU_ID_OPEN_APP: &str = "open_app";
 const MENU_ID_TYPING_ON: &str = "typing_on";
 const MENU_ID_NATIVE_NUMERALS: &str = "native_numerals";
 const MENU_ID_INHERENT_VOWEL: &str = "inherent_vowel";
@@ -60,28 +57,31 @@ pub struct TrayManager {
 }
 
 impl TrayManager {
-  /// Creates a new tray icon with all menu items.
   pub fn new(app_state: Arc<AppState>) -> Result<Self, Box<dyn std::error::Error>> {
-    // Load icon from assets
     let icon_bytes = include_bytes!("../assets/icon.png");
     let icon_image = image::load_from_memory(icon_bytes)?;
     let icon_rgba = icon_image.to_rgba8();
     let (width, height) = icon_rgba.dimensions();
     let icon = Icon::from_rgba(icon_rgba.into_raw(), width, height)?;
 
-    // Get initial state
     let typing_enabled = app_state.typing_enabled.load(Ordering::SeqCst);
-    let ctx = app_state.typing_context.lock().unwrap();
-    let use_native_numerals = ctx.get_use_native_numerals();
-    let include_inherent_vowel = ctx.get_include_inherent_vowel();
-    let current_script = ctx.get_normalised_script();
-    drop(ctx); // Release lock early
-
-    // Initialize event mapper
+    let (use_native_numerals, include_inherent_vowel, current_script) = {
+      let ctx = app_state.typing_context.lock().unwrap();
+      (
+        ctx.get_use_native_numerals(),
+        ctx.get_include_inherent_vowel(),
+        ctx.get_normalised_script(),
+      )
+    };
     let mut event_mapper = MenuEventMapper::new();
-
-    // Create main menu
     let tray_menu = Menu::new();
+
+    // Open App menu item (first item)
+    let open_app_item = MenuItem::with_id(MENU_ID_OPEN_APP, "Open App", true, None);
+    tray_menu.append(&open_app_item)?;
+    event_mapper.register(MENU_ID_OPEN_APP.to_string(), TrayMenuEvent::OpenApp);
+
+    tray_menu.append(&PredefinedMenuItem::separator())?;
 
     // Typing On/Off checkbox
     let typing_on_item =
@@ -107,9 +107,7 @@ impl TrayManager {
       event_mapper.register(item_id, TrayMenuEvent::ScriptSelected(script_name.clone()));
       script_items.push((item, script_name));
     }
-
     tray_menu.append(&script_submenu)?;
-
     tray_menu.append(&PredefinedMenuItem::separator())?;
 
     // Native Numerals checkbox
@@ -147,7 +145,7 @@ impl TrayManager {
     tray_menu.append(&quit_item)?;
     event_mapper.register(MENU_ID_QUIT.to_string(), TrayMenuEvent::Quit);
 
-    // Build tray icon with tooltip
+    // tooltip
     let tooltip = Self::generate_tooltip(&app_state);
     let tray_icon = TrayIconBuilder::new()
       .with_menu(Box::new(tray_menu))
@@ -166,12 +164,11 @@ impl TrayManager {
     })
   }
 
-  /// Generates a tooltip string based on current state
   fn generate_tooltip(app_state: &Arc<AppState>) -> String {
     let typing_enabled = app_state.typing_enabled.load(Ordering::SeqCst);
     let current_script = {
       let ctx = app_state.typing_context.lock().unwrap();
-      // a better syntax as it auto drops the lock
+      // ^ auto drops in this scope
       ctx.get_normalised_script()
     };
 
@@ -182,13 +179,11 @@ impl TrayManager {
     )
   }
 
-  /// Updates the tooltip to reflect current state
   pub fn update_tooltip(&self) {
     let tooltip = Self::generate_tooltip(&self.app_state);
     self._tray_icon.set_tooltip(Some(&tooltip)).ok();
   }
 
-  /// Updates the tray menu to reflect current app state (called when receiving RerenderTray message)
   pub fn update_ui(&mut self) {
     let typing_enabled = self.app_state.typing_enabled.load(Ordering::SeqCst);
 
@@ -201,12 +196,10 @@ impl TrayManager {
       )
     };
 
-    // Update checkbox states (without holding the lock)
     self.typing_on_item.set_checked(typing_enabled);
     self.native_numerals_item.set_checked(use_native_numerals);
     self.inherent_vowel_item.set_checked(include_inherent_vowel);
 
-    // Update script checkmarks
     for (item, name) in &self.script_items {
       let is_selected = *name == current_script;
       item.set_checked(is_selected);
@@ -215,8 +208,6 @@ impl TrayManager {
     self.update_tooltip();
   }
 
-  /// Handles menu events and updates the app state accordingly
-  /// Returns (should_quit, messages_to_send)
   pub fn handle_menu_event(&mut self, event: MenuEvent) -> (bool, Vec<crate::ThreadMessageType>) {
     let event_id = event.id().0.clone();
     let mut messages = Vec::new();
@@ -230,7 +221,6 @@ impl TrayManager {
       }
     };
 
-    // Handle the event using pattern matching
     match tray_event {
       TrayMenuEvent::TypingOn => {
         let new_state = !self.app_state.typing_enabled.load(Ordering::SeqCst);
@@ -240,7 +230,6 @@ impl TrayManager {
           .store(new_state, Ordering::SeqCst);
         self.typing_on_item.set_checked(new_state);
         self.update_tooltip();
-        // Notify UI to rerender and show typing notification
         messages.push(crate::ThreadMessageType::RerenderUI);
         messages.push(crate::ThreadMessageType::TriggerTypingNotification);
         (false, messages)
@@ -251,7 +240,6 @@ impl TrayManager {
         ctx.update_use_native_numerals(new_state);
         drop(ctx);
         self.native_numerals_item.set_checked(new_state);
-        // Notify UI to rerender
         messages.push(crate::ThreadMessageType::RerenderUI);
         (false, messages)
       }
@@ -261,13 +249,17 @@ impl TrayManager {
         ctx.update_include_inherent_vowel(new_state);
         drop(ctx);
         self.inherent_vowel_item.set_checked(new_state);
-        // Notify UI to rerender
         messages.push(crate::ThreadMessageType::RerenderUI);
         (false, messages)
       }
       TrayMenuEvent::Quit => {
         // Return true to signal application should quit (true)
         (true, messages)
+      }
+      TrayMenuEvent::OpenApp => {
+        // Send message to UI to restore the minimized window
+        messages.push(crate::ThreadMessageType::MaximizeUI);
+        (false, messages)
       }
       TrayMenuEvent::ScriptSelected(script_name) => {
         let current_options = {
@@ -311,7 +303,6 @@ pub fn run_tray_thread(
   rx: Receiver<crate::ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
   std::thread::spawn(move || {
-    // Create the tray icon
     let mut tray_manager = match TrayManager::new(Arc::clone(&app_state)) {
       Ok(manager) => manager,
       Err(e) => {
@@ -322,6 +313,8 @@ pub fn run_tray_thread(
 
     // Subscribe to menu events
     let menu_channel = MenuEvent::receiver();
+    // Subscribe to tray icon click events
+    let tray_icon_channel = TrayIconEvent::receiver();
 
     // Helper closure to send messages
     let send_messages = |tx_ui: &Sender<crate::ThreadMessage>,
@@ -347,9 +340,7 @@ pub fn run_tray_thread(
           break;
         }
 
-        // Check for thread messages (RerenderTray)
         while let Ok(thread_msg) = rx.try_recv() {
-          // Only process messages not originating from Tray
           if !matches!(thread_msg.origin, crate::ThreadMessageOrigin::Tray) {
             use crate::ThreadMessageType;
 
@@ -358,18 +349,28 @@ pub fn run_tray_thread(
               ThreadMessageType::RerenderTray => {
                 tray_manager.update_ui();
               }
-              _ => {} // Ignore other message types
+              _ => {}
             }
           }
         }
 
-        // Check for menu events (non-blocking)
         while let Ok(event) = menu_channel.try_recv() {
           let (should_quit, messages) = tray_manager.handle_menu_event(event);
           send_messages(&tx_ui, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);
+          }
+        }
+
+        // Handle tray icon click events (double-click to open app)
+        while let Ok(event) = tray_icon_channel.try_recv() {
+          if let TrayIconEvent::DoubleClick { .. } = event {
+            // Double-click on tray icon opens the app
+            let _ = tx_ui.send(crate::ThreadMessage {
+              origin: crate::ThreadMessageOrigin::Tray,
+              msg: crate::ThreadMessageType::MaximizeUI,
+            });
           }
         }
 
@@ -415,6 +416,17 @@ pub fn run_tray_thread(
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             std::process::exit(0);
+          }
+        }
+
+        // Handle tray icon click events (double-click to open app)
+        while let Ok(event) = tray_icon_channel.try_recv() {
+          if let TrayIconEvent::DoubleClick { .. } = event {
+            // Double-click on tray icon opens the app
+            let _ = tx_ui.send(crate::ThreadMessage {
+              origin: crate::ThreadMessageOrigin::Tray,
+              msg: crate::ThreadMessageType::MaximizeUI,
+            });
           }
         }
       }

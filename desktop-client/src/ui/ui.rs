@@ -2,6 +2,7 @@ use crate::ui::data::{Message, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::{Receiver, Sender};
+use iced::widget::button;
 use iced::{
   Element, Subscription, Task,
   widget::{checkbox, column, container, pick_list, row, toggler},
@@ -14,8 +15,10 @@ struct App {
   global_app_state: Arc<crate::AppState>,
   rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
   tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
-  // Window tracking
-  main_window: window::Id,
+  // Window tracking - None means minimized to tray
+  main_window: Option<window::Id>,
+  // Icon for re-opening window
+  window_icon: window::Icon,
   // Notification state
   notification_window: Option<window::Id>,
   notification_message: String,
@@ -31,7 +34,7 @@ impl App {
   ) -> (Self, Task<Message>) {
     // Open main window since daemon mode doesn't create one automatically
     let (main_id, main_open_task) = window::open(window::Settings {
-      icon: Some(icon),
+      icon: Some(icon.clone()),
       resizable: false,
       size: iced::Size::new(400.0, 200.0),
       position: window::Position::Centered,
@@ -44,7 +47,8 @@ impl App {
         global_app_state: app_state,
         rx,
         tx_tray,
-        main_window: main_id,
+        main_window: Some(main_id),
+        window_icon: icon,
         notification_window: None,
         notification_message: String::new(),
         notification_config: NotificationConfig::default(),
@@ -162,14 +166,54 @@ impl App {
         }
       }
       Message::WindowClosed(id) => {
-        // Exit the daemon when the main window is closed
-        if id == self.main_window {
+        // Window was actually closed (programmatically or otherwise)
+        if self.main_window == Some(id) {
+          // Main window closed - mark as minimized to tray
+          self.main_window = None;
+        } else if self.notification_window == Some(id) {
+          // Clean up notification window
+          self.notification_window = None;
+        }
+        Task::none()
+      }
+      Message::WindowCloseRequested(id) => {
+        // User clicked X button - exit the entire application
+        if self.main_window == Some(id) {
           iced::exit()
+        } else if self.notification_window == Some(id) {
+          // Just close notification window
+          self.notification_window = None;
+          window::close(id)
         } else {
-          // Clean up notification window if it was closed by user
-          if self.notification_window == Some(id) {
-            self.notification_window = None;
-          }
+          Task::none()
+        }
+      }
+      Message::MinimizeBackground => {
+        // Close the main window to hide from taskbar (minimize to tray)
+        if let Some(id) = self.main_window {
+          window::close(id)
+        } else {
+          Task::none()
+        }
+      }
+      Message::MaximizeUI => {
+        // Re-open the main window if it was closed/minimized to tray
+        if self.main_window.is_none() {
+          let (new_id, open_task) = window::open(window::Settings {
+            icon: Some(self.window_icon.clone()),
+            resizable: false,
+            size: iced::Size::new(400.0, 200.0),
+            position: window::Position::Centered,
+            exit_on_close_request: false,
+            ..Default::default()
+          });
+          self.main_window = Some(new_id);
+          // Return the open task and focus the window
+          Task::batch([open_task.discard(), window::gain_focus(new_id)])
+        } else if let Some(id) = self.main_window {
+          // Window exists but might be minimized, restore and focus
+          Task::batch([window::minimize(id, false), window::gain_focus(id)])
+        } else {
           Task::none()
         }
       }
@@ -179,7 +223,10 @@ impl App {
   fn subscription(&self) -> Subscription<Message> {
     Subscription::batch([
       Subscription::run_with(ThreadRx::new(Arc::clone(&self.rx)), thread_message_stream),
-      window::close_requests().map(Message::WindowClosed),
+      // Listen for user clicking X button (to exit app)
+      window::close_requests().map(Message::WindowCloseRequested),
+      // Listen for actual window closes (to track programmatic closes)
+      window::close_events().map(Message::WindowClosed),
     ])
   }
 
@@ -192,7 +239,6 @@ impl App {
       let scripts = get_ordered_script_list();
       let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
 
-      // Read all values and IMMEDIATELY drop the lock before building the view
       let (use_native_numerals, include_inherent_vowel, curr_script) = {
         let ctx = self.global_app_state.typing_context.lock().unwrap();
         (
@@ -200,8 +246,8 @@ impl App {
           ctx.get_include_inherent_vowel(),
           ctx.get_normalised_script(),
         )
-      }; // Lock is dropped here, before any UI rendering
-      // this avoids some potential deadlocks
+        // auto drops lock
+      };
 
       container(column![
         row![
@@ -220,6 +266,7 @@ impl App {
         ]
         .spacing(20)
         .padding([10, 0]),
+        row![button("Background Minimize").on_press(Message::MinimizeBackground)].padding([10, 0]),
       ])
       .padding(10)
       .into()
