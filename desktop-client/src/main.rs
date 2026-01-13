@@ -12,6 +12,7 @@ use std::{
 };
 
 mod platform;
+mod tray;
 mod ui;
 
 /// shared app state for both the platform specific hook code, UI, etc
@@ -56,6 +57,10 @@ fn main() {
     typing_enabled: AtomicBool::new(false),
   });
 
+  // Shutdown flag for coordinating thread shutdown
+  let shutdown = Arc::new(AtomicBool::new(false));
+
+  // Start keyboard hook thread
   let state_clone = Arc::clone(&app_state);
   let tx_clone = tx.clone();
   let _handle_hook = thread::spawn(move || {
@@ -65,6 +70,12 @@ fn main() {
       std::process::exit(1);
     }
   });
+
+  // Start tray icon thread
+  let state_clone = Arc::clone(&app_state);
+  let shutdown_clone = Arc::clone(&shutdown);
+  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone);
+
   let state_clone = Arc::clone(&app_state);
   // starts the UI event loop
   ui::run(state_clone, rx).unwrap();

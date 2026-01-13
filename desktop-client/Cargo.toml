@@ -11,6 +11,7 @@ iced_futures = "0.14.0"
 smol = "2"
 crossbeam-channel = "0.5.15"
 tray-icon = "0.21.3"
+image = "0.25"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62.2", features = [

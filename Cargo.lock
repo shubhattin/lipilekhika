@@ -2447,6 +2447,7 @@ dependencies = [
  "crossbeam-channel",
  "iced",
  "iced_futures",
+ "image",
  "lipilekhika",
  "smol",
  "tray-icon",
