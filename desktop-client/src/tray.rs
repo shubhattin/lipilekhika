@@ -416,7 +416,8 @@ pub fn run_tray_thread(
           send_messages(&tx_ui, messages);
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
-            std::process::exit(0);
+            // std::process::exit(0);
+            break; // Let main thread handle graceful shutdown  
           }
         }
 
