@@ -11,6 +11,9 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      # Chocolatey needs an exact version string. Update this when you want to bump WiX.
+      WIX_VERSION: 3.14.1.20250415
 
     steps:
       - name: Checkout repo
@@ -62,14 +65,39 @@ jobs:
       - name: Install WiX Toolset
         shell: powershell
         run: |
-          choco install wixtoolset -y --no-progress
-          # Add WiX to PATH
-          $wixPath = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
-          if (-not (Test-Path $wixPath)) {
-            $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          choco install wixtoolset -y --no-progress --version "$env:WIX_VERSION"
+          
+          # If WiX is already on PATH, don't do anything.
+          $existing = Get-Command candle.exe -ErrorAction SilentlyContinue
+          if ($existing) {
+            Write-Host "WiX already available on PATH: $($existing.Source)"
+            exit 0
           }
-          echo "$wixPath" >> $env:GITHUB_PATH
-          Write-Host "WiX Toolset installed and added to PATH: $wixPath"
+          
+          # Discover WiX install location robustly (Chocolatey may install in different locations).
+          $wixDirVersion = ($env:WIX_VERSION -split '\.')[0..1] -join '.'
+          $candidateDirs = @(
+            "$env:ProgramFiles(x86)\WiX Toolset v$wixDirVersion\bin",
+            "C:\ProgramData\chocolatey\lib\wixtoolset\tools\bin"
+          )
+          
+          $wixBin = $candidateDirs |
+            Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
+            Select-Object -First 1
+          
+          if (-not $wixBin) {
+            $wixBin = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib" -Directory -Filter "wixtoolset*" -ErrorAction SilentlyContinue |
+              ForEach-Object { Join-Path $_.FullName "tools\bin" } |
+              Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
+              Select-Object -First 1
+          }
+          
+          if (-not $wixBin) {
+            throw "WiX Toolset not found after install (could not locate candle.exe)"
+          }
+          
+          $wixBin | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          Write-Host "WiX Toolset added to PATH: $wixBin"
 
       # Build MSI Installer
       - name: Build MSI Installer
