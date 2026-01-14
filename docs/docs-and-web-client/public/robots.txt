@@ -2,3 +2,5 @@ User-agent: *
 Disallow: /old/
 Disallow: /typing_tool_examples/
 Disallow: /_astro/
+
+Allow: /favicon.ico
