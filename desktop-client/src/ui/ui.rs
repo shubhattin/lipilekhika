@@ -9,6 +9,9 @@ use iced::{
   window,
 };
 use lipilekhika::typing::TypingContext;
+use std::env;
+use std::path::PathBuf;
+use std::process::Command;
 use std::sync::{Arc, Mutex, atomic::Ordering};
 
 struct App {
@@ -232,6 +235,41 @@ impl App {
         self.about_modal_open = false;
         Task::none()
       }
+      Message::OpenLipiParivartaka => {
+        // Launch lipiparivartaka.exe
+        // Try to find the executable in various locations
+        let exe_paths = [
+          // Current directory
+          PathBuf::from("lipiparivartaka.exe"),
+          // Relative to current exe directory
+          env::current_exe()
+            .unwrap_or_default()
+            .parent()
+            .unwrap_or(&PathBuf::new())
+            .join("lipiparivartaka.exe"),
+          // In lipiparivartaka/src-tauri/target/release
+          PathBuf::from("lipiparivartaka")
+            .join("src-tauri")
+            .join("target")
+            .join("release")
+            .join("lipiparivartaka.exe"),
+          // In lipiparivartaka/src-tauri/target/debug
+          PathBuf::from("lipiparivartaka")
+            .join("src-tauri")
+            .join("target")
+            .join("debug")
+            .join("lipiparivartaka.exe"),
+        ];
+
+        for exe_path in &exe_paths {
+          if exe_path.exists() {
+            let _ = Command::new(exe_path).spawn();
+            break;
+          }
+        }
+
+        Task::none()
+      }
     }
   }
 
@@ -285,7 +323,8 @@ impl App {
         .padding([10, 0]),
         row![
           button("Background Minimize").on_press(Message::MinimizeBackground),
-          button("About").on_press(Message::OpenAbout)
+          button("About").on_press(Message::OpenAbout),
+          button("Lipi Parivartaka").on_press(Message::OpenLipiParivartaka)
         ]
         .spacing(10)
         .padding([10, 0]),

@@ -27,4 +27,5 @@ pub enum Message {
   CloseApp,
   OpenAbout,
   CloseAbout,
+  OpenLipiParivartaka,
 }
