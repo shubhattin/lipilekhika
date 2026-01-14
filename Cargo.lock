@@ -3303,6 +3303,7 @@ dependencies = [
 name = "lipiparivartaka"
 version = "0.1.0"
 dependencies = [
+ "lipilekhika",
  "serde",
  "serde_json",
  "tauri",

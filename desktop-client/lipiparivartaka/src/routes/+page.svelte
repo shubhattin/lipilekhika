@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
   import {
-    transliterate,
+    // transliterate,
     preloadScriptData,
     getAllOptions,
     type ScriptListType,
@@ -35,6 +35,7 @@
   import CustomOptions from "$components/script/CustomOptions.svelte";
   import { SiConvertio } from "svelte-icons-pack/si";
   import Label from "$lib/components/ui/label/label.svelte";
+  import { invoke } from "@tauri-apps/api/core";
 
   const DEFAULT_TO: ScriptListType = "Romanized";
 
@@ -57,14 +58,24 @@
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
+    invoke("transliterate", {
+      text: $input_text_atom,
+      from: $typing_script_atom,
+      to: toScript,
+      options: JSON.stringify(options),
+    }).then((result) => {
+      console.log(result);
+    });
     try {
       const startTime = performance.now();
-      const result = await transliterate(
-        $input_text_atom,
-        $typing_script_atom,
-        toScript,
-        options
-      );
+      const result: string = await invoke("transliterate", {
+        payload: {
+          text: $input_text_atom,
+          from: $typing_script_atom,
+          to: toScript,
+          options: options,
+        },
+      });
       const endTime = performance.now();
       const timeTaken = endTime - startTime;
 
