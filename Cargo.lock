@@ -3287,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "lipilekhika-ui"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "crossbeam-channel",
  "iced",
