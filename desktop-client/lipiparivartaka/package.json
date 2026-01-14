@@ -33,6 +33,7 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
     "lucide-svelte": "^0.562.0",
+    "mode-watcher": "^1.1.0",
     "pretty-ms": "^9.3.0",
     "svelte-icons-pack": "^3.1.3"
   },
