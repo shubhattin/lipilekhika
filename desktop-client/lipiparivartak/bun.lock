@@ -24,7 +24,6 @@
         "@fontsource/noto-sans-telugu": "^5.2.8",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-opener": "^2",
-        "lipilekhika": "^1.0.3",
         "lucide-svelte": "^0.562.0",
         "pretty-ms": "^9.3.0",
         "svelte-icons-pack": "^3.1.3",
@@ -354,8 +353,6 @@
     "lightningcss-win32-arm64-msvc": ["lightningcss-win32-arm64-msvc@1.30.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-FZn+vaj7zLv//D/192WFFVA0RgHawIcHqLX9xuWiQt7P0PtdFEVaxgF9rjM/IRYHQXNnk61/H/gb2Ei+kUQ4xQ=="],
 
     "lightningcss-win32-x64-msvc": ["lightningcss-win32-x64-msvc@1.30.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5g1yc73p+iAkid5phb4oVFMB45417DkRevRbt/El/gKXJk4jid+vPFF/AXbxn05Aky8PapwzZrdJShv5C0avjw=="],
-
-    "lipilekhika": ["lipilekhika@1.0.3", "", {}, "sha512-OWL8Cv5HPqGbSglNwgxmi68zHX1xGsJpgVIhPs8I4Zp7w7fZ/ikm2jXtYIBInHOU2ANOOVXV/7AcuJaBXGbkdQ=="],
 
     "locate-character": ["locate-character@3.0.0", "", {}, "sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA=="],
 

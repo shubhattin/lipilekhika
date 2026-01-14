@@ -14,8 +14,10 @@ const config = {
     }),
     alias: {
       "$components/*": "./src/components/*",
+      "lipilekhika/*": "../../packages/js/src/*",
+      lipilekhika: "../../packages/js/src/index.ts",
     },
-  }, 
+  },
 };
 
 export default config;

@@ -1,5 +1,5 @@
 {
-  "name": "tauri-app",
+  "name": "lipiparivartaka",
   "version": "0.1.0",
   "description": "",
   "type": "module",
@@ -32,7 +32,6 @@
     "@fontsource/noto-sans-telugu": "^5.2.8",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
-    "lipilekhika": "^1.0.3",
     "lucide-svelte": "^0.562.0",
     "pretty-ms": "^9.3.0",
     "svelte-icons-pack": "^3.1.3"

@@ -18,10 +18,6 @@ jobs:
 
       # JS Step (matches release_rust.yml)
       - uses: oven-sh/setup-bun@v2
-      - name: Generate Test Data
-        run: |
-          bun install
-          bun run gen:test-data
       - name: Make Script Data
         run: |
           cd packages/js
