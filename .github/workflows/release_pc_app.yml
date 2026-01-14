@@ -59,4 +59,4 @@ jobs:
           files: |
             lipilekhika.exe
             lipiparivartaka.exe
-          generate_release_notes: true
+          generate_release_notes: false
