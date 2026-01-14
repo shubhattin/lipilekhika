@@ -83,7 +83,9 @@ jobs:
 
       - name: Build lipiparivartaka (Windows)
         run: |
-          cargo build --release -p lipiparivartaka
+          cd desktop-client/lipiparivartaka
+          bun install
+          bun tauri build
 
       - run: |
           mv target/release/lipiparivartaka.exe lipiparivartaka.exe
