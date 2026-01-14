@@ -58,14 +58,6 @@
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
-    invoke("transliterate", {
-      text: $input_text_atom,
-      from: $typing_script_atom,
-      to: toScript,
-      options: JSON.stringify(options),
-    }).then((result) => {
-      console.log(result);
-    });
     try {
       const startTime = performance.now();
       const result: string = await invoke("transliterate", {
