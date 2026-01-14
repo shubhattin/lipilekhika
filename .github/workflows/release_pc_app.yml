@@ -42,21 +42,46 @@ jobs:
       - name: Build lipilekhika-ui (Windows)
         run: |
           cargo build --release -p lipilekhika-ui
-      - run: |
-          mv target/release/lipilekhika-ui.exe lipilekhika.exe
-      
+
       - name: Build lipiparivartaka (Windows)
         run: |
           cd desktop-client/lipiparivartaka
           bun install
           bun tauri build
-      - run: |
-          mv target/release/lipiparivartaka.exe lipiparivartaka.exe
 
+      # Extract version from Cargo.toml
+      - name: Get version
+        id: get_version
+        shell: powershell
+        run: |
+          $ver = (Select-String -Path desktop-client/Cargo.toml -Pattern 'version\s*=\s*"(.*?)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          Write-Host "Version: $ver"
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+
+      # Install WiX Toolset
+      - name: Install WiX Toolset
+        shell: powershell
+        run: |
+          choco install wixtoolset -y --no-progress
+          # Add WiX to PATH
+          $wixPath = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
+          if (-not (Test-Path $wixPath)) {
+            $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          }
+          echo "$wixPath" >> $env:GITHUB_PATH
+          Write-Host "WiX Toolset installed and added to PATH: $wixPath"
+
+      # Build MSI Installer
+      - name: Build MSI Installer
+        shell: powershell
+        run: |
+          cd desktop-client
+          .\bundle.ps1 -CI
+
+      # Create GitHub Release and upload assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            lipilekhika.exe
-            lipiparivartaka.exe
+            desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
           generate_release_notes: false

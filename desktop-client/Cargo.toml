@@ -21,3 +21,6 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_Globalization",
 ] }
+
+[build-dependencies]
+embed-resource = "2"
