@@ -5,6 +5,7 @@ use crossbeam_channel::{Receiver, Sender};
 use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
   Element, Subscription, Task,
+  keyboard::{self, Key, key::Named},
   widget::{checkbox, column, container, pick_list, row, text, toggler},
   window,
 };
@@ -100,6 +101,20 @@ impl App {
           msg: crate::ThreadMessageType::RerenderTray,
         });
         Task::none()
+      }
+      Message::KeyboardToggleTypingMode => {
+        // Toggle typing mode (flip current state)
+        let current = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
+        self
+          .global_app_state
+          .typing_enabled
+          .store(!current, Ordering::SeqCst);
+        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
+        // Trigger notification after toggling
+        self.update(Message::TriggerTypingNotification)
       }
       Message::ToogleUseNativeNumerals(use_native_numerals) => {
         self
@@ -280,6 +295,28 @@ impl App {
       window::close_requests().map(Message::WindowCloseRequested),
       // Listen for actual window closes (to track programmatic closes)
       window::close_events().map(Message::WindowClosed),
+      // Listen for keyboard shortcuts
+      keyboard::listen().filter_map(|event| {
+        if let keyboard::Event::KeyPressed { key, modifiers, .. } = event {
+          // Alt+X or Alt+C: Toggle typing mode
+          if modifiers.alt() && !modifiers.control() && !modifiers.logo() && !modifiers.shift() {
+            if let Key::Character(ref c) = key {
+              let c_lower = c.to_lowercase();
+              if c_lower == "x" || c_lower == "c" {
+                // Toggle typing mode and trigger notification
+                return Some(Message::KeyboardToggleTypingMode);
+              }
+            }
+          }
+          // Win+Esc: Close the application
+          if modifiers.logo() && !modifiers.alt() && !modifiers.control() && !modifiers.shift() {
+            if key == Key::Named(Named::Escape) {
+              return Some(Message::CloseApp);
+            }
+          }
+        }
+        None
+      }),
     ])
   }
 

@@ -13,6 +13,7 @@ pub fn get_ordered_script_list() -> Vec<String> {
 #[derive(Clone, Debug)]
 pub enum Message {
   ToggleTypingMode(bool),
+  KeyboardToggleTypingMode, // Toggle from keyboard shortcut (triggers notification)
   SetScript(String),
   TriggerTypingNotification,
   NotificationOpened(window::Id),
