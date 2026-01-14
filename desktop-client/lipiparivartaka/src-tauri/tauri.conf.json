@@ -14,7 +14,8 @@
       {
         "title": "Lipi Parivartaka",
         "width": 1000,
-        "height": 700
+        "height": 700,
+        "center": true
       }
     ],
     "security": {

@@ -1,4 +1,4 @@
-use crate::{ThreadMessageOrigin, ThreadMessageType, ui::data::Message};
+use crate::{ThreadMessageOrigin, ThreadMessageType, ui::ui::UIMessage};
 use crossbeam_channel::{Receiver, TryRecvError};
 use iced::stream;
 use iced_futures::BoxStream;
@@ -25,12 +25,12 @@ impl Hash for ThreadRx {
   }
 }
 
-pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
+pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<UIMessage> {
   let rx = Arc::clone(&data.rx);
 
   Box::pin(stream::channel(
     32,
-    move |mut output: iced::futures::channel::mpsc::Sender<Message>| async move {
+    move |mut output: iced::futures::channel::mpsc::Sender<UIMessage>| async move {
       use iced::futures::SinkExt;
 
       loop {
@@ -51,7 +51,7 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
           Some(msg) if !matches!(msg.origin, ThreadMessageOrigin::UI) => match msg.msg {
             ThreadMessageType::RerenderUI => {
               // println!("RerenderUI");
-              let _out = output.send(Message::RerenderUI).await;
+              let _out = output.send(UIMessage::RerenderUI).await;
               if _out.is_err() {
                 break;
               }
@@ -60,7 +60,7 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
               if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook)
                 || matches!(msg.origin, ThreadMessageOrigin::Tray)
               {
-                let _out = output.send(Message::TriggerTypingNotification).await;
+                let _out = output.send(UIMessage::TriggerTypingNotification).await;
                 if _out.is_err() {
                   break;
                 }
@@ -68,15 +68,17 @@ pub fn thread_message_stream(data: &ThreadRx) -> BoxStream<Message> {
             }
             ThreadMessageType::MaximizeUI => {
               if matches!(msg.origin, ThreadMessageOrigin::Tray) {
-                let _out = output.send(Message::MaximizeUI).await;
+                let _out = output.send(UIMessage::MaximizeUI).await;
                 if _out.is_err() {
                   break;
                 }
               }
             }
             ThreadMessageType::CloseApp => {
-              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook) {
-                let _out = output.send(Message::CloseApp).await;
+              if matches!(msg.origin, ThreadMessageOrigin::KeyboardHook)
+                || matches!(msg.origin, ThreadMessageOrigin::Tray)
+              {
+                let _out = output.send(UIMessage::CloseApp).await;
                 if _out.is_err() {
                   break;
                 }

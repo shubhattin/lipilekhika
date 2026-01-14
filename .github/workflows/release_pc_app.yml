@@ -11,6 +11,9 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      # Chocolatey needs an exact version string. Update this when you want to bump WiX.
+      WIX_VERSION: 3.14.1.20250415
 
     steps:
       - name: Checkout repo
@@ -42,21 +45,71 @@ jobs:
       - name: Build lipilekhika-ui (Windows)
         run: |
           cargo build --release -p lipilekhika-ui
-      - run: |
-          mv target/release/lipilekhika-ui.exe lipilekhika.exe
-      
+
       - name: Build lipiparivartaka (Windows)
         run: |
           cd desktop-client/lipiparivartaka
           bun install
           bun tauri build
-      - run: |
-          mv target/release/lipiparivartaka.exe lipiparivartaka.exe
 
+      # Extract version from Cargo.toml
+      - name: Get version
+        id: get_version
+        shell: powershell
+        run: |
+          $ver = (Select-String -Path desktop-client/Cargo.toml -Pattern 'version\s*=\s*"(.*?)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          Write-Host "Version: $ver"
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+
+      # Install WiX Toolset
+      - name: Install WiX Toolset
+        shell: powershell
+        run: |
+          choco install wixtoolset -y --no-progress --version "$env:WIX_VERSION"
+          
+          # If WiX is already on PATH, don't do anything.
+          $existing = Get-Command candle.exe -ErrorAction SilentlyContinue
+          if ($existing) {
+            Write-Host "WiX already available on PATH: $($existing.Source)"
+            exit 0
+          }
+          
+          # Discover WiX install location robustly (Chocolatey may install in different locations).
+          $wixDirVersion = ($env:WIX_VERSION -split '\.')[0..1] -join '.'
+          $candidateDirs = @(
+            "$env:ProgramFiles(x86)\WiX Toolset v$wixDirVersion\bin",
+            "C:\ProgramData\chocolatey\lib\wixtoolset\tools\bin"
+          )
+          
+          $wixBin = $candidateDirs |
+            Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
+            Select-Object -First 1
+          
+          if (-not $wixBin) {
+            $wixBin = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib" -Directory -Filter "wixtoolset*" -ErrorAction SilentlyContinue |
+              ForEach-Object { Join-Path $_.FullName "tools\bin" } |
+              Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
+              Select-Object -First 1
+          }
+          
+          if (-not $wixBin) {
+            throw "WiX Toolset not found after install (could not locate candle.exe)"
+          }
+          
+          $wixBin | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          Write-Host "WiX Toolset added to PATH: $wixBin"
+
+      # Build MSI Installer
+      - name: Build MSI Installer
+        shell: powershell
+        run: |
+          cd desktop-client
+          .\bundle.ps1 -CI
+
+      # Create GitHub Release and upload assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            lipilekhika.exe
-            lipiparivartaka.exe
+            desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
           generate_release_notes: false

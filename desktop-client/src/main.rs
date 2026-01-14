@@ -11,6 +11,7 @@ use std::{
   thread,
 };
 
+mod data;
 mod platform;
 mod tray;
 mod ui;
@@ -71,9 +72,6 @@ fn main() {
     typing_enabled: AtomicBool::new(false),
   });
 
-  // Shutdown flag for coordinating thread shutdown
-  let shutdown = Arc::new(AtomicBool::new(false));
-
   // Start keyboard hook thread
   let state_clone = Arc::clone(&app_state);
   let tx_ui_clone = tx_ui.clone();
@@ -88,9 +86,8 @@ fn main() {
 
   // Start tray icon thread
   let state_clone = Arc::clone(&app_state);
-  let shutdown_clone = Arc::clone(&shutdown);
   let tx_ui_clone = tx_ui.clone();
-  let _handle_tray = tray::run_tray_thread(state_clone, shutdown_clone, tx_ui_clone, rx_tray);
+  let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
 
   // starts the UI event loop
   let state_clone = Arc::clone(&app_state);

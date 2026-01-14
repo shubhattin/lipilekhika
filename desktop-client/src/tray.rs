@@ -1,11 +1,8 @@
-use crate::AppState;
+use crate::data::get_ordered_script_list;
+use crate::{AppState, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
-use lipilekhika::get_script_list_data;
 use std::collections::HashMap;
-use std::sync::{
-  Arc,
-  atomic::{AtomicBool, Ordering},
-};
+use std::sync::{Arc, atomic::Ordering};
 use tray_icon::{
   Icon, TrayIcon, TrayIconBuilder, TrayIconEvent,
   menu::{CheckMenuItem, Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu},
@@ -93,12 +90,10 @@ impl TrayManager {
 
     // Script submenu
     let script_submenu = Submenu::new("Script", true);
-    let script_list_data = get_script_list_data();
-    let mut scripts: Vec<(String, u8)> = script_list_data.scripts.clone().into_iter().collect();
-    scripts.sort_by(|a, b| a.1.cmp(&b.1));
+    let scripts = get_ordered_script_list();
 
     let mut script_items = Vec::new();
-    for (script_name, _) in scripts {
+    for script_name in scripts {
       let item_id = format!("{}{}", MENU_ID_SCRIPT_PREFIX, script_name);
       let is_current = script_name == current_script;
       let item = CheckMenuItem::with_id(&item_id, &script_name, true, is_current, None);
@@ -208,7 +203,7 @@ impl TrayManager {
     self.update_tooltip();
   }
 
-  pub fn handle_menu_event(&mut self, event: MenuEvent) -> (bool, Vec<crate::ThreadMessageType>) {
+  pub fn handle_menu_event(&mut self, event: MenuEvent) -> Vec<ThreadMessageType> {
     let event_id = event.id().0.clone();
     let mut messages = Vec::new();
 
@@ -217,7 +212,7 @@ impl TrayManager {
       Some(evt) => evt.clone(),
       None => {
         eprintln!("Unknown menu event ID: {}", event_id);
-        return (false, messages);
+        return messages;
       }
     };
 
@@ -232,7 +227,6 @@ impl TrayManager {
         self.update_tooltip();
         messages.push(crate::ThreadMessageType::RerenderUI);
         messages.push(crate::ThreadMessageType::TriggerTypingNotification);
-        (false, messages)
       }
       TrayMenuEvent::NativeNumerals => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -241,7 +235,6 @@ impl TrayManager {
         drop(ctx);
         self.native_numerals_item.set_checked(new_state);
         messages.push(crate::ThreadMessageType::RerenderUI);
-        (false, messages)
       }
       TrayMenuEvent::InherentVowel => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -250,16 +243,13 @@ impl TrayManager {
         drop(ctx);
         self.inherent_vowel_item.set_checked(new_state);
         messages.push(crate::ThreadMessageType::RerenderUI);
-        (false, messages)
       }
       TrayMenuEvent::Quit => {
-        // Return true to signal application should quit (true)
-        (true, messages)
+        messages.push(crate::ThreadMessageType::CloseApp);
       }
       TrayMenuEvent::OpenApp => {
         // Send message to UI to restore the minimized window
         messages.push(crate::ThreadMessageType::MaximizeUI);
-        (false, messages)
       }
       TrayMenuEvent::ScriptSelected(script_name) => {
         let current_options = {
@@ -289,16 +279,15 @@ impl TrayManager {
           // Notify UI to rerender
           messages.push(crate::ThreadMessageType::RerenderUI);
         }
-        (false, messages)
       }
-    }
+    };
+    messages
   }
 }
 
 /// Runs the tray icon event loop in a separate thread
 pub fn run_tray_thread(
   app_state: Arc<AppState>,
-  shutdown: Arc<AtomicBool>,
   tx_ui: Sender<crate::ThreadMessage>,
   rx: Receiver<crate::ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
@@ -336,14 +325,8 @@ pub fn run_tray_thread(
 
       let mut msg = MSG::default();
       loop {
-        if shutdown.load(Ordering::SeqCst) {
-          break;
-        }
-
         while let Ok(thread_msg) = rx.try_recv() {
-          if !matches!(thread_msg.origin, crate::ThreadMessageOrigin::Tray) {
-            use crate::ThreadMessageType;
-
+          if !matches!(thread_msg.origin, ThreadMessageOrigin::Tray) {
             // println!("Tray thread_msg: {:?}", thread_msg);
             match thread_msg.msg {
               ThreadMessageType::RerenderTray => {
@@ -355,13 +338,8 @@ pub fn run_tray_thread(
         }
 
         while let Ok(event) = menu_channel.try_recv() {
-          let (should_quit, messages) = tray_manager.handle_menu_event(event);
+          let messages = tray_manager.handle_menu_event(event);
           send_messages(&tx_ui, messages);
-          if should_quit {
-            shutdown.store(true, Ordering::SeqCst);
-            // std::process::exit(0);
-            break; // Let main thread handle graceful shutdown  
-          }
         }
 
         // Handle tray icon click events (double-click to open app)
@@ -417,7 +395,7 @@ pub fn run_tray_thread(
           if should_quit {
             shutdown.store(true, Ordering::SeqCst);
             // std::process::exit(0);
-            break; // Let main thread handle graceful shutdown  
+            break; // Let main thread handle graceful shutdown
           }
         }
 

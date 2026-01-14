@@ -1,6 +1,6 @@
 [package]
 name = "lipilekhika-ui"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2024"
 publish = false
 
@@ -21,3 +21,6 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_Globalization",
 ] }
+
+[build-dependencies]
+embed-resource = "2"

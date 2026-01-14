@@ -1,10 +1,11 @@
-use crate::ui::data::{Message, get_ordered_script_list};
+use crate::data::get_ordered_script_list;
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crossbeam_channel::{Receiver, Sender};
 use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
   Element, Subscription, Task,
+  keyboard::{self, Key, key::Named},
   widget::{checkbox, column, container, pick_list, row, text, toggler},
   window,
 };
@@ -13,6 +14,27 @@ use std::env;
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::{Arc, Mutex, atomic::Ordering};
+
+#[derive(Clone, Debug)]
+pub enum UIMessage {
+  ToggleTypingMode(bool),
+  KeyboardToggleTypingMode, // Toggle from keyboard shortcut (triggers notification)
+  SetScript(String),
+  TriggerTypingNotification,
+  NotificationOpened(window::Id),
+  CloseNotification(window::Id),
+  WindowClosed(window::Id),
+  WindowCloseRequested(window::Id),
+  ToogleUseNativeNumerals(bool),
+  ToogleIncludeInherentVowel(bool),
+  RerenderUI,
+  MinimizeBackground,
+  MaximizeUI,
+  CloseApp,
+  OpenAbout,
+  CloseAbout,
+  OpenLipiParivartaka,
+}
 
 struct App {
   global_app_state: Arc<crate::AppState>,
@@ -36,7 +58,7 @@ impl App {
     rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
     tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
     icon: window::Icon,
-  ) -> (Self, Task<Message>) {
+  ) -> (Self, Task<UIMessage>) {
     // Open main window since daemon mode doesn't create one automatically
     let (main_id, main_open_task) = window::open(window::Settings {
       icon: Some(icon.clone()),
@@ -63,11 +85,11 @@ impl App {
     )
   }
 
-  fn update(&mut self, message: Message) -> Task<Message> {
+  fn update(&mut self, message: UIMessage) -> Task<UIMessage> {
     // println!("UI update: {:?}", message);
     match message {
-      Message::RerenderUI => Task::none(),
-      Message::SetScript(script) => {
+      UIMessage::RerenderUI => Task::none(),
+      UIMessage::SetScript(script) => {
         // Get current options before creating new context
         let current_options = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
@@ -90,7 +112,7 @@ impl App {
         }
         Task::none()
       }
-      Message::ToggleTypingMode(enabled) => {
+      UIMessage::ToggleTypingMode(enabled) => {
         self
           .global_app_state
           .typing_enabled
@@ -101,7 +123,21 @@ impl App {
         });
         Task::none()
       }
-      Message::ToogleUseNativeNumerals(use_native_numerals) => {
+      UIMessage::KeyboardToggleTypingMode => {
+        // Toggle typing mode (flip current state)
+        let current = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
+        self
+          .global_app_state
+          .typing_enabled
+          .store(!current, Ordering::SeqCst);
+        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
+          origin: crate::ThreadMessageOrigin::UI,
+          msg: crate::ThreadMessageType::RerenderTray,
+        });
+        // Trigger notification after toggling
+        self.update(UIMessage::TriggerTypingNotification)
+      }
+      UIMessage::ToogleUseNativeNumerals(use_native_numerals) => {
         self
           .global_app_state
           .typing_context
@@ -114,7 +150,7 @@ impl App {
         });
         Task::none()
       }
-      Message::ToogleIncludeInherentVowel(include_inherent_vowel) => {
+      UIMessage::ToogleIncludeInherentVowel(include_inherent_vowel) => {
         self
           .global_app_state
           .typing_context
@@ -127,7 +163,7 @@ impl App {
         });
         Task::none()
       }
-      Message::TriggerTypingNotification => {
+      UIMessage::TriggerTypingNotification => {
         let enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
         // Show notification based on typing state
         let msg = if enabled {
@@ -150,20 +186,20 @@ impl App {
         // Start timeout timer
         let timeout_task = notification::notification_timeout(
           &self.notification_config,
-          Message::CloseNotification(new_id),
+          UIMessage::CloseNotification(new_id),
         );
 
         Task::batch([
           close_task,
-          open_task.map(Message::NotificationOpened),
+          open_task.map(UIMessage::NotificationOpened),
           timeout_task,
         ])
       }
-      Message::NotificationOpened(_id) => {
+      UIMessage::NotificationOpened(_id) => {
         // Window is already tracked, nothing more to do
         Task::none()
       }
-      Message::CloseNotification(id) => {
+      UIMessage::CloseNotification(id) => {
         if self.notification_window == Some(id) {
           self.notification_window = None;
           window::close(id)
@@ -171,7 +207,7 @@ impl App {
           Task::none()
         }
       }
-      Message::WindowClosed(id) => {
+      UIMessage::WindowClosed(id) => {
         // Window was actually closed (programmatically or otherwise)
         if self.main_window == Some(id) {
           // Main window closed - mark as minimized to tray
@@ -182,7 +218,7 @@ impl App {
         }
         Task::none()
       }
-      Message::WindowCloseRequested(id) => {
+      UIMessage::WindowCloseRequested(id) => {
         // User clicked X button - exit the entire application
         if self.main_window == Some(id) {
           iced::exit()
@@ -194,7 +230,7 @@ impl App {
           Task::none()
         }
       }
-      Message::MinimizeBackground => {
+      UIMessage::MinimizeBackground => {
         // Close the main window to hide from taskbar (minimize to tray)
         if let Some(id) = self.main_window {
           window::close(id)
@@ -202,7 +238,7 @@ impl App {
           Task::none()
         }
       }
-      Message::MaximizeUI => {
+      UIMessage::MaximizeUI => {
         // Re-open the main window if it was closed/minimized to tray
         if self.main_window.is_none() {
           let (new_id, open_task) = window::open(window::Settings {
@@ -223,19 +259,19 @@ impl App {
           Task::none()
         }
       }
-      Message::CloseApp => {
+      UIMessage::CloseApp => {
         // Exit the application (triggered by Win+Esc shortcut)
         iced::exit()
       }
-      Message::OpenAbout => {
+      UIMessage::OpenAbout => {
         self.about_modal_open = true;
         Task::none()
       }
-      Message::CloseAbout => {
+      UIMessage::CloseAbout => {
         self.about_modal_open = false;
         Task::none()
       }
-      Message::OpenLipiParivartaka => {
+      UIMessage::OpenLipiParivartaka => {
         // Launch lipiparivartaka.exe
         // Try to find the executable in various locations
         let exe_paths = [
@@ -273,17 +309,39 @@ impl App {
     }
   }
 
-  fn subscription(&self) -> Subscription<Message> {
+  fn subscription(&self) -> Subscription<UIMessage> {
     Subscription::batch([
       Subscription::run_with(ThreadRx::new(Arc::clone(&self.rx)), thread_message_stream),
       // Listen for user clicking X button (to exit app)
-      window::close_requests().map(Message::WindowCloseRequested),
+      window::close_requests().map(UIMessage::WindowCloseRequested),
       // Listen for actual window closes (to track programmatic closes)
-      window::close_events().map(Message::WindowClosed),
+      window::close_events().map(UIMessage::WindowClosed),
+      // Listen for keyboard shortcuts
+      keyboard::listen().filter_map(|event| {
+        if let keyboard::Event::KeyPressed { key, modifiers, .. } = event {
+          // Alt+X or Alt+C: Toggle typing mode
+          if modifiers.alt() && !modifiers.control() && !modifiers.logo() && !modifiers.shift() {
+            if let Key::Character(ref c) = key {
+              let c_lower = c.to_lowercase();
+              if c_lower == "x" || c_lower == "c" {
+                // Toggle typing mode and trigger notification
+                return Some(UIMessage::KeyboardToggleTypingMode);
+              }
+            }
+          }
+          // Win+Esc: Close the application
+          if modifiers.logo() && !modifiers.alt() && !modifiers.control() && !modifiers.shift() {
+            if key == Key::Named(Named::Escape) {
+              return Some(UIMessage::CloseApp);
+            }
+          }
+        }
+        None
+      }),
     ])
   }
 
-  fn view(&self, window_id: window::Id) -> Element<'_, Message> {
+  fn view(&self, window_id: window::Id) -> Element<'_, UIMessage> {
     if Some(window_id) == self.notification_window {
       // Render notification view
       notification::view_notification(&self.notification_message)
@@ -306,25 +364,25 @@ impl App {
         row![
           toggler(typing_enabled)
             .label("Typing")
-            .on_toggle(Message::ToggleTypingMode),
+            .on_toggle(UIMessage::ToggleTypingMode),
           text!["Alt+X/C"].size(12)
         ]
         .spacing(20),
-        row![pick_list(scripts, Some(curr_script), Message::SetScript)].padding([10, 0]),
+        row![pick_list(scripts, Some(curr_script), UIMessage::SetScript)].padding([10, 0]),
         row![
           checkbox(use_native_numerals)
-            .on_toggle(Message::ToogleUseNativeNumerals)
+            .on_toggle(UIMessage::ToogleUseNativeNumerals)
             .label("Native Numerals"),
           checkbox(include_inherent_vowel)
-            .on_toggle(Message::ToogleIncludeInherentVowel)
+            .on_toggle(UIMessage::ToogleIncludeInherentVowel)
             .label("Inherent Vowel")
         ]
         .spacing(20)
         .padding([10, 0]),
         row![
-          button("Background Minimize").on_press(Message::MinimizeBackground),
-          button("About").on_press(Message::OpenAbout),
-          button("Lipi Parivartaka").on_press(Message::OpenLipiParivartaka)
+          button("Background Minimize").on_press(UIMessage::MinimizeBackground),
+          button("About").on_press(UIMessage::OpenAbout),
+          button("Lipi Parivartaka").on_press(UIMessage::OpenLipiParivartaka)
         ]
         .spacing(10)
         .padding([10, 0]),
@@ -338,7 +396,7 @@ impl App {
             text(format!("Version: {}", env!("CARGO_PKG_VERSION"))).size(14),
             container(text("A transliteration typing tool for Indic scripts.").size(12))
               .padding([10, 0]),
-            button("Close").on_press(Message::CloseAbout)
+            button("Close").on_press(UIMessage::CloseAbout)
           ]
           .spacing(10)
           .align_x(iced::Alignment::Center),
@@ -358,7 +416,7 @@ impl App {
 
         stack![
           main_content,
-          mouse_area(center(opaque(about_modal))).on_press(Message::CloseAbout)
+          mouse_area(center(opaque(about_modal))).on_press(UIMessage::CloseAbout)
         ]
         .into()
       } else {
