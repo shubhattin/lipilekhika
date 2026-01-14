@@ -11,6 +11,7 @@ use std::{
   thread,
 };
 
+mod data;
 mod platform;
 mod tray;
 mod ui;

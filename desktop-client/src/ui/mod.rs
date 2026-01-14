@@ -1,4 +1,3 @@
-mod data;
 mod notification;
 mod thread_receive;
 mod ui;

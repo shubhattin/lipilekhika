@@ -1,6 +1,6 @@
+use crate::data::get_ordered_script_list;
 use crate::{AppState, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
-use lipilekhika::get_script_list_data;
 use std::collections::HashMap;
 use std::sync::{Arc, atomic::Ordering};
 use tray_icon::{
@@ -90,12 +90,10 @@ impl TrayManager {
 
     // Script submenu
     let script_submenu = Submenu::new("Script", true);
-    let script_list_data = get_script_list_data();
-    let mut scripts: Vec<(String, u8)> = script_list_data.scripts.clone().into_iter().collect();
-    scripts.sort_by(|a, b| a.1.cmp(&b.1));
+    let scripts = get_ordered_script_list();
 
     let mut script_items = Vec::new();
-    for (script_name, _) in scripts {
+    for script_name in scripts {
       let item_id = format!("{}{}", MENU_ID_SCRIPT_PREFIX, script_name);
       let is_current = script_name == current_script;
       let item = CheckMenuItem::with_id(&item_id, &script_name, true, is_current, None);
