@@ -2,35 +2,38 @@
 import init, { transliterate as wasmTransliterate, initSync } from './pkg/lipilekhika_wasm.js';
 import type { TransliterationOptions } from '../src/index';
 
-let initialized = false;
+let initPromise: Promise<void> | null = null;
 
 /**
  * Initialize the WASM module
  */
 async function initWasm(): Promise<void> {
-  if (initialized) return;
-  // @ts-ignore
-  const isBun = typeof Bun !== 'undefined';
-  if (isBun || import.meta.env.PROD) {
-    // this approach is also used in prod as it converts the wasm to base64 in bundling step
-    await init();
-  } else {
-    // fallback to run with `vite-node` "locally"
-    const [fs, path, url] = await Promise.all([
-      import('node:fs'),
-      import('node:path'),
-      import('node:url')
-    ]);
+  if (initPromise) return initPromise;
 
-    const __filename = url.fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const wasmPath = path.join(__dirname, 'pkg', 'lipilekhika_wasm_bg.wasm');
+  initPromise = (async () => {
+    // @ts-ignore
+    const isBun = typeof Bun !== 'undefined';
+    if (isBun || import.meta.env.PROD) {
+      // this approach is also used in prod as it converts the wasm to base64 in bundling step
+      await init();
+    } else {
+      // fallback to run with `vite-node` "locally"
+      const [fs, path, url] = await Promise.all([
+        import('node:fs'),
+        import('node:path'),
+        import('node:url')
+      ]);
 
-    const wasmBuffer = fs.readFileSync(wasmPath);
-    initSync({ module: wasmBuffer });
-  }
+      const __filename = url.fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const wasmPath = path.join(__dirname, 'pkg', 'lipilekhika_wasm_bg.wasm');
 
-  initialized = true;
+      const wasmBuffer = fs.readFileSync(wasmPath);
+      initSync({ module: wasmBuffer });
+    }
+  })();
+
+  return initPromise;
 }
 
 export async function transliterate(

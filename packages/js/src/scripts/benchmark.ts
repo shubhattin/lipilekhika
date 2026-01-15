@@ -3,7 +3,8 @@ import {
   preloadScriptData,
   type ScriptListType,
   SCRIPT_LIST,
-  transliterate_wasm
+  transliterate_wasm,
+  preloadWasm
 } from '..';
 import { performance } from 'node:perf_hooks';
 import path from 'node:path';
@@ -115,7 +116,7 @@ async function benchmark() {
   // Transliteration Cases (WASM)
   {
     console.log(chalk.cyan.bold('Transliteration Cases (WASM): '));
-    await preload_data();
+    await preloadWasm();
     const start = performance.now();
     for (let i = 0; i < TEST_DATA.length; i++) {
       const testData = TEST_DATA[i];

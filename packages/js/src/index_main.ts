@@ -102,7 +102,7 @@ export async function getAllOptions(
 }
 
 /**
- * This returns the schwa deletion characerstic of the script provided.
+ * his returns the schwa deletion characteristic of the script provided.
  * It is the property in which a inherent vowel 'a' (अ) is added to
  * the end of vyanjana (consonant) characters.
  */

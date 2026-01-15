@@ -3,7 +3,6 @@ import { defineConfig } from 'vite';
 import path from 'node:path';
 import dts from 'vite-plugin-dts';
 import MacroPlugin from 'unplugin-macros/vite';
-import wasm from 'vite-plugin-wasm';
 import fs from 'node:fs';
 import type { Plugin } from 'vite';
 
@@ -11,7 +10,6 @@ const IS_UMD_BUILD_MODE = process.env.VITE_IS_UMD_BUILD_MODE === 'true';
 
 export default defineConfig({
   plugins: [
-    wasm(),
     dts({ include: ['src'], outDir: 'dist/types' }),
     MacroPlugin(),
     ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [])

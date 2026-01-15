@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased (js-lib@v1.0.4)
+## js-lib@v1.0.4
 
 - added a new function `getSchwaStatusForScript` to get the schwa deletion characteristic of the script provided.
 - added in typing module
   - `getUseNativeNumerals`
   - `getIncludeInherentVowel`
   - `getNormalizedScript`
-- Add experimental WASM based transliteration support
+- Add WASM-based transliteration support
 
 ## js-lib@v1.0.3
 
