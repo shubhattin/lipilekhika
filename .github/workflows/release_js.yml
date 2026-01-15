@@ -17,6 +17,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
       
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
       # Compile wasm
       - name: Generate Script Data
         run: |
@@ -42,14 +44,11 @@ jobs:
           cd packages/js/wasm
           wasm-pack build --release --target web
 
-          
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: oven-sh/setup-bun@v2
-        name: Setup Bun        
       - name: Generate Test Data
         run: |
           bun install
