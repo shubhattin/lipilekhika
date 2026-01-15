@@ -1,6 +1,6 @@
 {
   "name": "lipilekhika",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "MIT",
   "homepage": "https://lipilekhika.in",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.55.2",
-    "@types/bun": "^1.3.5",
+    "@types/bun": "^1.3.6",
     "@types/node": "^24.10.4",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",

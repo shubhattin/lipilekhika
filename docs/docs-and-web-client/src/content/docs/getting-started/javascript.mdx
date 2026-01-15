@@ -17,24 +17,16 @@ Lipi Lekhika offers a typesafe, tree-shakable package for JavaScript/TypeScript.
 
 <Tabs>
   <TabItem label="npm" icon="npm">
-    ```bash
-    npm install lipilekhika
-    ```
+    ```bash npm install lipilekhika ```
   </TabItem>
   <TabItem label="pnpm" icon="pnpm">
-   ```bash
-   pnpm add lipilekhika
-   ```
+    ```bash pnpm add lipilekhika ```
   </TabItem>
   <TabItem label="bun" icon="bun">
-    ```bash 
-    bun add lipilekhika
-    ```
+    ```bash bun add lipilekhika ```
   </TabItem>
   <TabItem label="yarn" icon="seti:yarn">
-    ```bash
-    yarn add lipilekhika
-    ```
+    ```bash yarn add lipilekhika ```
   </TabItem>
 </Tabs>
 
@@ -53,15 +45,25 @@ console.log(result); // न जायते म्रियते वा
 - The Script/Language names are type safe so you will get editor support for autocompletion for names(including aliases).
 - You can also pass in **custom transliteration options** to the `transliterate` as the fourth argument to the function.
 
-<LinkCard 
-   title="Custom Transliteration Options" 
-   href="/reference/custom_trans_options" 
-   description="A detailed Overview of the available custom transliteration options"
+<LinkCard
+  title="Custom Transliteration Options"
+  href="/reference/custom_trans_options"
+  description="A detailed Overview of the available custom transliteration options"
 />
-<LinkCard 
-   title="Supported Scripts and Languages"
-   href="/reference/supported_scripts"
-   description="List of all supported scripts/languages and their aliases"
+<LinkCard
+  title="Supported Scripts and Languages"
+  href="/reference/supported_scripts"
+  description="List of all supported scripts/languages and their aliases"
+/>
+
+### Web Assembly
+
+The package includes a blazing-fast 🦀 Rust-based WASM implementation that works across all JavaScript environments (Node.js, browsers, Deno, Bun). Use `transliterate_wasm()` for improved performance and `preloadWasm()` to avoid initial loading delays.
+
+<LinkCard
+  title="Web Assembly Guide"
+  href="/getting-started/wasm"
+  description="Detailed guide on using the WASM module for high-performance transliteration"
 />
 
 ### Other Exports
@@ -80,10 +82,10 @@ The package also exports the following constants and utilities:
 - **`ScriptListType`** / **`LangListType`** — Types for script and language lists
 - **`ScriptLangType`** — Type for script/language identifiers (with aliases)
 
-<LinkCard 
-    title="Typing Utilities"
-    href="/reference/realtime_typing#additional-typing-utilities"
-    description="Additional Typing Utilities to compare scripts and for Typing Helpers"
+<LinkCard
+  title="Typing Utilities"
+  href="/reference/realtime_typing#additional-typing-utilities"
+  description="Additional Typing Utilities to compare scripts and for Typing Helpers"
 />
 
 ## Using Without a Package Manager
@@ -95,8 +97,7 @@ You can also use the package directly in the browser using the ESM and UMD Packa
 ```html
 <script type="module">
   import { transliterate } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
-  transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
-    .then((text) => console.log(text));
+  transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari').then((text) => console.log(text));
 </script>
 ```
 
@@ -105,31 +106,38 @@ You can also use the package directly in the browser using the ESM and UMD Packa
 ```html
 <script src="https://cdn.jsdelivr.net/npm/lipilekhika"></script>
 <script>
-  lipilekhika.transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
+  lipilekhika
+    .transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
     .then((text) => console.log(text));
 </script>
 ```
 
 <Aside type="caution">
-  The links above point to the latest version of the package. You should use it with a specific version number to avoid breaking changes. Current version is **{PACKAGE_CURRENT_VERSION}**.
-  - **UMD** :- <a href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}>{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}</a>
-  - **ESM** :- <a href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}>{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}</a>
+  The links above point to the latest version of the package. You should use it with a specific
+  version number to avoid breaking changes. Current version is **{PACKAGE_CURRENT_VERSION}**. -
+  **UMD** :-{' '}
+  <a
+    href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}
+  >{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}`}</a>
+  - **ESM** :-{' '}
+  <a
+    href={`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}>{`https://cdn.jsdelivr.net/npm/lipilekhika@${PACKAGE_CURRENT_VERSION}/dist/esm/index.mjs`}</a>
 </Aside>
 
 ## Typing Tool
 
 For Browser environments we have a premade plugin for multiple frontend frameworks to use Lipi Lekhika's realtime typing features.
 
-<LinkCard 
-   title="Browser Typing Tool Usage" 
-   href="/getting-started/browser_typing_tool"
-   description="Detailed Guide on implementing Realtime typing"
+<LinkCard
+  title="Browser Typing Tool Usage"
+  href="/getting-started/browser_typing_tool"
+  description="Detailed Guide on implementing Realtime typing"
 />
 
-An environment agnostic reference guide to implement Realtime typing is any environment is available at the link below.
+An environment-agnostic reference guide to implement Realtime typing is any environment is available at the link below.
 
-<LinkCard 
-   title="Reference Guide to implement Realtime typing" 
-   href="/reference/realtime_typing" 
-   description="Reference Guide to implement Realtime typing"
+<LinkCard
+  title="Reference Guide to implement Realtime typing"
+  href="/reference/realtime_typing"
+  description="Reference Guide to implement Realtime typing"
 />

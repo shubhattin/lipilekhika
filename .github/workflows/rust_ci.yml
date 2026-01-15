@@ -43,7 +43,7 @@ jobs:
         run: |
           bun install
           bun run gen:test-data
-      - name: Test and Coverage
+      - name: Generate Script Data
         run: |
           cd packages/js
           bun install

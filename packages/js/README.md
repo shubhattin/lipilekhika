@@ -15,8 +15,10 @@
 - 🛡️ **Full TypeScript Support** — Type-safe script/language names and options
 - 📦 **Multiple Module Formats** — Tree-shakable ESM, CommonJS, and UMD builds
 - ⚡ **Real-time Typing** — Low-latency typing engine for browser environments
+- 🚀 **WASM Support** - Use Blazing fast Rust 🦀 in JS environments
 - 🎯 **Highly Customizable** — Fine-tune transliteration with custom options
 - 🌍 **Universal Runtime** — Works in Node.js, browsers, Deno, Bun, and more
+- 🪶 **Lightweight** — Only 7 KB gzipped
 
 ## 📥 Installation
 
@@ -99,6 +101,32 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 - `to: ScriptLangType` — Target script/language
 
 **Returns:** `Promise<string[]>`
+
+</details>
+
+<details>
+<summary><strong><code>transliterate_wasm(text, from, to, options?)</code></strong> — WASM-based transliteration using Rust</summary>
+
+Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
+
+**Parameters:**
+- `text: string` — Text to transliterate
+- `from: ScriptLangType` — Source script/language
+- `to: ScriptLangType` — Target script/language
+- `options?: TransliterationOptions` — Custom transliteration options
+
+**Returns:** `Promise<string>`
+
+**Note:** Uses the fast Rust-based WASM implementation for improved performance. Works in all JavaScript environments (Node.js, browsers, Deno, Bun).
+
+</details>
+
+<details>
+<summary><strong><code>preloadWasm()</code></strong> — Preload the WASM module</summary>
+
+**Returns:** `Promise<void>`
+
+**Note:** Preloads the WASM module to avoid initial loading delay when using `transliterate_wasm`.
 
 </details>
 

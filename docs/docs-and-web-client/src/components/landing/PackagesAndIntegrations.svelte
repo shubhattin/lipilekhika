@@ -157,8 +157,7 @@
           </p>
           <div class="mt-5 grid gap-3 sm:grid-cols-2">
             <a
-              href="https://www.npmjs.com/package/lipilekhika"
-              target="_blank"
+              href="/getting-started/wasm"
               rel="noopener noreferrer"
               class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:bg-background/60 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
             >
@@ -170,7 +169,7 @@
                 </span>
                 <div class="min-w-0">
                   <p class="leading-tight font-medium">WebAssembly</p>
-                  <p class="text-xs text-muted-foreground">comming soon</p>
+                  <p class="text-xs text-muted-foreground">npm package • available</p>
                 </div>
               </div>
             </a>
