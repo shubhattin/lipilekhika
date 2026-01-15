@@ -5,7 +5,7 @@
            Language="1033"
            Version="$(var.ProductVersion)" 
            Manufacturer="Shubham Anand Gupta"
-           UpgradeCode="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+           UpgradeCode="93b58ef9-666b-4caf-8efb-b4ce4b91c044">
     
     <Package InstallerVersion="500" 
              Compressed="yes" 
@@ -15,17 +15,21 @@
              Comments="Installer for Lipi Lekhika application" />
 
     <!-- MajorUpgrade allows replacing previous versions -->
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <!-- AllowSameVersionUpgrades="yes" -->
+    <MajorUpgrade 
+        Schedule="afterInstallInitialize"
+        DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <MediaTemplate EmbedCab="yes" />
-
+    
     <Feature Id="ProductFeature" Title="Lipi Lekhika" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentGroupRef Id="LicenseComponents" />
     </Feature>
 
-    <!-- Application Icon -->
-    <Icon Id="AppIcon" SourceFile="$(var.StagingPath)\icon.ico" />
+    <!-- Application Icons (uses separate .ico files instead of executables to reduce installer size) -->
+    <Icon Id="AppIcon" SourceFile="$(var.StagingPath)\lipilekhika.ico" />
+    <Icon Id="LipiparivartakaIcon" SourceFile="$(var.StagingPath)\lipiparivartaka.ico" />
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     
     <!-- Add/Remove Programs metadata -->
@@ -74,13 +78,6 @@
               Checksum="yes" />
       </Component>
 
-      <!-- Icon file -->
-      <Component Id="IconFileComponent" Guid="d4e5f6a7-b8c9-0123-defa-456789012345" Directory="INSTALLFOLDER">
-        <File Id="IconFile" 
-              Source="$(var.StagingPath)\icon.ico" 
-              KeyPath="yes" />
-      </Component>
-
       <!-- Start Menu shortcut for Lipi Lekhika -->
       <Component Id="LipilekhikaStartMenuShortcut" Guid="e5f6a7b8-c9d0-1234-efab-567890123456" Directory="ApplicationProgramsFolder">
         <Shortcut Id="LipilekhikaStartMenuLink" 
@@ -101,7 +98,7 @@
                   Description="Lipi Parivartaka - Script Transliteration Tool" 
                   Target="[INSTALLFOLDER]lipiparivartaka.exe" 
                   WorkingDirectory="INSTALLFOLDER" 
-                  Icon="AppIcon" 
+                  Icon="LipiparivartakaIcon" 
                   IconIndex="0" />
         <RegistryValue Root="HKCU" Key="Software\LipiLekhika" Name="LipiparivartakaStartMenuShortcut" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
@@ -118,17 +115,7 @@
         <RegistryValue Root="HKCU" Key="Software\LipiLekhika" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
 
-      <!-- Desktop shortcut for Lipi Parivartaka -->
-      <Component Id="LipiparivartakaDesktopShortcut" Guid="b8c9d0e1-f2a3-4567-bcde-890123456789" Directory="DesktopFolder">
-        <Shortcut Id="LipiparivartakaDesktopLink" 
-                  Name="Lipi Parivartaka" 
-                  Description="Lipi Parivartaka - Script Transliteration Tool" 
-                  Target="[INSTALLFOLDER]lipiparivartaka.exe" 
-                  WorkingDirectory="INSTALLFOLDER" 
-                  Icon="AppIcon" 
-                  IconIndex="0" />
-        <RegistryValue Root="HKCU" Key="Software\LipiLekhika" Name="LipiparivartakaDesktopShortcut" Type="integer" Value="1" KeyPath="yes"/>
-      </Component>
+
     </ComponentGroup>
 
     <!-- License file component -->

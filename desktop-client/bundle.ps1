@@ -61,16 +61,25 @@ Copy-Item -Path $LipiparivartakaExe -Destination (Join-Path $StagingDir "lipipar
 Write-Host "  - Copied lipilekhika.exe" -ForegroundColor Green
 Write-Host "  - Copied lipiparivartaka.exe" -ForegroundColor Green
 
-# Copy icon
-Write-Host "`n[3/6] Copying assets..." -ForegroundColor Yellow
-$IconPath = Join-Path $ScriptDir "assets\icon.ico"
-if (Test-Path $IconPath) {
-    Copy-Item -Path $IconPath -Destination (Join-Path $StagingDir "icon.ico") -Force
-    Write-Host "  - Copied icon.ico" -ForegroundColor Green
-} else {
-    Write-Error "Icon not found at $IconPath"
+# Copy icon files
+Write-Host "`n[3/6] Copying icon files..." -ForegroundColor Yellow
+$LipilekhikaIcon = Join-Path $ScriptDir "assets\icon.ico"
+$LipiparivartakaIcon = Join-Path $ScriptDir "lipiparivartaka\assets\icon.ico"
+
+if (-not (Test-Path $LipilekhikaIcon)) {
+    Write-Error "Lipi Lekhika icon not found at $LipilekhikaIcon"
     exit 1
 }
+if (-not (Test-Path $LipiparivartakaIcon)) {
+    Write-Error "Lipi Parivartaka icon not found at $LipiparivartakaIcon"
+    exit 1
+}
+
+Copy-Item -Path $LipilekhikaIcon -Destination (Join-Path $StagingDir "lipilekhika.ico") -Force
+Copy-Item -Path $LipiparivartakaIcon -Destination (Join-Path $StagingDir "lipiparivartaka.ico") -Force
+
+Write-Host "  - Copied lipilekhika.ico" -ForegroundColor Green
+Write-Host "  - Copied lipiparivartaka.ico" -ForegroundColor Green
 
 # Copy and convert license
 Write-Host "`n[4/6] Preparing license files..." -ForegroundColor Yellow
