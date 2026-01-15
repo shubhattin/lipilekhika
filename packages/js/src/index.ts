@@ -5,7 +5,7 @@ import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import type { CustomOptionType } from './transliteration/transliterate';
 
 /**
- * Experimental WASM based transliteration.
+ * WASM(Rust) based transliteration.
  *
  * Transliterates `text` from `from` to `to`.
  * @param text - The text to transliterate

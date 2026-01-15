@@ -371,10 +371,6 @@ pub fn run_tray_thread(
     #[cfg(not(target_os = "windows"))]
     {
       loop {
-        if shutdown.load(Ordering::SeqCst) {
-          break;
-        }
-
         // Check for thread messages (RerenderTray)
         while let Ok(thread_msg) = rx.try_recv() {
           // Only process messages not originating from Tray
@@ -390,13 +386,8 @@ pub fn run_tray_thread(
 
         // Check for menu events (non-blocking with timeout)
         if let Ok(event) = menu_channel.recv_timeout(std::time::Duration::from_millis(100)) {
-          let (should_quit, messages) = tray_manager.handle_menu_event(event);
+          let messages = tray_manager.handle_menu_event(event);
           send_messages(&tx_ui, messages);
-          if should_quit {
-            shutdown.store(true, Ordering::SeqCst);
-            // std::process::exit(0);
-            break; // Let main thread handle graceful shutdown
-          }
         }
 
         // Handle tray icon click events (double-click to open app)
