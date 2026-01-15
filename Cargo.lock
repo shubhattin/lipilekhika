@@ -3315,6 +3315,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipilekhika-wasm"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "lipilekhika",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "lipiparivartaka"
 version = "0.1.0"
 dependencies = [
