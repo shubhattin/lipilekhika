@@ -18,6 +18,7 @@
 - 🚀 **WASM Support** - Use Blazing fast Rust 🦀 in JS environments
 - 🎯 **Highly Customizable** — Fine-tune transliteration with custom options
 - 🌍 **Universal Runtime** — Works in Node.js, browsers, Deno, Bun, and more
+- 🪶 **Lightweight** — Only 7 KB gzipped
 
 ## 📥 Installation
 
