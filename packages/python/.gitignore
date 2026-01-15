@@ -1,3 +1,5 @@
 dist
 lipilekhika.egg-info
 **/__pycache__
+
+lipilekhika/_rust.cpython*

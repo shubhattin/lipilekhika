@@ -1,0 +1,13 @@
+[package]
+name = "binding"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+lipilekhika = { path = "../../rust" }
+pyo3 = { version = "0.27.2", features = ["extension-module"] }

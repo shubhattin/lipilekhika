@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.5"]
+build-backend = "maturin"
 
 [project]
 name = "lipilekhika"
@@ -11,5 +11,8 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = []
 
-[tool.hatch.build.targets.wheel]
-packages = ["lipilekhika"]
+[tool.maturin]
+bindings = "pyo3"
+module-name = "lipilekhika._rust"
+manifest-path = "binding/Cargo.toml"
+python-source = "."
