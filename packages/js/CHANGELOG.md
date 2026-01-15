@@ -7,6 +7,7 @@
   - `getUseNativeNumerals`
   - `getIncludeInherentVowel`
   - `getNormalizedScript`
+- Add experimental WASM based transliteration support
 
 ## js-lib@v1.0.3
 

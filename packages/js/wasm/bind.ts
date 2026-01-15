@@ -10,7 +10,8 @@ let initialized = false;
 async function initWasm(): Promise<void> {
   if (initialized) return;
   // @ts-ignore
-  if (typeof Bun !== 'undefined') {
+  const isBun = typeof Bun !== 'undefined';
+  if (isBun || import.meta.env.PROD) {
     // this approach is also used in prod as it converts the wasm to base64 in bundling step
     await init();
   } else {
