@@ -16,7 +16,33 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      
+      # Compile wasm
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+      ## Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build WASM
+        run: |
+          cd packages/js/wasm
+          wasm-pack build --release --target web
 
+          
       - uses: actions/setup-node@v4
         with:
           node-version: '24'

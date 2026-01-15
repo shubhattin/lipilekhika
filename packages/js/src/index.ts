@@ -5,6 +5,8 @@ import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import type { CustomOptionType } from './transliteration/transliterate';
 
 /**
+ * Experimental WASM based transliteration.
+ *
  * Transliterates `text` from `from` to `to`.
  * @param text - The text to transliterate
  * @param from - The script/language to transliterate from
@@ -31,3 +33,11 @@ export async function transliterate_wasm(
   const result = await wasm_mod.transliterate(text, normalized_from, normalized_to, trans_options);
   return result;
 }
+
+/**
+ * Preload the WASM module.
+ */
+export const preloadWasm = async () => {
+  const wasm_mod = await import('../wasm/bind');
+  await wasm_mod.preloadWasm();
+};

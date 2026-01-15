@@ -1,13 +1,6 @@
-import type { TransliterationOptions } from '../src/index';
-
-/**
- * Universal WASM binding for lipilekhika
- * Works with: Vite, vite-node, and Bun
- * Uses vite-plugin-wasm for seamless WASM imports
- */
-
-// Direct import - vite-plugin-wasm handles the WASM loading
+// binding for vite-node and bun
 import init, { transliterate as wasmTransliterate, initSync } from './pkg/lipilekhika_wasm.js';
+import type { TransliterationOptions } from '../src/index';
 
 let initialized = false;
 
@@ -16,13 +9,12 @@ let initialized = false;
  */
 async function initWasm(): Promise<void> {
   if (initialized) return;
-
-  // @ts-ignore - Check for Bun runtime
+  // @ts-ignore
   if (typeof Bun !== 'undefined') {
-    // For Bun, use the async init which fetches via URL
+    // this approach is also used in prod as it converts the wasm to base64 in bundling step
     await init();
   } else {
-    // For vite-node, dynamically import node modules to avoid build warnings
+    // fallback to run with `vite-node` "locally"
     const [fs, path, url] = await Promise.all([
       import('node:fs'),
       import('node:path'),
@@ -40,16 +32,6 @@ async function initWasm(): Promise<void> {
   initialized = true;
 }
 
-/**
- * Transliterates text from one script to another.
- *
- * - `text`: The text to transliterate
- * - `from`: Source script name/alias
- * - `to`: Target script name/alias
- * - `trans_options`: Optional JSON object with transliteration options
- *
- * Returns the transliterated text or throws an error if script names are invalid.
- */
 export async function transliterate(
   text: string,
   from: string,

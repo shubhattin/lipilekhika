@@ -1,4 +1,10 @@
-import { transliterate, preloadScriptData, type ScriptListType, SCRIPT_LIST } from '..';
+import {
+  transliterate,
+  preloadScriptData,
+  type ScriptListType,
+  SCRIPT_LIST,
+  transliterate_wasm
+} from '..';
 import { performance } from 'node:perf_hooks';
 import path from 'node:path';
 import {
@@ -99,6 +105,24 @@ async function benchmark() {
       await emulateTyping(
         testData.text,
         testData.script as ScriptListType,
+        testData.options ?? undefined
+      );
+    }
+    const end = performance.now();
+    console.log(`Time taken: ` + chalk.yellow(`${end - start} ms`));
+  }
+
+  // Transliteration Cases (WASM)
+  {
+    console.log(chalk.cyan.bold('Transliteration Cases (WASM): '));
+    await preload_data();
+    const start = performance.now();
+    for (let i = 0; i < TEST_DATA.length; i++) {
+      const testData = TEST_DATA[i];
+      await transliterate_wasm(
+        testData.input,
+        testData.from as ScriptListType,
+        testData.to as ScriptListType,
         testData.options ?? undefined
       );
     }
