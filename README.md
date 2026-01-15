@@ -21,6 +21,8 @@
 
 - **Rust** 🦀 - [`lipilekhika`](https://crates.io/crates/lipilekhika) on Crates.io · [![crates.io](https://img.shields.io/crates/v/lipilekhika.svg)](https://crates.io/crates/lipilekhika) [![crates.io](https://img.shields.io/crates/d/lipilekhika.svg)](https://crates.io/crates/lipilekhika) · [Docs](https://lipilekhika.in/getting-started/rust)
 
+- **Web Assembly** : Rust Powered [Web Assembly Module](https://lipilekhika.in/getting-started/wasm)
+
 - **Python** 🐍 & **Go** - Coming soon
 
 ## 🚀 Quick Start
@@ -30,6 +32,7 @@
 **Documentation**: [lipilekhika.in](https://lipilekhika.in/getting-started/introduction/) - Comprehensive guides and API reference
 
 **Key Resources**:
+
 - [Introduction](https://lipilekhika.in/getting-started/introduction) - Learn the basics
 - [JavaScript Guide](https://lipilekhika.in/getting-started/javascript) - Integration guide
 - [Supported Scripts](https://lipilekhika.in/reference/supported_scripts) - Full list of scripts
@@ -46,4 +49,5 @@ Contributions are welcome! Help us improve Lipi Lekhika through bug reports, fea
 ## 📚 Legacy
 
 **Old Lipi Lekhika** (archived version):
+
 - [GitHub Archive](https://github.com/shubhattin/old_lipi_lekhika_archive) · [Old Web App](https://lipilekhika.in/old/) · [Windows/Android Binaries](https://github.com/shubhattin/lipilekhika/releases/tag/old)

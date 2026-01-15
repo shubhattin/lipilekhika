@@ -1,5 +1,5 @@
 use crate::data::get_ordered_script_list;
-use crate::{AppState, ThreadMessageOrigin, ThreadMessageType};
+use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use std::collections::HashMap;
 use std::sync::{Arc, atomic::Ordering};
@@ -225,8 +225,8 @@ impl TrayManager {
           .store(new_state, Ordering::SeqCst);
         self.typing_on_item.set_checked(new_state);
         self.update_tooltip();
-        messages.push(crate::ThreadMessageType::RerenderUI);
-        messages.push(crate::ThreadMessageType::TriggerTypingNotification);
+        messages.push(ThreadMessageType::RerenderUI);
+        messages.push(ThreadMessageType::TriggerTypingNotification);
       }
       TrayMenuEvent::NativeNumerals => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -234,7 +234,7 @@ impl TrayManager {
         ctx.update_use_native_numerals(new_state);
         drop(ctx);
         self.native_numerals_item.set_checked(new_state);
-        messages.push(crate::ThreadMessageType::RerenderUI);
+        messages.push(ThreadMessageType::RerenderUI);
       }
       TrayMenuEvent::InherentVowel => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -242,14 +242,14 @@ impl TrayManager {
         ctx.update_include_inherent_vowel(new_state);
         drop(ctx);
         self.inherent_vowel_item.set_checked(new_state);
-        messages.push(crate::ThreadMessageType::RerenderUI);
+        messages.push(ThreadMessageType::RerenderUI);
       }
       TrayMenuEvent::Quit => {
-        messages.push(crate::ThreadMessageType::CloseApp);
+        messages.push(ThreadMessageType::CloseApp);
       }
       TrayMenuEvent::OpenApp => {
         // Send message to UI to restore the minimized window
-        messages.push(crate::ThreadMessageType::MaximizeUI);
+        messages.push(ThreadMessageType::MaximizeUI);
       }
       TrayMenuEvent::ScriptSelected(script_name) => {
         let current_options = {
@@ -277,7 +277,7 @@ impl TrayManager {
           // update_tooltip() also locks typing_context, so must be called after dropping lock
           self.update_tooltip();
           // Notify UI to rerender
-          messages.push(crate::ThreadMessageType::RerenderUI);
+          messages.push(ThreadMessageType::RerenderUI);
         }
       }
     };
@@ -288,8 +288,8 @@ impl TrayManager {
 /// Runs the tray icon event loop in a separate thread
 pub fn run_tray_thread(
   app_state: Arc<AppState>,
-  tx_ui: Sender<crate::ThreadMessage>,
-  rx: Receiver<crate::ThreadMessage>,
+  tx_ui: Sender<ThreadMessage>,
+  rx: Receiver<ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
   std::thread::spawn(move || {
     let mut tray_manager = match TrayManager::new(Arc::clone(&app_state)) {
@@ -306,11 +306,10 @@ pub fn run_tray_thread(
     let tray_icon_channel = TrayIconEvent::receiver();
 
     // Helper closure to send messages
-    let send_messages = |tx_ui: &Sender<crate::ThreadMessage>,
-                         messages: Vec<crate::ThreadMessageType>| {
+    let send_messages = |tx_ui: &Sender<ThreadMessage>, messages: Vec<ThreadMessageType>| {
       for msg_type in messages {
-        let _ = tx_ui.send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::Tray,
+        let _ = tx_ui.send(ThreadMessage {
+          origin: ThreadMessageOrigin::Tray,
           msg: msg_type,
         });
       }
@@ -346,9 +345,9 @@ pub fn run_tray_thread(
         while let Ok(event) = tray_icon_channel.try_recv() {
           if let TrayIconEvent::DoubleClick { .. } = event {
             // Double-click on tray icon opens the app
-            let _ = tx_ui.send(crate::ThreadMessage {
-              origin: crate::ThreadMessageOrigin::Tray,
-              msg: crate::ThreadMessageType::MaximizeUI,
+            let _ = tx_ui.send(ThreadMessage {
+              origin: ThreadMessageOrigin::Tray,
+              msg: ThreadMessageType::MaximizeUI,
             });
           }
         }
@@ -374,9 +373,9 @@ pub fn run_tray_thread(
         // Check for thread messages (RerenderTray)
         while let Ok(thread_msg) = rx.try_recv() {
           // Only process messages not originating from Tray
-          if !matches!(thread_msg.origin, crate::ThreadMessageOrigin::Tray) {
+          if !matches!(thread_msg.origin, ThreadMessageOrigin::Tray) {
             match thread_msg.msg {
-              crate::ThreadMessageType::RerenderTray => {
+              ThreadMessageType::RerenderTray => {
                 tray_manager.update_ui();
               }
               _ => {} // Ignore other message types
@@ -394,9 +393,9 @@ pub fn run_tray_thread(
         while let Ok(event) = tray_icon_channel.try_recv() {
           if let TrayIconEvent::DoubleClick { .. } = event {
             // Double-click on tray icon opens the app
-            let _ = tx_ui.send(crate::ThreadMessage {
-              origin: crate::ThreadMessageOrigin::Tray,
-              msg: crate::ThreadMessageType::MaximizeUI,
+            let _ = tx_ui.send(ThreadMessage {
+              origin: ThreadMessageOrigin::Tray,
+              msg: ThreadMessageType::MaximizeUI,
             });
           }
         }

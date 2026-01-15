@@ -1,4 +1,4 @@
-use crate::{ThreadMessageOrigin, ThreadMessageType, ui::ui::UIMessage};
+use crate::{ThreadMessage, ThreadMessageOrigin, ThreadMessageType, ui::ui::UIMessage};
 use crossbeam_channel::{Receiver, TryRecvError};
 use iced::stream;
 use iced_futures::BoxStream;
@@ -9,11 +9,11 @@ use std::{
 };
 
 pub struct ThreadRx {
-  rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
+  rx: Arc<Mutex<Receiver<ThreadMessage>>>,
 }
 
 impl ThreadRx {
-  pub fn new(rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>) -> Self {
+  pub fn new(rx: Arc<Mutex<Receiver<ThreadMessage>>>) -> Self {
     Self { rx }
   }
 }

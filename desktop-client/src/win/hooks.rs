@@ -1,3 +1,5 @@
+use crate::{ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
+
 use super::WinAppState;
 use super::constants::*;
 use std::cell::RefCell;
@@ -338,17 +340,17 @@ unsafe extern "system" fn low_level_keyboard_proc(
         }
 
         // Notify UI and tray to rerender based on latest app state
-        let _ = state.tx_ui.send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::TriggerTypingNotification,
+        let _ = state.tx_ui.send(ThreadMessage {
+          origin: ThreadMessageOrigin::KeyboardHook,
+          msg: ThreadMessageType::TriggerTypingNotification,
         });
-        let _ = state.tx_ui.send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::RerenderUI,
+        let _ = state.tx_ui.send(ThreadMessage {
+          origin: ThreadMessageOrigin::KeyboardHook,
+          msg: ThreadMessageType::RerenderUI,
         });
-        let _ = state.tx_tray.send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::RerenderTray,
+        let _ = state.tx_tray.send(ThreadMessage {
+          origin: ThreadMessageOrigin::KeyboardHook,
+          msg: ThreadMessageType::RerenderTray,
         });
 
         // Suppress Alt+X/Alt+C so it doesn't reach apps
@@ -358,9 +360,9 @@ unsafe extern "system" fn low_level_keyboard_proc(
       // ---- Handle Win+Esc to close the app ----
       if is_keydown && vk == VK_ESCAPE && is_ctrl_or_win_pressed() {
         // Send close app message to UI
-        let _ = state.tx_ui.send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::KeyboardHook,
-          msg: crate::ThreadMessageType::CloseApp,
+        let _ = state.tx_ui.send(ThreadMessage {
+          origin: ThreadMessageOrigin::KeyboardHook,
+          msg: ThreadMessageType::CloseApp,
         });
 
         // Suppress Win+Esc so it doesn't reach apps

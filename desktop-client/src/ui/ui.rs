@@ -1,6 +1,7 @@
 use crate::data::get_ordered_script_list;
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
+use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
@@ -37,9 +38,9 @@ pub enum UIMessage {
 }
 
 struct App {
-  global_app_state: Arc<crate::AppState>,
-  rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
-  tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
+  global_app_state: Arc<AppState>,
+  rx: Arc<Mutex<Receiver<ThreadMessage>>>,
+  tx_tray: Arc<Mutex<Sender<ThreadMessage>>>,
   // Window tracking - None means minimized to tray
   main_window: Option<window::Id>,
   // Icon for re-opening window
@@ -54,9 +55,9 @@ struct App {
 
 impl App {
   fn new(
-    app_state: Arc<crate::AppState>,
-    rx: Arc<Mutex<Receiver<crate::ThreadMessage>>>,
-    tx_tray: Arc<Mutex<Sender<crate::ThreadMessage>>>,
+    app_state: Arc<AppState>,
+    rx: Arc<Mutex<Receiver<ThreadMessage>>>,
+    tx_tray: Arc<Mutex<Sender<ThreadMessage>>>,
     icon: window::Icon,
   ) -> (Self, Task<UIMessage>) {
     // Open main window since daemon mode doesn't create one automatically
@@ -105,9 +106,9 @@ impl App {
           let mut ctx = self.global_app_state.typing_context.lock().unwrap();
           *ctx = new_script_context;
           drop(ctx);
-          let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
-            origin: crate::ThreadMessageOrigin::UI,
-            msg: crate::ThreadMessageType::RerenderTray,
+          let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+            origin: ThreadMessageOrigin::UI,
+            msg: ThreadMessageType::RerenderTray,
           });
         }
         Task::none()
@@ -117,9 +118,9 @@ impl App {
           .global_app_state
           .typing_enabled
           .store(enabled, Ordering::SeqCst);
-        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::UI,
-          msg: crate::ThreadMessageType::RerenderTray,
+        let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+          origin: ThreadMessageOrigin::UI,
+          msg: ThreadMessageType::RerenderTray,
         });
         Task::none()
       }
@@ -130,9 +131,9 @@ impl App {
           .global_app_state
           .typing_enabled
           .store(!current, Ordering::SeqCst);
-        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::UI,
-          msg: crate::ThreadMessageType::RerenderTray,
+        let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+          origin: ThreadMessageOrigin::UI,
+          msg: ThreadMessageType::RerenderTray,
         });
         // Trigger notification after toggling
         self.update(UIMessage::TriggerTypingNotification)
@@ -144,9 +145,9 @@ impl App {
           .lock()
           .unwrap()
           .update_use_native_numerals(use_native_numerals);
-        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::UI,
-          msg: crate::ThreadMessageType::RerenderTray,
+        let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+          origin: ThreadMessageOrigin::UI,
+          msg: ThreadMessageType::RerenderTray,
         });
         Task::none()
       }
@@ -157,9 +158,9 @@ impl App {
           .lock()
           .unwrap()
           .update_include_inherent_vowel(include_inherent_vowel);
-        let _ = self.tx_tray.lock().unwrap().send(crate::ThreadMessage {
-          origin: crate::ThreadMessageOrigin::UI,
-          msg: crate::ThreadMessageType::RerenderTray,
+        let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+          origin: ThreadMessageOrigin::UI,
+          msg: ThreadMessageType::RerenderTray,
         });
         Task::none()
       }
@@ -436,9 +437,9 @@ impl App {
 }
 
 pub fn run(
-  app_state: Arc<crate::AppState>,
-  rx: Receiver<crate::ThreadMessage>,
-  tx_tray: Sender<crate::ThreadMessage>,
+  app_state: Arc<AppState>,
+  rx: Receiver<ThreadMessage>,
+  tx_tray: Sender<ThreadMessage>,
 ) -> iced::Result {
   let icon = window::icon::from_file_data(include_bytes!("../../assets/icon.png"), None)
     .expect("icon should be valid");
