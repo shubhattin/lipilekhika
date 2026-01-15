@@ -1,48 +1,8 @@
-import {
-  transliterate_text,
-  get_active_custom_options,
-  type CustomOptionType,
-  type CustomOptionList
-} from './transliteration/transliterate';
-import { getScriptData } from './utils/get_script_data';
-import {
-  getNormalizedScriptName,
-  type script_input_name_type
-} from './utils/lang_list/script_normalization';
-import custom_options_json from './custom_options.json';
-import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
-import type { ScriptLangType, ScriptListType } from './types';
+// also exports the wasm modules
 
-export * from './types';
-
-export {
-  /**
-   * The list of all supported script names
-   */
-  SCRIPT_LIST,
-  /**
-   * The list of all supported language names which are mapped to a script
-   */
-  LANG_LIST,
-  /** Lists of all Supported Script/Language */
-  ALL_LANG_SCRIPT_LIST,
-  /** Get Normalized Script Name */
-  getNormalizedScriptName
-};
-/**
- * Preloads the script data. Useful for browsers as avoids the fetch latency
- * @param name - The name of the script/language to preload
- * @returns The script data
- * @public
- */
-export const preloadScriptData = async (name: script_input_name_type) => {
-  const normalizedName = getNormalizedScriptName(name);
-  if (!normalizedName) {
-    throw new Error(`Invalid script name: ${name}`);
-  }
-  const scriptData = await getScriptData(normalizedName);
-  return scriptData;
-};
+export * from './index_main';
+import { getNormalizedScriptName, type ScriptLangType } from './index_main';
+import type { CustomOptionType } from './transliteration/transliterate';
 
 /**
  * Transliterates `text` from `from` to `to`.
@@ -52,7 +12,7 @@ export const preloadScriptData = async (name: script_input_name_type) => {
  * @param trans_options - The custom transliteration options to use for the transliteration
  * @returns The transliterated text
  */
-export async function transliterate(
+export async function transliterate_wasm(
   text: string,
   from: ScriptLangType,
   to: ScriptLangType,
@@ -67,52 +27,7 @@ export async function transliterate(
     throw new Error(`Invalid script name: ${to}`);
   }
   if (normalized_from === normalized_to) return text;
-  const result = await transliterate_text(text, normalized_from, normalized_to, trans_options);
-  return result.output;
-}
-
-/**
- * This returns the list of all supported custom options for
- * transliterations for the provided script pair
- * @param from_script_name - The script/language to transliterate from
- * @param to_script_name - The script/language to transliterate to
- * @returns The list of all supported custom options for the provided script pair
- */
-export async function getAllOptions(
-  from_script_name: ScriptLangType,
-  to_script_name: ScriptLangType
-) {
-  const normalized_from = getNormalizedScriptName(from_script_name);
-  if (!normalized_from) {
-    throw new Error(`Invalid script name: ${from_script_name}`);
-  }
-  const normalized_to = getNormalizedScriptName(to_script_name);
-  if (!normalized_to) {
-    throw new Error(`Invalid script name: ${to_script_name}`);
-  }
-  const from_script_data = await getScriptData(normalized_from);
-  const to_script_data = await getScriptData(normalized_to);
-  return Object.keys(
-    get_active_custom_options(
-      from_script_data,
-      to_script_data,
-      Object.fromEntries(Object.keys(custom_options_json).map((key) => [key, true]))
-    )
-  ) as CustomOptionList[];
-}
-
-/**
- * This returns the schwa deletion characerstic of the script provided.
- * It is the property in which a inherent vowel 'a' (अ) is added to
- * the end of vyanjana (consonant) characters.
- */
-export async function getSchwaStatusForScript(
-  script_name: ScriptListType
-): Promise<boolean | null> {
-  const script_data = await getScriptData(script_name);
-  if (script_data.script_type === 'brahmic') {
-    return script_data.schwa_property;
-  } else {
-    return null;
-  }
+  const wasm_mod = await import('../wasm/bind');
+  const result = await wasm_mod.transliterate(text, normalized_from, normalized_to, trans_options);
+  return result;
 }
