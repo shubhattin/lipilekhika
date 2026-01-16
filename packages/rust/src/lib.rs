@@ -1,5 +1,7 @@
 use crate::script_data::ScriptData;
-pub use crate::script_data::{get_all_option, get_normalized_script_name, get_script_list_data};
+pub use crate::script_data::{
+  ScriptListData, get_all_options, get_normalized_script_name, get_script_list_data,
+};
 use crate::transliterate::transliterate_text;
 pub use crate::typing::{
   ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_typing_data_map,
@@ -55,6 +57,11 @@ pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, St
     ScriptData::Brahmic { schwa_property, .. } => Ok(Some(*schwa_property)),
     ScriptData::Other { .. } => Ok(None),
   }
+}
+
+/// preload script data
+pub fn preload_script_data(_script_name: &str) {
+  ScriptData::get_script_data("Devanagari");
 }
 
 #[cfg(test)]

@@ -2,19 +2,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashMap;
 
-/// Transliterates text from one script to another.
-///
-/// Args:
-///     text (str): The text to transliterate.
-///     from_script (str): The source script or language name/alias.
-///     to_script (str): The target script or language name/alias.
-///     trans_options (dict[str, bool], optional): Custom transliteration options.
-///
-/// Returns:
-///     str: The transliterated text.
-///
-/// Raises:
-///     ValueError: If script names are invalid.
 #[pyfunction]
 #[pyo3(signature = (text, from_script, to_script, trans_options=None))]
 fn transliterate(
@@ -36,6 +23,84 @@ fn transliterate(
 
   lipilekhika::transliterate(text, from_script, to_script, options.as_ref())
     .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+
+#[pyfunction]
+#[pyo3(signature = (script_name))]
+fn preload_script_data(script_name: &str) {
+  lipilekhika::preload_script_data(script_name);
+}
+
+#[pyfunction]
+#[pyo3(signature = (script_name))]
+fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
+  lipilekhika::get_schwa_status_for_script(script_name)
+    .map(|status| status.unwrap_or(false))
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+
+#[pyfunction]
+#[pyo3(signature = (from_script, to_script))]
+fn get_all_options(from_script: &str, to_script: &str) -> PyResult<Vec<String>> {
+  lipilekhika::get_all_options(from_script, to_script)
+    .map(|options| options.into_iter().collect::<Vec<String>>())
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}
+
+#[pyfunction]
+#[pyo3(signature = (script_name))]
+fn get_normalized_script_name(script_name: &str) -> PyResult<String> {
+  lipilekhika::get_normalized_script_name(script_name).ok_or_else(|| {
+    pyo3::exceptions::PyValueError::new_err(format!("Invalid script name: {}", script_name))
+  })
+}
+
+#[pyfunction]
+#[pyo3(signature = ())]
+fn get_script_list_data() -> PyScriptListData {
+  PyScriptListData::from(lipilekhika::get_script_list_data())
+}
+
+/// Script list data containing scripts, languages, and their mappings.
+#[pyclass]
+#[derive(Clone)]
+struct PyScriptListData {
+  /// Map of script names to their IDs.
+  #[pyo3(get)]
+  scripts: HashMap<String, u8>,
+  /// Map of language names to their IDs.
+  #[pyo3(get)]
+  langs: HashMap<String, u8>,
+  /// Map of languages to their corresponding scripts.
+  #[pyo3(get)]
+  lang_script_map: HashMap<String, String>,
+  /// Map of script aliases to their canonical script names.
+  #[pyo3(get)]
+  script_alternates_map: HashMap<String, String>,
+}
+
+#[pymethods]
+impl PyScriptListData {
+  fn __repr__(&self) -> String {
+    format!(
+      "PyScriptListData(scripts={}, langs={}, lang_script_map={}, script_alternates_map={})",
+      self.scripts.len(),
+      self.langs.len(),
+      self.lang_script_map.len(),
+      self.script_alternates_map.len()
+    )
+  }
+}
+
+impl From<&lipilekhika::ScriptListData> for PyScriptListData {
+  fn from(data: &lipilekhika::ScriptListData) -> Self {
+    Self {
+      scripts: data.scripts.clone(),
+      langs: data.langs.clone(),
+      lang_script_map: data.lang_script_map.clone(),
+      script_alternates_map: data.script_alternates_map.clone(),
+    }
+  }
 }
 
 /// Options for configuring a typing context.
@@ -189,10 +254,17 @@ fn create_typing_context(
     .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
 
-/// Python bindings for Lipi Lekhika - a transliteration library.
+/// Python bindings to be exported
 #[pymodule]
 fn _lipilekhika(m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(transliterate, m)?)?;
+  m.add_function(wrap_pyfunction!(preload_script_data, m)?)?;
+  m.add_function(wrap_pyfunction!(get_schwa_status_for_script, m)?)?;
+  m.add_function(wrap_pyfunction!(get_all_options, m)?)?;
+  m.add_function(wrap_pyfunction!(get_normalized_script_name, m)?)?;
+  m.add_function(wrap_pyfunction!(get_script_list_data, m)?)?;
+  m.add_class::<PyScriptListData>()?;
+  // typing module
   m.add_function(wrap_pyfunction!(create_typing_context, m)?)?;
   m.add_class::<TypingContextOptions>()?;
   m.add_class::<TypingDiff>()?;

@@ -18,7 +18,10 @@ pub use script_list::*;
 ///
 /// Returns the list of all supported custom option keys for the provided script pair,
 /// or an error string if script names are invalid.
-pub fn get_all_option(from_script_name: &str, to_script_name: &str) -> Result<Vec<String>, String> {
+pub fn get_all_options(
+  from_script_name: &str,
+  to_script_name: &str,
+) -> Result<Vec<String>, String> {
   let normalized_from = get_normalized_script_name(from_script_name)
     .ok_or_else(|| format!("Invalid script name: {}", from_script_name))?;
 
@@ -50,7 +53,7 @@ mod tests {
 
   #[test]
   fn test_get_all_option_valid_scripts() {
-    let result = get_all_option("Devanagari", "Telugu");
+    let result = get_all_options("Devanagari", "Telugu");
     assert!(result.is_ok());
     // The result should be a list of option keys
     // We just verify it returns without error (could be 0 or more options)
@@ -59,20 +62,20 @@ mod tests {
   #[test]
   fn test_get_all_option_normalized_names() {
     // Test with acronyms that should be normalized
-    let result = get_all_option("dev", "tel");
+    let result = get_all_options("dev", "tel");
     assert!(result.is_ok());
   }
 
   #[test]
   fn test_get_all_option_invalid_from_script() {
-    let result = get_all_option("InvalidScript", "Telugu");
+    let result = get_all_options("InvalidScript", "Telugu");
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
   }
 
   #[test]
   fn test_get_all_option_invalid_to_script() {
-    let result = get_all_option("Devanagari", "InvalidScript");
+    let result = get_all_options("Devanagari", "InvalidScript");
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
   }
