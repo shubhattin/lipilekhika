@@ -13,6 +13,11 @@ dependencies = []
 
 [tool.maturin]
 bindings = "pyo3"
-module-name = "lipilekhika._rust"
+module-name = "lipilekhika._lipilekhika"
 manifest-path = "binding/Cargo.toml"
 python-source = "."
+
+[dependency-groups]
+dev = [
+    "typer>=0.21.1",
+]

@@ -191,7 +191,7 @@ fn create_typing_context(
 
 /// Python bindings for Lipi Lekhika - a transliteration library.
 #[pymodule]
-fn _rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _lipilekhika(m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(transliterate, m)?)?;
   m.add_function(wrap_pyfunction!(create_typing_context, m)?)?;
   m.add_class::<TypingContextOptions>()?;

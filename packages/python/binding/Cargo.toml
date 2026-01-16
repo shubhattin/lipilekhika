@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [lib]
-name = "_rust"
+name = "_lipilekhika"
 crate-type = ["cdylib"]
 
 [dependencies]
