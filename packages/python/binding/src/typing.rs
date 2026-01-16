@@ -1,18 +1,26 @@
 use pyo3::prelude::*;
 
-/// Options for configuring a typing context.
+#[pyfunction]
+pub fn default_auto_context_clear_time_ms() -> u64 {
+  lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS
+}
+
+#[pyfunction]
+pub fn default_use_native_numerals() -> bool {
+  lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS
+}
+
+#[pyfunction]
+pub fn default_include_inherent_vowel() -> bool {
+  lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL
+}
+
 #[pyclass]
 #[derive(Clone)]
 pub struct TypingContextOptions {
-  /// The time in milliseconds after which the context will be cleared automatically.
-  #[pyo3(get, set)]
-  pub auto_context_clear_time_ms: u64,
-  /// Use native numerals in transliteration/typing.
-  #[pyo3(get, set)]
-  pub use_native_numerals: bool,
-  /// Include inherent vowels (schwa character) in transliteration/typing.
-  #[pyo3(get, set)]
-  pub include_inherent_vowel: bool,
+  auto_context_clear_time_ms: u64,
+  use_native_numerals: bool,
+  include_inherent_vowel: bool,
 }
 
 #[pymethods]
@@ -74,21 +82,9 @@ pub struct TypingContext {
 
 #[pymethods]
 impl TypingContext {
-  /// Clears all internal state and contexts.
   fn clear_context(&mut self) {
     self.inner.clear_context();
   }
-
-  /// Accepts character-by-character input and returns the diff relative to the previous output.
-  ///
-  /// Args:
-  ///     key (str): The key/character input.
-  ///
-  /// Returns:
-  ///     TypingDiff: The diff containing characters to delete and text to add.
-  ///
-  /// Raises:
-  ///     ValueError: If there's an error processing the input.
   fn take_key_input(&mut self, key: &str) -> PyResult<TypingDiff> {
     self
       .inner
@@ -100,40 +96,25 @@ impl TypingContext {
       .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
   }
 
-  /// Updates whether native numerals should be used for subsequent typing.
   fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
     self.inner.update_use_native_numerals(use_native_numerals);
   }
 
-  /// Updates whether inherent vowels should be included for subsequent typing.
   fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
     self
       .inner
       .update_include_inherent_vowel(include_inherent_vowel);
   }
 
-  /// Returns whether native numerals are being used.
   fn get_use_native_numerals(&self) -> bool {
     self.inner.get_use_native_numerals()
   }
 
-  /// Returns whether inherent vowels are included.
   fn get_include_inherent_vowel(&self) -> bool {
     self.inner.get_include_inherent_vowel()
   }
 }
 
-/// Creates a new typing context for the given script/language.
-///
-/// Args:
-///     typing_lang (str): The script or language name/alias.
-///     options (TypingContextOptions, optional): Configuration options.
-///
-/// Returns:
-///     TypingContext: A new typing context instance.
-///
-/// Raises:
-///     ValueError: If the script name is invalid.
 #[pyfunction]
 #[pyo3(signature = (typing_lang, options=None))]
 pub fn create_typing_context(
@@ -146,21 +127,72 @@ pub fn create_typing_context(
     .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
 
-/// Default time in milliseconds after which the context will be cleared automatically.
-#[pyfunction]
-pub fn default_auto_context_clear_time_ms() -> u64 {
-  lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS
+/// An item in the typing data map: (text, list_type, mappings).
+/// - `text`: The displayed character/text in the target script.
+/// - `list_type`: One of "anya", "vyanjana", "matra", "svara".
+/// - `mappings`: List of input key sequences that produce this character.
+pub type TypingDataMapItem = (String, String, Vec<String>);
+
+/// Result containing typing data for a script.
+#[pyclass]
+#[derive(Clone)]
+pub struct ScriptTypingDataMap {
+  /// Mappings for common characters across scripts (from krama_text_arr).
+  #[pyo3(get)]
+  pub common_krama_map: Vec<TypingDataMapItem>,
+  /// Mappings for script-specific characters (from custom_script_chars_arr).
+  #[pyo3(get)]
+  pub script_specific_krama_map: Vec<TypingDataMapItem>,
 }
 
-/// Default value for using native numerals while typing.
-#[pyfunction]
-pub fn default_use_native_numerals() -> bool {
-  lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS
+#[pymethods]
+impl ScriptTypingDataMap {
+  fn __repr__(&self) -> String {
+    format!(
+      "ScriptTypingDataMap(common_krama_map={} items, script_specific_krama_map={} items)",
+      self.common_krama_map.len(),
+      self.script_specific_krama_map.len()
+    )
+  }
 }
 
-/// Default value for including inherent vowels while typing.
-/// By default avoids schwa deletion.
+/// Returns the typing data map for a script.
+///
+/// Args:
+///     script (str): The script/language name to get the typing data map for.
+///
+/// Returns:
+///     ScriptTypingDataMap: The typing data map for the script.
+///
+/// Raises:
+///     ValueError: If the script name is invalid or is 'Normal' (English).
 #[pyfunction]
-pub fn default_include_inherent_vowel() -> bool {
-  lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL
+#[pyo3(signature = (script))]
+pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap> {
+  lipilekhika::typing::get_script_typing_data_map(script)
+    .map(|data| {
+      // Convert ListType enum to lowercase string
+      fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+        match lt {
+          lipilekhika::typing::ListType::Anya => "anya".to_string(),
+          lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+          lipilekhika::typing::ListType::Matra => "matra".to_string(),
+          lipilekhika::typing::ListType::Svara => "svara".to_string(),
+        }
+      }
+
+      ScriptTypingDataMap {
+        common_krama_map: data
+          .common_krama_map
+          .into_iter()
+          .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+          .collect(),
+        script_specific_krama_map: data
+          .script_specific_krama_map
+          .into_iter()
+          .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+          .collect(),
+      }
+    })
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }

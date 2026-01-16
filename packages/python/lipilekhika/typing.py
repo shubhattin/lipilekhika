@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from ._lipilekhika import (  # ty:ignore[unresolved-import]
     create_typing_context as _create_typing_context,
@@ -10,6 +10,8 @@ from ._lipilekhika import (  # ty:ignore[unresolved-import]
     TypingContextOptions as _TypingContextOptions,
     TypingDiff as _TypingDiff,
     TypingContext as _TypingContext,
+    get_script_typing_data_map as _get_script_typing_data_map,
+    ScriptTypingDataMap as _ScriptTypingDataMap,
 )
 
 
@@ -22,6 +24,18 @@ DEFAULT_USE_NATIVE_NUMERALS = _default_use_native_numerals()
 
 DEFAULT_INCLUDE_INHERENT_VOWEL = _default_include_inherent_vowel()
 """Default value for including inherent vowels while typing. By default avoids schwa deletion."""
+
+
+# Type definitions
+ListType = Literal["anya", "vyanjana", "matra", "svara"]
+"""Type of a character in a script's list."""
+
+TypingDataMapItem = tuple[str, ListType, list[str]]
+"""An item in the typing data map: (text, list_type, mappings).
+- `text`: The displayed character/text in the target script.
+- `list_type`: One of "anya", "vyanjana", "matra", "svara".
+- `mappings`: List of input key sequences that produce this character.
+"""
 
 
 # Stub Classes for Editor Support and Tooling
@@ -86,62 +100,43 @@ class TypingContext:
         pass
 
 
+class ScriptTypingDataMap:
+    """Result containing typing data for a script."""
+
+    @property
+    def common_krama_map(self) -> list[TypingDataMapItem]:  # ty:ignore[invalid-return-type]
+        """Mappings for common characters across scripts."""
+        pass
+
+    @property
+    def script_specific_krama_map(
+        self,
+    ) -> list[TypingDataMapItem]:  # ty:ignore[invalid-return-type]
+        """Mappings for script-specific characters."""
+        pass
+
+    def __repr__(self) -> str:  # ty:ignore[invalid-return-type]
+        """Return a string representation of the ScriptTypingDataMap."""
+        pass
+
+
 if not TYPE_CHECKING:
     # Replace stub classes with actual native implementations at runtime
     TypingContextOptions = _TypingContextOptions
     TypingDiff = _TypingDiff
     TypingContext = _TypingContext
-
-
-class ListType:
-    """Type of a character in a script's list."""
-
-    Anya = "Anya"
-    Vyanjana = "Vyanjana"
-    Matra = "Matra"
-    Svara = "Svara"
-
-
-TypingDataMapItem = tuple[str, str, list[str]]
-"""An item in the typing data map containing the text, its type, and associated input mappings."""
-
-
-class ScriptTypingDataMap:
-    """Result containing typing data for a script."""
-
-    def __init__(
-        self,
-        common_krama_map: list[TypingDataMapItem],
-        script_specific_krama_map: list[TypingDataMapItem],
-    ):
-        self.common_krama_map = common_krama_map
-        self.script_specific_krama_map = script_specific_krama_map
+    ScriptTypingDataMap = _ScriptTypingDataMap
 
 
 def create_typing_context(
     typing_lang: str, options: TypingContextOptions | None = None
 ) -> TypingContext:
+    """Create a new typing context for the given script/language."""
     return _create_typing_context(typing_lang, options)
 
 
 def get_script_typing_data_map(script: str) -> ScriptTypingDataMap:
-    """
-    Get the typing data map for a specific script.
-
-    Args:
-        script: The script name to get typing data for.
-
-    Returns:
-        ScriptTypingDataMap: The typing data map for the script.
-
-    Raises:
-        NotImplementedError: This function is not yet implemented in the native binding.
-    """
-    # This would need to be implemented in the native binding
-    # For now, return a placeholder that matches the expected structure
-    raise NotImplementedError(
-        "get_script_typing_data_map needs to be implemented in the native binding"
-    )
+    return _get_script_typing_data_map(script)
 
 
 __all__ = [
@@ -151,9 +146,10 @@ __all__ = [
     "TypingContextOptions",
     "TypingDiff",
     "TypingContext",
-    # "ListType",
-    # "TypingDataMapItem",
-    # "ScriptTypingDataMap",
     "create_typing_context",
-    # "get_script_typing_data_map",
+    # typing map data
+    "ScriptTypingDataMap",
+    "ListType",
+    "TypingDataMapItem",
+    "get_script_typing_data_map",
 ]
