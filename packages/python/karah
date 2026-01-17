@@ -27,5 +27,11 @@ def build_bindings():
     raise typer.Exit(code=result.returncode)
 
 
+@app.command()
+def test():
+    """Build bindings using maturin."""
+    result = subprocess.run(["uvx", "pytest"])
+    raise typer.Exit(code=result.returncode)
+
 if __name__ == "__main__":
     app()

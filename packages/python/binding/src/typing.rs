@@ -18,8 +18,11 @@ pub fn default_include_inherent_vowel() -> bool {
 #[pyclass]
 #[derive(Clone)]
 pub struct TypingContextOptions {
+  #[pyo3(get, set)]
   auto_context_clear_time_ms: u64,
+  #[pyo3(get, set)]
   use_native_numerals: bool,
+  #[pyo3(get, set)]
   include_inherent_vowel: bool,
 }
 

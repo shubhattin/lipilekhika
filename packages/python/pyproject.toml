@@ -19,5 +19,8 @@ python-source = "."
 
 [dependency-groups]
 dev = [
+    "pydantic>=2.12.5",
+    "pytest>=9.0.2",
+    "pyyaml>=6.0.3",
     "typer>=0.21.1",
 ]
