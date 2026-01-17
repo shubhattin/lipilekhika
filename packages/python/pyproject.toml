@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "lipilekhika"
-version = "0.0.1"
+version = "0.0.2"
 description = "Lipi Lekhika is a library for transliterating text from one script to another."
 readme = "README.md"
 license = "MIT"
