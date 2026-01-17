@@ -1,0 +1,431 @@
+---
+title: Python
+description: Lipi Lekhika usage in Python
+sidebar:
+  order: 5
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Code } from '@astrojs/starlight/components';
+import { LinkCard } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+Lipi Lekhika offers a powerful Python package with full type hints and IDE support. The package uses **Rust-compiled functions** for blazing-fast transliteration operations, providing high performance while maintaining Python's ease of use.
+
+## Installation
+
+<Tabs>
+  <TabItem label="pip" icon="seti:python">
+    ```bash
+    pip install lipilekhika
+    ```
+  </TabItem>
+  <TabItem label="uv" icon="seti:python">
+    ```bash
+    uv add lipilekhika
+    ```
+  </TabItem>
+  <TabItem label="poetry" icon="seti:python">
+    ```bash
+    poetry add lipilekhika
+    ```
+  </TabItem>
+</Tabs>
+
+**Requirements:** Python 3.10 or higher
+
+
+## Usage
+
+For transliteration, use the `transliterate` function. It returns a string directly (synchronous).
+
+```python
+from lipilekhika import transliterate
+
+result = transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
+print(result)  # न जायते म्रियते वा
+```
+
+- The Script/Language names are fully typed with `Literal` types, so you will get IDE autocompletion and type checking.
+- You can also pass **custom transliteration options** to `transliterate` as the fourth argument.
+
+<LinkCard
+  title="Custom Transliteration Options"
+  href="/reference/custom_trans_options"
+  description="A detailed overview of the available custom transliteration options"
+/>
+<LinkCard
+  title="Supported Scripts and Languages"
+  href="/reference/supported_scripts"
+  description="List of all supported scripts/languages and their aliases"
+/>
+
+### Custom Transliteration Options
+
+```python
+from lipilekhika import transliterate
+
+result = transliterate(
+    'गङ्गा',
+    'Devanagari',
+    'Gujarati',
+    {'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': True}
+)
+print(result)  # ગંગા (instead of ગઙ્ગા)
+```
+
+### Preloading Script Data
+
+For better performance in applications where you know which scripts you'll use:
+
+```python
+from lipilekhika import preload_script_data, transliterate
+
+# Preload script data to avoid initial loading delay
+preload_script_data('Telugu')
+preload_script_data('Devanagari')
+
+# Now transliteration will be instant
+result = transliterate('namaskAramu', 'Normal', 'Telugu')
+```
+
+### Getting Available Options
+
+```python
+from lipilekhika import get_all_options
+
+# Get all available custom options for a script pair
+options = get_all_options('Normal', 'Devanagari')
+print(options)
+# ['normal_to_brahmic:use_alternative_mAtrA_form', ...]
+```
+
+## Core API Reference
+
+### Functions
+
+#### `transliterate(text, from_script, to_script, options=None)`
+
+Transliterates text from one script/language to another.
+
+**Parameters:**
+- `text: str` — The text to transliterate
+- `from_script: ScriptLangType` — The source script/language
+- `to_script: ScriptLangType` — The target script/language
+- `options: dict[str, bool] | None` — Optional custom transliteration options
+
+**Returns:** `str` — The transliterated text
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+result = transliterate('hello', 'Normal', 'Telugu')
+print(result)  # హెల్లొ
+```
+
+---
+
+#### `preload_script_data(script_name)`
+
+Preloads the script data for the given script/language. This is useful for avoiding initial loading delay in applications.
+
+**Parameters:**
+- `script_name: ScriptLangType` — The name of the script/language to preload
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+preload_script_data('Devanagari')
+```
+
+---
+
+#### `get_all_options(from_script, to_script)`
+
+Returns the list of all supported custom options for transliterations between the provided script pair.
+
+**Parameters:**
+- `from_script: ScriptLangType` — The script/language to transliterate from
+- `to_script: ScriptLangType` — The script/language to transliterate to
+
+**Returns:** `list[str]` — List of all supported custom option keys
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+options = get_all_options('Normal', 'Devanagari')
+for option in options:
+    print(option)
+```
+
+---
+
+#### `get_normalized_script_name(script_name)`
+
+Get the normalized script name for the given script/language. This function maps language names to their corresponding script names.
+
+**Parameters:**
+- `script_name: ScriptLangType` — The script/language name to normalize
+
+**Returns:** `str` — The normalized script name
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+from lipilekhika import get_normalized_script_name
+
+script = get_normalized_script_name('Hindi')
+print(script)  # 'Devanagari'
+```
+
+---
+
+#### `get_schwa_status_for_script(script_name)`
+
+Returns the schwa deletion characteristic of the script. This is the property in which an inherent vowel 'a' (अ) is added to the end of vyanjana (consonant) characters.
+
+**Parameters:**
+- `script_name: ScriptLangType` — The script/language name to check
+
+**Returns:** `bool | None`
+- `True` if the script has schwa deletion
+- `False` if it doesn't
+- `None` if the script is not a Brahmic script
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+from lipilekhika import get_schwa_status_for_script
+
+has_schwa = get_schwa_status_for_script('Devanagari')
+print(has_schwa)  # True
+```
+
+### Constants & Types
+
+The package exports the following constants:
+
+```python
+from lipilekhika import SCRIPT_LIST, LANG_LIST, ALL_SCRIPT_LANG_LIST
+
+print(SCRIPT_LIST)  # ['Devanagari', 'Bengali', 'Telugu', ...]
+print(LANG_LIST)    # ['Sanskrit', 'Hindi', 'Marathi', ...]
+print(ALL_SCRIPT_LANG_LIST)  # Combined list
+```
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `SCRIPT_LIST` | `list[str]` | List of all supported script names |
+| `LANG_LIST` | `list[str]` | List of all supported language names mapped to scripts |
+| `ALL_SCRIPT_LANG_LIST` | `list[str]` | Combined list of all scripts and languages |
+
+**Type Hints:**
+
+The package provides comprehensive type hints for better IDE support:
+
+- **`ScriptLangType`** — Literal type for script/language identifiers (includes aliases)
+- **`TransliterationOptionsType`** — Type for custom transliteration option keys
+- **`ScriptListType`** — Type for script names
+- **`LangListType`** — Type for language names
+
+## Real-time Typing
+
+Enable real-time transliteration as users type character by character. This is useful for building interactive text editors, chat applications, or any interface requiring real-time script input.
+
+```python
+from lipilekhika.typing import create_typing_context
+
+ctx = create_typing_context('Telugu')
+
+# Process each character as the user types
+for char in "namaste":
+    diff = ctx.take_key_input(char)
+    # The diff tells you what to change in your text buffer:
+    # - Remove the last diff.to_delete_chars_count characters
+    # - Append diff.diff_add_text
+    print(f"Delete {diff.to_delete_chars_count}, Add: {diff.diff_add_text}")
+```
+
+<LinkCard
+  title="Realtime Typing Reference"
+  href="/reference/realtime_typing"
+  description="Complete guide to implementing real-time typing"
+/>
+
+### Quick Example
+
+Here's a complete example of emulating typing:
+
+```python
+from lipilekhika.typing import create_typing_context
+
+def emulate_typing(text: str, script: str) -> str:
+    """Emulate typing character by character."""
+    ctx = create_typing_context(script)
+    result = ""
+    
+    for char in text:
+        diff = ctx.take_key_input(char)
+        # Apply the diff
+        if diff.to_delete_chars_count > 0:
+            result = result[:-diff.to_delete_chars_count]
+        result += diff.diff_add_text
+    
+    return result
+
+# Usage
+output = emulate_typing("namaste", "Devanagari")
+print(output)  # नमस्ते
+```
+
+### Typing API
+
+#### `create_typing_context(typing_lang, options=None)`
+
+Creates a stateful isolated context for character-by-character input typing.
+
+**Parameters:**
+- `typing_lang: ScriptLangType` — The script/language to type in
+- `options: TypingContextOptions | None` — Optional configuration
+
+**Returns:** `TypingContext` — A context object with the following methods:
+- `clear_context()` — Clears all internal states and contexts
+- `take_key_input(key: str) -> TypingDiff` — Accepts character input and returns the diff
+- `update_use_native_numerals(value: bool)` — Update native numerals setting
+- `update_include_inherent_vowel(value: bool)` — Update inherent vowel setting
+- `get_use_native_numerals() -> bool` — Get current native numerals setting
+- `get_include_inherent_vowel() -> bool` — Get current inherent vowel setting
+
+**Raises:** `Exception` — If an invalid script name is provided
+
+**Example:**
+```python
+from lipilekhika.typing import create_typing_context, TypingContextOptions
+
+# Create with custom options
+options = TypingContextOptions(
+    auto_context_clear_time_ms=4500,
+    use_native_numerals=True,
+    include_inherent_vowel=False
+)
+
+ctx = create_typing_context('Devanagari', options)
+
+# Process input
+diff = ctx.take_key_input('n')
+print(diff.diff_add_text)  # 'न्'
+```
+
+---
+
+#### `get_script_typing_data_map(script)`
+
+Returns the typing data map for a script. This function is useful for comparing the krama array of two scripts or building typing helper UIs.
+
+**Parameters:**
+- `script: ScriptLangType` — The script to get the typing data map for
+
+**Returns:** `ScriptTypingDataMap` — Object containing:
+- `common_krama_map` — Mappings for common characters across scripts
+- `script_specific_krama_map` — Mappings for script-specific characters
+
+Each mapping is a tuple of `(text, type, mappings)` where:
+- `text: str` — The displayed character in the target script
+- `type: Literal["anya", "vyanjana", "matra", "svara"]` — Character category
+- `mappings: list[str]` — List of input key sequences that produce this character
+
+**Raises:** `Exception` — If an invalid script name is provided or if 'Normal' is used
+
+**Example:**
+```python
+from lipilekhika.typing import get_script_typing_data_map
+
+typing_map = get_script_typing_data_map('Devanagari')
+
+# Access common character mappings
+for text, char_type, mappings in typing_map.common_krama_map:
+    print(f"{text} ({char_type}): {mappings}")
+
+# Access script-specific mappings
+for text, char_type, mappings in typing_map.script_specific_krama_map:
+    print(f"{text} ({char_type}): {mappings}")
+```
+
+### Typing Options
+
+#### `TypingContextOptions`
+
+Configuration class for typing contexts.
+
+**Attributes:**
+- `auto_context_clear_time_ms: int` — Time in ms after which context is cleared (default: 4500)
+- `use_native_numerals: bool` — Whether to use native numerals (default: True)
+- `include_inherent_vowel: bool` — Whether to include inherent vowels/schwa (default: False)
+
+**Example:**
+```python
+from lipilekhika.typing import TypingContextOptions, DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS
+
+options = TypingContextOptions(
+    auto_context_clear_time_ms=DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+    use_native_numerals=False,
+    include_inherent_vowel=True
+)
+```
+
+### Typing Constants
+
+```python
+from lipilekhika.typing import (
+    DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+    DEFAULT_USE_NATIVE_NUMERALS,
+    DEFAULT_INCLUDE_INHERENT_VOWEL
+)
+
+print(DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS)  # 4500
+print(DEFAULT_USE_NATIVE_NUMERALS)  # True
+print(DEFAULT_INCLUDE_INHERENT_VOWEL)  # False
+```
+
+## Performance
+
+The Python package leverages **Rust's performance** through PyO3 bindings:
+
+- ⚡ **Fast Transliteration** — Core operations are compiled Rust code
+- 🚀 **Low Latency** — Real-time typing with minimal overhead
+- 📦 **Efficient** — Optimized memory usage and execution speed
+
+<Aside type="note">
+  All transliteration and typing operations use Rust functions under the hood, providing near-native performance while maintaining Python's ease of use and expressiveness.
+</Aside>
+
+## Additional Resources
+
+<LinkCard
+  title="Supported Scripts"
+  href="/reference/supported_scripts"
+  description="Complete list of all supported scripts and languages"
+/>
+
+<LinkCard
+  title="Custom Transliteration Options"
+  href="/reference/custom_trans_options"
+  description="Detailed reference for all custom options"
+/>
+
+<LinkCard
+  title="Python Package on PyPI"
+  href="https://pypi.org/project/lipilekhika/"
+  description="View package details and version history"
+/>
+
+<LinkCard
+  title="GitHub Repository"
+  href="https://github.com/shubhattin/lipilekhika"
+  description="Source code, issues, and contributions"
+/>
