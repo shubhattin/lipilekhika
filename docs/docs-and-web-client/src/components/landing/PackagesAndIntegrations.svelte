@@ -60,6 +60,22 @@
               </div>
             </div>
           </a>
+          <a
+            href="https://pypi.org/project/lipilekhika/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
+          >
+            <div class="flex items-center gap-3">
+              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
+                <Icon src={PythonIcon} className="size-12" />
+              </span>
+              <div class="min-w-0">
+                <p class="leading-tight font-medium">Python</p>
+                <p class="text-xs text-muted-foreground">available</p>
+              </div>
+            </div>
+          </a>
           <div
             class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
           >
@@ -69,19 +85,6 @@
               </span>
               <div class="min-w-0">
                 <p class="leading-tight font-medium">Go</p>
-                <p class="text-xs text-muted-foreground">planned</p>
-              </div>
-            </div>
-          </div>
-          <div
-            class="rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-border hover:bg-accent/20 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:bg-background/40 dark:bg-none dark:shadow-none dark:hover:shadow-lg dark:hover:shadow-black/25"
-          >
-            <div class="flex items-center gap-3">
-              <span class="inline-flex size-9 items-center justify-center rounded-lg bg-background">
-                <Icon src={PythonIcon} className="size-12" />
-              </span>
-              <div class="min-w-0">
-                <p class="leading-tight font-medium">Python</p>
                 <p class="text-xs text-muted-foreground">planned</p>
               </div>
             </div>

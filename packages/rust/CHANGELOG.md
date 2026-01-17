@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (rust-lib@v1.0.3)
+## rust-lib@v1.0.3
 
 - added a new function `get_schwa_status_for_script` to get the schwa deletion characteristic of the script provided.
 - added
