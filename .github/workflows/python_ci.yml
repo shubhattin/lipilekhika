@@ -75,10 +75,10 @@ jobs:
       - name: Compile Python Bindings
         run: |
           cd packages/python
+          uv sync
           uvx maturin develop --release
         
       - name: Run Tests
         run: |
           cd packages/python
-          uv sync
           uv run pytest
