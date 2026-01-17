@@ -9,6 +9,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  PYTHON_VERSIONS: "3.10 3.11 3.12 3.13 3.14"
+
 jobs:
   # Job 1: Generate script data (shared by all build jobs)
   generate-script-data:
@@ -37,9 +40,40 @@ jobs:
           name: script-data
           path: packages/rust/src/data/
 
-  # Job 2: Build Linux wheels (x86_64 and aarch64)
-  build-linux:
+  # Job 2: Run tests to ensure quality before building
+  test:
     needs: generate-script-data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download script data
+        uses: actions/download-artifact@v4
+        with:
+          name: script-data
+          path: packages/rust/src/data/
+
+      - name: Prepare Rust package
+        run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Sync dependencies and run tests
+        run: |
+          cd packages/python
+          uv sync
+          uv run pytest
+
+  # Job 3: Build Linux wheels (x86_64 and aarch64)
+  build-linux:
+    needs: [generate-script-data, test]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,7 +97,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --interpreter 3.10 3.11 3.12 3.13
+          args: --release --out dist --interpreter ${{ env.PYTHON_VERSIONS }}
           manylinux: auto
           working-directory: packages/python
 
@@ -73,9 +107,9 @@ jobs:
           name: wheels-linux-${{ matrix.target }}
           path: packages/python/dist
 
-  # Job 3: Build macOS wheels (x86_64 and aarch64)
+  # Job 4: Build macOS wheels (x86_64 and aarch64)
   build-macos:
-    needs: generate-script-data
+    needs: [generate-script-data, test]
     runs-on: macos-latest
     strategy:
       matrix:
@@ -99,7 +133,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target == 'x86_64' && 'x86_64-apple-darwin' || 'aarch64-apple-darwin' }}
-          args: --release --out dist --interpreter 3.10 3.11 3.12 3.13
+          args: --release --out dist --interpreter ${{ env.PYTHON_VERSIONS }}
           working-directory: packages/python
 
       - name: Upload wheels
@@ -108,10 +142,13 @@ jobs:
           name: wheels-macos-${{ matrix.target }}
           path: packages/python/dist
 
-  # Job 4: Build Windows wheels (x86_64)
+  # Job 5: Build Windows wheels (x86_64 and aarch64)
   build-windows:
-    needs: generate-script-data
+    needs: [generate-script-data, test]
     runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [x86_64, aarch64]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -131,19 +168,19 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: x86_64
-          args: --release --out dist --interpreter 3.10 3.11 3.12 3.13
+          target: ${{ matrix.target }}
+          args: --release --out dist --interpreter ${{ env.PYTHON_VERSIONS }}
           working-directory: packages/python
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-x86_64
+          name: wheels-windows-${{ matrix.target }}
           path: packages/python/dist
 
-  # Job 5: Build source distribution
+  # Job 6: Build source distribution
   build-sdist:
-    needs: generate-script-data
+    needs: [generate-script-data, test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -173,7 +210,7 @@ jobs:
           name: wheels-sdist
           path: packages/python/dist
 
-  # Job 6: Publish to PyPI
+  # Job 7: Publish to PyPI
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest

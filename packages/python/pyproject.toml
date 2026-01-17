@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "lipilekhika"
-version = "0.0.1b1"
+version = "0.0.1b2"
 description = "Lipi Lekhika is a library for transliterating text from one script to another."
 readme = "README.md"
 license = "MIT"
@@ -16,6 +16,7 @@ bindings = "pyo3"
 module-name = "lipilekhika._lipilekhika"
 manifest-path = "binding/Cargo.toml"
 python-source = "."
+include = ["LICENCE"]
 
 [dependency-groups]
 dev = [
