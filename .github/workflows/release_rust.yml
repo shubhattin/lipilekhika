@@ -3,11 +3,11 @@ name: Release Rust Package
 on:
   push:
     tags:
-      - 'rust-lib@v*'
+      - "rust-lib@v*"
 
 permissions:
-  id-token: write  # Required for OIDC
-  contents: write  # Required for uploading to releases
+  id-token: write # Required for OIDC
+  contents: write # Required for uploading to releases
 
 jobs:
   publish:
@@ -31,7 +31,7 @@ jobs:
 
       # Rust
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable 
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry + build
         uses: actions/cache@v4
@@ -45,16 +45,19 @@ jobs:
             ${{ runner.os }}-cargo-
       - name: Test and Build Rust Package
         run: |
-            cd packages/rust 
-            cargo build --release
-            cargo test --release
+          cd packages/rust 
+          cargo build --release
+          cargo test --release
+
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
       - name: Publish to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
-            cd packages/rust
-            sed -i '/^src\/data\// s/^/#/' .gitignore
-            cargo publish
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+          cargo publish
 
   build-binaries:
     runs-on: ${{ matrix.os }}
