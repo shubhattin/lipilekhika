@@ -123,10 +123,17 @@ jobs:
           name: wheels-macos-${{ matrix.target }}
           path: packages/python/dist
 
-  # Job 4: Build Windows wheels (x86_64 only - ARM64 not supported in CI)
+  # Job 4: Build Windows wheels (x86_64 and aarch64)
   build-windows:
     needs: test
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64
+            runner: windows-latest
+          - target: aarch64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -149,14 +156,14 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: x86_64
+          target: ${{ matrix.target }}
           args: --release --out dist --interpreter ${{ env.PYTHON_VERSIONS }}
           working-directory: packages/python
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-x86_64
+          name: wheels-windows-${{ matrix.target }}
           path: packages/python/dist
 
   # Job 5: Build source distribution
