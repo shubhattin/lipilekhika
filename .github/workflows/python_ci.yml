@@ -1,0 +1,84 @@
+name: Python Package CI
+
+on:
+  - push
+
+jobs:
+  type_build_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Rust
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+  
+      - name: Build and Check
+        run: |
+          cd packages/python
+          uv sync
+          uv build
+          uvx ty check
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Compile Python Bindings using Maturin from Rust
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable 
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Compile Python Bindings
+        run: |
+          cd packages/python
+          uv sync
+          uvx maturin develop --release
+        
+      - name: Run Tests
+        run: |
+          cd packages/python
+          uv run pytest

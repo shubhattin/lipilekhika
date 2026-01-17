@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
@@ -249,7 +250,8 @@ fn truncate_last_chars(s: &mut String, n: usize) {
 }
 
 /// Type of a character in a script's list.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum ListType {
   Anya,
   Vyanjana,

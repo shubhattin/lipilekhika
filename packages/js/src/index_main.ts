@@ -6,8 +6,7 @@ import {
 } from './transliteration/transliterate';
 import { getScriptData } from './utils/get_script_data';
 import {
-  getNormalizedScriptName,
-  type script_input_name_type
+  getNormalizedScriptName
 } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
@@ -35,7 +34,7 @@ export {
  * @returns The script data
  * @public
  */
-export const preloadScriptData = async (name: script_input_name_type) => {
+export const preloadScriptData = async (name: ScriptLangType) => {
   const normalizedName = getNormalizedScriptName(name);
   if (!normalizedName) {
     throw new Error(`Invalid script name: ${name}`);

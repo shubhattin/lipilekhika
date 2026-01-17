@@ -21,9 +21,11 @@
 
 - **Rust** 🦀 - [`lipilekhika`](https://crates.io/crates/lipilekhika) on Crates.io · [![crates.io](https://img.shields.io/crates/v/lipilekhika.svg)](https://crates.io/crates/lipilekhika) [![crates.io](https://img.shields.io/crates/d/lipilekhika.svg)](https://crates.io/crates/lipilekhika) · [Docs](https://lipilekhika.in/getting-started/rust)
 
-- **Web Assembly** : Rust Powered [Web Assembly Module](https://lipilekhika.in/getting-started/wasm)
+- **Python** 🐍 - [`lipilekhika`](https://pypi.org/project/lipilekhika/) on PyPI · [![PyPI version](https://img.shields.io/pypi/v/lipilekhika.svg)](https://pypi.org/project/lipilekhika/) [![PyPI downloads](https://img.shields.io/pypi/dm/lipilekhika.svg)](https://pypi.org/project/lipilekhika/) · [Docs](https://lipilekhika.in/getting-started/python)
 
-- **Python** 🐍 & **Go** - Coming soon
+- **WebAssembly** : Rust-powered [WebAssembly module](https://lipilekhika.in/getting-started/wasm)
+
+- **Go** - Coming soon
 
 ## 🚀 Quick Start
 
@@ -34,7 +36,8 @@
 **Key Resources**:
 
 - [Introduction](https://lipilekhika.in/getting-started/introduction) - Learn the basics
-- [JavaScript Guide](https://lipilekhika.in/getting-started/javascript) - Integration guide
+- [JavaScript Guide](https://lipilekhika.in/getting-started/javascript) - Integration guide for JavaScript/TypeScript
+- [Python Guide](https://lipilekhika.in/getting-started/python) - Integration guide for Python
 - [Supported Scripts](https://lipilekhika.in/reference/supported_scripts) - Full list of scripts
 - [Browser Typing Tool](https://lipilekhika.in/getting-started/browser_typing_tool) - Real-time typing setup
 
