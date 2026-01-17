@@ -31,10 +31,14 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+      - run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
   
       - name: Build and Check
         run: |
           cd packages/python
+          uv sync
           uv build
           uvx ty check
   tests:
@@ -67,6 +71,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
       - name: Compile Python Bindings
         run: |
           cd packages/python
@@ -75,4 +80,5 @@ jobs:
       - name: Run Tests
         run: |
           cd packages/python
+          uv sync
           uv run pytest
