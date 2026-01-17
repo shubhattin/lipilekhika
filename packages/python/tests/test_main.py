@@ -10,7 +10,6 @@ from lipilekhika import (
     get_normalized_script_name,
     get_schwa_status_for_script,
     preload_script_data,
-    transliterate,
 )
 
 

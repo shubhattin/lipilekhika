@@ -6,13 +6,13 @@ use crossbeam_channel::Sender;
 use std::sync::Arc;
 
 pub fn run(
-  app_state: Arc<crate::AppState>,
-  tx_ui: Sender<crate::ThreadMessage>,
-  tx_tray: Sender<crate::ThreadMessage>,
+  _app_state: Arc<crate::AppState>,
+  _tx_ui: Sender<crate::ThreadMessage>,
+  _tx_tray: Sender<crate::ThreadMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
   #[cfg(windows)]
   {
-    return win::run(app_state, tx_ui, tx_tray)
+    return win::run(_app_state, _tx_ui, _tx_tray)
       .map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
   }
 
