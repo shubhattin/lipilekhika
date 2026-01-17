@@ -149,7 +149,7 @@ class TestEmulateTyping:
                     f"  Actual: \"{result}\""
                 )
                 assert result == expected_output, error_message
-                increment_assertion_count()
+                increment_assertion_count(1, 'test_emulate_typing.py')
                 file_comparisons += 1
 
             total_comparisons += file_comparisons
@@ -202,7 +202,7 @@ class TestTypingMode:
                 f"  Actual: \"{result}\""
             )
             assert result == expected_output, error_message
-            increment_assertion_count()
+            increment_assertion_count(1, 'test_emulate_typing.py')
             comparison_count += 1
 
             # Preserve check: type -> transliterate back -> should get original
@@ -225,7 +225,7 @@ class TestTypingMode:
                     f"  Transliterated Back: \"{result_back}\""
                 )
                 assert result_back == text, error_message_preserve
-                increment_assertion_count()
+                increment_assertion_count(1, 'test_emulate_typing.py')
                 comparison_count += 1
 
         print(f"\n  ✓ {yaml_file.name}: {comparison_count} comparisons passed, {skipped_count} skipped")

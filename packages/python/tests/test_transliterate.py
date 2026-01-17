@@ -121,7 +121,7 @@ class TestTransliteration:
                 f"  Actual: \"{result}\""
             )
             assert result == expected_output, error_message
-            increment_assertion_count()
+            increment_assertion_count(1, 'test_transliterate.py')
 
             # Reversible transliteration test
             if reversible:
@@ -138,4 +138,4 @@ class TestTransliteration:
                     f"  Reversed Output: \"{result_reversed}\""
                 )
                 assert result_reversed == input_text, error_message_reversed
-                increment_assertion_count()
+                increment_assertion_count(1, 'test_transliterate.py')
