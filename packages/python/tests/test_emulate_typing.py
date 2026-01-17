@@ -56,7 +56,7 @@ def emulate_typing(text: str, script: str, options=None):
             auto_context_clear_time_ms=options.get("autoContextClearTimeMs"),
         )
 
-    ctx = create_typing_context(script, options)
+    ctx = create_typing_context(script, options)  # ty:ignore[invalid-argument-type]
     result = ""
     for char in text:
         diff = ctx.take_key_input(char)
@@ -233,7 +233,7 @@ class TestTypingMode:
                 # Transliterate back to Normal
                 result_back = transliterate(
                     result,
-                    script,
+                    script,  # ty:ignore[invalid-argument-type]
                     "Normal",
                     {"all_to_normal:preserve_specific_chars": True},
                 )

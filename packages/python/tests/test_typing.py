@@ -13,6 +13,7 @@ from lipilekhika.typing import (
     create_typing_context,
     get_script_typing_data_map,
 )
+from lipilekhika.types import ScriptLangType
 
 
 class TestConstants:
@@ -66,12 +67,12 @@ class TestCreateTypingContext:
 
     def test_create_context_devanagari(self):
         """Test creating a typing context for Devanagari."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         assert isinstance(ctx, TypingContext)
 
     def test_create_context_tamil(self):
         """Test creating a typing context for Tamil."""
-        ctx = create_typing_context("tamil")
+        ctx = create_typing_context("Tamil")
         assert isinstance(ctx, TypingContext)
 
     def test_create_context_with_options(self):
@@ -79,13 +80,13 @@ class TestCreateTypingContext:
         options = TypingContextOptions(
             use_native_numerals=True, include_inherent_vowel=False
         )
-        ctx = create_typing_context("devanagari", options)
+        ctx = create_typing_context("Devanagari", options)
         assert isinstance(ctx, TypingContext)
 
     def test_create_context_invalid_script(self):
         """Test creating a typing context with an invalid script raises ValueError."""
         with pytest.raises(ValueError):
-            create_typing_context("InvalidScriptName")
+            create_typing_context("InvalidScriptName")  # ty:ignore[invalid-argument-type]
 
     def test_create_context_normalized_names(self):
         """Test creating a typing context with script acronyms/aliases."""
@@ -99,7 +100,7 @@ class TestTypingContext:
 
     def test_clear_context(self):
         """Test clear_context method."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         diff = ctx.take_key_input("k")
         ctx.clear_context()
         # After clearing, context should start fresh
@@ -108,7 +109,7 @@ class TestTypingContext:
 
     def test_take_key_input_basic(self):
         """Test basic key input."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         diff = ctx.take_key_input("k")
         assert isinstance(diff, TypingDiff)
         assert isinstance(diff.to_delete_chars_count, int)
@@ -118,7 +119,7 @@ class TestTypingContext:
 
     def test_take_key_input_sequence(self):
         """Test a sequence of key inputs (simulating 'namaste')."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         result_chars = []
 
         for char in "namaste":
@@ -136,7 +137,7 @@ class TestTypingContext:
 
     def test_update_use_native_numerals(self):
         """Test updating native numerals setting."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         ctx.update_use_native_numerals(True)
         assert ctx.get_use_native_numerals() is True
         ctx.update_use_native_numerals(False)
@@ -144,7 +145,7 @@ class TestTypingContext:
 
     def test_update_include_inherent_vowel(self):
         """Test updating inherent vowel setting."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         ctx.update_include_inherent_vowel(True)
         assert ctx.get_include_inherent_vowel() is True
         ctx.update_include_inherent_vowel(False)
@@ -153,13 +154,13 @@ class TestTypingContext:
     def test_get_use_native_numerals(self):
         """Test getting native numerals setting."""
         options = TypingContextOptions(use_native_numerals=True)
-        ctx = create_typing_context("devanagari", options)
+        ctx = create_typing_context("Devanagari", options)
         assert ctx.get_use_native_numerals() is True
 
     def test_get_include_inherent_vowel(self):
         """Test getting inherent vowel setting."""
         options = TypingContextOptions(include_inherent_vowel=False)
-        ctx = create_typing_context("devanagari", options)
+        ctx = create_typing_context("Devanagari", options)
         assert ctx.get_include_inherent_vowel() is False
 
 
@@ -168,7 +169,7 @@ class TestTypingDiff:
 
     def test_typing_diff_properties(self):
         """Test TypingDiff properties."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         diff = ctx.take_key_input("a")
         assert isinstance(diff.to_delete_chars_count, int)
         assert isinstance(diff.diff_add_text, str)
@@ -176,7 +177,7 @@ class TestTypingDiff:
 
     def test_typing_diff_repr(self):
         """Test TypingDiff __repr__ method."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         diff = ctx.take_key_input("k")
         repr_str = repr(diff)
         assert isinstance(repr_str, str)
@@ -190,21 +191,21 @@ class TestGetScriptTypingDataMap:
 
     def test_get_data_map_devanagari(self):
         """Test getting typing data map for Devanagari."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
         assert isinstance(data_map, ScriptTypingDataMap)
         assert isinstance(data_map.common_krama_map, list)
         assert isinstance(data_map.script_specific_krama_map, list)
 
     def test_get_data_map_tamil(self):
         """Test getting typing data map for Tamil."""
-        data_map = get_script_typing_data_map("tamil")
+        data_map = get_script_typing_data_map("Tamil")
         assert isinstance(data_map, ScriptTypingDataMap)
         assert len(data_map.common_krama_map) > 0
 
     def test_get_data_map_invalid_script(self):
         """Test getting typing data map with invalid script raises ValueError."""
         with pytest.raises(ValueError):
-            get_script_typing_data_map("InvalidScript")
+            get_script_typing_data_map("InvalidScript")  # ty:ignore[invalid-argument-type]
 
     def test_get_data_map_normal_script(self):
         """Test getting typing data map for Normal/English raises ValueError."""
@@ -222,13 +223,13 @@ class TestScriptTypingDataMap:
 
     def test_script_typing_data_map_structure(self):
         """Test ScriptTypingDataMap structure."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
         assert hasattr(data_map, "common_krama_map")
         assert hasattr(data_map, "script_specific_krama_map")
 
     def test_common_krama_map_items(self):
         """Test common_krama_map contains valid items."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
         assert len(data_map.common_krama_map) > 0
 
         for item in data_map.common_krama_map[:5]:  # Check first 5 items
@@ -244,7 +245,7 @@ class TestScriptTypingDataMap:
 
     def test_script_specific_krama_map_items(self):
         """Test script_specific_krama_map contains valid items."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
 
         for item in data_map.script_specific_krama_map[:5]:  # Check first 5 items
             assert isinstance(item, tuple)
@@ -257,7 +258,7 @@ class TestScriptTypingDataMap:
 
     def test_script_typing_data_map_repr(self):
         """Test ScriptTypingDataMap __repr__ method."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
         repr_str = repr(data_map)
         assert isinstance(repr_str, str)
         assert "ScriptTypingDataMap" in repr_str
@@ -270,7 +271,7 @@ class TestTypingDataMapItem:
 
     def test_typing_data_map_item_structure(self):
         """Test TypingDataMapItem structure matches expected type."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
 
         if len(data_map.common_krama_map) > 0:
             item = data_map.common_krama_map[0]
@@ -290,7 +291,7 @@ class TestListType:
 
     def test_list_type_values(self):
         """Test ListType can hold expected values."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
         all_types = set()
 
         for item in data_map.common_krama_map:
@@ -307,7 +308,7 @@ class TestIntegrationScenarios:
 
     def test_typing_workflow_devanagari(self):
         """Test a complete typing workflow for Devanagari."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
         result_chars = []
 
         # Type "namaste"
@@ -324,7 +325,7 @@ class TestIntegrationScenarios:
     def test_typing_with_native_numerals(self):
         """Test typing with native numerals enabled."""
         options = TypingContextOptions(use_native_numerals=True)
-        ctx = create_typing_context("devanagari", options)
+        ctx = create_typing_context("Devanagari", options)
 
         result_chars = []
         for char in "123":
@@ -340,7 +341,7 @@ class TestIntegrationScenarios:
 
     def test_context_clear_resets_state(self):
         """Test that clearing context resets the state properly."""
-        ctx = create_typing_context("devanagari")
+        ctx = create_typing_context("Devanagari")
 
         # Type something
         ctx.take_key_input("k")
@@ -356,7 +357,7 @@ class TestIntegrationScenarios:
 
     def test_multiple_scripts(self):
         """Test creating contexts for multiple scripts."""
-        scripts = ["devanagari", "tamil", "telugu", "kannada"]
+        scripts = list[ScriptLangType](["Devanagari", "Tamil", "Telugu", "Kannada"])
 
         for script in scripts:
             ctx = create_typing_context(script)
@@ -366,7 +367,7 @@ class TestIntegrationScenarios:
 
     def test_data_map_has_mappings(self):
         """Test that data maps actually contain useful mappings."""
-        data_map = get_script_typing_data_map("devanagari")
+        data_map = get_script_typing_data_map("Devanagari")
 
         # Find items that have mappings
         items_with_mappings = [

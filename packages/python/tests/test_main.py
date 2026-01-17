@@ -11,6 +11,7 @@ from lipilekhika import (
     get_schwa_status_for_script,
     preload_script_data,
 )
+from lipilekhika.types import ScriptLangType
 
 
 class TestPreloadScriptData:
@@ -23,7 +24,7 @@ class TestPreloadScriptData:
 
     def test_preload_multiple_scripts(self):
         """Test preloading multiple scripts."""
-        scripts = ["Devanagari", "Tamil", "Telugu", "Kannada"]
+        scripts = list[ScriptLangType](["Devanagari", "Tamil", "Telugu", "Kannada"])
         for script in scripts:
             preload_script_data(script)
 
@@ -54,7 +55,9 @@ class TestGetSchwaStatusForScript:
 
     def test_get_schwa_status_multiple_scripts(self):
         """Test getting schwa status for multiple scripts."""
-        scripts = ["Devanagari", "Tamil", "Telugu", "Kannada", "Malayalam"]
+        scripts = list[ScriptLangType](
+            ["Devanagari", "Tamil", "Telugu", "Kannada", "Malayalam"]
+        )
         for script in scripts:
             status = get_schwa_status_for_script(script)
             assert isinstance(status, bool)
@@ -67,7 +70,7 @@ class TestGetSchwaStatusForScript:
     def test_get_schwa_status_invalid_script(self):
         """Test getting schwa status for invalid script raises error."""
         with pytest.raises(ValueError):
-            get_schwa_status_for_script("InvalidScript")
+            get_schwa_status_for_script("InvalidScript")  # ty:ignore[invalid-argument-type]
 
 
 class TestGetAllOptions:
@@ -93,19 +96,21 @@ class TestGetAllOptions:
     def test_get_all_options_invalid_scripts(self):
         """Test getting all options with invalid scripts raises error."""
         with pytest.raises(ValueError):
-            get_all_options("InvalidScript", "Devanagari")
+            get_all_options("InvalidScript", "Devanagari")  # ty:ignore[invalid-argument-type]
 
         with pytest.raises(ValueError):
-            get_all_options("Normal", "InvalidScript")
+            get_all_options("Normal", "InvalidScript")  # ty:ignore[invalid-argument-type]
 
     def test_get_all_options_multiple_pairs(self):
         """Test getting all options for various script pairs."""
-        pairs = [
-            ("Normal", "Devanagari"),
-            ("Normal", "Tamil"),
-            ("Devanagari", "Tamil"),
-            ("Tamil", "Telugu"),
-        ]
+        pairs = list[tuple[ScriptLangType, ScriptLangType]](
+            [
+                ("Normal", "Devanagari"),
+                ("Normal", "Tamil"),
+                ("Devanagari", "Tamil"),
+                ("Tamil", "Telugu"),
+            ]
+        )
 
         for from_script, to_script in pairs:
             options = get_all_options(from_script, to_script)
@@ -129,8 +134,8 @@ class TestGetNormalizedScriptName:
 
     def test_get_normalized_script_name_case_insensitive(self):
         """Test normalization is case insensitive."""
-        result1 = get_normalized_script_name("devanagari")
-        result2 = get_normalized_script_name("DEVANAGARI")
+        result1 = get_normalized_script_name("devanagari")  # ty:ignore[invalid-argument-type]
+        result2 = get_normalized_script_name("DEVANAGARI")  # ty:ignore[invalid-argument-type]
         result3 = get_normalized_script_name("Devanagari")
         assert result1 == result2 == result3
 
@@ -138,14 +143,14 @@ class TestGetNormalizedScriptName:
         """Test normalizing various script names."""
         scripts = ["dev", "tamil", "telugu", "kannada", "mal"]
         for script in scripts:
-            result = get_normalized_script_name(script)
+            result = get_normalized_script_name(script)  # ty:ignore[invalid-argument-type]
             assert isinstance(result, str)
             assert len(result) > 0
 
     def test_get_normalized_script_name_invalid(self):
         """Test normalizing invalid script name raises error."""
         with pytest.raises(ValueError):
-            get_normalized_script_name("InvalidScript")
+            get_normalized_script_name("InvalidScript")  # ty:ignore[invalid-argument-type]
 
     def test_get_normalized_script_name_all_scripts(self):
         """Test normalizing all scripts in SCRIPT_LIST."""

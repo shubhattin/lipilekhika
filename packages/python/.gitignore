@@ -3,3 +3,4 @@ lipilekhika.egg-info
 **/__pycache__
 
 lipilekhika/_lipilekhika.cpython*
+lipilekhika/types.py

@@ -13,16 +13,17 @@ from ._lipilekhika import (  # ty:ignore[unresolved-import]
     get_script_typing_data_map as _get_script_typing_data_map,
     ScriptTypingDataMap as _ScriptTypingDataMap,
 )
+from .types import ScriptLangType
 
 
 # Default constants
-DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = _default_auto_context_clear_time_ms()
+DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = int(_default_auto_context_clear_time_ms())
 """Default time in milliseconds after which the context will be cleared automatically."""
 
-DEFAULT_USE_NATIVE_NUMERALS = _default_use_native_numerals()
+DEFAULT_USE_NATIVE_NUMERALS = bool(_default_use_native_numerals())
 """Default value for using native numerals while typing."""
 
-DEFAULT_INCLUDE_INHERENT_VOWEL = _default_include_inherent_vowel()
+DEFAULT_INCLUDE_INHERENT_VOWEL = bool(_default_include_inherent_vowel())
 """Default value for including inherent vowels while typing. By default avoids schwa deletion."""
 
 
@@ -129,13 +130,13 @@ if not TYPE_CHECKING:
 
 
 def create_typing_context(
-    typing_lang: str, options: TypingContextOptions | None = None
+    typing_lang: ScriptLangType, options: TypingContextOptions | None = None
 ) -> TypingContext:
     """Create a new typing context for the given script/language."""
     return _create_typing_context(typing_lang, options)
 
 
-def get_script_typing_data_map(script: str) -> ScriptTypingDataMap:
+def get_script_typing_data_map(script: ScriptLangType) -> ScriptTypingDataMap:
     return _get_script_typing_data_map(script)
 
 

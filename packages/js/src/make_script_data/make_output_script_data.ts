@@ -24,7 +24,7 @@ import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 import { type TransOptionsType, CustomOptionsInput } from './custom_options_input';
 import { ALTERNATE_TO_SCRIPT_MAP } from '../utils/lang_list/script_normalization';
-import { lang_list_obj, script_list_obj, LANG_SCRIPT_MAP } from '../utils/lang_list';
+import { lang_list_obj, script_list_obj, LANG_SCRIPT_MAP, SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from '../utils/lang_list';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
@@ -704,6 +704,29 @@ function copy_script_data_json() {
   }
 }
 
+const PYTHON_TYPES_PY_TEMPLATE = `# This is generated and should not be edited manually
+from typing import Literal
+
+ScriptListType = Literal[${SCRIPT_LIST.map((script) => `"${script}"`).join(', ')}]
+"""List of all supported script names"""
+
+LangListType = Literal[${LANG_LIST.map((lang) => `"${lang}"`).join(', ')}]
+"""List of all supported language names which are mapped to a script"""
+
+ScriptAndLangListType = Literal[${ALL_LANG_SCRIPT_LIST.map((script) => `"${script}"`).join(', ')}]
+"""List of all Supported Script/Language"""
+
+ScriptLangType = ScriptAndLangListType | Literal[${Object.keys(ALTERNATE_TO_SCRIPT_MAP).map((script) => `"${script}"`).join(', ')}]
+"""Supported script/language identifier types (aliases allowed)"""
+
+TransliterationOptionsType = Literal[${Object.keys(CustomOptionsInput).map((option) => `"${option}"`).join(', ')}]
+`
+
+function generate_python_types_py() {
+  const content = PYTHON_TYPES_PY_TEMPLATE;
+  fs.writeFileSync(path.resolve('../python/lipilekhika/types.py'), content);
+}
+
 function minify_json_file(file: string) {
   const content = fs.readFileSync(file, 'utf-8');
   const minified = JSON.stringify(JSON.parse(content));
@@ -716,6 +739,7 @@ make_script_data()
     try {
       execSync('npx prettier --write ./src/script_data');
       copy_script_data_json();
+      generate_python_types_py();
     } catch (e) {
       console.error(chalk.red('✖  Error formatting script data'), e);
     }

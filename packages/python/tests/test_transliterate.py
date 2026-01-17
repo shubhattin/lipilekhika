@@ -6,6 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 from lipilekhika import transliterate, preload_script_data
 from test_stats import increment_assertion_count  # ty:ignore[unresolved-import]
+from lipilekhika.types import ScriptLangType, TransliterationOptionsType
 
 # Test data folder
 TEST_DATA_FOLDER = (
@@ -23,13 +24,13 @@ class TransliterationDataItem(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     index: int | float | str = "unknown"  # index can be int, float, or 'unknown'
-    from_: str  # 'from' is a Python keyword, use alias
-    to: str
+    from_: ScriptLangType  # 'from' is a Python keyword, use alias
+    to: ScriptLangType
     input: str
     output: str
     reversible: bool = False
     todo: bool = False
-    options: dict[str, bool] | None = None
+    options: dict[TransliterationOptionsType, bool] | None = None
 
     def __init__(self, **data):
         # Handle 'from' -> 'from_' conversion
