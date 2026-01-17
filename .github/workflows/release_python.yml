@@ -71,6 +71,11 @@ jobs:
           cd packages/rust
           sed -i '/^src\/data\// s/^/#/' .gitignore
 
+      - name: Prepare Python package
+        run: |
+          cd packages/python
+          sed -i '/^lipilekhika\/types.py/ s/^/#/' .gitignore
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -109,6 +114,11 @@ jobs:
         run: |
           cd packages/rust
           sed -i '' '/^src\/data\// s/^/#/' .gitignore
+
+      - name: Prepare Python package
+        run: |
+          cd packages/python
+          sed -i '' '/^lipilekhika\/types.py/ s/^/#/' .gitignore
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -153,6 +163,12 @@ jobs:
           cd packages/rust
           sed -i '/^src\/data\// s/^/#/' .gitignore
 
+      - name: Prepare Python package
+        shell: bash
+        run: |
+          cd packages/python
+          sed -i '/^lipilekhika\/types.py/ s/^/#/' .gitignore
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -187,6 +203,11 @@ jobs:
         run: |
           cd packages/rust
           sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      - name: Prepare Python package
+        run: |
+          cd packages/python
+          sed -i '/^lipilekhika\/types.py/ s/^/#/' .gitignore
 
       - name: Build sdist
         uses: PyO3/maturin-action@v1
