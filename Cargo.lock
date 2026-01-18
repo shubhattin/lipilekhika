@@ -3529,7 +3529,9 @@ dependencies = [
  "iced_futures",
  "image",
  "lipilekhika",
+ "serde",
  "smol",
+ "toml 0.8.2",
  "tray-icon",
  "windows 0.62.2",
 ]

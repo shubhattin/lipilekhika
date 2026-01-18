@@ -41,6 +41,8 @@ pub enum UIMessage {
   OpenLipiParivartaka,
   OpenGitHub,
   OpenWebsite,
+  ToggleInherentVowelInfo,
+  CloseInherentVowelInfo,
 }
 
 struct App {
@@ -57,9 +59,24 @@ struct App {
   notification_config: NotificationConfig,
   // About modal state
   about_modal_open: bool,
+  // Inherent vowel info popover state
+  inherent_vowel_info_open: bool,
 }
 
 impl App {
+  /// Helper function to save persistent state asynchronously
+  fn save_persistent_state_async(app_state: Arc<AppState>) -> Task<UIMessage> {
+    Task::future(async move {
+      let state_to_save = {
+        let state = app_state.persitent_state.lock().unwrap();
+        state.clone()
+      };
+      let _ = state_to_save.save_app_config();
+
+      UIMessage::RerenderUI
+    })
+  }
+
   fn new(
     app_state: Arc<AppState>,
     rx: Arc<Mutex<Receiver<ThreadMessage>>>,
@@ -87,6 +104,7 @@ impl App {
         notification_message: String::new(),
         notification_config: NotificationConfig::default(),
         about_modal_open: false,
+        inherent_vowel_info_open: false,
       },
       main_open_task.discard(),
     )
@@ -110,15 +128,24 @@ impl App {
         let script_name = script_display.script_name.as_str();
         let new_script_context = TypingContext::new(script_name, current_options);
         if let Ok(new_script_context) = new_script_context {
-          let mut ctx = self.global_app_state.typing_context.lock().unwrap();
-          *ctx = new_script_context;
-          drop(ctx);
+          {
+            let mut ctx = self.global_app_state.typing_context.lock().unwrap();
+            *ctx = new_script_context;
+          }
+          // Update persistent state and save asynchronously
+          {
+            let mut state = self.global_app_state.persitent_state.lock().unwrap();
+            state.script = script_display.script_name.clone();
+          }
           let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
             origin: ThreadMessageOrigin::UI,
             msg: ThreadMessageType::RerenderTray,
           });
+          // Return async save task
+          Self::save_persistent_state_async(Arc::clone(&self.global_app_state))
+        } else {
+          Task::none()
         }
-        Task::none()
       }
       UIMessage::ToggleTypingMode(enabled) => {
         self
@@ -146,30 +173,46 @@ impl App {
         self.update(UIMessage::TriggerTypingNotification)
       }
       UIMessage::ToogleUseNativeNumerals(use_native_numerals) => {
-        self
-          .global_app_state
-          .typing_context
-          .lock()
-          .unwrap()
-          .update_use_native_numerals(use_native_numerals);
+        {
+          self
+            .global_app_state
+            .typing_context
+            .lock()
+            .unwrap()
+            .update_use_native_numerals(use_native_numerals);
+        }
+        // Update persistent state and save asynchronously
+        {
+          let mut state = self.global_app_state.persitent_state.lock().unwrap();
+          state.native_numerals = use_native_numerals;
+        }
         let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
           origin: ThreadMessageOrigin::UI,
           msg: ThreadMessageType::RerenderTray,
         });
-        Task::none()
+        // Return async save task
+        Self::save_persistent_state_async(Arc::clone(&self.global_app_state))
       }
       UIMessage::ToogleIncludeInherentVowel(include_inherent_vowel) => {
-        self
-          .global_app_state
-          .typing_context
-          .lock()
-          .unwrap()
-          .update_include_inherent_vowel(include_inherent_vowel);
+        {
+          self
+            .global_app_state
+            .typing_context
+            .lock()
+            .unwrap()
+            .update_include_inherent_vowel(include_inherent_vowel);
+        }
+        // Update persistent state and save asynchronously
+        {
+          let mut state = self.global_app_state.persitent_state.lock().unwrap();
+          state.inherent_vowel = include_inherent_vowel;
+        }
         let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
           origin: ThreadMessageOrigin::UI,
           msg: ThreadMessageType::RerenderTray,
         });
-        Task::none()
+        // Return async save task
+        Self::save_persistent_state_async(Arc::clone(&self.global_app_state))
       }
       UIMessage::TriggerTypingNotification => {
         let enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
@@ -328,6 +371,14 @@ impl App {
           .spawn();
         Task::none()
       }
+      UIMessage::ToggleInherentVowelInfo => {
+        self.inherent_vowel_info_open = !self.inherent_vowel_info_open;
+        Task::none()
+      }
+      UIMessage::CloseInherentVowelInfo => {
+        self.inherent_vowel_info_open = false;
+        Task::none()
+      }
     }
   }
 
@@ -413,7 +464,7 @@ impl App {
                   button(
                     row![
                       svg(iced::widget::svg::Handle::from_memory(include_bytes!(
-                        "../../assets/info.svg"
+                        "../../assets/about.svg"
                       )))
                       .width(Length::Fixed(26.0))
                       .height(Length::Fixed(26.0)),
@@ -423,7 +474,22 @@ impl App {
                     .align_y(iced::Alignment::Center),
                   )
                   .width(Length::Fill)
-                  .on_press(UIMessage::OpenAbout),
+                  .on_press(UIMessage::OpenAbout)
+                  .style(
+                    |theme: &Theme, status: iced::widget::button::Status| {
+                      let palette = theme.extended_palette();
+                      iced::widget::button::Style {
+                        background: Some(iced::Background::Color(match status {
+                          iced::widget::button::Status::Hovered => palette.background.weak.color,
+                          _ => iced::Color::TRANSPARENT,
+                        })),
+                        text_color: palette.background.base.text,
+                        border: iced::Border::default(),
+                        shadow: iced::Shadow::default(),
+                        snap: false,
+                      }
+                    },
+                  ),
                 ),
                 Item::new(
                   button(
@@ -439,7 +505,22 @@ impl App {
                     .align_y(iced::Alignment::Center),
                   )
                   .width(Length::Fill)
-                  .on_press(UIMessage::OpenLipiParivartaka),
+                  .on_press(UIMessage::OpenLipiParivartaka)
+                  .style(
+                    |theme: &Theme, status: iced::widget::button::Status| {
+                      let palette = theme.extended_palette();
+                      iced::widget::button::Style {
+                        background: Some(iced::Background::Color(match status {
+                          iced::widget::button::Status::Hovered => palette.background.weak.color,
+                          _ => iced::Color::TRANSPARENT,
+                        })),
+                        text_color: palette.background.base.text,
+                        border: iced::Border::default(),
+                        shadow: iced::Shadow::default(),
+                        snap: false,
+                      }
+                    },
+                  ),
                 ),
               ])
               .max_width(180.0),
@@ -483,7 +564,25 @@ impl App {
             .interaction(mouse::Interaction::Pointer),
             "Minimize to Taskbar",
             tooltip::Position::Bottom,
-          ),
+          )
+          .style(|theme: &Theme| {
+            let palette = theme.extended_palette();
+            container::Style {
+              background: Some(iced::Background::Color(palette.background.strong.color)),
+              border: iced::Border {
+                color: palette.background.base.text,
+                width: 1.0,
+                radius: 4.0.into(),
+              },
+              shadow: iced::Shadow {
+                color: iced::Color::from_rgba(0.0, 0.0, 0.0, 0.3),
+                offset: iced::Vector::new(0.0, 2.0),
+                blur_radius: 4.0,
+              },
+              text_color: Some(palette.background.base.text),
+              snap: false,
+            }
+          }),
         ],
         row![
           toggler(typing_enabled)
@@ -506,9 +605,30 @@ impl App {
           checkbox(use_native_numerals)
             .on_toggle(UIMessage::ToogleUseNativeNumerals)
             .label("Native Numerals"),
-          checkbox(include_inherent_vowel)
-            .on_toggle(UIMessage::ToogleIncludeInherentVowel)
-            .label("Inherent Vowel")
+          row![
+            checkbox(include_inherent_vowel)
+              .on_toggle(UIMessage::ToogleIncludeInherentVowel)
+              .label("Inherent Vowel"),
+            mouse_area(
+              svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                "../../assets/info.svg"
+              )))
+              .width(Length::Fixed(16.0))
+              .height(Length::Fixed(16.0))
+              .style(|theme: &Theme, status: iced::widget::svg::Status| {
+                iced::widget::svg::Style {
+                  color: match status {
+                    iced::widget::svg::Status::Hovered => Some(theme.palette().primary),
+                    _ => Some(theme.extended_palette().background.weak.text),
+                  },
+                }
+              }),
+            )
+            .on_press(UIMessage::ToggleInherentVowelInfo)
+            .interaction(mouse::Interaction::Pointer)
+          ]
+          .spacing(4)
+          .align_y(iced::Alignment::Center)
         ]
         .spacing(20)
         .padding([10, 0]),
@@ -564,13 +684,31 @@ impl App {
                 .interaction(mouse::Interaction::Pointer),
                 "Open GitHub",
                 tooltip::Position::Bottom,
-              ),
+              )
+              .style(|theme: &Theme| {
+                let palette = theme.extended_palette();
+                container::Style {
+                  background: Some(iced::Background::Color(palette.background.strong.color)),
+                  border: iced::Border {
+                    color: palette.background.base.text,
+                    width: 1.0,
+                    radius: 4.0.into(),
+                  },
+                  shadow: iced::Shadow {
+                    color: iced::Color::from_rgba(0.0, 0.0, 0.0, 0.3),
+                    offset: iced::Vector::new(0.0, 2.0),
+                    blur_radius: 4.0,
+                  },
+                  text_color: Some(palette.background.base.text),
+                  snap: false,
+                }
+              }),
               // Website link
               mouse_area(text("lipilekhika.in").size(12).style(|theme: &Theme| {
                 iced::widget::text::Style {
                   color: Some(theme.palette().primary),
                 }
-              }),)
+              }))
               .on_press(UIMessage::OpenWebsite)
               .interaction(mouse::Interaction::Pointer),
             ]
@@ -601,6 +739,46 @@ impl App {
         stack![
           main_content,
           mouse_area(center(opaque(about_modal))).on_press(UIMessage::CloseAbout)
+        ]
+        .into()
+      } else if self.inherent_vowel_info_open {
+        // Inherent vowel info popover
+        let info_popover = container(
+          column![
+            text("Schwa Deletion").size(16),
+            column![
+              text("Controls final inherent vowel (schwa).").size(10),
+              text("").size(4),
+              text("rAm → राम (On)").size(14),
+              text(" rAm → राम् (Off)").size(14),
+            ]
+          ]
+          .spacing(4)
+          .align_x(iced::Alignment::Start),
+        )
+        .padding([8, 12])
+        .style(|theme: &Theme| {
+          let palette = theme.extended_palette();
+          container::Style {
+            background: Some(iced::Background::Color(palette.background.strong.color)),
+            border: iced::Border {
+              color: palette.background.base.text,
+              width: 1.0,
+              radius: 6.0.into(),
+            },
+            shadow: iced::Shadow {
+              color: iced::Color::from_rgba(0.0, 0.0, 0.0, 0.4),
+              offset: iced::Vector::new(0.0, 3.0),
+              blur_radius: 8.0,
+            },
+            text_color: Some(palette.background.base.text),
+            snap: false,
+          }
+        });
+
+        stack![
+          main_content,
+          mouse_area(center(opaque(info_popover))).on_press(UIMessage::CloseInherentVowelInfo)
         ]
         .into()
       } else {
