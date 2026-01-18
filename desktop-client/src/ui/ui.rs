@@ -1,6 +1,9 @@
 use crate::data::{ScriptDisplay, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
+use crate::ui::typing_helper::{
+  TypingHelperMessage, TypingHelperState, open_typing_helper_window, view_typing_helper,
+};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use dark_light::detect;
@@ -43,6 +46,16 @@ pub enum UIMessage {
   OpenWebsite,
   ToggleInherentVowelInfo,
   CloseInherentVowelInfo,
+  // Typing helper
+  OpenTypingHelper,
+  TypingHelperOpened(window::Id),
+  TypingHelper(TypingHelperMessage),
+}
+
+impl From<TypingHelperMessage> for UIMessage {
+  fn from(msg: TypingHelperMessage) -> Self {
+    UIMessage::TypingHelper(msg)
+  }
 }
 
 struct App {
@@ -61,6 +74,9 @@ struct App {
   about_modal_open: bool,
   // Inherent vowel info popover state
   inherent_vowel_info_open: bool,
+  // Typing Helper window state
+  typing_helper_window: Option<window::Id>,
+  typing_helper_state: TypingHelperState,
 }
 
 impl App {
@@ -105,6 +121,8 @@ impl App {
         notification_config: NotificationConfig::default(),
         about_modal_open: false,
         inherent_vowel_info_open: false,
+        typing_helper_window: None,
+        typing_helper_state: TypingHelperState::new("Devanagari"),
       },
       main_open_task.discard(),
     )
@@ -266,6 +284,9 @@ impl App {
         } else if self.notification_window == Some(id) {
           // Clean up notification window
           self.notification_window = None;
+        } else if self.typing_helper_window == Some(id) {
+          // Clean up typing helper window
+          self.typing_helper_window = None;
         }
         Task::none()
       }
@@ -276,6 +297,10 @@ impl App {
         } else if self.notification_window == Some(id) {
           // Just close notification window
           self.notification_window = None;
+          window::close(id)
+        } else if self.typing_helper_window == Some(id) {
+          // Close typing helper window
+          self.typing_helper_window = None;
           window::close(id)
         } else {
           Task::none()
@@ -379,6 +404,45 @@ impl App {
         self.inherent_vowel_info_open = false;
         Task::none()
       }
+      UIMessage::OpenTypingHelper => {
+        // Don't open if already open
+        if self.typing_helper_window.is_some() {
+          // Focus the existing window
+          if let Some(id) = self.typing_helper_window {
+            return window::gain_focus(id);
+          }
+          return Task::none();
+        }
+
+        // Sync script from current context
+        let curr_script = {
+          let ctx = self.global_app_state.typing_context.lock().unwrap();
+          ctx.get_normalized_script()
+        };
+        self.typing_helper_state.current_script = curr_script;
+
+        let (new_id, open_task) = open_typing_helper_window(Some(self.window_icon.clone()));
+        self.typing_helper_window = Some(new_id);
+        open_task.map(UIMessage::TypingHelperOpened)
+      }
+      UIMessage::TypingHelperOpened(_id) => {
+        // Window is tracked, nothing more to do
+        Task::none()
+      }
+      UIMessage::TypingHelper(msg) => {
+        match msg {
+          TypingHelperMessage::SetScript(script_display) => {
+            self.typing_helper_state.current_script = script_display.script_name;
+          }
+          TypingHelperMessage::SetTab(tab) => {
+            self.typing_helper_state.active_tab = tab;
+          }
+          TypingHelperMessage::SetCompareScript(script_display) => {
+            self.typing_helper_state.compare_script = Some(script_display);
+          }
+        }
+        Task::none()
+      }
     }
   }
 
@@ -418,6 +482,9 @@ impl App {
     if Some(window_id) == self.notification_window {
       // Render notification view
       notification::view_notification(&self.notification_message)
+    } else if Some(window_id) == self.typing_helper_window {
+      // Render typing helper view
+      view_typing_helper(&self.typing_helper_state)
     } else {
       // Render main app view
       let scripts = get_ordered_script_list();
@@ -447,8 +514,8 @@ impl App {
                 svg(iced::widget::svg::Handle::from_memory(include_bytes!(
                   "../../assets/menu.svg"
                 )))
-                .width(Length::Fixed(24.0))
-                .height(Length::Fixed(24.0))
+                .width(Length::Fixed(28.0))
+                .height(Length::Fixed(28.0))
                 .style(|theme: &Theme, status: iced::widget::svg::Status| {
                   iced::widget::svg::Style {
                     color: match status {
@@ -522,6 +589,30 @@ impl App {
                     },
                   ),
                 ),
+                Item::new(
+                  button(
+                    row![text("Typing Help")]
+                      .spacing(8)
+                      .align_y(iced::Alignment::Center),
+                  )
+                  .width(Length::Fill)
+                  .on_press(UIMessage::OpenTypingHelper)
+                  .style(
+                    |theme: &Theme, status: iced::widget::button::Status| {
+                      let palette = theme.extended_palette();
+                      iced::widget::button::Style {
+                        background: Some(iced::Background::Color(match status {
+                          iced::widget::button::Status::Hovered => palette.background.weak.color,
+                          _ => iced::Color::TRANSPARENT,
+                        })),
+                        text_color: palette.background.base.text,
+                        border: iced::Border::default(),
+                        shadow: iced::Shadow::default(),
+                        snap: false,
+                      }
+                    },
+                  ),
+                ),
               ])
               .max_width(180.0),
             );
@@ -544,13 +635,16 @@ impl App {
             })
           },
           Space::new().width(Length::Fill),
+          pick_list(scripts, current_script_display, UIMessage::SetScript)
+            .width(Length::Fixed(200.0)),
+          Space::new().width(Length::Fill),
           tooltip(
             mouse_area(
               svg(iced::widget::svg::Handle::from_memory(include_bytes!(
                 "../../assets/minimize.svg"
               )))
-              .width(Length::Fixed(30.0))
-              .height(Length::Fixed(30.0))
+              .width(Length::Fixed(26.0))
+              .height(Length::Fixed(26.0))
               .style(
                 |theme: &Theme, status: iced::widget::svg::Status| iced::widget::svg::Style {
                   color: match status {
@@ -595,12 +689,13 @@ impl App {
             .center()
             .size(12),
         ]
+        .padding([12, 0])
         .spacing(20),
-        row![
-          pick_list(scripts, current_script_display, UIMessage::SetScript)
-            .width(Length::Fixed(200.0))
-        ]
-        .padding([10, 0]),
+        // row![
+        //   pick_list(scripts, current_script_display, UIMessage::SetScript)
+        //     .width(Length::Fixed(200.0))
+        // ]
+        // .padding([8, 0]),
         row![
           checkbox(use_native_numerals)
             .on_toggle(UIMessage::ToogleUseNativeNumerals)
@@ -631,9 +726,9 @@ impl App {
           .align_y(iced::Alignment::Center)
         ]
         .spacing(20)
-        .padding([10, 0]),
+        .padding([12, 0]),
       ])
-      .padding(10);
+      .padding([7, 10]);
 
       if self.about_modal_open {
         let about_modal = container(
@@ -655,10 +750,10 @@ impl App {
               ]
               .spacing(2)
             ]
-            .spacing(10)
+            .spacing(8)
             .align_y(iced::Alignment::Center),
             // Description
-            text("A transliteration typing tool for Indic scripts.")
+            text("Type Indian Languages with full Speed and Accuracy")
               .size(12)
               .center(),
             // Links row
@@ -719,10 +814,12 @@ impl App {
               .on_press(UIMessage::CloseAbout)
               .padding([4, 16])
           ]
-          .spacing(8)
+          .spacing(6)
           .align_x(iced::Alignment::Center),
         )
-        .padding([12, 20])
+        .max_width(280.0)
+        .max_height(300.0)
+        .padding([5, 15])
         .style(|theme: &Theme| {
           let palette = theme.extended_palette();
           container::Style {
@@ -791,6 +888,8 @@ impl App {
     // No title for notification windows
     if self.notification_window == Some(_window_id) {
       String::new()
+    } else if self.typing_helper_window == Some(_window_id) {
+      "Typing Help".to_string()
     } else {
       "Lipi Lekhika".to_string()
     }
@@ -831,7 +930,7 @@ fn get_theme() -> Theme {
     Ok(dark_light::Mode::Light) => Theme::CatppuccinLatte,
     // Ok(dark_light::Mode::Dark) => Theme::Oxocarbon,
     // Ok(dark_light::Mode::Dark) => Theme::CatppuccinMocha,
-    Ok(dark_light::Mode::Dark) => Theme::CatppuccinMacchiato,
+    Ok(dark_light::Mode::Dark) => Theme::Dark,
     Ok(_) | _ => Theme::CatppuccinLatte,
   }
 }
