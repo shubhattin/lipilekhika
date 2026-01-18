@@ -47,10 +47,10 @@ func main() {
 	}
 
 	// Test transliteration with options (JSON string)
-	text2 := C.CString("rAma")
-	from2 := C.CString("Normal")
-	to2 := C.CString("Devanagari")
-	optionsJson := C.CString(`{"retain_danda_as_period": true}`)
+	text2 := C.CString("गङ्गा")
+	from2 := C.CString("dev")
+	to2 := C.CString("nor")
+	optionsJson := C.CString(`{"all_to_normal:replace_pancham_varga_varna_with_n": true}`)
 	defer C.free(unsafe.Pointer(text2))
 	defer C.free(unsafe.Pointer(from2))
 	defer C.free(unsafe.Pointer(to2))
