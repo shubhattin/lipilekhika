@@ -1,0 +1,13 @@
+[package]
+name = "rustlipip"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "rustlipi"
+crate-type = ["cdylib"]
+
+[dependencies]
+lipilekhika = { path = "../../rust" }
+serde_json = "1"
