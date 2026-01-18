@@ -12,6 +12,7 @@ crossbeam-channel = "0.5.15"
 tray-icon = "0.21.3"
 image = "0.25"
 smol = "2.0.2"
+dark-light = "2.0.0"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62.2", features = [

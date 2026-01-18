@@ -3,6 +3,8 @@ use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
+use dark_light::detect;
+use iced::theme::Theme;
 use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
   Element, Subscription, Task,
@@ -64,7 +66,7 @@ impl App {
     let (main_id, main_open_task) = window::open(window::Settings {
       icon: Some(icon.clone()),
       resizable: false,
-      size: iced::Size::new(400.0, 200.0),
+      size: iced::Size::new(430.0, 210.0),
       position: window::Position::Centered,
       exit_on_close_request: false,
       ..Default::default()
@@ -369,7 +371,8 @@ impl App {
           text!["Alt+X/C"].size(12)
         ]
         .spacing(20),
-        row![pick_list(scripts, Some(curr_script), UIMessage::SetScript)].padding([10, 0]),
+        row![pick_list(scripts, Some(curr_script), UIMessage::SetScript).width(Length::Fill)]
+          .padding([10, 0]),
         row![
           checkbox(use_native_numerals)
             .on_toggle(UIMessage::ToogleUseNativeNumerals)
@@ -460,5 +463,17 @@ pub fn run(
   )
   .title(App::title)
   .subscription(App::subscription)
+  // .theme(Theme::CatppuccinLatte)
+  .theme(get_theme())
   .run()
+}
+
+fn get_theme() -> Theme {
+  match detect() {
+    Ok(dark_light::Mode::Light) => Theme::CatppuccinLatte,
+    // Ok(dark_light::Mode::Dark) => Theme::Oxocarbon,
+    // Ok(dark_light::Mode::Dark) => Theme::CatppuccinMocha,
+    Ok(dark_light::Mode::Dark) => Theme::CatppuccinMacchiato,
+    Ok(_) | _ => Theme::CatppuccinLatte,
+  }
 }
