@@ -1,4 +1,4 @@
-use crate::data::get_ordered_script_list;
+use crate::data::{ScriptDisplay, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
@@ -7,7 +7,7 @@ use dark_light::detect;
 use iced::theme::Theme;
 use iced::widget::{button, center, mouse_area, opaque, stack};
 use iced::{
-  Element, Subscription, Task,
+  Element, Length, Subscription, Task,
   keyboard::{self, Key, key::Named},
   widget::{checkbox, column, container, pick_list, row, text, toggler},
   window,
@@ -22,7 +22,7 @@ use std::sync::{Arc, Mutex, atomic::Ordering};
 pub enum UIMessage {
   ToggleTypingMode(bool),
   KeyboardToggleTypingMode, // Toggle from keyboard shortcut (triggers notification)
-  SetScript(String),
+  SetScript(ScriptDisplay),
   TriggerTypingNotification,
   NotificationOpened(window::Id),
   CloseNotification(window::Id),
@@ -92,7 +92,7 @@ impl App {
     // println!("UI update: {:?}", message);
     match message {
       UIMessage::RerenderUI => Task::none(),
-      UIMessage::SetScript(script) => {
+      UIMessage::SetScript(script_display) => {
         // Get current options before creating new context
         let current_options = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
@@ -103,7 +103,8 @@ impl App {
           })
         };
 
-        let new_script_context = TypingContext::new(&script, current_options);
+        let script_name = script_display.script_name.as_str();
+        let new_script_context = TypingContext::new(script_name, current_options);
         if let Ok(new_script_context) = new_script_context {
           let mut ctx = self.global_app_state.typing_context.lock().unwrap();
           *ctx = new_script_context;
@@ -363,6 +364,12 @@ impl App {
         // auto drops lock
       };
 
+      // Find the ScriptDisplay that matches the current script
+      let current_script_display = scripts
+        .iter()
+        .find(|sd| sd.script_name == curr_script)
+        .cloned();
+
       let main_content = container(column![
         row![
           toggler(typing_enabled)
@@ -371,8 +378,11 @@ impl App {
           text!["Alt+X/C"].size(12)
         ]
         .spacing(20),
-        row![pick_list(scripts, Some(curr_script), UIMessage::SetScript).width(Length::Fill)]
-          .padding([10, 0]),
+        row![
+          pick_list(scripts, current_script_display, UIMessage::SetScript)
+            .width(Length::Fixed(200.0))
+        ]
+        .padding([10, 0]),
         row![
           checkbox(use_native_numerals)
             .on_toggle(UIMessage::ToogleUseNativeNumerals)
