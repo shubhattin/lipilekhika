@@ -339,15 +339,15 @@ class TestGetScriptKramaData:
     def test_krama_data_item_structure(self):
         """Test KramaDataItem structure."""
         krama_data = get_script_krama_data("Devanagari")
-        
+
         # Check at least some items exist
         assert len(krama_data) > 0
-        
+
         # Check structure of first few items
         for item in krama_data[:10]:
             assert isinstance(item, tuple)
             assert len(item) == 2
-            
+
             character_text, list_type = item
             assert isinstance(character_text, str)
             assert isinstance(list_type, str)
@@ -356,7 +356,7 @@ class TestGetScriptKramaData:
     def test_krama_data_has_characters(self):
         """Test that krama data contains actual characters."""
         krama_data = get_script_krama_data("Devanagari")
-        
+
         # At least some items should have non-empty text
         non_empty_items = [item for item in krama_data if len(item[0]) > 0]
         assert len(non_empty_items) > 0
@@ -364,9 +364,9 @@ class TestGetScriptKramaData:
     def test_krama_data_all_types_present(self):
         """Test that krama data contains all expected character types."""
         krama_data = get_script_krama_data("Devanagari")
-        
+
         types_found = set(item[1] for item in krama_data)
-        
+
         # Should have at least some of the major types
         assert len(types_found) > 0
         assert types_found.issubset({"anya", "vyanjana", "matra", "svara"})
@@ -377,7 +377,7 @@ class TestGetScriptKramaData:
         dev_data = get_script_krama_data("Devanagari")
         tamil_data = get_script_krama_data("Tamil")
         telugu_data = get_script_krama_data("Telugu")
-        
+
         # All Brahmic scripts should have the same krama array length
         assert len(dev_data) == len(tamil_data)
         assert len(dev_data) == len(telugu_data)
@@ -386,19 +386,21 @@ class TestGetScriptKramaData:
         """Test that krama data has 1:1 correspondence at same indices."""
         dev_data = get_script_krama_data("Devanagari")
         tamil_data = get_script_krama_data("Tamil")
-        
+
         # Types should match at the same indices
         for i in range(min(10, len(dev_data), len(tamil_data))):
             dev_char, dev_type = dev_data[i]
             tamil_char, tamil_type = tamil_data[i]
-            
+
             # Same index should have same type
             assert dev_type == tamil_type
 
     def test_krama_data_multiple_scripts(self):
         """Test getting krama data for multiple scripts."""
-        scripts = ["Devanagari", "Tamil", "Telugu", "Kannada", "Bengali"]
-        
+        scripts = list[ScriptLangType](
+            ["Devanagari", "Tamil", "Telugu", "Kannada", "Bengali"]
+        )
+
         for script in scripts:
             krama_data = get_script_krama_data(script)
             assert isinstance(krama_data, list)
@@ -411,14 +413,14 @@ class TestKramaDataItem:
     def test_krama_data_item_type(self):
         """Test KramaDataItem matches expected type."""
         krama_data = get_script_krama_data("Devanagari")
-        
+
         if len(krama_data) > 0:
             item = krama_data[0]
-            
+
             # Should be a 2-tuple
             assert isinstance(item, tuple)
             assert len(item) == 2
-            
+
             character_text, list_type = item
             assert isinstance(character_text, str)
             assert isinstance(list_type, str)
@@ -428,20 +430,25 @@ class TestKramaDataItem:
         """Test consistency between krama data and typing data map."""
         krama_data = get_script_krama_data("Devanagari")
         typing_data = get_script_typing_data_map("Devanagari")
-        
+
         # Krama data includes all characters, typing_data filters out unmapped ones
         # So krama_data.length >= typing_data.common_krama_map.length
         assert len(krama_data) >= len(typing_data.common_krama_map)
-        
+
         # Build a map of character -> (type, index) from krama data
-        krama_map = {char: (char_type, idx) for idx, (char, char_type) in enumerate(krama_data)}
-        
+        krama_map = {
+            char: (char_type, idx) for idx, (char, char_type) in enumerate(krama_data)
+        }
+
         # For each character in typing data, verify it matches in krama data
         for typing_char, typing_type, _ in typing_data.common_krama_map:
-            assert typing_char in krama_map, f"Character {typing_char} in typing data but not in krama data"
+            assert typing_char in krama_map, (
+                f"Character {typing_char} in typing data but not in krama data"
+            )
             krama_type, _ = krama_map[typing_char]
-            assert typing_type == krama_type, f"Type mismatch for {typing_char}: {typing_type} vs {krama_type}"
-
+            assert typing_type == krama_type, (
+                f"Type mismatch for {typing_char}: {typing_type} vs {krama_type}"
+            )
 
 
 class TestIntegrationScenarios:

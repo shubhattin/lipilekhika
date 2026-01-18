@@ -96,10 +96,10 @@ class TypingContext:
 
     def take_key_input(self, key: str) -> TypingDiff:  # ty:ignore[invalid-return-type]
         """Accepts character by character input and returns the diff.
-        
+
         Args:
             key: The key to take input for
-        
+
         Returns:
             The diff containing the number of characters to delete and the text to add
         """
@@ -148,17 +148,17 @@ def create_typing_context(
     typing_lang: ScriptLangType, options: TypingContextOptions | None = None
 ) -> TypingContext:
     """Creates a stateful isolated context for character by character input typing.
-    
+
     This is the main function which returns a context object with methods for
     handling typing input. Different realtime schemes can be implemented using this.
-    
+
     **Note**: Script data is loaded in the background, but it's recommended to
     ensure the context is ready before first use (though not strictly required).
-    
+
     Args:
         typing_lang: The script/language to type in
         options: Optional configuration for the typing context
-    
+
     Returns:
         A typing context object with the following methods:
         - `clear_context()`: Clears all internal states and contexts
@@ -167,7 +167,7 @@ def create_typing_context(
         - `update_include_inherent_vowel(include_inherent_vowel)`: Update inherent vowel setting
         - `get_use_native_numerals()`: Get current native numerals setting
         - `get_include_inherent_vowel()`: Get current inherent vowel setting
-    
+
     Raises:
         Exception: If an invalid script name is provided
     """
@@ -176,23 +176,23 @@ def create_typing_context(
 
 def get_script_typing_data_map(script: ScriptLangType) -> ScriptTypingDataMap:
     """Returns the typing data map for a script.
-    
+
     This function can be used to compare the krama array of two scripts.
     It's especially useful for brahmic scripts, as they have a direct correlation.
-    
+
     Args:
         script: The script to get the typing data map for
-    
+
     Returns:
         A ScriptTypingDataMap object containing:
         - `common_krama_map`: Mappings for common characters across scripts
         - `script_specific_krama_map`: Mappings for script-specific characters
-        
+
         Each mapping is a tuple of (text, type, mappings) where:
         - text: The displayed character in the target script
         - type: One of "anya", "vyanjana", "matra", "svara"
         - mappings: List of input key sequences that produce this character
-    
+
     Raises:
         Exception: If an invalid script name is provided or if 'Normal' is used
     """
@@ -201,19 +201,19 @@ def get_script_typing_data_map(script: ScriptLangType) -> ScriptTypingDataMap:
 
 def get_script_krama_data(script: ScriptLangType) -> list[KramaDataItem]:
     """Returns the krama data for a script (character + type pairs).
-    
+
     Used for comparing character sets between scripts. Each script's krama array
     has a 1:1 correspondence at the same indices, making it useful for side-by-side
     comparison of characters across Brahmic scripts.
-    
+
     Args:
         script: The script/language name to get krama data for
-    
+
     Returns:
         A list of tuples, where each tuple is (character_text, list_type):
         - character_text: The displayed character in the target script
         - list_type: One of "anya", "vyanjana", "matra", "svara"
-    
+
     Raises:
         Exception: If an invalid script name is provided or if 'Normal' is used
     """
