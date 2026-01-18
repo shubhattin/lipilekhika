@@ -2,7 +2,8 @@ use crate::data::{ScriptDisplay, get_ordered_script_list};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crate::ui::typing_helper::{
-  TypingHelperMessage, TypingHelperState, open_typing_helper_window, view_typing_helper,
+  TypingHelperMessage, TypingHelperState, TypingHelperTab, open_typing_helper_window,
+  view_typing_helper,
 };
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
@@ -48,6 +49,7 @@ pub enum UIMessage {
   CloseInherentVowelInfo,
   // Typing helper
   OpenTypingHelper,
+  OpenTypingHelperCompare,
   TypingHelperOpened(window::Id),
   TypingHelper(TypingHelperMessage),
 }
@@ -425,6 +427,30 @@ impl App {
         self.typing_helper_window = Some(new_id);
         open_task.map(UIMessage::TypingHelperOpened)
       }
+      UIMessage::OpenTypingHelperCompare => {
+        // Don't open if already open
+        if self.typing_helper_window.is_some() {
+          // Focus the existing window and switch to Compare Scripts tab
+          if let Some(id) = self.typing_helper_window {
+            self.typing_helper_state.active_tab = TypingHelperTab::CompareScripts;
+            return window::gain_focus(id);
+          }
+          return Task::none();
+        }
+
+        // Sync script from current context
+        let curr_script = {
+          let ctx = self.global_app_state.typing_context.lock().unwrap();
+          ctx.get_normalized_script()
+        };
+        self.typing_helper_state.current_script = curr_script;
+        // Set active tab to Compare Scripts
+        self.typing_helper_state.active_tab = TypingHelperTab::CompareScripts;
+
+        let (new_id, open_task) = open_typing_helper_window(Some(self.window_icon.clone()));
+        self.typing_helper_window = Some(new_id);
+        open_task.map(UIMessage::TypingHelperOpened)
+      }
       UIMessage::TypingHelperOpened(_id) => {
         // Window is tracked, nothing more to do
         Task::none()
@@ -589,30 +615,6 @@ impl App {
                     },
                   ),
                 ),
-                Item::new(
-                  button(
-                    row![text("Typing Help")]
-                      .spacing(8)
-                      .align_y(iced::Alignment::Center),
-                  )
-                  .width(Length::Fill)
-                  .on_press(UIMessage::OpenTypingHelper)
-                  .style(
-                    |theme: &Theme, status: iced::widget::button::Status| {
-                      let palette = theme.extended_palette();
-                      iced::widget::button::Style {
-                        background: Some(iced::Background::Color(match status {
-                          iced::widget::button::Status::Hovered => palette.background.weak.color,
-                          _ => iced::Color::TRANSPARENT,
-                        })),
-                        text_color: palette.background.base.text,
-                        border: iced::Border::default(),
-                        shadow: iced::Shadow::default(),
-                        snap: false,
-                      }
-                    },
-                  ),
-                ),
               ])
               .max_width(180.0),
             );
@@ -723,10 +725,86 @@ impl App {
             .interaction(mouse::Interaction::Pointer)
           ]
           .spacing(4)
-          .align_y(iced::Alignment::Center)
+          .align_y(iced::Alignment::Center),
         ]
         .spacing(20)
         .padding([12, 0]),
+        row![
+          // Typing Help button
+          button(
+            row![
+              svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                "../../assets/keyboard.svg"
+              )))
+              .width(Length::Fixed(20.0))
+              .height(Length::Fixed(20.0))
+              .style(|theme: &Theme, _status: iced::widget::svg::Status| {
+                iced::widget::svg::Style {
+                  color: Some(theme.palette().text),
+                }
+              }),
+              text("Typing Help").size(17),
+            ]
+            .spacing(6)
+            .align_y(iced::Alignment::Center),
+          )
+          .on_press(UIMessage::OpenTypingHelper)
+          .style(|theme: &Theme, status: iced::widget::button::Status| {
+            let palette = theme.extended_palette();
+            iced::widget::button::Style {
+              background: Some(iced::Background::Color(match status {
+                iced::widget::button::Status::Hovered => palette.background.weak.color,
+                _ => iced::Color::TRANSPARENT,
+              })),
+              text_color: palette.background.base.text,
+              border: iced::Border {
+                color: palette.background.strong.color,
+                width: 1.0,
+                radius: 4.0.into(),
+              },
+              shadow: iced::Shadow::default(),
+              snap: false,
+            }
+          }),
+          // Compare Scripts button
+          button(
+            row![
+              svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                "../../assets/arrow_left_right.svg"
+              )))
+              .width(Length::Fixed(20.0))
+              .height(Length::Fixed(20.0))
+              .style(|theme: &Theme, _status: iced::widget::svg::Status| {
+                iced::widget::svg::Style {
+                  color: Some(theme.palette().text),
+                }
+              }),
+              text("Compare Scripts").size(17),
+            ]
+            .spacing(6)
+            .align_y(iced::Alignment::Center),
+          )
+          .on_press(UIMessage::OpenTypingHelperCompare)
+          .style(|theme: &Theme, status: iced::widget::button::Status| {
+            let palette = theme.extended_palette();
+            iced::widget::button::Style {
+              background: Some(iced::Background::Color(match status {
+                iced::widget::button::Status::Hovered => palette.background.weak.color,
+                _ => iced::Color::TRANSPARENT,
+              })),
+              text_color: palette.background.base.text,
+              border: iced::Border {
+                color: palette.background.strong.color,
+                width: 1.0,
+                radius: 4.0.into(),
+              },
+              shadow: iced::Shadow::default(),
+              snap: false,
+            }
+          })
+        ]
+        .spacing(25)
+        .padding([10, 0])
       ])
       .padding([7, 10]);
 
