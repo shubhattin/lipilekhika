@@ -199,3 +199,43 @@ pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap>
     })
     .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
 }
+
+/// An item in the krama data: (character_text, list_type).
+pub type KramaDataItem = (String, String);
+
+/// Returns the krama data for a script (character + type pairs).
+///
+/// Used for comparing character sets between scripts. Each script's krama array
+/// has a 1:1 correspondence at the same indices, making it useful for side-by-side
+/// comparison of characters across Brahmic scripts.
+///
+/// Args:
+///     script (str): The script/language name to get krama data for.
+///
+/// Returns:
+///     list[tuple[str, str]]: List of (character_text, list_type) tuples.
+///
+/// Raises:
+///     ValueError: If the script name is invalid or is 'Normal' (English).
+#[pyfunction]
+#[pyo3(signature = (script))]
+pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
+  lipilekhika::typing::get_script_krama_data(script)
+    .map(|data| {
+      // Convert ListType enum to lowercase string
+      fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+        match lt {
+          lipilekhika::typing::ListType::Anya => "anya".to_string(),
+          lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+          lipilekhika::typing::ListType::Matra => "matra".to_string(),
+          lipilekhika::typing::ListType::Svara => "svara".to_string(),
+        }
+      }
+
+      data
+        .into_iter()
+        .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
+        .collect()
+    })
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+}

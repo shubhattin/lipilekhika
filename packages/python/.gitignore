@@ -2,5 +2,5 @@ dist
 lipilekhika.egg-info
 **/__pycache__
 
-lipilekhika/_lipilekhika.cpython*
+lipilekhika/_lipilekhika.*
 lipilekhika/types.py

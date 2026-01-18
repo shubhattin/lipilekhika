@@ -123,5 +123,6 @@ fn _lipilekhika(m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(typing::default_include_inherent_vowel, m)?)?;
   m.add_class::<typing::ScriptTypingDataMap>()?;
   m.add_function(wrap_pyfunction!(typing::get_script_typing_data_map, m)?)?;
+  m.add_function(wrap_pyfunction!(typing::get_script_krama_data, m)?)?;
   Ok(())
 }

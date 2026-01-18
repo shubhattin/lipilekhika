@@ -12,6 +12,7 @@ from ._lipilekhika import (  # ty:ignore[unresolved-import]
     TypingContext as _TypingContext,
     get_script_typing_data_map as _get_script_typing_data_map,
     ScriptTypingDataMap as _ScriptTypingDataMap,
+    get_script_krama_data as _get_script_krama_data,
 )
 from .types import ScriptLangType
 
@@ -36,6 +37,12 @@ TypingDataMapItem = tuple[str, ListType, list[str]]
 - `text`: The displayed character/text in the target script.
 - `list_type`: One of "anya", "vyanjana", "matra", "svara".
 - `mappings`: List of input key sequences that produce this character.
+"""
+
+KramaDataItem = tuple[str, ListType]
+"""An item in the krama data: (character_text, list_type).
+- `character_text`: The displayed character in the target script.
+- `list_type`: One of "anya", "vyanjana", "matra", "svara".
 """
 
 
@@ -192,6 +199,27 @@ def get_script_typing_data_map(script: ScriptLangType) -> ScriptTypingDataMap:
     return _get_script_typing_data_map(script)
 
 
+def get_script_krama_data(script: ScriptLangType) -> list[KramaDataItem]:
+    """Returns the krama data for a script (character + type pairs).
+    
+    Used for comparing character sets between scripts. Each script's krama array
+    has a 1:1 correspondence at the same indices, making it useful for side-by-side
+    comparison of characters across Brahmic scripts.
+    
+    Args:
+        script: The script/language name to get krama data for
+    
+    Returns:
+        A list of tuples, where each tuple is (character_text, list_type):
+        - character_text: The displayed character in the target script
+        - list_type: One of "anya", "vyanjana", "matra", "svara"
+    
+    Raises:
+        Exception: If an invalid script name is provided or if 'Normal' is used
+    """
+    return _get_script_krama_data(script)
+
+
 __all__ = [
     "DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS",
     "DEFAULT_USE_NATIVE_NUMERALS",
@@ -205,4 +233,7 @@ __all__ = [
     "ListType",
     "TypingDataMapItem",
     "get_script_typing_data_map",
+    # krama data
+    "KramaDataItem",
+    "get_script_krama_data",
 ]
