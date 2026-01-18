@@ -5,9 +5,11 @@ use crate::ui::typing_helper::{
   TypingHelperMessage, TypingHelperState, TypingHelperTab, open_typing_helper_window,
   view_typing_helper,
 };
+use crate::ui::version_check::{self, UpdateResult, VersionCheckResult};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use dark_light::detect;
+use iced::Padding;
 use iced::theme::Theme;
 use iced::widget::{Space, button, center, mouse_area, opaque, stack};
 use iced::{
@@ -52,6 +54,11 @@ pub enum UIMessage {
   OpenTypingHelperCompare,
   TypingHelperOpened(window::Id),
   TypingHelper(TypingHelperMessage),
+  // Version check
+  VersionCheckResult(VersionCheckResult),
+  UpdateApp,
+  UpdateAppResult(UpdateResult),
+  DismissUpdateNotification,
 }
 
 impl From<TypingHelperMessage> for UIMessage {
@@ -79,6 +86,9 @@ struct App {
   // Typing Helper window state
   typing_helper_window: Option<window::Id>,
   typing_helper_state: TypingHelperState,
+  // Version check result
+  version_check_result: Option<VersionCheckResult>,
+  update_notification_dismissed: bool,
 }
 
 impl App {
@@ -105,7 +115,7 @@ impl App {
     let (main_id, main_open_task) = window::open(window::Settings {
       icon: Some(icon.clone()),
       resizable: false,
-      size: iced::Size::new(430.0, 210.0),
+      size: iced::Size::new(430.0, 230.0),
       position: window::Position::Centered,
       exit_on_close_request: false,
       ..Default::default()
@@ -125,8 +135,17 @@ impl App {
         inherent_vowel_info_open: false,
         typing_helper_window: None,
         typing_helper_state: TypingHelperState::new("Devanagari"),
+        version_check_result: None,
+        update_notification_dismissed: false,
       },
-      main_open_task.discard(),
+      Task::batch([
+        main_open_task.discard(),
+        // Trigger version check on startup
+        Task::future(async {
+          let result = version_check::check_for_updates().await;
+          UIMessage::VersionCheckResult(result)
+        }),
+      ]),
     )
   }
 
@@ -469,6 +488,47 @@ impl App {
         }
         Task::none()
       }
+      UIMessage::VersionCheckResult(result) => {
+        self.version_check_result = Some(result);
+        Task::none()
+      }
+      UIMessage::UpdateApp => {
+        // Download and install the update asynchronously
+        if let Some(ref result) = self.version_check_result {
+          if let (Some(url), Some(version)) = (
+            result.windows_msi_download_url.clone(),
+            result.latest_version.clone(),
+          ) {
+            return Task::future(async move {
+              let result = version_check::download_and_install_update(url, version).await;
+              UIMessage::UpdateAppResult(result)
+            });
+          }
+        }
+        Task::none()
+      }
+      UIMessage::UpdateAppResult(result) => {
+        match result {
+          UpdateResult::InstallerLaunched => {
+            // Installer launched successfully, exit the app
+            return iced::exit();
+          }
+          UpdateResult::DownloadFailed(err) => {
+            eprintln!("Update download failed: {}", err);
+          }
+          UpdateResult::LaunchFailed(err) => {
+            eprintln!("Installer launch failed: {}", err);
+          }
+          UpdateResult::NoUpdateUrl => {
+            eprintln!("No update URL available");
+          }
+        }
+        Task::none()
+      }
+      UIMessage::DismissUpdateNotification => {
+        self.update_notification_dismissed = true;
+        Task::none()
+      }
     }
   }
 
@@ -804,7 +864,98 @@ impl App {
           })
         ]
         .spacing(25)
-        .padding([10, 0])
+        .padding([10, 0]),
+        // Update notification (redesigned)
+        {
+          let notification: Element<'_, UIMessage> = if let Some(ref result) =
+            self.version_check_result
+          {
+            if result.update_available && !self.update_notification_dismissed {
+              if let Some(ref version) = result.latest_version {
+                row![
+                  text("New Version Available :").size(13),
+                  // Green update button
+                  button(
+                    row![
+                      svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                        "../../assets/update.svg"
+                      )))
+                      .width(Length::Fixed(15.0))
+                      .height(Length::Fixed(15.0))
+                      .style(
+                        |_theme: &Theme, _status: iced::widget::svg::Status| {
+                          iced::widget::svg::Style {
+                            color: Some(iced::Color::WHITE),
+                          }
+                        }
+                      ),
+                      text(format!("Update v{}", version)).size(13),
+                    ]
+                    .spacing(4)
+                    .align_y(iced::Alignment::Center),
+                  )
+                  .on_press(UIMessage::UpdateApp)
+                  .padding([4, 12])
+                  .style(|_: &Theme, status: iced::widget::button::Status| {
+                    iced::widget::button::Style {
+                      background: Some(iced::Background::Color(match status {
+                        iced::widget::button::Status::Hovered => {
+                          iced::Color::from_rgb(0.15, 0.55, 0.25)
+                        }
+                        _ => iced::Color::from_rgb(0.2, 0.6, 0.3),
+                      })),
+                      text_color: iced::Color::WHITE,
+                      border: iced::Border {
+                        color: iced::Color::from_rgb(0.15, 0.5, 0.25),
+                        width: 1.0,
+                        radius: 4.0.into(),
+                      },
+                      shadow: iced::Shadow::default(),
+                      snap: false,
+                    }
+                  }),
+                  // Later button (ghost style)
+                  button(text("Later").size(13))
+                    .on_press(UIMessage::DismissUpdateNotification)
+                    .padding([4, 12])
+                    .style(|theme: &Theme, status: iced::widget::button::Status| {
+                      let palette = theme.extended_palette();
+                      iced::widget::button::Style {
+                        background: Some(iced::Background::Color(match status {
+                          iced::widget::button::Status::Hovered => palette.background.weak.color,
+                          _ => iced::Color::TRANSPARENT,
+                        })),
+                        text_color: palette.background.base.text,
+                        border: iced::Border {
+                          color: palette.background.strong.color,
+                          width: 1.0,
+                          radius: 4.0.into(),
+                        },
+                        shadow: iced::Shadow::default(),
+                        snap: false,
+                      }
+                    }),
+                ]
+                .padding(Padding {
+                  top: 10.0,
+                  bottom: 0.0,
+                  left: 0.0,
+                  right: 0.0,
+                })
+                .spacing(10)
+                .align_y(iced::Alignment::Center)
+                .into()
+              } else {
+                Space::new().height(0).into()
+              }
+            } else {
+              Space::new().height(0).into()
+            }
+          } else {
+            Space::new().height(0).into()
+          };
+          notification
+        }
       ])
       .padding([7, 10]);
 
@@ -887,6 +1038,63 @@ impl App {
             ]
             .spacing(15)
             .align_y(iced::Alignment::Center),
+            // Update available indicator
+            {
+              let update_element: Element<'_, UIMessage> =
+                if let Some(ref result) = self.version_check_result {
+                  if result.update_available {
+                    if let Some(ref version) = result.latest_version {
+                      mouse_area(
+                        container(
+                          row![
+                            svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                              "../../assets/update.svg"
+                            )))
+                            .width(Length::Fixed(14.0))
+                            .height(Length::Fixed(14.0))
+                            .style(
+                              |_theme: &Theme, _status: iced::widget::svg::Status| {
+                                iced::widget::svg::Style {
+                                  color: Some(iced::Color::WHITE),
+                                }
+                              }
+                            ),
+                            text(format!("Update available: v{}", version))
+                              .size(11)
+                              .style(|_theme: &Theme| iced::widget::text::Style {
+                                color: Some(iced::Color::WHITE),
+                              }),
+                          ]
+                          .spacing(6)
+                          .align_y(iced::Alignment::Center),
+                        )
+                        .padding([4, 10])
+                        .style(|_theme: &Theme| container::Style {
+                          background: Some(iced::Background::Color(iced::Color::from_rgb(
+                            0.2, 0.6, 0.3,
+                          ))),
+                          border: iced::Border {
+                            color: iced::Color::from_rgb(0.15, 0.5, 0.25),
+                            width: 1.0,
+                            radius: 4.0.into(),
+                          },
+                          ..Default::default()
+                        }),
+                      )
+                      .on_press(UIMessage::UpdateApp)
+                      .interaction(mouse::Interaction::Pointer)
+                      .into()
+                    } else {
+                      Space::new().height(0).into()
+                    }
+                  } else {
+                    Space::new().height(0).into()
+                  }
+                } else {
+                  Space::new().height(0).into()
+                };
+              update_element
+            },
             // Close button
             button("Close")
               .on_press(UIMessage::CloseAbout)
