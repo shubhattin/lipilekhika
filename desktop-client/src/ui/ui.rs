@@ -5,13 +5,15 @@ use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use dark_light::detect;
 use iced::theme::Theme;
-use iced::widget::{button, center, mouse_area, opaque, stack};
+use iced::widget::{Space, button, center, mouse_area, opaque, stack};
 use iced::{
   Element, Length, Subscription, Task,
   keyboard::{self, Key, key::Named},
-  widget::{checkbox, column, container, pick_list, row, text, toggler},
+  mouse,
+  widget::{checkbox, column, container, image, pick_list, row, svg, text, toggler, tooltip},
   window,
 };
+use iced_aw::menu::{Item, Menu, MenuBar};
 use lipilekhika::typing::TypingContext;
 use std::env;
 use std::path::PathBuf;
@@ -37,6 +39,8 @@ pub enum UIMessage {
   OpenAbout,
   CloseAbout,
   OpenLipiParivartaka,
+  OpenGitHub,
+  OpenWebsite,
 }
 
 struct App {
@@ -310,6 +314,20 @@ impl App {
 
         Task::none()
       }
+      UIMessage::OpenGitHub => {
+        // Open GitHub repository in default browser
+        let _ = Command::new("cmd")
+          .args(["/C", "start", "https://github.com/shubhattin/lipilekhika"])
+          .spawn();
+        Task::none()
+      }
+      UIMessage::OpenWebsite => {
+        // Open website in default browser
+        let _ = Command::new("cmd")
+          .args(["/C", "start", "https://lipilekhika.in"])
+          .spawn();
+        Task::none()
+      }
     }
   }
 
@@ -372,10 +390,111 @@ impl App {
 
       let main_content = container(column![
         row![
+          {
+            let more_menu = Item::with_menu(
+              container(
+                svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                  "../../assets/menu.svg"
+                )))
+                .width(Length::Fixed(24.0))
+                .height(Length::Fixed(24.0))
+                .style(|theme: &Theme, status: iced::widget::svg::Status| {
+                  iced::widget::svg::Style {
+                    color: match status {
+                      iced::widget::svg::Status::Hovered => Some(theme.palette().primary),
+                      _ => Some(theme.palette().text),
+                    },
+                  }
+                }),
+              )
+              .padding(4),
+              Menu::new(vec![
+                Item::new(
+                  button(
+                    row![
+                      svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                        "../../assets/info.svg"
+                      )))
+                      .width(Length::Fixed(26.0))
+                      .height(Length::Fixed(26.0)),
+                      text("About")
+                    ]
+                    .spacing(8)
+                    .align_y(iced::Alignment::Center),
+                  )
+                  .width(Length::Fill)
+                  .on_press(UIMessage::OpenAbout),
+                ),
+                Item::new(
+                  button(
+                    row![
+                      image(iced::widget::image::Handle::from_bytes(
+                        include_bytes!("../../assets/icon.png").to_vec(),
+                      ))
+                      .width(Length::Fixed(20.0))
+                      .height(Length::Fixed(20.0)),
+                      text("Lipi Parivartaka")
+                    ]
+                    .spacing(8)
+                    .align_y(iced::Alignment::Center),
+                  )
+                  .width(Length::Fill)
+                  .on_press(UIMessage::OpenLipiParivartaka),
+                ),
+              ])
+              .max_width(180.0),
+            );
+            MenuBar::new(vec![more_menu]).style(|theme: &Theme, _status| {
+              let palette = theme.extended_palette();
+              iced_aw::menu::Style {
+                bar_background: iced::Background::Color(iced::Color::TRANSPARENT),
+                bar_border: iced::Border::default(),
+                bar_shadow: iced::Shadow::default(),
+                menu_background: iced::Background::Color(palette.background.base.color),
+                menu_border: iced::Border {
+                  color: palette.background.strong.color,
+                  width: 1.0,
+                  radius: 4.0.into(),
+                },
+                menu_shadow: iced::Shadow::default(),
+                path: iced::Background::Color(iced::Color::TRANSPARENT),
+                path_border: iced::Border::default(),
+              }
+            })
+          },
+          Space::new().width(Length::Fill),
+          tooltip(
+            mouse_area(
+              svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                "../../assets/minimize.svg"
+              )))
+              .width(Length::Fixed(30.0))
+              .height(Length::Fixed(30.0))
+              .style(
+                |theme: &Theme, status: iced::widget::svg::Status| iced::widget::svg::Style {
+                  color: match status {
+                    iced::widget::svg::Status::Hovered => Some(theme.palette().primary),
+                    _ => Some(theme.palette().text),
+                  },
+                }
+              )
+            )
+            .on_press(UIMessage::MinimizeBackground)
+            .interaction(mouse::Interaction::Pointer),
+            "Minimize to Taskbar",
+            tooltip::Position::Bottom,
+          ),
+        ],
+        row![
           toggler(typing_enabled)
             .label("Typing")
             .on_toggle(UIMessage::ToggleTypingMode),
-          text!["Alt+X/C"].size(12)
+          text("Alt+X/C")
+            .style(|theme: &Theme| iced::widget::text::Style {
+              color: Some(theme.extended_palette().background.weak.text),
+            })
+            .center()
+            .size(12),
         ]
         .spacing(20),
         row![
@@ -393,39 +512,90 @@ impl App {
         ]
         .spacing(20)
         .padding([10, 0]),
-        row![
-          button("Background Minimize").on_press(UIMessage::MinimizeBackground),
-          button("About").on_press(UIMessage::OpenAbout),
-          button("Lipi Parivartaka").on_press(UIMessage::OpenLipiParivartaka)
-        ]
-        .spacing(10)
-        .padding([10, 0]),
       ])
       .padding(10);
 
       if self.about_modal_open {
         let about_modal = container(
           column![
-            text("Lipi Lekhika").size(24),
-            text(format!("Version: {}", env!("CARGO_PKG_VERSION"))).size(14),
-            container(text("A transliteration typing tool for Indic scripts.").size(12))
-              .padding([10, 0]),
-            button("Close").on_press(UIMessage::CloseAbout)
+            // Header with icon and title
+            row![
+              image(iced::widget::image::Handle::from_bytes(
+                include_bytes!("../../assets/icon.png").to_vec(),
+              ))
+              .width(Length::Fixed(32.0))
+              .height(Length::Fixed(32.0)),
+              column![
+                text("Lipi Lekhika").size(18),
+                text(format!("v{}", env!("CARGO_PKG_VERSION")))
+                  .size(11)
+                  .style(|theme: &Theme| iced::widget::text::Style {
+                    color: Some(theme.extended_palette().background.weak.text),
+                  }),
+              ]
+              .spacing(2)
+            ]
+            .spacing(10)
+            .align_y(iced::Alignment::Center),
+            // Description
+            text("A transliteration typing tool for Indic scripts.")
+              .size(12)
+              .center(),
+            // Links row
+            row![
+              // GitHub button
+              tooltip(
+                mouse_area(
+                  svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                    "../../assets/github.svg"
+                  )))
+                  .width(Length::Fixed(22.0))
+                  .height(Length::Fixed(22.0))
+                  .style(|theme: &Theme, status: iced::widget::svg::Status| {
+                    iced::widget::svg::Style {
+                      color: match status {
+                        iced::widget::svg::Status::Hovered => Some(theme.palette().primary),
+                        _ => Some(theme.palette().text),
+                      },
+                    }
+                  },),
+                )
+                .on_press(UIMessage::OpenGitHub)
+                .interaction(mouse::Interaction::Pointer),
+                "Open GitHub",
+                tooltip::Position::Bottom,
+              ),
+              // Website link
+              mouse_area(text("lipilekhika.in").size(12).style(|theme: &Theme| {
+                iced::widget::text::Style {
+                  color: Some(theme.palette().primary),
+                }
+              }),)
+              .on_press(UIMessage::OpenWebsite)
+              .interaction(mouse::Interaction::Pointer),
+            ]
+            .spacing(15)
+            .align_y(iced::Alignment::Center),
+            // Close button
+            button("Close")
+              .on_press(UIMessage::CloseAbout)
+              .padding([4, 16])
           ]
-          .spacing(10)
+          .spacing(8)
           .align_x(iced::Alignment::Center),
         )
-        .padding(20)
-        .style(|_| container::Style {
-          background: Some(iced::Background::Color(iced::Color::from_rgb(
-            0.15, 0.15, 0.18,
-          ))),
-          border: iced::Border {
-            color: iced::Color::from_rgb(0.3, 0.3, 0.35),
-            width: 1.0,
-            radius: 8.0.into(),
-          },
-          ..Default::default()
+        .padding([12, 20])
+        .style(|theme: &Theme| {
+          let palette = theme.extended_palette();
+          container::Style {
+            background: Some(iced::Background::Color(palette.background.base.color)),
+            border: iced::Border {
+              color: palette.background.strong.color,
+              width: 1.0,
+              radius: 8.0.into(),
+            },
+            ..Default::default()
+          }
         });
 
         stack![
