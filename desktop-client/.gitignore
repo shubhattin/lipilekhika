@@ -1,5 +1,4 @@
 target
 bundle_build
-app_conf.toml
 
 .env

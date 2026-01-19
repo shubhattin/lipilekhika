@@ -1,3 +1,9 @@
 [workspace]
-members = ["desktop-client", "packages/rust", "desktop-client/lipiparivartaka/src-tauri", "packages/js/wasm", "packages/python/binding"]
+members = [
+    "desktop-client",
+    "packages/rust",
+    "desktop-client/lipiparivartaka/src-tauri",
+    "packages/js/wasm",
+    "packages/python/binding",
+]
 resolver = "3"

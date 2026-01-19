@@ -293,11 +293,20 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
     .filter(|s| s.script_name != state.current_script && s.script_name != "Normal")
     .collect();
 
+  // Validate the current compare selection against the filtered list
+  let selected_compare = state.compare_script.clone().filter(|s| {
+    compare_scripts
+      .iter()
+      .any(|c| c.script_name == s.script_name)
+  });
+
   let compare_selector = row![
     text("Compare with ").size(13),
-    pick_list(compare_scripts, state.compare_script.clone(), |selected| {
-      Message::from(TypingHelperMessage::SetCompareScript(selected))
-    })
+    pick_list(
+      compare_scripts.clone(),
+      selected_compare.clone(),
+      |selected| { Message::from(TypingHelperMessage::SetCompareScript(selected)) }
+    )
     .width(Length::Fixed(180.0)),
   ]
   .spacing(8)
@@ -311,7 +320,7 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   .spacing(20)
   .padding([0, 0]);
 
-  let content: Element<'a, Message> = if let Some(compare_script) = &state.compare_script {
+  let content: Element<'a, Message> = if let Some(compare_script) = selected_compare {
     // Get krama data for both scripts
     let base_krama = get_script_krama_data(&current_script).ok();
     let compare_krama = get_script_krama_data(&compare_script.script_name).ok();

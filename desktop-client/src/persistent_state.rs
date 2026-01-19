@@ -1,7 +1,20 @@
+use lipilekhika::get_normalized_script_name;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use toml::from_str;
+
+fn app_config_path() -> PathBuf {
+  let mut path = match dirs::data_dir() {
+    Some(p) => p,
+    None => return PathBuf::from("app_conf.toml"), // fallback to current dir
+  };
+  path.push("lipilekhika");
+  fs::create_dir_all(&path).ok();
+  path.push("app_conf.toml");
+  // unique anonymous identifier
+  path
+}
 
 fn default_true() -> bool {
   true
@@ -42,11 +55,17 @@ impl Default for PersitentState {
 
 impl PersitentState {
   pub fn read_app_config() -> PersitentState {
-    let config_path = get_config_path();
+    let config_path = app_config_path();
 
     match fs::read_to_string(&config_path) {
       Ok(content) => match from_str::<PersitentState>(&content) {
-        Ok(config) => config,
+        Ok(mut config) => match get_normalized_script_name(&config.script) {
+          Some(_) => config,
+          None => {
+            config.script = default_script();
+            config
+          }
+        },
         Err(_) => PersitentState::default(),
       },
       Err(_) => PersitentState::default(),
@@ -54,7 +73,7 @@ impl PersitentState {
   }
 
   pub fn save_app_config(&self) -> Result<(), String> {
-    let config_path = get_config_path();
+    let config_path = app_config_path();
 
     let toml_string =
       toml::to_string_pretty(self).map_err(|e| format!("Failed to serialize config: {}", e))?;
@@ -64,12 +83,4 @@ impl PersitentState {
 
     Ok(())
   }
-}
-fn get_config_path() -> PathBuf {
-  if let Ok(exe_path) = std::env::current_exe() {
-    if let Some(exe_dir) = exe_path.parent() {
-      return exe_dir.join("app_conf.toml");
-    }
-  }
-  PathBuf::from("app_conf.toml")
 }

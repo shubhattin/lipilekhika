@@ -4,7 +4,10 @@ use std::{fs, path::PathBuf};
 use uuid::Uuid;
 
 fn install_id_path() -> PathBuf {
-  let mut path = dirs::data_dir().expect("no data dir");
+  let mut path = match dirs::data_dir() {
+    Some(p) => p,
+    None => return PathBuf::from("install_id"), // fallback to current dir
+  };
   path.push("lipilekhika");
   fs::create_dir_all(&path).ok();
   path.push("install_id");

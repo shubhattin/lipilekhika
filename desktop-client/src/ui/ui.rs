@@ -61,6 +61,8 @@ pub enum UIMessage {
   DismissUpdateNotification,
 }
 
+const DIMS: [f32; 2] = [430.0, 230.0];
+
 impl From<TypingHelperMessage> for UIMessage {
   fn from(msg: TypingHelperMessage) -> Self {
     UIMessage::TypingHelper(msg)
@@ -116,7 +118,7 @@ impl App {
     let (main_id, main_open_task) = window::open(window::Settings {
       icon: Some(icon.clone()),
       resizable: false,
-      size: iced::Size::new(430.0, 230.0),
+      size: iced::Size::new(DIMS[0], DIMS[1]),
       position: window::Position::Centered,
       exit_on_close_request: false,
       ..Default::default()
@@ -343,7 +345,7 @@ impl App {
           let (new_id, open_task) = window::open(window::Settings {
             icon: Some(self.window_icon.clone()),
             resizable: false,
-            size: iced::Size::new(400.0, 200.0),
+            size: iced::Size::new(DIMS[0], DIMS[1]),
             position: window::Position::Centered,
             exit_on_close_request: false,
             ..Default::default()
