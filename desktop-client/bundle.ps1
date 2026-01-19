@@ -33,12 +33,12 @@ Write-Host "Version: $Version" -ForegroundColor Cyan
 Write-Host "====================================" -ForegroundColor Cyan
 
 # Create directories
-Write-Host "`n[1/6] Creating directories..." -ForegroundColor Yellow
+Write-Host "`n[1/7] Creating directories..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Path $StagingDir -Force | Out-Null
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
 # Copy executables
-Write-Host "`n[2/6] Copying executables..." -ForegroundColor Yellow
+Write-Host "`n[2/7] Copying executables..." -ForegroundColor Yellow
 $TargetReleaseDir = Join-Path $RootDir "target\release"
 
 # Copy from release build target
@@ -62,7 +62,7 @@ Write-Host "  - Copied lipilekhika.exe" -ForegroundColor Green
 Write-Host "  - Copied lipiparivartaka.exe" -ForegroundColor Green
 
 # Copy icon files
-Write-Host "`n[3/6] Copying icon files..." -ForegroundColor Yellow
+Write-Host "`n[3/7] Copying icon files..." -ForegroundColor Yellow
 $LipilekhikaIcon = Join-Path $ScriptDir "assets\icon.ico"
 $LipiparivartakaIcon = Join-Path $ScriptDir "lipiparivartaka\assets\icon.ico"
 
@@ -81,8 +81,24 @@ Copy-Item -Path $LipiparivartakaIcon -Destination (Join-Path $StagingDir "lipipa
 Write-Host "  - Copied lipilekhika.ico" -ForegroundColor Green
 Write-Host "  - Copied lipiparivartaka.ico" -ForegroundColor Green
 
+# Copy font files
+Write-Host "`n[4/7] Copying font files..." -ForegroundColor Yellow
+$FontsDir = Join-Path $ScriptDir "assets\fonts"
+$StagingFontsDir = Join-Path $StagingDir "fonts"
+
+if (Test-Path $FontsDir) {
+    New-Item -ItemType Directory -Path $StagingFontsDir -Force | Out-Null
+    $FontFiles = Get-ChildItem -Path $FontsDir -Filter "*.ttf"
+    foreach ($font in $FontFiles) {
+        Copy-Item -Path $font.FullName -Destination $StagingFontsDir -Force
+        Write-Host "  - Copied $($font.Name)" -ForegroundColor Green
+    }
+} else {
+    Write-Warning "Fonts directory not found at $FontsDir - skipping font files"
+}
+
 # Copy and convert license
-Write-Host "`n[4/6] Preparing license files..." -ForegroundColor Yellow
+Write-Host "`n[5/7] Preparing license files..." -ForegroundColor Yellow
 $LicensePath = Join-Path $RootDir "LICENCE"
 if (Test-Path $LicensePath) {
     # Copy plain text license
@@ -106,7 +122,7 @@ if (Test-Path $LicensePath) {
 }
 
 # Find WiX Toolset
-Write-Host "`n[5/6] Locating WiX Toolset..." -ForegroundColor Yellow
+Write-Host "`n[6/7] Locating WiX Toolset..." -ForegroundColor Yellow
 $WixPaths = @(
     "C:\Program Files (x86)\WiX Toolset v3.14\bin",
     "C:\Program Files (x86)\WiX Toolset v3.11\bin",
@@ -142,7 +158,7 @@ $Candle = Join-Path $WixBinPath "candle.exe"
 $Light = Join-Path $WixBinPath "light.exe"
 
 # Compile and link MSI
-Write-Host "`n[6/6] Building MSI installer..." -ForegroundColor Yellow
+Write-Host "`n[7/7] Building MSI installer..." -ForegroundColor Yellow
 $WxsPath = Join-Path $InstallerDir "Product.wxs"
 $WixObjPath = Join-Path $OutputDir "Product.wixobj"
 $MsiName = "lipilekhika-$Version.msi"

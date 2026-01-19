@@ -3,8 +3,8 @@ use std::env;
 use std::process::Command;
 
 /// Current app version from Cargo.toml
-// pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const CURRENT_VERSION: &str = "0.0.1";
+pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
+// pub const CURRENT_VERSION: &str = "0.0.1";
 
 /// Result of a version check
 #[derive(Debug, Clone)]
