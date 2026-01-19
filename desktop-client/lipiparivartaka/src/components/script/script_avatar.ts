@@ -12,7 +12,7 @@ export const SCRIPT_AVATAR_MAP: Record<ScriptListType, string> = {
   Odia: 'ଅ',
   Sinhala: 'අ',
   Normal: 'a',
-  Romanized: 'a',
+  Romanized: 'ā',
   Gurumukhi: 'ਅ',
   Assamese: 'অ',
   Siddham: '𑖀',

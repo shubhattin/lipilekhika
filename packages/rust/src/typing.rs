@@ -406,6 +406,45 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
   })
 }
 
+/// Type alias for krama data items used in script comparison.
+/// Each item is (character_text, list_type).
+pub type KramaDataItem = (String, ListType);
+
+/// Returns the krama data for a script (character + type pairs).
+///
+/// Used for comparing character sets between scripts. Each script's krama array
+/// has a 1:1 correspondence at the same indices, making it useful for side-by-side
+/// comparison of characters across Brahmic scripts.
+///
+/// - `script` - The script/language name to get krama data for.
+///
+/// Returns an error if the script name is invalid or is 'Normal' (English).
+pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, String> {
+  let normalized =
+    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
+
+  if normalized == "Normal" {
+    return Err(format!("Invalid script name: {}", script));
+  }
+
+  let script_data = ScriptData::get_script_data(&normalized);
+  let common_attr = script_data.get_common_attr();
+
+  Ok(
+    common_attr
+      .krama_text_arr
+      .iter()
+      .map(|(text, list_idx)| {
+        let list_type = list_idx
+          .and_then(|idx| common_attr.list.get(idx as usize))
+          .map(ListType::from_list)
+          .unwrap_or(ListType::Anya);
+        (text.clone(), list_type)
+      })
+      .collect(),
+  )
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

@@ -1,2 +1,4 @@
 target
 bundle_build
+
+.env

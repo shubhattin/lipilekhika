@@ -25,6 +25,7 @@
     <Feature Id="ProductFeature" Title="Lipi Lekhika" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentGroupRef Id="LicenseComponents" />
+      <ComponentGroupRef Id="FontComponents" />
     </Feature>
 
     <!-- Application Icons (uses separate .ico files instead of executables to reduce installer size) -->
@@ -51,6 +52,8 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLFOLDER" Name="Lipi Lekhika" />
       </Directory>
+
+      <Directory Id="FontsFolder" />
 
       <Directory Id="ProgramMenuFolder">
         <Directory Id="ApplicationProgramsFolder" Name="Lipi Lekhika" />
@@ -123,6 +126,46 @@
       <Component Id="LicenseFileComponent" Guid="c9d0e1f2-a3b4-5678-cdef-901234567890" Directory="INSTALLFOLDER">
         <File Id="LicenseFile" 
               Source="$(var.StagingPath)\LICENSE.txt" 
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Font file components -->
+    <ComponentGroup Id="FontComponents">
+      <Component Id="FontNotoSansBrahmi" Guid="d1e2f3a4-b5c6-7890-abcd-123456789001" Directory="FontsFolder">
+        <File Id="NotoSansBrahmiFont" 
+              Source="$(var.StagingPath)\fonts\NotoSansBrahmi.ttf" 
+              TrueType="yes"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="FontNotoSansGrantha" Guid="d1e2f3a4-b5c6-7890-abcd-123456789002" Directory="FontsFolder">
+        <File Id="NotoSansGranthaFont" 
+              Source="$(var.StagingPath)\fonts\NotoSansGrantha.ttf" 
+              TrueType="yes"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="FontNotoSansModi" Guid="d1e2f3a4-b5c6-7890-abcd-123456789003" Directory="FontsFolder">
+        <File Id="NotoSansModiFont" 
+              Source="$(var.StagingPath)\fonts\NotoSansModi.ttf" 
+              TrueType="yes"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="FontNotoSansSharada" Guid="d1e2f3a4-b5c6-7890-abcd-123456789004" Directory="FontsFolder">
+        <File Id="NotoSansSharadaFont" 
+              Source="$(var.StagingPath)\fonts\NotoSansSharada.ttf" 
+              TrueType="yes"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="FontNotoSansSiddham" Guid="d1e2f3a4-b5c6-7890-abcd-123456789005" Directory="FontsFolder">
+        <File Id="NotoSansSiddhamFont" 
+              Source="$(var.StagingPath)\fonts\NotoSansSiddham.ttf" 
+              TrueType="yes"
+              KeyPath="yes" />
+      </Component>
+      <Component Id="FontSatisarSharada" Guid="d1e2f3a4-b5c6-7890-abcd-123456789006" Directory="FontsFolder">
+        <File Id="SatisarSharadaFont" 
+              Source="$(var.StagingPath)\fonts\SatisarSharada.ttf" 
+              TrueType="yes"
               KeyPath="yes" />
       </Component>
     </ComponentGroup>

@@ -4,7 +4,8 @@ pub use crate::script_data::{
 };
 use crate::transliterate::transliterate_text;
 pub use crate::typing::{
-  ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_typing_data_map,
+  KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
+  get_script_typing_data_map,
 };
 use std::collections::HashMap;
 

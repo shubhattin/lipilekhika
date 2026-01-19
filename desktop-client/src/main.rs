@@ -3,16 +3,18 @@
 
 use crossbeam_channel;
 use lipilekhika::typing::{
-  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, DEFAULT_INCLUDE_INHERENT_VOWEL, DEFAULT_USE_NATIVE_NUMERALS,
-  TypingContext, TypingContextOptions,
+  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, TypingContext, TypingContextOptions,
 };
+use persistent_state::PersitentState;
 use std::{
   sync::{Arc, Mutex, atomic::AtomicBool},
   thread,
 };
 
 mod data;
+mod persistent_state;
 mod platform;
+mod posthog;
 mod tray;
 mod ui;
 
@@ -21,6 +23,7 @@ pub struct AppState {
   pub typing_enabled: AtomicBool,
   /// both typing script and typing options are stored in the typing context
   pub typing_context: Mutex<TypingContext>,
+  pub persitent_state: Mutex<PersitentState>,
 }
 
 /// use to pass messages between threads
@@ -58,18 +61,21 @@ fn main() {
   let (tx_ui, rx_ui) = crossbeam_channel::bounded::<ThreadMessage>(100);
   let (tx_tray, rx_tray) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
+  let persitent_state = PersitentState::read_app_config();
+
   let typing_context = TypingContext::new(
-    "Devanagari",
+    &persitent_state.script,
     Some(TypingContextOptions {
       auto_context_clear_time_ms: DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
-      use_native_numerals: DEFAULT_USE_NATIVE_NUMERALS,
-      include_inherent_vowel: DEFAULT_INCLUDE_INHERENT_VOWEL,
+      use_native_numerals: persitent_state.native_numerals,
+      include_inherent_vowel: persitent_state.inherent_vowel,
     }),
   )
   .expect("Failed to create typing context");
   let app_state = Arc::new(AppState {
     typing_context: Mutex::new(typing_context),
     typing_enabled: AtomicBool::new(false),
+    persitent_state: Mutex::new(persitent_state),
   });
 
   // Start keyboard hook thread
@@ -88,6 +94,10 @@ fn main() {
   let state_clone = Arc::clone(&app_state);
   let tx_ui_clone = tx_ui.clone();
   let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
+
+  thread::spawn(|| {
+    posthog::init_posthog();
+  });
 
   // starts the UI event loop
   let state_clone = Arc::clone(&app_state);

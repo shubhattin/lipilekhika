@@ -1,4 +1,4 @@
-use crate::data::get_ordered_script_list;
+use crate::data::{ScriptDisplay, get_ordered_script_list};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use std::collections::HashMap;
@@ -49,7 +49,7 @@ pub struct TrayManager {
   typing_on_item: CheckMenuItem,
   native_numerals_item: CheckMenuItem,
   inherent_vowel_item: CheckMenuItem,
-  script_items: Vec<(CheckMenuItem, String)>,
+  script_items: Vec<(CheckMenuItem, ScriptDisplay)>,
   event_mapper: MenuEventMapper,
 }
 
@@ -93,14 +93,24 @@ impl TrayManager {
     let scripts = get_ordered_script_list();
 
     let mut script_items = Vec::new();
-    for script_name in scripts {
+    for script_display in scripts {
+      let script_name = script_display.script_name.clone();
       let item_id = format!("{}{}", MENU_ID_SCRIPT_PREFIX, script_name);
       let is_current = script_name == current_script;
-      let item = CheckMenuItem::with_id(&item_id, &script_name, true, is_current, None);
+      let item = CheckMenuItem::with_id(
+        &item_id,
+        &script_display.display_label,
+        true,
+        is_current,
+        None,
+      );
       script_submenu.append(&item)?;
       // Register event with script name as associated data
-      event_mapper.register(item_id, TrayMenuEvent::ScriptSelected(script_name.clone()));
-      script_items.push((item, script_name));
+      event_mapper.register(
+        item_id,
+        TrayMenuEvent::ScriptSelected(script_name.to_string()),
+      );
+      script_items.push((item, script_display));
     }
     tray_menu.append(&script_submenu)?;
     tray_menu.append(&PredefinedMenuItem::separator())?;
@@ -195,8 +205,8 @@ impl TrayManager {
     self.native_numerals_item.set_checked(use_native_numerals);
     self.inherent_vowel_item.set_checked(include_inherent_vowel);
 
-    for (item, name) in &self.script_items {
-      let is_selected = *name == current_script;
+    for (item, script_display) in &self.script_items {
+      let is_selected = script_display.script_name == current_script;
       item.set_checked(is_selected);
     }
 
@@ -269,8 +279,8 @@ impl TrayManager {
           }
 
           // Update checkmarks on all script items (without holding lock)
-          for (item, name) in &self.script_items {
-            let is_selected = name == &script_name;
+          for (item, script_display) in &self.script_items {
+            let is_selected = script_display.script_name == script_name;
             item.set_checked(is_selected);
           }
 
