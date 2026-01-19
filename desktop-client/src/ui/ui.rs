@@ -586,6 +586,11 @@ impl App {
     } else {
       // Render main app view
       let scripts = get_ordered_script_list();
+      let scripts: Vec<ScriptDisplay> = scripts
+        .into_iter()
+        .filter(|s| s.script_name != "Normal")
+        .collect();
+
       let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
 
       let (use_native_numerals, include_inherent_vowel, curr_script) = {

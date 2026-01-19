@@ -96,7 +96,9 @@ async fn check_for_updates_inner() -> VersionCheckResult {
 
 async fn check_for_updates_fetch()
 -> Result<VersionCheckResult, Box<dyn std::error::Error + Send + Sync>> {
-  let octocrab = Octocrab::builder().build()?;
+  let octocrab = Octocrab::builder()
+    .set_connect_timeout(Some(std::time::Duration::from_secs(10)))
+    .build()?;
 
   // Fetch releases from the repository (already in descending order)
   let releases = octocrab

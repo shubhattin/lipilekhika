@@ -388,6 +388,12 @@ pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
 ) -> Element<'a, Message> {
   let scripts = get_ordered_script_list();
 
+  // Filter out "Normal" script to match Compare Scripts behavior
+  let scripts: Vec<ScriptDisplay> = scripts
+    .into_iter()
+    .filter(|s| s.script_name != "Normal")
+    .collect();
+
   // Find current script display
   let current_script_display = scripts
     .iter()

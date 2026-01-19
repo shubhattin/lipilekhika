@@ -37,7 +37,7 @@ fn get_script_avatar_map() -> &'static HashMap<String, String> {
     map.insert("Odia".to_string(), "ଅ".to_string());
     map.insert("Sinhala".to_string(), "අ".to_string());
     map.insert("Normal".to_string(), "a".to_string());
-    map.insert("Romanized".to_string(), "a".to_string());
+    map.insert("Romanized".to_string(), "ā".to_string());
     map.insert("Gurumukhi".to_string(), "ਅ".to_string());
     map.insert("Assamese".to_string(), "অ".to_string());
     map.insert("Siddham".to_string(), "𑖀".to_string());
