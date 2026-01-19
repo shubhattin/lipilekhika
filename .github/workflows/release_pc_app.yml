@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write # Required for creating releases + uploading assets
 
+env:
+  PC_APP_POSTHOG_KEY: ${{  vars.PC_APP_POSTHOG_KEY }}
+
 jobs:
   build-windows:
     runs-on: windows-latest

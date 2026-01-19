@@ -14,6 +14,7 @@ use std::{
 mod data;
 mod persistent_state;
 mod platform;
+mod posthog;
 mod tray;
 mod ui;
 
@@ -93,6 +94,10 @@ fn main() {
   let state_clone = Arc::clone(&app_state);
   let tx_ui_clone = tx_ui.clone();
   let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
+
+  thread::spawn(|| {
+    posthog::init_posthog();
+  });
 
   // starts the UI event loop
   let state_clone = Arc::clone(&app_state);

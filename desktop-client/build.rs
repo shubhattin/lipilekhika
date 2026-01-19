@@ -1,7 +1,20 @@
-// build.rs
+use dotenvy::dotenv;
 use std::{env, fs, path::PathBuf};
 
 fn main() {
+  {
+    // posthog env setup
+    dotenv().ok();
+
+    // Tell Cargo to re-run build.rs if env changes
+    println!("cargo:rerun-if-env-changed=PC_APP_POSTHOG_KEY");
+
+    if let Ok(val) = env::var("PC_APP_POSTHOG_KEY") {
+      // Pass it to rustc as a compile-time env var
+      println!("cargo:rustc-env=PC_APP_POSTHOG_KEY={}", val);
+    }
+  }
+
   // Only compile resources on Windows
   if env::var("CARGO_CFG_WINDOWS").is_err() {
     return;
