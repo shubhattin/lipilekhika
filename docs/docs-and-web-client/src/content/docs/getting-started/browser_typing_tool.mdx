@@ -73,6 +73,10 @@ You can view all examples in live environment [here](/typing_tool_examples)
 - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/react/ReactComp.tsx)
 - [Demo Page](/typing_tool_examples/react)
 
+```ts
+const ctx = useMemo(() => createTypingContext(script), [script]);
+```
+
 ```tsx
   <textarea
     value={text}
@@ -92,12 +96,18 @@ You can view all examples in live environment [here](/typing_tool_examples)
      ctx.ready;
    }, [ctx]);
    ```
+
+   Also you are using [React Compiler](https://react.dev/learn/react-compiler) you drop the `useMemo`.
 </Aside>
 
 ### Vue
 
 - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/VueComp.vue)
 - [Demo Page](/typing_tool_examples/vue)
+
+```ts
+const ctx = computed(() => createTypingContext(script.value));
+```
 
 ```vue
 <input
@@ -120,6 +130,10 @@ watchEffect(() => {
 - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/SvelteComp.svelte)
 - [Demo Page](/typing_tool_examples/svelte)
 
+```ts
+const ctx = $derived(createTypingContext(script));
+```
+
 ```svelte
 <textarea
   bind:value={text}
@@ -140,6 +154,10 @@ $effect(() => {
 
 - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/solid/SolidComp.tsx)
 - [Demo Page](/typing_tool_examples/solid)
+
+```ts
+const ctx = createMemo(() => createTypingContext(script()));
+```
 
 ```tsx
 <textarea

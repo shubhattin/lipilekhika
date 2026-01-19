@@ -27,7 +27,7 @@
         href="https://www.npmjs.com/package/lipilekhika"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-foreground/80 hover:text-foreground"
+        class="hidden text-foreground/80 hover:text-foreground sm:flex"
       >
         <Icon src={SiNpm} className="size-4 sm:size-5" />
         <span class="sr-only">NPM</span>

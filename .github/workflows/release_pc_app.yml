@@ -3,7 +3,7 @@ name: Release PC App (Windows)
 on:
   push:
     tags:
-      - 'pc-app@*'
+      - "pc-app@v*"
 
 permissions:
   contents: write # Required for creating releases + uploading assets
@@ -69,36 +69,36 @@ jobs:
         shell: powershell
         run: |
           choco install wixtoolset -y --no-progress --version "$env:WIX_VERSION"
-          
+
           # If WiX is already on PATH, don't do anything.
           $existing = Get-Command candle.exe -ErrorAction SilentlyContinue
           if ($existing) {
             Write-Host "WiX already available on PATH: $($existing.Source)"
             exit 0
           }
-          
+
           # Discover WiX install location robustly (Chocolatey may install in different locations).
           $wixDirVersion = ($env:WIX_VERSION -split '\.')[0..1] -join '.'
           $candidateDirs = @(
             "$env:ProgramFiles(x86)\WiX Toolset v$wixDirVersion\bin",
             "C:\ProgramData\chocolatey\lib\wixtoolset\tools\bin"
           )
-          
+
           $wixBin = $candidateDirs |
             Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
             Select-Object -First 1
-          
+
           if (-not $wixBin) {
             $wixBin = Get-ChildItem -Path "C:\ProgramData\chocolatey\lib" -Directory -Filter "wixtoolset*" -ErrorAction SilentlyContinue |
               ForEach-Object { Join-Path $_.FullName "tools\bin" } |
               Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
               Select-Object -First 1
           }
-          
+
           if (-not $wixBin) {
             throw "WiX Toolset not found after install (could not locate candle.exe)"
           }
-          
+
           $wixBin | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
           Write-Host "WiX Toolset added to PATH: $wixBin"
 

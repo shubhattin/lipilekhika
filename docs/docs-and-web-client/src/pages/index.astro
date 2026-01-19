@@ -4,7 +4,14 @@ import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
 import ScriptTrans from '$components/landing/ScriptTrans.svelte';
-import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
+import { BookOpen, Globe, Github, ArrowRight } from 'lucide-svelte';
+import { Icon } from 'svelte-icons-pack';
+import { SiWindows } from 'svelte-icons-pack/si';
+import { findLatestRelease, getWindowsDownloadUrl } from '$lib/github';
+
+// Fetch latest Windows release on server-side
+const latestRelease = await findLatestRelease('pc-app@v');
+const windowsDownloadUrl = latestRelease ? getWindowsDownloadUrl(latestRelease) : null;
 ---
 
 <RootLayout
@@ -45,36 +52,31 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
           </p>
 
           <div
-            class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
+            class="mt-7 flex flex-row items-center justify-center gap-3 lg:justify-start"
           >
             <a
               href="/app"
-              class="group relative inline-flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-linear-to-br from-blue-600 via-blue-700 to-blue-800 px-6 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-900/40 active:scale-100 sm:w-auto"
+              class="group relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-amber-600 bg-linear-to-b from-amber-50/80 to-amber-100/90 px-5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(217,119,6,0.1)] transition-all hover:-translate-y-0.5 hover:border-amber-700 hover:bg-linear-to-b hover:from-amber-100 hover:to-amber-200/90 hover:shadow-[0_8px_20px_rgba(217,119,6,0.2)] active:translate-y-0 dark:border-amber-500 dark:from-amber-950/30 dark:to-amber-900/40 dark:text-white dark:hover:border-amber-400 dark:hover:from-amber-900/50 dark:hover:to-amber-800/60"
             >
-              <div
-                class="absolute inset-0 bg-linear-to-br from-blue-500/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
-              >
-              </div>
-              <Rocket class="relative size-4" />
+              <Globe class="relative size-4 text-amber-700 dark:text-amber-400" />
               <span class="relative">Use Online</span>
               <ArrowRight class="relative size-4 transition-transform group-hover:translate-x-1" />
             </a>
-            <a
-              href="/getting-started/introduction"
-              class="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
-            >
-              <BookOpen class="size-4" />
-              Documentation
-            </a>
-            <a
-              href="https://github.com/shubhattin/lipilekhika"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group hidden h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] sm:inline-flex sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
-            >
-              <Github class="size-4" />
-              GitHub
-            </a>
+            {
+              windowsDownloadUrl && (
+                <a
+                  href={windowsDownloadUrl}
+                  rel="noopener noreferrer"
+                  class="group relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-blue-600 bg-linear-to-b from-blue-50/80 to-blue-100/90 px-5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(29,78,216,0.1)] transition-all hover:-translate-y-0.5 hover:border-blue-700 hover:bg-linear-to-b hover:from-blue-100 hover:to-blue-200/90 hover:shadow-[0_8px_20px_rgba(29,78,216,0.2)] active:translate-y-0 dark:border-blue-500 dark:from-blue-950/30 dark:to-blue-900/40 dark:text-white dark:hover:border-blue-400 dark:hover:from-blue-900/50 dark:hover:to-blue-800/60"
+                >
+                  <Icon
+                    src={SiWindows}
+                    className="relative size-4 fill-blue-700 dark:fill-blue-400"
+                  />
+                  <span class="relative">Windows</span>
+                </a>
+              )
+            }
           </div>
         </div>
 
@@ -151,6 +153,24 @@ import { BookOpen, Rocket, ArrowRight, Github } from 'lucide-svelte';
     </div>
   </section>
 
+  <section class="flex justify-center gap-3 pt-12">
+    <a
+      href="/getting-started/introduction"
+      class="group inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
+    >
+      <BookOpen class="size-4" />
+      Documentation
+    </a>
+    <a
+      href="https://github.com/shubhattin/lipilekhika"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-linear-to-b from-white to-slate-50 px-6 text-sm font-medium text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.12)] dark:border-slate-700 dark:bg-slate-900 dark:bg-none dark:text-slate-100 dark:shadow-none dark:hover:border-slate-600 dark:hover:shadow-none"
+    >
+      <Github class="size-4" />
+      GitHub
+    </a>
+  </section>
   <!-- Features Section -->
   <Features />
 
