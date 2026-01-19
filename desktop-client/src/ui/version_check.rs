@@ -3,8 +3,8 @@ use std::env;
 use std::process::Command;
 
 /// Current app version from Cargo.toml
-pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-// pub const CURRENT_VERSION: &str = "0.0.1";
+// pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const CURRENT_VERSION: &str = "0.0.1";
 
 /// Result of a version check
 #[derive(Debug, Clone)]
@@ -170,14 +170,50 @@ pub async fn download_and_install_update(download_url: String, version: String) 
 }
 
 async fn download_and_install_inner(download_url: String, version: String) -> UpdateResult {
-  // Download MSI to temp directory
+  // Get MSI path in temp directory
   let temp_dir = env::temp_dir();
   let msi_filename = format!("lipilekhika-{}.msi", version);
   let msi_path = temp_dir.join(&msi_filename);
 
-  // Download the file
+  // Check if file already exists
+  if msi_path.exists() {
+    println!(
+      "MSI file already exists at {:?}, trying to install...",
+      msi_path
+    );
+
+    // Try to install existing file
+    if launch_installer_wizard(&msi_path) {
+      return UpdateResult::InstallerLaunched;
+    }
+
+    // Install failed, try redownloading once
+    println!("Install from existing file failed, redownloading...");
+    match download_file(&download_url, &msi_path).await {
+      Ok(_) => {
+        println!("Redownload successful, trying install again...");
+        if launch_installer_wizard(&msi_path) {
+          return UpdateResult::InstallerLaunched;
+        } else {
+          eprintln!("Install failed after redownload");
+          return UpdateResult::LaunchFailed(
+            "Failed to launch installer after redownload".to_string(),
+          );
+        }
+      }
+      Err(e) => {
+        eprintln!("Redownload failed: {}", e);
+        return UpdateResult::DownloadFailed(format!("Redownload failed: {}", e));
+      }
+    }
+  }
+
+  // File doesn't exist, download it
+  println!("Downloading MSI to {:?}...", msi_path);
   match download_file(&download_url, &msi_path).await {
-    Ok(_) => {}
+    Ok(_) => {
+      println!("Download successful, launching installer...");
+    }
     Err(e) => return UpdateResult::DownloadFailed(format!("Download failed: {}", e)),
   }
 

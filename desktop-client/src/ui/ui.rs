@@ -89,6 +89,7 @@ struct App {
   // Version check result
   version_check_result: Option<VersionCheckResult>,
   update_notification_dismissed: bool,
+  update_in_progress: bool,
 }
 
 impl App {
@@ -137,6 +138,7 @@ impl App {
         typing_helper_state: TypingHelperState::new("Devanagari"),
         version_check_result: None,
         update_notification_dismissed: false,
+        update_in_progress: false,
       },
       Task::batch([
         main_open_task.discard(),
@@ -493,12 +495,17 @@ impl App {
         Task::none()
       }
       UIMessage::UpdateApp => {
+        // Prevent multiple presses
+        if self.update_in_progress {
+          return Task::none();
+        }
         // Download and install the update asynchronously
         if let Some(ref result) = self.version_check_result {
           if let (Some(url), Some(version)) = (
             result.windows_msi_download_url.clone(),
             result.latest_version.clone(),
           ) {
+            self.update_in_progress = true;
             return Task::future(async move {
               let result = version_check::download_and_install_update(url, version).await;
               UIMessage::UpdateAppResult(result)
@@ -515,12 +522,15 @@ impl App {
           }
           UpdateResult::DownloadFailed(err) => {
             eprintln!("Update download failed: {}", err);
+            self.update_in_progress = false; // Re-enable button on failure
           }
           UpdateResult::LaunchFailed(err) => {
             eprintln!("Installer launch failed: {}", err);
+            self.update_in_progress = false; // Re-enable button on failure
           }
           UpdateResult::NoUpdateUrl => {
             eprintln!("No update URL available");
+            self.update_in_progress = false; // Re-enable button on failure
           }
         }
         Task::none()
@@ -867,93 +877,127 @@ impl App {
         .padding([10, 0]),
         // Update notification (redesigned)
         {
-          let notification: Element<'_, UIMessage> = if let Some(ref result) =
-            self.version_check_result
-          {
-            if result.update_available && !self.update_notification_dismissed {
-              if let Some(ref version) = result.latest_version {
-                row![
-                  text("New Version Available :").size(13),
-                  // Green update button
-                  button(
-                    row![
-                      svg(iced::widget::svg::Handle::from_memory(include_bytes!(
-                        "../../assets/update.svg"
-                      )))
-                      .width(Length::Fixed(15.0))
-                      .height(Length::Fixed(15.0))
+          let notification: Element<'_, UIMessage> =
+            if let Some(ref result) = self.version_check_result {
+              if result.update_available && !self.update_notification_dismissed {
+                if let Some(ref version) = result.latest_version {
+                  row![
+                    text("New Version Available :").size(13),
+                    // Green update button (disabled while updating)
+                    {
+                      let is_updating = self.update_in_progress;
+                      let button_text = if is_updating {
+                        "Updating...".to_string()
+                      } else {
+                        format!("Update v{}", version)
+                      };
+                      let mut btn = button(
+                        row![
+                          svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                            "../../assets/update.svg"
+                          )))
+                          .width(Length::Fixed(15.0))
+                          .height(Length::Fixed(15.0))
+                          .style(
+                            move |_theme: &Theme, _status: iced::widget::svg::Status| {
+                              iced::widget::svg::Style {
+                                color: Some(if is_updating {
+                                  iced::Color::from_rgba(1.0, 1.0, 1.0, 0.5)
+                                } else {
+                                  iced::Color::WHITE
+                                }),
+                              }
+                            }
+                          ),
+                          text(button_text).size(13),
+                        ]
+                        .spacing(4)
+                        .align_y(iced::Alignment::Center),
+                      )
+                      .padding([4, 12])
                       .style(
-                        |_theme: &Theme, _status: iced::widget::svg::Status| {
-                          iced::widget::svg::Style {
-                            color: Some(iced::Color::WHITE),
+                        move |_: &Theme, status: iced::widget::button::Status| {
+                          if is_updating {
+                            // Disabled style
+                            iced::widget::button::Style {
+                              background: Some(iced::Background::Color(iced::Color::from_rgb(
+                                0.4, 0.5, 0.4,
+                              ))),
+                              text_color: iced::Color::from_rgba(1.0, 1.0, 1.0, 0.5),
+                              border: iced::Border {
+                                color: iced::Color::from_rgb(0.35, 0.45, 0.35),
+                                width: 1.0,
+                                radius: 4.0.into(),
+                              },
+                              shadow: iced::Shadow::default(),
+                              snap: false,
+                            }
+                          } else {
+                            // Normal style
+                            iced::widget::button::Style {
+                              background: Some(iced::Background::Color(match status {
+                                iced::widget::button::Status::Hovered => {
+                                  iced::Color::from_rgb(0.15, 0.55, 0.25)
+                                }
+                                _ => iced::Color::from_rgb(0.2, 0.6, 0.3),
+                              })),
+                              text_color: iced::Color::WHITE,
+                              border: iced::Border {
+                                color: iced::Color::from_rgb(0.15, 0.5, 0.25),
+                                width: 1.0,
+                                radius: 4.0.into(),
+                              },
+                              shadow: iced::Shadow::default(),
+                              snap: false,
+                            }
                           }
-                        }
-                      ),
-                      text(format!("Update v{}", version)).size(13),
-                    ]
-                    .spacing(4)
-                    .align_y(iced::Alignment::Center),
-                  )
-                  .on_press(UIMessage::UpdateApp)
-                  .padding([4, 12])
-                  .style(|_: &Theme, status: iced::widget::button::Status| {
-                    iced::widget::button::Style {
-                      background: Some(iced::Background::Color(match status {
-                        iced::widget::button::Status::Hovered => {
-                          iced::Color::from_rgb(0.15, 0.55, 0.25)
-                        }
-                        _ => iced::Color::from_rgb(0.2, 0.6, 0.3),
-                      })),
-                      text_color: iced::Color::WHITE,
-                      border: iced::Border {
-                        color: iced::Color::from_rgb(0.15, 0.5, 0.25),
-                        width: 1.0,
-                        radius: 4.0.into(),
-                      },
-                      shadow: iced::Shadow::default(),
-                      snap: false,
-                    }
-                  }),
-                  // Later button (ghost style)
-                  button(text("Later").size(13))
-                    .on_press(UIMessage::DismissUpdateNotification)
-                    .padding([4, 12])
-                    .style(|theme: &Theme, status: iced::widget::button::Status| {
-                      let palette = theme.extended_palette();
-                      iced::widget::button::Style {
-                        background: Some(iced::Background::Color(match status {
-                          iced::widget::button::Status::Hovered => palette.background.weak.color,
-                          _ => iced::Color::TRANSPARENT,
-                        })),
-                        text_color: palette.background.base.text,
-                        border: iced::Border {
-                          color: palette.background.strong.color,
-                          width: 1.0,
-                          radius: 4.0.into(),
                         },
-                        shadow: iced::Shadow::default(),
-                        snap: false,
+                      );
+                      if !is_updating {
+                        btn = btn.on_press(UIMessage::UpdateApp);
                       }
-                    }),
-                ]
-                .padding(Padding {
-                  top: 10.0,
-                  bottom: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                })
-                .spacing(10)
-                .align_y(iced::Alignment::Center)
-                .into()
+                      btn
+                    },
+                    // Later button (ghost style)
+                    button(text("Later").size(13))
+                      .on_press(UIMessage::DismissUpdateNotification)
+                      .padding([4, 12])
+                      .style(|theme: &Theme, status: iced::widget::button::Status| {
+                        let palette = theme.extended_palette();
+                        iced::widget::button::Style {
+                          background: Some(iced::Background::Color(match status {
+                            iced::widget::button::Status::Hovered => palette.background.weak.color,
+                            _ => iced::Color::TRANSPARENT,
+                          })),
+                          text_color: palette.background.base.text,
+                          border: iced::Border {
+                            color: palette.background.strong.color,
+                            width: 1.0,
+                            radius: 4.0.into(),
+                          },
+                          shadow: iced::Shadow::default(),
+                          snap: false,
+                        }
+                      }),
+                  ]
+                  .padding(Padding {
+                    top: 10.0,
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                  })
+                  .spacing(10)
+                  .align_y(iced::Alignment::Center)
+                  .into()
+                } else {
+                  Space::new().height(0).into()
+                }
               } else {
                 Space::new().height(0).into()
               }
             } else {
               Space::new().height(0).into()
-            }
-          } else {
-            Space::new().height(0).into()
-          };
+            };
           notification
         }
       ])
