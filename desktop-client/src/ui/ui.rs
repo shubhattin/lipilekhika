@@ -1095,7 +1095,8 @@ impl App {
                 if let Some(ref result) = self.version_check_result {
                   if result.update_available {
                     if let Some(ref version) = result.latest_version {
-                      mouse_area(
+                      if self.update_in_progress {
+                        // Non-interactive "Updating..." variant with disabled styling
                         container(
                           row![
                             svg(iced::widget::svg::Handle::from_memory(include_bytes!(
@@ -1106,14 +1107,14 @@ impl App {
                             .style(
                               |_theme: &Theme, _status: iced::widget::svg::Status| {
                                 iced::widget::svg::Style {
-                                  color: Some(iced::Color::WHITE),
+                                  color: Some(iced::Color::from_rgba(1.0, 1.0, 1.0, 0.5)),
                                 }
                               }
                             ),
-                            text(format!("Update available: v{}", version))
+                            text("Updating...")
                               .size(11)
                               .style(|_theme: &Theme| iced::widget::text::Style {
-                                color: Some(iced::Color::WHITE),
+                                color: Some(iced::Color::from_rgba(1.0, 1.0, 1.0, 0.5)),
                               }),
                           ]
                           .spacing(6)
@@ -1122,19 +1123,59 @@ impl App {
                         .padding([4, 10])
                         .style(|_theme: &Theme| container::Style {
                           background: Some(iced::Background::Color(iced::Color::from_rgb(
-                            0.2, 0.6, 0.3,
+                            0.4, 0.5, 0.4,
                           ))),
                           border: iced::Border {
-                            color: iced::Color::from_rgb(0.15, 0.5, 0.25),
+                            color: iced::Color::from_rgb(0.35, 0.45, 0.35),
                             width: 1.0,
                             radius: 4.0.into(),
                           },
                           ..Default::default()
-                        }),
-                      )
-                      .on_press(UIMessage::UpdateApp)
-                      .interaction(mouse::Interaction::Pointer)
-                      .into()
+                        })
+                        .into()
+                      } else {
+                        // Clickable update indicator
+                        mouse_area(
+                          container(
+                            row![
+                              svg(iced::widget::svg::Handle::from_memory(include_bytes!(
+                                "../../assets/update.svg"
+                              )))
+                              .width(Length::Fixed(14.0))
+                              .height(Length::Fixed(14.0))
+                              .style(
+                                |_theme: &Theme, _status: iced::widget::svg::Status| {
+                                  iced::widget::svg::Style {
+                                    color: Some(iced::Color::WHITE),
+                                  }
+                                }
+                              ),
+                              text(format!("Update available: v{}", version))
+                                .size(11)
+                                .style(|_theme: &Theme| iced::widget::text::Style {
+                                  color: Some(iced::Color::WHITE),
+                                }),
+                            ]
+                            .spacing(6)
+                            .align_y(iced::Alignment::Center),
+                          )
+                          .padding([4, 10])
+                          .style(|_theme: &Theme| container::Style {
+                            background: Some(iced::Background::Color(iced::Color::from_rgb(
+                              0.2, 0.6, 0.3,
+                            ))),
+                            border: iced::Border {
+                              color: iced::Color::from_rgb(0.15, 0.5, 0.25),
+                              width: 1.0,
+                              radius: 4.0.into(),
+                            },
+                            ..Default::default()
+                          }),
+                        )
+                        .on_press(UIMessage::UpdateApp)
+                        .interaction(mouse::Interaction::Pointer)
+                        .into()
+                      }
                     } else {
                       Space::new().height(0).into()
                     }
