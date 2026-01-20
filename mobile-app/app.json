@@ -23,6 +23,7 @@
       "package": "com.shubhattin.mobileapp"
     },
     "web": {
+      "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
