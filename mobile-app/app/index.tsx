@@ -9,8 +9,9 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Copy,
   HelpCircle,
@@ -160,12 +161,13 @@ export default function TransliterationScreen() {
   // Render About page
   if (currentPage === "about") {
     return (
-      <SafeAreaView className="flex-1 bg-zinc-50 dark:bg-zinc-900">
+      <SafeAreaView style={{ flex: 1 }} className="bg-zinc-50 dark:bg-zinc-900">
         {/* Header */}
         <View className="flex-row items-center border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
-            className="mr-3"
+            className="mr-3 p-2"
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
           >
             <Menu size={24} color={isDark ? "#fff" : "#18181b"} />
           </TouchableOpacity>
@@ -186,10 +188,14 @@ export default function TransliterationScreen() {
 
   // Render Home page
   return (
-    <SafeAreaView className="flex-1 bg-zinc-50 dark:bg-zinc-900">
+    <SafeAreaView style={{ flex: 1 }} className="bg-zinc-50 dark:bg-zinc-900">
       {/* Header */}
       <View className="flex-row items-center border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-        <TouchableOpacity onPress={() => setMenuVisible(true)} className="mr-3">
+        <TouchableOpacity
+          onPress={() => setMenuVisible(true)}
+          className="mr-3 p-2"
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+        >
           <Menu size={24} color={isDark ? "#fff" : "#18181b"} />
         </TouchableOpacity>
         <View>
@@ -201,10 +207,10 @@ export default function TransliterationScreen() {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        style={{ flex: 1 }}
       >
         <ScrollView
-          className="flex-1"
+          style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 32 }}
           keyboardShouldPersistTaps="handled"
         >
