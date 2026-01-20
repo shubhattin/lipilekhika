@@ -20,6 +20,7 @@ import {
   Menu,
 } from "lucide-react-native";
 import * as Clipboard from "expo-clipboard";
+import { useUniwind } from "uniwind";
 
 import {
   transliterate,
@@ -39,13 +40,13 @@ import { SettingsPopover } from "../components/SettingsPopover";
 import { TypingHelper } from "../components/TypingHelper";
 import { MenuDrawer } from "../components/MenuDrawer";
 import { AboutPage } from "../components/AboutPage";
-import { useTheme } from "../components/ThemeContext";
 
 const DEFAULT_FROM: ScriptListType = "Devanagari";
 const DEFAULT_TO: ScriptListType = "Romanized";
 
 export default function TransliterationScreen() {
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   // Navigation state
   const [currentPage, setCurrentPage] = useState<"home" | "about">("home");
@@ -159,24 +160,16 @@ export default function TransliterationScreen() {
   // Render About page
   if (currentPage === "about") {
     return (
-      <SafeAreaView
-        className={`flex-1 ${isDark ? "bg-zinc-900" : "bg-zinc-50"}`}
-      >
+      <SafeAreaView className="flex-1 bg-zinc-50 dark:bg-zinc-900">
         {/* Header */}
-        <View
-          className={`flex-row items-center border-b px-4 py-3 ${
-            isDark ? "border-zinc-800 bg-zinc-900" : "border-zinc-200 bg-white"
-          }`}
-        >
+        <View className="flex-row items-center border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
           <TouchableOpacity
             onPress={() => setMenuVisible(true)}
             className="mr-3"
           >
             <Menu size={24} color={isDark ? "#fff" : "#18181b"} />
           </TouchableOpacity>
-          <Text
-            className={`text-lg font-semibold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
             About
           </Text>
         </View>
@@ -193,20 +186,14 @@ export default function TransliterationScreen() {
 
   // Render Home page
   return (
-    <SafeAreaView className={`flex-1 ${isDark ? "bg-zinc-900" : "bg-zinc-50"}`}>
+    <SafeAreaView className="flex-1 bg-zinc-50 dark:bg-zinc-900">
       {/* Header */}
-      <View
-        className={`flex-row items-center border-b px-4 py-3 ${
-          isDark ? "border-zinc-800 bg-zinc-900" : "border-zinc-200 bg-white"
-        }`}
-      >
+      <View className="flex-row items-center border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
         <TouchableOpacity onPress={() => setMenuVisible(true)} className="mr-3">
           <Menu size={24} color={isDark ? "#fff" : "#18181b"} />
         </TouchableOpacity>
         <View>
-          <Text
-            className={`text-lg font-semibold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+          <Text className="text-lg font-semibold text-zinc-900 dark:text-white">
             Lipi Lekhika
           </Text>
         </View>
@@ -223,21 +210,11 @@ export default function TransliterationScreen() {
         >
           <View className="p-4">
             {/* Main Card */}
-            <View
-              className={`rounded-2xl border p-4 ${
-                isDark
-                  ? "border-zinc-700 bg-zinc-800/50"
-                  : "border-zinc-200 bg-white shadow-sm"
-              }`}
-            >
+            <View className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/50">
               {/* FROM Section */}
               <View className="mb-4">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text
-                    className={`text-xs font-semibold uppercase tracking-wide ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}
-                  >
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     From
                   </Text>
                   <ScriptSelector
@@ -249,9 +226,7 @@ export default function TransliterationScreen() {
                 {/* Source text label row */}
                 <View className="mb-2 flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
-                    <Text
-                      className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                    >
+                    <Text className="text-sm text-zinc-500 dark:text-zinc-400">
                       Source text
                     </Text>
                     <TouchableOpacity
@@ -298,11 +273,7 @@ export default function TransliterationScreen() {
 
                 {/* Input TextArea */}
                 <TextInput
-                  className={`min-h-[140px] rounded-lg border p-3 text-base ${
-                    isDark
-                      ? "border-zinc-700 bg-zinc-900 text-white"
-                      : "border-zinc-300 bg-zinc-50 text-zinc-900"
-                  }`}
+                  className="min-h-[140px] rounded-lg border border-zinc-300 bg-zinc-50 p-3 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                   placeholder="Enter text to transliterate..."
                   placeholderTextColor={isDark ? "#71717a" : "#a1a1aa"}
                   multiline
@@ -316,15 +287,9 @@ export default function TransliterationScreen() {
               <View className="mb-4 items-center">
                 <TouchableOpacity
                   onPress={handleSwap}
-                  className={`h-10 w-10 items-center justify-center rounded-full border ${
-                    isDark
-                      ? "border-zinc-600 bg-zinc-700"
-                      : "border-zinc-300 bg-zinc-100"
-                  }`}
+                  className="h-10 w-10 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-700"
                 >
-                  <Text
-                    className={`text-lg ${isDark ? "text-white" : "text-zinc-900"}`}
-                  >
+                  <Text className="text-lg text-zinc-900 dark:text-white">
                     ⇅
                   </Text>
                 </TouchableOpacity>
@@ -333,11 +298,7 @@ export default function TransliterationScreen() {
               {/* TO Section */}
               <View className="mb-4">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text
-                    className={`text-xs font-semibold uppercase tracking-wide ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}
-                  >
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     To
                   </Text>
                   <ScriptSelector
@@ -348,9 +309,7 @@ export default function TransliterationScreen() {
 
                 {/* Output label row */}
                 <View className="mb-2 flex-row items-center gap-3">
-                  <Text
-                    className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                  >
+                  <Text className="text-sm text-zinc-500 dark:text-zinc-400">
                     Output
                   </Text>
                   <TouchableOpacity
@@ -360,9 +319,7 @@ export default function TransliterationScreen() {
                     <Copy size={14} color={isDark ? "#9ca3af" : "#6b7280"} />
                   </TouchableOpacity>
                   <View className="flex-row items-center gap-1.5">
-                    <Text
-                      className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                    >
+                    <Text className="text-sm text-zinc-500 dark:text-zinc-400">
                       Auto
                     </Text>
                     <Switch
@@ -393,20 +350,10 @@ export default function TransliterationScreen() {
                 </View>
 
                 {/* Output TextArea */}
-                <View
-                  className={`min-h-[140px] rounded-lg border p-3 ${
-                    isDark
-                      ? "border-zinc-700 bg-zinc-900/50"
-                      : "border-zinc-300 bg-zinc-100"
-                  }`}
-                >
-                  <Text
-                    className={`text-base ${isDark ? "text-white" : "text-zinc-900"}`}
-                  >
+                <View className="min-h-[140px] rounded-lg border border-zinc-300 bg-zinc-100 p-3 dark:border-zinc-700 dark:bg-zinc-900/50">
+                  <Text className="text-base text-zinc-900 dark:text-white">
                     {outputText || (
-                      <Text
-                        className={isDark ? "text-zinc-500" : "text-zinc-400"}
-                      >
+                      <Text className="text-zinc-400 dark:text-zinc-500">
                         Transliterated text will appear here...
                       </Text>
                     )}

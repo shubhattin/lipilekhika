@@ -16,14 +16,15 @@ import {
   type CategoryKey,
 } from "./scriptCategories";
 import type { ScriptSelectorProps } from "./types";
-import { useTheme } from "./ThemeContext";
+import { useUniwind } from "uniwind";
 
 export function ScriptSelector({
   script,
   onScriptChange,
 }: ScriptSelectorProps) {
   const [modalVisible, setModalVisible] = useState(false);
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   const handleSelect = (selectedScript: ScriptListType) => {
     onScriptChange(selectedScript);
@@ -34,24 +35,14 @@ export function ScriptSelector({
     <>
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
-        className={`flex-row items-center gap-1.5 rounded-lg border px-3 py-2 ${
-          isDark ? "border-zinc-700 bg-zinc-800/50" : "border-zinc-300 bg-white"
-        }`}
+        className="flex-row items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800/50"
       >
-        <View
-          className={`h-6 w-6 items-center justify-center rounded-full ${
-            isDark ? "bg-zinc-700" : "bg-zinc-200"
-          }`}
-        >
-          <Text
-            className={`text-sm ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+        <View className="h-6 w-6 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
+          <Text className="text-sm text-zinc-900 dark:text-white">
             {getScriptAvatar(script)}
           </Text>
         </View>
-        <Text className={`text-sm ${isDark ? "text-white" : "text-zinc-900"}`}>
-          {script}
-        </Text>
+        <Text className="text-sm text-zinc-900 dark:text-white">{script}</Text>
         <ChevronDown size={16} color={isDark ? "#9ca3af" : "#6b7280"} />
       </TouchableOpacity>
 
@@ -65,26 +56,14 @@ export function ScriptSelector({
           className="flex-1 bg-black/60"
           onPress={() => setModalVisible(false)}
         >
-          <View
-            className={`mx-4 mt-20 max-h-[70%] rounded-xl p-4 ${
-              isDark ? "bg-zinc-900" : "bg-white"
-            }`}
-          >
-            <Text
-              className={`mb-4 text-lg font-semibold ${
-                isDark ? "text-white" : "text-zinc-900"
-              }`}
-            >
+          <View className="mx-4 mt-20 max-h-[70%] rounded-xl bg-white p-4 dark:bg-zinc-900">
+            <Text className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
               Select Script
             </Text>
             <ScrollView showsVerticalScrollIndicator={false}>
               {(Object.keys(CATEGORIES) as CategoryKey[]).map((category) => (
                 <View key={category} className="mb-4">
-                  <Text
-                    className={`mb-2 text-xs font-semibold uppercase tracking-wide ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}
-                  >
+                  <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                     {CATEGORIES[category]}
                   </Text>
                   {getScriptsByCategory(category).map((scriptItem) => (
@@ -93,22 +72,12 @@ export function ScriptSelector({
                       onPress={() => handleSelect(scriptItem)}
                       className={`flex-row items-center gap-3 rounded-lg px-3 py-2.5 ${
                         scriptItem === script
-                          ? isDark
-                            ? "bg-blue-600/20"
-                            : "bg-blue-50"
+                          ? "bg-blue-50 dark:bg-blue-600/20"
                           : ""
                       }`}
                     >
-                      <View
-                        className={`h-7 w-7 items-center justify-center rounded-full ${
-                          isDark ? "bg-zinc-700" : "bg-zinc-200"
-                        }`}
-                      >
-                        <Text
-                          className={`text-base ${
-                            isDark ? "text-white" : "text-zinc-900"
-                          }`}
-                        >
+                      <View className="h-7 w-7 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
+                        <Text className="text-base text-zinc-900 dark:text-white">
                           {getScriptAvatar(scriptItem)}
                         </Text>
                       </View>
@@ -116,9 +85,7 @@ export function ScriptSelector({
                         className={`text-sm ${
                           scriptItem === script
                             ? "font-medium text-blue-500"
-                            : isDark
-                              ? "text-white"
-                              : "text-zinc-900"
+                            : "text-zinc-900 dark:text-white"
                         }`}
                       >
                         {scriptItem}

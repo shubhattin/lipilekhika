@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { X } from "lucide-react-native";
 import type { SettingsPopoverProps } from "./types";
-import { useTheme } from "./ThemeContext";
+import { useUniwind } from "uniwind";
 
 export function SettingsPopover({
   visible,
@@ -19,7 +19,8 @@ export function SettingsPopover({
   includeInherentVowel,
   onIncludeInherentVowelChange,
 }: SettingsPopoverProps) {
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   return (
     <Modal
@@ -29,17 +30,9 @@ export function SettingsPopover({
       onRequestClose={onClose}
     >
       <Pressable className="flex-1 bg-black/60" onPress={onClose}>
-        <View
-          className={`mx-4 mt-32 rounded-xl p-5 ${
-            isDark ? "bg-zinc-900" : "bg-white"
-          }`}
-        >
+        <View className="mx-4 mt-32 rounded-xl bg-white p-5 dark:bg-zinc-900">
           <View className="mb-4 flex-row items-center justify-between">
-            <Text
-              className={`text-base font-medium ${
-                isDark ? "text-white" : "text-zinc-900"
-              }`}
-            >
+            <Text className="text-base font-medium text-zinc-900 dark:text-white">
               Typing Options
             </Text>
             <TouchableOpacity onPress={onClose}>
@@ -51,16 +44,10 @@ export function SettingsPopover({
             {/* Use Native Numerals */}
             <View className="flex-row items-center justify-between gap-4">
               <View className="flex-1">
-                <Text
-                  className={`text-sm font-medium ${
-                    isDark ? "text-white" : "text-zinc-900"
-                  }`}
-                >
+                <Text className="text-sm font-medium text-zinc-900 dark:text-white">
                   Use Native Numerals
                 </Text>
-                <Text
-                  className={`text-xs ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                >
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400">
                   Convert numbers to script numerals
                 </Text>
               </View>
@@ -75,23 +62,15 @@ export function SettingsPopover({
               />
             </View>
 
-            <View
-              className={`h-px ${isDark ? "bg-zinc-700" : "bg-zinc-200"}`}
-            />
+            <View className="h-px bg-zinc-200 dark:bg-zinc-700" />
 
             {/* Include Inherent Vowel */}
             <View className="flex-row items-center justify-between gap-4">
               <View className="flex-1">
-                <Text
-                  className={`text-sm font-medium ${
-                    isDark ? "text-white" : "text-zinc-900"
-                  }`}
-                >
+                <Text className="text-sm font-medium text-zinc-900 dark:text-white">
                   Include Inherent Vowel
                 </Text>
-                <Text
-                  className={`text-xs ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                >
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400">
                   Add inherent vowel (schwa) to consonants
                 </Text>
               </View>

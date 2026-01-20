@@ -1,10 +1,12 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "../global.css";
-import { ThemeProvider, useTheme } from "../components/ThemeContext";
+import { ThemeProvider } from "../components/ThemeContext";
+import { useUniwind } from "uniwind";
 
 function RootLayoutContent() {
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   return (
     <>

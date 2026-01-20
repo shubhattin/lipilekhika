@@ -5,8 +5,8 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Uniwind, useUniwind } from "uniwind";
 
 export type ThemeMode = "system" | "dark" | "light";
 export type ResolvedTheme = "dark" | "light";
@@ -23,15 +23,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = "@lipi_theme_mode";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const systemColorScheme = useColorScheme();
+  const { theme } = useUniwind();
   const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
 
-  // Load saved theme on mount
+  // Load saved theme on mount and apply it
   useEffect(() => {
     AsyncStorage.getItem(THEME_STORAGE_KEY)
       .then((savedTheme) => {
         if (savedTheme && ["system", "dark", "light"].includes(savedTheme)) {
           setThemeModeState(savedTheme as ThemeMode);
+          Uniwind.setTheme(savedTheme as ThemeMode);
         }
       })
       .catch(() => {
@@ -41,6 +42,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setThemeMode = async (mode: ThemeMode) => {
     setThemeModeState(mode);
+    Uniwind.setTheme(mode);
     try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
     } catch (error) {
@@ -48,13 +50,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const resolvedTheme: ResolvedTheme =
-    themeMode === "system"
-      ? systemColorScheme === "light"
-        ? "light"
-        : "dark"
-      : themeMode;
-
+  const resolvedTheme: ResolvedTheme = theme === "dark" ? "dark" : "light";
   const isDark = resolvedTheme === "dark";
 
   return (

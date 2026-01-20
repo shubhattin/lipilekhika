@@ -12,7 +12,7 @@ import { ChevronDown, Info } from "lucide-react-native";
 import type { TransliterationOptions } from "lipilekhika";
 import { CUSTOM_OPTION_DESCRIPTIONS } from "./optionDescriptions";
 import type { CustomOptionsProps } from "./types";
-import { useTheme } from "./ThemeContext";
+import { useUniwind } from "uniwind";
 
 // Enable LayoutAnimation on Android
 if (
@@ -29,7 +29,8 @@ export function CustomOptions({
 }: CustomOptionsProps) {
   const [showOptions, setShowOptions] = useState(false);
   const [infoVisible, setInfoVisible] = useState<string | null>(null);
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   const toggleOptions = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -44,20 +45,12 @@ export function CustomOptions({
   };
 
   return (
-    <View
-      className={`overflow-hidden rounded-lg border ${
-        isDark ? "border-zinc-700 bg-zinc-800/50" : "border-zinc-200 bg-zinc-50"
-      }`}
-    >
+    <View className="overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50">
       <TouchableOpacity
         onPress={toggleOptions}
         className="flex-row items-center justify-between px-4 py-3.5"
       >
-        <Text
-          className={`text-sm font-medium tracking-wide ${
-            isDark ? "text-white" : "text-zinc-900"
-          }`}
-        >
+        <Text className="text-sm font-medium tracking-wide text-zinc-900 dark:text-white">
           Transliteration Options
         </Text>
         <ChevronDown
@@ -70,17 +63,9 @@ export function CustomOptions({
       </TouchableOpacity>
 
       {showOptions && (
-        <View
-          className={`border-t px-4 py-4 ${
-            isDark ? "border-zinc-700" : "border-zinc-200"
-          }`}
-        >
+        <View className="border-t border-zinc-200 px-4 py-4 dark:border-zinc-700">
           {availableOptions.length === 0 ? (
-            <Text
-              className={
-                isDark ? "text-sm text-zinc-400" : "text-sm text-zinc-500"
-              }
-            >
+            <Text className="text-sm text-zinc-500 dark:text-zinc-400">
               No options available for this combination.
             </Text>
           ) : (
@@ -110,9 +95,7 @@ export function CustomOptions({
                         thumbColor="#fff"
                       />
                       <Text
-                        className={`flex-1 text-sm ${
-                          isDark ? "text-white" : "text-zinc-900"
-                        }`}
+                        className="flex-1 text-sm text-zinc-900 dark:text-white"
                         numberOfLines={1}
                       >
                         {displayName}
@@ -134,14 +117,8 @@ export function CustomOptions({
 
               {/* Info tooltip */}
               {infoVisible && (
-                <View
-                  className={`mt-2 rounded-lg p-3 ${
-                    isDark ? "bg-zinc-700" : "bg-zinc-200"
-                  }`}
-                >
-                  <Text
-                    className={`text-sm ${isDark ? "text-zinc-200" : "text-zinc-700"}`}
-                  >
+                <View className="mt-2 rounded-lg bg-zinc-200 p-3 dark:bg-zinc-700">
+                  <Text className="text-sm text-zinc-700 dark:text-zinc-200">
                     {CUSTOM_OPTION_DESCRIPTIONS[
                       infoVisible as keyof TransliterationOptions
                     ]?.[1] ?? "No description available."}

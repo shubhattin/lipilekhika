@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { ExternalLink, Github, Globe, Heart } from "lucide-react-native";
-import { useTheme } from "./ThemeContext";
+import { useUniwind } from "uniwind";
 
 export function AboutPage() {
-  const { isDark } = useTheme();
+  const { theme } = useUniwind();
+  const isDark = theme === "dark";
 
   const features = [
     "Transliterate text between 20+ Indian scripts",
@@ -41,40 +42,26 @@ export function AboutPage() {
 
   return (
     <ScrollView
-      className={`flex-1 ${isDark ? "bg-zinc-900" : "bg-zinc-50"}`}
+      className="flex-1 bg-zinc-50 dark:bg-zinc-900"
       contentContainerStyle={{ paddingBottom: 40 }}
     >
       <View className="p-4">
         {/* Header */}
         <View className="mb-6 items-center">
-          <Text
-            className={`text-3xl font-bold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+          <Text className="text-3xl font-bold text-zinc-900 dark:text-white">
             Lipi Lekhika
           </Text>
-          <Text
-            className={`text-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-          >
+          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
             लिपि लेखिका
           </Text>
-          <Text
-            className={`mt-2 text-center text-base ${isDark ? "text-zinc-300" : "text-zinc-600"}`}
-          >
+          <Text className="mt-2 text-center text-base text-zinc-600 dark:text-zinc-300">
             Script Transliteration Tool
           </Text>
         </View>
 
         {/* Description */}
-        <View
-          className={`mb-6 rounded-xl border p-4 ${
-            isDark
-              ? "border-zinc-700 bg-zinc-800/50"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
-          <Text
-            className={`text-base leading-6 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
-          >
+        <View className="mb-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <Text className="text-base leading-6 text-zinc-700 dark:text-zinc-300">
             Lipi Lekhika is a powerful Indian script transliteration library and
             tool. It enables seamless conversion of text between various Brahmic
             scripts used across South Asia.
@@ -82,28 +69,14 @@ export function AboutPage() {
         </View>
 
         {/* Features */}
-        <View
-          className={`mb-6 rounded-xl border p-4 ${
-            isDark
-              ? "border-zinc-700 bg-zinc-800/50"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
-          <Text
-            className={`mb-3 text-lg font-semibold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+        <View className="mb-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <Text className="mb-3 text-lg font-semibold text-zinc-900 dark:text-white">
             ✨ Features
           </Text>
           {features.map((feature, index) => (
             <View key={index} className="mb-2 flex-row items-start">
-              <Text
-                className={`mr-2 ${isDark ? "text-blue-400" : "text-blue-500"}`}
-              >
-                •
-              </Text>
-              <Text
-                className={`flex-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
-              >
+              <Text className="mr-2 text-blue-500 dark:text-blue-400">•</Text>
+              <Text className="flex-1 text-zinc-700 dark:text-zinc-300">
                 {feature}
               </Text>
             </View>
@@ -111,62 +84,36 @@ export function AboutPage() {
         </View>
 
         {/* Supported Scripts */}
-        <View
-          className={`mb-6 rounded-xl border p-4 ${
-            isDark
-              ? "border-zinc-700 bg-zinc-800/50"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
-          <Text
-            className={`mb-3 text-lg font-semibold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+        <View className="mb-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <Text className="mb-3 text-lg font-semibold text-zinc-900 dark:text-white">
             📜 Supported Scripts
           </Text>
 
-          <Text
-            className={`mb-2 text-sm font-medium ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-          >
+          <Text className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
             Modern Indian Scripts
           </Text>
-          <Text
-            className={`mb-3 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
-          >
+          <Text className="mb-3 text-zinc-700 dark:text-zinc-300">
             {scripts.modern.join(" • ")}
           </Text>
 
-          <Text
-            className={`mb-2 text-sm font-medium ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-          >
+          <Text className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
             Romanization
           </Text>
-          <Text
-            className={`mb-3 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}
-          >
+          <Text className="mb-3 text-zinc-700 dark:text-zinc-300">
             {scripts.romanized.join(" • ")}
           </Text>
 
-          <Text
-            className={`mb-2 text-sm font-medium ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-          >
+          <Text className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
             Ancient Scripts
           </Text>
-          <Text className={isDark ? "text-zinc-300" : "text-zinc-700"}>
+          <Text className="text-zinc-700 dark:text-zinc-300">
             {scripts.ancient.join(" • ")}
           </Text>
         </View>
 
         {/* Links */}
-        <View
-          className={`mb-6 rounded-xl border p-4 ${
-            isDark
-              ? "border-zinc-700 bg-zinc-800/50"
-              : "border-zinc-200 bg-white"
-          }`}
-        >
-          <Text
-            className={`mb-3 text-lg font-semibold ${isDark ? "text-white" : "text-zinc-900"}`}
-          >
+        <View className="mb-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+          <Text className="mb-3 text-lg font-semibold text-zinc-900 dark:text-white">
             🔗 Links
           </Text>
 
@@ -174,14 +121,10 @@ export function AboutPage() {
             onPress={() =>
               Linking.openURL("https://github.com/AoH-lipi/lipilekhika")
             }
-            className={`mb-2 flex-row items-center gap-3 rounded-lg p-3 ${
-              isDark ? "bg-zinc-700/50" : "bg-zinc-100"
-            }`}
+            className="mb-2 flex-row items-center gap-3 rounded-lg bg-zinc-100 p-3 dark:bg-zinc-700/50"
           >
             <Github size={20} color={isDark ? "#fff" : "#18181b"} />
-            <Text
-              className={`flex-1 ${isDark ? "text-white" : "text-zinc-900"}`}
-            >
+            <Text className="flex-1 text-zinc-900 dark:text-white">
               GitHub Repository
             </Text>
             <ExternalLink size={16} color={isDark ? "#71717a" : "#a1a1aa"} />
@@ -189,14 +132,10 @@ export function AboutPage() {
 
           <TouchableOpacity
             onPress={() => Linking.openURL("https://lipilekhika.vercel.app")}
-            className={`flex-row items-center gap-3 rounded-lg p-3 ${
-              isDark ? "bg-zinc-700/50" : "bg-zinc-100"
-            }`}
+            className="flex-row items-center gap-3 rounded-lg bg-zinc-100 p-3 dark:bg-zinc-700/50"
           >
             <Globe size={20} color={isDark ? "#fff" : "#18181b"} />
-            <Text
-              className={`flex-1 ${isDark ? "text-white" : "text-zinc-900"}`}
-            >
+            <Text className="flex-1 text-zinc-900 dark:text-white">
               Web Application
             </Text>
             <ExternalLink size={16} color={isDark ? "#71717a" : "#a1a1aa"} />
@@ -206,11 +145,9 @@ export function AboutPage() {
         {/* Footer */}
         <View className="items-center py-4">
           <View className="flex-row items-center gap-1">
-            <Text className={isDark ? "text-zinc-500" : "text-zinc-400"}>
-              Made with
-            </Text>
+            <Text className="text-zinc-400 dark:text-zinc-500">Made with</Text>
             <Heart size={14} color="#ef4444" fill="#ef4444" />
-            <Text className={isDark ? "text-zinc-500" : "text-zinc-400"}>
+            <Text className="text-zinc-400 dark:text-zinc-500">
               for Indian Languages
             </Text>
           </View>
