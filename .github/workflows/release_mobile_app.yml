@@ -46,6 +46,11 @@ jobs:
         working-directory: mobile-app
         run: bun install --frozen-lockfile
 
+      # Generate android folder (gitignored, needs to be generated)
+      - name: Expo Prebuild
+        working-directory: mobile-app
+        run: bunx expo prebuild --platform android --clean
+
       # Build APK
       - name: Build Release APK
         working-directory: mobile-app/android
