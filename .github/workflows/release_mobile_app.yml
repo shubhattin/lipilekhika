@@ -16,10 +16,6 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: mobile-app
-
     steps:
       - uses: actions/checkout@v4
 
@@ -47,11 +43,12 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
+        working-directory: mobile-app
         run: bun install --frozen-lockfile
 
       # Build APK
       - name: Build Release APK
-        working-directory: android
+        working-directory: mobile-app/android
         run: ./gradlew assembleRelease
 
       # Upload APK as artifact
