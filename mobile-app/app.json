@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile-app",
-    "slug": "mobile-app",
-    "version": "1.0.0",
+    "name": "lipilekhika",
+    "slug": "lipilekhika",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobileapp",
+    "scheme": "lipilekhika",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

@@ -1,0 +1,63 @@
+name: Release Mobile App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "mobile-app/**"
+      - ".github/workflows/release_mobile_app.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mobile-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # Setup Java for Android build
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Cache Gradle
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('mobile-app/android/**/*.gradle*', 'mobile-app/android/**/gradle-wrapper.properties') }}
+
+      # Install dependencies
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Build APK
+      - name: Build Release APK
+        working-directory: mobile-app/android
+        run: ./gradlew assembleRelease
+
+      # Upload APK as artifact
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-app-apk-${{ github.sha }}
+          path: mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
