@@ -13,8 +13,15 @@ permissions:
   contents: read
 
 jobs:
-  build-android:
+  build-android-gradle:
+    name: Build APK (Gradle)
     runs-on: ubuntu-latest
+
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -51,15 +58,64 @@ jobs:
         working-directory: mobile-app
         run: bunx expo prebuild --platform android --clean
 
-      # Build APK
+      # Decode and setup keystore for signing
+      - name: Decode keystore
+        working-directory: mobile-app
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+
+      # Build signed and zipaligned APK
       - name: Build Release APK
         working-directory: mobile-app/android
-        run: ./gradlew assembleRelease
+        run: |
+          KEYSTORE_PATH="$(pwd)/app/release.keystore"
 
-      # Upload APK as artifact
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file="$KEYSTORE_PATH" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
+
+      # Upload signed APK as artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-app-apk-${{ github.sha }}
+          name: lipilekhika-gradle-${{ github.sha }}
           path: mobile-app/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
+
+  build-android-eas:
+    name: Build APK (EAS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # Setup Node (EAS CLI requires Node)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Install dependencies
+      - name: Install dependencies
+        working-directory: mobile-app
+        run: bun install --frozen-lockfile
+
+      # Setup EAS
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # Build with EAS
+      - name: Build with EAS
+        working-directory: mobile-app
+        run: eas build --platform android --profile preview --non-interactive --no-wait
