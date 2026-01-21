@@ -51,7 +51,7 @@ jobs:
 
       # Build APK
       - name: Build Release APK
-        working-directory: mobile-app/android
+        working-directory: android
         run: ./gradlew assembleRelease
 
       # Upload APK as artifact
