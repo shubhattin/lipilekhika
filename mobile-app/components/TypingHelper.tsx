@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { X, Keyboard, ArrowLeftRight } from "lucide-react-native";
 import type { ScriptListType } from "lipilekhika";
-import { SCRIPT_LIST } from "lipilekhika";
 import { getScriptTypingDataMap, getScriptKramaData } from "lipilekhika/typing";
 import { ScriptSelector } from "./ScriptSelector";
 import type { TypingHelperProps } from "./types";
@@ -96,7 +95,6 @@ export function TypingHelper({
   );
   const [scriptToCompare, setScriptToCompare] =
     useState<ScriptListType>("Romanized");
-  const [showCompareSelector, setShowCompareSelector] = useState(false);
 
   // Typing map data
   const [typingMapData, setTypingMapData] = useState<{
@@ -274,10 +272,6 @@ export function TypingHelper({
   };
 
   const renderCompareTab = () => {
-    const availableScripts = (SCRIPT_LIST as ScriptListType[]).filter(
-      (s) => s !== script && s !== "Normal",
-    );
-
     return (
       <View className="gap-4">
         <View className="flex-row items-center justify-between">
@@ -291,14 +285,10 @@ export function TypingHelper({
             <Text className="text-sm text-zinc-500 dark:text-zinc-400">
               Compare with
             </Text>
-            <TouchableOpacity
-              onPress={() => setShowCompareSelector(true)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 dark:border-zinc-700 dark:bg-zinc-800"
-            >
-              <Text className="text-sm text-zinc-900 dark:text-white">
-                {scriptToCompare}
-              </Text>
-            </TouchableOpacity>
+            <ScriptSelector
+              script={scriptToCompare}
+              onScriptChange={setScriptToCompare}
+            />
           </View>
         </View>
 
@@ -330,52 +320,6 @@ export function TypingHelper({
             )}
           </View>
         ) : null}
-
-        {/* Compare script selector modal */}
-        <Modal
-          visible={showCompareSelector}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowCompareSelector(false)}
-        >
-          <TouchableOpacity
-            className="flex-1 bg-black/60"
-            activeOpacity={1}
-            onPress={() => setShowCompareSelector(false)}
-          >
-            <View className="mx-4 mt-32 max-h-[60%] rounded-xl bg-white p-4 dark:bg-zinc-900">
-              <Text className="mb-3 text-base font-medium text-zinc-900 dark:text-white">
-                Select script to compare
-              </Text>
-              <ScrollView>
-                {availableScripts.map((s) => (
-                  <TouchableOpacity
-                    key={s}
-                    onPress={() => {
-                      setScriptToCompare(s);
-                      setShowCompareSelector(false);
-                    }}
-                    className={`rounded-lg px-3 py-2.5 ${
-                      s === scriptToCompare
-                        ? "bg-blue-50 dark:bg-blue-600/20"
-                        : ""
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm ${
-                        s === scriptToCompare
-                          ? "font-medium text-blue-500"
-                          : "text-zinc-900 dark:text-white"
-                      }`}
-                    >
-                      {s}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </TouchableOpacity>
-        </Modal>
       </View>
     );
   };
