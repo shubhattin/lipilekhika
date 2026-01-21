@@ -2,11 +2,11 @@ name: Release Mobile App
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "mobile-app/**"
-      - ".github/workflows/release_mobile_app.yml"
+    # branches:
+    #   - main
+    # paths:
+    #   - "mobile-app/**"
+    #   - ".github/workflows/release_mobile_app.yml"
   workflow_dispatch:
 
 permissions:
