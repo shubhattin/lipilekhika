@@ -35,6 +35,7 @@ import {
   DEFAULT_INCLUDE_INHERENT_VOWEL,
 } from "lipilekhika/typing";
 
+import { useTypingHandler } from "../hooks/useTypingHandler";
 import { ScriptSelector } from "../components/ScriptSelector";
 import { CustomOptions } from "../components/CustomOptions";
 import { SettingsPopover } from "../components/SettingsPopover";
@@ -73,6 +74,20 @@ export default function TransliterationScreen() {
   const [includeInherentVowel, setIncludeInherentVowel] = useState(
     DEFAULT_INCLUDE_INHERENT_VOWEL,
   );
+
+  const {
+    selection: inputSelection,
+    handleChangeText: handleInputChangeText,
+    handleSelectionChange: handleInputSelectionChange,
+    handleBlur: handleInputBlur,
+  } = useTypingHandler({
+    value: inputText,
+    onValueChange: setInputText,
+    typingEnabled,
+    typingScript: fromScript,
+    useNativeNumerals,
+    includeInherentVowel,
+  });
 
   // UI states
   const [autoConvert, setAutoConvert] = useState(true);
@@ -285,7 +300,10 @@ export default function TransliterationScreen() {
                   multiline
                   textAlignVertical="top"
                   value={inputText}
-                  onChangeText={setInputText}
+                  onChangeText={handleInputChangeText}
+                  onSelectionChange={handleInputSelectionChange}
+                  onBlur={handleInputBlur}
+                  selection={inputSelection}
                 />
               </View>
 
