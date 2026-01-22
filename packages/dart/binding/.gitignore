@@ -1,0 +1,11 @@
+# This file lists patterns to ignore when using version control.
+# All generated files should be regenerated at build time.
+
+# See https://cjycode.com/flutter_rust_bridge/ for more info
+
+# Generated Rust FFI bindings
+src/frb_generated.rs
+
+# Build artifacts
+target/
+Cargo.lock
