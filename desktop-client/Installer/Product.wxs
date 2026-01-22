@@ -4,14 +4,14 @@
            Name="Lipi Lekhika" 
            Language="1033"
            Version="$(var.ProductVersion)" 
-           Manufacturer="Shubham Anand Gupta"
+           Manufacturer="ShubhaYantriki"
            UpgradeCode="93b58ef9-666b-4caf-8efb-b4ce4b91c044">
     
     <Package InstallerVersion="500" 
              Compressed="yes" 
              InstallScope="perMachine"
              Description="Lipi Lekhika - Indic Script Typing Tool"
-             Manufacturer="Shubham Anand Gupta"
+             Manufacturer="ShubhaYantriki"
              Comments="Installer for Lipi Lekhika application" />
 
     <!-- MajorUpgrade allows replacing previous versions -->
@@ -35,7 +35,7 @@
     
     <!-- Add/Remove Programs metadata -->
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/shubhattin/lipilekhika" />
-    <Property Id="ARPCONTACT" Value="Shubham Anand Gupta" />
+    <Property Id="ARPCONTACT" Value="ShubhaYantriki" />
     <Property Id="ARPCOMMENTS" Value="Indic Script Typing Tool for Windows" />
 
     <!-- UI -->

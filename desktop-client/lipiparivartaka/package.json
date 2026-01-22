@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "copy-fonts": "mkdir -p src/fonts && cp -r ../../docs/docs-and-web-client/src/styles/fonts/*.woff2 src/fonts/ && cp ../../docs/docs-and-web-client/src/styles/fonts.css src/fonts.css",
+    "build": "bun run copy-fonts && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "format": "prettier --write ."
   },
   "license": "MIT",
   "dependencies": {
@@ -47,6 +49,9 @@
     "@tauri-apps/cli": "^2",
     "bits-ui": "^2.14.4",
     "clsx": "^2.1.1",
+    "prettier": "^3.8.1",
+    "prettier-plugin-svelte": "^3.4.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "tailwind-merge": "^3.4.0",

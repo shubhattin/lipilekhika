@@ -144,7 +144,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   }
 
   return {
-    /** Await once, then use `takeKeyInputSync` for best typing latency. */
+    /** Await once, then use `takeKeyInput` for best typing latency. */
     ready,
     clearContext,
     takeKeyInput,
@@ -156,7 +156,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     },
     getUseNativeNumerals: () => use_native_numerals,
     getIncludeInherentVowel: () => include_inherent_vowel,
-    getNormalizedScript: () => normalized_typing_lang,
+    getNormalizedScript: () => normalized_typing_lang
   };
 }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, untrack } from 'svelte';
+  import { onMount, untrack, type Snippet } from 'svelte';
   import {
     transliterate,
     preloadScriptData,
@@ -16,23 +16,33 @@
   } from 'lipilekhika/typing';
   // ^ import directly for real time development
   import { getFontClass } from '$components/script/font_list';
-  import prettyMs from 'pretty-ms';
+  // import prettyMs from 'pretty-ms';
 
-  import { Button } from '$lib/components/ui/button';
-  import { Switch } from '$lib/components/ui/switch';
-  import { Textarea } from '$lib/components/ui/textarea';
-  import { Separator } from '$lib/components/ui/separator';
-  import * as Popover from '$lib/components/ui/popover';
+  import { Button } from '~/lib/components/ui/button';
+  import { Switch } from '~/lib/components/ui/switch';
+  import { Textarea } from '~/lib/components/ui/textarea';
+  import { Separator } from '~/lib/components/ui/separator';
+  import * as Popover from '~/lib/components/ui/popover';
   import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { BsCopy } from 'svelte-icons-pack/bs';
-  import { input_text_atom, typing_script_atom } from '$components/script/state';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
   import { SiConvertio } from 'svelte-icons-pack/si';
-  import Label from '$lib/components/ui/label/label.svelte';
-  import PWAInstall from './PWAInstall.svelte';
+  import Label from '~/lib/components/ui/label/label.svelte';
+
+  let {
+    input_text = $bindable(),
+    typing_script = $bindable(),
+    pwa_snippet,
+    transliterate_func = transliterate
+  }: {
+    input_text: string;
+    typing_script: ScriptListType;
+    pwa_snippet?: Snippet;
+    transliterate_func: typeof transliterate;
+  } = $props();
 
   const DEFAULT_TO: ScriptListType = 'Romanized';
 
@@ -40,14 +50,14 @@
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
   let availableOptions = $state<string[]>([]);
-  let conversionTime = $state<string>('');
+  // let conversionTime = $state<string>('');
   let timeoutId: NodeJS.Timeout | undefined;
 
   let typing_enabled = $state(true);
   let useNativeNumerals = $state(DEFAULT_USE_NATIVE_NUMERALS);
   let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
-  let from_input_typing_context = $derived(createTypingContext($typing_script_atom));
+  let from_input_typing_context = $derived(createTypingContext(typing_script));
 
   let typing_modal_open = $state(false);
 
@@ -55,11 +65,11 @@
     event.preventDefault();
     try {
       const startTime = performance.now();
-      const result = await transliterate($input_text_atom, $typing_script_atom, toScript, options);
+      const result = await transliterate_func(input_text, typing_script, toScript, options);
       const endTime = performance.now();
       const timeTaken = endTime - startTime;
 
-      conversionTime = prettyMs(timeTaken);
+      // conversionTime = prettyMs(timeTaken);
       // console.log(`Conversion took: ${conversionTime}`);
       // console.log([inputText, result]);
       outputText = result;
@@ -69,23 +79,23 @@
       }
 
       timeoutId = setTimeout(() => {
-        conversionTime = '';
+        // conversionTime = '';
       }, 5000);
     } catch (error) {
       console.error(error);
       outputText = '';
-      conversionTime = '';
+      // conversionTime = '';
     }
   };
 
   const handleSwap = () => {
-    const currentFrom = $typing_script_atom;
+    const currentFrom = typing_script;
     const currentTo = toScript;
-    const currentInputText = $input_text_atom;
+    const currentInputText = input_text;
     const currentOutputText = outputText;
-    $typing_script_atom = currentTo;
+    typing_script = currentTo;
     toScript = currentFrom;
-    $input_text_atom = currentOutputText;
+    input_text = currentOutputText;
     outputText = currentInputText;
   };
 
@@ -98,7 +108,7 @@
   };
 
   $effect(() => {
-    getAllOptions($typing_script_atom, toScript).then((all_options) => {
+    getAllOptions(typing_script, toScript).then((all_options) => {
       options = Object.fromEntries(all_options.map((v) => [v, false]));
       availableOptions = all_options;
     });
@@ -113,7 +123,7 @@
   });
 
   onMount(() => {
-    const prom = [preloadScriptData($typing_script_atom), preloadScriptData(toScript)];
+    const prom = [preloadScriptData(typing_script), preloadScriptData(toScript)];
     Promise.allSettled(prom).then(() => {
       handleSubmit(new SubmitEvent('submit'));
     });
@@ -131,7 +141,7 @@
   let auto_convert = $state(true);
 
   $effect(() => {
-    $input_text_atom;
+    input_text;
     untrack(() => {
       if (auto_convert) {
         handleSubmit(new SubmitEvent('submit'));
@@ -155,7 +165,7 @@
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >From</span
               >
-              <ScriptSeleector bind:script={$typing_script_atom} />
+              <ScriptSeleector bind:script={typing_script} />
             </div>
             <div class="hidden items-center justify-center lg:flex">
               <Button
@@ -184,7 +194,7 @@
                   variant="ghost"
                   size="icon"
                   class="size-8"
-                  onclick={() => copyToClipboard($input_text_atom)}
+                  onclick={() => copyToClipboard(input_text)}
                   title="Copy source text"
                 >
                   <Icon src={BsCopy} className="size-4" />
@@ -246,14 +256,14 @@
             <Textarea
               id="source-text"
               class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
-                getFontClass($typing_script_atom)}
+                getFontClass(typing_script)}
               placeholder="Enter text to transliterate..."
-              bind:value={$input_text_atom}
+              bind:value={input_text}
               onbeforeinput={(e) =>
                 handleTypingBeforeInputEvent(
                   from_input_typing_context,
                   e,
-                  (new_value) => ($input_text_atom = new_value),
+                  (new_value) => (input_text = new_value),
                   typing_enabled
                 )}
               onblur={() => from_input_typing_context.clearContext()}
@@ -337,14 +347,12 @@
 
       <CustomOptions {availableOptions} bind:options />
     </form>
-    <div class="mt-8">
-      <PWAInstall />
-    </div>
+    {@render pwa_snippet?.()}
   </div>
 
   {#if typing_modal_open}
     {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
-      <TypingHelper bind:open={typing_modal_open} script={$typing_script_atom} />
+      <TypingHelper bind:open={typing_modal_open} script={typing_script} />
     {/await}
   {/if}
 </div>

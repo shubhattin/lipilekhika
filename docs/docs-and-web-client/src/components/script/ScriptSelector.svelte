@@ -1,6 +1,6 @@
 <script lang="ts">
-  import * as Select from '$lib/components/ui/select';
-  import * as Avatar from '$lib/components/ui/avatar';
+  import * as Select from '~/lib/components/ui/select';
+  import * as Avatar from '~/lib/components/ui/avatar';
   import { type ScriptListType } from 'lipilekhika';
   import { getScriptAvatar } from '$components/script/script_avatar';
 
