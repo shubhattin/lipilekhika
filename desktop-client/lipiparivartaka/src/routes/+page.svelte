@@ -1,30 +1,30 @@
 <script lang="ts">
-  import MainApp from "$components/MainApp.svelte";
+  import MainApp from '$components/MainApp.svelte';
   import {
     transliterate,
     type ScriptListType,
     type TransliterationOptions,
-    type ScriptLangType,
-  } from "lipilekhika";
-  import { invoke } from "@tauri-apps/api/core";
+    type ScriptLangType
+  } from 'lipilekhika';
+  import { invoke } from '@tauri-apps/api/core';
 
-  let input_text = $state("");
-  let typing_script = $state<ScriptListType>("Devanagari");
+  let input_text = $state('');
+  let typing_script = $state<ScriptListType>('Devanagari');
 
   const transliterate_func = async (
     text: string,
     from: ScriptLangType,
     to: ScriptLangType,
-    options?: TransliterationOptions,
+    options?: TransliterationOptions
   ) => {
     try {
-      const result: string = await invoke("transliterate", {
+      const result: string = await invoke('transliterate', {
         payload: {
           text: text,
           from: from,
           to: to,
-          options: options,
-        },
+          options: options
+        }
       });
       return result;
     } catch {}
