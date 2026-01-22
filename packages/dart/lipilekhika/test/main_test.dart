@@ -66,6 +66,7 @@ void main() {
         toScript: 'Devanagari',
       );
       expect(options, isA<List<String>>());
+      // ignore: unnecessary_type_check
       expect(options.every((opt) => opt is String), isTrue);
     });
 
@@ -75,6 +76,7 @@ void main() {
         toScript: 'Tamil',
       );
       expect(options, isA<List<String>>());
+      // ignore: unnecessary_type_check
       expect(options.every((opt) => opt is String), isTrue);
     });
 
@@ -152,6 +154,7 @@ void main() {
     test('scriptList should be a non-empty list of strings', () {
       expect(scriptList, isA<List<String>>());
       expect(scriptList, isNotEmpty);
+      // ignore: unnecessary_type_check
       expect(scriptList.every((script) => script is String), isTrue);
     });
 
@@ -165,12 +168,14 @@ void main() {
     test('langList should be a non-empty list of strings', () {
       expect(langList, isA<List<String>>());
       expect(langList, isNotEmpty);
+      // ignore: unnecessary_type_check
       expect(langList.every((lang) => lang is String), isTrue);
     });
 
     test('allScriptLangList should be a non-empty list of strings', () {
       expect(allScriptLangList, isA<List<String>>());
       expect(allScriptLangList, isNotEmpty);
+      // ignore: unnecessary_type_check
       expect(allScriptLangList.every((item) => item is String), isTrue);
     });
 
