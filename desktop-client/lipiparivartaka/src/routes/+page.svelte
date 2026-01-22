@@ -27,10 +27,7 @@
   import { Icon } from "svelte-icons-pack";
   import { BiHelpCircle } from "svelte-icons-pack/bi";
   import { BsCopy } from "svelte-icons-pack/bs";
-  import {
-    input_text_atom,
-    typing_script_atom,
-  } from "$components/script/state";
+  import { input_text_atom, typing_script_atom } from "../state/app_state";
   import ScriptSeleector from "$components/script/ScriptSelector.svelte";
   import CustomOptions from "$components/script/CustomOptions.svelte";
   import { SiConvertio } from "svelte-icons-pack/si";
@@ -51,7 +48,7 @@
   let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
   let from_input_typing_context = $derived(
-    createTypingContext($typing_script_atom)
+    createTypingContext($typing_script_atom),
   );
 
   let typing_modal_open = $state(false);
@@ -294,7 +291,7 @@
                   from_input_typing_context,
                   e,
                   (new_value) => ($input_text_atom = new_value),
-                  typing_enabled
+                  typing_enabled,
                 )}
               onblur={() => from_input_typing_context.clearContext()}
               onkeydown={(e) => {

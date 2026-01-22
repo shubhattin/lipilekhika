@@ -13,10 +13,10 @@ const config = {
       fallback: "index.html",
     }),
     alias: {
-      "$components/*": "./src/components/*",
+      "$components/*": "../../docs/docs-and-web-client/src/components/*",
       "lipilekhika/*": "../../packages/js/src/*",
       lipilekhika: "../../packages/js/src/index_main.ts",
-      "~/lib/*": "../../docs/docs-and-web-client/src/lib/*",
+      "~/*": "../../docs/docs-and-web-client/src/*",
     },
   },
 };
