@@ -1,6 +1,6 @@
 <script lang="ts">
-  import * as Popover from '$lib/components/ui/popover';
-  import { Button } from '$lib/components/ui/button';
+  import * as Popover from '~/lib/components/ui/popover';
+  import { Button } from '~/lib/components/ui/button';
   import Sun from 'lucide-svelte/icons/sun';
   import Moon from 'lucide-svelte/icons/moon';
   import Monitor from 'lucide-svelte/icons/monitor';

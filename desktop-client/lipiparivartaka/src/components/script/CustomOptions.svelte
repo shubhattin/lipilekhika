@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Switch from '$lib/components/ui/switch/switch.svelte';
+  import Switch from '~/lib/components/ui/switch/switch.svelte';
   import { slide } from 'svelte/transition';
   import type { TransliterationOptions } from 'lipilekhika';
   import { InfoIcon } from 'lucide-svelte';
-  import * as Popover from '$lib/components/ui/popover';
-  import Button from '$lib/components/ui/button/button.svelte';
+  import * as Popover from '~/lib/components/ui/popover';
+  import Button from '~/lib/components/ui/button/button.svelte';
 
   let {
     availableOptions,

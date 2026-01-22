@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Textarea } from '$lib/components/ui/textarea';
+  import { Textarea } from '~/lib/components/ui/textarea';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
@@ -10,7 +10,7 @@
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { BsCopy } from 'svelte-icons-pack/bs';
-  import Button from '$lib/components/ui/button/button.svelte';
+  import Button from '~/lib/components/ui/button/button.svelte';
   import ScriptSeleector from '$components/script/ScriptSelector.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));

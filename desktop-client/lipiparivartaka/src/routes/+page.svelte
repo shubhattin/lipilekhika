@@ -18,11 +18,11 @@
   import { getFontClass } from "$components/script/font_list";
   import prettyMs from "pretty-ms";
 
-  import { Button } from "$lib/components/ui/button";
-  import { Switch } from "$lib/components/ui/switch";
-  import { Textarea } from "$lib/components/ui/textarea";
-  import { Separator } from "$lib/components/ui/separator";
-  import * as Popover from "$lib/components/ui/popover";
+  import { Button } from "~/lib/components/ui/button";
+  import { Switch } from "~/lib/components/ui/switch";
+  import { Textarea } from "~/lib/components/ui/textarea";
+  import { Separator } from "~/lib/components/ui/separator";
+  import * as Popover from "~/lib/components/ui/popover";
   import { KeyboardIcon, SettingsIcon } from "lucide-svelte";
   import { Icon } from "svelte-icons-pack";
   import { BiHelpCircle } from "svelte-icons-pack/bi";
@@ -34,7 +34,7 @@
   import ScriptSeleector from "$components/script/ScriptSelector.svelte";
   import CustomOptions from "$components/script/CustomOptions.svelte";
   import { SiConvertio } from "svelte-icons-pack/si";
-  import Label from "$lib/components/ui/label/label.svelte";
+  import Label from "~/lib/components/ui/label/label.svelte";
   import { invoke } from "@tauri-apps/api/core";
 
   const DEFAULT_TO: ScriptListType = "Romanized";

@@ -5,11 +5,11 @@
     getScriptTypingDataMap,
   } from "lipilekhika/typing";
 
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as Select from "$lib/components/ui/select";
-  import * as Tabs from "$lib/components/ui/tabs";
-  import { Badge } from "$lib/components/ui/badge";
-  import { Skeleton } from "$lib/components/ui/skeleton";
+  import * as Dialog from "~/lib/components/ui/dialog";
+  import * as Select from "~/lib/components/ui/select";
+  import * as Tabs from "~/lib/components/ui/tabs";
+  import { Badge } from "~/lib/components/ui/badge";
+  import { Skeleton } from "~/lib/components/ui/skeleton";
 
   import { Keyboard, Map as MapIcon, ArrowLeftRight } from "lucide-svelte";
   import ScriptSeleector from "$components/script/ScriptSelector.svelte";

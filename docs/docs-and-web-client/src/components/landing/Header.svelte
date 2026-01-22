@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
+  import { Button } from '~/lib/components/ui/button';
   import ThemeToggle from './ThemeToggle.svelte';
   import { BsGithub } from 'svelte-icons-pack/bs';
   import { SiNpm } from 'svelte-icons-pack/si';

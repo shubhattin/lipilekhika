@@ -16,6 +16,7 @@ const config = {
       "$components/*": "./src/components/*",
       "lipilekhika/*": "../../packages/js/src/*",
       lipilekhika: "../../packages/js/src/index_main.ts",
+      "~/lib/*": "../../docs/docs-and-web-client/src/lib/*",
     },
   },
 };

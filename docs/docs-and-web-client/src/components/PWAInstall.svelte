@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Button } from '$lib/components/ui/button';
+  import { Button } from '~/lib/components/ui/button';
   import {
     pwa_state_atom,
     is_ios_atom,
