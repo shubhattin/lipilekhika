@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "copy-fonts": "mkdir -p src/fonts && cp -r ../../docs/docs-and-web-client/src/styles/fonts/*.woff2 src/fonts/ && cp ../../docs/docs-and-web-client/src/styles/fonts.css src/fonts.css",
+    "build": "bun run copy-fonts && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
