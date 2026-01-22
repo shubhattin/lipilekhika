@@ -7,6 +7,7 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+use std::thread;
 use std::time::{Duration, Instant};
 
 // ----------------------------
@@ -65,7 +66,7 @@ where
   deserializer.deserialize_any(IndexVisitor)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct TransliterationTestCase {
   #[serde(deserialize_with = "de_index")]
   #[allow(dead_code)]
@@ -79,7 +80,7 @@ struct TransliterationTestCase {
   todo: Option<bool>,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Clone, Debug, Deserialize, Default)]
 struct TypingOptionsYaml {
   #[serde(rename = "useNativeNumerals")]
   #[serde(default)]
@@ -94,7 +95,7 @@ struct TypingOptionsYaml {
   auto_context_clear_time_ms: Option<u64>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 struct TypingTestCase {
   #[allow(dead_code)]
   index: i64,
@@ -254,37 +255,105 @@ fn typing_cases() -> &'static [TypingTestCase] {
 // Workloads (mirrors `packages/js/src/scripts/benchmark.ts`)
 // ----------------------------
 
+const TOTAL_THREADS: usize = 40;
+
 fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
-  for case in cases {
-    if case.todo.unwrap_or(false) {
-      continue;
-    }
-    let out = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
-    black_box(out).ok();
+  let mut handles = Vec::with_capacity(TOTAL_THREADS);
+  let total_cases = cases.len();
+  let chunk_size = total_cases / TOTAL_THREADS;
+
+  for thread_id in 0..TOTAL_THREADS {
+    let start = thread_id * chunk_size;
+    let end = if thread_id == TOTAL_THREADS - 1 {
+      total_cases // Last thread handles any remainder
+    } else {
+      (thread_id + 1) * chunk_size
+    };
+
+    let cases_chunk: Vec<_> = cases[start..end].to_vec();
+    let handle = thread::spawn(move || {
+      for case in cases_chunk {
+        if case.todo.unwrap_or(false) {
+          continue;
+        }
+        let out = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
+        black_box(out).ok();
+      }
+    });
+    handles.push(handle);
+  }
+
+  // Join all threads
+  for handle in handles {
+    handle.join().expect("Thread panicked");
   }
 }
 
 fn run_typing_normal_to_others_pass(cases: &[TransliterationTestCase]) {
-  for case in cases {
-    if case.todo.unwrap_or(false) {
-      continue;
-    }
-    if case.from != "Normal" {
-      continue;
-    }
-    let out = emulate_typing(&case.input, &case.to, None);
-    black_box(out).ok();
+  let mut handles = Vec::with_capacity(TOTAL_THREADS);
+  let total_cases = cases.len();
+  let chunk_size = total_cases / TOTAL_THREADS;
+
+  for thread_id in 0..TOTAL_THREADS {
+    let start = thread_id * chunk_size;
+    let end = if thread_id == TOTAL_THREADS - 1 {
+      total_cases // Last thread handles any remainder
+    } else {
+      (thread_id + 1) * chunk_size
+    };
+
+    let cases_chunk: Vec<_> = cases[start..end].to_vec();
+    let handle = thread::spawn(move || {
+      for case in cases_chunk {
+        if case.todo.unwrap_or(false) {
+          continue;
+        }
+        if case.from != "Normal" {
+          continue;
+        }
+        let out = emulate_typing(&case.input, &case.to, None);
+        black_box(out).ok();
+      }
+    });
+    handles.push(handle);
+  }
+
+  // Join all threads
+  for handle in handles {
+    handle.join().expect("Thread panicked");
   }
 }
 
 fn run_typing_others_to_normal_pass(cases: &[TypingTestCase]) {
-  for case in cases {
-    if case.todo {
-      continue;
-    }
-    let opts = build_typing_options(&case.options);
-    let out = emulate_typing(&case.text, &case.script, opts);
-    black_box(out).ok();
+  let mut handles = Vec::with_capacity(TOTAL_THREADS);
+  let total_cases = cases.len();
+  let chunk_size = total_cases / TOTAL_THREADS;
+
+  for thread_id in 0..TOTAL_THREADS {
+    let start = thread_id * chunk_size;
+    let end = if thread_id == TOTAL_THREADS - 1 {
+      total_cases // Last thread handles any remainder
+    } else {
+      (thread_id + 1) * chunk_size
+    };
+
+    let cases_chunk: Vec<_> = cases[start..end].to_vec();
+    let handle = thread::spawn(move || {
+      for case in cases_chunk {
+        if case.todo {
+          continue;
+        }
+        let opts = build_typing_options(&case.options);
+        let out = emulate_typing(&case.text, &case.script, opts);
+        black_box(out).ok();
+      }
+    });
+    handles.push(handle);
+  }
+
+  // Join all threads
+  for handle in handles {
+    handle.join().expect("Thread panicked");
   }
 }
 
