@@ -119,7 +119,7 @@ impl TypingContext {
       .inner
       .read()
       .map(|inner| inner.get_use_native_numerals())
-      .unwrap_or(false)
+      .unwrap_or(lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS)
   }
 
   /// Gets whether inherent vowels are currently included.

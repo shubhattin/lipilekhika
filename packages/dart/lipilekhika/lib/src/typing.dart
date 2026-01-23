@@ -18,15 +18,15 @@ export 'rust/api/typing.dart'
         KramaDataItem;
 
 /// Default time in milliseconds after which the context will be cleared automatically.
-final int defaultAutoContextClearTimeMs =
+int get defaultAutoContextClearTimeMs =>
     rust_typing.defaultAutoContextClearTimeMs().toInt();
 
 /// Default value for using native numerals while typing.
-final bool defaultUseNativeNumerals = rust_typing.defaultUseNativeNumerals();
+bool get defaultUseNativeNumerals => rust_typing.defaultUseNativeNumerals();
 
 /// Default value for including inherent vowels while typing.
 /// By default avoids schwa deletion.
-final bool defaultIncludeInherentVowel =
+bool get defaultIncludeInherentVowel =>
     rust_typing.defaultIncludeInherentVowel();
 
 /// Creates a stateful isolated context for character by character input typing.

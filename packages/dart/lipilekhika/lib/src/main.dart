@@ -12,14 +12,6 @@ export 'rust/api/main.dart' show ScriptListData;
 /// Initializes the LipiLekhika library.
 ///
 /// This must be called before using any other functions in the library.
-/// Typically called in your app's main() function.
-///
-/// ```dart
-/// void main() async {
-///   await RustLib.init();
-///   runApp(MyApp());
-/// }
-/// ```
 Future<void> initLipiLekhika() async {
   await RustLib.init();
 }
