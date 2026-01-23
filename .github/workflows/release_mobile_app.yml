@@ -1,0 +1,130 @@
+name: Release Mobile App
+
+on:
+  push:
+    paths:
+      - "mobile-app/**"
+      - "packages/dart/**"
+      - "packages/rust/**"
+      - ".github/workflows/release_mobile_app.yml"
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Bun for script/test data generation
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Setup Java (required for Android build)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Setup Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-
+
+      # Install cargo-ndk
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Install flutter_rust_bridge_codegen
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen
+
+      # Enable script data in Rust package
+      - name: Enable script data
+        run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      # Generate Dart FFI bindings
+      - name: Generate Dart bindings
+        run: |
+          cd packages/dart/lipilekhika
+          flutter_rust_bridge_codegen generate
+
+      # Build Android native libraries
+      - name: Build Android native libraries
+        run: |
+          cd packages/dart/binding
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
+            -o ../lipilekhika/android/src/main/jniLibs \
+            build --release
+
+      # Verify native libraries were built
+      - name: Verify native libraries
+        run: |
+          ls -la packages/dart/lipilekhika/android/src/main/jniLibs/*/
+
+      # Install Flutter dependencies for the app
+      - name: Install Flutter dependencies
+        run: |
+          cd mobile-app/flutter
+          flutter pub get
+
+      # Build release APK
+      - name: Build release APK
+        run: |
+          cd mobile-app/flutter
+          flutter build apk --release --split-per-abi
+
+      # Upload APKs as artifacts
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: |
+            mobile-app/flutter/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            mobile-app/flutter/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            mobile-app/flutter/build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+
+      # Also build a fat APK (all architectures in one)
+      - name: Build universal APK
+        run: |
+          cd mobile-app/flutter
+          flutter build apk --release
+
+      - name: Upload universal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-universal
+          path: mobile-app/flutter/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
