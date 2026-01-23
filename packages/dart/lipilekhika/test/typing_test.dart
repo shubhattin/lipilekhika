@@ -235,6 +235,7 @@ void main() {
         expect(item.text, isNotEmpty);
         expect(item.listType, isA<ListType>());
         expect(item.mappings, isA<List<String>>());
+        // ignore: unnecessary_type_check
         expect(item.mappings.every((m) => m is String), isTrue);
       }
     });
