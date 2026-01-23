@@ -2,7 +2,6 @@
 @import './fonts.css';
 @source '../../../docs/docs-and-web-client/src';
 
-
 @import 'tw-animate-css';
 @custom-variant dark (&:is(.dark *));
 

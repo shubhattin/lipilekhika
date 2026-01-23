@@ -7,25 +7,30 @@
     type ScriptLangType
   } from 'lipilekhika';
   import { invoke } from '@tauri-apps/api/core';
+  import { Store } from '@tauri-apps/plugin-store';
+  import { onMount } from 'svelte';
 
-  const KEYS = {
-    from_script: 'parivartaka_local:from_script',
-    to_script: 'parivartaka_local:to_script'
-  };
-
+  
+  const KEY = 'scripts';
   let input_text = $state('');
-  let typing_script = $state<ScriptListType>(
-    (() => {
-      return (localStorage.getItem(KEYS.from_script) as ScriptListType | null) ?? 'Devanagari';
-      // return 'Devanagari';
-    })()
-  );
-  let to_script = $state<ScriptListType>(
-    (() => {
-      return (localStorage.getItem(KEYS.to_script) as ScriptListType | null) ?? 'Romanized';
-      // return 'Romanized';
-    })()
-  );
+  let typing_script = $state<ScriptListType>('Devanagari');
+    let to_script = $state<ScriptListType>('Romanized');
+      
+      onMount(async () => {
+    const store = await Store.load('parivartaka_conf.json');
+    await store.load();
+    
+    store.get<{ from: ScriptListType; to: ScriptListType }>(KEY).then((value) => {
+      typing_script = value?.from ?? 'Devanagari';
+      to_script = value?.to ?? 'Romanized';
+    });
+  });
+  
+  $effect(async () => {
+    const store = awit Store.load('parivartaka_conf.json');
+    store.set(KEY, { from: typing_script, to: to_script });
+    console.log(store);
+  });
 
   const transliterate_func = async (
     text: string,

@@ -12,3 +12,4 @@ public/old
 
 *.mdx
 src/components/Posthog.astro
+src_tauri/gen
