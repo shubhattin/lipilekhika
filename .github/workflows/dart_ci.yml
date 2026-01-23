@@ -51,12 +51,9 @@ jobs:
           channel: stable
           cache: true
 
-      # Install flutter_rust_bridge_codegen
+      # Install flutter_rust_bridge_codegen via Cargo
       - name: Install flutter_rust_bridge_codegen
-        run: dart pub global activate flutter_rust_bridge
-
-      - name: Add Dart global bin to PATH
-        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+        run: cargo install flutter_rust_bridge_codegen
 
       # Generate Dart FFI bindings
       - name: Generate Dart bindings
