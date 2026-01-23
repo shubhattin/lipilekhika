@@ -1,0 +1,245 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+class AboutScreen extends StatelessWidget {
+  const AboutScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+
+          // App Icon
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              LucideIcons.languages,
+              size: 64,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // App Name
+          Text(
+            'Lipi Lekhika',
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Script Transliteration Tool',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Version 1.0.0',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Description Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        LucideIcons.info,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'About',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Lipi Lekhika is a powerful transliteration tool that allows you to convert text between various Indian Brahmic scripts and languages.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.6,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Supported scripts include Devanagari, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Oriya, Gurmukhi, and many more.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.6,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Features Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        LucideIcons.sparkles,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Features',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFeatureItem(
+                    context,
+                    LucideIcons.arrowLeftRight,
+                    'Bidirectional transliteration',
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    LucideIcons.zap,
+                    'Real-time conversion',
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    LucideIcons.settings2,
+                    'Customizable options',
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    LucideIcons.keyboard,
+                    'Typing map reference',
+                  ),
+                  _buildFeatureItem(
+                    context,
+                    LucideIcons.moon,
+                    'Dark mode support',
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Links Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        LucideIcons.link,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Links',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    leading: const Icon(LucideIcons.globe),
+                    title: const Text('Website'),
+                    subtitle: const Text('lipilekhika.in'),
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () {
+                      // Could add url_launcher to open links
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(LucideIcons.github),
+                    title: const Text('GitHub'),
+                    subtitle: const Text('shubhattin/lipilekhika'),
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () {
+                      // Could add url_launcher to open links
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+
+          Text(
+            '© 2024 Lipi Lekhika',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+          ),
+
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
