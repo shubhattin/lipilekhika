@@ -49,6 +49,11 @@ jobs:
         run: |
           cargo build --release -p lipilekhika-ui
 
+      - name: Prepare Tauri Build
+        # Install Common dependencies
+        run: |
+          cd docs/docs-and-web-client
+          bun install
       - name: Build lipiparivartaka (Windows)
         run: |
           cd desktop-client/lipiparivartaka
