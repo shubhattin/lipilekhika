@@ -3,5 +3,13 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "opener:default"]
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "store:default",
+    "store:allow-load",
+    "store:allow-save",
+    "store:allow-set",
+    "store:allow-get"
+  ]
 }

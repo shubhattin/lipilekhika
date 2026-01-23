@@ -35,18 +35,17 @@
   let {
     input_text = $bindable(),
     typing_script = $bindable(),
+    to_script = $bindable(),
     pwa_snippet,
     transliterate_func = transliterate
   }: {
     input_text: string;
     typing_script: ScriptListType;
+    to_script: ScriptListType;
     pwa_snippet?: Snippet;
     transliterate_func: typeof transliterate;
   } = $props();
 
-  const DEFAULT_TO: ScriptListType = 'Romanized';
-
-  let toScript = $state<ScriptListType>(DEFAULT_TO);
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
   let availableOptions = $state<string[]>([]);
@@ -65,7 +64,7 @@
     event.preventDefault();
     try {
       const startTime = performance.now();
-      const result = await transliterate_func(input_text, typing_script, toScript, options);
+      const result = await transliterate_func(input_text, typing_script, to_script, options);
       const endTime = performance.now();
       const timeTaken = endTime - startTime;
 
@@ -90,11 +89,11 @@
 
   const handleSwap = () => {
     const currentFrom = typing_script;
-    const currentTo = toScript;
+    const currentTo = to_script;
     const currentInputText = input_text;
     const currentOutputText = outputText;
     typing_script = currentTo;
-    toScript = currentFrom;
+    to_script = currentFrom;
     input_text = currentOutputText;
     outputText = currentInputText;
   };
@@ -108,7 +107,7 @@
   };
 
   $effect(() => {
-    getAllOptions(typing_script, toScript).then((all_options) => {
+    getAllOptions(typing_script, to_script).then((all_options) => {
       options = Object.fromEntries(all_options.map((v) => [v, false]));
       availableOptions = all_options;
     });
@@ -123,14 +122,14 @@
   });
 
   onMount(() => {
-    const prom = [preloadScriptData(typing_script), preloadScriptData(toScript)];
+    const prom = [preloadScriptData(typing_script), preloadScriptData(to_script)];
     Promise.allSettled(prom).then(() => {
       handleSubmit(new SubmitEvent('submit'));
     });
   });
 
   $effect(() => {
-    toScript;
+    to_script;
     $state.snapshot(options);
     // on change of any of the above, re-run the handleSubmit
     untrack(() => {
@@ -287,7 +286,7 @@
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >To</span
               >
-              <ScriptSeleector bind:script={toScript} />
+              <ScriptSeleector bind:script={to_script} />
             </div>
             <div class="flex items-center justify-center lg:hidden">
               <Button
@@ -337,7 +336,7 @@
             <Textarea
               id="output-text"
               class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
-                getFontClass(toScript)}
+                getFontClass(to_script)}
               value={outputText}
               readonly
             />

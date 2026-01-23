@@ -16,7 +16,7 @@ async function copyFonts() {
 
     // Copy all .woff2 files from source fonts directory to destination
     const allFiles = await fs.readdir(fontsSourceDir);
-    const fontFiles = allFiles.filter(file => file.endsWith('.woff2'));
+    const fontFiles = allFiles.filter((file) => file.endsWith('.woff2'));
     for (const fontFile of fontFiles) {
       const sourcePath = join(fontsSourceDir, fontFile);
       const destPath = join(fontsDestDir, fontFile);
