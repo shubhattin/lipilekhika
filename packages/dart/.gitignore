@@ -1,0 +1,32 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Generated files - should be regenerated at build time
+lipilekhika/lib/src/rust/
+binding/src/frb_generated.rs
+
+# Freezed and JSON serialization generated files
+*.freezed.dart
+*.g.dart
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+*.a
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# Misc
+.DS_Store
+*.log

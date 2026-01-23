@@ -1,0 +1,86 @@
+name: Dart Package CI
+
+on:
+  - push
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Bun for script/test data generation
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Setup Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # Enable script data in Rust package (uncomment in .gitignore)
+      - run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Install flutter_rust_bridge_codegen via Cargo
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen
+
+      # Generate Dart FFI bindings
+      - name: Generate Dart bindings
+        run: |
+          cd packages/dart/lipilekhika
+          flutter_rust_bridge_codegen generate
+
+      # Build Rust library
+      - name: Build Rust bindings
+        run: |
+          cd packages/dart/binding
+          cargo build --release
+
+      # Install Dart dependencies
+      - name: Install Dart dependencies
+        run: |
+          cd packages/dart/lipilekhika
+          flutter pub get
+
+      # Copy compiled library
+      - name: Copy compiled library
+        run: |
+          cd packages/dart/lipilekhika
+          cp ../../../target/release/liblipilekhika_dart.so .
+
+      # Run tests
+      - name: Run Dart Tests
+        run: |
+          cd packages/dart/lipilekhika
+          LD_LIBRARY_PATH=. dart test

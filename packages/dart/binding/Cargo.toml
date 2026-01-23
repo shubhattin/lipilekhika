@@ -1,0 +1,15 @@
+[package]
+name = "lipilekhika_dart"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+lipilekhika = { path = "../../rust" }
+flutter_rust_bridge = "=2.11.1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

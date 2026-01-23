@@ -1,0 +1,6 @@
+# flutter_rust_bridge configuration
+# See: https://cjycode.com/flutter_rust_bridge/guides/how-to/config
+
+rust_input: crate::api
+dart_output: lib/src/rust
+rust_root: ../binding

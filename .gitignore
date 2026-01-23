@@ -10,6 +10,7 @@ target
 **/a.rs
 **/a.go
 **/tmp/
+**/a.dart
 
 # Script Data Ignore (Built Output)
 packages/js/src/script_data
