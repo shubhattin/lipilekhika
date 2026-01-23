@@ -167,7 +167,7 @@ void preloadData() {
 
 /// Run all benchmarks
 Future<void> benchmark() async {
-  print('${_bold}${_cyan}Loading test data...$_reset');
+  print('$_bold${_cyan}Loading test data...$_reset');
   final testData = getTestData();
   final typingTestData = getTypingTestData();
 
@@ -175,7 +175,7 @@ Future<void> benchmark() async {
   print('Loaded ${typingTestData.length} typing tests\n');
 
   // Transliteration Cases
-  print('${_bold}${_cyan}Transliteration Cases:$_reset');
+  print('$_bold${_cyan}Transliteration Cases:$_reset');
   preloadData();
 
   final translitStart = DateTime.now();
@@ -206,7 +206,7 @@ Future<void> benchmark() async {
       'Time taken: $_yellow${translitElapsed.toStringAsFixed(2)} ms$_reset\n');
 
   // Typing Emulation
-  print('${_bold}${_cyan}Typing Emulation:$_reset');
+  print('$_bold${_cyan}Typing Emulation:$_reset');
 
   // 1. Emulate on Normal to others
   final normalToOthers =
