@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Payload {
@@ -26,6 +25,7 @@ fn transliterate(payload: Payload) -> String {
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_opener::init())
+    .plugin(tauri_plugin_store::Builder::default().build())
     .invoke_handler(tauri::generate_handler![transliterate])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

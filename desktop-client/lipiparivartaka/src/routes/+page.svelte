@@ -8,8 +8,24 @@
   } from 'lipilekhika';
   import { invoke } from '@tauri-apps/api/core';
 
+  const KEYS = {
+    from_script: 'parivartaka_local:from_script',
+    to_script: 'parivartaka_local:to_script'
+  };
+
   let input_text = $state('');
-  let typing_script = $state<ScriptListType>('Devanagari');
+  let typing_script = $state<ScriptListType>(
+    (() => {
+      return (localStorage.getItem(KEYS.from_script) as ScriptListType | null) ?? 'Devanagari';
+      // return 'Devanagari';
+    })()
+  );
+  let to_script = $state<ScriptListType>(
+    (() => {
+      return (localStorage.getItem(KEYS.to_script) as ScriptListType | null) ?? 'Romanized';
+      // return 'Romanized';
+    })()
+  );
 
   const transliterate_func = async (
     text: string,
@@ -34,4 +50,4 @@
   };
 </script>
 
-<MainApp bind:input_text bind:typing_script {transliterate_func} />
+<MainApp bind:input_text bind:typing_script bind:to_script {transliterate_func} />
