@@ -205,9 +205,9 @@ Write-Host "====================================" -ForegroundColor Cyan
 Copy-Item -Path $MsiPath -Destination (Join-Path $BundleBuildDir $MsiName) -Force
 Write-Host "`nMSI also copied to: $(Join-Path $BundleBuildDir $MsiName)" -ForegroundColor Gray
 
-# Output version for CI
-if ($CI) {
-    Write-Host "::set-output name=version::$Version"
-    Write-Host "::set-output name=msi_path::$(Join-Path $BundleBuildDir $MsiName)"
-    Write-Host "::set-output name=msi_name::$MsiName"
+# Output values for CI (GitHub Actions)
+if ($CI -and $env:GITHUB_OUTPUT) {
+    "version=$Version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+    "msi_path=$(Join-Path $BundleBuildDir $MsiName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+    "msi_name=$MsiName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 }
