@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "rust-lib@v*"
+  workflow_dispatch:
+    # This would work only if the package version was already not published to crates.io
+    inputs:
+      tag:
+        description: "Existing tag to attach release to (e.g. rust-lib@v1.2.3)"
+        required: true
 
 permissions:
   id-token: write # Required for OIDC
@@ -29,7 +35,7 @@ jobs:
           bun install
           bun run make-script-data
 
-      # Rust
+      # Rust setup
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -43,20 +49,61 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
       - name: Test and Build Rust Package
         run: |
-          cd packages/rust 
+          cd packages/rust
           cargo build --release
           cargo test --release
 
+      # Extract package version from packages/rust/Cargo.toml
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(awk -F'"' '/^[[:space:]]*version[[:space:]]*=/ {print $2; exit}' packages/rust/Cargo.toml)
+          if [[ -z "$VERSION" ]]; then
+            echo "Could not determine version from packages/rust/Cargo.toml"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: $VERSION"
+
+      # Resolve release tag (from input on workflow_dispatch, else from pushed tag)
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Verify tag contains the package version
+      - name: Verify tag matches version
+        id: verify_tag
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Resolved TAG = $TAG"
+          echo "Package VERSION = $VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "Tag ($TAG) does not contain version ($VERSION). Aborting publish."
+            exit 1
+          fi
+
       - uses: rust-lang/crates-io-auth-action@v1
         id: auth
+
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           cd packages/rust
-          sed -i '/^src\/data\// s/^/#/' .gitignore
+          # temporarily ignore src/data in .gitignore if necessary
+          sed -i '/^src\/data\// s/^/#/' .gitignore || true
           cargo publish
 
   build-binaries:
@@ -97,7 +144,7 @@ jobs:
           bun install
           bun run make-script-data
 
-      # Rust
+      # Rust setup (with targets)
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -130,8 +177,70 @@ jobs:
         run: |
           mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
 
+      # Extract package version (each job runs independently)
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(awk -F'"' '/^[[:space:]]*version[[:space:]]*=/ {print $2; exit}' packages/rust/Cargo.toml)
+          if [[ -z "$VERSION" ]]; then
+            echo "Could not determine version from packages/rust/Cargo.toml"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: $VERSION"
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify tag matches version
+        id: verify_tag
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Resolved TAG = $TAG"
+          echo "Package VERSION = $VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "Tag ($TAG) does not contain version ($VERSION). Aborting upload."
+            exit 1
+          fi
+
+      # Normalize the tag to the canonical `rust-lib@v<version>` form
+      - name: Normalize tag for release upload
+        id: normalized_tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
+          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
+          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          VERSION="${VERSION#v}"
+
+          if [[ "$RAW_TAG" == rust-lib@* ]]; then
+            TAG_SUFFIX="${RAW_TAG#rust-lib@}"
+            TAG_SUFFIX="${TAG_SUFFIX#v}"
+            NORMALIZED_TAG="rust-lib@v${TAG_SUFFIX}"
+          else
+            NORMALIZED_TAG="rust-lib@v${VERSION}"
+          fi
+
+          echo "Normalized TAG=$NORMALIZED_TAG"
+          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
+
       - name: Upload binary to release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }} --clobber
+          TAG="${{ steps.normalized_tag.outputs.TAG }}"
+          ASSET="${{ matrix.asset_name }}"
+          echo "Uploading $ASSET to release $TAG"
+          gh release upload "$TAG" "$ASSET" --clobber
