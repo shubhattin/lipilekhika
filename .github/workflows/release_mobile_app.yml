@@ -1,13 +1,13 @@
 name: Release Mobile App
 
 on:
-  push:
-    paths:
-      - "mobile-app/**"
-      - "packages/dart/**"
-      - "packages/rust/**"
-      - ".github/workflows/release_mobile_app.yml"
-  workflow_dispatch:
+  - push
+    # paths:
+    #   - "mobile-app/**"
+    #   - "packages/dart/**"
+    #   - "packages/rust/**"
+    #   - ".github/workflows/release_mobile_app.yml"
+  # workflow_dispatch:
 
 jobs:
   build-android:
