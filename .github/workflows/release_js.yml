@@ -59,8 +59,9 @@ jobs:
           TAG="${{ steps.release_tag.outputs.TAG }}"
           VERSION="${{ steps.pkg_version.outputs.VERSION }}"
 
-          if [[ "$TAG" != *"$VERSION"* ]]; then
-            echo "❌ Tag ($TAG) does not contain package.json version ($VERSION)"
+          EXPECTED="js-lib@v$VERSION"
+          if [[ "$TAG" != "$EXPECTED" ]]; then
+            echo "❌ Tag ($TAG) does not match expected tag ($EXPECTED)"
             exit 1
           fi
 

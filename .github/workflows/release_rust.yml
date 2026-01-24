@@ -61,7 +61,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          VERSION=$(grep -m1 -Po '^\s*version\s*=\s*"\K[^"]+' packages/rust/Cargo.toml || true)
+          VERSION=$(awk -F'"' '/^[[:space:]]*version[[:space:]]*=/ {print $2; exit}' packages/rust/Cargo.toml)
           if [[ -z "$VERSION" ]]; then
             echo "Could not determine version from packages/rust/Cargo.toml"
             exit 1
