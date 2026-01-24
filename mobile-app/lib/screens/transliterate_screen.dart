@@ -30,6 +30,10 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
   TypingContext? _typingContext;
   TransliterationFormatter? _formatter;
 
+  // Typing options
+  bool _useNativeNumerals = true;
+  bool _includeInherentVowel = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,7 +77,16 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
 
   void _initTypingContext() {
     try {
-      _typingContext = createTypingContext(typingLang: _fromScript);
+      final options = TypingContextOptions(
+        autoContextClearTimeMs: BigInt.from(defaultAutoContextClearTimeMs),
+        useNativeNumerals: _useNativeNumerals,
+        includeInherentVowel: _includeInherentVowel,
+      );
+
+      _typingContext = createTypingContext(
+        typingLang: _fromScript,
+        options: options,
+      );
       setState(() {
         _formatter = TransliterationFormatter(_typingContext!);
       });
@@ -90,6 +103,104 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
         );
       }
     }
+  }
+
+  void _showTypingSettings() {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.settings,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Typing Options',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildSwitchOption(
+                  title: 'Use Native Numerals',
+                  subtitle: 'Convert numbers to script numerals',
+                  value: _useNativeNumerals,
+                  onChanged: (value) {
+                    setModalState(() => _useNativeNumerals = value);
+                    setState(() => _useNativeNumerals = value);
+                    _typingContext?.updateUseNativeNumerals(
+                      useNativeNumerals: value,
+                    );
+                  },
+                ),
+                const Divider(height: 32),
+                _buildSwitchOption(
+                  title: 'Include Inherent Vowel',
+                  subtitle: 'Add inherent vowel (schwa) to consonants',
+                  value: _includeInherentVowel,
+                  onChanged: (value) {
+                    setModalState(() => _includeInherentVowel = value);
+                    setState(() => _includeInherentVowel = value);
+                    _typingContext?.updateIncludeInherentVowel(
+                      includeInherentVowel: value,
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSwitchOption({
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+      ],
+    );
   }
 
   void _performTransliteration() {
@@ -232,6 +343,17 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                           }
                         });
                       },
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      onPressed: _showTypingSettings,
+                      icon: const Icon(LucideIcons.settings, size: 18),
+                      tooltip: 'Typing options',
+                      visualDensity: VisualDensity.compact,
+                      style: IconButton.styleFrom(
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
