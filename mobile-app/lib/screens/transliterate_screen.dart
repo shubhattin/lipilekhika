@@ -6,6 +6,7 @@ import 'package:lipilekhika/lipilekhika.dart';
 import '../widgets/script_selector.dart';
 import '../widgets/transliteration_options.dart';
 import '../widgets/typing_helper_modal.dart';
+import '../widgets/transliteration_formatter.dart';
 
 class TransliterateScreen extends StatefulWidget {
   const TransliterateScreen({super.key});
@@ -24,11 +25,18 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
   Map<String, bool> _options = {};
   List<String> _availableOptions = [];
 
+  // Typing mode state
+  bool _isTypingMode = true;
+  TypingContext? _typingContext;
+  TransliterationFormatter? _formatter;
+
   @override
   void initState() {
     super.initState();
     _loadOptions();
     _inputController.addListener(_onInputChanged);
+    // Initialize typing context on startup since typing is enabled by default
+    _initTypingContext();
   }
 
   @override
@@ -54,8 +62,33 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
         _availableOptions = options;
         _options = {for (var opt in options) opt: false};
       });
+      // Update typing context if script changed and typing mode is active
+      if (_isTypingMode) {
+        _initTypingContext();
+      }
     } catch (e) {
       debugPrint('Error loading options: $e');
+    }
+  }
+
+  void _initTypingContext() {
+    try {
+      _typingContext = createTypingContext(typingLang: _fromScript);
+      setState(() {
+        _formatter = TransliterationFormatter(_typingContext!);
+      });
+    } catch (e) {
+      debugPrint('Error initializing typing context: $e');
+      setState(() {
+        _isTypingMode = false;
+        _formatter = null;
+        _typingContext = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Typing not available for $_fromScript')),
+        );
+      }
     }
   }
 
@@ -180,14 +213,45 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                       tooltip: 'Typing help',
                       visualDensity: VisualDensity.compact,
                     ),
+                    const Spacer(),
+                    Text(
+                      'Type',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    const SizedBox(width: 4),
+                    Switch(
+                      value: _isTypingMode,
+                      onChanged: (value) {
+                        setState(() {
+                          _isTypingMode = value;
+                          if (value) {
+                            _initTypingContext();
+                          } else {
+                            _formatter = null;
+                            _typingContext = null;
+                          }
+                        });
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _inputController,
                   maxLines: 6,
+                  inputFormatters: [
+                    if (_isTypingMode && _formatter != null) _formatter!,
+                  ],
+                  onTapOutside: (_) {
+                    if (_isTypingMode) {
+                      _typingContext?.clearContext();
+                    }
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
                   decoration: InputDecoration(
-                    hintText: 'Enter text to transliterate...',
+                    hintText: _isTypingMode
+                        ? 'Type in English to see $_fromScript...'
+                        : 'Enter text to transliterate...',
                     filled: true,
                     fillColor: colorScheme.surfaceContainerLowest,
                   ),
