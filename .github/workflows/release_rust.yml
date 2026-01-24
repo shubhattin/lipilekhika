@@ -182,7 +182,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          VERSION=$(grep -m1 -Po '^\s*version\s*=\s*"\K[^"]+' packages/rust/Cargo.toml || true)
+          VERSION=$(awk -F'"' '/^[[:space:]]*version[[:space:]]*=/ {print $2; exit}' packages/rust/Cargo.toml)
           if [[ -z "$VERSION" ]]; then
             echo "Could not determine version from packages/rust/Cargo.toml"
             exit 1
@@ -213,12 +213,34 @@ jobs:
             exit 1
           fi
 
+      # Normalize the tag to the canonical `rust-lib@v<version>` form
+      - name: Normalize tag for release upload
+        id: normalized_tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
+          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
+          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          VERSION="${VERSION#v}"
+
+          if [[ "$RAW_TAG" == rust-lib@* ]]; then
+            TAG_SUFFIX="${RAW_TAG#rust-lib@}"
+            TAG_SUFFIX="${TAG_SUFFIX#v}"
+            NORMALIZED_TAG="rust-lib@v${TAG_SUFFIX}"
+          else
+            NORMALIZED_TAG="rust-lib@v${VERSION}"
+          fi
+
+          echo "Normalized TAG=$NORMALIZED_TAG"
+          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
+
       - name: Upload binary to release
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          TAG="${{ steps.release_tag.outputs.TAG }}"
+          TAG="${{ steps.normalized_tag.outputs.TAG }}"
           ASSET="${{ matrix.asset_name }}"
           echo "Uploading $ASSET to release $TAG"
           gh release upload "$TAG" "$ASSET" --clobber

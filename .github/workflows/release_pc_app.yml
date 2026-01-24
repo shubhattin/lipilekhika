@@ -146,13 +146,35 @@ jobs:
             exit 1
           fi
 
-      # Create GitHub Release and upload assets using the resolved tag
+      # Normalize the tag to the canonical `pc-app@v<version>` form
+      - name: Normalize tag for release upload
+        id: normalized_tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
+          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
+          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          VERSION="${VERSION#v}"
+
+          if [[ "$RAW_TAG" == pc-app@* ]]; then
+            TAG_SUFFIX="${RAW_TAG#pc-app@}"
+            TAG_SUFFIX="${TAG_SUFFIX#v}"
+            NORMALIZED_TAG="pc-app@v${TAG_SUFFIX}"
+          else
+            NORMALIZED_TAG="pc-app@v${VERSION}"
+          fi
+
+          echo "Normalized TAG=$NORMALIZED_TAG"
+          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
+
+      # Create GitHub Release and upload assets using the normalized tag
       - name: Upload binary to release
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          TAG="${{ steps.release_tag.outputs.TAG }}"
+          TAG="${{ steps.normalized_tag.outputs.TAG }}"
           MSI_PATH="desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi"
 
           echo "Uploading $MSI_PATH to release $TAG"
