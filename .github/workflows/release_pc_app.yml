@@ -4,12 +4,17 @@ on:
   push:
     tags:
       - "pc-app@v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to attach release to (e.g. pc-app@v1.2.3)"
+        required: true
 
 permissions:
   contents: write # Required for creating releases + uploading assets
 
 env:
-  PC_APP_POSTHOG_KEY: ${{  vars.PC_APP_POSTHOG_KEY }}
+  PC_APP_POSTHOG_KEY: ${{ vars.PC_APP_POSTHOG_KEY }}
 
 jobs:
   build-windows:
@@ -24,6 +29,7 @@ jobs:
 
       # JS Step (matches release_rust.yml)
       - uses: oven-sh/setup-bun@v2
+
       - name: Make Script Data
         run: |
           cd packages/js
@@ -50,10 +56,10 @@ jobs:
           cargo build --release -p lipilekhika-ui
 
       - name: Prepare Tauri Build
-        # Install Common dependencies
         run: |
           cd docs/docs-and-web-client
           bun install
+
       - name: Build lipiparivartaka (Windows)
         run: |
           cd desktop-client/lipiparivartaka
@@ -114,10 +120,41 @@ jobs:
           cd desktop-client
           .\bundle.ps1 -CI
 
-      # Create GitHub Release and upload assets
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
-          generate_release_notes: false
+      # Resolve the release tag (from input on workflow_dispatch, else from the pushed tag)
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            # github.ref_name is the short ref (tag or branch)
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Basic validation: ensure resolved tag contains the package version
+      - name: Verify tag matches version
+        id: verify_tag
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Resolved TAG = $TAG"
+          echo "Cargo VERSION = $VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "Tag ($TAG) does not contain version ($VERSION). Aborting upload."
+            exit 1
+          fi
+
+      # Create GitHub Release and upload assets using the resolved tag
+      - name: Upload binary to release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          MSI_PATH="desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi"
+
+          echo "Uploading $MSI_PATH to release $TAG"
+          # --clobber replaces existing asset with the same name
+          gh release upload "$TAG" "$MSI_PATH" --clobber
