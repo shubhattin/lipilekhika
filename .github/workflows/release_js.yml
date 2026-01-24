@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'js-lib@v*'
+  workflow_dispatch:
+    # This would work only if the package version was already not published to npm
+    inputs:
+      tag:
+        description: "Tag corresponding to the npm version (e.g. js-lib@v1.2.3)"
+        required: true
 
 permissions:
   id-token: write  # Required for OIDC
@@ -16,18 +22,61 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      
-      - uses: oven-sh/setup-bun@v2
-        name: Setup Bun
-      # Compile wasm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      # Resolve & validate tag
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+          echo "Resolved tag: $TAG"
+
+      - name: Read package.json version
+        id: pkg_version
+        shell: bash
+        run: |
+          VERSION=$(jq -r '.version' packages/js/package.json)
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+            echo "Failed to read version from package.json"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version: $VERSION"
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.pkg_version.outputs.VERSION }}"
+
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "❌ Tag ($TAG) does not contain package.json version ($VERSION)"
+            exit 1
+          fi
+
+          echo "✅ Tag matches package version"
+
+      # Build prerequisites
       - name: Generate Script Data
         run: |
           cd packages/js
           bun install
           bun run make-script-data
-      ## Rust
+
+      ## Rust (for WASM)
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable 
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Cache cargo registry + build
         uses: actions/cache@v4
         with:
@@ -38,12 +87,15 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
       - uses: jetli/wasm-pack-action@v0.4.0
+
       - name: Build WASM
         run: |
           cd packages/js/wasm
           wasm-pack build --release --target web
 
+      # npm setup
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -53,14 +105,15 @@ jobs:
         run: |
           bun install
           bun run gen:test-data
+
       - name: Build Package
         run: |
           cd packages/js
           bun install
           bun run build
           bun test --only-failures
-        # Test before publishing to npm
 
+      # Publish to npm
       - name: Publish to npm
         run: |
           cd packages/js

@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "python-lib@v*"
+  workflow_dispatch:
+    # This would work only if the package version was already not published to PyPI
+    inputs:
+      tag:
+        description: "Existing tag to attach release to (e.g. python-lib@v1.2.3)"
+        required: true
 
 permissions:
   id-token: write
@@ -39,6 +45,45 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
+      # Resolve & validate tag
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "Resolved TAG: $TAG"
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Read package version from pyproject.toml
+        id: pkg_version
+        shell: bash
+        run: |
+          # Try to read a simple version declaration from pyproject.toml
+          VERSION=$(grep -m1 -Po '^\s*version\s*=\s*"\K[^"]+' packages/python/pyproject.toml || true)
+          if [[ -z "$VERSION" ]]; then
+            echo "Error: could not determine version from packages/python/pyproject.toml"
+            echo "Make sure pyproject.toml contains a version = \"x.y.z\" entry under [project] or tool.poetry."
+            exit 1
+          fi
+          echo "Found package version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.pkg_version.outputs.VERSION }}"
+          echo "Comparing TAG=$TAG with VERSION=$VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "❌ Tag ($TAG) does not contain package version ($VERSION). Aborting."
+            exit 1
+          fi
+          echo "✅ Tag matches package version"
 
       - name: Sync dependencies and run tests
         run: |

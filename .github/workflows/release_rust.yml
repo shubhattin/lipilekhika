@@ -5,6 +5,7 @@ on:
     tags:
       - "rust-lib@v*"
   workflow_dispatch:
+    # This would work only if the package version was already not published to crates.io
     inputs:
       tag:
         description: "Existing tag to attach release to (e.g. rust-lib@v1.2.3)"
