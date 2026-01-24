@@ -96,27 +96,27 @@ jobs:
       # Install Flutter dependencies for the app
       - name: Install Flutter dependencies
         run: |
-          cd mobile-app/flutter
+          cd mobile-app
           flutter pub get
 
       # Build release APK
       - name: Build release APK
         run: |
-          cd mobile-app/flutter
+          cd mobile-app
           flutter build apk --release --split-per-abi
 
       # Extract version from pubspec.yaml
       - name: Get version
         id: version
         run: |
-          VERSION=$(grep "^version:" mobile-app/flutter/pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
+          VERSION=$(grep "^version:" mobile-app/pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
       # Rename APKs to lipilekhika_version_arch.apk format
       - name: Rename split APKs
         run: |
-          cd mobile-app/flutter/build/app/outputs/flutter-apk
+          cd mobile-app/build/app/outputs/flutter-apk
           mv app-arm64-v8a-release.apk lipilekhika_${{ steps.version.outputs.version }}_arm64-v8a.apk
           mv app-armeabi-v7a-release.apk lipilekhika_${{ steps.version.outputs.version }}_armeabi-v7a.apk
           mv app-x86_64-release.apk lipilekhika_${{ steps.version.outputs.version }}_x86_64.apk
@@ -127,43 +127,43 @@ jobs:
         with:
           name: release-apks
           path: |
-            mobile-app/flutter/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_arm64-v8a.apk
-            mobile-app/flutter/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_armeabi-v7a.apk
-            mobile-app/flutter/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_x86_64.apk
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_arm64-v8a.apk
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_armeabi-v7a.apk
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_x86_64.apk
           retention-days: 30
 
       # Also build a fat APK (all architectures in one)
       - name: Build universal APK
         run: |
-          cd mobile-app/flutter
+          cd mobile-app
           flutter build apk --release
 
       - name: Rename universal APK
         run: |
-          cd mobile-app/flutter/build/app/outputs/flutter-apk
+          cd mobile-app/build/app/outputs/flutter-apk
           mv app-release.apk lipilekhika_${{ steps.version.outputs.version }}_universal.apk
 
       - name: Upload universal APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk-universal
-          path: mobile-app/flutter/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_universal.apk
+          path: mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.version.outputs.version }}_universal.apk
           retention-days: 30
 
       # Build AAB for Google Play Console
       - name: Build release AAB
         run: |
-          cd mobile-app/flutter
+          cd mobile-app
           flutter build appbundle --release
 
       - name: Rename AAB
         run: |
-          cd mobile-app/flutter/build/app/outputs/bundle/release
+          cd mobile-app/build/app/outputs/bundle/release
           mv app-release.aab lipilekhika_${{ steps.version.outputs.version }}.aab
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: release-aab
-          path: mobile-app/flutter/build/app/outputs/bundle/release/lipilekhika_${{ steps.version.outputs.version }}.aab
+          path: mobile-app/build/app/outputs/bundle/release/lipilekhika_${{ steps.version.outputs.version }}.aab
           retention-days: 30

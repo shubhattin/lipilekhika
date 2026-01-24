@@ -1,4 +1,4 @@
-package `in`.lipilekhika.lipilekhika_flutter
+package com.shubhattin.lipilekhika
 
 import io.flutter.embedding.android.FlutterActivity
 

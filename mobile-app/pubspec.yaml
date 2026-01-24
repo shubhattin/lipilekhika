@@ -14,7 +14,7 @@ dependencies:
 
   # Lipilekhika package for transliteration
   lipilekhika:
-    path: ../../packages/dart/lipilekhika
+    path: ../packages/dart/lipilekhika
 
   # Icons
   lucide_icons: ^0.257.0

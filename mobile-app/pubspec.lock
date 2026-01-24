@@ -163,7 +163,7 @@ packages:
   lipilekhika:
     dependency: "direct main"
     description:
-      path: "../../packages/dart/lipilekhika"
+      path: "../packages/dart/lipilekhika"
       relative: true
     source: path
     version: "0.1.0"
