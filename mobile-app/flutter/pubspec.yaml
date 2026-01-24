@@ -2,7 +2,7 @@ name: lipilekhika_flutter
 description: "Lipi Lekhika - Transliterate between Indian Brahmic scripts"
 publish_to: "none"
 
-version: 1.0.0+1
+version: 0.0.1+1
 
 environment:
   sdk: ^3.5.0

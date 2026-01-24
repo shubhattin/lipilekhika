@@ -25,7 +25,7 @@ rootProject.allprojects {
 apply plugin: "com.android.library"
 
 android {
-    namespace = "in.lipilekhika"
+    namespace = "com.shubhattin.lipilekhika"
     compileSdk = 36
 
     compileOptions {
