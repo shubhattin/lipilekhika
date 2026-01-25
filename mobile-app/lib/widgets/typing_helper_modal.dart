@@ -372,36 +372,28 @@ class _TypingHelperModalState extends State<TypingHelperModal>
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(width: 16),
-            Text(
-              'Compare with:',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
           ],
         ),
         const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          initialValue: scriptsForCompare.contains(_compareScript)
-              ? _compareScript
-              : scriptsForCompare.first,
-          decoration: InputDecoration(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+        Row(
+          children: [
+            Text(
+              'Compare with:',
+              style: Theme.of(context).textTheme.labelLarge,
             ),
-          ),
-          items: scriptsForCompare.map((script) {
-            return DropdownMenuItem<String>(
-              value: script,
-              child: Text(script),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              _onCompareScriptChanged(value);
-            }
-          },
+            const SizedBox(width: 12),
+            Expanded(
+              child: ScriptSelector(
+                value: _compareScript != null &&
+                        scriptsForCompare.contains(_compareScript)
+                    ? _compareScript!
+                    : scriptsForCompare.first,
+                onChanged: (value) {
+                  _onCompareScriptChanged(value);
+                },
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
 

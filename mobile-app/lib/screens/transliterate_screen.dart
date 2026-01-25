@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:lipilekhika/lipilekhika.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/script_selector.dart';
 import '../widgets/transliteration_options.dart';
@@ -37,10 +38,50 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
   @override
   void initState() {
     super.initState();
-    _loadOptions();
+    _loadSavedScripts();
     _inputController.addListener(_onInputChanged);
-    // Initialize typing context on startup since typing is enabled by default
-    _initTypingContext();
+  }
+
+  /// Load saved script preferences from SharedPreferences
+  Future<void> _loadSavedScripts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedFromScript = prefs.getString('fromScript');
+      final savedToScript = prefs.getString('toScript');
+
+      setState(() {
+        if (savedFromScript != null) {
+          _fromScript = savedFromScript;
+        }
+        if (savedToScript != null) {
+          _toScript = savedToScript;
+        }
+      });
+
+      _loadOptions();
+      // Initialize typing context after loading saved scripts
+      if (_isTypingMode) {
+        _initTypingContext();
+      }
+    } catch (e) {
+      debugPrint('Error loading saved scripts: $e');
+      // If loading fails, just use defaults and continue
+      _loadOptions();
+      if (_isTypingMode) {
+        _initTypingContext();
+      }
+    }
+  }
+
+  /// Save script preferences to SharedPreferences
+  Future<void> _saveScripts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('fromScript', _fromScript);
+      await prefs.setString('toScript', _toScript);
+    } catch (e) {
+      debugPrint('Error saving scripts: $e');
+    }
   }
 
   @override
@@ -233,6 +274,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
       _inputController.text = tempOutput;
       _outputText = tempInput;
     });
+    _saveScripts();
     _loadOptions();
   }
 
@@ -285,6 +327,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                         value: _fromScript,
                         onChanged: (value) {
                           setState(() => _fromScript = value);
+                          _saveScripts();
                           _loadOptions();
                           if (_autoConvert) _performTransliteration();
                         },
@@ -394,6 +437,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                   value: _toScript,
                   onChanged: (value) {
                     setState(() => _toScript = value);
+                    _saveScripts();
                     _loadOptions();
                     if (_autoConvert) _performTransliteration();
                   },
