@@ -229,7 +229,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 32),
 
           Text(
-            '© 2026 Shubham Anand Gupta',
+            '© ${DateTime.now().year} Shubham Anand Gupta',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

@@ -465,10 +465,11 @@ class _TypingHelperModalState extends State<TypingHelperModal>
         else if (_error != null)
           Center(
             child: Text(
-              'Select a script to compare',
+              _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
+              textAlign: TextAlign.center,
             ),
           ),
 

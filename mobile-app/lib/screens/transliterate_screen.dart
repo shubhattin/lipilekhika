@@ -47,6 +47,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
   Future<void> _loadSavedScripts() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
       final savedFromScript = prefs.getString('fromScript');
       final savedToScript = prefs.getString('toScript');
 
@@ -67,6 +68,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
     } catch (e) {
       debugPrint('Error loading saved scripts: $e');
       // If loading fails, just use defaults and continue
+      if (!mounted) return;
       _loadOptions();
       if (_isTypingMode) {
         _initTypingContext();
@@ -104,6 +106,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
         fromScript: _fromScript,
         toScript: _toScript,
       );
+      if (!mounted) return;
       setState(() {
         _availableOptions = options;
         _options = {for (var opt in options) opt: false};
@@ -261,6 +264,14 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
       setState(() => _outputText = result);
     } catch (e) {
       debugPrint('Transliteration error: $e');
+      if (mounted) {
+        setState(() => _outputText = '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to transliterate. Please retry.'),
+          ),
+        );
+      }
     }
   }
 
