@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/theme_provider.dart';
 import 'transliterate_screen.dart';
@@ -50,26 +51,26 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    LucideIcons.languages,
-                    size: 48,
-                    color: colorScheme.onPrimaryContainer,
+                  Image.asset(
+                    'assets/icon_128.png',
+                    height: 48,
+                    width: 48,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Lipi Lekhika',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
                   ),
                   Text(
-                    'Script Transliteration',
+                    'Script Transliteration and Typing',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer.withValues(
-                        alpha: 0.8,
-                      ),
-                    ),
+                          color: colorScheme.onPrimaryContainer.withValues(
+                            alpha: 0.8,
+                          ),
+                        ),
                   ),
                 ],
               ),
@@ -110,6 +111,30 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
+            const Divider(indent: 16, endIndent: 16),
+
+            ListTile(
+              leading: const Icon(LucideIcons.globe, size: 20),
+              title: const Text('Online App'),
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              onTap: () {
+                Navigator.pop(context);
+                _launchUrl('https://lipilekhika.in/app');
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(LucideIcons.github, size: 20),
+              title: const Text('GitHub'),
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              onTap: () {
+                Navigator.pop(context);
+                _launchUrl('https://github.com/shubhattin/lipilekhika');
+              },
+            ),
+
             const Spacer(),
 
             // Theme section
@@ -119,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'Theme',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
               ),
             ),
 
@@ -157,5 +182,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    try {
+      final url = Uri.parse(urlString);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
   }
 }
