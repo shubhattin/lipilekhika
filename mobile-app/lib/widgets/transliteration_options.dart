@@ -1,6 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+// Custom option descriptions matching the TypeScript/Svelte version
+const Map<String, (String, String)> customOptionDescriptions = {
+  'all_to_normal:preserve_specific_chars': (
+    'Preserve Specific Characters',
+    'Preserves script-specific characters when converting to Normal script. Can be useful for studying script specific characters.'
+  ),
+  'all_to_normal:remove_virAma_and_double_virAma': (
+    'Remove Virāma and Double Virāma',
+    'Removes virāma (।) and pūrṇa virāma (॥) punctuation from Normal/Romanized output.'
+  ),
+  'all_to_normal:replace_avagraha_with_a': (
+    'Replace Avagraha with a',
+    "Replaces avagraha (ऽ) with 'a' in Normal/Romanized output."
+  ),
+  'all_to_sinhala:use_conjunct_enabling_halant': (
+    'Use Conjunct Enabling Halant',
+    'Uses conjunct-enabling halant (්) for Sinhala output to properly form conjunct consonants.'
+  ),
+  'all_to_normal:replace_pancham_varga_varna_with_n': (
+    'Replace Pancham Varga Varna with n',
+    "Replaces ङ (G) and ञ (J) with 'n' for more natural output."
+  ),
+  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': (
+    'Replace Pancham Varga Varna with Anusvāra',
+    'Replaces 5th varga consonants (ङ्, ञ्, ण्, न्, म्) with anusvāra (ं) when followed by consonants of the same varga.'
+  ),
+  'normal_to_all:use_typing_chars': (
+    'Use Typing Characters',
+    'Enables typing mode characters including duplicate alternatives and script-specific characters. Equivalent to typing mode using `createTypingContext` function.'
+  ),
+};
+
 class TransliterationOptionsWidget extends StatefulWidget {
   final Map<String, bool> options;
   final List<String> availableOptions;
@@ -67,21 +99,29 @@ class _TransliterationOptionsWidgetState
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: widget.availableOptions.map((option) {
-                      return _buildOptionTile(
-                        context,
-                        option,
-                        widget.options[option] ?? false,
-                        (value) {
-                          final newOptions =
-                              Map<String, bool>.from(widget.options);
-                          newOptions[option] = value;
-                          widget.onOptionsChanged(newOptions);
-                        },
-                      );
-                    }).toList(),
-                  ),
+                  child: widget.availableOptions.isEmpty
+                      ? Text(
+                          'No options available for this combination.',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                        )
+                      : Column(
+                          children: widget.availableOptions.map((option) {
+                            return _buildOptionTile(
+                              context,
+                              option,
+                              widget.options[option] ?? false,
+                              (value) {
+                                final newOptions =
+                                    Map<String, bool>.from(widget.options);
+                                newOptions[option] = value;
+                                widget.onOptionsChanged(newOptions);
+                              },
+                            );
+                          }).toList(),
+                        ),
                 ),
               ],
             ),
@@ -103,13 +143,15 @@ class _TransliterationOptionsWidgetState
   ) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Format the option key to be more readable
-    final displayName = _formatOptionName(optionKey);
-    final description = _getOptionDescription(optionKey);
+    // Get proper name and description from the map
+    final optionInfo = customOptionDescriptions[optionKey];
+    final displayName = optionInfo?.$1 ?? optionKey;
+    final description = optionInfo?.$2 ?? 'No description available.';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Switch(
             value: value,
@@ -117,30 +159,24 @@ class _TransliterationOptionsWidgetState
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                if (description != null)
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-              ],
+            child: GestureDetector(
+              onTap: () => onChanged(!value),
+              child: Text(
+                displayName,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
             ),
           ),
           IconButton(
-            onPressed: () => _showOptionInfo(context, optionKey, displayName),
+            onPressed: () => _showOptionInfo(context, displayName, description),
             icon: Icon(
               LucideIcons.info,
               size: 18,
-              color: colorScheme.onSurfaceVariant,
+              color: colorScheme.primary,
             ),
+            tooltip: 'More info',
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -148,38 +184,13 @@ class _TransliterationOptionsWidgetState
     );
   }
 
-  String _formatOptionName(String key) {
-    // Convert camelCase or snake_case to readable format
-    return key
-        .replaceAllMapped(
-          RegExp(r'([a-z])([A-Z])'),
-          (match) => '${match.group(1)} ${match.group(2)}',
-        )
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map((word) => word.isNotEmpty
-            ? '${word[0].toUpperCase()}${word.substring(1)}'
-            : word)
-        .join(' ');
-  }
-
-  String? _getOptionDescription(String key) {
-    // Add descriptions for known options
-    const descriptions = {
-      'removeViramaAndDoubleVirama': 'Remove virama marks from output',
-      'replaceAvagrahaWithA': 'Replace avagraha with \'a\' character',
-    };
-    return descriptions[key];
-  }
-
-  void _showOptionInfo(BuildContext context, String key, String displayName) {
+  void _showOptionInfo(
+      BuildContext context, String displayName, String description) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(displayName),
-        content: Text(
-          'This option modifies the transliteration behavior for $displayName.',
-        ),
+        content: Text(description),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

@@ -372,7 +372,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: _isTypingMode
-                        ? 'Type in English to see $_fromScript...'
+                        ? 'Type in $_fromScript...'
                         : 'Enter text to transliterate...',
                     filled: true,
                     fillColor: colorScheme.surfaceContainerLowest,
@@ -461,7 +461,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Transliteration Options
           if (_availableOptions.isNotEmpty)
@@ -473,6 +473,9 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                 if (_autoConvert) _performTransliteration();
               },
             ),
+
+          // Bottom padding for better spacing
+          const SizedBox(height: 32),
         ],
       ),
     );
