@@ -8,6 +8,7 @@ import '../widgets/script_selector.dart';
 import '../widgets/transliteration_options.dart';
 import '../widgets/typing_helper_modal.dart';
 import '../widgets/transliteration_formatter.dart';
+import '../utils/font_config.dart';
 
 class TransliterateScreen extends StatefulWidget {
   const TransliterateScreen({super.key});
@@ -404,6 +405,10 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                 TextField(
                   controller: _inputController,
                   maxLines: 6,
+                  style: FontConfig.getTextStyleForScript(
+                    _fromScript,
+                    baseStyle: Theme.of(context).textTheme.bodyLarge,
+                  ),
                   inputFormatters: [
                     if (_isTypingMode && _formatter != null) _formatter!,
                   ],
@@ -496,9 +501,13 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                   ),
                   child: SelectableText(
                     _outputText,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          height: 1.5,
-                        ),
+                    style: FontConfig.getTextStyleForScript(
+                      _toScript,
+                      baseStyle:
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                height: 1.5,
+                              ),
+                    ),
                   ),
                 ),
               ],

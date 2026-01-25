@@ -30,6 +30,7 @@ dependencies:
 
   # URL launcher
   url_launcher: ^6.3.0
+  google_fonts: ^8.0.0
 
 dev_dependencies:
   flutter_test:
@@ -40,3 +41,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+
+  fonts:
+    - family: SatisarSharada
+      fonts:
+        - asset: assets/fonts/SatisarSharada.ttf

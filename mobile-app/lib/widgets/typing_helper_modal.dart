@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:lipilekhika/lipilekhika.dart';
 
 import 'script_selector.dart';
+import '../utils/font_config.dart';
 
 class TypingHelperModal extends StatefulWidget {
   final String script;
@@ -307,9 +308,12 @@ class _TypingHelperModalState extends State<TypingHelperModal>
         children: [
           Text(
             item.text == '\u200d' ? 'ZWJ' : item.text,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: FontConfig.getTextStyleForScript(
+              _selectedScript,
+              baseStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
           ),
           const Spacer(),
           Wrap(
@@ -434,16 +438,24 @@ class _TypingHelperModalState extends State<TypingHelperModal>
                   children: [
                     Text(
                       baseItem.characterText,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: FontConfig.getTextStyleForScript(
+                        _selectedScript,
+                        baseStyle:
+                            Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       compareItem?.characterText ?? '—',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                      style: FontConfig.getTextStyleForScript(
+                        _compareScript ?? 'Romanized',
+                        baseStyle:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                      ),
                     ),
                   ],
                 ),
