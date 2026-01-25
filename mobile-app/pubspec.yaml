@@ -12,25 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Lipilekhika package for transliteration
   lipilekhika:
     path: ../packages/dart/lipilekhika
-
-  # Icons
   lucide_icons: ^0.257.0
-
-  # State management
   provider: ^6.1.2
-
-  # Shared preferences for theme persistence
   shared_preferences: ^2.3.3
-
-  # Package info for versioning
   package_info_plus: ^8.1.2
-
-  # URL launcher
   url_launcher: ^6.3.0
   google_fonts: ^8.0.0
+  posthog_flutter: ^5.0.0
 
 dev_dependencies:
   flutter_test:

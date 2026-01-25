@@ -375,6 +375,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  posthog_flutter:
+    dependency: "direct main"
+    description:
+      name: posthog_flutter
+      sha256: "89fca6fb854ff47f283abfdb658868b8644afb92739155dfa10e8158b9546703"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.11.1"
   provider:
     dependency: "direct main"
     description:

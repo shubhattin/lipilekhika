@@ -13,6 +13,9 @@ on:
 permissions:
   contents: write # Required for uploading to releases
 
+env:
+  MOBILE_APP_POSTHOG_KEY: ${{ vars.MOBILE_APP_POSTHOG_KEY }}
+
 jobs:
   build-android:
     runs-on: ubuntu-latest

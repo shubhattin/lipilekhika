@@ -20,7 +20,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.shubhattin.lipilekhika"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -28,6 +27,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Inject environment variables into the manifest
+        manifestPlaceholders["POSTHOG_API_KEY"] = System.getenv("MOBILE_APP_POSTHOG_KEY") ?: ""
     }
 
     signingConfigs {
