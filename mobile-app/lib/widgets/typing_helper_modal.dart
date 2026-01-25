@@ -349,8 +349,9 @@ class _TypingHelperModalState extends State<TypingHelperModal>
   Widget _buildCompareScriptsTab(ScrollController scrollController) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Get scripts list excluding Normal and current script
-    final scriptsForCompare = allScriptLangList
+    // Get scripts list excluding Normal and current script, using the ordered list
+    final scriptsForCompare = orderedScripts
+        .map((s) => s.name)
         .where((s) => s != 'Normal' && s != _selectedScript)
         .toList();
 
