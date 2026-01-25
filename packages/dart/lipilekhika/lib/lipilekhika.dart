@@ -3,7 +3,7 @@
 /// This library provides functions to transliterate text between various
 /// Indian scripts and languages, as well as typing context support for
 /// real-time character-by-character input.
-library lipilekhika;
+library;
 
 // Export main transliteration functions
 export 'src/main.dart';

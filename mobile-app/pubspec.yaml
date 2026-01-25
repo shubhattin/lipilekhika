@@ -1,0 +1,38 @@
+name: lipilekhika_mobile
+description: "Lipi Lekhika - Transliterate between Indian Brahmic scripts"
+publish_to: "none"
+
+version: 0.0.1+1
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  lipilekhika:
+    path: ../packages/dart/lipilekhika
+  lucide_icons: ^0.257.0
+  provider: ^6.1.2
+  shared_preferences: ^2.3.3
+  package_info_plus: ^8.1.2
+  url_launcher: ^6.3.0
+  google_fonts: ^8.0.0
+  posthog_flutter: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
+  fonts:
+    - family: SatisarSharada
+      fonts:
+        - asset: assets/fonts/SatisarSharada.ttf

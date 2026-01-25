@@ -1,0 +1,263 @@
+name: Release Mobile App
+
+on:
+  push:
+    tags:
+      - "mobile-app@v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to attach release to (e.g. mobile-app@v1.2.3)"
+        required: true
+
+permissions:
+  contents: write # Required for uploading to releases
+
+env:
+  MOBILE_APP_POSTHOG_KEY: ${{ vars.MOBILE_APP_POSTHOG_KEY }}
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Extract version from pubspec.yaml (do this early for verification)
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep "^version:" mobile-app/pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
+          if [[ -z "$VERSION" ]]; then
+            echo "Could not determine version from mobile-app/pubspec.yaml"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: $VERSION"
+
+      # Resolve release tag (from input on workflow_dispatch, else from pushed tag)
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Verify tag contains the app version
+      - name: Verify tag matches version
+        id: verify_tag
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Resolved TAG = $TAG"
+          echo "App VERSION = $VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "Tag ($TAG) does not contain version ($VERSION). Aborting build."
+            exit 1
+          fi
+
+      # Normalize the tag to the canonical `mobile-app@v<version>` form
+      - name: Normalize tag for release upload
+        id: normalized_tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
+          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
+          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          VERSION="${VERSION#v}"
+
+          if [[ "$RAW_TAG" == mobile-app@* ]]; then
+            TAG_SUFFIX="${RAW_TAG#mobile-app@}"
+            TAG_SUFFIX="${TAG_SUFFIX#v}"
+            NORMALIZED_TAG="mobile-app@v${TAG_SUFFIX}"
+          else
+            NORMALIZED_TAG="mobile-app@v${VERSION}"
+          fi
+
+          echo "Normalized TAG=$NORMALIZED_TAG"
+          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
+
+      # Setup Bun for script/test data generation
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      # Setup Java (required for Android build)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Setup Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-
+
+      # Install cargo-ndk
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Install flutter_rust_bridge_codegen
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen
+
+      # Enable script data in Rust package
+      - name: Enable script data
+        run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      # Generate Dart FFI bindings
+      - name: Generate Dart bindings
+        run: |
+          cd packages/dart/lipilekhika
+          flutter_rust_bridge_codegen generate
+
+      # Build Android native libraries
+      - name: Build Android native libraries
+        run: |
+          cd packages/dart/binding
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
+            -o ../lipilekhika/android/src/main/jniLibs \
+            build --release
+
+      # Verify native libraries were built
+      - name: Verify native libraries
+        run: |
+          ls -la packages/dart/lipilekhika/android/src/main/jniLibs/*/
+
+      # Decode keystore
+      - name: Decode Keystore
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > mobile-app/android/app/release.keystore
+          echo "ANDROID_KEYSTORE_PATH=$(pwd)/mobile-app/android/app/release.keystore" >> $GITHUB_ENV
+
+      # Install Flutter dependencies for the app
+      - name: Install Flutter dependencies
+        run: |
+          cd mobile-app
+          flutter pub get
+
+      # Build release APK (split per ABI)
+      - name: Build release APK
+        run: |
+          cd mobile-app
+          flutter build apk --release --split-per-abi
+
+      # Rename APKs to lipilekhika_version_arch.apk format
+      - name: Rename split APKs
+        run: |
+          cd mobile-app/build/app/outputs/flutter-apk
+          mv app-arm64-v8a-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_arm64-v8a.apk
+          mv app-armeabi-v7a-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_armeabi-v7a.apk
+          mv app-x86_64-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_x86_64.apk
+
+      # Upload split APKs as artifacts
+      - name: Upload split APKs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apks
+          path: |
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_arm64-v8a.apk
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_armeabi-v7a.apk
+            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_x86_64.apk
+          retention-days: 30
+
+      # Also build a fat APK (all architectures in one)
+      - name: Build universal APK
+        run: |
+          cd mobile-app
+          flutter build apk --release
+
+      - name: Rename universal APK
+        run: |
+          cd mobile-app/build/app/outputs/flutter-apk
+          mv app-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_universal.apk
+
+      - name: Upload universal APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-universal
+          path: mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_universal.apk
+          retention-days: 30
+
+      # Build AAB for Google Play Console
+      - name: Build release AAB
+        run: |
+          cd mobile-app
+          flutter build appbundle --release
+
+      - name: Rename AAB
+        run: |
+          cd mobile-app/build/app/outputs/bundle/release
+          mv app-release.aab lipilekhika_${{ steps.get_version.outputs.VERSION }}.aab
+
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: mobile-app/build/app/outputs/bundle/release/lipilekhika_${{ steps.get_version.outputs.VERSION }}.aab
+          retention-days: 30
+
+      # Upload architecture-specific APKs to the GitHub release (with --clobber to allow re-runs)
+      - name: Upload APKs to release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${{ steps.normalized_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          APK_DIR="mobile-app/build/app/outputs/flutter-apk"
+
+          echo "Uploading architecture-specific APKs to release $TAG"
+
+          # Upload arm64-v8a APK
+          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_arm64-v8a.apk" --clobber
+
+          # Upload armeabi-v7a APK
+          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_armeabi-v7a.apk" --clobber
+
+          # Upload x86_64 APK
+          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_x86_64.apk" --clobber
+
+          echo "Successfully uploaded all APKs to release"

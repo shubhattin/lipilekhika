@@ -119,11 +119,20 @@ rust_main.ScriptListData getScriptListData() {
   return rust_main.getScriptListData();
 }
 
+late final rust_main.ScriptListData _scriptData = getScriptListData();
+
 /// The list of all supported script names.
-late final List<String> scriptList = getScriptListData().scripts.keys.toList();
+List<String> get scriptList => _scriptNames;
+
+late final List<String> _scriptNames = _scriptData.scripts.keys.toList();
 
 /// The list of all supported language names which are mapped to a script.
-late final List<String> langList = getScriptListData().langs.keys.toList();
+List<String> get langList => _langNames;
+
+late final List<String> _langNames = _scriptData.langs.keys.toList();
 
 /// Combined list of all supported scripts and languages.
-late final List<String> allScriptLangList = {...scriptList, ...langList}.toList();
+List<String> get allScriptLangList => _allScriptLangs;
+
+late final List<String> _allScriptLangs =
+    {..._scriptNames, ..._langNames}.toList();
