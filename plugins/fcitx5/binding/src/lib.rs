@@ -54,6 +54,8 @@ pub struct LipiTypingDiff {
   pub to_delete_chars_count: usize,
   /// UTF-8 text to append to the preedit.
   pub diff_add_text: LipiString,
+  /// Remaining internal context length (0 means context was cleared).
+  pub context_length: usize,
 }
 
 /// Options for configuring a typing context.
@@ -267,6 +269,7 @@ pub unsafe extern "C" fn lipi_typing_context_take_key_input(
       *out_diff = LipiTypingDiff {
         to_delete_chars_count: diff.to_delete_chars_count,
         diff_add_text: alloc_lipi_string(diff.diff_add_text),
+        context_length: diff.context_length,
       };
       LipiStatus::Ok
     }

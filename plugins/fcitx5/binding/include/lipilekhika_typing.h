@@ -67,6 +67,10 @@ typedef struct LipiTypingDiff {
    * UTF-8 text to append to the preedit.
    */
   struct LipiString diff_add_text;
+  /**
+   * Remaining internal context length (0 means context was cleared).
+   */
+  size_t context_length;
 } LipiTypingDiff;
 
 #ifdef __cplusplus

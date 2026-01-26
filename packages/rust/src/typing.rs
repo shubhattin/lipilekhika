@@ -50,6 +50,8 @@ pub struct TypingDiff {
   pub to_delete_chars_count: usize,
   /// Text that should be inserted into the current "app" input state.
   pub diff_add_text: String,
+  /// Can be used to determine if the context should be cleared
+  pub context_length: usize,
 }
 
 /// Stateful isolated context for character-by-character input typing.
@@ -128,6 +130,7 @@ impl TypingContext {
       return Ok(TypingDiff {
         to_delete_chars_count: 0,
         diff_add_text: String::new(),
+        context_length: 0,
       });
     };
 
@@ -169,6 +172,7 @@ impl TypingContext {
     Ok(TypingDiff {
       to_delete_chars_count,
       diff_add_text,
+      context_length,
     })
   }
 

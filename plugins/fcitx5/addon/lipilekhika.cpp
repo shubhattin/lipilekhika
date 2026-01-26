@@ -93,9 +93,7 @@ static void updatePreeditUI(fcitx::InputContext *ic, const std::string &preedit)
   fcitx::Text text;
   text.append(preedit);
   ic->inputPanel().setClientPreedit(text);
-  ic->inputPanel().setPreedit(text);
   ic->updatePreedit();
-  ic->updateUserInterface(fcitx::UserInterfaceComponent::InputPanel);
 }
 
 } // namespace
@@ -206,9 +204,12 @@ void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
 
   // Cancel composition.
   if (sym == FcitxKey_Escape) {
-    state->clear();
-    updatePreeditUI(ic, state->preedit_utf8_);
-    keyEvent.filterAndAccept();
+    // Only consume Escape if we actually had an active composition.
+    if (!state->preedit_utf8_.empty() || !state->raw_ascii_.empty()) {
+      state->clear();
+      updatePreeditUI(ic, state->preedit_utf8_);
+      keyEvent.filterAndAccept();
+    }
     return;
   }
 
@@ -263,9 +264,12 @@ void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
 
   // Only accept printable ASCII for v1 roman typing.
   if (!isPrintableAscii(sym)) {
-    // Non-text input: clear context so we don't desync.
-    state->clear();
-    updatePreeditUI(ic, state->preedit_utf8_);
+    // Non-text input: if we are composing, clear so we don't desync,
+    // but do NOT consume the key (let it pass through to the app).
+    if (!state->preedit_utf8_.empty() || !state->raw_ascii_.empty()) {
+      state->clear();
+      updatePreeditUI(ic, state->preedit_utf8_);
+    }
     return;
   }
 
@@ -297,6 +301,18 @@ void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
     state->preedit_utf8_.append(diff.diff_add_text.ptr, diff.diff_add_text.len);
   }
   lipi_string_free(diff.diff_add_text);
+
+  // If Rust indicates the context has been cleared, commit immediately.
+  // This keeps the preedit tooltip short and matches lipilekhika's internal context behavior.
+  if (diff.context_length == 0) {
+    if (!state->preedit_utf8_.empty()) {
+      ic->commitString(state->preedit_utf8_);
+    }
+    state->clear();
+    updatePreeditUI(ic, state->preedit_utf8_);
+    keyEvent.filterAndAccept();
+    return;
+  }
 
   updatePreeditUI(ic, state->preedit_utf8_);
   keyEvent.filterAndAccept();
