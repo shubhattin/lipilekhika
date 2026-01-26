@@ -9,7 +9,10 @@ import { ExternalLink } from 'lucide-svelte';
 type Props = {
   title: string;
   description?: string;
+  index?: boolean;
 };
+
+const index_site = Astro.props.index ?? true;
 
 const { title, description }: Props = Astro.props;
 
@@ -26,6 +29,7 @@ const shareImageInfo = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    {!index_site && <meta name="robots" content="noindex, nofollow" />}
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />

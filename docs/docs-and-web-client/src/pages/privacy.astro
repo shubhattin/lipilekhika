@@ -1,0 +1,127 @@
+---
+import RootLayout from '../components/RootLayout.astro';
+---
+
+<RootLayout title="Privacy Policy" description="Privacy Policy for Lipi Lekhika" index={false}>
+  <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+    <h1 class="mb-8 text-4xl font-bold">Privacy Policy</h1>
+
+    <div class="prose prose-invert max-w-none space-y-6">
+      <p class="text-lg text-muted-foreground">
+        <strong>Last Updated:</strong> January 26, 2026
+      </p>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Introduction</h2>
+        <p>
+          Lipi Lekhika ("we", "our", or "the app") is committed to protecting your privacy. This
+          Privacy Policy explains how our Android application handles data.
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Data Collection</h2>
+        <p>
+          <strong>We do NOT collect any personal information.</strong> Lipi Lekhika does not collect,
+          store, or share any personally identifiable information such as:
+        </p>
+        <ul class="list-disc space-y-2 pl-6">
+          <li>Name, email address, or phone number</li>
+          <li>Location data</li>
+          <li>Device identifiers (except anonymous analytics identifiers)</li>
+          <li>User-generated content or text you write in the app</li>
+          <li>Contacts, photos, or any other personal data</li>
+        </ul>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Anonymous Analytics</h2>
+        <p>
+          We collect anonymous usage analytics through <strong>PostHog</strong>, a third-party
+          analytics service. This data is completely anonymous and cannot be used to identify you
+          personally. The information collected includes:
+        </p>
+        <ul class="list-disc space-y-2 pl-6">
+          <li>App usage patterns (which features are used)</li>
+          <li>Screen views and navigation flows</li>
+          <li>Device type and operating system version</li>
+          <li>App performance metrics (crashes, errors)</li>
+          <li>General usage statistics</li>
+        </ul>
+        <p>
+          This anonymous data helps us understand how the app is used and improve its functionality
+          and user experience.
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Third-Party Services</h2>
+        <p>
+          We use PostHog for anonymous analytics. PostHog may collect and process anonymous data as
+          described in their privacy policy. You can learn more about PostHog's privacy practices
+          at:
+          <a
+            href="https://posthog.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary hover:underline"
+          >
+            https://posthog.com/privacy
+          </a>
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Data Storage</h2>
+        <p>
+          All your text and preferences are stored locally on your device only. We do not have
+          access to this data, and it never leaves your device. You maintain complete control over
+          your data.
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Children's Privacy</h2>
+        <p>
+          Our app does not collect any personal information from anyone, including children under 13
+          years of age.
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Changes to This Privacy Policy</h2>
+        <p>
+          We may update this Privacy Policy from time to time. Any changes will be posted on this
+          page with an updated "Last Updated" date. We encourage you to review this Privacy Policy
+          periodically.
+        </p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-semibold">Contact Us</h2>
+        <p>
+          If you have any questions or concerns about this Privacy Policy, please contact us at:
+        </p>
+        <p>
+          <a
+            href="https://github.com/shubhattin/lipilekhika"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary hover:underline"
+          >
+            GitHub Repository
+          </a>
+        </p>
+      </section>
+
+      <section class="mt-8 rounded-lg border border-border/40 bg-muted/20 p-6">
+        <h3 class="mb-2 text-xl font-semibold">Summary</h3>
+        <p class="text-muted-foreground">
+          <strong>Your privacy is important to us.</strong> Lipi Lekhika does not collect any personal
+          information. We only collect anonymous usage statistics to improve the app. All your content
+          stays on your device.
+        </p>
+      </section>
+    </div>
+  </div>
+</RootLayout>

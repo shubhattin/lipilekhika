@@ -85,8 +85,9 @@ class ScriptSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final scripts =
-        orderedScripts.map((scriptInfo) => scriptInfo.name).toList(growable: false);
+    final scripts = orderedScripts
+        .map((scriptInfo) => scriptInfo.name)
+        .toList(growable: false);
     final String? initialValue = scripts.contains(value)
         ? value
         : (scripts.contains('Normal') ? 'Normal' : null);
@@ -150,7 +151,7 @@ class ScriptSelector extends StatelessWidget {
     }
 
     return DropdownButtonFormField<String>(
-      value: initialValue,
+      initialValue: initialValue,
       decoration: InputDecoration(
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
