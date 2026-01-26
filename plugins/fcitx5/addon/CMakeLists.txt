@@ -54,5 +54,8 @@ install(
 )
 
 # Input method registration file(s)
-install(FILES "lipilekhika-devanagari.conf" DESTINATION "${FCITX_INSTALL_PKGDATADIR}/inputmethod")
+file(GLOB LIPILEKHIKA_INPUTMETHOD_CONFS
+  "${CMAKE_CURRENT_LIST_DIR}/conf/lipilekhika-*.conf"
+)
+install(FILES ${LIPILEKHIKA_INPUTMETHOD_CONFS} DESTINATION "${FCITX_INSTALL_PKGDATADIR}/inputmethod")
 

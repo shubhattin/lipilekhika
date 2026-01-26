@@ -16,8 +16,58 @@
 #include <fcitx-utils/keysym.h>
 
 #include <algorithm>
+#include <cctype>
+#include <string_view>
+#include <unordered_map>
 
 namespace {
+
+static std::string normalizeKey(std::string_view s) {
+  std::string out;
+  out.reserve(s.size());
+  bool lastWasDash = false;
+  for (unsigned char ch : s) {
+    if (std::isalnum(ch)) {
+      out.push_back(static_cast<char>(std::tolower(ch)));
+      lastWasDash = false;
+    } else if (ch == '-' || ch == '_') {
+      if (!out.empty() && !lastWasDash) {
+        out.push_back('-');
+        lastWasDash = true;
+      }
+    } else {
+      // drop everything else (spaces, parentheses, etc.)
+    }
+  }
+  if (!out.empty() && out.back() == '-') {
+    out.pop_back();
+  }
+  return out;
+}
+
+static std::string scriptFromEntry(const fcitx::InputMethodEntry &entry) {
+  // Prefer uniqueName() since it's stable and usually derived from the .conf filename.
+  std::string raw = entry.uniqueName();
+  if (raw.empty()) {
+    raw = entry.name();
+  }
+  if (raw.empty()) {
+    raw = entry.label();
+  }
+
+  // If it's "addon:name", keep the trailing portion.
+  if (auto pos = raw.rfind(':'); pos != std::string::npos) {
+    raw = raw.substr(pos + 1);
+  }
+
+  std::string key = normalizeKey(raw);
+  constexpr std::string_view kPrefix = "lipilekhika-";
+  if (key.rfind(kPrefix, 0) == 0) {
+    key.erase(0, kPrefix.size());
+  }
+
+  return key;
+}
 
 // Remove last Unicode codepoint from a UTF-8 string.
 static void truncateLastCodepoints(std::string &s, size_t n) {
@@ -63,11 +113,6 @@ bool LipilekhikaState::ensureContext(const std::string &script) {
   script_ = script;
   LipiTypingContextOptions opts;
   lipi_typing_default_options(&opts);
-
-  // Devanagari/Hindi feel more natural with inherent vowel included.
-  if (script_ == "Devanagari") {
-    opts.include_inherent_vowel = true;
-  }
 
   LipiString err = {};
   auto status =
@@ -132,8 +177,6 @@ LipilekhikaEngine::LipilekhikaEngine(fcitx::Instance *instance)
 
 void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
                                  fcitx::KeyEvent &keyEvent) {
-  FCITX_UNUSED(entry);
-
   if (keyEvent.isRelease()) {
     return;
   }
@@ -154,8 +197,8 @@ void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
     return;
   }
 
-  // For now: one IM -> Devanagari. Later we can derive script from entry.uniqueName().
-  if (!state->ensureContext("Devanagari")) {
+  const std::string script = scriptFromEntry(entry);
+  if (!state->ensureContext(script)) {
     return;
   }
 
@@ -171,6 +214,18 @@ void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,
 
   // Commit preedit on Return.
   if (sym == FcitxKey_Return || sym == FcitxKey_KP_Enter) {
+    if (!state->preedit_utf8_.empty()) {
+      ic->commitString(state->preedit_utf8_);
+      state->clear();
+      updatePreeditUI(ic, state->preedit_utf8_);
+      keyEvent.filterAndAccept();
+      return;
+    }
+    return;
+  }
+
+  // Commit preedit on Shift (without adding any character).
+  if (sym == FcitxKey_Shift_L || sym == FcitxKey_Shift_R) {
     if (!state->preedit_utf8_.empty()) {
       ic->commitString(state->preedit_utf8_);
       state->clear();
