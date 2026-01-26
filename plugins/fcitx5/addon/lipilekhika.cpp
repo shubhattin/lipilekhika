@@ -8,6 +8,8 @@
 
 #include "lipilekhika.h"
 
+#include <fcitx-config/iniparser.h>
+#include <fcitx-config/rawconfig.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputmethodentry.h>
 #include <fcitx/inputpanel.h>
@@ -99,6 +101,32 @@ static void updatePreeditUI(fcitx::InputContext *ic, const std::string &preedit)
 } // namespace
 
 bool LipilekhikaState::ensureContext(const std::string &script) {
+  // Pull current engine options.
+  const auto &cfg = engine_->config();
+  const uint64_t autoMs = static_cast<uint64_t>(std::max(0, *cfg.autoContextClearTimeMs));
+  const bool useNative = *cfg.useNativeNumerals;
+  const bool includeInherent = *cfg.includeInherentVowel;
+
+  if (ctx_ && script_ == script) {
+    // Apply mutable options to existing context.
+    if (use_native_numerals_ != useNative) {
+      lipi_typing_context_set_use_native_numerals(ctx_, useNative);
+      use_native_numerals_ = useNative;
+    }
+    if (include_inherent_vowel_ != includeInherent) {
+      lipi_typing_context_set_include_inherent_vowel(ctx_, includeInherent);
+      include_inherent_vowel_ = includeInherent;
+    }
+    // No setter for auto context clear time: recreate context if it changed.
+    if (auto_context_clear_time_ms_ != autoMs) {
+      resetContext();
+      // fallthrough to recreate.
+    } else {
+      return true;
+    }
+  }
+
+  // Either script changed or we need to recreate the context.
   if (ctx_ && script_ == script) {
     return true;
   }
@@ -111,6 +139,12 @@ bool LipilekhikaState::ensureContext(const std::string &script) {
   script_ = script;
   LipiTypingContextOptions opts;
   lipi_typing_default_options(&opts);
+  opts.auto_context_clear_time_ms = autoMs;
+  opts.use_native_numerals = useNative;
+  opts.include_inherent_vowel = includeInherent;
+  auto_context_clear_time_ms_ = autoMs;
+  use_native_numerals_ = useNative;
+  include_inherent_vowel_ = includeInherent;
 
   LipiString err = {};
   auto status =
@@ -133,6 +167,16 @@ void LipilekhikaState::clear() {
   preedit_utf8_.clear();
   if (ctx_) {
     lipi_typing_context_clear(ctx_);
+  }
+}
+
+void LipilekhikaState::resetContext() {
+  raw_ascii_.clear();
+  preedit_utf8_.clear();
+  script_.clear();
+  if (ctx_) {
+    lipi_typing_context_free(ctx_);
+    ctx_ = nullptr;
   }
 }
 
@@ -169,8 +213,41 @@ void LipilekhikaState::rebuildFromRaw() {
 
 LipilekhikaEngine::LipilekhikaEngine(fcitx::Instance *instance)
     : instance_(instance),
-      factory_([this](fcitx::InputContext &ic) { return new LipilekhikaState(&ic); }) {
+      factory_([this](fcitx::InputContext &ic) { return new LipilekhikaState(this, &ic); }) {
+  reloadConfig();
   instance_->inputContextManager().registerProperty("lipilekhikaState", &factory_);
+}
+
+void LipilekhikaEngine::reloadConfig() {
+  // User config: ~/.config/fcitx5/conf/lipilekhika.conf
+  fcitx::readAsIni(config_, "conf/lipilekhika.conf");
+  refreshAllContexts();
+}
+
+const fcitx::Configuration *LipilekhikaEngine::getConfig() const { return &config_; }
+
+void LipilekhikaEngine::saveConfig() const { fcitx::safeSaveAsIni(config_, "conf/lipilekhika.conf"); }
+
+void LipilekhikaEngine::refreshAllContexts() {
+  if (!factory_.registered()) {
+    return;
+  }
+  instance_->inputContextManager().foreach([this](fcitx::InputContext *ic) {
+    auto *state = ic->propertyFor(&factory_);
+    if (!state) {
+      return true;
+    }
+    // Reset to make option changes deterministic and avoid desync.
+    state->resetContext();
+    updatePreeditUI(ic, state->preedit_utf8_);
+    return true;
+  });
+}
+
+void LipilekhikaEngine::setConfig(const fcitx::RawConfig &config) {
+  config_.load(config, true);
+  saveConfig();
+  refreshAllContexts();
 }
 
 void LipilekhikaEngine::keyEvent(const fcitx::InputMethodEntry &entry,

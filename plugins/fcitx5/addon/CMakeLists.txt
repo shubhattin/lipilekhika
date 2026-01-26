@@ -33,7 +33,7 @@ target_include_directories(lipilekhika PRIVATE
 add_dependencies(lipilekhika lipilekhika_typing_rust)
 
 # Link directly to the Rust-built shared library.
-target_link_libraries(lipilekhika PRIVATE Fcitx5::Core "${RUST_LIB_PATH}")
+target_link_libraries(lipilekhika PRIVATE Fcitx5::Core Fcitx5::Config "${RUST_LIB_PATH}")
 set_target_properties(lipilekhika PROPERTIES PREFIX "")
 
 install(TARGETS lipilekhika DESTINATION "${FCITX_INSTALL_LIBDIR}/fcitx5")
