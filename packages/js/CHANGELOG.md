@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.5)
+
+- Added `context_length` to `takeKeyInput` return value
+
 ## js-lib@v1.0.4
 
 - added a new function `getSchwaStatusForScript` to get the schwa deletion characteristic of the script provided.

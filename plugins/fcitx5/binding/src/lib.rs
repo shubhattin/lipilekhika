@@ -104,7 +104,9 @@ unsafe fn cstr_to_string(ptr: *const c_char) -> Result<String, LipiStatus> {
     .map_err(|_| LipiStatus::InvalidUtf8)
 }
 
-unsafe fn ctx_from_ptr<'a>(ctx: *mut LipiTypingContext) -> Result<&'a mut RustTypingContext, LipiStatus> {
+unsafe fn ctx_from_ptr<'a>(
+  ctx: *mut LipiTypingContext,
+) -> Result<&'a mut RustTypingContext, LipiStatus> {
   if ctx.is_null() {
     return Err(LipiStatus::NullPtr);
   }
@@ -135,7 +137,9 @@ pub unsafe extern "C" fn lipi_string_free(s: LipiString) {
 
 /// Writes default typing options to `out_opts`.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn lipi_typing_default_options(out_opts: *mut LipiTypingContextOptions) -> LipiStatus {
+pub unsafe extern "C" fn lipi_typing_default_options(
+  out_opts: *mut LipiTypingContextOptions,
+) -> LipiStatus {
   if out_opts.is_null() {
     return LipiStatus::NullPtr;
   }
@@ -166,6 +170,7 @@ pub unsafe extern "C" fn lipi_typing_context_new(
   if out_ctx.is_null() {
     return LipiStatus::NullPtr;
   }
+  *out_ctx = std::ptr::null_mut();
 
   let lang = match cstr_to_string(typing_lang_utf8) {
     Ok(s) => s,
@@ -181,9 +186,7 @@ pub unsafe extern "C" fn lipi_typing_context_new(
     Some(map_options(Some(*opts)))
   };
 
-  let result = std::panic::catch_unwind(|| {
-    RustTypingContext::new(&lang, rust_opts).map_err(|e| e)
-  });
+  let result = std::panic::catch_unwind(|| RustTypingContext::new(&lang, rust_opts).map_err(|e| e));
 
   match result {
     Err(_) => {
@@ -311,4 +314,3 @@ pub unsafe extern "C" fn lipi_typing_context_set_include_inherent_vowel(
     Ok(Ok(())) => LipiStatus::Ok,
   }
 }
-

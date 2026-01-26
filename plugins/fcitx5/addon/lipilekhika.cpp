@@ -131,6 +131,12 @@ bool LipilekhikaState::ensureContext(const std::string &script) {
     return true;
   }
 
+  // clear composition buffers
+  if (script_ != script) {  
+    raw_ascii_.clear();  
+    preedit_utf8_.clear();  
+  }  
+
   if (ctx_) {
     lipi_typing_context_free(ctx_);
     ctx_ = nullptr;
