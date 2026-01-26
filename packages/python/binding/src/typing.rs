@@ -65,6 +65,9 @@ pub struct TypingDiff {
   /// Text that should be inserted into the current input state.
   #[pyo3(get)]
   pub diff_add_text: String,
+  /// Remaining internal context length (0 means context was cleared).
+  #[pyo3(get)]
+  pub context_length: usize,
 }
 
 #[pymethods]
@@ -95,6 +98,7 @@ impl TypingContext {
       .map(|diff| TypingDiff {
         to_delete_chars_count: diff.to_delete_chars_count,
         diff_add_text: diff.diff_add_text,
+        context_length: diff.context_length,
       })
       .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
   }

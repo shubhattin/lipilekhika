@@ -629,14 +629,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "binding"
-version = "0.1.0"
-dependencies = [
- "lipilekhika",
- "pyo3",
-]
-
-[[package]]
 name = "bit-set"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -930,6 +922,25 @@ name = "cast"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
+
+[[package]]
+name = "cbindgen"
+version = "0.29.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "befbfd072a8e81c02f8c507aefce431fe5e7d051f83d48a23ffc9b9fe5a11799"
+dependencies = [
+ "clap",
+ "heck 0.5.0",
+ "indexmap 2.12.1",
+ "log",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn 2.0.114",
+ "tempfile",
+ "toml 0.9.11+spec-1.1.0",
+]
 
 [[package]]
 name = "cc"
@@ -1543,6 +1554,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57967e4b200d767d091b961d6ab42cc7d0cc14fe9e052e75d0d3cf9eb732d895"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "dart_binding"
+version = "0.1.0"
+dependencies = [
+ "flutter_rust_bridge",
+ "lipilekhika",
 ]
 
 [[package]]
@@ -3932,6 +3951,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipilekhika-fcitx5-binding"
+version = "0.1.0"
+dependencies = [
+ "cbindgen",
+ "lipilekhika",
+]
+
+[[package]]
 name = "lipilekhika-ui"
 version = "1.0.4"
 dependencies = [
@@ -3964,14 +3991,6 @@ dependencies = [
  "js-sys",
  "lipilekhika",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "lipilekhika_dart"
-version = "0.1.0"
-dependencies = [
- "flutter_rust_bridge",
- "lipilekhika",
 ]
 
 [[package]]
@@ -5619,6 +5638,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d381ef313ae70b4da5f95f8a4de773c6aa5cd28f73adec4b4a31df70b66780d8"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "python_binding"
+version = "0.1.0"
+dependencies = [
+ "lipilekhika",
+ "pyo3",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@
 ## Unreleased (rust-lib@v1.0.4)
 
 - Added `get_script_krama_data`
+- Added `context_length` to `TypingDiff`
 
 ## rust-lib@v1.0.3
 

@@ -1,0 +1,16 @@
+[package]
+name = "lipilekhika-fcitx5-binding"
+version = "0.1.0"
+edition = "2024"
+publish = false
+build = "build.rs"
+
+[lib]
+name = "lipilekhika_typing"
+crate-type = ["cdylib"]
+
+[dependencies]
+lipilekhika = { path = "../../../packages/rust" }
+
+[build-dependencies]
+cbindgen = "0.29.2"

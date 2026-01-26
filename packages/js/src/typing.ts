@@ -139,7 +139,9 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       /** These number of characters need to be deleted from the current "app" input state */
       to_delete_chars_count,
       /** These characters need to be added to the current "app" input state */
-      diff_add_text
+      diff_add_text,
+      /** Remaining internal context length (0 means context was cleared) */
+      context_length
     };
   }
 
