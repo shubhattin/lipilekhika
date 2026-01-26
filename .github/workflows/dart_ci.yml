@@ -78,7 +78,7 @@ jobs:
       - name: Copy compiled library
         run: |
           cd packages/dart/lipilekhika
-          cp ../../../target/release/liblipilekhika_dart.so .
+          cp ../../../target/release/libdart_binding.so .
 
       # Run tests
       - name: Run Dart Tests
