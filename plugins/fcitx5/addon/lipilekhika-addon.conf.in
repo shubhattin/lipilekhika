@@ -1,0 +1,9 @@
+[Addon]
+Name=Lipilekhika
+Category=InputMethod
+Version=0.1.0
+Library=lipilekhika
+Type=SharedLibrary
+OnDemand=True
+Configurable=False
+
