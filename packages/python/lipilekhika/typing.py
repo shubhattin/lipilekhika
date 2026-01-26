@@ -79,6 +79,11 @@ class TypingDiff:
         """Text that should be inserted into the current input state."""
         pass
 
+    @property
+    def context_length(self) -> int:  # ty:ignore[invalid-return-type]
+        """Remaining internal context length (0 means context was cleared)."""
+        pass
+
     def __repr__(self) -> str:  # ty:ignore[invalid-return-type]
         """Return a string representation of the TypingDiff."""
         pass

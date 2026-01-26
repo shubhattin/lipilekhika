@@ -56,7 +56,7 @@ flutter pub get
 
 echo ""
 echo "🎯 Copying compiled library..."
-cp ../../../target/release/liblipilekhika_dart.so .
+cp ../../../target/release/libdart_binding.so .
 
 echo ""
 echo "✅ Build complete! You can now run:"

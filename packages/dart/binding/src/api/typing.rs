@@ -57,6 +57,8 @@ pub struct TypingDiff {
   pub to_delete_chars_count: usize,
   /// Text that should be inserted into the current input state.
   pub diff_add_text: String,
+  /// Remaining internal context length (0 means context was cleared).
+  pub context_length: usize,
 }
 
 /// Stateful isolated context for character-by-character input typing.
@@ -72,10 +74,9 @@ impl TypingContext {
   #[frb(sync)]
   pub fn new(typing_lang: String, options: Option<TypingContextOptions>) -> Result<Self, String> {
     let rust_options = options.map(|o| o.into());
-    lipilekhika::typing::TypingContext::new(&typing_lang, rust_options)
-      .map(|ctx| TypingContext {
-        inner: RwLock::new(ctx),
-      })
+    lipilekhika::typing::TypingContext::new(&typing_lang, rust_options).map(|ctx| TypingContext {
+      inner: RwLock::new(ctx),
+    })
   }
 
   /// Clears all internal state and contexts.
@@ -93,6 +94,7 @@ impl TypingContext {
     inner.take_key_input(&key).map(|diff| TypingDiff {
       to_delete_chars_count: diff.to_delete_chars_count,
       diff_add_text: diff.diff_add_text,
+      context_length: diff.context_length,
     })
   }
 
