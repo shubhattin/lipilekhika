@@ -124,14 +124,9 @@ export function getWindowsDownloadUrl(release: GitHubRelease): string | null {
  * @param release - The GitHub release object
  * @returns Download URL or null if not found
  */
-export function getAndroidDownloadUrl(release: GitHubRelease): string | null {
-  const version = parseTagVersion(release.tag_name, 'android-app@v');
+export function getAndroidReleasePage(release: GitHubRelease): string | null {
+  const version = parseTagVersion(release.tag_name, 'mobile-app@v');
   if (!version) return null;
 
-  // Look for APK asset in the release
-  const apkAsset = release.assets.find(
-    (asset) => asset.name.endsWith('.apk') && asset.name.includes('lipilekhika')
-  );
-
-  return apkAsset ? apkAsset.browser_download_url : null;
+  return `https://github.com/shubhattin/lipilekhika/releases/mobile-app%40v${version}`;
 }

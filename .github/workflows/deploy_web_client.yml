@@ -8,6 +8,9 @@ on:
       - 'packages/rust/**'
       - 'docs/docs-and-web-client/**'
       - '.github/workflows/deploy_web_client.yml'
+      # PC and mobile app version numbers
+      - 'desktop-client/Cargo.toml'
+      - 'mobile-app/pubspec.yaml'
   workflow_dispatch:
 
 permissions:

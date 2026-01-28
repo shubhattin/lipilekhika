@@ -4,14 +4,15 @@ import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
 import ScriptTrans from '$components/landing/ScriptTrans.svelte';
-import { BookOpen, Globe, Github, ArrowRight } from 'lucide-svelte';
+import { BookOpen, Globe, Github, ArrowRight, ChevronDown } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
-import { SiWindows } from 'svelte-icons-pack/si';
-import { findLatestRelease, getWindowsDownloadUrl } from '~/lib/github';
+import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
-// Fetch latest Windows release on server-side
-const latestRelease = await findLatestRelease('pc-app@v');
-const windowsDownloadUrl = latestRelease ? getWindowsDownloadUrl(latestRelease) : null;
+const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
+const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
+const LINUX_FCITX_PLUGIN_URL =
+  'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
 ---
 
 <RootLayout
@@ -51,30 +52,94 @@ const windowsDownloadUrl = latestRelease ? getWindowsDownloadUrl(latestRelease) 
             predictable typing experience.
           </p>
 
-          <div class="mt-7 flex flex-row items-center justify-center gap-3 lg:justify-start">
+          <div
+            class="mt-7 flex w-full flex-row flex-wrap items-center justify-center gap-2.5 lg:justify-start"
+          >
             <a
               href="/app"
-              class="group relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-amber-600 bg-linear-to-b from-amber-50/80 to-amber-100/90 px-5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(217,119,6,0.1)] transition-all hover:-translate-y-0.5 hover:border-amber-700 hover:bg-linear-to-b hover:from-amber-100 hover:to-amber-200/90 hover:shadow-[0_8px_20px_rgba(217,119,6,0.2)] active:translate-y-0 dark:border-amber-500 dark:from-amber-950/30 dark:to-amber-900/40 dark:text-white dark:hover:border-amber-400 dark:hover:from-amber-900/50 dark:hover:to-amber-800/60"
+              class="group relative inline-flex h-10 min-w-0 flex-1 basis-0 items-center justify-center gap-1.5 overflow-hidden rounded-lg border-2 border-amber-600 bg-linear-to-b from-amber-50/80 to-amber-100/90 px-3 text-sm font-medium whitespace-nowrap text-white shadow-[0_4px_12px_rgba(217,119,6,0.1)] transition-all hover:-translate-y-0.5 hover:border-amber-700 hover:bg-linear-to-b hover:from-amber-100 hover:to-amber-200/90 hover:shadow-[0_8px_20px_rgba(217,119,6,0.2)] active:translate-y-0 sm:flex-none sm:basis-auto sm:px-4 dark:border-amber-500 dark:from-amber-950/30 dark:to-amber-900/40 dark:text-white dark:hover:border-amber-400 dark:hover:from-amber-900/50 dark:hover:to-amber-800/60"
             >
               <Globe class="relative size-4 text-amber-700 dark:text-amber-400" />
               <span class="relative">Use Online</span>
-              <ArrowRight class="relative size-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight
+                class="relative hidden size-4 transition-transform group-hover:translate-x-1 sm:inline-block"
+              />
             </a>
-            {
-              windowsDownloadUrl && (
-                <a
-                  href={windowsDownloadUrl}
-                  rel="noopener noreferrer"
-                  class="group relative inline-flex h-11 items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-blue-600 bg-linear-to-b from-blue-50/80 to-blue-100/90 px-5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(29,78,216,0.1)] transition-all hover:-translate-y-0.5 hover:border-blue-700 hover:bg-linear-to-b hover:from-blue-100 hover:to-blue-200/90 hover:shadow-[0_8px_20px_rgba(29,78,216,0.2)] active:translate-y-0 dark:border-blue-500 dark:from-blue-950/30 dark:to-blue-900/40 dark:text-white dark:hover:border-blue-400 dark:hover:from-blue-900/50 dark:hover:to-blue-800/60"
+
+            <!-- Android: default click -> Play Store, caret menu -> APK -->
+            <div
+              class="cta-split group relative inline-flex h-10 min-w-0 flex-1 basis-0 sm:flex-none sm:basis-auto"
+            >
+              <a
+                href={PLAY_STORE_URL}
+                rel="noopener noreferrer"
+                class="relative inline-flex h-10 w-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-lg rounded-r-none border-2 border-r-0 border-emerald-600 bg-linear-to-b from-emerald-50/80 to-emerald-100/90 px-3 text-sm font-medium whitespace-nowrap text-white shadow-[0_4px_12px_rgba(5,150,105,0.1)] transition-all group-hover:-translate-y-0.5 group-hover:border-emerald-700 group-hover:bg-linear-to-b group-hover:from-emerald-100 group-hover:to-emerald-200/90 group-hover:shadow-[0_8px_20px_rgba(5,150,105,0.2)] active:translate-y-0 sm:px-4 dark:border-emerald-500 dark:from-emerald-950/30 dark:to-emerald-900/40 dark:text-white dark:group-hover:border-emerald-400 dark:group-hover:from-emerald-900/50 dark:group-hover:to-emerald-800/60"
+              >
+                <Icon
+                  src={SiAndroid}
+                  className="relative size-4 fill-emerald-700 dark:fill-emerald-400"
+                />
+                <span class="relative">Android</span>
+              </a>
+
+              <details class="relative">
+                <summary
+                  aria-label="Android download options"
+                  class="relative inline-flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg rounded-l-none border-2 border-emerald-600 bg-linear-to-b from-emerald-50/80 to-emerald-100/90 text-white shadow-[0_4px_12px_rgba(5,150,105,0.1)] transition-all group-hover:-translate-y-0.5 group-hover:border-emerald-700 group-hover:bg-linear-to-b group-hover:from-emerald-100 group-hover:to-emerald-200/90 group-hover:shadow-[0_8px_20px_rgba(5,150,105,0.2)] active:translate-y-0 dark:border-emerald-500 dark:from-emerald-950/30 dark:to-emerald-900/40 dark:text-white dark:group-hover:border-emerald-400 dark:group-hover:from-emerald-900/50 dark:group-hover:to-emerald-800/60"
                 >
-                  <Icon
-                    src={SiWindows}
-                    className="relative size-4 fill-blue-700 dark:fill-blue-400"
-                  />
-                  <span class="relative">Windows</span>
-                </a>
-              )
-            }
+                  <ChevronDown class="relative size-4 text-emerald-700 dark:text-emerald-400" />
+                </summary>
+
+                <div
+                  class="absolute right-0 z-20 mt-2 w-40 overflow-hidden rounded-lg border border-border/60 bg-background/95 shadow-lg shadow-black/10 backdrop-blur-sm"
+                >
+                  <a
+                    rel="noopener noreferrer"
+                    href={ANDROID_DOWNLOAD_URL}
+                    class="block px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
+                  >
+                    Download APK
+                  </a>
+                </div>
+              </details>
+            </div>
+
+            <a
+              rel="noopener noreferrer"
+              href={WINDOWS_DOWNLOAD_URL}
+              class="group relative hidden h-10 w-full items-center justify-center gap-1.5 overflow-hidden rounded-lg border-2 border-blue-600 bg-linear-to-b from-blue-50/80 to-blue-100/90 px-4 text-sm font-medium text-white shadow-[0_4px_12px_rgba(29,78,216,0.1)] transition-all hover:-translate-y-0.5 hover:border-blue-700 hover:bg-linear-to-b hover:from-blue-100 hover:to-blue-200/90 hover:shadow-[0_8px_20px_rgba(29,78,216,0.2)] active:translate-y-0 sm:inline-flex sm:w-auto dark:border-blue-500 dark:from-blue-950/30 dark:to-blue-900/40 dark:text-white dark:hover:border-blue-400 dark:hover:from-blue-900/50 dark:hover:to-blue-800/60"
+            >
+              <Icon src={SiWindows} className="relative size-4 fill-blue-700 dark:fill-blue-400" />
+              <span class="relative">Windows</span>
+            </a>
+
+            <a
+              href={LINUX_FCITX_PLUGIN_URL}
+              rel="noopener noreferrer"
+              class="group relative hidden h-10 w-full items-center justify-center gap-1.5 overflow-hidden rounded-lg border-2 border-slate-600 bg-linear-to-b from-slate-50/80 to-slate-100/90 px-4 text-sm font-medium text-white shadow-[0_4px_12px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:border-slate-700 hover:bg-linear-to-b hover:from-slate-100 hover:to-slate-200/90 hover:shadow-[0_8px_20px_rgba(15,23,42,0.14)] active:translate-y-0 sm:inline-flex sm:w-auto dark:border-slate-500 dark:from-slate-950/30 dark:to-slate-900/40 dark:text-white dark:hover:border-slate-400 dark:hover:from-slate-900/50 dark:hover:to-slate-800/60"
+            >
+              <Icon src={SiLinux} className="relative size-4 fill-slate-700 dark:fill-slate-300" />
+              <span class="relative">Linux</span>
+            </a>
+          </div>
+
+          <!-- Mobile-only: Desktop downloads -->
+          <div class="mt-4 text-center text-xs text-muted-foreground sm:hidden">
+            Desktop downloads:
+
+            <a
+              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
+              href={WINDOWS_DOWNLOAD_URL}
+            >
+              Windows
+            </a>
+
+            <a
+              href={LINUX_FCITX_PLUGIN_URL}
+              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
+            >
+              Linux
+            </a>
           </div>
         </div>
 
@@ -174,3 +239,13 @@ const windowsDownloadUrl = latestRelease ? getWindowsDownloadUrl(latestRelease) 
 
   <PackagesAndIntegrations />
 </RootLayout>
+
+<style is:global>
+  /* Hide the default disclosure triangle for the Android options menu */
+  .cta-split summary::-webkit-details-marker {
+    display: none;
+  }
+  .cta-split summary {
+    list-style: none;
+  }
+</style>
