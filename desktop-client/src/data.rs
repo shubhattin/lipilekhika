@@ -65,14 +65,12 @@ pub fn get_script_avatar(script: &str) -> String {
 }
 
 pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
-  let _script_list = get_script_list_data();
-  let mut scripts: Vec<(String, u8)> = _script_list.scripts.clone().into_iter().collect();
+  let script_list = get_script_list_data();
 
-  scripts.sort_by(|a, b| a.1.cmp(&b.1));
-
-  scripts
+  script_list
+    .scripts
     .into_iter()
-    .map(|(key, _)| {
+    .map(|script_name| {
       let avatar = get_script_avatar(&key);
       ScriptDisplay {
         script_name: key.clone(),
