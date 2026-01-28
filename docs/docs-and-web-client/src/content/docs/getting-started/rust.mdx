@@ -110,6 +110,23 @@ fn main() {
 
 **Returns:** `Result<Vec<String>, String>` — List of option keys or error message
 
+### Getting Script List Data
+
+Use `get_script_list_data()` to grab the cached script metadata that powers the transliteration helpers.
+It returns a `&'static ScriptListData` containing the ordered script and language names plus the maps that translate between languages, scripts, and alternate aliases.
+
+```rust
+use lipilekhika::get_script_list_data;
+
+fn main() {
+    let data = get_script_list_data();
+    println!("Supported scripts: {:?}", data.scripts);
+    println!("Language to script map: {:?}", data.lang_script_map);
+}
+```
+
+Each call is zero-cost after the first because the data is stored in a `OnceLock`, so you can use it wherever you need to inspect available scripts or resolve language aliases.
+
 ### Getting Typing Data
 
 Use `get_script_typing_data_map` to get typing mappings for a script (useful for building custom input methods):

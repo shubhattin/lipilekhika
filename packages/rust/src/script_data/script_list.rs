@@ -36,7 +36,7 @@ pub struct ScriptListData {
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
-pub fn get_ordered_script_list(map: &HashMap<String, u8>) -> Vec<String> {
+fn get_ordered_script_list(map: &HashMap<String, u8>) -> Vec<String> {
   let mut scripts: Vec<(String, u8)> = map.clone().into_iter().collect();
 
   scripts.sort_by(|a, b| a.1.cmp(&b.1));
