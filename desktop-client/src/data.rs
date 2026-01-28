@@ -63,6 +63,7 @@ pub fn get_script_avatar(script: &str) -> String {
     None => "अ".to_string(),
   }
 }
+
 pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
   let _script_list = get_script_list_data();
   let mut scripts: Vec<(String, u8)> = _script_list.scripts.clone().into_iter().collect();

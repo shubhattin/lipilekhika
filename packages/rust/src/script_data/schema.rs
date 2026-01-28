@@ -308,7 +308,7 @@ pub type CustomOptionMap = HashMap<String, CustomOptions>;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct ScriptListData {
+pub struct ScriptListDataJson {
   pub scripts: HashMap<String, u8>,
   pub langs: HashMap<String, u8>,
   /// all langs are mapped to a script
