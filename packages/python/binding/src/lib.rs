@@ -67,9 +67,9 @@ fn get_script_list_data() -> PyScriptListData {
 #[derive(Clone)]
 struct PyScriptListData {
   #[pyo3(get)]
-  scripts: HashMap<String, u8>,
+  scripts: Vec<String>,
   #[pyo3(get)]
-  langs: HashMap<String, u8>,
+  langs: Vec<String>,
   #[pyo3(get)]
   lang_script_map: HashMap<String, String>,
   #[pyo3(get)]
