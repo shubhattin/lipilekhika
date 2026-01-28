@@ -3,8 +3,8 @@ use std::collections::HashMap;
 /// Data structure containing script list information.
 #[flutter_rust_bridge::frb(dart_metadata = ("freezed"))]
 pub struct ScriptListData {
-  pub scripts: HashMap<String, u8>,
-  pub langs: HashMap<String, u8>,
+  pub scripts: Vec<String>,
+  pub langs: Vec<String>,
   pub lang_script_map: HashMap<String, String>,
   pub script_alternates_map: HashMap<String, String>,
 }
