@@ -1,8 +1,15 @@
 name: Dart Package CI
 
 on:
-  - push
-  # - workflow_dispatch
+  push:
+    paths:
+      - 'packages/dart/**'
+      - 'packages/rust/**'
+      - 'packages/js/**'
+      - 'test_data/**'
+      - 'scripts/**'
+      - '.github/workflows/dart_ci.yml'
+  workflow_dispatch:
 
 jobs:
   tests:

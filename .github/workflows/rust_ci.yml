@@ -1,7 +1,14 @@
 name: Rust Package CI
 
 on:
-  - push
+  push:
+    paths:
+      - 'packages/rust/**'
+      - 'packages/js/**'
+      - 'test_data/**'
+      - 'scripts/**'
+      - '.github/workflows/rust_ci.yml'
+  workflow_dispatch:
 
 jobs:
   build:

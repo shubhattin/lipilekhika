@@ -1,7 +1,15 @@
 name: Python Package CI
 
 on:
-  - push
+  push:
+    paths:
+      - 'packages/rust/**'
+      - 'packages/js/**'
+      - 'test_data/**'
+      - 'scripts/**'
+      - 'packages/python/**'
+      - '.github/workflows/python_ci.yml'
+  workflow_dispatch:
 
 jobs:
   type_build_check:

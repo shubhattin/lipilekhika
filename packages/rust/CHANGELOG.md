@@ -4,6 +4,7 @@
 
 - Added `get_script_krama_data`
 - Added `context_length` to `TypingDiff`
+- Replaced `HashMap<String, u8>` with `Vec<String>` in `ScriptListData` for `scripts` and `langs`
 
 ## rust-lib@v1.0.3
 
