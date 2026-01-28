@@ -1,7 +1,8 @@
+use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use super::generated;
-use super::schema::{List, ScriptListData};
+use super::schema::{List, ScriptListDataJson};
 
 impl List {
   pub fn get_krama_ref(&self) -> &Vec<i16> {
@@ -26,13 +27,34 @@ impl List {
   }
 }
 
+pub struct ScriptListData {
+  pub scripts: Vec<String>,
+  pub langs: Vec<String>,
+  pub lang_script_map: HashMap<String, String>,
+  pub script_alternates_map: HashMap<String, String>,
+}
+
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
+fn get_ordered_script_list(map: &HashMap<String, u8>) -> Vec<String> {
+  let mut scripts: Vec<(String, u8)> = map.clone().into_iter().collect();
+
+  scripts.sort_by(|a, b| a.1.cmp(&b.1));
+
+  scripts.into_iter().map(|(key, _)| key).collect()
+}
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
     let bytes = generated::SCRIPT_LIST_BYTES;
-    bincode::deserialize(bytes).expect("bincode decode failed for script_list")
+    let data: ScriptListDataJson =
+      bincode::deserialize(bytes).expect("bincode decode failed for script_list");
+    ScriptListData {
+      scripts: get_ordered_script_list(&data.scripts),
+      langs: get_ordered_script_list(&data.langs),
+      lang_script_map: data.lang_script_map.clone(),
+      script_alternates_map: data.script_alternates_map.clone(),
+    }
   })
 }
 
@@ -65,12 +87,12 @@ pub fn get_normalized_script_name(script_name: &str) -> Option<String> {
   let capitalized_name = capitalize_first_and_after_dash(script_name);
 
   // Direct script name match
-  if data.scripts.contains_key(&capitalized_name) {
+  if data.scripts.contains(&capitalized_name) {
     return Some(capitalized_name);
   }
 
   // Language -> script mapping
-  if data.langs.contains_key(&capitalized_name) {
+  if data.langs.contains(&capitalized_name) {
     if let Some(script) = data.lang_script_map.get(&capitalized_name) {
       return Some(script.clone());
     }

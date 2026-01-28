@@ -118,10 +118,10 @@ def get_normalized_script_name(script_name: ScriptLangType) -> ScriptListType:
 SCRIPT_LIST_DATA = get_script_list_data()
 """Raw script list data containing all script and language mappings."""
 
-SCRIPT_LIST = list[ScriptListType](SCRIPT_LIST_DATA.scripts.keys())
+SCRIPT_LIST = list[ScriptListType](SCRIPT_LIST_DATA.scripts)
 """The list of all supported script names."""
 
-LANG_LIST = list[LangListType](SCRIPT_LIST_DATA.langs.keys())
+LANG_LIST = list[LangListType](SCRIPT_LIST_DATA.langs)
 """The list of all supported language names which are mapped to a script."""
 
 ALL_SCRIPT_LANG_LIST = list[ScriptAndLangListType](set(SCRIPT_LIST + LANG_LIST))

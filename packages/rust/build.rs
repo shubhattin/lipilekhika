@@ -65,7 +65,7 @@ fn main() {
 
   // 2) script_list.json -> script_list.bin
   let script_list_json = read_json_file(script_list_path);
-  let script_list: schema::ScriptListData = serde_json::from_str(&script_list_json)
+  let script_list: schema::ScriptListDataJson = serde_json::from_str(&script_list_json)
     .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
   let script_list_bytes =
     bincode::serialize(&script_list).expect("bincode encode failed for script_list");
