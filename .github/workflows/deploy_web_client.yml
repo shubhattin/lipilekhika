@@ -3,6 +3,11 @@ name: Deploy Web Client
 on:
   push:
     branches: [main]
+    paths:
+      - 'packages/js/**'
+      - 'packages/rust/**'
+      - 'docs/docs-and-web-client/**'
+      - '.github/workflows/deploy_web_client.yml'
   workflow_dispatch:
 
 permissions:
