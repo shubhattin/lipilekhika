@@ -18,9 +18,23 @@ export interface GitHubAsset {
 /**
  * Fetch releases from GitHub repository
  */
-async function fetchReleases(owner: string, repo: string): Promise<GitHubRelease[]> {
+export async function fetchReleases(
+  owner: string,
+  repo: string,
+  token?: string
+): Promise<GitHubRelease[]> {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+    'User-Agent': 'lipilekhika-website'
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/releases?per_page=50`
+    `https://api.github.com/repos/${owner}/${repo}/releases?per_page=50`,
+    { headers }
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch releases: ${response.status}`);
@@ -32,7 +46,7 @@ async function fetchReleases(owner: string, repo: string): Promise<GitHubRelease
  * Parse version from tag name with given prefix
  * Returns the version string after the prefix, or null if not matching
  */
-function parseTagVersion(tag: string, prefix: string): string | null {
+export function parseTagVersion(tag: string, prefix: string): string | null {
   if (tag.startsWith(prefix)) {
     return tag.slice(prefix.length);
   }
@@ -69,15 +83,17 @@ function isVersionGreater(versionA: string, versionB: string): boolean {
  * @param tagPrefix - The prefix to match (e.g., "pc-app@v", "android-app@v")
  * @param owner - GitHub repository owner (default: "shubhattin")
  * @param repo - GitHub repository name (default: "lipilekhika")
+ * @param token - Optional GitHub token to avoid rate limiting
  * @returns The latest release object or null if not found
  */
 export async function findLatestRelease(
   tagPrefix: string,
   owner: string = 'shubhattin',
-  repo: string = 'lipilekhika'
+  repo: string = 'lipilekhika',
+  token?: string
 ): Promise<GitHubRelease | null> {
   try {
-    const releases = await fetchReleases(owner, repo);
+    const releases = await fetchReleases(owner, repo, token);
 
     // Filter and sort releases by version (descending)
     const matchingReleases = releases
