@@ -4,41 +4,38 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/js/**'
-      - 'packages/rust/**'
-      - 'docs/docs-and-web-client/**'
-      - '.github/workflows/deploy_web_client.yml'
+      - "packages/js/**"
+      - "packages/rust/**"
+      - "docs/docs-and-web-client/**"
+      - ".github/workflows/deploy_web_client.yml"
       # PC and mobile app version numbers
-      - 'desktop-client/Cargo.toml'
-      - 'mobile-app/pubspec.yaml'
+      - "desktop-client/Cargo.toml"
+      - "mobile-app/pubspec.yaml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-  
 env:
-  PUBLIC_POSTHOG_KEY: ${{  vars.PUBLIC_POSTHOG_KEY }}
+  PUBLIC_POSTHOG_KEY: ${{ vars.PUBLIC_POSTHOG_KEY }}
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        name: Setup Bun
-      
 
-      # Compile wasm
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      # Generate script data
       - name: Generate Script Data
         run: |
           cd packages/js
           bun install
           bun run make-script-data
-      ## Rust
+
+      # Rust and WASM setup
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable 
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Cache cargo registry + build
         uses: actions/cache@v4
         with:
@@ -49,36 +46,35 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
+
       - uses: jetli/wasm-pack-action@v0.4.0
+
       - name: Build WASM
         run: |
           cd packages/js/wasm
           wasm-pack build --release --target web
 
-
-
+      # Build JS package and site
       - name: Build JS Package
         run: |
           cd packages/js
           bun install
           bun run build
+
       - name: Build Site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd docs/docs-and-web-client
           bun install
           bun run build
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/docs-and-web-client/dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Deploy to Netlify
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: docs/docs-and-web-client/dist
+          production-deploy: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
