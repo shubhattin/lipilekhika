@@ -70,21 +70,21 @@ class TypingContextOptions:
 
 class TypingDiff:
     @property
-    def to_delete_chars_count(self) -> int:  # ty:ignore[invalid-return-type]
+    def to_delete_chars_count(self) -> int:  # ty:ignore[empty-body]
         """Number of characters that should be deleted from the current input state."""
         pass
 
     @property
-    def diff_add_text(self) -> str:  # ty:ignore[invalid-return-type]
+    def diff_add_text(self) -> str:  # ty:ignore[empty-body]
         """Text that should be inserted into the current input state."""
         pass
 
     @property
-    def context_length(self) -> int:  # ty:ignore[invalid-return-type]
+    def context_length(self) -> int:  # ty:ignore[empty-body]
         """Remaining internal context length (0 means context was cleared)."""
         pass
 
-    def __repr__(self) -> str:  # ty:ignore[invalid-return-type]
+    def __repr__(self) -> str:  # ty:ignore[empty-body]
         """Return a string representation of the TypingDiff."""
         pass
 
@@ -99,7 +99,7 @@ class TypingContext:
         """
         ...
 
-    def take_key_input(self, key: str) -> TypingDiff:  # ty:ignore[invalid-return-type]
+    def take_key_input(self, key: str) -> TypingDiff:  # ty:ignore[empty-body]
         """Accepts character by character input and returns the diff.
 
         Args:
@@ -114,10 +114,10 @@ class TypingContext:
 
     def update_include_inherent_vowel(self, include_inherent_vowel: bool) -> None: ...
 
-    def get_use_native_numerals(self) -> bool:  # ty:ignore[invalid-return-type]
+    def get_use_native_numerals(self) -> bool:  # ty:ignore[empty-body]
         pass
 
-    def get_include_inherent_vowel(self) -> bool:  # ty:ignore[invalid-return-type]
+    def get_include_inherent_vowel(self) -> bool:  # ty:ignore[empty-body]
         pass
 
 
@@ -125,18 +125,18 @@ class ScriptTypingDataMap:
     """Result containing typing data for a script."""
 
     @property
-    def common_krama_map(self) -> list[TypingDataMapItem]:  # ty:ignore[invalid-return-type]
+    def common_krama_map(self) -> list[TypingDataMapItem]:  # ty:ignore[empty-body]
         """Mappings for common characters across scripts."""
         pass
 
     @property
     def script_specific_krama_map(
         self,
-    ) -> list[TypingDataMapItem]:  # ty:ignore[invalid-return-type]
+    ) -> list[TypingDataMapItem]:  # ty:ignore[empty-body]
         """Mappings for script-specific characters."""
         pass
 
-    def __repr__(self) -> str:  # ty:ignore[invalid-return-type]
+    def __repr__(self) -> str:  # ty:ignore[empty-body]
         """Return a string representation of the ScriptTypingDataMap."""
         pass
 
