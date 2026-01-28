@@ -9,6 +9,7 @@ import react from '@astrojs/react';
 import vue from '@astrojs/vue';
 import solidJs from '@astrojs/solid-js';
 import sitemap from '@astrojs/sitemap';
+import { netlifyRedirects } from './integrations/netlify-redirects';
 
 // https://astro.build/config
 export default defineConfig({
@@ -51,7 +52,8 @@ export default defineConfig({
     vue(),
     sitemap({
       filter: (page) => !page.includes('/typing_tool_examples/')
-    })
+    }),
+    netlifyRedirects()
   ],
   vite: {
     plugins: [tailwindcss(), MacroPlugin()]
