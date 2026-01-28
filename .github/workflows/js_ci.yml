@@ -1,7 +1,15 @@
 name: JS Package CI
 
 on:
-  - push
+  push:
+      paths:
+        - 'packages/js/**'
+        - 'packages/rust/**'
+        - 'test_data/**'
+        - 'scripts/**'
+        - '.github/workflows/js_ci.yml'
+
+  workflow_dispatch:
 
 jobs:
   type_build_check:
