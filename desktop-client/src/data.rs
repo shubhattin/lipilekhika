@@ -25,28 +25,28 @@ static SCRIPT_AVATAR_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
 fn get_script_avatar_map() -> &'static HashMap<String, String> {
   SCRIPT_AVATAR_MAP.get_or_init(|| {
-    let mut map = HashMap::new();
-    map.insert("Devanagari".to_string(), "अ".to_string());
-    map.insert("Telugu".to_string(), "అ".to_string());
-    map.insert("Tamil".to_string(), "அ".to_string());
-    map.insert("Tamil-Extended".to_string(), "அ".to_string());
-    map.insert("Bengali".to_string(), "অ".to_string());
-    map.insert("Kannada".to_string(), "ಅ".to_string());
-    map.insert("Gujarati".to_string(), "અ".to_string());
-    map.insert("Malayalam".to_string(), "അ".to_string());
-    map.insert("Odia".to_string(), "ଅ".to_string());
-    map.insert("Sinhala".to_string(), "අ".to_string());
-    map.insert("Normal".to_string(), "a".to_string());
-    map.insert("Romanized".to_string(), "ā".to_string());
-    map.insert("Gurumukhi".to_string(), "ਅ".to_string());
-    map.insert("Assamese".to_string(), "অ".to_string());
-    map.insert("Siddham".to_string(), "𑖀".to_string());
-    map.insert("Purna-Devanagari".to_string(), "अ".to_string());
-    map.insert("Brahmi".to_string(), "𑀅".to_string());
-    map.insert("Granth".to_string(), "𑌅".to_string());
-    map.insert("Modi".to_string(), "𑘀".to_string());
-    map.insert("Sharada".to_string(), "𑆃".to_string());
-    map
+    HashMap::from([
+      ("Devanagari".to_string(), "अ".to_string()),
+      ("Telugu".to_string(), "అ".to_string()),
+      ("Tamil".to_string(), "அ".to_string()),
+      ("Tamil-Extended".to_string(), "அ".to_string()),
+      ("Bengali".to_string(), "অ".to_string()),
+      ("Kannada".to_string(), "ಅ".to_string()),
+      ("Gujarati".to_string(), "અ".to_string()),
+      ("Malayalam".to_string(), "അ".to_string()),
+      ("Odia".to_string(), "ଅ".to_string()),
+      ("Sinhala".to_string(), "අ".to_string()),
+      ("Normal".to_string(), "a".to_string()),
+      ("Romanized".to_string(), "ā".to_string()),
+      ("Gurumukhi".to_string(), "ਅ".to_string()),
+      ("Assamese".to_string(), "অ".to_string()),
+      ("Siddham".to_string(), "𑖀".to_string()),
+      ("Purna-Devanagari".to_string(), "अ".to_string()),
+      ("Brahmi".to_string(), "𑀅".to_string()),
+      ("Granth".to_string(), "𑌅".to_string()),
+      ("Modi".to_string(), "𑘀".to_string()),
+      ("Sharada".to_string(), "𑆃".to_string()),
+    ])
   })
 }
 
