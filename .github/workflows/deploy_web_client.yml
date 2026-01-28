@@ -31,36 +31,6 @@ jobs:
           cd packages/js
           bun install
           bun run make-script-data
-
-      # Rust and WASM setup
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache cargo registry + build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
-
-      - uses: jetli/wasm-pack-action@v0.4.0
-
-      - name: Build WASM
-        run: |
-          cd packages/js/wasm
-          wasm-pack build --release --target web
-
-      # Build JS package and site
-      - name: Build JS Package
-        run: |
-          cd packages/js
-          bun install
-          bun run build
-
       - name: Build Site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
