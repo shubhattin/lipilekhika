@@ -32,19 +32,6 @@
         </Popover.Trigger>
         <Popover.Content class="w-80">
           <p class="text-sm">{PRESETS[preset].description}</p>
-          {#if PRESETS[preset].direct_apply_rules.length > 0 || PRESETS[preset].conditional_rules.length > 0}
-            <div class="mt-2 space-y-1">
-              <p class="text-xs font-medium text-muted-foreground">Applied options:</p>
-              <ul class="list-inside list-disc text-xs text-muted-foreground">
-                {#each PRESETS[preset].direct_apply_rules as rule}
-                  <li>{rule}</li>
-                {/each}
-                {#if PRESETS[preset].conditional_rules.length > 0}
-                  <li>+ {PRESETS[preset].conditional_rules.length} conditional rule(s)</li>
-                {/if}
-              </ul>
-            </div>
-          {/if}
         </Popover.Content>
       </Popover.Root>
     {/if}

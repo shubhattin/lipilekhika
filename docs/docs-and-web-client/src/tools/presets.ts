@@ -32,7 +32,7 @@ export const PRESETS: Preset = {
   },
   tsc_portal: {
     label: 'The Sanskrit Channel',
-    description: 'Preset for TSC Portal',
+    description: 'Default Transliteration Options used in The Sanskrit Channel Projects Portal',
     direct_apply_rules: [
       'all_to_normal:remove_virAma_and_double_virAma',
       'all_to_normal:replace_avagraha_with_a',
