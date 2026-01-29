@@ -5,13 +5,16 @@
   import { InfoIcon } from 'lucide-svelte';
   import * as Popover from '~/lib/components/ui/popover';
   import Button from '~/lib/components/ui/button/button.svelte';
+  import type { Snippet } from 'svelte';
 
   let {
     availableOptions,
-    options = $bindable()
+    options = $bindable(),
+    presetSelector
   }: {
     availableOptions: string[];
     options: TransliterationOptions;
+    presetSelector?: Snippet;
   } = $props();
 
   let showOptions = $state(false);
@@ -49,6 +52,13 @@
     ]
   };
 </script>
+
+<!-- Preset Selector Section -->
+{#if presetSelector}
+  <div class="mb-4">
+    {@render presetSelector()}
+  </div>
+{/if}
 
 <!-- Options Section -->
 <div class="rounded-lg border border-border bg-card/50">

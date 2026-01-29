@@ -29,21 +29,25 @@
   import { BsCopy } from 'svelte-icons-pack/bs';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
+  import PresetSelector from './script/PresetSelector.svelte';
   import { SiConvertio } from 'svelte-icons-pack/si';
   import Label from '~/lib/components/ui/label/label.svelte';
+  import { type PresetListType, PRESETS } from '~/tools/presets';
 
   let {
     input_text = $bindable(),
     typing_script = $bindable(),
     to_script = $bindable(),
     pwa_snippet,
-    transliterate_func = transliterate
+    transliterate_func = transliterate,
+    current_preset = $bindable('none')
   }: {
     input_text: string;
     typing_script: ScriptListType;
     to_script: ScriptListType;
     pwa_snippet?: Snippet;
     transliterate_func: typeof transliterate;
+    current_preset?: PresetListType;
   } = $props();
 
   let outputText = $state('');
@@ -106,10 +110,75 @@
     }
   };
 
+  // Flag to track if options are being set programmatically (to avoid resetting preset)
+  let isApplyingPreset = false;
+  // Flag to track if preset was reset due to manual option change (to avoid reapplying "none" preset)
+  let isResettingPresetDueToManualChange = false;
+  // Track previous preset to detect actual user-initiated preset changes
+  let previousPreset: PresetListType = current_preset;
+
+  // Apply preset options when preset changes or scripts change
   $effect(() => {
-    getAllOptions(typing_script, to_script).then((all_options) => {
-      options = Object.fromEntries(all_options.map((v) => [v, false]));
-      availableOptions = all_options;
+    const _currentPreset = current_preset;
+    const _typingScript = typing_script;
+    const _toScript = to_script;
+
+    getAllOptions(_typingScript, _toScript).then((all_options) => {
+      untrack(() => {
+        availableOptions = all_options;
+
+        // Skip applying options if preset was reset due to manual option change
+        if (isResettingPresetDueToManualChange) {
+          isResettingPresetDueToManualChange = false;
+          previousPreset = _currentPreset;
+          return;
+        }
+
+        isApplyingPreset = true;
+
+        const newOptions: TransliterationOptions = Object.fromEntries(
+          all_options.map((v) => [v, false])
+        );
+
+        const preset = PRESETS[_currentPreset];
+        if (preset) {
+          for (const rule of preset.direct_apply_rules) {
+            if (all_options.includes(rule)) {
+              newOptions[rule] = true;
+            }
+          }
+          for (const conditional of preset.conditional_rules) {
+            if (
+              _typingScript === conditional.from &&
+              _toScript === conditional.to &&
+              all_options.includes(conditional.rule)
+            ) {
+              newOptions[conditional.rule] = true;
+            }
+          }
+        }
+
+        options = newOptions;
+        previousPreset = _currentPreset;
+        // Reset flag after a microtask to allow the options assignment to complete
+        queueMicrotask(() => {
+          isApplyingPreset = false;
+        });
+      });
+    });
+  });
+
+  // Reset preset to 'none' when options are manually modified
+  $effect(() => {
+    // Track options changes
+    $state.snapshot(options);
+
+    untrack(() => {
+      // Only reset if not applying preset programmatically and preset is not already 'none'
+      if (!isApplyingPreset && current_preset !== 'none') {
+        isResettingPresetDueToManualChange = true;
+        current_preset = 'none';
+      }
     });
   });
 
@@ -344,7 +413,11 @@
         </section>
       </div>
 
-      <CustomOptions {availableOptions} bind:options />
+      <CustomOptions {availableOptions} bind:options>
+        {#snippet presetSelector()}
+          <PresetSelector bind:preset={current_preset} />
+        {/snippet}
+      </CustomOptions>
     </form>
     {@render pwa_snippet?.()}
   </div>
