@@ -21,7 +21,7 @@ type Preset = Record<
  * Scripts in which option `brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra`
  * is to be enabled
  */
-export const SCRIPTS_TO_REPLACE_WITH_ANUNASIK = ['Telugu', 'Kannada'];
+export const SCRIPTS_TO_REPLACE_WITH_ANUNASIK = ['Telugu', 'Kannada'] as const;
 
 export const PRESETS: Preset = {
   none: {
@@ -42,7 +42,7 @@ export const PRESETS: Preset = {
     conditional_rules: SCRIPTS_TO_REPLACE_WITH_ANUNASIK.map((script) => ({
       rule: 'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra',
       from: 'Devanagari',
-      to: script as ScriptListType
+      to: script
     }))
   }
 };
