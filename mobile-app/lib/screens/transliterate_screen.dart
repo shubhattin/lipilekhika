@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:lipilekhika/lipilekhika.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/presets.dart';
 import '../widgets/script_selector.dart';
 import '../widgets/transliteration_options.dart';
 import '../widgets/typing_helper_modal.dart';
@@ -26,6 +27,11 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
   bool _autoConvert = true;
   Map<String, bool> _options = {};
   List<String> _availableOptions = [];
+
+  // Preset state
+  PresetListType _currentPreset = PresetListType.none;
+  bool _isApplyingPreset = false;
+  bool _isResettingPresetDueToManualChange = false;
 
   // Typing mode state
   bool _isTypingMode = true;
@@ -50,6 +56,7 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
       if (!mounted) return;
       final savedFromScript = prefs.getString('fromScript');
       final savedToScript = prefs.getString('toScript');
+      final savedPreset = prefs.getString('currentPreset');
 
       setState(() {
         if (savedFromScript != null) {
@@ -57,6 +64,9 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
         }
         if (savedToScript != null) {
           _toScript = savedToScript;
+        }
+        if (savedPreset != null && isPresetKey(savedPreset)) {
+          _currentPreset = PresetListTypeExtension.fromKey(savedPreset);
         }
       });
 
@@ -87,6 +97,16 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
     }
   }
 
+  /// Save preset to SharedPreferences
+  Future<void> _savePreset() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('currentPreset', _currentPreset.key);
+    } catch (e) {
+      debugPrint('Error saving preset: $e');
+    }
+  }
+
   @override
   void dispose() {
     _inputController.removeListener(_onInputChanged);
@@ -107,10 +127,49 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
         toScript: _toScript,
       );
       if (!mounted) return;
-      setState(() {
-        _availableOptions = options;
-        _options = {for (var opt in options) opt: false};
-      });
+
+      // Skip applying options if preset was reset due to manual option change
+      final shouldSkipApplyingPreset = _isResettingPresetDueToManualChange &&
+          _currentPreset == PresetListType.none;
+
+      if (shouldSkipApplyingPreset) {
+        _isResettingPresetDueToManualChange = false;
+        setState(() {
+          _availableOptions = options;
+        });
+      } else {
+        _isResettingPresetDueToManualChange = false;
+        _isApplyingPreset = true;
+
+        // Build new options based on current preset
+        final newOptions = <String, bool>{for (var opt in options) opt: false};
+        final preset = presets[_currentPreset];
+
+        if (preset != null) {
+          // Apply direct rules
+          for (final rule in preset.directApplyRules) {
+            if (options.contains(rule)) {
+              newOptions[rule] = true;
+            }
+          }
+          // Apply conditional rules
+          for (final conditional in preset.conditionalRules) {
+            if (_fromScript == conditional.from &&
+                _toScript == conditional.to &&
+                options.contains(conditional.rule)) {
+              newOptions[conditional.rule] = true;
+            }
+          }
+        }
+
+        setState(() {
+          _availableOptions = options;
+          _options = newOptions;
+        });
+
+        _isApplyingPreset = false;
+      }
+
       // Update typing context if script changed and typing mode is active
       if (_isTypingMode) {
         _initTypingContext();
@@ -528,15 +587,27 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
           const SizedBox(height: 12),
 
           // Transliteration Options
-          if (_availableOptions.isNotEmpty)
-            TransliterationOptionsWidget(
-              options: _options,
-              availableOptions: _availableOptions,
-              onOptionsChanged: (newOptions) {
-                setState(() => _options = newOptions);
-                if (_autoConvert) _performTransliteration();
-              },
-            ),
+          TransliterationOptionsWidget(
+            options: _options,
+            availableOptions: _availableOptions,
+            onOptionsChanged: (newOptions) {
+              // Reset preset to 'none' when options are manually modified
+              if (!_isApplyingPreset && _currentPreset != PresetListType.none) {
+                _isResettingPresetDueToManualChange = true;
+                setState(() => _currentPreset = PresetListType.none);
+                _savePreset();
+              }
+              setState(() => _options = newOptions);
+              if (_autoConvert) _performTransliteration();
+            },
+            preset: _currentPreset,
+            onPresetChanged: (newPreset) {
+              setState(() => _currentPreset = newPreset);
+              _savePreset();
+              _loadOptions();
+              if (_autoConvert) _performTransliteration();
+            },
+          ),
 
           // Bottom padding for better spacing
           const SizedBox(height: 32),

@@ -3944,6 +3944,7 @@ dependencies = [
  "bincode",
  "clap",
  "criterion",
+ "indexmap 2.12.1",
  "owo-colors",
  "serde",
  "serde_json",

@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -303,8 +304,8 @@ pub struct CustomOptions {
 }
 
 #[allow(dead_code)]
-pub type CustomOptionMapJson = HashMap<String, CustomOptionsJson>;
-pub type CustomOptionMap = HashMap<String, CustomOptions>;
+pub type CustomOptionMapJson = IndexMap<String, CustomOptionsJson>;
+pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]

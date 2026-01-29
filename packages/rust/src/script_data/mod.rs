@@ -31,7 +31,9 @@ pub fn get_all_options(
   let from_script_data = ScriptData::get_script_data(&normalized_from);
   let to_script_data = ScriptData::get_script_data(&normalized_to);
 
-  // Create a HashMap with all custom options set to true
+  // Create a HashMap with all custom options set to true.
+  // `custom_options_map` is insertion-ordered (same as `custom_options.json`),
+  // but `HashMap` is not. We only use this for lookup below.
   let custom_options_map = get_custom_options_map();
   let all_options_enabled: HashMap<String, bool> = custom_options_map
     .keys()
@@ -44,7 +46,15 @@ pub fn get_all_options(
     Some(&all_options_enabled),
   );
 
-  Ok(active_options.keys().cloned().collect())
+  // Preserve `custom_options.json` order by filtering in that key order.
+  let mut ordered: Vec<String> = Vec::new();
+  for key in custom_options_map.keys() {
+    if active_options.contains_key(key) {
+      ordered.push(key.clone());
+    }
+  }
+
+  Ok(ordered)
 }
 
 #[cfg(test)]

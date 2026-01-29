@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../models/presets.dart';
+import 'preset_selector.dart';
 
 // Custom option descriptions matching the TypeScript/Svelte version
 const Map<String, (String, String)> customOptionDescriptions = {
@@ -37,12 +39,16 @@ class TransliterationOptionsWidget extends StatefulWidget {
   final Map<String, bool> options;
   final List<String> availableOptions;
   final ValueChanged<Map<String, bool>> onOptionsChanged;
+  final PresetListType preset;
+  final ValueChanged<PresetListType> onPresetChanged;
 
   const TransliterationOptionsWidget({
     super.key,
     required this.options,
     required this.availableOptions,
     required this.onOptionsChanged,
+    required this.preset,
+    required this.onPresetChanged,
   });
 
   @override
@@ -99,29 +105,45 @@ class _TransliterationOptionsWidgetState
                 const Divider(height: 1),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: widget.availableOptions.isEmpty
-                      ? Text(
-                          'No options available for this combination.',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PresetSelector(
+                        value: widget.preset,
+                        onChanged: widget.onPresetChanged,
+                      ),
+                      if (widget.availableOptions.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Divider(height: 1),
+                        const SizedBox(height: 12),
+                      ],
+                      if (widget.availableOptions.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Text(
+                            'No options available for this combination.',
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                          ),
                         )
-                      : Column(
-                          children: widget.availableOptions.map((option) {
-                            return _buildOptionTile(
-                              context,
-                              option,
-                              widget.options[option] ?? false,
-                              (value) {
-                                final newOptions =
-                                    Map<String, bool>.from(widget.options);
-                                newOptions[option] = value;
-                                widget.onOptionsChanged(newOptions);
-                              },
-                            );
-                          }).toList(),
-                        ),
+                      else
+                        ...widget.availableOptions.map((option) {
+                          return _buildOptionTile(
+                            context,
+                            option,
+                            widget.options[option] ?? false,
+                            (value) {
+                              final newOptions =
+                                  Map<String, bool>.from(widget.options);
+                              newOptions[option] = value;
+                              widget.onOptionsChanged(newOptions);
+                            },
+                          );
+                        }),
+                    ],
+                  ),
                 ),
               ],
             ),
