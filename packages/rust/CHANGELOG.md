@@ -5,6 +5,7 @@
 - Added `get_script_krama_data`
 - Added `context_length` to `TypingDiff`
 - Replaced `HashMap<String, u8>` with `Vec<String>` in `ScriptListData` for `scripts` and `langs`
+- Preserve `custom_options.json` order by filtering in that key order in `get_all_options`
 
 ## rust-lib@v1.0.3
 
