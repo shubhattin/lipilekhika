@@ -3,7 +3,6 @@
   import { getScriptKramaData, getScriptTypingDataMap } from 'lipilekhika/typing';
 
   import * as Dialog from '~/lib/components/ui/dialog';
-  import * as Select from '~/lib/components/ui/select';
   import * as Tabs from '~/lib/components/ui/tabs';
   import { Badge } from '~/lib/components/ui/badge';
   import { Skeleton } from '~/lib/components/ui/skeleton';
@@ -235,18 +234,7 @@
 
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                   <span class="text-sm text-muted-foreground">Compare with</span>
-                  <Select.Root type="single" bind:value={script_to_compare}>
-                    <Select.Trigger
-                      class={`w-full sm:w-64 ${!script_to_compare ? 'text-muted-foreground' : ''}`}
-                    >
-                      {script_to_compare ?? 'Select a script'}
-                    </Select.Trigger>
-                    <Select.Content>
-                      {#each (SCRIPT_LIST as ScriptListType[]).filter((s) => s !== script && s !== 'Normal') as s (s)}
-                        <Select.Item value={s} label={s} />
-                      {/each}
-                    </Select.Content>
-                  </Select.Root>
+                  <ScriptSeleector bind:script={script_to_compare as ScriptListType} />
                 </div>
               </div>
 
