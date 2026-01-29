@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (js-lib@v1.0.5)
+## js-lib@v1.0.5
 
 - Added `context_length` to `takeKeyInput` return value
 
