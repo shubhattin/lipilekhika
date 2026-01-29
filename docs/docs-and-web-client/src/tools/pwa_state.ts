@@ -36,3 +36,42 @@ export const is_ios_atom = atom<boolean>(
     return /iPad|iPhone|iPod/.test(window.navigator.userAgent);
   })()
 );
+
+// Platform detection for download prompts
+export type Platform = 'android' | 'windows' | 'linux' | 'ios' | 'macos' | 'unknown';
+
+export const detected_platform_atom = atom<Platform>(
+  (() => {
+    if (typeof window === 'undefined') return 'unknown';
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const platform = window.navigator.platform?.toLowerCase() || '';
+
+    // Check Android first (before Linux since Android UA contains 'linux')
+    if (/android/.test(userAgent)) {
+      return 'android';
+    }
+
+    // Check iOS
+    if (/ipad|iphone|ipod/.test(userAgent)) {
+      return 'ios';
+    }
+
+    // Check macOS
+    if (/macintosh|macintel|mac os x/.test(userAgent) || platform.includes('mac')) {
+      return 'macos';
+    }
+
+    // Check Windows
+    if (/windows|win32|win64/.test(userAgent) || platform.includes('win')) {
+      return 'windows';
+    }
+
+    // Check Linux (after Android check)
+    if (/linux|x11/.test(userAgent) || platform.includes('linux')) {
+      return 'linux';
+    }
+
+    return 'unknown';
+  })()
+);
