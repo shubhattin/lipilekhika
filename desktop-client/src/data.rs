@@ -69,12 +69,12 @@ pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
 
   script_list
     .scripts
-    .into_iter()
+    .iter()
     .map(|script_name| {
-      let avatar = get_script_avatar(&key);
+      let avatar = get_script_avatar(script_name);
       ScriptDisplay {
-        script_name: key.clone(),
-        display_label: format!("{} - {}", avatar, key),
+        script_name: script_name.clone(),
+        display_label: format!("{} - {}", avatar, script_name),
       }
     })
     .collect()
