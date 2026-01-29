@@ -26,7 +26,7 @@ export const SCRIPTS_TO_REPLACE_WITH_ANUNASIK = ['Telugu', 'Kannada'];
 export const PRESETS: Preset = {
   none: {
     label: 'None',
-    description: 'No preset',
+    description: 'No Default Transliteration Options',
     direct_apply_rules: [],
     conditional_rules: []
   },
@@ -46,13 +46,3 @@ export const PRESETS: Preset = {
     }))
   }
 };
-
-/**
- * Custom Options used for Transliteration in this project
- */
-export const CUSTOM_TRANS_OPTIONS = {
-  'all_to_normal:remove_virAma_and_double_virAma': true,
-  'all_to_normal:replace_avagraha_with_a': true,
-  'all_to_normal:replace_pancham_varga_varna_with_n': true,
-  'all_to_sinhala:use_conjunct_enabling_halant': true
-} as TransliterationOptions;
