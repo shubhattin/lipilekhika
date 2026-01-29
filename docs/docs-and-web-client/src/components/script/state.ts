@@ -1,6 +1,8 @@
 import { atom } from 'nanostores';
 import type { ScriptListType } from 'lipilekhika';
-import type { PresetListType } from '~/tools/presets';
+import { PRESETS, type PresetListType } from '~/tools/presets';
+
+const isPreset = (value: string): value is PresetListType => value in PRESETS;
 
 const LOCAL_STORAGE_KEYS = {
   TYPING_SCRIPT: 'lipilekhika-app-typing-script',
@@ -37,7 +39,7 @@ export const current_preset_atom = atom<PresetListType>(
   (() => {
     if (typeof window === 'undefined') return DEFAULT_PRESET;
     const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.CURRENT_PRESET);
-    return localStorageValue ? (localStorageValue as PresetListType) : DEFAULT_PRESET;
+    return localStorageValue && isPreset(localStorageValue) ? localStorageValue : DEFAULT_PRESET;
   })()
 );
 current_preset_atom.subscribe((value) => {

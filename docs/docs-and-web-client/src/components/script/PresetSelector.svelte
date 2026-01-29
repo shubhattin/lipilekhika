@@ -26,7 +26,7 @@
     {#if preset !== 'none' && PRESETS[preset]?.description}
       <Popover.Root>
         <Popover.Trigger>
-          <Button variant="ghost" size="icon" class="size-8">
+          <Button variant="ghost" size="icon" class="size-8" aria-label="Preset details">
             <InfoIcon class="size-4" />
           </Button>
         </Popover.Trigger>
