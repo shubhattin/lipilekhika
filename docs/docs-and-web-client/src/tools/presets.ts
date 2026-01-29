@@ -2,7 +2,7 @@ import { type ScriptListType, type TransliterationOptions } from 'lipilekhika';
 
 type Rule = keyof TransliterationOptions;
 
-type PresetListType = 'none' | 'tsc_portal';
+export type PresetListType = 'none' | 'tsc_portal';
 type Preset = Record<
   PresetListType,
   {

@@ -29,21 +29,25 @@
   import { BsCopy } from 'svelte-icons-pack/bs';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
+  import PresetSelector from './script/PresetSelector.svelte';
   import { SiConvertio } from 'svelte-icons-pack/si';
   import Label from '~/lib/components/ui/label/label.svelte';
+  import { type PresetListType, PRESETS } from '~/tools/presets';
 
   let {
     input_text = $bindable(),
     typing_script = $bindable(),
     to_script = $bindable(),
     pwa_snippet,
-    transliterate_func = transliterate
+    transliterate_func = transliterate,
+    current_preset = $bindable('none')
   }: {
     input_text: string;
     typing_script: ScriptListType;
     to_script: ScriptListType;
     pwa_snippet?: Snippet;
     transliterate_func: typeof transliterate;
+    current_preset?: PresetListType;
   } = $props();
 
   let outputText = $state('');
@@ -107,9 +111,35 @@
   };
 
   $effect(() => {
+    // Track these to trigger effect on changes
+    const _currentPreset = current_preset;
     getAllOptions(typing_script, to_script).then((all_options) => {
-      options = Object.fromEntries(all_options.map((v) => [v, false]));
       availableOptions = all_options;
+      // Reset options and apply preset
+      const newOptions: TransliterationOptions = Object.fromEntries(
+        all_options.map((v) => [v, false])
+      );
+      // Apply preset options
+      const preset = PRESETS[_currentPreset];
+      if (preset) {
+        // Apply direct rules
+        for (const rule of preset.direct_apply_rules) {
+          if (all_options.includes(rule)) {
+            newOptions[rule] = true;
+          }
+        }
+        // Apply conditional rules
+        for (const conditional of preset.conditional_rules) {
+          if (
+            typing_script === conditional.from &&
+            to_script === conditional.to &&
+            all_options.includes(conditional.rule)
+          ) {
+            newOptions[conditional.rule] = true;
+          }
+        }
+      }
+      options = newOptions;
     });
   });
 
@@ -344,7 +374,11 @@
         </section>
       </div>
 
-      <CustomOptions {availableOptions} bind:options />
+      <CustomOptions {availableOptions} bind:options>
+        {#snippet presetSelector()}
+          <PresetSelector bind:preset={current_preset} />
+        {/snippet}
+      </CustomOptions>
     </form>
     {@render pwa_snippet?.()}
   </div>
