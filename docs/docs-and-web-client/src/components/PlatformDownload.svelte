@@ -3,7 +3,7 @@
   import { X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { SiAndroid, SiWindows, SiLinux, SiGoogleplay } from 'svelte-icons-pack/si';
-  import { detected_platform_atom } from '../tools/pwa_state';
+  import { detect_platform } from '../tools/pwa_state';
   import PWAInstall from './PWAInstall.svelte';
 
   const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
@@ -12,8 +12,7 @@
     'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
 
   let dismissed = $state(false);
-  // const platform = $detected_platform_atom;
-  let platform = 'windows';
+  const platform = detect_platform();
 
   // Only show platform prompt for supported desktop/mobile platforms
   const showPlatformPrompt =
