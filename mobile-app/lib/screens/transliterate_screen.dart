@@ -129,12 +129,16 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
       if (!mounted) return;
 
       // Skip applying options if preset was reset due to manual option change
-      if (_isResettingPresetDueToManualChange) {
+      final shouldSkipApplyingPreset = _isResettingPresetDueToManualChange &&
+          _currentPreset == PresetListType.none;
+
+      if (shouldSkipApplyingPreset) {
         _isResettingPresetDueToManualChange = false;
         setState(() {
           _availableOptions = options;
         });
       } else {
+        _isResettingPresetDueToManualChange = false;
         _isApplyingPreset = true;
 
         // Build new options based on current preset
