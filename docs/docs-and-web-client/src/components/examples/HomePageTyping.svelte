@@ -67,6 +67,9 @@
   </div>
 
   <Textarea
+    autocomplete="off"
+    spellcheck="false"
+    autocapitalize="none"
     placeholder={`Start typing to see realtime transliteration in ${$typing_script_atom}...`}
     class={'min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background ' +
       getFontClass($typing_script_atom)}

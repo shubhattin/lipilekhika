@@ -17,6 +17,9 @@
 </script>
 
 <Textarea
+  autocomplete="off"
+  spellcheck="false"
+  autocapitalize="none"
   placeholder="Type in देवनागरी..."
   class="h-20 sm:h-30"
   bind:value={textarea_text}

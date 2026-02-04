@@ -323,6 +323,9 @@
             </div>
             <Textarea
               id="source-text"
+              autocomplete="off"
+              spellcheck="false"
+              autocapitalize="none"
               class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
                 getFontClass(typing_script)}
               placeholder="Enter text to transliterate..."
