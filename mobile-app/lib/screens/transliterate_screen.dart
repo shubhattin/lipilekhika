@@ -474,6 +474,11 @@ class _TransliterateScreenState extends State<TransliterateScreen> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _inputController,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textCapitalization: TextCapitalization.none,
+                  spellCheckConfiguration:
+                      const SpellCheckConfiguration.disabled(),
                   maxLines: 6,
                   style: FontConfig.getTextStyleForScript(
                     _fromScript,
