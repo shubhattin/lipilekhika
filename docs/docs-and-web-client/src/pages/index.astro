@@ -10,7 +10,7 @@ import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
 const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
 const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
+// const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
 const LINUX_FCITX_PLUGIN_URL =
   'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
 ---
@@ -70,8 +70,9 @@ const LINUX_FCITX_PLUGIN_URL =
             <div
               class="cta-split group relative inline-flex h-10 min-w-0 flex-1 basis-0 sm:flex-none sm:basis-auto"
             >
+              <!-- href={PLAY_STORE_URL} -->
               <a
-                href={PLAY_STORE_URL}
+                href={ANDROID_DOWNLOAD_URL}
                 rel="noopener noreferrer"
                 class="relative inline-flex h-10 w-full min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden rounded-lg rounded-r-none border-2 border-r-0 border-emerald-600 bg-linear-to-b from-emerald-50/80 to-emerald-100/90 px-3 text-sm font-medium whitespace-nowrap text-emerald-900 shadow-[0_4px_12px_rgba(5,150,105,0.1)] transition-all group-hover:-translate-y-0.5 group-hover:border-emerald-700 group-hover:bg-linear-to-b group-hover:from-emerald-100 group-hover:to-emerald-200/90 group-hover:shadow-[0_8px_20px_rgba(5,150,105,0.2)] active:translate-y-0 sm:px-4 dark:border-emerald-500 dark:from-emerald-950/30 dark:to-emerald-900/40 dark:text-white dark:group-hover:border-emerald-400 dark:group-hover:from-emerald-900/50 dark:group-hover:to-emerald-800/60"
               >

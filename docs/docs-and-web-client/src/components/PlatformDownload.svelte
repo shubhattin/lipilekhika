@@ -7,9 +7,10 @@
   import PWAInstall from './PWAInstall.svelte';
 
   const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
-  const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
+  // const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
   const LINUX_FCITX_PLUGIN_URL =
     'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
+  const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
 
   let dismissed = $state(false);
   const platform = detect_platform();
@@ -43,7 +44,7 @@
       <Button
         size="sm"
         class="h-8 shrink-0 bg-emerald-600 px-3 text-xs text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-        href={PLAY_STORE_URL}
+        href={ANDROID_DOWNLOAD_URL}
         target="_blank"
         rel="noopener noreferrer"
       >
