@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (js-lib@v1.0.6)
+## js-lib@v1.0.6
 
 - Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^
 
