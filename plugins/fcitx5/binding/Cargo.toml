@@ -10,7 +10,8 @@ name = "lipilekhika_typing"
 crate-type = ["cdylib"]
 
 [dependencies]
-lipilekhika = { path = "../../../packages/rust" }
+lipilekhika = "1.0.4"
+# Use published version instead of path to avoid bun dependency for the build/install
 
 [build-dependencies]
 cbindgen = "0.29.2"

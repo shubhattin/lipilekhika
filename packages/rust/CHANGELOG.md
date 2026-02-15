@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (rust-lib@v1.0.5)
+
+- Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^
+
 ## rust-lib@v1.0.4
 
 - Added `get_script_krama_data`
