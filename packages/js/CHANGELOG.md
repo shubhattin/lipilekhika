@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.6)
+
+- Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^
+
 ## js-lib@v1.0.5
 
 - Added `context_length` to `takeKeyInput` return value
