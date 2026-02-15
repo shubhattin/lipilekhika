@@ -3939,19 +3939,6 @@ checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
 
 [[package]]
 name = "lipilekhika"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbb59f4eb92dd48aef537b944f9221b19fb28b5bdfa01d53d7cf07faf71ca9a5"
-dependencies = [
- "bincode",
- "clap",
- "indexmap 2.12.1",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "lipilekhika"
 version = "1.0.5"
 dependencies = [
  "bincode",
@@ -3965,11 +3952,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipilekhika"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0f4b440ca8d3e2ea07d8e4b69067322d4b99ec8f623b23dfa641e98ada95c20"
+dependencies = [
+ "bincode",
+ "clap",
+ "indexmap 2.12.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "lipilekhika-fcitx5-binding"
 version = "0.1.0"
 dependencies = [
  "cbindgen",
- "lipilekhika 1.0.4",
+ "lipilekhika 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

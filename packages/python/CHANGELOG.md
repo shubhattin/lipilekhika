@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (python-lib@v1.0.2)
+## python-lib@v1.0.2
 
 - Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^
 
