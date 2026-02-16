@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleasd (pc-app@v1.0.7)
+
+- Added normal capital letters for Romanized to allow capital letter typing
+
 ## pc-app@v1.0.6
 
 - Use update `lipilekhika` package (rust-lib@v1.0.5)

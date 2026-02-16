@@ -5,9 +5,7 @@ import {
   type CustomOptionList
 } from './transliteration/transliterate';
 import { getScriptData } from './utils/get_script_data';
-import {
-  getNormalizedScriptName
-} from './utils/lang_list/script_normalization';
+import { getNormalizedScriptName } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
 import type { ScriptLangType, ScriptListType } from './types';

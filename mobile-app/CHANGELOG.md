@@ -1,5 +1,11 @@
 # Changelog
 
+
+## Unreleasd (mobile-app@v0.2.3+6)
+
+- Added normal capital letters for Romanized to allow capital letter typing
+
+
 ## mobile-app@v0.2.2+5
 
 - Use update `lipilekhika` core package

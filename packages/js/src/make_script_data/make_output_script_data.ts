@@ -24,7 +24,14 @@ import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 import { type TransOptionsType, CustomOptionsInput } from './custom_options_input';
 import { ALTERNATE_TO_SCRIPT_MAP } from '../utils/lang_list/script_normalization';
-import { lang_list_obj, script_list_obj, LANG_SCRIPT_MAP, SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from '../utils/lang_list';
+import {
+  lang_list_obj,
+  script_list_obj,
+  LANG_SCRIPT_MAP,
+  SCRIPT_LIST,
+  LANG_LIST,
+  ALL_LANG_SCRIPT_LIST
+} from '../utils/lang_list';
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
@@ -716,11 +723,15 @@ LangListType = Literal[${LANG_LIST.map((lang) => `"${lang}"`).join(', ')}]
 ScriptAndLangListType = Literal[${ALL_LANG_SCRIPT_LIST.map((script) => `"${script}"`).join(', ')}]
 """List of all Supported Script/Language"""
 
-ScriptLangType = ScriptAndLangListType | Literal[${Object.keys(ALTERNATE_TO_SCRIPT_MAP).map((script) => `"${script}"`).join(', ')}]
+ScriptLangType = ScriptAndLangListType | Literal[${Object.keys(ALTERNATE_TO_SCRIPT_MAP)
+  .map((script) => `"${script}"`)
+  .join(', ')}]
 """Supported script/language identifier types (aliases allowed)"""
 
-TransliterationOptionsType = Literal[${Object.keys(CustomOptionsInput).map((option) => `"${option}"`).join(', ')}]
-`
+TransliterationOptionsType = Literal[${Object.keys(CustomOptionsInput)
+  .map((option) => `"${option}"`)
+  .join(', ')}]
+`;
 
 function generate_python_types_py() {
   const content = PYTHON_TYPES_PY_TEMPLATE;

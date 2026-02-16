@@ -3974,7 +3974,7 @@ dependencies = [
 
 [[package]]
 name = "lipilekhika-ui"
-version = "1.0.6"
+version = "1.0.7"
 dependencies = [
  "crossbeam-channel",
  "dark-light",

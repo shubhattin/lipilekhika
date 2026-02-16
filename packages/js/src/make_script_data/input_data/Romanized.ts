@@ -166,7 +166,20 @@ const Romanized: InputOtherScriptType = {
     ...get_list('Ḷ', 'L^'),
     ...get_list('Ḻ', 'Lz^'),
     ...get_list('Ś', 'sh^'),
-    ...get_list('Ṣ', 'Sh^')
+    ...get_list('Ṣ', 'Sh^'),
+    // Capital Letter forms (Pure)
+    ...get_list('A', 'A-'),
+    ...get_list('I', 'I-'),
+    ...get_list('U', 'U-'),
+    ...get_list('E', 'E-'),
+    ...get_list('O', 'O-'),
+    ...get_list('R', 'R-'),
+    ...get_list('M', 'M-'),
+    ...get_list('H', 'H-'),
+    ...get_list('Ṭ', 'T-'),
+    ...get_list('Ḍ', 'D-'),
+    ...get_list('Ṇ', 'N-'),
+    ...get_list('Ḷ', 'L-')
   ],
   list: [
     {

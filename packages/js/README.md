@@ -34,6 +34,7 @@ pnpm add lipilekhika
 bun add lipilekhika
 yarn add lipilekhika
 ```
+
 </details>
 
 ## 🚀 Quick Start
@@ -53,12 +54,9 @@ console.log(result); // न जायते म्रियते वा
 ```typescript
 import { transliterate } from 'lipilekhika';
 
-const result = await transliterate(
-  'గంగా',
-  'Devanagari',
-  'Gujarati',
-  { 'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true }
-);
+const result = await transliterate('గంగా', 'Devanagari', 'Gujarati', {
+  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
+});
 console.log(result); // ગંગા (instead of ગઙ્ગા)
 ```
 
@@ -72,6 +70,7 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 <summary><strong><code>transliterate(text, from, to, options?)</code></strong> — Transliterate text between scripts</summary>
 
 **Parameters:**
+
 - `text: string` — Text to transliterate
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
@@ -85,6 +84,7 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 <summary><strong><code>preloadScriptData(name)</code></strong> — Preload script data to avoid fetch latency</summary>
 
 **Parameters:**
+
 - `name: ScriptLangType` — Script/language name to preload
 
 **Returns:** `Promise<ScriptData>`
@@ -97,6 +97,7 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 <summary><strong><code>getAllOptions(from, to)</code></strong> — Get available custom options for a script pair</summary>
 
 **Parameters:**
+
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
 
@@ -110,6 +111,7 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 **Parameters:**
+
 - `text: string` — Text to transliterate
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
@@ -137,15 +139,15 @@ import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from 'lipilekhika';
 import type { ScriptLangType, TransliterationOptions } from 'lipilekhika';
 ```
 
-| Export | Description |
-|--------|-------------|
-| `SCRIPT_LIST` | Array of all supported script names |
-| `LANG_LIST` | Array of all supported language names mapped to scripts |
-| `ALL_LANG_SCRIPT_LIST` | Combined list of all scripts and languages |
-| `ScriptLangType` | Type for script/language identifiers (includes aliases) |
-| `TransliterationOptions` | Type for custom transliteration options |
-| `ScriptListType` | Type for the script list |
-| `LangListType` | Type for the language list |
+| Export                   | Description                                             |
+| ------------------------ | ------------------------------------------------------- |
+| `SCRIPT_LIST`            | Array of all supported script names                     |
+| `LANG_LIST`              | Array of all supported language names mapped to scripts |
+| `ALL_LANG_SCRIPT_LIST`   | Combined list of all scripts and languages              |
+| `ScriptLangType`         | Type for script/language identifiers (includes aliases) |
+| `TransliterationOptions` | Type for custom transliteration options                 |
+| `ScriptListType`         | Type for the script list                                |
+| `LangListType`           | Type for the language list                              |
 
 ## ⌨️ Real-time Typing
 
@@ -164,7 +166,11 @@ import {
 ### Quick Example
 
 ```tsx
-import { createTypingContext, handleTypingBeforeInputEvent, clearTypingContextOnKeyDown } from 'lipilekhika/typing';
+import {
+  createTypingContext,
+  handleTypingBeforeInputEvent,
+  clearTypingContextOnKeyDown
+} from 'lipilekhika/typing';
 
 const ctx = createTypingContext('Telugu');
 
@@ -172,7 +178,7 @@ const ctx = createTypingContext('Telugu');
   onBeforeInput={(e) => handleTypingBeforeInputEvent(ctx, e, setText)}
   onBlur={() => ctx.clearContext()}
   onKeyDown={(e) => clearTypingContextOnKeyDown(e, ctx)}
-/>
+/>;
 ```
 
 ### API
@@ -181,6 +187,7 @@ const ctx = createTypingContext('Telugu');
 <summary><strong><code>createTypingContext(script, options?)</code></strong> — Create a typing context</summary>
 
 **Parameters:**
+
 - `script: ScriptLangType` — Target script/language for typing
 - `options?: TypingOptions` — Custom typing options
   - `autoContextClearTimeMs?: number` (default: `4500`)
@@ -188,6 +195,7 @@ const ctx = createTypingContext('Telugu');
   - `includeInherentVowel?: boolean` (default: `false`)
 
 **Returns:** `TypingContext` with:
+
 - `ready: Promise<void>` — Await before using (ensures script data loaded)
 - `takeKeyInput(char: string)` — Process character input and return diff
 - `clearContext()` — Clear internal state
@@ -200,6 +208,7 @@ const ctx = createTypingContext('Telugu');
 <summary><strong><code>handleTypingBeforeInputEvent(ctx, event, callback?, options?)</code></strong> — Handle beforeinput events</summary>
 
 **Parameters:**
+
 - `ctx: TypingContext` — Typing context
 - `event: InputEvent` — The beforeinput event
 - `callback?: (newValue: string) => void` — Called with updated value
@@ -213,6 +222,7 @@ const ctx = createTypingContext('Telugu');
 Handles keyboard events (Arrow keys, Esc, etc.) to clear context appropriately.
 
 **Parameters:**
+
 - `event: KeyboardEvent` — The keydown event
 - `ctx: TypingContext` — Typing context to clear
 
@@ -240,7 +250,7 @@ const typingMap = await getScriptTypingDataMap('Telugu');
 ```html
 <script type="module">
   import { transliterate } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
-  
+
   const text = await transliterate('namaste', 'Normal', 'Devanagari');
   console.log(text); // नमस्ते
 </script>
@@ -254,8 +264,7 @@ const typingMap = await getScriptTypingDataMap('Telugu');
 ```html
 <script src="https://cdn.jsdelivr.net/npm/lipilekhika"></script>
 <script>
-  lipilekhika.transliterate('namaste', 'Normal', 'Devanagari')
-    .then(text => console.log(text)); // नमस्ते
+  lipilekhika.transliterate('namaste', 'Normal', 'Devanagari').then((text) => console.log(text)); // नमस्ते
 </script>
 ```
 
@@ -272,4 +281,3 @@ const typingMap = await getScriptTypingDataMap('Telugu');
 - **[Custom Options](https://lipilekhika.in/reference/custom_trans_options)** — Transliteration options reference
 - **[GitHub Repository](https://github.com/shubhattin/lipilekhika)** — Source code and issues
 - **[Changelog](./CHANGELOG.md)** — Version history and updates
-

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleasd (rust-lib@v1.0.6)
+
+- Added normal capital letters for Romanized to allow capital letter typing
+
 ## rust-lib@v1.0.5
 
 - Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleasd (python-lib@v1.0.3)
+
+- Added normal capital letters for Romanized to allow capital letter typing
+
 ## python-lib@v1.0.2
 
 - Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^

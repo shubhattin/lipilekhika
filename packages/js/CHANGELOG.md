@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleasd (js-lib@v1.0.7)
+
+- Added normal capital letters for Romanized to allow capital letter typing
+
 ## js-lib@v1.0.6
 
 - Added more typing alternatives for Romanized Capital letter forms like aa^ besides A^
