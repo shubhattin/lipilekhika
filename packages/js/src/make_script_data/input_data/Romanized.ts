@@ -176,10 +176,10 @@ const Romanized: InputOtherScriptType = {
     ...get_list('R', 'R#'),
     ...get_list('M', 'M#'),
     ...get_list('H', 'H#'),
-    ...get_list('Ṭ', 'T#'),
-    ...get_list('Ḍ', 'D#'),
-    ...get_list('Ṇ', 'N#'),
-    ...get_list('Ḷ', 'L#')
+    ...get_list('T', 'T#'),
+    ...get_list('D', 'D#'),
+    ...get_list('N', 'N#'),
+    ...get_list('L', 'L#')
   ],
   list: [
     {
