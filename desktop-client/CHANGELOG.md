@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleasd (pc-app@v1.0.7)
+## pc-app@v1.0.7
 
 - Added normal capital letters for Romanized to allow capital letter typing
 
