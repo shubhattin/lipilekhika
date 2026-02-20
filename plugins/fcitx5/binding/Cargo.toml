@@ -10,7 +10,7 @@ name = "lipilekhika_typing"
 crate-type = ["cdylib"]
 
 [dependencies]
-lipilekhika = "1.0.5"
+lipilekhika = "1.0.6"
 # Use published version instead of path to avoid bun dependency for the build/install
 
 [build-dependencies]

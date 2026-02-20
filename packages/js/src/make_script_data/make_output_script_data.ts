@@ -682,12 +682,15 @@ async function copy_script_data_json() {
     minify: boolean;
     single_script_data_file?: boolean;
     cmd?: string;
+    id?: string;
   }[] = [
     {
+      id: 'rust',
       target: '../rust/src/data',
       minify: true
     },
     {
+      id: 'go',
       target: '../go/lipilekhika/data',
       minify: false,
       single_script_data_file: true,
@@ -695,7 +698,7 @@ async function copy_script_data_json() {
     }
   ];
 
-  for (const { target, minify, single_script_data_file, cmd } of LIST) {
+  for (const { target, minify, single_script_data_file, cmd, id } of LIST) {
     if (fs.existsSync(path.resolve(target))) {
       fs.rmSync(path.resolve(target), { recursive: true, force: true });
     }
@@ -727,15 +730,21 @@ async function copy_script_data_json() {
       fs.writeFileSync(target + '/script_list.json', JSON.stringify(script_list_data, null, 2));
     }
     // The Go target folder can be fully regenerated; ensure embed scaffold exists.
-    if (cmd) {
+    if (cmd && id === 'go') {
       fs.mkdirSync(target + '/gob', { recursive: true });
       fs.writeFileSync(
         target + '/embed.go',
-        "package data\n\nimport \"embed\"\n\n// FS contains generated binary artifacts committed to git.\n//\n//go:embed gob/*\nvar FS embed.FS\n"
+        'package data\n\nimport "embed"\n\n// FS contains generated binary artifacts committed to git.\n//\n//go:embed gob/*\nvar FS embed.FS\n'
       );
       fs.writeFileSync(target + '/gob/placeholder.txt', 'generated gob files live here');
     }
-    if (cmd) execSync(cmd, { stdio: 'inherit' });
+    if (cmd && id === 'go') {
+      try {
+        execSync(cmd);
+      } catch (e) {
+        console.error(chalk.red('✖  Error generating Go script data'), e);
+      }
+    }
   }
 }
 
