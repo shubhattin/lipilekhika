@@ -676,22 +676,40 @@ async function make_custom_option_json() {
   fs.writeFileSync(CUSTOM_OPTIONS_OUT_FOLDER, jsonOutput);
 }
 
-function copy_script_data_json() {
+async function copy_script_data_json() {
   const LIST: {
     target: string;
     minify: boolean;
+    single_script_data_file?: boolean;
+    cmd?: string;
   }[] = [
     {
       target: '../rust/src/data',
       minify: true
+    },
+    {
+      target: '../go/lipilekhika/data',
+      minify: false,
+      single_script_data_file: true,
+      cmd: 'cd ../go/lipilekhika && go run ./cmd/generate-data'
     }
   ];
 
-  for (const { target, minify } of LIST) {
+  for (const { target, minify, single_script_data_file, cmd } of LIST) {
     if (fs.existsSync(path.resolve(target))) {
       fs.rmSync(path.resolve(target), { recursive: true, force: true });
     }
-    fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    fs.mkdirSync(target, { recursive: true });
+    if (!single_script_data_file) {
+      fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    } else {
+      const ALL_DATA: Record<string, OutputScriptData> = {};
+      for (const script of SCRIPT_LIST) {
+        const data = await import(`../script_data/${script}.json`);
+        ALL_DATA[script] = data.default;
+      }
+      fs.writeFileSync(target + '/script_data.json', JSON.stringify(ALL_DATA, null, 2));
+    }
     fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
     const script_list_data = {
       scripts: script_list_obj,
@@ -708,6 +726,16 @@ function copy_script_data_json() {
     } else {
       fs.writeFileSync(target + '/script_list.json', JSON.stringify(script_list_data, null, 2));
     }
+    // The Go target folder can be fully regenerated; ensure embed scaffold exists.
+    if (cmd) {
+      fs.mkdirSync(target + '/gob', { recursive: true });
+      fs.writeFileSync(
+        target + '/embed.go',
+        "package data\n\nimport \"embed\"\n\n// FS contains generated binary artifacts committed to git.\n//\n//go:embed gob/*\nvar FS embed.FS\n"
+      );
+      fs.writeFileSync(target + '/gob/placeholder.txt', 'generated gob files live here');
+    }
+    if (cmd) execSync(cmd, { stdio: 'inherit' });
   }
 }
 

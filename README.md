@@ -31,7 +31,7 @@
 
 - **WebAssembly** : Rust-powered [WebAssembly module](https://lipilekhika.in/getting-started/wasm)
 
-- **Go** - Coming soon
+- **Go** - [`github.com/shubhattin/lipilekhika/packages/go/lipilekhika`](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika) · [Package README](./packages/go/lipilekhika/README.md) · [Docs](https://lipilekhika.in/getting-started/go)
 
 ## 🚀 Quick Start
 

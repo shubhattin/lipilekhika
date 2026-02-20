@@ -1,0 +1,42 @@
+name: Go Package CI
+
+on:
+  push:
+    paths:
+      - 'packages/js/**'
+      - 'packages/go/**'
+      - '.github/workflows/go_ci.yml'
+  pull_request:
+    paths:
+      - 'packages/js/**'
+      - 'packages/go/**'
+      - '.github/workflows/go_ci.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+      - name: Generate Script Data JSON
+        run: |
+          cd packages/js
+          bun make-script-data
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: packages/go/lipilekhika/go.mod
+      - name: Test
+        run: |
+          cd packages/go/lipilekhika
+          go test -v ./...
+      - name: Verify Generated Artifacts Are Current
+        run: |
+          cd packages/go/lipilekhika
+          go run ./cmd/generate-data
+          git diff --exit-code data/gob/*.gob

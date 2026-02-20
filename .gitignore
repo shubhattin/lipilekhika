@@ -17,17 +17,3 @@ packages/js/src/script_data
 packages/js/src/custom_options.json
 
 test_data/transliteration/auto-*/auto-*.yaml
-
-# Dart package generated/build files
-packages/dart/lipilekhika/*.so
-packages/dart/lipilekhika/*.dylib
-packages/dart/lipilekhika/*.dll
-packages/dart/lipilekhika/android/src/main/jniLibs/
-packages/dart/lipilekhika/.dart_tool/
-packages/dart/lipilekhika/build/
-packages/dart/lipilekhika/pubspec.lock
-packages/dart/lipilekhika/*.iml
-packages/dart/binding/target/
-packages/dart/lipilekhika/android/.cxx/
-packages/dart/lipilekhika/android/local.properties
-packages/dart/lipilekhika/android/*.iml
