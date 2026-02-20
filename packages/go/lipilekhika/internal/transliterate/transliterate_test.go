@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 
@@ -69,6 +70,7 @@ func testDataRoot(t *testing.T) string {
 }
 
 func TestTransliterationYAMLSmoke(t *testing.T) {
+	strictExpected := strings.EqualFold(os.Getenv("LIPILEKHIKA_STRICT_YAML_EXPECTED"), "true")
 	root := testDataRoot(t)
 	if root == "" {
 		return
@@ -115,7 +117,11 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 					"INFO transliteration::tests index=%d from=%s to=%s input=%q output=%q",
 					c.Index, c.From, c.To, c.Input, result,
 				)
-				if c.Input != "" && result == "" {
+				if strictExpected && c.Output != "" && result != c.Output {
+					forwardFailures++
+					t.Errorf("index %d %s→%s: expected %q, got %q",
+						c.Index, c.From, c.To, c.Output, result)
+				} else if c.Input != "" && result == "" {
 					forwardFailures++
 					t.Errorf("index %d %s→%s: got empty output for non-empty input",
 						c.Index, c.From, c.To)
@@ -135,7 +141,11 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 						"INFO transliteration::tests reverse index=%d from=%s to=%s output=%q reversed=%q",
 						c.Index, c.From, c.To, result, reversed,
 					)
-					if c.Input != "" && reversed == "" {
+					if strictExpected && reversed != c.Input {
+						reverseFailures++
+						t.Errorf("index %d reverse %s←%s: expected %q, got %q",
+							c.Index, c.From, c.To, c.Input, reversed)
+					} else if c.Input != "" && reversed == "" {
 						reverseFailures++
 						t.Errorf("index %d reverse %s←%s: got empty reverse output for non-empty input",
 							c.Index, c.From, c.To)

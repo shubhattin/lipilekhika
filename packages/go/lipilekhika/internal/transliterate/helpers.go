@@ -7,13 +7,6 @@ import (
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
 )
 
-func KramaTextOrNull(s *scriptdata.ScriptData, idx int) string {
-	if idx < 0 || idx >= len(s.KramaTextArr) {
-		return ""
-	}
-	return s.KramaTextArr[idx].Text
-}
-
 func kramaTextOrEmpty(s *scriptdata.ScriptData, idx int) string {
 	if idx < 0 || idx >= len(s.KramaTextArr) {
 		return ""

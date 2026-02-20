@@ -197,11 +197,16 @@ func findRepoRoot() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for d := wd; d != "" && d != string(filepath.Separator); d = filepath.Dir(d) {
+	for d := wd; d != ""; {
 		candidate := filepath.Join(d, "test_data")
 		if st, err := os.Stat(candidate); err == nil && st.IsDir() {
 			return d, nil
 		}
+		next := filepath.Dir(d)
+		if next == d {
+			break
+		}
+		d = next
 	}
 	return "", fmt.Errorf("test_data directory not found from %q", wd)
 }

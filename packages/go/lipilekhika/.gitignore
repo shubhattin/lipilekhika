@@ -1,4 +1,3 @@
 data/*.json
-typing/test_log/
-internal/transliterate/test_log/
+test_log/
 bench/.tmp/

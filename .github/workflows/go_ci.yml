@@ -6,6 +6,11 @@ on:
       - 'packages/js/**'
       - 'packages/go/**'
       - '.github/workflows/go_ci.yml'
+  pull_request:
+    paths:
+      - 'packages/js/**'
+      - 'packages/go/**'
+      - '.github/workflows/go_ci.yml'
   workflow_dispatch:
 
 jobs:

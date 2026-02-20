@@ -48,7 +48,7 @@ func loadScriptDataMap() (map[string]ScriptData, error) {
 	return scriptDataMap, scriptDataErr
 }
 
-func loadScriptListJSON() (ScriptListJSON, error) {
+func loadScriptListJSON() error {
 	scriptListOnce.Do(func() {
 		raw, err := embedded.FS.ReadFile(scriptListBlobPath)
 		if err != nil {
@@ -69,15 +69,7 @@ func loadScriptListJSON() (ScriptListJSON, error) {
 			ScriptAlternatesMap: jsonData.ScriptAlternatesMap,
 		}
 	})
-	if scriptListErr != nil {
-		return ScriptListJSON{}, scriptListErr
-	}
-	return ScriptListJSON{
-		Scripts:             namesToRankMap(scriptListData.Scripts),
-		Langs:               namesToRankMap(scriptListData.Langs),
-		LangScriptMap:       scriptListData.LangScriptMap,
-		ScriptAlternatesMap: scriptListData.ScriptAlternatesMap,
-	}, nil
+	return scriptListErr
 }
 
 func loadCustomOptionsMap() (map[string]CustomOption, error) {
@@ -123,7 +115,7 @@ func MustGetScriptData(name string) ScriptData {
 }
 
 func GetScriptListData() (ScriptListData, error) {
-	if _, err := loadScriptListJSON(); err != nil {
+	if err := loadScriptListJSON(); err != nil {
 		return ScriptListData{}, err
 	}
 	return scriptListData, nil
@@ -170,14 +162,6 @@ func getOrderedNames(input map[string]uint8) []string {
 	out := make([]string, 0, len(arr))
 	for _, item := range arr {
 		out = append(out, item.name)
-	}
-	return out
-}
-
-func namesToRankMap(names []string) map[string]uint8 {
-	out := make(map[string]uint8, len(names))
-	for index, name := range names {
-		out[name] = uint8(index + 1)
 	}
 	return out
 }
