@@ -1,7 +1,7 @@
 use crate::macros::is_script_tamil_ext;
 use crate::script_data::{List, ScriptData};
 use crate::utils::binary_search::binary_search_lower_with_index;
-use crate::utils::strings::char_substring;
+
 // pub fn krama_index_of_text()
 
 impl ScriptData {
@@ -248,8 +248,9 @@ impl PrevContextBuilder {
   }
 }
 
-pub struct InputTextCursor<'a> {
-  text: &'a str,
+pub struct InputTextCursor {
+  /// Pre-computed char array for O(1) indexed access (like Go's []rune).
+  chars: Vec<char>,
   pos: usize,
 }
 
@@ -258,21 +259,27 @@ pub struct InputCursor {
   // no cp(codepoint) or width needed here in rust
 }
 
-impl<'a> InputTextCursor<'a> {
-  pub fn new(text: &'a str) -> InputTextCursor<'a> {
-    InputTextCursor { text, pos: 0 }
+impl InputTextCursor {
+  pub fn new(text: &str) -> InputTextCursor {
+    InputTextCursor {
+      chars: text.chars().collect(),
+      pos: 0,
+    }
   }
 
   pub fn pos(&self) -> usize {
     self.pos
   }
 
+  pub fn char_count(&self) -> usize {
+    self.chars.len()
+  }
+
   pub fn peek_at(&self, index_units: usize) -> Option<InputCursor> {
     self
-      .text
-      .chars()
-      .nth(index_units)
-      .and_then(|ch| Some(InputCursor { ch: ch.to_string() }))
+      .chars
+      .get(index_units)
+      .map(|&ch| InputCursor { ch: ch.to_string() })
   }
 
   pub fn peek(&self) -> Option<InputCursor> {
@@ -283,7 +290,6 @@ impl<'a> InputTextCursor<'a> {
   pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<InputCursor> {
     self.peek_at(self.pos + offset_units)
   }
-
   /// units here is for char (and not bytes)
   /// in TS version `units` is byte index for utf-16 encoding used by js
   /// rust stores as utf-8 but has methods to access nth char or substring (char_substring)
@@ -292,11 +298,10 @@ impl<'a> InputTextCursor<'a> {
   }
 
   pub fn slice(&self, start: usize, end: usize) -> Option<String> {
-    let char_count = self.text.chars().count();
-    if start > end || end > char_count {
+    if start > end || end > self.chars.len() {
       return None;
     }
-    Some(char_substring(&self.text, start, end).to_owned())
+    Some(self.chars[start..end].iter().collect())
   }
 }
 

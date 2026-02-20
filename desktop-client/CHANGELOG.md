@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (pc-app@v1.0.8)
+
+- Add **Major Performance Improvements** for `transliterate`
+
 ## pc-app@v1.0.7
 
 - Added normal capital letters for Romanized to allow capital letter typing

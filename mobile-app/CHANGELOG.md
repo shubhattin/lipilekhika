@@ -1,10 +1,12 @@
 # Changelog
 
+## Unreleased (mobile-app@v0.2.4+7)
+
+- Add **Major Performance Improvements** for `transliterate`
 
 ## mobile-app@v0.2.3+6
 
 - Added normal capital letters for Romanized to allow capital letter typing
-
 
 ## mobile-app@v0.2.2+5
 

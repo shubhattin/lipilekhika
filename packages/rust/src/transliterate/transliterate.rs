@@ -15,7 +15,7 @@ struct TransliterateCtx<'a> {
   to_script_data: &'a ScriptData,
   trans_options: &'a HashMap<String, bool>,
   custom_rules: &'a [Rule],
-  cursor: &'a mut InputTextCursor<'a>,
+  cursor: &'a mut InputTextCursor,
   result: &'a mut ResultStringBuilder,
   prev_context: &'a mut PrevContextBuilder,
   prev_context_in_use: bool,
@@ -640,14 +640,24 @@ pub fn transliterate_text_core(
   custom_rules: &[Rule],
   options: Option<TransliterationFnOptions>,
 ) -> Result<TransliterationOutput, String> {
-  let mut trans_options = trans_options_in.clone();
   let opts = options.unwrap_or_default();
 
   if opts.typing_mode && from_script_name != "Normal" {
     return Err("Typing mode is only supported with Normal script as the input".to_owned());
   }
+
+  // Only clone trans_options when we actually need to insert a key (typing mode).
+  // In the common (non-typing) path this avoids a full HashMap allocation per call.
+  let owned_trans_options: Option<HashMap<String, bool>>;
+  let trans_options: &HashMap<String, bool>;
   if opts.typing_mode {
-    trans_options.insert("normal_to_all:use_typing_chars".to_string(), true);
+    let mut cloned = trans_options_in.clone();
+    cloned.insert("normal_to_all:use_typing_chars".to_string(), true);
+    owned_trans_options = Some(cloned);
+    trans_options = owned_trans_options.as_ref().unwrap();
+  } else {
+    // owned_trans_options = None;
+    trans_options = trans_options_in;
   }
 
   if opts.typing_mode && from_script_name == "Normal" {
@@ -708,8 +718,8 @@ pub fn transliterate_text_core(
     include_inherent_vowels: opts.include_inherent_vowel,
   };
 
-  let chars_len = &text.chars().count();
-  while ctx.cursor.pos() < *chars_len {
+  let chars_len = ctx.cursor.char_count();
+  while ctx.cursor.pos() < chars_len {
     let mut text_index = ctx.cursor.pos();
     let cur = match ctx.cursor.peek() {
       Some(v) => v,
@@ -800,10 +810,7 @@ pub fn transliterate_text_core(
 
       loop {
         let next = ctx.cursor.peek_at(text_index + scan_units + 1);
-        let next_char = next
-          .as_ref()
-          .map(|c| c.ch.clone())
-          .unwrap_or("".to_string());
+        let next_char: String = next.as_ref().map(|c| c.ch.clone()).unwrap_or_default();
 
         if ignore_ta_ext_sup_num_text_index != -1
           && !next_char.is_empty()
@@ -817,7 +824,7 @@ pub fn transliterate_text_core(
           let a = ctx
             .cursor
             .slice(text_index, ignore_ta_ext_sup_num_text_index as usize)
-            .unwrap_or(String::new());
+            .unwrap_or_default();
           let b = if end_index > (ignore_ta_ext_sup_num_text_index as usize) {
             ctx
               .cursor

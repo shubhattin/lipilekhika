@@ -9,3 +9,7 @@ members = [
     "plugins/fcitx5/binding",
 ]
 resolver = "3"
+
+[profile.bench]
+lto = true
+codegen-units = 1

@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub fn char_substring(s: &str, start: usize, end: usize) -> &str {
   if start >= end {
     return "";
