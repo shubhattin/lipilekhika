@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/typing"
 	"gopkg.in/yaml.v3"
 )
+
+// ── shared types ─────────────────────────────────────────────────────────────
 
 type typingTestCase struct {
 	Index         int                    `yaml:"index"`
@@ -22,22 +23,17 @@ type typingTestCase struct {
 	Todo          bool                   `yaml:"todo"`
 }
 
-var logMu sync.Mutex
-
-func appendTestLog(format string, args ...interface{}) {
-	logMu.Lock()
-	defer logMu.Unlock()
-
-	dir := filepath.Join("test_log")
-	_ = os.MkdirAll(dir, 0o755)
-	path := filepath.Join(dir, "typing.log")
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	_, _ = fmt.Fprintf(f, format+"\n", args...)
+type transTestCase struct {
+	Index   int             `yaml:"index"`
+	From    string          `yaml:"from"`
+	To      string          `yaml:"to"`
+	Input   string          `yaml:"input"`
+	Output  string          `yaml:"output"`
+	Todo    bool            `yaml:"todo"`
+	Options map[string]bool `yaml:"options"`
 }
+
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 func optionsFromMap(m map[string]interface{}) *typing.TypingContextOptions {
 	if m == nil {
@@ -94,6 +90,30 @@ func emulateTyping(text, script string, options *typing.TypingContextOptions) (s
 	return result, nil
 }
 
+// packageRoot walks up from the working directory to find go.mod.
+func packageRoot() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for d := wd; d != "" && d != "/"; d = filepath.Dir(d) {
+		if _, err := os.Stat(filepath.Join(d, "go.mod")); err == nil {
+			return d, nil
+		}
+	}
+	return "", fmt.Errorf("go.mod not found from %q", wd)
+}
+
+func writeTestLog(filename, content string) {
+	root, err := packageRoot()
+	if err != nil {
+		return
+	}
+	dir := filepath.Join(root, "test_log")
+	_ = os.MkdirAll(dir, 0o755)
+	_ = os.WriteFile(filepath.Join(dir, filename), []byte(content+"\n"), 0o644)
+}
+
 func loadTypingTests(t *testing.T) []typingTestCase {
 	t.Helper()
 	path := filepath.Join("..", "..", "..", "..", "test_data", "typing", "01-typing-mode.yaml")
@@ -108,16 +128,70 @@ func loadTypingTests(t *testing.T) []typingTestCase {
 	return tests
 }
 
+// loadAutoEmulateTests loads all Normal→Brahmic/Other transliteration cases
+// from the auto-nor-brahmic and auto-nor-other folders (same source as JS).
+func loadAutoEmulateTests(t *testing.T) []transTestCase {
+	t.Helper()
+	root, err := packageRoot()
+	if err != nil {
+		t.Fatalf("find package root: %v", err)
+	}
+	transRoot := filepath.Join(root, "..", "..", "..", "test_data", "transliteration")
+	folders := []string{
+		filepath.Join(transRoot, "auto-nor-brahmic"),
+		filepath.Join(transRoot, "auto-nor-other"),
+	}
+	var out []transTestCase
+	for _, folder := range folders {
+		entries, err := os.ReadDir(folder)
+		if err != nil {
+			// folder may not exist; skip silently
+			continue
+		}
+		for _, e := range entries {
+			if e.IsDir() || filepath.Ext(e.Name()) != ".yaml" {
+				continue
+			}
+			data, err := os.ReadFile(filepath.Join(folder, e.Name()))
+			if err != nil {
+				t.Fatalf("read %s: %v", e.Name(), err)
+			}
+			var cases []transTestCase
+			if err := yaml.Unmarshal(data, &cases); err != nil {
+				t.Fatalf("parse %s: %v", e.Name(), err)
+			}
+			out = append(out, cases...)
+		}
+	}
+	return out
+}
+
+// containsVedicSvara reports whether s contains any Vedic svara character.
+// Mirrors the JS skip logic for Tamil-Extended auto-emulate vedic edge cases.
+func containsVedicSvara(s string) bool {
+	for _, r := range s {
+		if r == '॒' || r == '॑' || r == '᳚' || r == '᳛' {
+			return true
+		}
+	}
+	return false
+}
+
+// ── tests ─────────────────────────────────────────────────────────────────────
+
 func TestTypingMode(t *testing.T) {
 	tests := loadTypingTests(t)
 	total := 0
 	passed := 0
 	failed := 0
+	todoSkipped := 0
+	preserveChecks := 0
 	for _, tc := range tests {
 		tc := tc
 		name := fmt.Sprintf("%d-%s", tc.Index, tc.Script)
 		if tc.Todo {
-			t.Run(name, func(t *testing.T) {})
+			todoSkipped++
+			t.Run(name, func(t *testing.T) { t.Skip("todo") })
 			continue
 		}
 		total++
@@ -127,14 +201,11 @@ func TestTypingMode(t *testing.T) {
 			if err != nil {
 				t.Fatalf("emulate typing: %v", err)
 			}
-			appendTestLog(
-				"INFO typing::tests %s input=%q output=%q expected=%q",
-				name, tc.Text, got, tc.Output,
-			)
 			if got != tc.Output {
 				t.Fatalf("typing mismatch: got %q want %q", got, tc.Output)
 			}
 			if tc.PreserveCheck {
+				preserveChecks++
 				back, err := lipilekhika.Transliterate(
 					got,
 					tc.Script,
@@ -155,8 +226,58 @@ func TestTypingMode(t *testing.T) {
 			failed++
 		}
 	}
-	appendTestLog(
-		"SUMMARY typing::tests total=%d passed=%d failed=%d",
-		total, passed, failed,
-	)
+	writeTestLog("typing_mode_log.txt", fmt.Sprintf(
+		"Typing Mode: total_emulations=%d, preserve_checks=%d, passed=%d, failed=%d, todo_skipped=%d",
+		total, preserveChecks, passed, failed, todoSkipped,
+	))
+}
+
+func TestAutoEmulateTyping(t *testing.T) {
+	cases := loadAutoEmulateTests(t)
+	total := 0
+	passed := 0
+	failed := 0
+	skipped := 0 // auto vedic skipped (Tamil-Extended + vedic svara edge case)
+
+	for _, tc := range cases {
+		tc := tc
+		if tc.From != "Normal" || tc.To == "Normal" {
+			continue
+		}
+		if tc.Todo {
+			continue
+		}
+		total++
+		name := fmt.Sprintf("%d-%s", tc.Index, tc.To)
+		skippedThisCase := false
+		ok := t.Run(name, func(t *testing.T) {
+			result, err := emulateTyping(tc.Input, tc.To, nil)
+			if err != nil {
+				t.Fatalf("emulate typing: %v", err)
+			}
+			// Mirror JS skip: auto files, Tamil-Extended, result has vedic svara
+			if tc.To == "Tamil-Extended" && containsVedicSvara(result) {
+				skippedThisCase = true
+				t.Skip("auto vedic Tamil-Extended edge case")
+				return
+			}
+			if result != tc.Output {
+				t.Errorf("auto emulate mismatch %s→%s index %d:\n  input:    %q\n  expected: %q\n  got:      %q",
+					tc.From, tc.To, tc.Index, tc.Input, tc.Output, result)
+			}
+		})
+		if skippedThisCase {
+			skipped++
+			continue
+		}
+		if ok {
+			passed++
+		} else {
+			failed++
+		}
+	}
+	writeTestLog("typing_auto_emulate_log.txt", fmt.Sprintf(
+		"Emulate Typing (auto transliteration): total_emulations=%d, auto_vedic_skipped=%d, passed=%d, failed=%d",
+		total, skipped, passed, failed,
+	))
 }

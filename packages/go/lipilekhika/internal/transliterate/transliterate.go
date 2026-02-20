@@ -2,6 +2,7 @@ package transliterate
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
 )
@@ -218,15 +219,21 @@ func TransliterateTextCore(
 			IncludeInherentVowel: defaultIncludeInherentVowel,
 		}
 	}
-	tOpts := make(map[string]bool)
-	for k, v := range transOptions {
-		tOpts[k] = v
-	}
 	if opts.TypingMode && fromName != "Normal" {
 		return TransliterateOutput{}, &TransliterateError{Msg: "typing mode requires Normal as from script"}
 	}
+	// Only copy transOptions when we need to mutate it (typing mode adds a key).
+	// For the common non-typing path, alias the map directly — Go nil-map reads
+	// return the zero value (false) so this is safe even when transOptions is nil.
+	var tOpts map[string]bool
 	if opts.TypingMode {
+		tOpts = make(map[string]bool, len(transOptions)+1)
+		for k, v := range transOptions {
+			tOpts[k] = v
+		}
 		tOpts["normal_to_all:use_typing_chars"] = true
+	} else {
+		tOpts = transOptions
 	}
 	if opts.TypingMode && fromName == "Normal" {
 		text = applyTypingInputAliases(text, toName)
@@ -259,9 +266,9 @@ func TransliterateTextCore(
 	}
 	var fromTextMap []textMapEntrySorted
 	if useTypingMap && fromName == "Normal" {
-		fromTextMap = textMapToSortedEntries(toData.TypingTextMap)
+		fromTextMap = getCachedSortedTextMap(toName, true, toData.TypingTextMap)
 	} else {
-		fromTextMap = textMapToSortedEntries(fromData.TextMap)
+		fromTextMap = getCachedSortedTextMap(fromName, false, fromData.TextMap)
 	}
 
 	ignoreTaExtSupRuneIndex := -1
@@ -959,10 +966,11 @@ func containsStr(s []string, v string) bool {
 }
 
 func isSingleASCIIDigit(s string) bool {
-	if len([]rune(s)) != 1 {
+	// Use utf8.DecodeRuneInString to avoid allocating a []rune slice.
+	r, size := utf8.DecodeRuneInString(s)
+	if r == utf8.RuneError || size != len(s) {
 		return false
 	}
-	r := []rune(s)[0]
 	return r >= '0' && r <= '9'
 }
 

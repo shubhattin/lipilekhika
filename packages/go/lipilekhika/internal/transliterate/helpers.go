@@ -3,6 +3,8 @@ package transliterate
 import (
 	"sort"
 	"strings"
+	"sync"
+	"unicode/utf8"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
 )
@@ -263,25 +265,31 @@ func (p *prevContextBuilder) push(text string, list *scriptdata.ListItem) {
 }
 
 type inputCursor struct {
-	text string
-	pos  int
+	// runes is the pre-computed rune slice of the input text.
+	// Storing it once avoids O(n) heap allocations on every character access,
+	// which would otherwise make the main transliteration loop O(n²).
+	runes []rune
+	pos   int
 }
 
 func newInputCursor(text string) *inputCursor {
-	return &inputCursor{text: text, pos: 0}
+	return &inputCursor{runes: []rune(text), pos: 0}
 }
 
 func (c *inputCursor) runeCount() int {
-	return len([]rune(c.text))
+	return len(c.runes)
 }
 
 func (c *inputCursor) peekAtRune(runeIndex int) (ch string, width int, ok bool) {
-	runes := []rune(c.text)
-	if runeIndex < 0 || runeIndex >= len(runes) {
+	if runeIndex < 0 || runeIndex >= len(c.runes) {
 		return "", 0, false
 	}
-	ch = string(runes[runeIndex])
-	return ch, len(ch), true
+	r := c.runes[runeIndex]
+	w := utf8.RuneLen(r)
+	if w < 0 {
+		w = 1
+	}
+	return string(r), w, true
 }
 
 func (c *inputCursor) peek() (ch string, width int, ok bool) {
@@ -293,17 +301,38 @@ func (c *inputCursor) advanceRunes(n int) {
 }
 
 func (c *inputCursor) sliceRunes(start, end int) string {
-	runes := []rune(c.text)
 	if start < 0 {
 		start = 0
 	}
-	if end > len(runes) {
-		end = len(runes)
+	if end > len(c.runes) {
+		end = len(c.runes)
 	}
 	if start >= end {
 		return ""
 	}
-	return string(runes[start:end])
+	return string(c.runes[start:end])
+}
+
+// sortedTextMapCache caches the sorted []textMapEntrySorted slices per script,
+// so textMapToSortedEntries is never called more than once per script name.
+var sortedTextMapCache sync.Map // key: string ("<scriptName>:text" or "<scriptName>:typing")
+
+// getCachedSortedTextMap returns the sorted text-map entries for a given script,
+// computing and caching them on first access.
+func getCachedSortedTextMap(scriptName string, isTyping bool, m map[string]scriptdata.TextToKramaMap) []textMapEntrySorted {
+	var key string
+	if isTyping {
+		key = scriptName + ":typing"
+	} else {
+		key = scriptName + ":text"
+	}
+	if v, ok := sortedTextMapCache.Load(key); ok {
+		return v.([]textMapEntrySorted)
+	}
+	entries := textMapToSortedEntries(m)
+	// Store returns the existing value if another goroutine raced us; ignore.
+	sortedTextMapCache.Store(key, entries)
+	return entries
 }
 
 type peekAtFunc func(index int) (ch string, ok bool)

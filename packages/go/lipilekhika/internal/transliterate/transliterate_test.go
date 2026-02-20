@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -20,23 +18,6 @@ type testCase struct {
 	Reversible bool            `yaml:"reversible"`
 	Todo       bool            `yaml:"todo"`
 	Options    map[string]bool `yaml:"options"`
-}
-
-var transliterationLogMu sync.Mutex
-
-func appendTransliterationTestLog(format string, args ...interface{}) {
-	transliterationLogMu.Lock()
-	defer transliterationLogMu.Unlock()
-
-	dir := filepath.Join("test_log")
-	_ = os.MkdirAll(dir, 0o755)
-	path := filepath.Join(dir, "transliteration.log")
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	_, _ = fmt.Fprintf(f, format+"\n", args...)
 }
 
 func listYamlFiles(dir string) ([]string, error) {
@@ -58,7 +39,6 @@ func testDataRoot(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// From internal/transliterate or packages/go/lipilekhika, walk up to find test_data
 	for d := wd; d != "" && d != "/"; d = filepath.Dir(d) {
 		p := filepath.Join(d, "test_data", "transliteration")
 		if _, err := os.Stat(p); err == nil {
@@ -69,8 +49,40 @@ func testDataRoot(t *testing.T) string {
 	return ""
 }
 
+// packageRoot walks up from the current working directory to find the Go
+// lipilekhika package root (the directory containing go.mod).
+func packageRoot() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for d := wd; d != "" && d != "/"; d = filepath.Dir(d) {
+		if _, err := os.Stat(filepath.Join(d, "go.mod")); err == nil {
+			return d, nil
+		}
+	}
+	return "", fmt.Errorf("go.mod not found from %q", wd)
+}
+
+func writeTransliterationSummary(strictExpected bool, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped int) {
+	root, err := packageRoot()
+	if err != nil {
+		return
+	}
+	dir := filepath.Join(root, "test_log")
+	_ = os.MkdirAll(dir, 0o755)
+	path := filepath.Join(dir, "transliteration_summary.txt")
+	line := fmt.Sprintf(
+		"Transliteration: strict_expected=%t, files_total=%d, files_passed=%d, files_failed=%d, tests_total=%d, tests_passed=%d, tests_failed=%d, tests_skipped=%d\n",
+		strictExpected, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped,
+	)
+	_ = os.WriteFile(path, []byte(line), 0o644)
+}
+
 func TestTransliterationYAMLSmoke(t *testing.T) {
-	strictExpected := strings.EqualFold(os.Getenv("LIPILEKHIKA_STRICT_YAML_EXPECTED"), "true")
+	// Keep strict checks opt-in because known edge-cases are still being aligned.
+	// Set LIPILEKHIKA_STRICT_YAML_EXPECTED=true to enforce exact expected outputs.
+	strictExpected := os.Getenv("LIPILEKHIKA_STRICT_YAML_EXPECTED") == "true"
 	root := testDataRoot(t)
 	if root == "" {
 		return
@@ -79,13 +91,19 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 	if err != nil {
 		t.Fatalf("list yaml files: %v", err)
 	}
-	totalFiles := 0
-	passedFiles := 0
-	failedFiles := 0
+
+	filesTotal := 0
+	filesPassed := 0
+	filesFailed := 0
+	testsTotal := 0
+	testsPassed := 0
+	testsFailed := 0
+	testsSkipped := 0
+
 	for _, fp := range files {
 		fp := fp
 		rel, _ := filepath.Rel(root, fp)
-		totalFiles++
+		filesTotal++
 		ok := t.Run(rel, func(t *testing.T) {
 			data, err := os.ReadFile(fp)
 			if err != nil {
@@ -95,78 +113,54 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 			if err := yaml.Unmarshal(data, &cases); err != nil {
 				t.Fatalf("parse yaml: %v", err)
 			}
-			totalCases := 0
-			forwardFailures := 0
-			reverseFailures := 0
 			for _, c := range cases {
 				if c.Todo {
+					testsSkipped++
 					continue
 				}
-				totalCases++
+				testsTotal++
 				result, err := Transliterate(c.Input, c.From, c.To, c.Options)
 				if err != nil {
-					forwardFailures++
-					appendTransliterationTestLog(
-						"ERROR transliteration::tests index=%d from=%s to=%s input=%q err=%v",
-						c.Index, c.From, c.To, c.Input, err,
-					)
+					testsFailed++
 					t.Errorf("index %d %s→%s: %v", c.Index, c.From, c.To, err)
 					continue
 				}
-				appendTransliterationTestLog(
-					"INFO transliteration::tests index=%d from=%s to=%s input=%q output=%q",
-					c.Index, c.From, c.To, c.Input, result,
-				)
+				caseFailed := false
 				if strictExpected && c.Output != "" && result != c.Output {
-					forwardFailures++
-					t.Errorf("index %d %s→%s: expected %q, got %q",
-						c.Index, c.From, c.To, c.Output, result)
+					caseFailed = true
+					t.Errorf("index %d %s→%s: expected %q, got %q", c.Index, c.From, c.To, c.Output, result)
 				} else if c.Input != "" && result == "" {
-					forwardFailures++
-					t.Errorf("index %d %s→%s: got empty output for non-empty input",
-						c.Index, c.From, c.To)
+					caseFailed = true
+					t.Errorf("index %d %s→%s: got empty output for non-empty input", c.Index, c.From, c.To)
 				}
 				if c.Reversible {
 					reversed, err := Transliterate(result, c.To, c.From, c.Options)
 					if err != nil {
-						reverseFailures++
-						appendTransliterationTestLog(
-							"ERROR transliteration::tests reverse index=%d from=%s to=%s input=%q err=%v",
-							c.Index, c.From, c.To, result, err,
-						)
+						caseFailed = true
 						t.Errorf("index %d reverse %s←%s: %v", c.Index, c.From, c.To, err)
-						continue
-					}
-					appendTransliterationTestLog(
-						"INFO transliteration::tests reverse index=%d from=%s to=%s output=%q reversed=%q",
-						c.Index, c.From, c.To, result, reversed,
-					)
-					if strictExpected && reversed != c.Input {
-						reverseFailures++
-						t.Errorf("index %d reverse %s←%s: expected %q, got %q",
-							c.Index, c.From, c.To, c.Input, reversed)
+					} else if strictExpected && reversed != c.Input {
+						caseFailed = true
+						t.Errorf("index %d reverse %s←%s: expected %q, got %q", c.Index, c.From, c.To, c.Input, reversed)
 					} else if c.Input != "" && reversed == "" {
-						reverseFailures++
-						t.Errorf("index %d reverse %s←%s: got empty reverse output for non-empty input",
-							c.Index, c.From, c.To)
+						caseFailed = true
+						t.Errorf("index %d reverse %s←%s: got empty reverse output", c.Index, c.From, c.To)
 					}
 				}
+				if caseFailed {
+					testsFailed++
+				} else {
+					testsPassed++
+				}
 			}
-			appendTransliterationTestLog(
-				"SUMMARY transliteration::tests file=%q total_cases=%d forward_failures=%d reverse_failures=%d",
-				rel, totalCases, forwardFailures, reverseFailures,
-			)
 		})
 		if ok {
-			passedFiles++
+			filesPassed++
 		} else {
-			failedFiles++
+			filesFailed++
 		}
 	}
-	appendTransliterationTestLog(
-		"SUMMARY transliteration::tests files_total=%d files_passed=%d files_failed=%d",
-		totalFiles, passedFiles, failedFiles,
-	)
+
+	writeTransliterationSummary(strictExpected, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped)
 }
 
 func TestTransliterateBasicPublicBehavior(t *testing.T) {

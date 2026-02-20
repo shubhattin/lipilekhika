@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "gen:test-data": " cd scripts && bun gen-test-data.ts"
+    "gen:test-data": "cd scripts && bun gen-test-data.ts"
   },
   "dependencies": {},
   "devDependencies": {
