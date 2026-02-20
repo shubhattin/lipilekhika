@@ -14,6 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
       - name: Generate Script Data JSON
         run: |
           cd packages/js
@@ -29,7 +33,7 @@ jobs:
       - name: Test
         run: |
           cd packages/go/lipilekhika
-          go test ./...
+          go test -v ./...
       - name: Verify Generated Artifacts Are Current
         run: |
           cd packages/go/lipilekhika

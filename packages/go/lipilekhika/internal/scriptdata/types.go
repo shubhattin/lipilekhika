@@ -151,8 +151,9 @@ type ScriptData struct {
 	CustomScriptCharsArr []CustomScriptCharItem `json:"custom_script_chars_arr"`
 	List                 []ListItem             `json:"list"`
 
-	TextMap       map[string]TextToKramaMap `json:"-"`
-	TypingTextMap map[string]TextToKramaMap `json:"-"`
+	TextMap              map[string]TextToKramaMap `json:"-"`
+	TypingTextMap        map[string]TextToKramaMap `json:"-"`
+	TypingTextMapEntries []TextMapEntry            `json:"-"` // ordered for index lookup
 
 	SchwaProperty  bool    `json:"schwa_property,omitempty"`
 	Halant         string  `json:"halant,omitempty"`
@@ -220,6 +221,7 @@ func (s *ScriptData) GobDecode(data []byte) error {
 		List:                 wire.List,
 		TextMap:              textEntriesToMap(wire.TextMapEntries),
 		TypingTextMap:        textEntriesToMap(wire.TypingTextEntries),
+		TypingTextMapEntries: wire.TypingTextEntries,
 		SchwaProperty:        wire.SchwaProperty,
 		Halant:               wire.Halant,
 		Nuqta:                wire.Nuqta,
@@ -274,6 +276,7 @@ func (s *ScriptData) UnmarshalJSON(data []byte) error {
 		List:                 wire.List,
 		TextMap:              textMap,
 		TypingTextMap:        typingMap,
+		TypingTextMapEntries: wire.TypingTextToKramaMap,
 		SchwaProperty:        wire.SchwaProperty,
 		Halant:               wire.Halant,
 		Nuqta:                wire.Nuqta,
