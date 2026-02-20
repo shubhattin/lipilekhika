@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (pc-app@v1.0.8)
+## pc-app@v1.0.8
 
 - Add **Major Performance Improvements** for `transliterate`
 

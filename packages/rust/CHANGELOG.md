@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleasd (rust-lib@v1.0.6)
+## rust-lib@v1.0.6
 
 - Added normal capital letters for Romanized to allow capital letter typing
 - Add **Major Performance Improvements** in rust version

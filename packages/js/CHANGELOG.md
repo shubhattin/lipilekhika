@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleasd (js-lib@v1.0.7)
+## js-lib@v1.0.7
 
 - Added normal capital letters for Romanized to allow capital letter typing
 - Add **Major Performance Improvements** for `transliterate_wasm`

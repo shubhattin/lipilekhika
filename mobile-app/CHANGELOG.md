@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (mobile-app@v0.2.4+7)
+## mobile-app@v0.2.4+7
 
 - Add **Major Performance Improvements** for `transliterate`
 

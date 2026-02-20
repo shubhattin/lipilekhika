@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "lipilekhika"
-version = "1.0.2"
+version = "1.0.3"
 description = "A transliteration library for Indian Brahmic scripts"
 readme = "README.md"
 license = "MIT"
