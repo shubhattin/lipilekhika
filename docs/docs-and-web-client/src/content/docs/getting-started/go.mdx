@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import { LinkCard } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
 
 Lipi Lekhika provides a fast Go transliteration package with a realtime typing module.
 Requires Go `1.23+`.
@@ -54,10 +55,10 @@ func Transliterate(
 ) (string, error)
 ```
 
-- `text` text to transliterate
-- `fromScript` source script/language name
-- `toScript` target script/language name
-- `transOptions` optional custom option map
+- `text` — text to transliterate
+- `fromScript` — source script/language name
+- `toScript` — target script/language name
+- `transOptions` — optional custom option map (`nil` to skip)
 
 ### Custom Transliteration Options
 
@@ -166,9 +167,15 @@ Runtime updates on context:
   description="Reference for implementing low-latency typing"
 />
 
-## Resources
+## Error Handling
 
-- [Go Package README](https://github.com/shubhattin/lipilekhika/tree/main/packages/go/lipilekhika)
-- [Go API on pkg.go.dev](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika)
+<Aside type="caution">
+  If a script name is invalid, all APIs return a non-nil `error`. Use the supported scripts list or its aliases to normalize names before calling.
+</Aside>
 
-If a script name is invalid, APIs return an `error`; normalize names/aliases from the supported scripts list above.
+## Next Steps
+
+- Explore [custom transliteration options](/reference/custom_trans_options) for fine-tuned control
+- Check out [supported scripts](/reference/supported_scripts) to see all available scripts
+- Review [realtime typing reference](/reference/realtime_typing) for advanced typing implementations
+- Browse the [Go API on pkg.go.dev](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika)

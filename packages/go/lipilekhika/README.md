@@ -2,27 +2,27 @@
 
 > A fast transliteration library for Indian Brahmic scripts in Go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/shubhattin/lipilekhika/packages/go/lipilekhika.svg)](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-🌐 **[Website](https://lipilekhika.in)** • 📖 **[Documentation](https://lipilekhika.in/getting-started/introduction/)** • 📝 **[Repository](https://github.com/shubhattin/lipilekhika)**
+🌐 **[Website](https://lipilekhika.in)** • 📖 **[Documentation](https://lipilekhika.in/getting-started/go)** • 📝 **[Repository](https://github.com/shubhattin/lipilekhika)**
 
 ---
 
-## Features
+## ✨ Features
 
-- Bidirectional transliteration across Indian Brahmic scripts
-- Real-time typing context for character-by-character input
-- Custom transliteration options support
-- Embedded script data for predictable runtime behavior
-- Benchmark tooling for release-performance checks
+- 🔄 **Bidirectional Transliteration** — Convert between 15+ Indian Brahmic scripts
+- ⌨️ **Realtime Typing** — Stateful context for character-by-character input
+- 🎯 **Customizable Options** — Fine-tune transliteration and typing behaviour
+- 📦 **Embedded Script Data** — All data bundled for predictable runtime behaviour
 
-## Installation
+## 📥 Installation
 
 ```bash
 go get github.com/shubhattin/lipilekhika/packages/go/lipilekhika
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Basic Transliteration
 
@@ -69,13 +69,23 @@ func main() {
 }
 ```
 
-## API
+## 📚 API
 
 - `lipilekhika.Transliterate(text, fromScript, toScript, transOptions)`
 - `typing.NewTypingContext(typingLang, options)`
 - `(*typing.TypingContext).TakeKeyInput(key)`
 - `(*typing.TypingContext).ClearContext()`
 
-## License
+## 🎯 Supported Scripts
+
+Devanagari, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Odia, Gurmukhi, Sinhala, Tamil-Extended, Myanmar, Tibetan, Limbu, and more.
+
+📖 Full list: [lipilekhika.in/reference/supported_scripts](https://lipilekhika.in/reference/supported_scripts)
+
+## 🔧 Custom Options
+
+📖 [lipilekhika.in/reference/custom_trans_options](https://lipilekhika.in/reference/custom_trans_options)
+
+## 📝 License
 
 MIT License — See [LICENCE](./LICENCE)
