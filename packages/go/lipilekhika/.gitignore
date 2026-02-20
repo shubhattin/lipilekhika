@@ -1,3 +1,4 @@
 data/*.json
 typing/test_log/
 internal/transliterate/test_log/
+bench/.tmp/

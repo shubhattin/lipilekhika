@@ -1,0 +1,174 @@
+---
+title: Go
+description: Lipi Lekhika usage in Go
+sidebar:
+  order: 6
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+Lipi Lekhika provides a fast Go transliteration package with a realtime typing module.
+Requires Go `1.23+`.
+
+## Installation
+
+```bash
+go get github.com/shubhattin/lipilekhika/packages/go/lipilekhika
+```
+
+## Basic Usage
+
+Use `Transliterate` to convert text between scripts.
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
+)
+
+func main() {
+	out, err := lipilekhika.Transliterate(
+		"na jAyatE mriyatE vA",
+		"Normal",
+		"Devanagari",
+		nil,
+	)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(out) // न जायते म्रियते वा
+}
+```
+
+`Transliterate` signature:
+
+```go
+func Transliterate(
+	text string,
+	fromScript string,
+	toScript string,
+	transOptions map[string]bool,
+) (string, error)
+```
+
+- `text` text to transliterate
+- `fromScript` source script/language name
+- `toScript` target script/language name
+- `transOptions` optional custom option map
+
+### Custom Transliteration Options
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
+)
+
+func main() {
+	out, err := lipilekhika.Transliterate(
+		"गङ्गा",
+		"Devanagari",
+		"Gujarati",
+		map[string]bool{
+			"brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true,
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(out) // ગંગા
+}
+```
+
+<LinkCard
+  title="Custom Transliteration Options"
+  href="/reference/custom_trans_options"
+  description="List of available transliteration option keys"
+/>
+<LinkCard
+  title="Supported Scripts and Languages"
+  href="/reference/supported_scripts"
+  description="Complete script/language list and aliases"
+/>
+
+## Realtime Typing
+
+Use the `typing` package for character-by-character input.
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/typing"
+)
+
+func main() {
+	ctx, err := typing.NewTypingContext("Devanagari", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	diff, err := ctx.TakeKeyInput("k")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("delete=%d add=%q\n", diff.ToDeleteCharsCount, diff.DiffAddText)
+}
+```
+
+In an editor-like workflow, apply each returned diff as:
+- delete `ToDeleteCharsCount` runes from the current buffer tail
+- append `DiffAddText`
+
+### Typing With Options
+
+```go
+package main
+
+import "github.com/shubhattin/lipilekhika/packages/go/lipilekhika/typing"
+
+func main() {
+	useNative := false
+	includeInherent := true
+	clearMs := 3000
+
+	ctx, _ := typing.NewTypingContext("Devanagari", &typing.TypingContextOptions{
+		AutoContextClearTimeMs: &clearMs,
+		UseNativeNumerals:      &useNative,
+		IncludeInherentVowel:   &includeInherent,
+	})
+
+	_ = ctx
+}
+```
+
+Key types:
+- `typing.TypingContext`
+- `typing.TypingContextOptions`
+- `typing.TypingDiff`
+
+Runtime updates on context:
+- `UpdateUseNativeNumerals(bool)`
+- `UpdateIncludeInherentVowel(bool)`
+- `ClearContext()`
+
+<LinkCard
+  title="Realtime Typing Reference"
+  href="/reference/realtime_typing"
+  description="Reference for implementing low-latency typing"
+/>
+
+## Resources
+
+- [Go Package README](https://github.com/shubhattin/lipilekhika/tree/main/packages/go/lipilekhika)
+- [Go API on pkg.go.dev](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika)
+
+If a script name is invalid, APIs return an `error`; normalize names/aliases from the supported scripts list above.
