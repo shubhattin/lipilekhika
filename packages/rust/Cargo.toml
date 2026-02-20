@@ -10,7 +10,7 @@ categories = ["text-processing", "localization"]
 
 version = "1.0.5"
 edition = "2024"
-include = ["src/**/*", "Cargo.toml", "LICENSE*", "README*"]
+include = ["src/**/*", "build.rs", "Cargo.toml", "LICENSE*", "README*"]
 
 
 [dependencies]

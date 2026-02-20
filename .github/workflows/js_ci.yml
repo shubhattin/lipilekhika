@@ -2,12 +2,12 @@ name: JS Package CI
 
 on:
   push:
-      paths:
-        - 'packages/js/**'
-        - 'packages/rust/**'
-        - 'test_data/**'
-        - 'scripts/**'
-        - '.github/workflows/js_ci.yml'
+    paths:
+      - "packages/js/**"
+      - "packages/rust/**"
+      - "test_data/**"
+      - "scripts/**"
+      - ".github/workflows/js_ci.yml"
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,7 @@ jobs:
           bun run make-script-data
       ## Rust
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable 
+        uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo registry + build
         uses: actions/cache@v4
         with:
@@ -46,8 +46,6 @@ jobs:
           cd packages/js/wasm
           wasm-pack build --release --target web
 
-
-          
       - name: Typescript and Build Check
         run: |
           cd packages/js

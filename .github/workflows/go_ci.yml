@@ -3,14 +3,9 @@ name: Go Package CI
 on:
   push:
     paths:
-      - 'packages/js/**'
-      - 'packages/go/**'
-      - '.github/workflows/go_ci.yml'
-  pull_request:
-    paths:
-      - 'packages/js/**'
-      - 'packages/go/**'
-      - '.github/workflows/go_ci.yml'
+      - "packages/js/**"
+      - "packages/go/**"
+      - ".github/workflows/go_ci.yml"
   workflow_dispatch:
 
 jobs:

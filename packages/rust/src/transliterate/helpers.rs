@@ -1,6 +1,7 @@
 use crate::macros::is_script_tamil_ext;
 use crate::script_data::{List, ScriptData};
 use crate::utils::binary_search::binary_search_lower_with_index;
+use std::collections::VecDeque;
 
 // pub fn krama_index_of_text()
 
@@ -163,14 +164,14 @@ impl ResultStringBuilder {
 type PrevContextItem = (Option<String>, Option<List>);
 
 pub struct PrevContextBuilder {
-  arr: Vec<PrevContextItem>,
+  arr: VecDeque<PrevContextItem>,
   max_len: usize,
 }
 
 impl PrevContextBuilder {
   pub fn new(max_len: usize) -> PrevContextBuilder {
     PrevContextBuilder {
-      arr: Vec::new(),
+      arr: VecDeque::new(),
       max_len,
     }
   }
@@ -208,7 +209,7 @@ impl PrevContextBuilder {
   }
   #[allow(dead_code)]
   pub fn last(&self) -> Option<&PrevContextItem> {
-    self.arr.last()
+    self.arr.back()
   }
   #[allow(dead_code)]
   pub fn last_text(&self) -> Option<&str> {
@@ -240,10 +241,9 @@ impl PrevContextBuilder {
     if !text_ok {
       return;
     }
-    self.arr.push(item);
+    self.arr.push_back(item);
     if self.arr.len() > self.max_len {
-      // Remove oldest, similar to shift
-      self.arr.remove(0);
+      self.arr.pop_front();
     }
   }
 }
@@ -275,21 +275,26 @@ impl InputTextCursor {
     self.chars.len()
   }
 
-  pub fn peek_at(&self, index_units: usize) -> Option<InputCursor> {
-    self
-      .chars
-      .get(index_units)
-      .map(|&ch| InputCursor { ch: ch.to_string() })
+  /// Returns the character at the given index without heap allocation.
+  pub fn peek_at(&self, index_units: usize) -> Option<char> {
+    self.chars.get(index_units).copied()
   }
 
-  pub fn peek(&self) -> Option<InputCursor> {
+  pub fn peek(&self) -> Option<char> {
     self.peek_at(self.pos)
   }
 
   #[allow(dead_code)]
-  pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<InputCursor> {
+  pub fn peek_at_offset_units(&self, offset_units: usize) -> Option<char> {
     self.peek_at(self.pos + offset_units)
   }
+
+  /// Peek and return as a String (for APIs that need &str).
+  /// Only call when you actually need the String form.
+  pub fn peek_at_str(&self, index_units: usize) -> Option<String> {
+    self.chars.get(index_units).map(|c| c.to_string())
+  }
+
   /// units here is for char (and not bytes)
   /// in TS version `units` is byte index for utf-16 encoding used by js
   /// rust stores as utf-8 but has methods to access nth char or substring (char_substring)
@@ -312,6 +317,8 @@ pub struct MatchPrevKramaSequenceResult {
 }
 
 impl ScriptData {
+  /// Match a sequence of krama items against previous context.
+  /// `peek_at` returns the text at a given index as a String.
   pub fn match_prev_krama_sequence<F>(
     &self,
     peek_at: F,
@@ -319,7 +326,7 @@ impl ScriptData {
     prev: &[usize], // indices(number) array
   ) -> MatchPrevKramaSequenceResult
   where
-    F: Fn(isize) -> Option<InputCursor>,
+    F: Fn(isize) -> Option<String>,
   {
     for i in 0..prev.len() {
       let expected_krama_index = prev[prev.len() - 1 - i];
@@ -333,11 +340,7 @@ impl ScriptData {
         }
       };
 
-      let got_krama_index = self.krama_index_of_text(&info.ch);
-      // a method check for in cases where a nullable is there
-      // to check something like !ch || ch.name
-      // in rust we cannot check for both nullability(single possible) and non-nullable
-      // attribute at the same time. In rust a variable wont change on the same expression
+      let got_krama_index = self.krama_index_of_text(&info);
       match got_krama_index {
         Some(got) if got == expected_krama_index => {}
         _ => {

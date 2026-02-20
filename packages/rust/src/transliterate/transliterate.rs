@@ -7,6 +7,14 @@ use crate::transliterate::helpers::{
 use crate::utils::binary_search::binary_search_lower;
 use std::collections::HashMap;
 
+/// Compare a char with a &str without heap allocation.
+#[inline]
+fn char_eq_str(c: char, s: &str) -> bool {
+  let mut buf = [0u8; 4];
+  let encoded = c.encode_utf8(&mut buf);
+  encoded == s
+}
+
 struct TransliterateCtx<'a> {
   #[allow(dead_code)]
   from_script_name: &'a str,
@@ -289,18 +297,16 @@ impl<'a> TransliterateCtx<'a> {
               continue;
             }
             let prev_match = self.from_script_data.match_prev_krama_sequence(
-              |i| self.cursor.peek_at(i as usize),
+              |i| self.cursor.peek_at_str(i as usize),
               current_text_index,
               &prev_arr_as_usize,
             );
 
             if prev_match.matched {
               let next_char_info = self.cursor.peek_at(text_index as usize);
-              if let Some(next_char_info) = next_char_info {
-                if let Some(next_idx) = self
-                  .from_script_data
-                  .krama_index_of_text(&next_char_info.ch)
-                {
+              if let Some(next_ch) = next_char_info {
+                let next_ch_str = next_ch.to_string();
+                if let Some(next_idx) = self.from_script_data.krama_index_of_text(&next_ch_str) {
                   let next_i16 = next_idx as i16;
                   if following.contains(&next_i16) {
                     let pieces = self.to_script_data.replace_with_pieces(replace_with);
@@ -323,7 +329,7 @@ impl<'a> TransliterateCtx<'a> {
                 continue;
               }
               let prev_match = self.to_script_data.match_prev_krama_sequence(
-                |i| self.result.peek_at(i),
+                |i| self.result.peek_at(i).map(|c| c.ch),
                 -2,
                 &prev_arr_as_usize,
               );
@@ -355,8 +361,11 @@ impl<'a> TransliterateCtx<'a> {
               Some(v) => v,
               None => continue,
             };
-            let matched =
-              lookup_data.match_prev_krama_sequence(|i| self.result.peek_at(i), -1, &sg_usize);
+            let matched = lookup_data.match_prev_krama_sequence(
+              |i| self.result.peek_at(i).map(|c| c.ch),
+              -1,
+              &sg_usize,
+            );
             if !matched.matched {
               continue;
             }
@@ -622,6 +631,8 @@ pub struct TransliterationOutput {
   pub context_length: usize,
 }
 
+#[inline]
+#[allow(dead_code)]
 fn is_single_ascii_digit(s: &str) -> bool {
   s.len() == 1 && s.chars().next().is_some_and(|c| c.is_ascii_digit())
 }
@@ -721,11 +732,10 @@ pub fn transliterate_text_core(
   let chars_len = ctx.cursor.char_count();
   while ctx.cursor.pos() < chars_len {
     let mut text_index = ctx.cursor.pos();
-    let cur = match ctx.cursor.peek() {
+    let ch = match ctx.cursor.peek() {
       Some(v) => v,
       None => break,
     };
-    let ch = cur.ch;
     // println!("{} - {:?}", ctx.cursor.pos(), ch);
 
     if ignore_ta_ext_sup_num_text_index != -1
@@ -737,21 +747,22 @@ pub fn transliterate_text_core(
     }
 
     // skip certain chars (preserve as-is)
-    if CHARS_TO_SKIP.contains(&ch.chars().next().unwrap_or('\0')) {
+    if CHARS_TO_SKIP.contains(&ch) {
       ctx.cursor.advance(1);
       if ctx.prev_context_in_use {
         ctx.prev_context_cleanup(Some((Some(" ".to_owned()), None)), None, None);
         ctx.prev_context.clear();
       }
-      ctx.result.emit(ch);
+      ctx.result.emit(ch.to_string());
       continue;
     }
 
     // latin digits passthrough if native numerals disabled
-    if is_single_ascii_digit(&ch) && !opts.use_native_numerals {
-      ctx.result.emit(ch.clone());
+    if ch.is_ascii_digit() && !opts.use_native_numerals {
+      let ch_str = ch.to_string();
+      ctx.result.emit(ch_str.clone());
       ctx.cursor.advance(1);
-      let _ = ctx.prev_context_cleanup(Some((Some(ch), None)), None, None);
+      let _ = ctx.prev_context_cleanup(Some((Some(ch_str), None)), None, None);
       continue;
     }
 
@@ -759,10 +770,11 @@ pub fn transliterate_text_core(
     if *trans_opt(&trans_options, "all_to_normal:preserve_specific_chars")
       && to_script_name == "Normal"
     {
+      let ch_str = ch.to_string();
       let custom_arr = &from_script_data.get_common_attr().custom_script_chars_arr;
       let idx = binary_search_lower(
         custom_arr,
-        &ch.as_str(),
+        &ch_str.as_str(),
         |a, i| a[i].0.as_str(),
         |a, b| a.cmp(b),
       );
@@ -810,13 +822,13 @@ pub fn transliterate_text_core(
 
       loop {
         let next = ctx.cursor.peek_at(text_index + scan_units + 1);
-        let next_char: String = next.as_ref().map(|c| c.ch.clone()).unwrap_or_default();
+        let next_char: Option<char> = next;
 
         if ignore_ta_ext_sup_num_text_index != -1
-          && !next_char.is_empty()
-          && is_ta_ext_superscript_tail(next_char.chars().next())
+          && next_char.is_some()
+          && is_ta_ext_superscript_tail(next_char)
         {
-          scan_units += next.as_ref().map(|c| c.ch.chars().count()).unwrap_or(0);
+          scan_units += 1; // each char is 1 unit
         }
 
         let end_index = text_index + scan_units + 1;
@@ -829,16 +841,13 @@ pub fn transliterate_text_core(
             ctx
               .cursor
               .slice((ignore_ta_ext_sup_num_text_index as usize) + 1, end_index)
-              .unwrap_or("".to_string())
+              .unwrap_or_default()
           } else {
-            "".to_string()
+            String::new()
           };
           format!("{}{}", a, b)
         } else {
-          ctx
-            .cursor
-            .slice(text_index, end_index)
-            .unwrap_or("".to_string())
+          ctx.cursor.slice(text_index, end_index).unwrap_or_default()
         };
 
         let potential_match_index = binary_search_lower(
@@ -884,7 +893,7 @@ pub fn transliterate_text_core(
         if let Some(next_list) = &potential_match.1.next {
           if !next_list.is_empty() {
             let nth_next = ctx.cursor.peek_at(end_index);
-            let nth_next_character = nth_next.as_ref().map(|c| c.ch.clone());
+            let nth_next_character: Option<char> = nth_next;
 
             // Tamil-Extended special handling (superscript numbers after matra/halant)
             if is_script_tamil_ext!(from_script_name)
@@ -895,7 +904,7 @@ pub fn transliterate_text_core(
               } else {
                 None
               };
-              let n_1_th_next_character = n_1_th_next.as_ref().map(|c| c.ch.clone());
+              let n_1_th_next_character: Option<char> = n_1_th_next;
 
               // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
               let n_2_th_next = if nth_next.is_some() && n_1_th_next.is_some() {
@@ -903,20 +912,19 @@ pub fn transliterate_text_core(
               } else {
                 None
               };
-              let n_2_th_next_character = n_2_th_next.as_ref().map(|c| c.ch.clone());
+              let n_2_th_next_character: Option<char> = n_2_th_next;
 
               let canonical_map = &from_script_data.get_common_attr().text_to_krama_map;
 
               // Case: matra/halant + superscript tail (superscript is in next list)
               if ignore_ta_ext_sup_num_text_index == -1
+                && is_ta_ext_superscript_tail(n_1_th_next_character)
                 && n_1_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
-                && n_1_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+                  .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
               {
-                let sup = n_1_th_next_character.clone().unwrap_or_default();
+                let sup = n_1_th_next_character
+                  .map(|c| c.to_string())
+                  .unwrap_or_default();
                 let char_index = binary_search_lower(
                   canonical_map,
                   &format!("{}{}", char_to_search, sup).as_str(),
@@ -924,6 +932,7 @@ pub fn transliterate_text_core(
                   |a, b| a.cmp(b),
                 );
                 let nth_char_text_index = nth_next_character
+                  .map(|c| c.to_string())
                   .as_ref()
                   .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
 
@@ -940,11 +949,11 @@ pub fn transliterate_text_core(
                     .and_then(|li| from_script_data.get_common_attr().list.get(li as usize));
 
                   if let ScriptData::Brahmic { halant, .. } = from_script_data {
-                    if nth_next_character.as_deref() == Some(halant)
+                    if nth_next_character.is_some_and(|c| char_eq_str(c, halant))
                       || nth_char_type.is_some_and(|k| k.is_matra())
                     {
                       ignore_ta_ext_sup_num_text_index =
-                        (end_index + nth_next_character.iter().len()) as isize;
+                        (end_index + if nth_next_character.is_some() { 1 } else { 0 }) as isize;
                       break;
                     }
                   }
@@ -952,14 +961,13 @@ pub fn transliterate_text_core(
               }
               // Case: matra + matra + superscript tail (superscript is in next list; special for gO = g + E + A)
               else if ignore_ta_ext_sup_num_text_index == -1
+                && is_ta_ext_superscript_tail(n_2_th_next_character)
                 && n_2_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
-                && n_2_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+                  .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
               {
-                let sup = n_2_th_next_character.clone().unwrap_or_default();
+                let sup = n_2_th_next_character
+                  .map(|c| c.to_string())
+                  .unwrap_or_default();
                 let char_index = binary_search_lower(
                   canonical_map,
                   &format!("{}{}", char_to_search, sup).as_str(),
@@ -967,9 +975,11 @@ pub fn transliterate_text_core(
                   |a, b| a.cmp(b),
                 );
                 let nth_char_text_index = nth_next_character
+                  .map(|c| c.to_string())
                   .as_ref()
                   .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
                 let n_1_th_char_text_index = n_1_th_next_character
+                  .map(|c| c.to_string())
                   .as_ref()
                   .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
 
@@ -995,9 +1005,12 @@ pub fn transliterate_text_core(
                     && n_1_th_char_type.is_some_and(|k| k.is_matra())
                   {
                     ignore_ta_ext_sup_num_text_index = (end_index
-                      + nth_next_character.iter().len()
-                      + n_1_th_next_character.iter().len())
-                      as isize;
+                      + if nth_next_character.is_some() { 1 } else { 0 }
+                      + if n_1_th_next_character.is_some() {
+                        1
+                      } else {
+                        0
+                      }) as isize;
                     break;
                   }
                 }
@@ -1005,18 +1018,14 @@ pub fn transliterate_text_core(
 
               // Handle case: mAtrA + Vedic mark + superscript (n_2_th is superscript, n_1_th is Vedic)
               if ignore_ta_ext_sup_num_text_index == -1
-                && nth_next_character.as_ref().is_some()
-                && n_1_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| is_vedic_svara_tail(s.chars().next()))
+                && nth_next_character.is_some()
+                && is_vedic_svara_tail(n_1_th_next_character)
+                && is_ta_ext_superscript_tail(n_2_th_next_character)
                 && n_2_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| is_ta_ext_superscript_tail(s.chars().next()))
-                && n_2_th_next_character
-                  .as_ref()
-                  .is_some_and(|s| next_list.iter().any(|x| x == s))
+                  .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
               {
                 let nth_char_text_index = nth_next_character
+                  .map(|c| c.to_string())
                   .as_ref()
                   .and_then(|s| from_script_data.krama_index_of_text(s.as_str()));
 
@@ -1030,7 +1039,9 @@ pub fn transliterate_text_core(
 
                   // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
                   if nth_char_type.is_some_and(|k| k.is_matra()) {
-                    let sup = n_2_th_next_character.clone().unwrap_or_default();
+                    let sup = n_2_th_next_character
+                      .map(|c| c.to_string())
+                      .unwrap_or_default();
                     let char_index = binary_search_lower(
                       canonical_map,
                       &format!("{}{}", char_to_search, sup).as_str(),
@@ -1040,9 +1051,12 @@ pub fn transliterate_text_core(
                     if let Some(char_index) = char_index {
                       text_to_krama_item_index = Some(char_index);
                       ignore_ta_ext_sup_num_text_index = (end_index
-                        + nth_next_character.iter().len()
-                        + n_1_th_next_character.iter().len())
-                        as isize;
+                        + if nth_next_character.is_some() { 1 } else { 0 }
+                        + if n_1_th_next_character.is_some() {
+                          1
+                        } else {
+                          0
+                        }) as isize;
                       break;
                     }
                   }
@@ -1051,9 +1065,9 @@ pub fn transliterate_text_core(
             }
 
             // Generic: if the next character is in the next list, extend scan and continue
-            if let Some(nth_next_character) = nth_next_character {
-              if next_list.iter().any(|x| x == &nth_next_character) {
-                scan_units += nth_next.as_ref().map(|c| c.ch.chars().count()).unwrap_or(0);
+            if let Some(nth_ch) = nth_next_character {
+              if next_list.iter().any(|x| char_eq_str(nth_ch, x)) {
+                scan_units += 1; // each char is 1 unit
                 continue;
               }
             }
@@ -1341,7 +1355,7 @@ pub fn transliterate_text_core(
     // Step 2: Search in krama_text_arr
     let char_to_search = text_to_krama_item
       .map(|k| k.0.clone())
-      .unwrap_or(ch.clone());
+      .unwrap_or_else(|| ch.to_string());
     let idx = from_script_data.krama_index_of_text(&char_to_search);
     let Some(index) = idx else {
       if ctx.prev_context_in_use {
