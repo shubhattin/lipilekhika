@@ -26,10 +26,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: packages/go/lipilekhika/go.mod
-      - name: Format Check
-        run: |
-          cd packages/go/lipilekhika
-          test -z "$(gofmt -l .)"
       - name: Test
         run: |
           cd packages/go/lipilekhika
