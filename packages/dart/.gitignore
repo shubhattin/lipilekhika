@@ -30,3 +30,17 @@ binding/src/frb_generated.rs
 # Misc
 .DS_Store
 *.log
+
+# Dart package generated/build files
+lipilekhika/*.so
+lipilekhika/*.dylib
+lipilekhika/*.dll
+lipilekhika/android/src/main/jniLibs/
+lipilekhika/.dart_tool/
+lipilekhika/build/
+lipilekhika/pubspec.lock
+lipilekhika/*.iml
+binding/target/
+lipilekhika/android/.cxx/
+lipilekhika/android/local.properties
+lipilekhika/android/*.iml

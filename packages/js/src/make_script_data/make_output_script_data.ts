@@ -676,22 +676,38 @@ async function make_custom_option_json() {
   fs.writeFileSync(CUSTOM_OPTIONS_OUT_FOLDER, jsonOutput);
 }
 
-function copy_script_data_json() {
+async function copy_script_data_json() {
   const LIST: {
     target: string;
     minify: boolean;
+    single_script_data_file?: boolean;
   }[] = [
     {
       target: '../rust/src/data',
       minify: true
+    },
+    {
+      target: '../go/lipilekhika/data',
+      minify: false,
+      single_script_data_file: true
     }
   ];
 
-  for (const { target, minify } of LIST) {
+  for (const { target, minify, single_script_data_file } of LIST) {
     if (fs.existsSync(path.resolve(target))) {
       fs.rmSync(path.resolve(target), { recursive: true, force: true });
     }
-    fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    fs.mkdirSync(target, { recursive: true });
+    if (!single_script_data_file) {
+      fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
+    } else {
+      const ALL_DATA: Record<string, OutputScriptData> = {};
+      for (const script of SCRIPT_LIST) {
+        const data = await import(`../script_data/${script}.json`);
+        ALL_DATA[script] = data.default;
+      }
+      fs.writeFileSync(target + '/script_data.json', JSON.stringify(ALL_DATA, null, 2));
+    }
     fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
     const script_list_data = {
       scripts: script_list_obj,
