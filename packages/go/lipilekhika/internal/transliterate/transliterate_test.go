@@ -1,8 +1,10 @@
 package transliterate
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -17,6 +19,23 @@ type testCase struct {
 	Reversible bool            `yaml:"reversible"`
 	Todo       bool            `yaml:"todo"`
 	Options    map[string]bool `yaml:"options"`
+}
+
+var transliterationLogMu sync.Mutex
+
+func appendTransliterationTestLog(format string, args ...interface{}) {
+	transliterationLogMu.Lock()
+	defer transliterationLogMu.Unlock()
+
+	dir := filepath.Join("test_log")
+	_ = os.MkdirAll(dir, 0o755)
+	path := filepath.Join(dir, "transliteration.log")
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_, _ = fmt.Fprintf(f, format+"\n", args...)
 }
 
 func listYamlFiles(dir string) ([]string, error) {
@@ -58,10 +77,14 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 	if err != nil {
 		t.Fatalf("list yaml files: %v", err)
 	}
+	totalFiles := 0
+	passedFiles := 0
+	failedFiles := 0
 	for _, fp := range files {
 		fp := fp
 		rel, _ := filepath.Rel(root, fp)
-		t.Run(rel, func(t *testing.T) {
+		totalFiles++
+		ok := t.Run(rel, func(t *testing.T) {
 			data, err := os.ReadFile(fp)
 			if err != nil {
 				t.Fatalf("read file: %v", err)
@@ -70,33 +93,70 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 			if err := yaml.Unmarshal(data, &cases); err != nil {
 				t.Fatalf("parse yaml: %v", err)
 			}
+			totalCases := 0
+			forwardFailures := 0
+			reverseFailures := 0
 			for _, c := range cases {
 				if c.Todo {
 					continue
 				}
+				totalCases++
 				result, err := Transliterate(c.Input, c.From, c.To, c.Options)
 				if err != nil {
+					forwardFailures++
+					appendTransliterationTestLog(
+						"ERROR transliteration::tests index=%d from=%s to=%s input=%q err=%v",
+						c.Index, c.From, c.To, c.Input, err,
+					)
 					t.Errorf("index %d %s→%s: %v", c.Index, c.From, c.To, err)
 					continue
 				}
+				appendTransliterationTestLog(
+					"INFO transliteration::tests index=%d from=%s to=%s input=%q output=%q",
+					c.Index, c.From, c.To, c.Input, result,
+				)
 				if c.Input != "" && result == "" {
+					forwardFailures++
 					t.Errorf("index %d %s→%s: got empty output for non-empty input",
 						c.Index, c.From, c.To)
 				}
 				if c.Reversible {
 					reversed, err := Transliterate(result, c.To, c.From, c.Options)
 					if err != nil {
+						reverseFailures++
+						appendTransliterationTestLog(
+							"ERROR transliteration::tests reverse index=%d from=%s to=%s input=%q err=%v",
+							c.Index, c.From, c.To, result, err,
+						)
 						t.Errorf("index %d reverse %s←%s: %v", c.Index, c.From, c.To, err)
 						continue
 					}
+					appendTransliterationTestLog(
+						"INFO transliteration::tests reverse index=%d from=%s to=%s output=%q reversed=%q",
+						c.Index, c.From, c.To, result, reversed,
+					)
 					if c.Input != "" && reversed == "" {
+						reverseFailures++
 						t.Errorf("index %d reverse %s←%s: got empty reverse output for non-empty input",
 							c.Index, c.From, c.To)
 					}
 				}
 			}
+			appendTransliterationTestLog(
+				"SUMMARY transliteration::tests file=%q total_cases=%d forward_failures=%d reverse_failures=%d",
+				rel, totalCases, forwardFailures, reverseFailures,
+			)
 		})
+		if ok {
+			passedFiles++
+		} else {
+			failedFiles++
+		}
 	}
+	appendTransliterationTestLog(
+		"SUMMARY transliteration::tests files_total=%d files_passed=%d files_failed=%d",
+		totalFiles, passedFiles, failedFiles,
+	)
 }
 
 func TestTransliterateBasicPublicBehavior(t *testing.T) {

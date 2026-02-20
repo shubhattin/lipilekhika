@@ -166,12 +166,12 @@ type scriptDataGob struct {
 	ScriptID   uint8
 	ScriptType ScriptType
 
-	KramaTextArr         []KramaTextItem
+	KramaTextArr         []kramaTextItemGob
 	KramaTextArrIndex    []int
-	CustomScriptCharsArr []CustomScriptCharItem
+	CustomScriptCharsArr []customScriptCharItemGob
 	List                 []ListItem
-	TextMapEntries       []TextMapEntry
-	TypingTextEntries    []TextMapEntry
+	TextMapEntries       []textMapEntryGob
+	TypingTextEntries    []textMapEntryGob
 
 	SchwaProperty  bool
 	Halant         string
@@ -179,20 +179,157 @@ type scriptDataGob struct {
 	SchwaCharacter string
 }
 
+type kramaTextItemGob struct {
+	Text       string
+	ListArrRef int16
+}
+
+type customScriptCharItemGob struct {
+	Text      string
+	FirstRef  int16
+	SecondRef int16
+}
+
+type textToKramaMapGob struct {
+	Next            []string
+	Krama           []int16
+	FallbackListRef int16
+	CustomBackRef   int16
+}
+
+type textMapEntryGob struct {
+	Text  string
+	Value textToKramaMapGob
+}
+
+const missingRefSentinel int16 = -1
+
+func refToGob(v *int16) int16 {
+	if v == nil {
+		return missingRefSentinel
+	}
+	return *v
+}
+
+func refFromGob(v int16) *int16 {
+	if v == missingRefSentinel {
+		return nil
+	}
+	out := v
+	return &out
+}
+
+func kramaTextArrToGob(items []KramaTextItem) []kramaTextItemGob {
+	out := make([]kramaTextItemGob, 0, len(items))
+	for _, item := range items {
+		out = append(out, kramaTextItemGob{
+			Text:       item.Text,
+			ListArrRef: refToGob(item.ListArrRef),
+		})
+	}
+	return out
+}
+
+func kramaTextArrFromGob(items []kramaTextItemGob) []KramaTextItem {
+	out := make([]KramaTextItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, KramaTextItem{
+			Text:       item.Text,
+			ListArrRef: refFromGob(item.ListArrRef),
+		})
+	}
+	return out
+}
+
+func customScriptCharsToGob(items []CustomScriptCharItem) []customScriptCharItemGob {
+	out := make([]customScriptCharItemGob, 0, len(items))
+	for _, item := range items {
+		out = append(out, customScriptCharItemGob{
+			Text:      item.Text,
+			FirstRef:  refToGob(item.FirstRef),
+			SecondRef: refToGob(item.SecondRef),
+		})
+	}
+	return out
+}
+
+func customScriptCharsFromGob(items []customScriptCharItemGob) []CustomScriptCharItem {
+	out := make([]CustomScriptCharItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, CustomScriptCharItem{
+			Text:      item.Text,
+			FirstRef:  refFromGob(item.FirstRef),
+			SecondRef: refFromGob(item.SecondRef),
+		})
+	}
+	return out
+}
+
+func textEntryToGob(entry TextMapEntry) textMapEntryGob {
+	return textMapEntryGob{
+		Text: entry.Text,
+		Value: textToKramaMapGob{
+			Next:            entry.Value.Next,
+			Krama:           entry.Value.Krama,
+			FallbackListRef: refToGob(entry.Value.FallbackListRef),
+			CustomBackRef:   refToGob(entry.Value.CustomBackRef),
+		},
+	}
+}
+
+func textEntryFromGob(entry textMapEntryGob) TextMapEntry {
+	return TextMapEntry{
+		Text: entry.Text,
+		Value: TextToKramaMap{
+			Next:            entry.Value.Next,
+			Krama:           entry.Value.Krama,
+			FallbackListRef: refFromGob(entry.Value.FallbackListRef),
+			CustomBackRef:   refFromGob(entry.Value.CustomBackRef),
+		},
+	}
+}
+
+func textEntriesToGob(entries []TextMapEntry) []textMapEntryGob {
+	out := make([]textMapEntryGob, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, textEntryToGob(entry))
+	}
+	return out
+}
+
+func textEntriesFromGob(entries []textMapEntryGob) []TextMapEntry {
+	out := make([]TextMapEntry, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, textEntryFromGob(entry))
+	}
+	return out
+}
+
+func typingEntriesForGob(s ScriptData) []TextMapEntry {
+	// typing_text_to_krama_map is index-addressed by custom script char back refs.
+	// Preserve source order when available; sorting breaks those references.
+	if len(s.TypingTextMapEntries) > 0 {
+		out := make([]TextMapEntry, len(s.TypingTextMapEntries))
+		copy(out, s.TypingTextMapEntries)
+		return out
+	}
+	return textMapToSortedEntries(s.TypingTextMap)
+}
+
 func (s ScriptData) GobEncode() ([]byte, error) {
 	textEntries := textMapToSortedEntries(s.TextMap)
-	typingEntries := textMapToSortedEntries(s.TypingTextMap)
+	typingEntries := typingEntriesForGob(s)
 
 	wire := scriptDataGob{
 		ScriptName:           s.ScriptName,
 		ScriptID:             s.ScriptID,
 		ScriptType:           s.ScriptType,
-		KramaTextArr:         s.KramaTextArr,
+		KramaTextArr:         kramaTextArrToGob(s.KramaTextArr),
 		KramaTextArrIndex:    s.KramaTextArrIndex,
-		CustomScriptCharsArr: s.CustomScriptCharsArr,
+		CustomScriptCharsArr: customScriptCharsToGob(s.CustomScriptCharsArr),
 		List:                 s.List,
-		TextMapEntries:       textEntries,
-		TypingTextEntries:    typingEntries,
+		TextMapEntries:       textEntriesToGob(textEntries),
+		TypingTextEntries:    textEntriesToGob(typingEntries),
 		SchwaProperty:        s.SchwaProperty,
 		Halant:               s.Halant,
 		Nuqta:                s.Nuqta,
@@ -215,13 +352,13 @@ func (s *ScriptData) GobDecode(data []byte) error {
 		ScriptName:           wire.ScriptName,
 		ScriptID:             wire.ScriptID,
 		ScriptType:           wire.ScriptType,
-		KramaTextArr:         wire.KramaTextArr,
+		KramaTextArr:         kramaTextArrFromGob(wire.KramaTextArr),
 		KramaTextArrIndex:    wire.KramaTextArrIndex,
-		CustomScriptCharsArr: wire.CustomScriptCharsArr,
+		CustomScriptCharsArr: customScriptCharsFromGob(wire.CustomScriptCharsArr),
 		List:                 wire.List,
-		TextMap:              textEntriesToMap(wire.TextMapEntries),
-		TypingTextMap:        textEntriesToMap(wire.TypingTextEntries),
-		TypingTextMapEntries: wire.TypingTextEntries,
+		TextMap:              textEntriesToMap(textEntriesFromGob(wire.TextMapEntries)),
+		TypingTextMap:        textEntriesToMap(textEntriesFromGob(wire.TypingTextEntries)),
+		TypingTextMapEntries: textEntriesFromGob(wire.TypingTextEntries),
 		SchwaProperty:        wire.SchwaProperty,
 		Halant:               wire.Halant,
 		Nuqta:                wire.Nuqta,

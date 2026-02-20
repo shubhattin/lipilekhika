@@ -57,12 +57,14 @@ func getActiveCustomOptions(
 			active[key] = enabled
 			continue
 		}
-		fromMatch := (opt.FromScriptType != nil && *opt.FromScriptType == fromType) ||
+		fromMatch := (opt.FromScriptType != nil &&
+			(*opt.FromScriptType == scriptdata.ScriptTypeAll || *opt.FromScriptType == fromType)) ||
 			contains(opt.FromScriptName, fromName)
 		if !fromMatch {
 			continue
 		}
-		toMatch := (opt.ToScriptType != nil && *opt.ToScriptType == toType) ||
+		toMatch := (opt.ToScriptType != nil &&
+			(*opt.ToScriptType == scriptdata.ScriptTypeAll || *opt.ToScriptType == toType)) ||
 			contains(opt.ToScriptName, toName)
 		if toMatch {
 			active[key] = enabled
@@ -99,6 +101,16 @@ func resolveTransliterationRules(
 		}
 	}
 	return ResolvedRules{TransOptions: tOpts, CustomRules: customRules}
+}
+
+// ResolveTransliterationRules is an exported wrapper around resolveTransliterationRules.
+// It enables other packages (like typing) to reuse the same rule resolution logic.
+func ResolveTransliterationRules(
+	fromData, toData *scriptdata.ScriptData,
+	customOptionsMap map[string]scriptdata.CustomOption,
+	inputOptions map[string]bool,
+) ResolvedRules {
+	return resolveTransliterationRules(fromData, toData, customOptionsMap, inputOptions)
 }
 
 func transOpt(m map[string]bool, key string) bool {
@@ -551,7 +563,7 @@ func TransliterateTextCore(
 				if !resultConcat {
 					toHalant := toData.Halant
 					if toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-						isScriptTamilExt(toName) && isTaExtSuperscriptTail(result.lastPiece()) {
+						isScriptTamilExt(toName) && resultLastCharIsTaExtSuperscript(result) {
 						lastKrama := int16(-1)
 						if len(mapVal.Krama) > 0 {
 							lastKrama = mapVal.Krama[len(mapVal.Krama)-1]
@@ -652,7 +664,7 @@ func TransliterateTextCore(
 		if !resultConcat {
 			toAdd := kramaTextOrEmpty(toData, index)
 			if toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-				isScriptTamilExt(toName) && isTaExtSuperscriptTail(result.lastPiece()) {
+				isScriptTamilExt(toName) && resultLastCharIsTaExtSuperscript(result) {
 				var li *scriptdata.ListItem
 				if index < len(toData.KramaTextArr) {
 					kt := toData.KramaTextArr[index]
@@ -751,18 +763,22 @@ func prevContextCleanup(
 		if listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) &&
 			(listItemIsMatra(itemType) || listItemIsSvara(itemType)) {
 			linkedMatra := itemText
-			if itemType != nil && itemType.Type == "svara" && len(itemType.MatraKramaRef) > 0 {
-				kr := itemType.MatraKramaRef[0]
-				linkedMatra = kramaTextOrEmpty(ctx.toData, int(kr))
+			if itemType != nil && itemType.Type == "svara" {
+				if len(itemType.MatraKramaRef) > 0 {
+					kr := itemType.MatraKramaRef[0]
+					linkedMatra = kramaTextOrEmpty(ctx.toData, int(kr))
+				} else {
+					linkedMatra = ""
+				}
 			}
 			emitPiecesWithReorder(ctx.result, []string{linkedMatra}, ctx.toData.Halant,
-				isScriptTamilExt(ctx.toData.ScriptName) && isTaExtSuperscriptTail(ctx.result.lastPiece()))
+				isScriptTamilExt(ctx.toData.ScriptName) && resultLastCharIsTaExtSuperscript(ctx.result))
 			resultConcat = true
-	} else if !ctx.includeInherentVowel &&
-		listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) &&
-		!(itemText == brahmicHalant || listItemIsMatra(itemType)) {
+		} else if !ctx.includeInherentVowel &&
+			listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) &&
+			!(itemText == brahmicHalant || listItemIsMatra(itemType)) {
 			shouldReorder := isScriptTamilExt(ctx.toData.ScriptName) &&
-				isTaExtSuperscriptTail(ctx.result.lastPiece())
+				resultLastCharIsTaExtSuperscript(ctx.result)
 			emitPiecesWithReorder(ctx.result, []string{brahmicHalant}, ctx.toData.Halant, shouldReorder)
 			if ctx.toData.ScriptName == "Sinhala" &&
 				transOpt(ctx.transOptions, "all_to_sinhala:use_conjunct_enabling_halant") {
@@ -774,7 +790,7 @@ func prevContextCleanup(
 				ctx.brahmicNuqta != nil && listItemIsVyanjana(ctx.prevCtx.typeAt(-2)) &&
 					ctx.prevCtx.textAt(-1) == brahmicNuqta) {
 			shouldReorder := isScriptTamilExt(ctx.toData.ScriptName) &&
-				isTaExtSuperscriptTail(ctx.result.lastPiece())
+				resultLastCharIsTaExtSuperscript(ctx.result)
 			emitPiecesWithReorder(ctx.result, []string{brahmicHalant}, ctx.toData.Halant, shouldReorder)
 			if ctx.toData.ScriptName == "Sinhala" &&
 				transOpt(ctx.transOptions, "all_to_sinhala:use_conjunct_enabling_halant") {
@@ -784,8 +800,8 @@ func prevContextCleanup(
 		}
 	}
 	toClear := false
-	if ctx.typingMode && (next == nil || len(next) == 0) && !lastExtraCall &&
-		!(isScriptTamilExt(ctx.toData.ScriptName) && isTaExtSuperscriptTail(ctx.result.lastPiece())) {
+	if ctx.typingMode && len(next) == 0 && !lastExtraCall &&
+		!(isScriptTamilExt(ctx.toData.ScriptName) && resultLastCharIsTaExtSuperscript(ctx.result)) {
 		toClear = true
 		if itemType != nil && listItemIsVyanjana(itemType) {
 			toClear = false
@@ -948,6 +964,11 @@ func isSingleASCIIDigit(s string) bool {
 	}
 	r := []rune(s)[0]
 	return r >= '0' && r <= '9'
+}
+
+func resultLastCharIsTaExtSuperscript(result *resultStringBuilder) bool {
+	last, ok := result.LastChar()
+	return ok && isTaExtSuperscriptTail(last)
 }
 
 // TransliterateError represents a transliteration error.

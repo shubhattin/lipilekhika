@@ -1,3 +1,3 @@
 package typing
 
-// Package typing is the public real-time typing module placeholder.
+// Package typing provides a real-time typing context for incremental transliteration.
