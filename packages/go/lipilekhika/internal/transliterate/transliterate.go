@@ -274,12 +274,22 @@ func TransliterateTextCore(
 	ignoreTaExtSupRuneIndex := -1
 	runeCount := cursor.runeCount()
 
+	// Hoist ctx so prevContextCleanup doesn't allocate a struct per call.
+	ctx := &transliterateCtx{
+		fromData: fromData, toData: toData,
+		result: result, prevCtx: prevCtx,
+		brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
+		typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
+		transOptions: tOpts,
+	}
+
 	for cursor.pos < runeCount {
 		textIndex := cursor.pos
-		ch, chWidth, ok := cursor.peek()
+		r, chWidth, ok := cursor.peek()
 		if !ok {
 			break
 		}
+		ch := string(r)
 
 		if ignoreTaExtSupRuneIndex >= 0 && textIndex >= ignoreTaExtSupRuneIndex {
 			ignoreTaExtSupRuneIndex = -1
@@ -287,16 +297,10 @@ func TransliterateTextCore(
 			continue
 		}
 
-		if strings.ContainsRune(charsToSkip, []rune(ch)[0]) {
+		if strings.ContainsRune(charsToSkip, r) {
 			cursor.advanceRunes(1)
 			if prevContextInUse {
-				prevContextCleanup(&transliterateCtx{
-					fromData: fromData, toData: toData,
-					result: result, prevCtx: prevCtx,
-					brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-					typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-					transOptions: tOpts,
-				}, "", nil, nil, false)
+				prevContextCleanup(ctx, "", nil, nil, false)
 				prevCtx.clear()
 			}
 			result.emit(ch)
@@ -306,13 +310,7 @@ func TransliterateTextCore(
 		if isSingleASCIIDigit(ch) && !opts.UseNativeNumerals {
 			result.emit(ch)
 			cursor.advanceRunes(1)
-			prevContextCleanup(&transliterateCtx{
-				fromData: fromData, toData: toData,
-				result: result, prevCtx: prevCtx,
-				brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-				typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-				transOptions: tOpts,
-			}, ch, nil, nil, false)
+			prevContextCleanup(ctx, ch, nil, nil, false)
 			continue
 		}
 
@@ -329,13 +327,7 @@ func TransliterateTextCore(
 						listRef = &fromData.List[li]
 					}
 				}
-				prevContextCleanup(&transliterateCtx{
-					fromData: fromData, toData: toData,
-					result: result, prevCtx: prevCtx,
-					brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-					typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-					transOptions: tOpts,
-				}, prevText, listRef, nil, false)
+				prevContextCleanup(ctx, prevText, listRef, nil, false)
 				normText := ""
 				if item.SecondRef != nil {
 					si := int(*item.SecondRef)
@@ -345,7 +337,7 @@ func TransliterateTextCore(
 					}
 				}
 				result.emit(normText)
-				cursor.advanceRunes(len([]rune(prevText)))
+				cursor.advanceRunes(utf8.RuneCountInString(prevText))
 				continue
 			}
 		}
@@ -365,8 +357,8 @@ func TransliterateTextCore(
 					prevCtx.textAt(-1) == *brahmicNuqta)
 
 		for {
-			nextCh, _, _ := cursor.peekAtRune(textIndex + searchBaseUnits + scanUnits)
-			if ignoreTaExtSupRuneIndex >= 0 && nextCh != "" && isTaExtSuperscriptTail(nextCh) {
+			nextR, _, nextROk := cursor.peekAtRune(textIndex + searchBaseUnits + scanUnits)
+			if ignoreTaExtSupRuneIndex >= 0 && nextROk && isTaExtSuperscriptTailRune(nextR) {
 				scanUnits++
 				continue
 			}
@@ -416,8 +408,8 @@ func TransliterateTextCore(
 			}
 
 			if len(potentialMatch.Value.Next) > 0 {
-				nthCh, _, nthOk := cursor.peekAtRune(endIdx)
-				if nthOk && containsStr(potentialMatch.Value.Next, nthCh) {
+				nthR, _, nthOk := cursor.peekAtRune(endIdx)
+				if nthOk && containsStr(potentialMatch.Value.Next, string(nthR)) {
 					scanUnits++
 					continue
 				}
@@ -435,7 +427,7 @@ func TransliterateTextCore(
 			matchedText := textToKramaItem.Text
 			mapVal := &textToKramaItem.Value
 			indexDeleteLen := 0
-			if ignoreTaExtSupRuneIndex >= 0 && len([]rune(matchedText)) > 1 {
+			if ignoreTaExtSupRuneIndex >= 0 && utf8.RuneCountInString(matchedText) > 1 {
 				if len(mapVal.Krama) > 0 {
 					ki := mapVal.Krama[0]
 					if ki >= 0 && int(ki) < len(fromData.KramaTextArr) {
@@ -453,7 +445,7 @@ func TransliterateTextCore(
 					}
 				}
 			}
-			matchedLenUnits := len([]rune(matchedText)) - indexDeleteLen
+			matchedLenUnits := utf8.RuneCountInString(matchedText) - indexDeleteLen
 			cursor.advanceRunes(matchedLenUnits)
 
 			if tOpts["normal_to_all:use_typing_chars"] && mapVal.CustomBackRef != nil && *mapVal.CustomBackRef >= 0 {
@@ -468,13 +460,7 @@ func TransliterateTextCore(
 							listItem = &toData.List[fi]
 						}
 					}
-					prevContextCleanup(&transliterateCtx{
-						fromData: fromData, toData: toData,
-						result: result, prevCtx: prevCtx,
-						brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-						typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-						transOptions: tOpts,
-					}, matchedText, listItem, mapVal.Next, false)
+					prevContextCleanup(ctx, matchedText, listItem, mapVal.Next, false)
 					continue
 				}
 			}
@@ -519,13 +505,7 @@ func TransliterateTextCore(
 								}
 							}
 						}
-						resultConcat = prevContextCleanup(&transliterateCtx{
-							fromData: fromData, toData: toData,
-							result: result, prevCtx: prevCtx,
-							brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-							typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-							transOptions: tOpts,
-						}, matchedText, item, nil, false)
+						resultConcat = prevContextCleanup(ctx, matchedText, item, nil, false)
 					} else if toData.ScriptType == scriptdata.ScriptTypeBrahmic && fromData.ScriptType == scriptdata.ScriptTypeOther {
 						var item *scriptdata.ListItem
 						if mapVal.FallbackListRef != nil {
@@ -550,21 +530,9 @@ func TransliterateTextCore(
 						if opts.TypingMode && fromName == "Normal" {
 							next = mapVal.Next
 						}
-						resultConcat = prevContextCleanup(&transliterateCtx{
-							fromData: fromData, toData: toData,
-							result: result, prevCtx: prevCtx,
-							brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-							typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-							transOptions: tOpts,
-						}, matchedText, item, next, false)
+						resultConcat = prevContextCleanup(ctx, matchedText, item, next, false)
 					} else if opts.TypingMode && fromName == "Normal" && toData.ScriptType == scriptdata.ScriptTypeOther {
-						resultConcat = prevContextCleanup(&transliterateCtx{
-							fromData: fromData, toData: toData,
-							result: result, prevCtx: prevCtx,
-							brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-							typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-							transOptions: tOpts,
-						}, matchedText, nil, mapVal.Next, false)
+						resultConcat = prevContextCleanup(ctx, matchedText, nil, mapVal.Next, false)
 					}
 				}
 				if !resultConcat {
@@ -589,18 +557,12 @@ func TransliterateTextCore(
 						result.emitPieces(pieces)
 					}
 				}
-				applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -matchedLenUnits)
+				applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -matchedLenUnits, ctx)
 				continue
 			} else if hasNegativeKrama {
 				result.emit(matchedText)
 				if opts.TypingMode {
-					prevContextCleanup(&transliterateCtx{
-						fromData: fromData, toData: toData,
-						result: result, prevCtx: prevCtx,
-						brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-						typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-						transOptions: tOpts,
-					}, matchedText, nil, mapVal.Next, false)
+					prevContextCleanup(ctx, matchedText, nil, mapVal.Next, false)
 				}
 				continue
 			}
@@ -616,13 +578,7 @@ func TransliterateTextCore(
 		index := kramaIndexOfText(fromData, charToSearch)
 		if index < 0 {
 			if prevContextInUse {
-				prevContextCleanup(&transliterateCtx{
-					fromData: fromData, toData: toData,
-					result: result, prevCtx: prevCtx,
-					brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-					typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-					transOptions: tOpts,
-				}, charToSearch, nil, nil, false)
+				prevContextCleanup(ctx, charToSearch, nil, nil, false)
 				prevCtx.clear()
 			}
 			result.emit(charToSearch)
@@ -641,13 +597,7 @@ func TransliterateTextCore(
 						}
 					}
 				}
-				resultConcat = prevContextCleanup(&transliterateCtx{
-					fromData: fromData, toData: toData,
-					result: result, prevCtx: prevCtx,
-					brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-					typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-					transOptions: tOpts,
-				}, charToSearch, li, nil, false)
+				resultConcat = prevContextCleanup(ctx, charToSearch, li, nil, false)
 			} else if toData.ScriptType == scriptdata.ScriptTypeBrahmic {
 				var li *scriptdata.ListItem
 				if index < len(toData.KramaTextArr) {
@@ -659,13 +609,7 @@ func TransliterateTextCore(
 						}
 					}
 				}
-				resultConcat = prevContextCleanup(&transliterateCtx{
-					fromData: fromData, toData: toData,
-					result: result, prevCtx: prevCtx,
-					brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-					typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-					transOptions: tOpts,
-				}, charToSearch, li, nil, false)
+				resultConcat = prevContextCleanup(ctx, charToSearch, li, nil, false)
 			}
 		}
 		if !resultConcat {
@@ -695,17 +639,11 @@ func TransliterateTextCore(
 				result.emit(toAdd)
 			}
 		}
-		applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -1)
+		applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -1, ctx)
 	}
 
 	if prevContextInUse {
-		prevContextCleanup(&transliterateCtx{
-			fromData: fromData, toData: toData,
-			result: result, prevCtx: prevCtx,
-			brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-			typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-			transOptions: tOpts,
-		}, "", nil, nil, true)
+		prevContextCleanup(ctx, "", nil, nil, true)
 	}
 	output := result.toString()
 	output = applyCustomReplaceRules(output, toData, customRules, scriptdata.CheckInOutput)
@@ -831,6 +769,7 @@ func applyCustomTransRules(
 	cursor *inputCursor,
 	rules []scriptdata.Rule,
 	textIndex, delta int,
+	ctx *transliterateCtx,
 ) {
 	currentIdx := textIndex + delta
 	for _, rule := range rules {
@@ -877,18 +816,21 @@ func applyCustomTransRules(
 					continue
 				}
 				cursorPeek := func(i int) (string, bool) {
-					ch, _, ok := cursor.peekAtRune(i)
-					return ch, ok
+					r, _, ok := cursor.peekAtRune(i)
+					if !ok {
+						return "", false
+					}
+					return string(r), ok
 				}
 				matched, mLen := matchPrevKramaSequence(cursorPeek, currentIdx, prevUsize, fromData)
 				if !matched {
 					continue
 				}
-				nextCh, _, ok := cursor.peekAtRune(textIndex)
+				nextR, _, ok := cursor.peekAtRune(textIndex)
 				if !ok {
 					continue
 				}
-				nextIdx := kramaIndexOfText(fromData, nextCh)
+				nextIdx := kramaIndexOfText(fromData, string(nextR))
 				if nextIdx < 0 {
 					continue
 				}
@@ -975,8 +917,8 @@ func isSingleASCIIDigit(s string) bool {
 }
 
 func resultLastCharIsTaExtSuperscript(result *resultStringBuilder) bool {
-	last, ok := result.LastChar()
-	return ok && isTaExtSuperscriptTail(last)
+	r, ok := result.LastChar()
+	return ok && isTaExtSuperscriptTailRune(r)
 }
 
 // TransliterateError represents a transliteration error.

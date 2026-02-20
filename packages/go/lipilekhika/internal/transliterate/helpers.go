@@ -122,16 +122,16 @@ func (r *resultStringBuilder) lastPiece() string {
 	return r.result[len(r.result)-1]
 }
 
-func (r *resultStringBuilder) LastChar() (string, bool) {
+func (r *resultStringBuilder) LastChar() (rune, bool) {
 	lp := r.lastPiece()
 	if lp == "" {
-		return "", false
+		return 0, false
 	}
-	runes := []rune(lp)
-	if len(runes) == 0 {
-		return "", false
+	ch, size := utf8.DecodeLastRuneInString(lp)
+	if ch == utf8.RuneError || size == 0 {
+		return 0, false
 	}
-	return string(runes[len(runes)-1]), true
+	return ch, true
 }
 
 func (r *resultStringBuilder) popLastChar() (string, bool) {
@@ -139,13 +139,15 @@ func (r *resultStringBuilder) popLastChar() (string, bool) {
 		return "", false
 	}
 	lp := r.result[len(r.result)-1]
-	runes := []rune(lp)
-	if len(runes) == 0 {
+	if lp == "" {
 		return "", false
 	}
-	ch := string(runes[len(runes)-1])
-	r.result[len(r.result)-1] = string(runes[:len(runes)-1])
-	return ch, true
+	ch, size := utf8.DecodeLastRuneInString(lp)
+	if ch == utf8.RuneError || size == 0 {
+		return "", false
+	}
+	r.result[len(r.result)-1] = lp[:len(lp)-size]
+	return string(ch), true
 }
 
 func (r *resultStringBuilder) rewriteTailPieces(count int, newPieces []string) {
@@ -208,34 +210,37 @@ type prevContextItem struct {
 	list *scriptdata.ListItem
 }
 
+// prevContextBuilder is a fixed-size ring buffer — O(1) push and no GC pressure.
 type prevContextBuilder struct {
-	arr    []prevContextItem
-	maxLen int
+	buf   [maxContextLength]prevContextItem
+	head  int // index of the oldest element
+	count int // number of elements stored
 }
 
-func newPrevContextBuilder(maxLen int) *prevContextBuilder {
-	return &prevContextBuilder{arr: make([]prevContextItem, 0), maxLen: maxLen}
+func newPrevContextBuilder(_ int) *prevContextBuilder {
+	return &prevContextBuilder{}
 }
 
 func (p *prevContextBuilder) clear() {
-	p.arr = p.arr[:0]
+	p.count = 0
+	p.head = 0
 }
 
 func (p *prevContextBuilder) length() int {
-	return len(p.arr)
+	return p.count
 }
 
 func (p *prevContextBuilder) resolveIndex(i int) int {
-	if len(p.arr) == 0 {
+	if p.count == 0 {
 		return -1
 	}
 	if i < 0 {
-		i = len(p.arr) + i
+		i = p.count + i
 	}
-	if i < 0 || i >= len(p.arr) {
+	if i < 0 || i >= p.count {
 		return -1
 	}
-	return i
+	return (p.head + i) % maxContextLength
 }
 
 func (p *prevContextBuilder) typeAt(i int) *scriptdata.ListItem {
@@ -243,7 +248,7 @@ func (p *prevContextBuilder) typeAt(i int) *scriptdata.ListItem {
 	if idx < 0 {
 		return nil
 	}
-	return p.arr[idx].list
+	return p.buf[idx].list
 }
 
 func (p *prevContextBuilder) textAt(i int) string {
@@ -251,16 +256,20 @@ func (p *prevContextBuilder) textAt(i int) string {
 	if idx < 0 {
 		return ""
 	}
-	return p.arr[idx].text
+	return p.buf[idx].text
 }
 
 func (p *prevContextBuilder) push(text string, list *scriptdata.ListItem) {
 	if text == "" {
 		return
 	}
-	p.arr = append(p.arr, prevContextItem{text: text, list: list})
-	if len(p.arr) > p.maxLen {
-		p.arr = p.arr[1:]
+	if p.count < maxContextLength {
+		p.buf[(p.head+p.count)%maxContextLength] = prevContextItem{text: text, list: list}
+		p.count++
+	} else {
+		// Ring is full: overwrite oldest slot and advance head.
+		p.buf[p.head] = prevContextItem{text: text, list: list}
+		p.head = (p.head + 1) % maxContextLength
 	}
 }
 
@@ -280,19 +289,20 @@ func (c *inputCursor) runeCount() int {
 	return len(c.runes)
 }
 
-func (c *inputCursor) peekAtRune(runeIndex int) (ch string, width int, ok bool) {
+// peekAtRune returns the rune at runeIndex without allocating a string.
+func (c *inputCursor) peekAtRune(runeIndex int) (r rune, width int, ok bool) {
 	if runeIndex < 0 || runeIndex >= len(c.runes) {
-		return "", 0, false
+		return 0, 0, false
 	}
-	r := c.runes[runeIndex]
+	r = c.runes[runeIndex]
 	w := utf8.RuneLen(r)
 	if w < 0 {
 		w = 1
 	}
-	return string(r), w, true
+	return r, w, true
 }
 
-func (c *inputCursor) peek() (ch string, width int, ok bool) {
+func (c *inputCursor) peek() (r rune, width int, ok bool) {
 	return c.peekAtRune(c.pos)
 }
 
@@ -370,38 +380,46 @@ func replaceWithPieces(replaceWith []int16, s *scriptdata.ScriptData) []string {
 
 var tamilExtendedSuperscriptNumbers = []rune{'²', '³', '⁴'}
 
-func isTaExtSuperscriptTail(ch string) bool {
-	if ch == "" {
-		return false
-	}
-	r := []rune(ch)
-	if len(r) != 1 {
-		return false
-	}
+func isTaExtSuperscriptTailRune(r rune) bool {
 	for _, t := range tamilExtendedSuperscriptNumbers {
-		if r[0] == t {
+		if r == t {
 			return true
 		}
 	}
 	return false
 }
 
+func isTaExtSuperscriptTail(ch string) bool {
+	if ch == "" {
+		return false
+	}
+	r, size := utf8.DecodeRuneInString(ch)
+	if r == utf8.RuneError || size != len(ch) {
+		return false
+	}
+	return isTaExtSuperscriptTailRune(r)
+}
+
 var vedicSvaras = []rune{'॒', '॑', '᳚', '᳛'}
+
+func isVedicSvaraTailRune(r rune) bool {
+	for _, v := range vedicSvaras {
+		if r == v {
+			return true
+		}
+	}
+	return false
+}
 
 func isVedicSvaraTail(ch string) bool {
 	if ch == "" {
 		return false
 	}
-	r := []rune(ch)
-	if len(r) != 1 {
+	r, size := utf8.DecodeRuneInString(ch)
+	if r == utf8.RuneError || size != len(ch) {
 		return false
 	}
-	for _, v := range vedicSvaras {
-		if r[0] == v {
-			return true
-		}
-	}
-	return false
+	return isVedicSvaraTailRune(r)
 }
 
 func isScriptTamilExt(scriptName string) bool {
