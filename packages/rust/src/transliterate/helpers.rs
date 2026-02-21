@@ -1,6 +1,5 @@
 use crate::macros::is_script_tamil_ext;
 use crate::script_data::{List, ScriptData};
-use crate::utils::binary_search::binary_search_lower_with_index;
 use std::collections::VecDeque;
 
 // pub fn krama_index_of_text()
@@ -28,13 +27,7 @@ impl ScriptData {
   }
 
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
-    binary_search_lower_with_index(
-      &self.get_common_attr().krama_text_arr,
-      &self.get_common_attr().krama_text_arr_index,
-      &text,
-      |arr, i| &arr[i].0,
-      |a, b| a.cmp(b),
-    )
+    self.get_common_attr().krama_text_lookup.get(text).copied()
   }
 }
 
