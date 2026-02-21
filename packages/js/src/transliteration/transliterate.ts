@@ -29,7 +29,8 @@ export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
 /** These Characters can be skipped/ignore while transliterating the input text */
-const CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', '~', '!', '@', '?', '%'] as const;
+const _CHARS_TO_SKIP = [' ', '\n', '\r', '\t', ',', '~', '!', '@', '?', '%'] as const;
+const CHARS_TO_SKIP_SET = new Set<string>(_CHARS_TO_SKIP);
 
 /**
  * Mostly used is -1 for prev context.
@@ -408,7 +409,8 @@ export const transliterate_text_core = (
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
-  if (typing_mode) trans_options['normal_to_all:use_typing_chars'] = true;
+  // Avoid mutating the caller's options object; use a local flag instead.
+  const use_typing_chars = typing_mode || !!trans_options['normal_to_all:use_typing_chars'];
 
   if (typing_mode && from_script_name === 'Normal') {
     text = applyTypingInputAliases(text, to_script_name);
@@ -464,8 +466,7 @@ export const transliterate_text_core = (
 
   // use a custom map when Normal -> All in typing mode (or when a explicit option)
   const from_text_to_krama_map =
-    (trans_options['normal_to_all:use_typing_chars'] || typing_mode) &&
-    from_script_name === 'Normal'
+    (use_typing_chars || typing_mode) && from_script_name === 'Normal'
       ? to_script_data.typing_text_to_krama_map
       : from_script_data.text_to_krama_map;
 
@@ -493,7 +494,7 @@ export const transliterate_text_core = (
       continue;
     }
 
-    if (CHARS_TO_SKIP.indexOf(char as (typeof CHARS_TO_SKIP)[number]) !== -1) {
+    if (CHARS_TO_SKIP_SET.has(char)) {
       // ignore blank spaces
       cursor.advance(char_width);
       if (PREV_CONTEXT_IN_USE) {
@@ -504,7 +505,7 @@ export const transliterate_text_core = (
       continue;
     }
 
-    if (char.match(/^\d$/) && !use_native_numerals) {
+    if (char >= '0' && char <= '9' && !use_native_numerals) {
       result.emit(char);
       cursor.advance(char_width);
       prev_context_cleanup(ctx, [char, null]);
@@ -768,7 +769,7 @@ export const transliterate_text_core = (
       text_index = cursor.pos;
       // console.log(text_to_krama_item);
       if (
-        trans_options['normal_to_all:use_typing_chars'] &&
+        use_typing_chars &&
         'custom_back_ref' in text_to_krama_item[1] &&
         text_to_krama_item[1].custom_back_ref !== undefined &&
         text_to_krama_item[1].custom_back_ref !== null
@@ -794,12 +795,10 @@ export const transliterate_text_core = (
         text_to_krama_item[1].krama.some((krama_index) => krama_index !== -1)
       ) {
         // as the krama index is present we can skip the Step 2 and return the result directly
-        const result_pieces_to_add = text_to_krama_item[1].krama.map(
-          (krama_index) => kramaTextOrEmpty(to_script_data, krama_index)
-          // revert to the original character if the krama index is not found
+        const result_pieces_to_add = text_to_krama_item[1].krama.map((krama_index) =>
+          kramaTextOrEmpty(to_script_data, krama_index)
         );
-        const normalized_result_pieces_to_add = result_pieces_to_add;
-        const result_text = normalized_result_pieces_to_add.join('');
+        const result_text = result_pieces_to_add.join('');
         let result_concat_status = false;
         if (PREV_CONTEXT_IN_USE) {
           if (
@@ -808,7 +807,7 @@ export const transliterate_text_core = (
           ) {
             let item: (typeof from_script_data.list)[number] | null | undefined = null;
             if (
-              !trans_options['normal_to_all:use_typing_chars'] &&
+              !use_typing_chars &&
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null
             ) {
@@ -884,22 +883,17 @@ export const transliterate_text_core = (
             (to_script_data.list[text_to_krama_item[1].krama?.at(-1) ?? -1]?.type === 'mAtrA' ||
               result_text === to_script_data.halant)
           ) {
-            emitPiecesWithReorder(
-              result,
-              normalized_result_pieces_to_add,
-              to_script_data.halant!,
-              true
-            );
+            emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
           } else if (
             isScriptTamilExt(to_script_name) &&
             isTaExtSuperscriptTail(result.lastChar()) &&
-            isVedicSvaraTail(normalized_result_pieces_to_add.at(-1)?.at(-1) ?? '')
+            isVedicSvaraTail(result_pieces_to_add.at(-1)?.at(-1) ?? '')
           ) {
             const last = result.popLastChar();
-            result.emitPieces(normalized_result_pieces_to_add);
+            result.emitPieces(result_pieces_to_add);
             result.emit(last ?? '');
           } else {
-            result.emitPieces(normalized_result_pieces_to_add);
+            result.emitPieces(result_pieces_to_add);
           }
         }
         apply_custom_trans_rules(ctx, text_index, -matched_len_units);

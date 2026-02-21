@@ -120,25 +120,32 @@ export const string_builder = () => {
 };
 
 export const prev_context_builder = (maxLen: number) => {
-  let arr: prev_context_array_type = [];
-
+  // Fixed-size ring buffer — O(1) push/evict, no GC pressure from shift().
   type ContextItem = prev_context_array_type[number];
   type ContextType = OutputBrahmicScriptData['list'][number]['type'];
 
+  const buf: ContextItem[] = new Array(maxLen);
+  let head = 0; // index of the oldest element
+  let count = 0;
+
   function clear() {
-    arr = [];
+    head = 0;
+    count = 0;
   }
 
   function length() {
-    return arr.length;
+    return count;
   }
 
   function at(i: number): ContextItem | undefined {
-    return arr.at(i);
+    if (count === 0) return undefined;
+    if (i < 0) i = count + i;
+    if (i < 0 || i >= count) return undefined;
+    return buf[(head + i) % maxLen];
   }
 
   function last(): ContextItem | undefined {
-    return arr.at(-1);
+    return at(-1);
   }
 
   function lastText(): string | undefined {
@@ -163,8 +170,15 @@ export const prev_context_builder = (maxLen: number) => {
 
   function push(item: ContextItem) {
     const text = item[0];
-    if (text !== undefined && text.length > 0) arr.push(item);
-    if (arr.length > maxLen) arr.shift();
+    if (text === undefined || text.length === 0) return;
+    if (count < maxLen) {
+      buf[(head + count) % maxLen] = item;
+      count++;
+    } else {
+      // Ring full: overwrite oldest slot and advance head.
+      buf[head] = item;
+      head = (head + 1) % maxLen;
+    }
   }
 
   return {
@@ -185,11 +199,18 @@ type CursorCp = { cp: number; ch: string; width: number };
 export const make_input_cursor = (text: string) => {
   let pos = 0; // UTF-16 code unit index
 
+  // Reuse a single scratch object to avoid allocating a new object on every peek.
+  // IMPORTANT: callers must not hold the returned reference across calls.
+  const _scratch: CursorCp = { cp: 0, ch: '', width: 0 };
+
   function peekAt(index: number): CursorCp | null {
     const cp = text.codePointAt(index);
     if (cp === undefined) return null;
     const ch = String.fromCodePoint(cp);
-    return { cp, ch, width: ch.length };
+    _scratch.cp = cp;
+    _scratch.ch = ch;
+    _scratch.width = ch.length;
+    return _scratch;
   }
 
   function peek(): CursorCp | null {
@@ -248,18 +269,14 @@ export const replaceWithPieces = (
 };
 
 export const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = ['²', '³', '⁴'] as const;
+// Direct equality checks are faster than indexOf on tiny constant arrays.
 export const isTaExtSuperscriptTail = (ch: string | undefined): boolean => {
-  return (
-    !!ch &&
-    TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.indexOf(
-      ch as (typeof TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS)[number]
-    ) !== -1
-  );
+  return ch === '²' || ch === '³' || ch === '⁴';
 };
 
 export const VEDIC_SVARAS = ['॒', '॑', '᳚', '᳛'] as const;
 export const isVedicSvaraTail = (ch: string | undefined): boolean => {
-  return !!ch && VEDIC_SVARAS.indexOf(ch as (typeof VEDIC_SVARAS)[number]) !== -1;
+  return ch === '॒' || ch === '॑' || ch === '᳚' || ch === '᳛';
 };
 
 export const isScriptTamilExt = (script_name: script_list_type): boolean => {
