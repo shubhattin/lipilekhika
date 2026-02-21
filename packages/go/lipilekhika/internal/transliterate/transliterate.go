@@ -264,11 +264,11 @@ func TransliterateTextCore(
 	if useTypingMap && fromName == "Normal" {
 		useTypingMap = true
 	}
-	var fromTextMap []textMapEntrySorted
+	var fromTextMap map[string]scriptdata.TextToKramaMap
 	if useTypingMap && fromName == "Normal" {
-		fromTextMap = getCachedSortedTextMap(toName, true, toData.TypingTextMap)
+		fromTextMap = toData.TypingTextMap
 	} else {
-		fromTextMap = getCachedSortedTextMap(fromName, false, fromData.TextMap)
+		fromTextMap = fromData.TextMap
 	}
 
 	ignoreTaExtSupRuneIndex := -1
@@ -316,8 +316,7 @@ func TransliterateTextCore(
 
 		if tOpts["all_to_normal:preserve_specific_chars"] && toName == "Normal" {
 			customArr := fromData.CustomScriptCharsArr
-			idx := binarySearchLowerCustomScript(customArr, ch)
-			if idx >= 0 {
+			if idx, ok := fromData.CustomScriptCharsLookup[ch]; ok {
 				item := customArr[idx]
 				prevText := item.Text
 				var listRef *scriptdata.ListItem
@@ -342,13 +341,15 @@ func TransliterateTextCore(
 			}
 		}
 
-		textToKramaIdx := -1
+		var matchedText string
+		var mapVal *scriptdata.TextToKramaMap
 		searchBaseUnits := 1
 		if chWidth > 1 {
 			searchBaseUnits = 1
 		}
 		scanUnits := 0
-		lastValidVowelMatch := -1
+		var lastValidVowelMatchVal *scriptdata.TextToKramaMap
+		var lastValidVowelMatchText string
 		checkVowelRetraction := prevContextInUse &&
 			fromData.ScriptType == scriptdata.ScriptTypeOther &&
 			toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
@@ -378,15 +379,15 @@ func TransliterateTextCore(
 			} else {
 				charToSearch = cursor.sliceRunes(textIndex, endIdx)
 			}
-			potentialIdx := binarySearchLowerTextMap(fromTextMap, charToSearch)
-			if potentialIdx < 0 {
-				textToKramaIdx = -1
+			potentialMatchVal, ok := fromTextMap[charToSearch]
+			if !ok {
+				mapVal = nil
 				break
 			}
-			potentialMatch := &fromTextMap[potentialIdx]
+			potentialMatch := &potentialMatchVal
 
-			if checkVowelRetraction && len(potentialMatch.Value.Krama) >= 1 {
-				kid := potentialMatch.Value.Krama[0]
+			if checkVowelRetraction && len(potentialMatch.Krama) >= 1 {
+				kid := potentialMatch.Krama[0]
 				if kid >= 0 && int(kid) < len(toData.KramaTextArr) {
 					kt := toData.KramaTextArr[kid]
 					var listType *scriptdata.ListItem
@@ -396,36 +397,32 @@ func TransliterateTextCore(
 							listType = &toData.List[li]
 						}
 					}
-					isSingleVowel := len(potentialMatch.Value.Krama) == 1 &&
+					isSingleVowel := len(potentialMatch.Krama) == 1 &&
 						(listItemIsSvara(listType) || listItemIsMatra(listType))
 					if isSingleVowel {
-						lastValidVowelMatch = potentialIdx
-					} else if lastValidVowelMatch >= 0 {
-						textToKramaIdx = lastValidVowelMatch
+						lastValidVowelMatchVal = potentialMatch
+						lastValidVowelMatchText = charToSearch
+					} else if lastValidVowelMatchVal != nil {
+						matchedText = lastValidVowelMatchText
+						mapVal = lastValidVowelMatchVal
 						break
 					}
 				}
 			}
 
-			if len(potentialMatch.Value.Next) > 0 {
+			if len(potentialMatch.Next) > 0 {
 				nthR, _, nthOk := cursor.peekAtRune(endIdx)
-				if nthOk && containsStr(potentialMatch.Value.Next, string(nthR)) {
+				if nthOk && containsStr(potentialMatch.Next, string(nthR)) {
 					scanUnits++
 					continue
 				}
 			}
-			textToKramaIdx = potentialIdx
+			matchedText = charToSearch
+			mapVal = potentialMatch
 			break
 		}
 
-		var textToKramaItem *textMapEntrySorted
-		if textToKramaIdx >= 0 {
-			textToKramaItem = &fromTextMap[textToKramaIdx]
-		}
-
-		if textToKramaItem != nil {
-			matchedText := textToKramaItem.Text
-			mapVal := &textToKramaItem.Value
+		if mapVal != nil {
 			indexDeleteLen := 0
 			if ignoreTaExtSupRuneIndex >= 0 && utf8.RuneCountInString(matchedText) > 1 {
 				if len(mapVal.Krama) > 0 {
@@ -572,8 +569,8 @@ func TransliterateTextCore(
 		}
 
 		charToSearch := ch
-		if textToKramaItem != nil {
-			charToSearch = textToKramaItem.Text
+		if mapVal != nil {
+			charToSearch = matchedText
 		}
 		index := kramaIndexOfText(fromData, charToSearch)
 		if index < 0 {
@@ -875,27 +872,6 @@ func applyCustomTransRules(
 			}
 		}
 	}
-}
-
-func binarySearchLowerCustomScript(arr []scriptdata.CustomScriptCharItem, target string) int {
-	if len(arr) == 0 {
-		return -1
-	}
-	left, right := 0, len(arr)-1
-	result := -1
-	for left <= right {
-		mid := (left + right) / 2
-		cmp := strings.Compare(target, arr[mid].Text)
-		if cmp == 0 {
-			result = mid
-			right = mid - 1
-		} else if cmp < 0 {
-			right = mid - 1
-		} else {
-			left = mid + 1
-		}
-	}
-	return result
 }
 
 func containsStr(s []string, v string) bool {
