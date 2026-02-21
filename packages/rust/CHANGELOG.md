@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (rust-lib@v1.0.7)
+
+- Use `HashMap` for faster Performance instead of Sorted array + Binary Search lookup
+
 ## rust-lib@v1.0.6
 
 - Added normal capital letters for Romanized to allow capital letter typing

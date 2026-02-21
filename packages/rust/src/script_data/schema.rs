@@ -94,6 +94,15 @@ pub struct CommonScriptAttr {
   pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
   pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
   pub list: Vec<List>,
+
+  #[serde(skip)]
+  pub krama_text_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  pub text_to_krama_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  pub typing_text_to_krama_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  pub custom_script_chars_lookup: HashMap<String, usize>,
 }
 
 impl From<CommonScriptAttrJson> for CommonScriptAttr {
@@ -107,6 +116,10 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
       typing_text_to_krama_map: value.typing_text_to_krama_map,
       custom_script_chars_arr: value.custom_script_chars_arr,
       list: value.list.into_iter().map(Into::into).collect(),
+      krama_text_lookup: HashMap::new(),
+      text_to_krama_lookup: HashMap::new(),
+      typing_text_to_krama_lookup: HashMap::new(),
+      custom_script_chars_lookup: HashMap::new(),
     }
   }
 }

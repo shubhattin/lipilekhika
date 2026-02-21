@@ -2,7 +2,6 @@ import type {
   OutputBrahmicScriptData,
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
-import { binarySearchLowerWithIndex } from '../utils/binary_search/binary_search';
 import type { script_list_type } from '../utils/lang_list';
 
 export type prev_context_array_type = [
@@ -19,15 +18,40 @@ export const kramaTextOrEmpty = (script: OutputScriptData, idx: number): string 
   return kramaTextOrNull(script, idx) ?? '';
 };
 
-export const kramaIndexOfText = (script_data: OutputScriptData, text: string): number => {
-  return binarySearchLowerWithIndex(
-    script_data.krama_text_arr,
-    script_data.krama_text_arr_index,
-    text,
-    {
-      accessor: (arr, i) => arr[i][0]
+const _arrayToMap = new WeakMap<readonly any[], Map<string, any>>();
+
+export function getTextMapLookup<T extends readonly [string, ...any[]]>(
+  arr: readonly T[]
+): Map<string, T> {
+  let m = _arrayToMap.get(arr as readonly any[]);
+  if (!m) {
+    m = new Map();
+    for (let i = 0; i < arr.length; i++) {
+      const key = (arr[i] as readonly any[])[0] as string;
+      if (!m.has(key)) {
+        m.set(key, arr[i]);
+      }
     }
-  );
+    _arrayToMap.set(arr as readonly any[], m);
+  }
+  return m as Map<string, T>;
+}
+
+const _kramaIdxCache = new WeakMap<OutputScriptData, Map<string, number>>();
+
+export const kramaIndexOfText = (script_data: OutputScriptData, text: string): number => {
+  let m = _kramaIdxCache.get(script_data);
+  if (!m) {
+    m = new Map();
+    for (let i = 0; i < script_data.krama_text_arr.length; i++) {
+      const key = script_data.krama_text_arr[i][0] as string;
+      if (!m.has(key)) {
+        m.set(key, i);
+      }
+    }
+    _kramaIdxCache.set(script_data, m);
+  }
+  return m.get(text) ?? -1;
 };
 
 export const string_builder = () => {

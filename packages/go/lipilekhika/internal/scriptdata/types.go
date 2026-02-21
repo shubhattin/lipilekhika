@@ -154,11 +154,29 @@ type ScriptData struct {
 	TextMap              map[string]TextToKramaMap `json:"-"`
 	TypingTextMap        map[string]TextToKramaMap `json:"-"`
 	TypingTextMapEntries []TextMapEntry            `json:"-"` // ordered for index lookup
+	
+	KramaTextLookup         map[string]int `json:"-"`
+	CustomScriptCharsLookup map[string]int `json:"-"`
 
 	SchwaProperty  bool    `json:"schwa_property,omitempty"`
 	Halant         string  `json:"halant,omitempty"`
 	Nuqta          *string `json:"nuqta,omitempty"`
 	SchwaCharacter string  `json:"schwa_character,omitempty"`
+}
+
+func (s *ScriptData) initLookups() {
+	s.KramaTextLookup = make(map[string]int, len(s.KramaTextArr))
+	for i, item := range s.KramaTextArr {
+		if _, exists := s.KramaTextLookup[item.Text]; !exists {
+			s.KramaTextLookup[item.Text] = i
+		}
+	}
+	s.CustomScriptCharsLookup = make(map[string]int, len(s.CustomScriptCharsArr))
+	for i, item := range s.CustomScriptCharsArr {
+		if _, exists := s.CustomScriptCharsLookup[item.Text]; !exists {
+			s.CustomScriptCharsLookup[item.Text] = i
+		}
+	}
 }
 
 type scriptDataGob struct {
@@ -364,6 +382,7 @@ func (s *ScriptData) GobDecode(data []byte) error {
 		Nuqta:                wire.Nuqta,
 		SchwaCharacter:       wire.SchwaCharacter,
 	}
+	s.initLookups()
 	return nil
 }
 
@@ -419,6 +438,7 @@ func (s *ScriptData) UnmarshalJSON(data []byte) error {
 		Nuqta:                wire.Nuqta,
 		SchwaCharacter:       wire.SchwaCharacter,
 	}
+	s.initLookups()
 	return nil
 }
 

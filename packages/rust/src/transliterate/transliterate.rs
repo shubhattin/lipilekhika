@@ -4,7 +4,6 @@ use crate::transliterate::helpers::{
   self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
   is_vedic_svara_tail,
 };
-use crate::utils::binary_search::binary_search_lower;
 use std::collections::HashMap;
 
 /// Compare a char with a &str without heap allocation.
@@ -703,10 +702,18 @@ pub fn transliterate_text_core(
   let use_typing_map = (*trans_opt(&trans_options, "normal_to_all:use_typing_chars")
     || opts.typing_mode)
     && from_script_name == "Normal";
+
+  // We'll borrow the whole `CommonScriptAttr` to access both the vector and the lookup map
+  let from_common_attr = from_script_data.get_common_attr();
   let from_text_to_krama_map = if use_typing_map {
     &to_script_data.get_common_attr().typing_text_to_krama_map
   } else {
-    &from_script_data.get_common_attr().text_to_krama_map
+    &from_common_attr.text_to_krama_map
+  };
+  let from_text_to_krama_lookup = if use_typing_map {
+    &to_script_data.get_common_attr().typing_text_to_krama_lookup
+  } else {
+    &from_common_attr.text_to_krama_lookup
   };
 
   // Used when converting from Tamil-Extended (superscript numbers)
@@ -771,14 +778,11 @@ pub fn transliterate_text_core(
       && to_script_name == "Normal"
     {
       let ch_str = ch.to_string();
-      let custom_arr = &from_script_data.get_common_attr().custom_script_chars_arr;
-      let idx = binary_search_lower(
-        custom_arr,
-        &ch_str.as_str(),
-        |a, i| a[i].0.as_str(),
-        |a, b| a.cmp(b),
-      );
-      if let Some(custom_idx) = idx {
+      let custom_lookup = &from_script_data
+        .get_common_attr()
+        .custom_script_chars_lookup;
+
+      if let Some(&custom_idx) = custom_lookup.get(&ch_str) {
         let (custom_text, list_ref_opt, back_ref_opt) =
           &from_script_data.get_common_attr().custom_script_chars_arr[custom_idx];
         let list_item = list_ref_opt
@@ -850,12 +854,7 @@ pub fn transliterate_text_core(
           ctx.cursor.slice(text_index, end_index).unwrap_or_default()
         };
 
-        let potential_match_index = binary_search_lower(
-          from_text_to_krama_map,
-          &char_to_search.as_str(),
-          |a, i| a[i].0.as_str(),
-          |a, b| a.cmp(b),
-        );
+        let potential_match_index = from_text_to_krama_lookup.get(&char_to_search).copied();
 
         let Some(potential_match_index) = potential_match_index else {
           text_to_krama_item_index = None;
@@ -914,8 +913,6 @@ pub fn transliterate_text_core(
               };
               let n_2_th_next_character: Option<char> = n_2_th_next;
 
-              let canonical_map = &from_script_data.get_common_attr().text_to_krama_map;
-
               // Case: matra/halant + superscript tail (superscript is in next list)
               if ignore_ta_ext_sup_num_text_index == -1
                 && is_ta_ext_superscript_tail(n_1_th_next_character)
@@ -925,12 +922,10 @@ pub fn transliterate_text_core(
                 let sup = n_1_th_next_character
                   .map(|c| c.to_string())
                   .unwrap_or_default();
-                let char_index = binary_search_lower(
-                  canonical_map,
-                  &format!("{}{}", char_to_search, sup).as_str(),
-                  |a, i| a[i].0.as_str(),
-                  |a, b| a.cmp(b),
-                );
+
+                let search_key = format!("{}{}", char_to_search, sup);
+                let char_index = from_text_to_krama_lookup.get(&search_key).copied();
+
                 let nth_char_text_index = nth_next_character
                   .map(|c| c.to_string())
                   .as_ref()
@@ -968,12 +963,10 @@ pub fn transliterate_text_core(
                 let sup = n_2_th_next_character
                   .map(|c| c.to_string())
                   .unwrap_or_default();
-                let char_index = binary_search_lower(
-                  canonical_map,
-                  &format!("{}{}", char_to_search, sup).as_str(),
-                  |a, i| a[i].0.as_str(),
-                  |a, b| a.cmp(b),
-                );
+
+                let search_key = format!("{}{}", char_to_search, sup);
+                let char_index = from_text_to_krama_lookup.get(&search_key).copied();
+
                 let nth_char_text_index = nth_next_character
                   .map(|c| c.to_string())
                   .as_ref()
@@ -1042,12 +1035,8 @@ pub fn transliterate_text_core(
                     let sup = n_2_th_next_character
                       .map(|c| c.to_string())
                       .unwrap_or_default();
-                    let char_index = binary_search_lower(
-                      canonical_map,
-                      &format!("{}{}", char_to_search, sup).as_str(),
-                      |a, i| a[i].0.as_str(),
-                      |a, b| a.cmp(b),
-                    );
+                    let search_key = format!("{}{}", char_to_search, sup);
+                    let char_index = from_text_to_krama_lookup.get(&search_key).copied();
                     if let Some(char_index) = char_index {
                       text_to_krama_item_index = Some(char_index);
                       ignore_ta_ext_sup_num_text_index = (end_index
