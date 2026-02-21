@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (python-lib@v1.0.4)
+
+- Use faster Rust backend for even faster performance due to `HashMap`
+
 ## python-lib@v1.0.3
 
 - Added normal capital letters for Romanized to allow capital letter typing

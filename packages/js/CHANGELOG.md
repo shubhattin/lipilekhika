@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.8)
+
+- Improved Performance with Map usage (44%, 650ms -> 450ms)
+
 ## js-lib@v1.0.7
 
 - Added normal capital letters for Romanized to allow capital letter typing
