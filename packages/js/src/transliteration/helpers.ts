@@ -2,6 +2,7 @@ import type {
   OutputBrahmicScriptData,
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
+import type { RuntimeScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
 export type prev_context_array_type = [
@@ -10,95 +11,40 @@ export type prev_context_array_type = [
 ][];
 
 type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
-type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
+// type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
 type _text_to_krama_map_val_type =
   | OutputScriptData['text_to_krama_map'][number][1]
   | OutputScriptData['typing_text_to_krama_map'][number][1];
-const CACHE = {
-  // Script Id based map key
-  /** `key` - krama_text, `value` - index (in array) */
-  krama_text_arr: new Map<number, Map<string, number>>(),
-  text_to_krama_map: new Map<number, Map<string, _text_to_krama_map_val_type>>(),
-  typing_text_to_krama_map: new Map<number, Map<string, _text_to_krama_map_val_type>>(),
-  custom_script_chars_arr: new Map<
-    number,
-    Map<string, [_custom_script_chars_arr_type[1], _custom_script_chars_arr_type[2]]>
-  >()
-};
-
-export const build_script_data_cache_ = (script_data: OutputScriptData) => {
-  // krama_text_array
-  if (!CACHE.krama_text_arr.has(script_data.script_id)) {
-    const krama_arr_cache = new Map<string, number>();
-    for (let i = 0; i < script_data.krama_text_arr.length; i++) {
-      const krama_key = script_data.krama_text_arr[i][0];
-      if (!krama_arr_cache.has(krama_key)) krama_arr_cache.set(krama_key, i);
-    }
-    CACHE.krama_text_arr.set(script_data.script_id, krama_arr_cache);
-  }
-
-  // text_to_krama_map
-  if (!CACHE.text_to_krama_map.has(script_data.script_id)) {
-    const text_to_krama_map_cache = new Map(script_data.text_to_krama_map);
-    CACHE.text_to_krama_map.set(script_data.script_id, text_to_krama_map_cache);
-  }
-  if (!CACHE.typing_text_to_krama_map.has(script_data.script_id)) {
-    const typing_text_to_krama_map_cache = new Map(script_data.typing_text_to_krama_map);
-    CACHE.typing_text_to_krama_map.set(script_data.script_id, typing_text_to_krama_map_cache);
-  }
-
-  // custom_script_chars_arr
-  if (!CACHE.custom_script_chars_arr.has(script_data.script_id)) {
-    const custom_script_chars_arr_cache = new Map(
-      script_data.custom_script_chars_arr.map((v) => [v[0], [v[1], v[2]]])
-    ) as GetMapValue<typeof CACHE.custom_script_chars_arr>;
-    CACHE.custom_script_chars_arr.set(script_data.script_id, custom_script_chars_arr_cache);
-  }
-};
 
 export const getTextToKramaMapData = (
-  script_data: OutputScriptData,
+  script_data: RuntimeScriptData,
   text: string,
   use_typing_text_to_krama_map: boolean = false
 ): _text_to_krama_map_val_type | undefined => {
-  const cache = use_typing_text_to_krama_map
-    ? CACHE.typing_text_to_krama_map.get(script_data.script_id)
-    : CACHE.text_to_krama_map.get(script_data.script_id);
-  return cache?.get(text) ?? undefined;
-  // no need to check for cache to exist as is computed at script load
+  return use_typing_text_to_krama_map
+    ? script_data.map_typing_text_to_krama_map.get(text)
+    : script_data.map_text_to_krama_map.get(text);
 };
 
 export const getCustomScriptCharsData = (
-  script_data: OutputScriptData,
+  script_data: RuntimeScriptData,
   text: string
 ): [_custom_script_chars_arr_type[1], _custom_script_chars_arr_type[2]] | undefined => {
-  const cache = CACHE.custom_script_chars_arr.get(script_data.script_id);
-  return cache?.get(text) ?? undefined;
+  return script_data.map_custom_script_chars_arr.get(text);
 };
 
-export const kramaTextOrNull = (script: OutputScriptData, idx: number): string | null => {
+export const kramaIndexOfText = (script_data: RuntimeScriptData, text: string): number => {
+  return script_data.map_krama_text_arr.get(text) ?? -1;
+  // no need to use lower bound binary search, we can direcly use a hash map lookup
+};
+
+export const kramaTextOrNull = (script: RuntimeScriptData, idx: number): string | null => {
   const v = script.krama_text_arr[idx]?.[0];
   return typeof v === 'string' ? v : null;
 };
 
-export const kramaTextOrEmpty = (script: OutputScriptData, idx: number): string => {
+export const kramaTextOrEmpty = (script: RuntimeScriptData, idx: number): string => {
   return kramaTextOrNull(script, idx) ?? '';
-};
-
-export const kramaIndexOfText = (script_data: OutputScriptData, text: string): number => {
-  const cache = CACHE.krama_text_arr.get(script_data.script_id);
-  return cache?.get(text) ?? -1;
-
-  // return binarySearchLowerWithIndex(
-  //   script_data.krama_text_arr,
-  //   script_data.krama_text_arr_index,
-  //   text,
-  //   {
-  //     accessor: (arr, i) => arr[i][0]
-  //   }
-  // );
-  // ^ As we were using the lower bound binary search so we can replicate the same thing
-  // by checking for a pre-existing key cache in the map
 };
 
 export const string_builder = () => {
@@ -318,7 +264,7 @@ export const matchPrevKramaSequence = (
   peekAt: PeekAtLike,
   anchorIndex: number,
   prev: number[],
-  script_data: OutputScriptData
+  script_data: RuntimeScriptData
 ): { matched: boolean; matchedLen: number } => {
   for (let i = 0; i < prev.length; i++) {
     const expected_krama_index = prev[prev.length - 1 - i];
@@ -334,7 +280,7 @@ export const matchPrevKramaSequence = (
 
 export const replaceWithPieces = (
   replace_with: number[],
-  script_data: OutputScriptData
+  script_data: RuntimeScriptData
 ): string[] => {
   return replace_with.map((k) => kramaTextOrEmpty(script_data, k)).filter(Boolean);
 };
