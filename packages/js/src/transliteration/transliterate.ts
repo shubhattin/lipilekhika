@@ -465,17 +465,12 @@ export const transliterate_text_core = (
   type TextToKramaItem =
     | OutputScriptData['text_to_krama_map'][number]
     | OutputScriptData['typing_text_to_krama_map'][number];
-  // use a custom map when Normal -> All in typing mode (or when an explicit option)
-  const typing_text_to_krama_map_cache: Map<string, TextToKramaItem[1]> | null =
-    (use_typing_chars || typing_mode) && from_script_name === 'Normal'
-      ? new Map(to_script_data.typing_text_to_krama_map)
-      : null;
-  const getFromTextToKramaMapData = (lookup_text: string): TextToKramaItem[1] | undefined => {
-    if (typing_text_to_krama_map_cache) {
-      return typing_text_to_krama_map_cache.get(lookup_text) ?? undefined;
-    }
-    return getTextToKramaMapData(from_script_data, lookup_text);
-  };
+  // use typing map when Normal -> All in typing mode (or with explicit typing chars option)
+  const use_typing_text_to_krama_map =
+    (use_typing_chars || typing_mode) && from_script_name === 'Normal';
+  const text_to_krama_lookup_script_data = use_typing_text_to_krama_map
+    ? to_script_data
+    : from_script_data;
 
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
@@ -527,7 +522,8 @@ export const transliterate_text_core = (
           char,
           from_script_data.list[custom_script_val[0] ?? -1] ?? null
         ]);
-        const normal_text = from_script_data.typing_text_to_krama_map[custom_script_val[1] ?? -1]?.[0];
+        const normal_text =
+          from_script_data.typing_text_to_krama_map[custom_script_val[1] ?? -1]?.[0];
         result.emit(normal_text ?? '');
         cursor.advance(char.length);
         continue;
@@ -574,7 +570,11 @@ export const transliterate_text_core = (
                 ? cursor.slice(ignore_ta_ext_sup_num_text_index + 1, end_index)
                 : '')
             : cursor.slice(text_index, end_index);
-        const potential_match_val = getFromTextToKramaMapData(char_to_search);
+        const potential_match_val = getTextToKramaMapData(
+          text_to_krama_lookup_script_data,
+          char_to_search,
+          use_typing_text_to_krama_map
+        );
         if (potential_match_val === undefined) {
           text_to_krama_item = null;
           break;
