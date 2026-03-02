@@ -4,6 +4,7 @@ import {
   get_package_current_version_macro,
   get_is_umd_build_mode_macro
 } from './runtime_macros' with { type: 'macro' };
+import { build_script_data_cache } from '../transliteration/helpers';
 
 const IS_UMD_BUILD_MODE = get_is_umd_build_mode_macro();
 
@@ -28,6 +29,7 @@ export const getScriptData = async (script_name: script_list_type): Promise<Outp
     const response = await fetch(SCRIPT_DATA_URL);
     const data = response.json() as Promise<OutputScriptData>;
     UMD_SCRIPT_DATA_PROMISE_CACHE[script_name] = data;
+    data.then((data) => build_script_data_cache(data));
     return data;
   }
   if (!ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
