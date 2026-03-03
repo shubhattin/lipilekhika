@@ -1,5 +1,9 @@
 # Changelog
 
+## mobile-app@v0.2.5+8
+
+- Performance Improvement (in rust-lib)
+
 ## mobile-app@v0.2.4+7
 
 - Add **Major Performance Improvements** for `transliterate`
