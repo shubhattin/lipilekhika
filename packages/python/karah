@@ -23,7 +23,8 @@ def format():
 @app.command()
 def build_bindings():
     """Build bindings using maturin."""
-    result = subprocess.run(["uvx", "maturin", "develop"])
+    # Use release profile for realistic runtime benchmarking/perf checks.
+    result = subprocess.run(["uvx", "maturin", "develop", "--release"])
     raise typer.Exit(code=result.returncode)
 
 

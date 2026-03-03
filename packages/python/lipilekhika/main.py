@@ -15,6 +15,7 @@ from .types import (
     LangListType,
     ScriptAndLangListType,
 )
+
 # ^ generated on build time
 # with `bun make-script-data` in packages/js
 
