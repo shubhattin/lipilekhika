@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (rust-lib@v1.0.7)
+## rust-lib@v1.0.7
 
 - Use `HashMap` for faster Performance instead of Sorted array + Binary Search lookup
 
