@@ -1,9 +1,4 @@
-import type { OutputScriptData } from '../make_script_data/output_script_data_schema';
-import {
-  binarySearchLower,
-  binarySearchLowerWithIndex
-} from '../utils/binary_search/binary_search';
-import { getScriptData } from '../utils/get_script_data';
+import { getScriptData, type ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 import custom_options_json from '../custom_options.json';
 import type { TransOptionsType } from '../make_script_data/custom_options_input';
@@ -20,6 +15,9 @@ import {
   isTaExtSuperscriptTail,
   isScriptTamilExt,
   isVedicSvaraTail,
+  getTextToKramaMapData,
+  getCustomScriptCharsData,
+  getTypingTextToKramaText,
   type prev_context_array_type
 } from './helpers';
 
@@ -263,8 +261,8 @@ function apply_custom_trans_rules(ctx: TransliterateCtx, text_index: number, del
  * Returns the active custom options to applied based on the `from` and `to` script information
  */
 export const get_active_custom_options = (
-  from_script_data: OutputScriptData,
-  to_script_data: OutputScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   input_options?: Record<string, boolean>
 ): CustomOptionType => {
   if (!input_options) return {};
@@ -302,8 +300,8 @@ export const get_active_custom_options = (
 
 /** Resolve active options + flattened rule list once, so hot paths can reuse it. */
 export const resolve_transliteration_rules = (
-  from_script_data: OutputScriptData,
-  to_script_data: OutputScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   transliteration_input_options?: CustomOptionType
 ): { trans_options: CustomOptionType; custom_rules: CustomRulesType } => {
   const trans_options = get_active_custom_options(
@@ -322,12 +320,12 @@ export const resolve_transliteration_rules = (
 
 const get_rule_replace_text = (
   rule: TransOptionsType[keyof TransOptionsType]['rules'][number],
-  script_data: OutputScriptData
+  script_data: ScriptData
 ) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
 export const apply_custom_replace_rules = (
   text: string,
-  script_data: OutputScriptData,
+  script_data: ScriptData,
   rules: TransOptionsType[keyof TransOptionsType]['rules'],
   allowed_input_rule_type: TransOptionsType[keyof TransOptionsType]['rules'][number]['check_in']
 ) => {
@@ -358,8 +356,8 @@ export const apply_custom_replace_rules = (
 type TransliterateCtx = {
   from_script_name: script_list_type;
   to_script_name: script_list_type;
-  from_script_data: OutputScriptData;
-  to_script_data: OutputScriptData;
+  from_script_data: ScriptData;
+  to_script_data: ScriptData;
   trans_options: CustomOptionType;
   custom_rules: CustomRulesType;
   cursor: ReturnType<typeof make_input_cursor>;
@@ -396,8 +394,8 @@ export const transliterate_text_core = (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  from_script_data: OutputScriptData,
-  to_script_data: OutputScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   trans_options: CustomOptionType,
   custom_rules: CustomRulesType,
   options?: CustomOptionsType
@@ -464,11 +462,15 @@ export const transliterate_text_core = (
     include_inherent_vowel
   };
 
-  // use a custom map when Normal -> All in typing mode (or when a explicit option)
-  const from_text_to_krama_map =
-    (use_typing_chars || typing_mode) && from_script_name === 'Normal'
-      ? to_script_data.typing_text_to_krama_map
-      : from_script_data.text_to_krama_map;
+  type TextToKramaItem =
+    | ScriptData['text_to_krama_map'][number]
+    | ScriptData['typing_text_to_krama_map'][number];
+  // use typing map when Normal -> All in typing mode (or with explicit typing chars option)
+  const use_typing_text_to_krama_map =
+    (use_typing_chars || typing_mode) && from_script_name === 'Normal';
+  const text_to_krama_lookup_script_data = use_typing_text_to_krama_map
+    ? to_script_data
+    : from_script_data;
 
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
@@ -514,34 +516,26 @@ export const transliterate_text_core = (
 
     // In Preserve mode, first check if the character is a custom script character
     if (trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal') {
-      const custom_script_index = binarySearchLower(
-        from_script_data.custom_script_chars_arr,
-        char,
-        {
-          accessor: (arr, i) => arr[i][0]
-        }
-      );
-      if (custom_script_index !== -1) {
-        const custom_script_item = from_script_data.custom_script_chars_arr[custom_script_index];
+      const custom_script_val = getCustomScriptCharsData(from_script_data, char);
+      if (custom_script_val !== undefined) {
         prev_context_cleanup(ctx, [
-          custom_script_item[0],
-          from_script_data.list[custom_script_item[1] ?? -1] ?? null
+          char,
+          from_script_data.list[custom_script_val[0] ?? -1] ?? null
         ]);
-        const normal_text =
-          from_script_data.typing_text_to_krama_map[custom_script_item[2] ?? -1]?.[0];
+        const normal_text = getTypingTextToKramaText(from_script_data, custom_script_val[1]);
         result.emit(normal_text ?? '');
-        cursor.advance(custom_script_item[0].length);
+        cursor.advance(char.length);
         continue;
       }
     }
 
     // Step 1: Search for the character in the text_to_krama_map
-    let text_to_krama_item_index = -1;
+    let text_to_krama_item: TextToKramaItem | null = null;
     {
       // Iterative matching with retraction support for vyanjana+vowel context
       // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
       let scan_units = 0;
-      let last_valid_vowel_match_index = -1;
+      let last_valid_vowel_match: TextToKramaItem | null = null;
       // Flag to track if we're in a vyanjana+vowel context where retraction may be needed
       const check_vowel_retraction =
         PREV_CONTEXT_IN_USE &&
@@ -575,14 +569,16 @@ export const transliterate_text_core = (
                 ? cursor.slice(ignore_ta_ext_sup_num_text_index + 1, end_index)
                 : '')
             : cursor.slice(text_index, end_index);
-        const potential_match_index = binarySearchLower(from_text_to_krama_map, char_to_search, {
-          accessor: (arr, i) => arr[i][0]
-        });
-        if (potential_match_index === -1) {
-          text_to_krama_item_index = -1;
+        const potential_match_val = getTextToKramaMapData(
+          text_to_krama_lookup_script_data,
+          char_to_search,
+          use_typing_text_to_krama_map
+        );
+        if (potential_match_val === undefined) {
+          text_to_krama_item = null;
           break;
         }
-        const potential_match = from_text_to_krama_map[potential_match_index];
+        const potential_match: TextToKramaItem = [char_to_search, potential_match_val];
 
         // When in vyanjana context, track single-vowel (svara/mAtrA) matches for potential retraction
         // eg: for kAUM :- काऊं
@@ -604,11 +600,11 @@ export const transliterate_text_core = (
 
           if (is_single_vowel) {
             // Save this as a valid retraction point
-            last_valid_vowel_match_index = potential_match_index;
-          } else if (last_valid_vowel_match_index !== -1) {
+            last_valid_vowel_match = potential_match;
+          } else if (last_valid_vowel_match !== null) {
             // Current match is NOT a single vowel but we have a saved vowel match
             // Retract to the last valid vowel match
-            text_to_krama_item_index = last_valid_vowel_match_index;
+            text_to_krama_item = last_valid_vowel_match;
             break;
           }
         }
@@ -634,19 +630,16 @@ export const transliterate_text_core = (
             ) {
               // the next character is also a superscript number and also is in the next list
               // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index = binarySearchLower(
-                from_script_data.text_to_krama_map,
-                char_to_search + n_1_th_next_character,
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
+              const char_val = getTextToKramaMapData(
+                from_script_data,
+                char_to_search + n_1_th_next_character
               );
               const nth_char_text_index = kramaIndexOfText(
                 from_script_data,
                 nth_next_character ?? ''
               );
-              if (char_index !== -1 && nth_char_text_index !== -1) {
-                text_to_krama_item_index = char_index;
+              if (char_val !== undefined && nth_char_text_index !== -1) {
+                text_to_krama_item = [char_to_search + n_1_th_next_character, char_val];
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 if (nth_next_character === from_script_data.halant || nth_char_type === 'mAtrA') {
@@ -662,12 +655,9 @@ export const transliterate_text_core = (
             ) {
               // the next character is also a superscript number and also is in the next list
               // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index = binarySearchLower(
-                from_script_data.text_to_krama_map,
-                char_to_search + n_2_th_next_character,
-                {
-                  accessor: (arr, i) => arr[i][0]
-                }
+              const char_val = getTextToKramaMapData(
+                from_script_data,
+                char_to_search + n_2_th_next_character
               );
               const nth_char_text_index = kramaIndexOfText(
                 from_script_data,
@@ -679,14 +669,14 @@ export const transliterate_text_core = (
               );
               // special case for some mAtrAs like gO = g + E + A
               if (
-                char_index !== -1 &&
+                char_val !== undefined &&
                 nth_char_text_index !== -1 &&
                 n_1_th_char_text_index !== -1
               ) {
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const n_1_th_char_text_item =
                   from_script_data.krama_text_arr[n_1_th_char_text_index];
-                text_to_krama_item_index = char_index;
+                text_to_krama_item = [char_to_search + n_2_th_next_character, char_val];
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 const n_1_th_char_type =
                   from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type;
@@ -707,24 +697,21 @@ export const transliterate_text_core = (
               isTaExtSuperscriptTail(n_2_th_next_character) &&
               potential_match[1].next.indexOf(n_2_th_next_character) !== -1
             ) {
-              const nth_char_text_index = binarySearchLowerWithIndex(
-                from_script_data.krama_text_arr,
-                from_script_data.krama_text_arr_index,
-                nth_next_character ?? '',
-                { accessor: (arr, i) => arr[i][0] }
+              const nth_char_text_index = kramaIndexOfText(
+                from_script_data,
+                nth_next_character ?? ''
               );
               if (nth_char_text_index !== -1) {
                 const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
                 const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
                 // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
                 if (nth_char_type === 'mAtrA') {
-                  const char_index = binarySearchLower(
-                    from_script_data.text_to_krama_map,
-                    char_to_search + n_2_th_next_character,
-                    { accessor: (arr, i) => arr[i][0] }
+                  const char_val = getTextToKramaMapData(
+                    from_script_data,
+                    char_to_search + n_2_th_next_character
                   );
-                  if (char_index !== -1) {
-                    text_to_krama_item_index = char_index;
+                  if (char_val !== undefined) {
+                    text_to_krama_item = [char_to_search + n_2_th_next_character, char_val];
                     ignore_ta_ext_sup_num_text_index =
                       end_index + (nth_next?.width ?? 0) + (n_1_th_next?.width ?? 0);
                     break;
@@ -741,18 +728,10 @@ export const transliterate_text_core = (
             continue;
           }
         }
-        text_to_krama_item_index = potential_match_index;
+        text_to_krama_item = potential_match;
         break;
       }
     }
-
-    const text_to_krama_item:
-      | (
-          | OutputScriptData['text_to_krama_map'][number]
-          | OutputScriptData['typing_text_to_krama_map'][number]
-        )
-      | null =
-      text_to_krama_item_index !== -1 ? from_text_to_krama_map[text_to_krama_item_index] : null;
     if (text_to_krama_item !== null) {
       // condtional subtarct 1 when a superscript number is present in the current match
       const index_delete_length =

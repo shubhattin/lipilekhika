@@ -4,3 +4,6 @@ lipilekhika.egg-info
 
 lipilekhika/_lipilekhika.*
 lipilekhika/types.py
+
+.pytest_cache/
+.ruff_cache/

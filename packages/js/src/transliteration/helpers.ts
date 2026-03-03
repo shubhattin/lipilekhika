@@ -2,7 +2,7 @@ import type {
   OutputBrahmicScriptData,
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
-import { binarySearchLowerWithIndex } from '../utils/binary_search/binary_search';
+import type { ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
 export type prev_context_array_type = [
@@ -10,24 +10,49 @@ export type prev_context_array_type = [
   OutputBrahmicScriptData['list'][number] | null | undefined
 ][];
 
-export const kramaTextOrNull = (script: OutputScriptData, idx: number): string | null => {
+type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
+// type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
+type _text_to_krama_map_val_type =
+  | OutputScriptData['text_to_krama_map'][number][1]
+  | OutputScriptData['typing_text_to_krama_map'][number][1];
+
+export const getTextToKramaMapData = (
+  script_data: ScriptData,
+  text: string,
+  use_typing_text_to_krama_map: boolean = false
+): _text_to_krama_map_val_type | undefined => {
+  return use_typing_text_to_krama_map
+    ? script_data.map_typing_text_to_krama_map.get(text)
+    : script_data.map_text_to_krama_map.get(text);
+};
+
+export const getCustomScriptCharsData = (
+  script_data: ScriptData,
+  text: string
+): [_custom_script_chars_arr_type[1], _custom_script_chars_arr_type[2]] | undefined => {
+  return script_data.map_custom_script_chars_arr.get(text);
+};
+
+export const getTypingTextToKramaText = (
+  script_data: ScriptData,
+  index: number | null | undefined
+): string | undefined => {
+  if (index === null || index === undefined || index < 0) return undefined;
+  return script_data.typing_text_to_krama_map[index]?.[0];
+};
+
+export const kramaIndexOfText = (script_data: ScriptData, text: string): number => {
+  return script_data.map_krama_text_arr.get(text) ?? -1;
+  // no need to use lower bound binary search, we can direcly use a hash map lookup
+};
+
+export const kramaTextOrNull = (script: ScriptData, idx: number): string | null => {
   const v = script.krama_text_arr[idx]?.[0];
   return typeof v === 'string' ? v : null;
 };
 
-export const kramaTextOrEmpty = (script: OutputScriptData, idx: number): string => {
+export const kramaTextOrEmpty = (script: ScriptData, idx: number): string => {
   return kramaTextOrNull(script, idx) ?? '';
-};
-
-export const kramaIndexOfText = (script_data: OutputScriptData, text: string): number => {
-  return binarySearchLowerWithIndex(
-    script_data.krama_text_arr,
-    script_data.krama_text_arr_index,
-    text,
-    {
-      accessor: (arr, i) => arr[i][0]
-    }
-  );
 };
 
 export const string_builder = () => {
@@ -247,7 +272,7 @@ export const matchPrevKramaSequence = (
   peekAt: PeekAtLike,
   anchorIndex: number,
   prev: number[],
-  script_data: OutputScriptData
+  script_data: ScriptData
 ): { matched: boolean; matchedLen: number } => {
   for (let i = 0; i < prev.length; i++) {
     const expected_krama_index = prev[prev.length - 1 - i];
@@ -261,10 +286,7 @@ export const matchPrevKramaSequence = (
   return { matched: true, matchedLen: prev.length };
 };
 
-export const replaceWithPieces = (
-  replace_with: number[],
-  script_data: OutputScriptData
-): string[] => {
+export const replaceWithPieces = (replace_with: number[], script_data: ScriptData): string[] => {
   return replace_with.map((k) => kramaTextOrEmpty(script_data, k)).filter(Boolean);
 };
 

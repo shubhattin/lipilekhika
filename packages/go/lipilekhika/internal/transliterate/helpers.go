@@ -1,9 +1,7 @@
 package transliterate
 
 import (
-	"sort"
 	"strings"
-	"sync"
 	"unicode/utf8"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
@@ -17,81 +15,10 @@ func kramaTextOrEmpty(s *scriptdata.ScriptData, idx int) string {
 }
 
 func kramaIndexOfText(s *scriptdata.ScriptData, text string) int {
-	idx := binarySearchLowerWithIndex(
-		s.KramaTextArr,
-		s.KramaTextArrIndex,
-		text,
-		func(arr []scriptdata.KramaTextItem, i int) string { return arr[i].Text },
-	)
-	return idx
-}
-
-func binarySearchLowerWithIndex(
-	arr []scriptdata.KramaTextItem,
-	index []int,
-	target string,
-	accessor func([]scriptdata.KramaTextItem, int) string,
-) int {
-	if len(index) == 0 {
-		return -1
+	if idx, ok := s.KramaTextLookup[text]; ok {
+		return idx
 	}
-	left, right := 0, len(index)-1
-	result := -1
-	for left <= right {
-		mid := (left + right) / 2
-		origIdx := index[mid]
-		val := accessor(arr, origIdx)
-		cmp := strings.Compare(target, val)
-		if cmp == 0 {
-			result = origIdx
-			right = mid - 1
-		} else if cmp < 0 {
-			right = mid - 1
-		} else {
-			left = mid + 1
-		}
-	}
-	return result
-}
-
-func binarySearchLowerTextMap(entries []textMapEntrySorted, target string) int {
-	if len(entries) == 0 {
-		return -1
-	}
-	left, right := 0, len(entries)-1
-	result := -1
-	for left <= right {
-		mid := (left + right) / 2
-		val := entries[mid].Text
-		cmp := strings.Compare(target, val)
-		if cmp == 0 {
-			result = mid
-			right = mid - 1
-		} else if cmp < 0 {
-			right = mid - 1
-		} else {
-			left = mid + 1
-		}
-	}
-	return result
-}
-
-type textMapEntrySorted struct {
-	Text  string
-	Value scriptdata.TextToKramaMap
-}
-
-func textMapToSortedEntries(m map[string]scriptdata.TextToKramaMap) []textMapEntrySorted {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	out := make([]textMapEntrySorted, 0, len(keys))
-	for _, k := range keys {
-		out = append(out, textMapEntrySorted{Text: k, Value: m[k]})
-	}
-	return out
+	return -1
 }
 
 type resultStringBuilder struct {
@@ -321,28 +248,6 @@ func (c *inputCursor) sliceRunes(start, end int) string {
 		return ""
 	}
 	return string(c.runes[start:end])
-}
-
-// sortedTextMapCache caches the sorted []textMapEntrySorted slices per script,
-// so textMapToSortedEntries is never called more than once per script name.
-var sortedTextMapCache sync.Map // key: string ("<scriptName>:text" or "<scriptName>:typing")
-
-// getCachedSortedTextMap returns the sorted text-map entries for a given script,
-// computing and caching them on first access.
-func getCachedSortedTextMap(scriptName string, isTyping bool, m map[string]scriptdata.TextToKramaMap) []textMapEntrySorted {
-	var key string
-	if isTyping {
-		key = scriptName + ":typing"
-	} else {
-		key = scriptName + ":text"
-	}
-	if v, ok := sortedTextMapCache.Load(key); ok {
-		return v.([]textMapEntrySorted)
-	}
-	entries := textMapToSortedEntries(m)
-	// Store returns the existing value if another goroutine raced us; ignore.
-	sortedTextMapCache.Store(key, entries)
-	return entries
 }
 
 type peekAtFunc func(index int) (ch string, ok bool)

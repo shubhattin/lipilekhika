@@ -1,6 +1,4 @@
-use crate::macros::is_script_tamil_ext;
 use crate::script_data::{List, ScriptData};
-use crate::utils::binary_search::binary_search_lower_with_index;
 use std::collections::VecDeque;
 
 // pub fn krama_index_of_text()
@@ -28,13 +26,7 @@ impl ScriptData {
   }
 
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
-    binary_search_lower_with_index(
-      &self.get_common_attr().krama_text_arr,
-      &self.get_common_attr().krama_text_arr_index,
-      &text,
-      |arr, i| &arr[i].0,
-      |a, b| a.cmp(b),
-    )
+    self.get_common_attr().krama_text_lookup.get(text).copied()
   }
 }
 
@@ -378,6 +370,7 @@ pub fn is_ta_ext_superscript_tail(ch: Option<char>) -> bool {
 
 pub const VEDIC_SVARAS: [char; 4] = ['॒', '॑', '᳚', '᳛'];
 
+#[inline]
 pub fn is_vedic_svara_tail(ch: Option<char>) -> bool {
   match ch {
     Some(c) => VEDIC_SVARAS.contains(&c),
@@ -417,6 +410,11 @@ impl ResultStringBuilder {
   }
 }
 
+#[inline]
+pub(crate) fn is_script_tamil_ext(var: &str) -> bool {
+  var == "Tamil-Extended"
+}
+
 const VEDIC_SVARAS_TYPING_SYMBOLS: [&str; 4] = ["_", "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS: [&str; 4] = ["↓", "↑↑↑", "↑↑", "↑"];
 
@@ -430,7 +428,7 @@ pub fn apply_typing_input_aliases(mut text: String, to_script_name: &str) -> Str
     text = text.replace("x", "kSh");
   }
 
-  if is_script_tamil_ext!(to_script_name) {
+  if is_script_tamil_ext(to_script_name) {
     for i in 0..VEDIC_SVARAS_TYPING_SYMBOLS.len() {
       let symbol = VEDIC_SVARAS_TYPING_SYMBOLS[i];
       if text.contains(symbol) {

@@ -9,7 +9,6 @@ pub use crate::typing::{
 };
 use std::collections::HashMap;
 
-mod macros;
 mod script_data;
 mod transliterate;
 mod utils;

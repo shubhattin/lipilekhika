@@ -1,10 +1,8 @@
-use crate::macros::is_script_tamil_ext;
 use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::transliterate::helpers::{
-  self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_ta_ext_superscript_tail,
-  is_vedic_svara_tail,
+  self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_script_tamil_ext,
+  is_ta_ext_superscript_tail, is_vedic_svara_tail,
 };
-use crate::utils::binary_search::binary_search_lower;
 use std::collections::HashMap;
 
 /// Compare a char with a &str without heap allocation.
@@ -76,7 +74,7 @@ impl<'a> TransliterateCtx<'a> {
     if matches!(self.from_script_data, ScriptData::Brahmic { .. })
       && matches!(self.to_script_data, ScriptData::Other { .. })
     {
-      let ta_ext_case = if is_script_tamil_ext!(self.from_script_name) {
+      let ta_ext_case = if is_script_tamil_ext(self.from_script_name) {
         item_text.and_then(|k| k.chars().nth(0))
           != self
             .brahmic_halant
@@ -139,7 +137,7 @@ impl<'a> TransliterateCtx<'a> {
           self.result.emit_pieces_with_reorder(
             &[linked_matra],
             halant,
-            is_script_tamil_ext!(self.to_script_name)
+            is_script_tamil_ext(self.to_script_name)
               && is_ta_ext_superscript_tail(self.result.last_char()),
           );
           result_str_concat_status = true;
@@ -158,7 +156,7 @@ impl<'a> TransliterateCtx<'a> {
           },
         ) = (brahmic_halant, self.to_script_data)
         {
-          let should_reorder = is_script_tamil_ext!(self.to_script_name)
+          let should_reorder = is_script_tamil_ext(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
           self.result.emit_pieces_with_reorder(
             &[brahmic_halant.to_owned()],
@@ -200,7 +198,7 @@ impl<'a> TransliterateCtx<'a> {
           },
         ) = (brahmic_halant, self.to_script_data)
         {
-          let should_reorder = is_script_tamil_ext!(self.to_script_name)
+          let should_reorder = is_script_tamil_ext(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
           self.result.emit_pieces_with_reorder(
             &[brahmic_halant.to_owned()],
@@ -231,7 +229,7 @@ impl<'a> TransliterateCtx<'a> {
             && next.map(|n| n.is_empty()).unwrap_or(true)
             && !last_extra_call
             // the case below is to enable typing of _, ' (Vedic svara chihnas too)
-            && !(is_script_tamil_ext!(self.to_script_name)
+            && !(is_script_tamil_ext(self.to_script_name)
                 && is_ta_ext_superscript_tail(self.result.last_char()))
     {
       to_clear_context = true;
@@ -703,6 +701,11 @@ pub fn transliterate_text_core(
   let use_typing_map = (*trans_opt(&trans_options, "normal_to_all:use_typing_chars")
     || opts.typing_mode)
     && from_script_name == "Normal";
+  let text_to_krama_lookup_script_data = if use_typing_map {
+    to_script_data
+  } else {
+    from_script_data
+  };
   let from_text_to_krama_map = if use_typing_map {
     &to_script_data.get_common_attr().typing_text_to_krama_map
   } else {
@@ -771,13 +774,7 @@ pub fn transliterate_text_core(
       && to_script_name == "Normal"
     {
       let ch_str = ch.to_string();
-      let custom_arr = &from_script_data.get_common_attr().custom_script_chars_arr;
-      let idx = binary_search_lower(
-        custom_arr,
-        &ch_str.as_str(),
-        |a, i| a[i].0.as_str(),
-        |a, b| a.cmp(b),
-      );
+      let idx = from_script_data.custom_script_char_index_of_text(&ch_str);
       if let Some(custom_idx) = idx {
         let (custom_text, list_ref_opt, back_ref_opt) =
           &from_script_data.get_common_attr().custom_script_chars_arr[custom_idx];
@@ -850,12 +847,8 @@ pub fn transliterate_text_core(
           ctx.cursor.slice(text_index, end_index).unwrap_or_default()
         };
 
-        let potential_match_index = binary_search_lower(
-          from_text_to_krama_map,
-          &char_to_search.as_str(),
-          |a, i| a[i].0.as_str(),
-          |a, b| a.cmp(b),
-        );
+        let potential_match_index =
+          text_to_krama_lookup_script_data.text_to_krama_map_index(&char_to_search, use_typing_map);
 
         let Some(potential_match_index) = potential_match_index else {
           text_to_krama_item_index = None;
@@ -896,7 +889,7 @@ pub fn transliterate_text_core(
             let nth_next_character: Option<char> = nth_next;
 
             // Tamil-Extended special handling (superscript numbers after matra/halant)
-            if is_script_tamil_ext!(from_script_name)
+            if is_script_tamil_ext(from_script_name)
               && matches!(from_script_data, ScriptData::Brahmic { .. })
             {
               let n_1_th_next = if nth_next.is_some() {
@@ -914,8 +907,6 @@ pub fn transliterate_text_core(
               };
               let n_2_th_next_character: Option<char> = n_2_th_next;
 
-              let canonical_map = &from_script_data.get_common_attr().text_to_krama_map;
-
               // Case: matra/halant + superscript tail (superscript is in next list)
               if ignore_ta_ext_sup_num_text_index == -1
                 && is_ta_ext_superscript_tail(n_1_th_next_character)
@@ -925,12 +916,8 @@ pub fn transliterate_text_core(
                 let sup = n_1_th_next_character
                   .map(|c| c.to_string())
                   .unwrap_or_default();
-                let char_index = binary_search_lower(
-                  canonical_map,
-                  &format!("{}{}", char_to_search, sup).as_str(),
-                  |a, i| a[i].0.as_str(),
-                  |a, b| a.cmp(b),
-                );
+                let char_index = from_script_data
+                  .text_to_krama_map_index(&format!("{}{}", char_to_search, sup), false);
                 let nth_char_text_index = nth_next_character
                   .map(|c| c.to_string())
                   .as_ref()
@@ -968,12 +955,8 @@ pub fn transliterate_text_core(
                 let sup = n_2_th_next_character
                   .map(|c| c.to_string())
                   .unwrap_or_default();
-                let char_index = binary_search_lower(
-                  canonical_map,
-                  &format!("{}{}", char_to_search, sup).as_str(),
-                  |a, i| a[i].0.as_str(),
-                  |a, b| a.cmp(b),
-                );
+                let char_index = from_script_data
+                  .text_to_krama_map_index(&format!("{}{}", char_to_search, sup), false);
                 let nth_char_text_index = nth_next_character
                   .map(|c| c.to_string())
                   .as_ref()
@@ -1042,12 +1025,8 @@ pub fn transliterate_text_core(
                     let sup = n_2_th_next_character
                       .map(|c| c.to_string())
                       .unwrap_or_default();
-                    let char_index = binary_search_lower(
-                      canonical_map,
-                      &format!("{}{}", char_to_search, sup).as_str(),
-                      |a, i| a[i].0.as_str(),
-                      |a, b| a.cmp(b),
-                    );
+                    let char_index = from_script_data
+                      .text_to_krama_map_index(&format!("{}{}", char_to_search, sup), false);
                     if let Some(char_index) = char_index {
                       text_to_krama_item_index = Some(char_index);
                       ignore_ta_ext_sup_num_text_index = (end_index
@@ -1190,7 +1169,7 @@ pub fn transliterate_text_core(
                       .map(|k| k.clone())
                   })
                   .collect::<Vec<Option<List>>>();
-                  if is_script_tamil_ext!(from_script_name)
+                  if is_script_tamil_ext(from_script_name)
                     && list_refs
                       .iter()
                       .any(|k| k.as_ref().is_some_and(|k| k.is_matra()))
@@ -1206,7 +1185,7 @@ pub fn transliterate_text_core(
                           .unwrap_or(Vec::new()),
                       });
                     }
-                  } else if is_script_tamil_ext!(from_script_name)
+                  } else if is_script_tamil_ext(from_script_name)
                     && list_refs.len() > 1
                     && list_refs.iter().any(|k| k.is_none())
                   {
@@ -1293,7 +1272,7 @@ pub fn transliterate_text_core(
               halant: to_halant, ..
             } = to_script_data
             {
-              if is_script_tamil_ext!(to_script_name)
+              if is_script_tamil_ext(to_script_name)
                 && is_ta_ext_superscript_tail(ctx.result.last_char())
               {
                 if pieces.concat() == *to_halant
@@ -1408,8 +1387,7 @@ pub fn transliterate_text_core(
         halant: to_halant, ..
       } = to_script_data
       {
-        if is_script_tamil_ext!(to_script_name)
-          && is_ta_ext_superscript_tail(ctx.result.last_char())
+        if is_script_tamil_ext(to_script_name) && is_ta_ext_superscript_tail(ctx.result.last_char())
         {
           if pieces.concat() == *to_halant
             || match to_script_data.get_common_attr().krama_text_arr.get(index) {
