@@ -95,6 +95,7 @@ pub struct CommonScriptAttr {
   pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
   pub list: Vec<List>,
 
+  // Store the index with the string key for faster lookup under O(1) time
   #[serde(skip)]
   #[allow(dead_code)]
   pub krama_text_lookup: HashMap<String, usize>,

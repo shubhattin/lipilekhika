@@ -594,7 +594,9 @@ func NewScriptDataBlob(input map[string]ScriptData) ScriptDataBlob {
 
 	entries := make([]ScriptDataEntry, 0, len(keys))
 	for _, key := range keys {
-		entries = append(entries, ScriptDataEntry{Name: key, Data: input[key]})
+		data := input[key]
+		data.initLookups()
+		entries = append(entries, ScriptDataEntry{Name: key, Data: data})
 	}
 	return ScriptDataBlob{Entries: entries}
 }
@@ -602,7 +604,9 @@ func NewScriptDataBlob(input map[string]ScriptData) ScriptDataBlob {
 func (b ScriptDataBlob) ToMap() map[string]ScriptData {
 	out := make(map[string]ScriptData, len(b.Entries))
 	for _, entry := range b.Entries {
-		out[entry.Name] = entry.Data
+		data := entry.Data
+		data.initLookups()
+		out[entry.Name] = data
 	}
 	return out
 }

@@ -737,8 +737,7 @@ async function copy_script_data_json() {
         'package data\n\nimport "embed"\n\n// FS contains generated binary artifacts committed to git.\n//\n//go:embed gob/*\nvar FS embed.FS\n'
       );
       fs.writeFileSync(target + '/gob/placeholder.txt', 'generated gob files live here');
-    }
-    if (cmd && id === 'go') {
+
       try {
         execSync(cmd);
       } catch (e) {
