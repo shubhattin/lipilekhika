@@ -94,15 +94,6 @@ pub struct CommonScriptAttr {
   pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
   pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
   pub list: Vec<List>,
-
-  #[serde(skip)]
-  pub krama_text_lookup: HashMap<String, usize>,
-  #[serde(skip)]
-  pub text_to_krama_lookup: HashMap<String, usize>,
-  #[serde(skip)]
-  pub typing_text_to_krama_lookup: HashMap<String, usize>,
-  #[serde(skip)]
-  pub custom_script_chars_lookup: HashMap<String, usize>,
 }
 
 impl From<CommonScriptAttrJson> for CommonScriptAttr {
@@ -116,10 +107,6 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
       typing_text_to_krama_map: value.typing_text_to_krama_map,
       custom_script_chars_arr: value.custom_script_chars_arr,
       list: value.list.into_iter().map(Into::into).collect(),
-      krama_text_lookup: HashMap::new(),
-      text_to_krama_lookup: HashMap::new(),
-      typing_text_to_krama_lookup: HashMap::new(),
-      custom_script_chars_lookup: HashMap::new(),
     }
   }
 }
@@ -150,7 +137,7 @@ pub enum ScriptDataJson {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub enum ScriptData {
+pub enum ScriptDataParsed {
   Brahmic {
     common_script_attr: CommonScriptAttr,
     #[allow(dead_code)]
@@ -165,7 +152,7 @@ pub enum ScriptData {
   },
 }
 
-impl From<ScriptDataJson> for ScriptData {
+impl From<ScriptDataJson> for ScriptDataParsed {
   fn from(value: ScriptDataJson) -> Self {
     match value {
       ScriptDataJson::Brahmic {
@@ -173,7 +160,7 @@ impl From<ScriptDataJson> for ScriptData {
         schwa_property,
         halant,
         nuqta,
-      } => ScriptData::Brahmic {
+      } => ScriptDataParsed::Brahmic {
         common_script_attr: common_script_attr.into(),
         schwa_property,
         halant,
@@ -182,7 +169,7 @@ impl From<ScriptDataJson> for ScriptData {
       ScriptDataJson::Other {
         common_script_attr,
         schwa_character,
-      } => ScriptData::Other {
+      } => ScriptDataParsed::Other {
         common_script_attr: common_script_attr.into(),
         schwa_character,
       },

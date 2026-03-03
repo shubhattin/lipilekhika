@@ -7,11 +7,9 @@ import {
 
 const IS_UMD_BUILD_MODE = get_is_umd_build_mode_macro();
 
-const UMD_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<RuntimeScriptData>>> =
-  {};
+const UMD_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
 
-const ESM_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<RuntimeScriptData>>> =
-  {};
+const ESM_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
 
 type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
 // type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
@@ -25,7 +23,7 @@ type _text_to_krama_map_val_type =
  *
  * O(1) lookup time instead of O(log n) for lower bound binary search. It has resulted in practical performance improvements
  */
-export type RuntimeScriptData = OutputScriptData & {
+export type ScriptData = OutputScriptData & {
   // Script Id based map key
   /** `key` - krama_text, `value` - index (in array) */
   map_krama_text_arr: Map<string, number>;
@@ -39,7 +37,7 @@ export type RuntimeScriptData = OutputScriptData & {
 
 export const get_runtime_script_data = async (
   script_data_: Promise<OutputScriptData>
-): Promise<RuntimeScriptData> => {
+): Promise<ScriptData> => {
   const script_data = await script_data_;
   // krama_text_array
   const krama_arr_cache = new Map<string, number>();
@@ -65,7 +63,7 @@ export const get_runtime_script_data = async (
  * @param script_name - The name of the script to get the data for
  * @returns The script data
  */
-export const getScriptData = async (script_name: script_list_type): Promise<RuntimeScriptData> => {
+export const getScriptData = async (script_name: script_list_type): Promise<ScriptData> => {
   if (IS_UMD_BUILD_MODE) {
     if (UMD_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
       return UMD_SCRIPT_DATA_PROMISE_CACHE[script_name];

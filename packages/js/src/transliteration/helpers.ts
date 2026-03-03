@@ -2,7 +2,7 @@ import type {
   OutputBrahmicScriptData,
   OutputScriptData
 } from '../make_script_data/output_script_data_schema';
-import type { RuntimeScriptData } from '../utils/get_script_data';
+import type { ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
 export type prev_context_array_type = [
@@ -17,7 +17,7 @@ type _text_to_krama_map_val_type =
   | OutputScriptData['typing_text_to_krama_map'][number][1];
 
 export const getTextToKramaMapData = (
-  script_data: RuntimeScriptData,
+  script_data: ScriptData,
   text: string,
   use_typing_text_to_krama_map: boolean = false
 ): _text_to_krama_map_val_type | undefined => {
@@ -27,23 +27,23 @@ export const getTextToKramaMapData = (
 };
 
 export const getCustomScriptCharsData = (
-  script_data: RuntimeScriptData,
+  script_data: ScriptData,
   text: string
 ): [_custom_script_chars_arr_type[1], _custom_script_chars_arr_type[2]] | undefined => {
   return script_data.map_custom_script_chars_arr.get(text);
 };
 
-export const kramaIndexOfText = (script_data: RuntimeScriptData, text: string): number => {
+export const kramaIndexOfText = (script_data: ScriptData, text: string): number => {
   return script_data.map_krama_text_arr.get(text) ?? -1;
   // no need to use lower bound binary search, we can direcly use a hash map lookup
 };
 
-export const kramaTextOrNull = (script: RuntimeScriptData, idx: number): string | null => {
+export const kramaTextOrNull = (script: ScriptData, idx: number): string | null => {
   const v = script.krama_text_arr[idx]?.[0];
   return typeof v === 'string' ? v : null;
 };
 
-export const kramaTextOrEmpty = (script: RuntimeScriptData, idx: number): string => {
+export const kramaTextOrEmpty = (script: ScriptData, idx: number): string => {
   return kramaTextOrNull(script, idx) ?? '';
 };
 
@@ -264,7 +264,7 @@ export const matchPrevKramaSequence = (
   peekAt: PeekAtLike,
   anchorIndex: number,
   prev: number[],
-  script_data: RuntimeScriptData
+  script_data: ScriptData
 ): { matched: boolean; matchedLen: number } => {
   for (let i = 0; i < prev.length; i++) {
     const expected_krama_index = prev[prev.length - 1 - i];
@@ -278,10 +278,7 @@ export const matchPrevKramaSequence = (
   return { matched: true, matchedLen: prev.length };
 };
 
-export const replaceWithPieces = (
-  replace_with: number[],
-  script_data: RuntimeScriptData
-): string[] => {
+export const replaceWithPieces = (replace_with: number[], script_data: ScriptData): string[] => {
   return replace_with.map((k) => kramaTextOrEmpty(script_data, k)).filter(Boolean);
 };
 

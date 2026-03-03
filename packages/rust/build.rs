@@ -51,7 +51,7 @@ fn main() {
     let data_json: schema::ScriptDataJson =
       serde_json::from_str(&json).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
 
-    let data: schema::ScriptData = data_json.into();
+    let data: schema::ScriptDataParsed = data_json.into();
     let bytes = bincode::serialize(&data).expect("bincode encode failed for script_data");
 
     let out_path = script_bins_dir.join(format!("{}.bin", stem));

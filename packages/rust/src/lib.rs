@@ -1,4 +1,4 @@
-use crate::script_data::ScriptData;
+use crate::script_data::ScriptDataParsed;
 pub use crate::script_data::{
   ScriptListData, get_all_options, get_normalized_script_name, get_script_list_data,
 };
@@ -9,7 +9,6 @@ pub use crate::typing::{
 };
 use std::collections::HashMap;
 
-mod macros;
 mod script_data;
 mod transliterate;
 mod utils;
@@ -53,16 +52,16 @@ pub fn transliterate(
 pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, String> {
   let normalized_script_name = get_normalized_script_name(script_name)
     .ok_or_else(|| format!("Invalid script name: {}", script_name))?;
-  let script_data = ScriptData::get_script_data(&normalized_script_name);
+  let script_data = ScriptDataParsed::get_script_data(&normalized_script_name);
   match script_data {
-    ScriptData::Brahmic { schwa_property, .. } => Ok(Some(*schwa_property)),
-    ScriptData::Other { .. } => Ok(None),
+    ScriptDataParsed::Brahmic { schwa_property, .. } => Ok(Some(*schwa_property)),
+    ScriptDataParsed::Other { .. } => Ok(None),
   }
 }
 
 /// preload script data
 pub fn preload_script_data(_script_name: &str) {
-  ScriptData::get_script_data("Devanagari");
+  ScriptDataParsed::get_script_data("Devanagari");
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-import { getScriptData, type RuntimeScriptData } from '../utils/get_script_data';
+import { getScriptData, type ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 import custom_options_json from '../custom_options.json';
 import type { TransOptionsType } from '../make_script_data/custom_options_input';
@@ -260,8 +260,8 @@ function apply_custom_trans_rules(ctx: TransliterateCtx, text_index: number, del
  * Returns the active custom options to applied based on the `from` and `to` script information
  */
 export const get_active_custom_options = (
-  from_script_data: RuntimeScriptData,
-  to_script_data: RuntimeScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   input_options?: Record<string, boolean>
 ): CustomOptionType => {
   if (!input_options) return {};
@@ -299,8 +299,8 @@ export const get_active_custom_options = (
 
 /** Resolve active options + flattened rule list once, so hot paths can reuse it. */
 export const resolve_transliteration_rules = (
-  from_script_data: RuntimeScriptData,
-  to_script_data: RuntimeScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   transliteration_input_options?: CustomOptionType
 ): { trans_options: CustomOptionType; custom_rules: CustomRulesType } => {
   const trans_options = get_active_custom_options(
@@ -319,12 +319,12 @@ export const resolve_transliteration_rules = (
 
 const get_rule_replace_text = (
   rule: TransOptionsType[keyof TransOptionsType]['rules'][number],
-  script_data: RuntimeScriptData
+  script_data: ScriptData
 ) => rule.replace_with.map((replace_with) => kramaTextOrEmpty(script_data, replace_with)).join('');
 /** Apply replacement rules using direct replaceAll method if exist */
 export const apply_custom_replace_rules = (
   text: string,
-  script_data: RuntimeScriptData,
+  script_data: ScriptData,
   rules: TransOptionsType[keyof TransOptionsType]['rules'],
   allowed_input_rule_type: TransOptionsType[keyof TransOptionsType]['rules'][number]['check_in']
 ) => {
@@ -355,8 +355,8 @@ export const apply_custom_replace_rules = (
 type TransliterateCtx = {
   from_script_name: script_list_type;
   to_script_name: script_list_type;
-  from_script_data: RuntimeScriptData;
-  to_script_data: RuntimeScriptData;
+  from_script_data: ScriptData;
+  to_script_data: ScriptData;
   trans_options: CustomOptionType;
   custom_rules: CustomRulesType;
   cursor: ReturnType<typeof make_input_cursor>;
@@ -393,8 +393,8 @@ export const transliterate_text_core = (
   text: string,
   from_script_name: script_list_type,
   to_script_name: script_list_type,
-  from_script_data: RuntimeScriptData,
-  to_script_data: RuntimeScriptData,
+  from_script_data: ScriptData,
+  to_script_data: ScriptData,
   trans_options: CustomOptionType,
   custom_rules: CustomRulesType,
   options?: CustomOptionsType
@@ -462,8 +462,8 @@ export const transliterate_text_core = (
   };
 
   type TextToKramaItem =
-    | RuntimeScriptData['text_to_krama_map'][number]
-    | RuntimeScriptData['typing_text_to_krama_map'][number];
+    | ScriptData['text_to_krama_map'][number]
+    | ScriptData['typing_text_to_krama_map'][number];
   // use typing map when Normal -> All in typing mode (or with explicit typing chars option)
   const use_typing_text_to_krama_map =
     (use_typing_chars || typing_mode) && from_script_name === 'Normal';
