@@ -1,10 +1,9 @@
-use crate::script_data::{List, ScriptDataParsed};
-use crate::utils::binary_search::binary_search_lower_with_index;
+use crate::script_data::{List, ScriptData};
 use std::collections::VecDeque;
 
 // pub fn krama_index_of_text()
 
-impl ScriptDataParsed {
+impl ScriptData {
   #[allow(dead_code)]
   pub fn krama_text_or_null(&self, idx: i16) -> Option<&str> {
     if idx < 0 {
@@ -27,13 +26,7 @@ impl ScriptDataParsed {
   }
 
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
-    binary_search_lower_with_index(
-      &self.get_common_attr().krama_text_arr,
-      &self.get_common_attr().krama_text_arr_index,
-      &text,
-      |arr, i| &arr[i].0,
-      |a, b| a.cmp(b),
-    )
+    self.get_common_attr().krama_text_lookup.get(text).copied()
   }
 }
 
@@ -315,7 +308,7 @@ pub struct MatchPrevKramaSequenceResult {
   pub matched_len: usize,
 }
 
-impl ScriptDataParsed {
+impl ScriptData {
   /// Match a sequence of krama items against previous context.
   /// `peek_at` returns the text at a given index as a String.
   pub fn match_prev_krama_sequence<F>(

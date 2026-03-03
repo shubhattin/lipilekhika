@@ -94,6 +94,19 @@ pub struct CommonScriptAttr {
   pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
   pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
   pub list: Vec<List>,
+
+  #[serde(skip)]
+  #[allow(dead_code)]
+  pub krama_text_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  #[allow(dead_code)]
+  pub text_to_krama_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  #[allow(dead_code)]
+  pub typing_text_to_krama_lookup: HashMap<String, usize>,
+  #[serde(skip)]
+  #[allow(dead_code)]
+  pub custom_script_chars_lookup: HashMap<String, usize>,
 }
 
 impl From<CommonScriptAttrJson> for CommonScriptAttr {
@@ -107,6 +120,10 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
       typing_text_to_krama_map: value.typing_text_to_krama_map,
       custom_script_chars_arr: value.custom_script_chars_arr,
       list: value.list.into_iter().map(Into::into).collect(),
+      krama_text_lookup: HashMap::new(),
+      text_to_krama_lookup: HashMap::new(),
+      typing_text_to_krama_lookup: HashMap::new(),
+      custom_script_chars_lookup: HashMap::new(),
     }
   }
 }
@@ -137,7 +154,7 @@ pub enum ScriptDataJson {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub enum ScriptDataParsed {
+pub enum ScriptData {
   Brahmic {
     common_script_attr: CommonScriptAttr,
     #[allow(dead_code)]
@@ -152,7 +169,7 @@ pub enum ScriptDataParsed {
   },
 }
 
-impl From<ScriptDataJson> for ScriptDataParsed {
+impl From<ScriptDataJson> for ScriptData {
   fn from(value: ScriptDataJson) -> Self {
     match value {
       ScriptDataJson::Brahmic {
@@ -160,7 +177,7 @@ impl From<ScriptDataJson> for ScriptDataParsed {
         schwa_property,
         halant,
         nuqta,
-      } => ScriptDataParsed::Brahmic {
+      } => ScriptData::Brahmic {
         common_script_attr: common_script_attr.into(),
         schwa_property,
         halant,
@@ -169,7 +186,7 @@ impl From<ScriptDataJson> for ScriptDataParsed {
       ScriptDataJson::Other {
         common_script_attr,
         schwa_character,
-      } => ScriptDataParsed::Other {
+      } => ScriptData::Other {
         common_script_attr: common_script_attr.into(),
         schwa_character,
       },

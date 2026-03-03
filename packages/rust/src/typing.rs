@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-use crate::script_data::{List, ScriptDataParsed, get_normalized_script_name};
+use crate::script_data::{List, ScriptData, get_normalized_script_name};
 use crate::transliterate::transliterate::{
   TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
 };
@@ -70,8 +70,8 @@ pub struct TypingContext {
   auto_context_clear_time: Duration,
   last_time: Option<Instant>,
 
-  from_script_data: &'static ScriptDataParsed,
-  to_script_data: &'static ScriptDataParsed,
+  from_script_data: &'static ScriptData,
+  to_script_data: &'static ScriptData,
   trans_options: HashMap<String, bool>,
   custom_rules: Vec<crate::script_data::Rule>,
 }
@@ -87,8 +87,8 @@ impl TypingContext {
     let normalized_typing_lang = get_normalized_script_name(typing_lang)
       .ok_or_else(|| format!("Invalid script name: {}", typing_lang))?;
 
-    let from_script_data = ScriptDataParsed::get_script_data("Normal");
-    let to_script_data = ScriptDataParsed::get_script_data(&normalized_typing_lang);
+    let from_script_data = ScriptData::get_script_data("Normal");
+    let to_script_data = ScriptData::get_script_data(&normalized_typing_lang);
 
     let resolved = resolve_transliteration_rules(from_script_data, to_script_data, None);
 
@@ -304,7 +304,7 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
     return Err(format!("Invalid script name: {}", script));
   }
 
-  let script_data = ScriptDataParsed::get_script_data(&normalized_typing_lang);
+  let script_data = ScriptData::get_script_data(&normalized_typing_lang);
   let common_attr = script_data.get_common_attr();
 
   /// Merges items that end up with the same displayed text (and type),
@@ -431,7 +431,7 @@ pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, String>
     return Err(format!("Invalid script name: {}", script));
   }
 
-  let script_data = ScriptDataParsed::get_script_data(&normalized);
+  let script_data = ScriptData::get_script_data(&normalized);
   let common_attr = script_data.get_common_attr();
 
   Ok(

@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+#[allow(dead_code)]
 pub fn binary_search_lower_with_index<'a, T, K, F, C>(
   arr: &'a [T],
   index: &'a [usize],
@@ -37,6 +38,7 @@ where
   result
 }
 
+#[allow(dead_code)]
 pub fn binary_search_lower<'a, T, K, F, C>(
   arr: &'a [T],
   target: &K,

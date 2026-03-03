@@ -33,6 +33,14 @@ export const getCustomScriptCharsData = (
   return script_data.map_custom_script_chars_arr.get(text);
 };
 
+export const getTypingTextToKramaText = (
+  script_data: ScriptData,
+  index: number | null | undefined
+): string | undefined => {
+  if (index === null || index === undefined || index < 0) return undefined;
+  return script_data.typing_text_to_krama_map[index]?.[0];
+};
+
 export const kramaIndexOfText = (script_data: ScriptData, text: string): number => {
   return script_data.map_krama_text_arr.get(text) ?? -1;
   // no need to use lower bound binary search, we can direcly use a hash map lookup

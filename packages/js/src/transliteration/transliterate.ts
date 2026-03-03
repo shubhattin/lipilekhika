@@ -17,6 +17,7 @@ import {
   isVedicSvaraTail,
   getTextToKramaMapData,
   getCustomScriptCharsData,
+  getTypingTextToKramaText,
   type prev_context_array_type
 } from './helpers';
 
@@ -521,8 +522,7 @@ export const transliterate_text_core = (
           char,
           from_script_data.list[custom_script_val[0] ?? -1] ?? null
         ]);
-        const normal_text =
-          from_script_data.typing_text_to_krama_map[custom_script_val[1] ?? -1]?.[0];
+        const normal_text = getTypingTextToKramaText(from_script_data, custom_script_val[1]);
         result.emit(normal_text ?? '');
         cursor.advance(char.length);
         continue;

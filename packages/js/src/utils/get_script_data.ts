@@ -55,6 +55,8 @@ export const get_runtime_script_data = async (
     map_custom_script_chars_arr: new Map(
       script_data.custom_script_chars_arr.map((v) => [v[0], [v[1], v[2]]])
     )
+    // we can parse other elements dirctly as there are no duplicates in them like
+    // map_krama_text_arr
   };
 };
 

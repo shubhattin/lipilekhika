@@ -28,8 +28,8 @@ pub fn get_all_options(
   let normalized_to = get_normalized_script_name(to_script_name)
     .ok_or_else(|| format!("Invalid script name: {}", to_script_name))?;
 
-  let from_script_data = ScriptDataParsed::get_script_data(&normalized_from);
-  let to_script_data = ScriptDataParsed::get_script_data(&normalized_to);
+  let from_script_data = ScriptData::get_script_data(&normalized_from);
+  let to_script_data = ScriptData::get_script_data(&normalized_to);
 
   // Create a HashMap with all custom options set to true.
   // `custom_options_map` is insertion-ordered (same as `custom_options.json`),
