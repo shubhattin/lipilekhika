@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
@@ -14,6 +15,8 @@ import (
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/typing"
 	"gopkg.in/yaml.v3"
 )
+
+const N_GOROUTINES = 10
 
 type transliterationCase struct {
 	From    string          `yaml:"from"`
@@ -66,6 +69,7 @@ func main() {
 	fmt.Printf("Typing cases: %d\n\n", len(typingCases))
 
 	runTransliterationBenchmark(transCases, *iterations)
+	runTransliterationMultiBenchmark(transCases, *iterations)
 	runTypingBenchmark(transCases, typingCases, *iterations)
 }
 
@@ -83,6 +87,56 @@ func runTransliterationBenchmark(cases []transliterationCase, iterations int) {
 	}
 	elapsed := time.Since(start)
 	printMetrics("Transliteration Cases", elapsed, ops)
+}
+
+func runTransliterationMultiBenchmark(cases []transliterationCase, iterations int) {
+	if len(cases) == 0 {
+		printMetrics("Transliteration Cases (multi)", 0, 0)
+		return
+	}
+
+	workers := N_GOROUTINES
+	if len(cases) < workers {
+		workers = len(cases)
+	}
+	chunkSize := (len(cases) + workers - 1) / workers
+
+	start := time.Now()
+	ops := len(cases) * iterations
+
+	for i := 0; i < iterations; i++ {
+		var wg sync.WaitGroup
+		errCh := make(chan error, workers)
+
+		for startIdx := 0; startIdx < len(cases); startIdx += chunkSize {
+			endIdx := min(startIdx+chunkSize, len(cases))
+			chunk := cases[startIdx:endIdx]
+
+			wg.Add(1)
+			go func(chunk []transliterationCase) {
+				defer wg.Done()
+				for _, tc := range chunk {
+					if _, err := lipilekhika.Transliterate(tc.Input, tc.From, tc.To, tc.Options); err != nil {
+						select {
+						case errCh <- fmt.Errorf("from=%s to=%s err=%w", tc.From, tc.To, err):
+						default:
+						}
+						return
+					}
+				}
+			}(chunk)
+		}
+
+		wg.Wait()
+		close(errCh)
+		if err, ok := <-errCh; ok {
+			fmt.Fprintf(os.Stderr, "transliteration multi benchmark failed: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	elapsed := time.Since(start)
+	printMetrics(fmt.Sprintf("Transliteration Cases (multi, %d goroutines)", N_GOROUTINES), elapsed, ops)
 }
 
 func runTypingBenchmark(transCases []transliterationCase, typingCases []typingCase, iterations int) {
@@ -283,6 +337,13 @@ func listYAMLFiles(root string, skipContext bool) ([]string, error) {
 	}
 	sort.Strings(files)
 	return files, nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func printMetrics(label string, elapsed time.Duration, ops int) {

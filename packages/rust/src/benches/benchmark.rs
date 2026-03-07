@@ -7,7 +7,10 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+use std::thread;
 use std::time::{Duration, Instant};
+
+const N_THREADS: usize = 10;
 
 // ----------------------------
 // YAML schemas (mirrors JS + existing Rust YAML tests)
@@ -264,6 +267,29 @@ fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
   }
 }
 
+fn run_transliteration_multi_pass(cases: &[TransliterationTestCase]) {
+  let active_cases: Vec<&TransliterationTestCase> = cases
+    .iter()
+    .filter(|case| !case.todo.unwrap_or(false))
+    .collect();
+  if active_cases.is_empty() {
+    return;
+  }
+
+  let chunk_size = active_cases.len().div_ceil(N_THREADS).max(1);
+
+  thread::scope(|scope| {
+    for chunk in active_cases.chunks(chunk_size) {
+      scope.spawn(move || {
+        for case in chunk {
+          let out = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
+          black_box(out).ok();
+        }
+      });
+    }
+  });
+}
+
 fn run_typing_normal_to_others_pass(cases: &[TransliterationTestCase]) {
   for case in cases {
     if case.todo.unwrap_or(false) {
@@ -391,6 +417,10 @@ fn criterion_benchmark(c: &mut Criterion) {
 
   c.bench_function("transliteration_all_cases", |b| {
     b.iter(|| run_transliteration_pass(black_box(translit)))
+  });
+
+  c.bench_function("transliter_multi", |b| {
+    b.iter(|| run_transliteration_multi_pass(black_box(translit)))
   });
 
   c.bench_function("typing_emulation_normal_to_others", |b| {
