@@ -6,7 +6,7 @@
   import Monitor from 'lucide-svelte/icons/monitor';
   import Check from 'lucide-svelte/icons/check';
 
-  const STORAGE_KEY = 'lipilekhika-theme';
+  const STORAGE_KEY = 'starlight-theme';
 
   type Theme = 'light' | 'dark' | 'system';
 
