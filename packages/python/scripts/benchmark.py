@@ -1,8 +1,11 @@
 import time
+from collections import defaultdict
 from pathlib import Path
-import yaml
 from typing import Any
+
+import yaml
 from rich.console import Console
+from rich.table import Table
 
 from lipilekhika import transliterate, preload_script_data, SCRIPT_LIST
 from lipilekhika.typing import create_typing_context, TypingContextOptions
@@ -19,6 +22,8 @@ TEST_DATA_FOLDER = (
 TYPING_TEST_DATA_FOLDER = (
     Path(__file__).resolve().parent.parent.parent.parent / "test_data" / "typing"
 )
+
+BULK_SEPARATOR = "\n"
 
 
 def get_test_data() -> list[dict[str, Any]]:
@@ -66,11 +71,48 @@ def get_typing_test_data() -> list[dict[str, Any]]:
     return data
 
 
+def build_transliteration_batches(
+    test_data: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Group by from-to; join inputs with newline; bulk calls ignore custom options."""
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for item in test_data:
+        key = f"{item['from']}-{item['to']}"
+        grouped[key].append(item)
+    batches = []
+    for _key, items in grouped.items():
+        batches.append(
+            {
+                "from": items[0]["from"],
+                "to": items[0]["to"],
+                "input": BULK_SEPARATOR.join(str(i["input"]) for i in items),
+            }
+        )
+    return batches
+
+
+def build_typing_batches(
+    transliteration_test_data: list[dict[str, Any]],
+    typing_test_data: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Group by target script; join inputs with newline; bulk calls ignore custom options."""
+    grouped: dict[str, list[str]] = defaultdict(list)
+    for item in transliteration_test_data:
+        if item.get("from") != "Normal":
+            continue
+        grouped[str(item["to"])].append(str(item["input"]))
+    for item in typing_test_data:
+        grouped[str(item["script"])].append(str(item["text"]))
+    return [
+        {"script": script, "input": BULK_SEPARATOR.join(parts)}
+        for script, parts in grouped.items()
+    ]
+
+
 def emulate_typing(
     text: str, typing_lang: ScriptListType, options: dict[str, Any] | None = None
 ) -> str:
     """Emulate typing text character by character."""
-    # Convert dict to TypingContextOptions if provided
     typing_options = None
     if options:
         typing_options = TypingContextOptions(
@@ -84,10 +126,8 @@ def emulate_typing(
 
     for char in text:
         diff = ctx.take_key_input(char)
-        # Delete characters if needed
         if diff.to_delete_chars_count > 0:
             result = result[: -diff.to_delete_chars_count]
-        # Add new text
         result += diff.diff_add_text
 
     return result
@@ -99,43 +139,92 @@ def preload_data() -> None:
         preload_script_data(script)
 
 
-def benchmark():
-    """Run all benchmarks."""
-    TEST_DATA = get_test_data()
-    TYPING_TEST_DATA = get_typing_test_data()
-
-    # Transliteration Cases
-    console.print("[bold cyan]Transliteration Cases:[/bold cyan]")
-    preload_data()
-
+def measure_individual_transliteration(test_data: list[dict[str, Any]]) -> float:
     start = time.perf_counter()
-    for test_data in TEST_DATA:
+    for td in test_data:
         transliterate(
-            test_data["input"],
-            test_data["from"],
-            test_data["to"],
-            test_data.get("options"),
+            td["input"],
+            td["from"],
+            td["to"],
+            td.get("options"),
         )
     end = time.perf_counter()
-    elapsed_ms = (end - start) * 1000
-    console.print(f"Time taken: [yellow]{elapsed_ms:.2f} ms[/yellow]")
+    return (end - start) * 1000
 
-    # Typing Emulation
-    console.print("[bold cyan]Typing Emulation:[/bold cyan]")
 
-    # 1. Emulate on Normal to others
-    normal_to_others_test_data = [td for td in TEST_DATA if td["from"] == "Normal"]
-
+def measure_bulk_transliteration(batches: list[dict[str, Any]]) -> float:
     start = time.perf_counter()
-    for test_data in normal_to_others_test_data:
-        emulate_typing(test_data["input"], test_data["to"])
+    for batch in batches:
+        transliterate(batch["input"], batch["from"], batch["to"], None)
+    end = time.perf_counter()
+    return (end - start) * 1000
 
-    # 2. Emulate on others to Normal
-    for test_data in TYPING_TEST_DATA:
+
+def measure_individual_typing(
+    test_data: list[dict[str, Any]], typing_test_data: list[dict[str, Any]]
+) -> float:
+    normal_to_others = [td for td in test_data if td["from"] == "Normal"]
+    start = time.perf_counter()
+    for test_data in normal_to_others:
+        emulate_typing(test_data["input"], test_data["to"])
+    for test_data in typing_test_data:
         emulate_typing(test_data["text"], test_data["script"], test_data.get("options"))
     end = time.perf_counter()
-    elapsed_ms = (end - start) * 1000
-    console.print(f"Time taken: [yellow]{elapsed_ms:.2f} ms[/yellow]")
+    return (end - start) * 1000
+
+
+def measure_bulk_typing(batches: list[dict[str, Any]]) -> float:
+    start = time.perf_counter()
+    for batch in batches:
+        emulate_typing(batch["input"], batch["script"])
+    end = time.perf_counter()
+    return (end - start) * 1000
+
+
+def format_ms(ms: float) -> str:
+    return f"{ms:.2f} ms"
+
+
+def benchmark() -> None:
+    """Run all benchmarks (iterated vs bulk, matching JS script layout)."""
+    test_data = get_test_data()
+    typing_test_data = get_typing_test_data()
+    transliteration_batches = build_transliteration_batches(test_data)
+    typing_batches = build_typing_batches(test_data, typing_test_data)
+
+    console.print("[bold cyan]Benchmark Results[/bold cyan]")
+    console.print(
+        f"[dim]Precomputed {len(transliteration_batches)} bulk batches from "
+        f"{len(test_data)} transliteration cases by from-to, ignoring custom options.[/dim]"
+    )
+    console.print(
+        f"[dim]Precomputed {len(typing_batches)} typing bulk batches, grouped by target script "
+        "and ignoring custom options.[/dim]"
+    )
+
+    preload_data()
+
+    transliteration_iterated = measure_individual_transliteration(test_data)
+    transliteration_bulk = measure_bulk_transliteration(transliteration_batches)
+
+    typing_iterated = measure_individual_typing(test_data, typing_test_data)
+    typing_bulk = measure_bulk_typing(typing_batches)
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Benchmark")
+    table.add_column("Iterated", justify="right")
+    table.add_column("Bulk", justify="right")
+    table.add_row(
+        "Transliteration Cases",
+        format_ms(transliteration_iterated),
+        format_ms(transliteration_bulk),
+    )
+    table.add_row(
+        "Typing Emulation",
+        format_ms(typing_iterated),
+        format_ms(typing_bulk),
+    )
+    console.print(table)
 
 
 if __name__ == "__main__":
