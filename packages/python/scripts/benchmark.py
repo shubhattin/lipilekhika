@@ -165,10 +165,10 @@ def measure_individual_typing(
 ) -> float:
     normal_to_others = [td for td in test_data if td["from"] == "Normal"]
     start = time.perf_counter()
-    for test_data in normal_to_others:
-        emulate_typing(test_data["input"], test_data["to"])
-    for test_data in typing_test_data:
-        emulate_typing(test_data["text"], test_data["script"], test_data.get("options"))
+    for transliteration_case in normal_to_others:
+        emulate_typing(transliteration_case["input"], transliteration_case["to"])
+    for typing_case in typing_test_data:
+        emulate_typing(typing_case["text"], typing_case["script"], typing_case.get("options"))
     end = time.perf_counter()
     return (end - start) * 1000
 
