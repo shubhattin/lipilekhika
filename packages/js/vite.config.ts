@@ -20,6 +20,7 @@ export default defineConfig({
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
+            node: path.resolve(__dirname, 'src/index_node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
@@ -31,11 +32,12 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: [],
+      external: [/^node:/],
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
+            node: path.resolve(__dirname, 'src/index_node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       output: !IS_UMD_BUILD_MODE

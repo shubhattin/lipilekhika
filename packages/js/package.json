@@ -27,6 +27,11 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.cjs"
     },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/esm/node.mjs",
+      "require": "./dist/cjs/node.cjs"
+    },
     "./typing": {
       "types": "./dist/typing.d.ts",
       "import": "./dist/esm/typing.mjs",

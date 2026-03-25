@@ -1,0 +1,16 @@
+[package]
+name = "node_binding"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+lipilekhika = { path = "../../rust" }
+napi = "3.8.3"
+napi-derive = "3.5.2"
+
+[build-dependencies]
+napi-build = "2.3.1"
