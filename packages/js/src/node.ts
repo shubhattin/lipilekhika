@@ -1,6 +1,12 @@
 import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import type { CustomOptionType } from './transliteration/transliterate';
 
+const loadNativeModule = () => import('../binding/pkg');
+
+export async function preloadNode() {
+  await loadNativeModule();
+}
+
 /**
  * Node.js native(Rust + N-API) based transliteration.
  *
@@ -27,7 +33,6 @@ export async function transliterate_node(
   }
   if (normalized_from === normalized_to) return text;
 
-  const nativeMod = await import('../binding/pkg');
-
+  const nativeMod = await loadNativeModule();
   return nativeMod.transliterate(text, normalized_from, normalized_to, trans_options);
 }

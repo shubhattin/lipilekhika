@@ -7,12 +7,13 @@ import fs from 'node:fs';
 import type { Plugin } from 'vite';
 
 const IS_UMD_BUILD_MODE = process.env.VITE_IS_UMD_BUILD_MODE === 'true';
+const NODE_BINDING_IMPORTS = new Set(['../binding/pkg', '../binding/pkg/index.mjs']);
 
 export default defineConfig({
   plugins: [
     dts({ include: ['src'], outDir: 'dist/types' }),
     MacroPlugin(),
-    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [])
+    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNodeBindingPlugin()])
   ],
   build: {
     lib: {
@@ -20,7 +21,7 @@ export default defineConfig({
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
-            node: path.resolve(__dirname, 'src/index_node.ts'),
+            node: path.resolve(__dirname, 'src/node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
@@ -32,12 +33,12 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: [/^node:/],
+      external: (id) => id.startsWith('node:') || NODE_BINDING_IMPORTS.has(id),
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
-            node: path.resolve(__dirname, 'src/index_node.ts'),
+            node: path.resolve(__dirname, 'src/node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       output: !IS_UMD_BUILD_MODE
@@ -69,6 +70,22 @@ export default defineConfig({
     }
   }
 });
+
+function copyNodeBindingPlugin(): Plugin {
+  return {
+    name: 'copy-node-binding',
+    closeBundle: async () => {
+      const srcDir = path.resolve(__dirname, 'binding/pkg');
+      const destDir = path.resolve(__dirname, 'dist/binding/pkg');
+
+      if (!fs.existsSync(srcDir)) return;
+
+      fs.rmSync(destDir, { recursive: true, force: true });
+      fs.mkdirSync(path.dirname(destDir), { recursive: true });
+      fs.cpSync(srcDir, destDir, { recursive: true });
+    }
+  };
+}
 
 // minify and copy json files for umd module
 function copyAndMinifyJsonPlugin(): Plugin {

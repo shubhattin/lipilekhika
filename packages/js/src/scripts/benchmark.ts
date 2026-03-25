@@ -4,10 +4,9 @@ import {
   type ScriptListType,
   SCRIPT_LIST,
   transliterate_wasm,
-  preloadWasm,
-  transliterate_node,
-  preloadNode
+  preloadWasm
 } from '..';
+import { transliterate_node, preloadNode } from '../node';
 import { performance } from 'node:perf_hooks';
 import path from 'node:path';
 import {
