@@ -7,6 +7,6 @@ bunx --package @napi-rs/cli napi build --platform --release --manifest-path Carg
 cat > pkg/index.mjs <<'EOF'
 import nativeMod from './index.cjs';
 
-export const { transliterate } = nativeMod;
+export const { transliterate, NativeTypingContext } = nativeMod;
 export default nativeMod;
 EOF
