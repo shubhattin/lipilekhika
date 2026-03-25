@@ -4,7 +4,9 @@ import {
   type ScriptListType,
   SCRIPT_LIST,
   transliterate_wasm,
-  preloadWasm
+  preloadWasm,
+  transliterate_node,
+  preloadNode
 } from '..';
 import { performance } from 'node:perf_hooks';
 import path from 'node:path';
@@ -230,6 +232,10 @@ async function benchmark() {
   const transliterationWasmIterated = await measureIndividualTransliteration(transliterate_wasm);
   const transliterationWasmBulk = await measureBulkTransliteration(transliterate_wasm);
 
+  await preloadNode();
+  const transliterationNodeIterated = await measureIndividualTransliteration(transliterate_node);
+  const transliterationNodeBulk = await measureBulkTransliteration(transliterate_node);
+
   const rows: BenchmarkRow[] = [
     {
       Benchmark: 'Transliteration Cases',
@@ -245,6 +251,11 @@ async function benchmark() {
       Benchmark: 'Transliteration Cases (WASM)',
       Iterated: formatDuration(transliterationWasmIterated),
       Bulk: formatDuration(transliterationWasmBulk)
+    },
+    {
+      Benchmark: 'Transliteration Cases (Node / N-API)',
+      Iterated: formatDuration(transliterationNodeIterated),
+      Bulk: formatDuration(transliterationNodeBulk)
     }
   ];
 
