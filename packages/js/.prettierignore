@@ -11,3 +11,4 @@ src/custom_options.json
 tmp
 
 wasm/pkg
+binding/pkg

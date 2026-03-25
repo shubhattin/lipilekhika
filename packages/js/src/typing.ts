@@ -16,7 +16,7 @@ export const DEFAULT_USE_NATIVE_NUMERALS = true;
  */
 export const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
 
-type TypingContextOptions = {
+export type TypingContextOptions = {
   /** The time in milliseconds after which the context will be cleared automatically
    * @default 4500ms
    */
@@ -34,6 +34,15 @@ type TypingContextOptions = {
    * @default false
    */
   includeInherentVowel?: boolean;
+};
+
+export type TypingDiff = {
+  /** These number of characters need to be deleted from the current "app" input state */
+  to_delete_chars_count: number;
+  /** These characters need to be added to the current "app" input state */
+  diff_add_text: string;
+  /** Remaining internal context length (0 means context was cleared) */
+  context_length: number;
 };
 
 /**
@@ -92,7 +101,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
    * @param key  The key to take input for
    * @returns The diff of the previous and current output
    */
-  function takeKeyInput(key: string) {
+  function takeKeyInput(key: string): TypingDiff {
     if (!from_script_data || !to_script_data) {
       throw new Error(
         'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'

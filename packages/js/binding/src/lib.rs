@@ -5,15 +5,21 @@ use std::collections::HashMap;
 
 #[napi(object)]
 pub struct TypingContextOptionsInput {
+  #[napi(js_name = "auto_context_clear_time_ms")]
   pub auto_context_clear_time_ms: Option<u32>,
+  #[napi(js_name = "use_native_numerals")]
   pub use_native_numerals: Option<bool>,
+  #[napi(js_name = "include_inherent_vowel")]
   pub include_inherent_vowel: Option<bool>,
 }
 
 #[napi(object)]
 pub struct TypingDiffOutput {
+  #[napi(js_name = "to_delete_chars_count")]
   pub to_delete_chars_count: u32,
+  #[napi(js_name = "diff_add_text")]
   pub diff_add_text: String,
+  #[napi(js_name = "context_length")]
   pub context_length: u32,
 }
 
@@ -55,12 +61,12 @@ impl NativeTypingContext {
     Ok(Self { inner })
   }
 
-  #[napi]
+  #[napi(js_name = "clear_context")]
   pub fn clear_context(&mut self) {
     self.inner.clear_context();
   }
 
-  #[napi]
+  #[napi(js_name = "take_key_input")]
   pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
     let diff = self.inner.take_key_input(&key).map_err(Error::from_reason)?;
     Ok(TypingDiffOutput {
@@ -70,28 +76,28 @@ impl NativeTypingContext {
     })
   }
 
-  #[napi]
+  #[napi(js_name = "update_use_native_numerals")]
   pub fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
     self.inner.update_use_native_numerals(use_native_numerals);
   }
 
-  #[napi]
+  #[napi(js_name = "update_include_inherent_vowel")]
   pub fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
     self.inner
       .update_include_inherent_vowel(include_inherent_vowel);
   }
 
-  #[napi]
+  #[napi(js_name = "get_use_native_numerals")]
   pub fn get_use_native_numerals(&self) -> bool {
     self.inner.get_use_native_numerals()
   }
 
-  #[napi]
+  #[napi(js_name = "get_include_inherent_vowel")]
   pub fn get_include_inherent_vowel(&self) -> bool {
     self.inner.get_include_inherent_vowel()
   }
 
-  #[napi]
+  #[napi(js_name = "get_normalized_script")]
   pub fn get_normalized_script(&self) -> String {
     self.inner.get_normalized_script()
   }
