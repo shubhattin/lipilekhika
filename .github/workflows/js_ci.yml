@@ -46,6 +46,11 @@ jobs:
           cd packages/js/wasm
           wasm-pack build --release --target web
 
+      - name: Build Node Binding
+        run: |
+          cd packages/js/binding
+          ./gen_node_bind.sh
+
       - name: Typescript and Build Check
         run: |
           cd packages/js
