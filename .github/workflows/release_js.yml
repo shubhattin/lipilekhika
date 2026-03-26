@@ -210,6 +210,14 @@ jobs:
     needs: [test, build-native]
     environment:
       name: release
+    env:
+      REQUIRED_NATIVE_NODE_FILES: |
+        index.linux-x64-gnu.node
+        index.linux-arm64-gnu.node
+        index.darwin-x64.node
+        index.darwin-arm64.node
+        index.win32-x64-msvc.node
+        index.win32-arm64-msvc.node
 
     steps:
       - name: Checkout repo
@@ -253,15 +261,10 @@ jobs:
           test -f packages/js/binding/pkg/index.cjs
           test -f packages/js/binding/pkg/index.d.ts
           test -f packages/js/binding/pkg/index.mjs
-          for file in \
-            index.linux-x64-gnu.node \
-            index.linux-arm64-gnu.node \
-            index.darwin-x64.node \
-            index.darwin-arm64.node \
-            index.win32-x64-msvc.node \
-            index.win32-arm64-msvc.node; do
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
             test -f "packages/js/binding/pkg/$file"
-          done
+          done <<< "$REQUIRED_NATIVE_NODE_FILES"
 
       - name: Generate Test Data
         run: |
@@ -292,15 +295,10 @@ jobs:
           test -f packages/js/dist/binding/pkg/index.cjs
           test -f packages/js/dist/binding/pkg/index.d.ts
           test -f packages/js/dist/binding/pkg/index.mjs
-          for file in \
-            index.linux-x64-gnu.node \
-            index.linux-arm64-gnu.node \
-            index.darwin-x64.node \
-            index.darwin-arm64.node \
-            index.win32-x64-msvc.node \
-            index.win32-arm64-msvc.node; do
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
             test -f "packages/js/dist/binding/pkg/$file"
-          done
+          done <<< "$REQUIRED_NATIVE_NODE_FILES"
 
       - name: Read package.json version (publish job)
         id: pkg_version_publish
