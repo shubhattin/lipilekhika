@@ -10,7 +10,13 @@ import {
 type NativeModule = typeof import('../binding/pkg');
 type NativeTypingContext = InstanceType<NativeModule['NativeTypingContext']>;
 
-const loadNativeModule = () => import('../binding/pkg');
+let nativeModulePromise: Promise<NativeModule> | null = null;
+const loadNativeModule = () => {
+  if (!nativeModulePromise) {
+    nativeModulePromise = import('../binding/pkg');
+  }
+  return nativeModulePromise;
+};
 
 export async function preloadNode() {
   await loadNativeModule();

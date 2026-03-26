@@ -8,7 +8,7 @@ import type { script_input_name_type } from '../utils/lang_list/script_normaliza
 import { TestDataTypeSchema } from './test_commons';
 import { VEDIC_SVARAS } from './helpers';
 import { transliterate as transliterate_js, preloadScriptData } from '../index';
-// import { transliterate_node } from '../index_node';
+// import { transliterate_node } from '../node';
 // import { transliterate_wasm } from '../index_wasm';
 
 const transliterate_fn = transliterate_js;
