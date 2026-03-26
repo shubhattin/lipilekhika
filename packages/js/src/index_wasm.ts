@@ -1,6 +1,14 @@
 import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import type { CustomOptionType } from './transliteration/transliterate';
 
+let wasmModulePromise: Promise<typeof import('../wasm/bind')> | null = null;
+const loadWasmModule = () => {
+  if (!wasmModulePromise) {
+    wasmModulePromise = import('../wasm/bind');
+  }
+  return wasmModulePromise;
+};
+
 /**
  * WASM(Rust) based transliteration.
  *
@@ -26,7 +34,7 @@ export async function transliterate_wasm(
     throw new Error(`Invalid script name: ${to}`);
   }
   if (normalized_from === normalized_to) return text;
-  const wasm_mod = await import('../wasm/bind');
+  const wasm_mod = await loadWasmModule();
   const result = await wasm_mod.transliterate(text, normalized_from, normalized_to, trans_options);
   return result;
 }
@@ -35,6 +43,6 @@ export async function transliterate_wasm(
  * Preload the WASM module.
  */
 export const preloadWasm = async () => {
-  const wasm_mod = await import('../wasm/bind');
+  const wasm_mod = await loadWasmModule();
   await wasm_mod.preloadWasm();
 };
