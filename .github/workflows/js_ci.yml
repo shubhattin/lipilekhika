@@ -67,6 +67,13 @@ jobs:
         run: |
           bun install
           bun run gen:test-data
+
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
       ## Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -91,8 +98,5 @@ jobs:
           cd packages/js/binding
           ./gen_node_bind.sh
       - name: Test and Coverage
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
-          bun test --coverage --concurrent --only-failures
+        working-directory: packages/js
+        run: bun test --coverage --concurrent --only-failures
