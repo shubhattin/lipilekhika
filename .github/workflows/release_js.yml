@@ -136,7 +136,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
             node_file: index.linux-arm64-gnu.node
           - name: macos-x64
-            runner: macos-13
+            runner: macos-15-intel
             target: x86_64-apple-darwin
             node_file: index.darwin-x64.node
           - name: macos-arm64

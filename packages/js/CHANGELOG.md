@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (js-lib@v1.0.9-beta.1)
+
+- Added a native `lipilekhika/node` binding for transliterate and create_typing_context functions
+
 ## js-lib@v1.0.8
 
 - Improved Performance with Map usage (44%, 650ms -> 450ms)

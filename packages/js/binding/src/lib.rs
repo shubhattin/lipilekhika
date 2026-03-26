@@ -70,9 +70,11 @@ impl NativeTypingContext {
   pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
     let diff = self.inner.take_key_input(&key).map_err(Error::from_reason)?;
     Ok(TypingDiffOutput {
-      to_delete_chars_count: diff.to_delete_chars_count as u32,
+      to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
+        .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,
       diff_add_text: diff.diff_add_text,
-      context_length: diff.context_length as u32,
+      context_length: u32::try_from(diff.context_length)
+        .map_err(|_| Error::from_reason("context_length exceeds u32 range"))?,
     })
   }
 
