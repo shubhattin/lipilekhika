@@ -44,6 +44,16 @@ async function main() {
     }
   );
 
+  runStep(
+    '.d.ts file unification (node)',
+    'bun',
+    ['api-extractor', 'run', '--local', '--config', 'scripts/api-extractor.node.json'],
+    {
+      cwd: packageRoot,
+      quiet: true
+    }
+  );
+
   await rm(path.join(packageRoot, 'dist', 'types'), { recursive: true, force: true });
   await rm(path.join(packageRoot, 'tsdoc-metadata.json'), { force: true });
 }

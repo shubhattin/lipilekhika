@@ -6,7 +6,7 @@ members = [
     "packages/js/wasm",
     "packages/python/binding",
     "packages/dart/binding",
-    "plugins/fcitx5/binding",
+    "plugins/fcitx5/binding", "packages/js/binding",
 ]
 resolver = "3"
 

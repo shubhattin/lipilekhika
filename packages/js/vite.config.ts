@@ -12,7 +12,7 @@ export default defineConfig({
   plugins: [
     dts({ include: ['src'], outDir: 'dist/types' }),
     MacroPlugin(),
-    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [])
+    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNativeBinariesPlugin()])
   ],
   build: {
     lib: {
@@ -20,6 +20,7 @@ export default defineConfig({
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
+            node: path.resolve(__dirname, 'src/node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
@@ -31,11 +32,12 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: [],
+      external: (id) => id.startsWith('node:'),
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
+            node: path.resolve(__dirname, 'src/node.ts'),
             typing: path.resolve(__dirname, 'src/typing.ts')
           },
       output: !IS_UMD_BUILD_MODE
@@ -67,6 +69,28 @@ export default defineConfig({
     }
   }
 });
+
+function copyNativeBinariesPlugin(): Plugin {
+  return {
+    name: 'copy-native-binaries',
+    closeBundle: async () => {
+      const srcDir = path.resolve(__dirname, 'binding/pkg');
+      const destDir = path.resolve(__dirname, 'dist/native');
+
+      if (!fs.existsSync(srcDir)) return;
+
+      const nativeBinaryFiles = fs.readdirSync(srcDir).filter((file) => file.endsWith('.node'));
+
+      fs.rmSync(destDir, { recursive: true, force: true });
+      if (nativeBinaryFiles.length === 0) return;
+
+      fs.mkdirSync(destDir, { recursive: true });
+      for (const nativeBinaryFile of nativeBinaryFiles) {
+        fs.copyFileSync(path.join(srcDir, nativeBinaryFile), path.join(destDir, nativeBinaryFile));
+      }
+    }
+  };
+}
 
 // minify and copy json files for umd module
 function copyAndMinifyJsonPlugin(): Plugin {

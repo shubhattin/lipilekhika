@@ -6,6 +6,7 @@ import {
   transliterate_wasm,
   preloadWasm
 } from '..';
+import { createTypingContext, transliterate_node, preloadNode } from '../node';
 import { performance } from 'node:perf_hooks';
 import path from 'node:path';
 import {
@@ -21,6 +22,7 @@ import chalk from 'chalk';
 type TransliterationTestData = z.infer<typeof TestDataTypeSchema>;
 type TypingTestData = z.infer<typeof typing_test_data_schema>;
 type TransliterationOptions = Parameters<typeof transliterate>[3];
+type NodeTypingOptions = Parameters<typeof createTypingContext>[1];
 type TransliterationFn = (
   text: string,
   from: ScriptListType,
@@ -191,12 +193,62 @@ async function measureTypingEmulation() {
   return performance.now() - start;
 }
 
+async function emulateTypingNode(
+  text: string,
+  typing_lang: ScriptListType,
+  options?: NodeTypingOptions
+) {
+  const ctx = createTypingContext(typing_lang, options);
+  await ctx.ready;
+  let result = '';
+  for (const char of text) {
+    const { diff_add_text, to_delete_chars_count } = ctx.takeKeyInput(char);
+    if (to_delete_chars_count > 0) {
+      result = result.slice(0, -to_delete_chars_count);
+    }
+    result += diff_add_text;
+  }
+  return result;
+}
+
+async function measureNodeTypingEmulation() {
+  const normal_to_others_test_data = TEST_DATA.filter((testData) => testData.from === 'Normal');
+  const start = performance.now();
+
+  for (let i = 0; i < normal_to_others_test_data.length; i++) {
+    const testData = normal_to_others_test_data[i];
+    await emulateTypingNode(testData.input, testData.to as ScriptListType);
+  }
+
+  for (let i = 0; i < TYPING_TEST_DATA.length; i++) {
+    const testData = TYPING_TEST_DATA[i];
+    await emulateTypingNode(
+      testData.text,
+      testData.script as ScriptListType,
+      (testData.options ?? undefined) as NodeTypingOptions
+    );
+  }
+
+  return performance.now() - start;
+}
+
 async function measureBulkTypingEmulation() {
   const start = performance.now();
 
   for (let i = 0; i < TYPING_BATCHES.length; i++) {
     const batch = TYPING_BATCHES[i];
     await emulateTyping(batch.input, batch.script);
+  }
+
+  return performance.now() - start;
+}
+
+async function measureBulkNodeTypingEmulation() {
+  const start = performance.now();
+
+  for (let i = 0; i < TYPING_BATCHES.length; i++) {
+    const batch = TYPING_BATCHES[i];
+    await emulateTypingNode(batch.input, batch.script);
   }
 
   return performance.now() - start;
@@ -230,6 +282,12 @@ async function benchmark() {
   const transliterationWasmIterated = await measureIndividualTransliteration(transliterate_wasm);
   const transliterationWasmBulk = await measureBulkTransliteration(transliterate_wasm);
 
+  await preloadNode();
+  const transliterationNodeIterated = await measureIndividualTransliteration(transliterate_node);
+  const transliterationNodeBulk = await measureBulkTransliteration(transliterate_node);
+  const typingNodeIterated = await measureNodeTypingEmulation();
+  const typingNodeBulk = await measureBulkNodeTypingEmulation();
+
   const rows: BenchmarkRow[] = [
     {
       Benchmark: 'Transliteration Cases',
@@ -242,9 +300,19 @@ async function benchmark() {
       Bulk: formatDuration(typingEmulationBulk)
     },
     {
+      Benchmark: 'Typing Emulation (Node / N-API)',
+      Iterated: formatDuration(typingNodeIterated),
+      Bulk: formatDuration(typingNodeBulk)
+    },
+    {
       Benchmark: 'Transliteration Cases (WASM)',
       Iterated: formatDuration(transliterationWasmIterated),
       Bulk: formatDuration(transliterationWasmBulk)
+    },
+    {
+      Benchmark: 'Transliteration Cases (Node / N-API)',
+      Iterated: formatDuration(transliterationNodeIterated),
+      Bulk: formatDuration(transliterationNodeBulk)
     }
   ];
 

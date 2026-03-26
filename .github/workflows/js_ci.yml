@@ -46,6 +46,11 @@ jobs:
           cd packages/js/wasm
           wasm-pack build --release --target web
 
+      - name: Build Node Binding
+        run: |
+          cd packages/js/binding
+          ./gen_node_bind.sh
+
       - name: Typescript and Build Check
         run: |
           cd packages/js
@@ -62,9 +67,36 @@ jobs:
         run: |
           bun install
           bun run gen:test-data
-      - name: Test and Coverage
+
+      - name: Generate Script Data
         run: |
           cd packages/js
           bun install
           bun run make-script-data
-          bun test --coverage --concurrent --only-failures
+
+      ## Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build WASM
+        run: |
+          cd packages/js/wasm
+          wasm-pack build --release --target web
+
+      - name: Build Node Binding
+        run: |
+          cd packages/js/binding
+          ./gen_node_bind.sh
+      - name: Test and Coverage
+        working-directory: packages/js
+        run: bun test --coverage --concurrent --only-failures
