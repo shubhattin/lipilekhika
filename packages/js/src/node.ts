@@ -1,4 +1,5 @@
 import { getNormalizedScriptName, type ScriptLangType } from './index_main';
+import { loadNativeBinding, type NativeModule } from './native_binding';
 import type { CustomOptionType } from './transliteration/transliterate';
 import {
   DEFAULT_INCLUDE_INHERENT_VOWEL,
@@ -7,13 +8,12 @@ import {
   type TypingDiff
 } from './typing';
 
-type NativeModule = typeof import('../binding/pkg');
 type NativeTypingContext = InstanceType<NativeModule['NativeTypingContext']>;
 
 let nativeModulePromise: Promise<NativeModule> | null = null;
 const loadNativeModule = () => {
   if (!nativeModulePromise) {
-    nativeModulePromise = import('../binding/pkg');
+    nativeModulePromise = Promise.resolve(loadNativeBinding());
   }
   return nativeModulePromise;
 };

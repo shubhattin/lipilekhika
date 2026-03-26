@@ -131,32 +131,26 @@ jobs:
             runner: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             node_file: index.linux-x64-gnu.node
-            include_loader: true
           - name: linux-arm64-gnu
             runner: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
             node_file: index.linux-arm64-gnu.node
-            include_loader: false
           - name: macos-x64
             runner: macos-13
             target: x86_64-apple-darwin
             node_file: index.darwin-x64.node
-            include_loader: false
           - name: macos-arm64
             runner: macos-14
             target: aarch64-apple-darwin
             node_file: index.darwin-arm64.node
-            include_loader: false
           - name: windows-x64-msvc
             runner: windows-latest
             target: x86_64-pc-windows-msvc
             node_file: index.win32-x64-msvc.node
-            include_loader: false
           - name: windows-arm64-msvc
             runner: windows-11-arm
             target: aarch64-pc-windows-msvc
             node_file: index.win32-arm64-msvc.node
-            include_loader: false
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -190,15 +184,7 @@ jobs:
           rm -rf pkg
           TARGET="${{ matrix.target }}" ./gen_node_bind.sh
 
-      - name: Upload primary binding package
-        if: ${{ matrix.include_loader }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-binding-${{ matrix.name }}
-          path: packages/js/binding/pkg
-
       - name: Upload target node artifact
-        if: ${{ !matrix.include_loader }}
         uses: actions/upload-artifact@v4
         with:
           name: native-binding-${{ matrix.name }}
@@ -258,9 +244,6 @@ jobs:
         shell: bash
         run: |
           ls -la packages/js/binding/pkg
-          test -f packages/js/binding/pkg/index.cjs
-          test -f packages/js/binding/pkg/index.d.ts
-          test -f packages/js/binding/pkg/index.mjs
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
             test -f "packages/js/binding/pkg/$file"
@@ -291,13 +274,10 @@ jobs:
       - name: Verify packaged native artifacts
         shell: bash
         run: |
-          ls -la packages/js/dist/binding/pkg
-          test -f packages/js/dist/binding/pkg/index.cjs
-          test -f packages/js/dist/binding/pkg/index.d.ts
-          test -f packages/js/dist/binding/pkg/index.mjs
+          ls -la packages/js/dist/native
           while IFS= read -r file; do
             [[ -n "$file" ]] || continue
-            test -f "packages/js/dist/binding/pkg/$file"
+            test -f "packages/js/dist/native/$file"
           done <<< "$REQUIRED_NATIVE_NODE_FILES"
 
       - name: Read package.json version (publish job)

@@ -7,13 +7,12 @@ import fs from 'node:fs';
 import type { Plugin } from 'vite';
 
 const IS_UMD_BUILD_MODE = process.env.VITE_IS_UMD_BUILD_MODE === 'true';
-const NODE_BINDING_IMPORTS = new Set(['../binding/pkg', '../binding/pkg/index.mjs']);
 
 export default defineConfig({
   plugins: [
     dts({ include: ['src'], outDir: 'dist/types' }),
     MacroPlugin(),
-    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNodeBindingPlugin()])
+    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNativeBinariesPlugin()])
   ],
   build: {
     lib: {
@@ -33,7 +32,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: (id) => id.startsWith('node:') || NODE_BINDING_IMPORTS.has(id),
+      external: (id) => id.startsWith('node:'),
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
@@ -71,18 +70,24 @@ export default defineConfig({
   }
 });
 
-function copyNodeBindingPlugin(): Plugin {
+function copyNativeBinariesPlugin(): Plugin {
   return {
-    name: 'copy-node-binding',
+    name: 'copy-native-binaries',
     closeBundle: async () => {
       const srcDir = path.resolve(__dirname, 'binding/pkg');
-      const destDir = path.resolve(__dirname, 'dist/binding/pkg');
+      const destDir = path.resolve(__dirname, 'dist/native');
 
       if (!fs.existsSync(srcDir)) return;
 
+      const nativeBinaryFiles = fs.readdirSync(srcDir).filter((file) => file.endsWith('.node'));
+
       fs.rmSync(destDir, { recursive: true, force: true });
-      fs.mkdirSync(path.dirname(destDir), { recursive: true });
-      fs.cpSync(srcDir, destDir, { recursive: true });
+      if (nativeBinaryFiles.length === 0) return;
+
+      fs.mkdirSync(destDir, { recursive: true });
+      for (const nativeBinaryFile of nativeBinaryFiles) {
+        fs.copyFileSync(path.join(srcDir, nativeBinaryFile), path.join(destDir, nativeBinaryFile));
+      }
     }
   };
 }
