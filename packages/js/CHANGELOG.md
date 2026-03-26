@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (js-lib@v1.0.9-beta.1)
+## js-lib@v1.0.9
 
 - Added a native `lipilekhika/node` binding for transliterate and create_typing_context functions
 
