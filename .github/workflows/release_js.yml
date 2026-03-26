@@ -10,6 +10,10 @@ on:
       tag:
         description: "Tag corresponding to the npm version (e.g. js-lib@v1.2.3)"
         required: true
+      npm_dist_tag:
+        description: "npm dist-tag to publish under (e.g. beta, latest)"
+        required: false
+        default: "beta"
 
 permissions:
   id-token: write  # Required for OIDC
@@ -298,7 +302,44 @@ jobs:
             test -f "packages/js/dist/binding/pkg/$file"
           done
 
+      - name: Read package.json version (publish job)
+        id: pkg_version_publish
+        shell: bash
+        run: |
+          VERSION=$(jq -r '.version' packages/js/package.json)
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+            echo "Failed to read version from package.json"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Package version (publish job): $VERSION"
+
+      - name: Resolve npm dist-tag
+        id: npm_dist_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            DIST_TAG="${{ inputs.npm_dist_tag }}"
+          else
+            # Heuristic: prerelease versions (e.g. 1.2.3-beta.1) publish under beta tag by default.
+            VERSION="${{ steps.pkg_version_publish.outputs.VERSION }}"
+            if [[ "$VERSION" == *-* ]]; then
+              DIST_TAG="beta"
+            else
+              DIST_TAG="latest"
+            fi
+          fi
+
+          if [[ -z "$DIST_TAG" ]]; then
+            echo "npm dist-tag is empty; aborting."
+            exit 1
+          fi
+
+          echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved npm dist-tag: $DIST_TAG"
+
       - name: Publish to npm
         run: |
           cd packages/js
-          npm publish
+          npm publish --tag "${{ steps.npm_dist_tag.outputs.DIST_TAG }}"
