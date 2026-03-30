@@ -16,6 +16,7 @@
 - 📦 **Multiple Module Formats** — Tree-shakable ESM, CommonJS, and UMD builds
 - ⚡ **Real-time Typing** — Low-latency typing engine for browser environments
 - 🚀 **WASM Support** - Use Blazing fast Rust 🦀 in JS environments
+- 🔧 **Native N-API Module** — Near-native Rust performance for Node.js/Bun/Deno
 - 🎯 **Highly Customizable** — Fine-tune transliteration with custom options
 - 🌍 **Universal Runtime** — Works in Node.js, browsers, Deno, Bun, and more
 - 🪶 **Lightweight** — Only 7 KB gzipped
@@ -129,6 +130,26 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 **Returns:** `Promise<void>`
 
 **Note:** Preloads the WASM module to avoid initial loading delay when using `transliterate_wasm`.
+
+</details>
+
+<details>
+<summary><strong><code>transliterate_node(text, from, to, options?)</code></strong> — Native N-API transliteration (Rust)</summary>
+
+Available via `lipilekhika/node`. Uses a native Rust N-API binding for near-native performance. Only works in **Node.js, Bun, and Deno** on **Linux/macOS/Windows (x86_64 & aarch64)**.
+
+**Parameters:** Same as `transliterate`.
+
+**Returns:** `Promise<string>`
+
+</details>
+
+<details>
+<summary><strong><code>preloadNode()</code></strong> — Preload the native module</summary>
+
+Available via `lipilekhika/node`.
+
+**Returns:** `Promise<void>`
 
 </details>
 
