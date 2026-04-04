@@ -1,0 +1,3 @@
+src/data
+.zig-cache/
+zig-out/

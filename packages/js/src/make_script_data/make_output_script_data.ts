@@ -690,6 +690,11 @@ async function copy_script_data_json() {
       minify: true
     },
     {
+      id: 'zig',
+      target: '../zig/src/data',
+      minify: true
+    },
+    {
       id: 'go',
       target: '../go/lipilekhika/data',
       minify: false,
