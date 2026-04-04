@@ -10,6 +10,9 @@ const BenchSummary = struct {
     transliteration_batches: usize,
     typing_cases: usize,
     typing_batches: usize,
+    total_fixture_cases: usize,
+    normal_to_other_cases: usize,
+    total_iterated_workloads: usize,
     transliteration_iterated_ms: f64,
     transliteration_bulk_ms: f64,
     typing_iterated_ms: f64,
@@ -46,12 +49,15 @@ pub fn main() !void {
     if (output_json) {
         const stdout = std.fs.File.stdout().deprecatedWriter();
         try stdout.print(
-            "{{\n  \"transliteration_cases\": {d},\n  \"transliteration_batches\": {d},\n  \"typing_cases\": {d},\n  \"typing_batches\": {d},\n  \"transliteration_iterated_ms\": {d:.2},\n  \"transliteration_bulk_ms\": {d:.2},\n  \"typing_iterated_ms\": {d:.2},\n  \"typing_bulk_ms\": {d:.2}\n}}\n",
+            "{{\n  \"transliteration_cases\": {d},\n  \"transliteration_batches\": {d},\n  \"typing_cases\": {d},\n  \"typing_batches\": {d},\n  \"total_fixture_cases\": {d},\n  \"normal_to_other_cases\": {d},\n  \"total_iterated_workloads\": {d},\n  \"transliteration_iterated_ms\": {d:.2},\n  \"transliteration_bulk_ms\": {d:.2},\n  \"typing_iterated_ms\": {d:.2},\n  \"typing_bulk_ms\": {d:.2}\n}}\n",
             .{
                 summary.transliteration_cases,
                 summary.transliteration_batches,
                 summary.typing_cases,
                 summary.typing_batches,
+                summary.total_fixture_cases,
+                summary.normal_to_other_cases,
+                summary.total_iterated_workloads,
                 summary.transliteration_iterated_ms,
                 summary.transliteration_bulk_ms,
                 summary.typing_iterated_ms,
@@ -67,6 +73,9 @@ pub fn main() !void {
     try stdout.print("Transliteration Batches: {d}\n", .{summary.transliteration_batches});
     try stdout.print("Typing Cases: {d}\n", .{summary.typing_cases});
     try stdout.print("Typing Batches: {d}\n", .{summary.typing_batches});
+    try stdout.print("Total Fixture Cases: {d}\n", .{summary.total_fixture_cases});
+    try stdout.print("Normal->Other Cases: {d}\n", .{summary.normal_to_other_cases});
+    try stdout.print("Total Iterated Workloads: {d}\n", .{summary.total_iterated_workloads});
     try stdout.print("Transliteration Iterated: {d:.2} ms\n", .{summary.transliteration_iterated_ms});
     try stdout.print("Transliteration Bulk: {d:.2} ms\n", .{summary.transliteration_bulk_ms});
     try stdout.print("Typing Iterated: {d:.2} ms\n", .{summary.typing_iterated_ms});
@@ -89,6 +98,9 @@ fn benchmark(allocator: Allocator) !BenchSummary {
     const typing_files = try fixtures.listYamlFiles(arena_allocator, typing_root, true);
     const typing_cases = try loadTypingCases(arena_allocator, typing_files);
     const typing_batches = try buildTypingBatches(arena_allocator, transliteration_cases, typing_cases);
+    const normal_to_other_cases = countNormalToOtherCases(transliteration_cases);
+    const total_fixture_cases = transliteration_cases.len + typing_cases.len;
+    const total_iterated_workloads = transliteration_cases.len + normal_to_other_cases + typing_cases.len;
 
     const transliteration_iterated_ms = try measureIndividualTransliteration(allocator, transliteration_cases);
     const transliteration_bulk_ms = try measureBulkTransliteration(allocator, transliteration_batches);
@@ -100,6 +112,9 @@ fn benchmark(allocator: Allocator) !BenchSummary {
         .transliteration_batches = transliteration_batches.len,
         .typing_cases = typing_cases.len,
         .typing_batches = typing_batches.len,
+        .total_fixture_cases = total_fixture_cases,
+        .normal_to_other_cases = normal_to_other_cases,
+        .total_iterated_workloads = total_iterated_workloads,
         .transliteration_iterated_ms = transliteration_iterated_ms,
         .transliteration_bulk_ms = transliteration_bulk_ms,
         .typing_iterated_ms = typing_iterated_ms,
@@ -278,6 +293,16 @@ fn measureBulkTyping(allocator: Allocator, batches: []const TypingBatch) !f64 {
     }
     const end = std.time.nanoTimestamp();
     return @as(f64, @floatFromInt(end - start)) / @as(f64, std.time.ns_per_ms);
+}
+
+fn countNormalToOtherCases(cases: []const fixtures.TransliterationTestCase) usize {
+    var count: usize = 0;
+    for (cases) |case| {
+        if (std.mem.eql(u8, case.from, "Normal") and !std.mem.eql(u8, case.to, "Normal")) {
+            count += 1;
+        }
+    }
+    return count;
 }
 
 fn buildTypingOptions(source: ?fixtures.TypingOptionsYaml) ?root.TypingContextOptions {
