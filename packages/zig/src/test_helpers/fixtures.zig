@@ -231,8 +231,9 @@ fn parseKeyValueInto(
     map: *std.StringHashMapUnmanaged([]const u8),
     line: []const u8,
 ) !void {
-    const colon_index = std.mem.indexOfScalar(u8, line, ':') orelse return;
-    const key = trim(line[0..colon_index]);
+    const colon_index = findKeyValueSeparator(line) orelse return;
+    const raw_key = trim(line[0..colon_index]);
+    const key = unquote(raw_key);
     const raw_value = trim(line[colon_index + 1 ..]);
     const parsed_value = try parseYamlValue(allocator, raw_value);
     try map.put(allocator, try allocator.dupe(u8, key), parsed_value);
@@ -269,6 +270,31 @@ fn unescapeDoubleQuoted(allocator: Allocator, text: []const u8) ![]const u8 {
 
 fn trim(text: []const u8) []const u8 {
     return std.mem.trim(u8, text, " ");
+}
+
+fn unquote(text: []const u8) []const u8 {
+    if (text.len >= 2 and text[0] == '"' and text[text.len - 1] == '"') {
+        return text[1 .. text.len - 1];
+    }
+    return text;
+}
+
+fn findKeyValueSeparator(line: []const u8) ?usize {
+    if (line.len == 0) return null;
+    if (line[0] == '"') {
+        var i: usize = 1;
+        while (i < line.len) : (i += 1) {
+            if (line[i] == '"' and line[i - 1] != '\\') {
+                var j = i + 1;
+                while (j < line.len) : (j += 1) {
+                    if (line[j] == ':') return j;
+                }
+                return null;
+            }
+        }
+        return null;
+    }
+    return std.mem.indexOfScalar(u8, line, ':');
 }
 
 fn dupRequired(allocator: Allocator, value: ?[]const u8) ![]const u8 {

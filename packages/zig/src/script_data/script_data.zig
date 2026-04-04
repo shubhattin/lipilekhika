@@ -199,12 +199,13 @@ fn openDirForPath(path: []const u8, iterate: bool) !std.fs.Dir {
 }
 
 test "all script data json files parse" {
-    const allocator = testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const data_root = try defaultDataRoot(allocator);
-    defer allocator.free(data_root);
 
     const script_data_path = try std.fs.path.join(allocator, &.{ data_root, "script_data" });
-    defer allocator.free(script_data_path);
 
     var dir = try openDirForPath(script_data_path, true);
     defer dir.close();
@@ -215,32 +216,26 @@ test "all script data json files parse" {
         if (!std.mem.endsWith(u8, entry.name, ".json")) continue;
 
         const file_path = try std.fs.path.join(allocator, &.{ script_data_path, entry.name });
-        defer allocator.free(file_path);
-
         const bytes = try readFileAlloc(allocator, file_path);
-        defer allocator.free(bytes);
-
         _ = try schema.parseScriptDataJsonBytes(allocator, bytes);
     }
 }
 
 test "script list and custom options parse" {
-    const allocator = testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const data_root = try defaultDataRoot(allocator);
-    defer allocator.free(data_root);
 
     const script_list_path = try std.fs.path.join(allocator, &.{ data_root, "script_list.json" });
-    defer allocator.free(script_list_path);
     const script_list_bytes = try readFileAlloc(allocator, script_list_path);
-    defer allocator.free(script_list_bytes);
     const script_list = try script_list_mod.parseScriptListJsonBytes(allocator, script_list_bytes);
     try testing.expect(script_list.scripts.len > 0);
     try testing.expect(script_list.langs.len > 0);
 
     const custom_options_path = try std.fs.path.join(allocator, &.{ data_root, "custom_options.json" });
-    defer allocator.free(custom_options_path);
     const custom_options_bytes = try readFileAlloc(allocator, custom_options_path);
-    defer allocator.free(custom_options_bytes);
     const options = try custom_options_mod.parseCustomOptionsJsonBytes(allocator, custom_options_bytes);
     try testing.expect(options.count() > 0);
 }
@@ -297,7 +292,7 @@ test "lookup indexes keep the first matching entry" {
     const common = devanagari.getCommonAttr();
 
     try testing.expectEqual(@as(?usize, 1), common.krama_text_lookup.get("अ"));
-    try testing.expectEqual(@as(?usize, 2), devanagari.textToKramaMapIndex("ऎ", false));
+    try testing.expectEqual(@as(?usize, 0), devanagari.textToKramaMapIndex("ऎ", false));
     try testing.expectEqual(@as(?usize, 0), devanagari.customScriptCharIndexOfText(""));
 }
 

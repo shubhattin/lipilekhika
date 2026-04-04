@@ -51,6 +51,12 @@ pub fn isVedicSvaraTail(ch: ?[]const u8) bool {
     return false;
 }
 
+pub fn firstScalarSlice(text: []const u8) ?[]const u8 {
+    if (text.len == 0) return null;
+    const width = std.unicode.utf8ByteSequenceLength(text[0]) catch return null;
+    return text[0..width];
+}
+
 pub fn applyTypingInputAliases(allocator: Allocator, text: []const u8, to_script_name: []const u8) ![]const u8 {
     if (text.len == 0) return text;
 

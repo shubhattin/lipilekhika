@@ -458,6 +458,8 @@ test "emulate typing auto transliteration yaml" {
         try std.fs.path.join(arena_allocator, &.{ root_dir, "auto-nor-brahmic" }),
         try std.fs.path.join(arena_allocator, &.{ root_dir, "auto-nor-other" }),
     };
+    var passed_cases: usize = 0;
+    var passed_files: usize = 0;
 
     for (input_dirs) |folder| {
         const files = try fixtures.listYamlFiles(arena_allocator, folder, false);
@@ -489,9 +491,17 @@ test "emulate typing auto transliteration yaml" {
                     );
                     return error.TestExpectedEqual;
                 }
+
+                passed_cases += 1;
             }
+            passed_files += 1;
         }
     }
+
+    std.debug.print(
+        "\n Zig Typing Auto      Files  {d} passed ({d})\n Zig Typing Auto      Tests  {d} passed ({d})\n",
+        .{ passed_files, passed_files, passed_cases, passed_cases },
+    );
 }
 
 test "typing mode yaml parity" {
@@ -504,6 +514,7 @@ test "typing mode yaml parity" {
 
     const files = try fixtures.listYamlFiles(arena_allocator, root_dir, true);
     try std.testing.expect(files.len > 0);
+    var passed_cases: usize = 0;
 
     for (files) |file_path| {
         const file = try std.fs.openFileAbsolute(file_path, .{});
@@ -547,8 +558,15 @@ test "typing mode yaml parity" {
                     return error.TestExpectedEqual;
                 }
             }
+
+            passed_cases += 1;
         }
     }
+
+    std.debug.print(
+        "\n Zig Typing Mode      Files  {d} passed ({d})\n Zig Typing Mode      Tests  {d} passed ({d})\n",
+        .{ files.len, files.len, passed_cases, passed_cases },
+    );
 }
 
 test "typing context fixture parity" {

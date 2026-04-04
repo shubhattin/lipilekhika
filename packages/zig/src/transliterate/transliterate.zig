@@ -68,10 +68,11 @@ const TransliterateCtx = struct {
         }
 
         if (isBrahmic(self.from_script_data) and isOther(self.to_script_data)) {
-            const ta_ext_case = if (helpers.isScriptTamilExt(self.from_script_name))
-                !helpers.optSliceEql(item_text, self.brahmic_halant)
-            else
-                true;
+            const ta_ext_case = if (helpers.isScriptTamilExt(self.from_script_name)) blk: {
+                const item_head = if (item_text) |text| helpers.firstScalarSlice(text) else null;
+                const halant_head = if (self.brahmic_halant) |text| helpers.firstScalarSlice(text) else null;
+                break :blk !helpers.optSliceEql(item_head, halant_head);
+            } else true;
 
             const vyanjana_case =
                 (!helpers.optSliceEql(item_text, self.brahmic_nuqta)) and
@@ -804,6 +805,18 @@ pub fn transliterateTextCore(
 
     if (ctx.prev_context_in_use) {
         _ = try ctx.prevContextCleanup(null, null, true);
+    }
+
+    if (!opts.typing_mode and isBrahmic(from_script_data) and isOther(to_script_data) and listIsVyanjana(ctx.prev_context.typeAt(-1))) {
+        switch (to_script_data.*) {
+            .other => |other| {
+                const last_piece = ctx.result.lastPiece() orelse "";
+                if (!std.mem.endsWith(u8, last_piece, other.schwa_character)) {
+                    try ctx.result.emit(other.schwa_character);
+                }
+            },
+            else => {},
+        }
     }
 
     var output = try ctx.result.toOwnedString();

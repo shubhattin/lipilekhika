@@ -90,6 +90,7 @@ test "transliteration yaml parity" {
 
     const root_dir = try fixtures.transliterationTestDataRoot(arena_allocator);
     const files = try fixtures.listYamlFiles(arena_allocator, root_dir, false);
+    var passed_cases: usize = 0;
 
     for (files) |file_path| {
         const file = try std.fs.openFileAbsolute(file_path, .{});
@@ -129,8 +130,15 @@ test "transliteration yaml parity" {
                     return error.TestExpectedEqual;
                 }
             }
+
+            passed_cases += 1;
         }
     }
+
+    std.debug.print(
+        "\n Zig Transliteration  Files  {d} passed ({d})\n Zig Transliteration  Tests  {d} passed ({d})\n",
+        .{ files.len, files.len, passed_cases, passed_cases },
+    );
 }
 
 fn containsAny(text: []const u8, needles: []const []const u8) bool {
