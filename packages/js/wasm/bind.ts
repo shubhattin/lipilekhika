@@ -11,7 +11,7 @@ async function initWasm(): Promise<void> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    // @ts-ignore
+    // @ts-expect-error Bun is a runtime global when executed under Bun
     const isBun = typeof Bun !== 'undefined';
     if (isBun || import.meta.env.PROD) {
       // this approach is also used in prod as it converts the wasm to base64 in bundling step

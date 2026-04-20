@@ -85,7 +85,7 @@ export function loadNativeBinding(): NativeModule {
     return nativeBinding;
   } catch (cause) {
     throw new Error(`Failed to load native Lipilekhika binary from ${nativeBinaryPath}.`, {
-      cause: cause instanceof Error ? cause : new Error(String(cause))
+      cause
     });
   }
 }

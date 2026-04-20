@@ -111,9 +111,9 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     if (last_time_ms && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
       clearContext();
     }
-    let char_key = key?.[0] ?? '';
+    const char_key = key?.[0] ?? '';
     curr_input += char_key;
-    let prev_output = curr_output;
+    const prev_output = curr_output;
     const { context_length, output } = transliterate_text_core(
       curr_input,
       'Normal',
@@ -140,8 +140,8 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       if (output[common_index] !== prev_output[common_index]) break;
       common_index++;
     }
-    let diff_add_text = output.substring(common_index);
-    let to_delete_chars_count = prev_output.length - common_index;
+    const diff_add_text = output.substring(common_index);
+    const to_delete_chars_count = prev_output.length - common_index;
 
     last_time_ms = Date.now();
     return {
@@ -171,6 +171,51 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   };
 }
 
+function isTextInputElement(value: unknown): value is HTMLInputElement | HTMLTextAreaElement {
+  return (
+    (typeof HTMLInputElement !== 'undefined' && value instanceof HTMLInputElement) ||
+    (typeof HTMLTextAreaElement !== 'undefined' && value instanceof HTMLTextAreaElement)
+  );
+}
+
+function inputElementFromTypingEvent(
+  event: unknown
+): HTMLInputElement | HTMLTextAreaElement | null {
+  if (!event || typeof event !== 'object') return null;
+  const o = event as {
+    currentTarget?: unknown;
+    target?: unknown;
+    nativeEvent?: { target?: unknown };
+  };
+  const fromCurrent = o.currentTarget;
+  if (isTextInputElement(fromCurrent)) {
+    return fromCurrent;
+  }
+  const fromNativeTarget = o.nativeEvent?.target;
+  if (isTextInputElement(fromNativeTarget)) {
+    return fromNativeTarget;
+  }
+  const fromTarget = o.target;
+  if (isTextInputElement(fromTarget)) {
+    return fromTarget;
+  }
+  return null;
+}
+
+function inputEventFromTypingEvent(event: unknown): InputEvent | null {
+  if (typeof InputEvent !== 'undefined' && event instanceof InputEvent) return event;
+  if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
+  const n = (event as { nativeEvent: unknown }).nativeEvent;
+  return typeof InputEvent !== 'undefined' && n instanceof InputEvent ? n : null;
+}
+
+function keyboardEventFromTypingEvent(event: unknown): KeyboardEvent | null {
+  if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return event;
+  if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
+  const n = (event as { nativeEvent: unknown }).nativeEvent;
+  return typeof KeyboardEvent !== 'undefined' && n instanceof KeyboardEvent ? n : null;
+}
+
 /**
  * @deprecated This function is deprecated.
  * Prefer using `handleTypingBeforeInputEvent` instead, which handles transliteration typing via the native `beforeinput` event in both React and Svelte.
@@ -186,20 +231,20 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
  */
 export async function handleTypingInputEvent(
   typingContext: ReturnType<typeof createTypingContext>,
-  event: any,
+  event: unknown,
   onValueChange?: (updatedValue: string) => void,
   enabled_?: boolean
 ) {
   const enabled = enabled_ ?? true;
   if (!enabled) {
-    onValueChange?.(event?.currentTarget?.value);
+    onValueChange?.(inputElementFromTypingEvent(event)?.value ?? '');
     return;
   }
 
-  const nativeEvent: any = event?.nativeEvent ?? event;
-  const isReactSyntheticEvent = 'nativeEvent' in event;
-  const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
-    nativeEvent?.target) as any;
+  const nativeEvent = inputEventFromTypingEvent(event);
+  const isReactSyntheticEvent =
+    typeof event === 'object' && event !== null && 'nativeEvent' in event;
+  const inputElement = inputElementFromTypingEvent(event);
 
   if (!nativeEvent || !inputElement) return;
 
@@ -233,7 +278,7 @@ export async function handleTypingInputEvent(
 
   if (isReactSyntheticEvent && onValueChange) {
     // Extra step required in React for controlled inputs: first acknowledge the browser's edit.
-    onValueChange(event.currentTarget.value);
+    onValueChange(inputElement.value);
   }
 
   await typingContext.ready;
@@ -259,7 +304,7 @@ export async function handleTypingInputEvent(
  */
 export async function handleTypingBeforeInputEvent(
   typingContext: ReturnType<typeof createTypingContext>,
-  event: any,
+  event: unknown,
   onValueChange?: (updatedValue: string) => void,
   enabled_?: boolean
 ) {
@@ -277,10 +322,8 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  const isReactSyntheticEvent = 'nativeEvent' in event;
-  const nativeEvent: any = isReactSyntheticEvent ? event.nativeEvent : event;
-  const inputElement: HTMLInputElement | HTMLTextAreaElement | null = (event?.currentTarget ??
-    nativeEvent?.target) as any;
+  const nativeEvent = inputEventFromTypingEvent(event);
+  const inputElement = inputElementFromTypingEvent(event);
 
   if (!nativeEvent || !inputElement) return;
 
@@ -352,11 +395,11 @@ const CONTEXT_CLEAR_KEYS = new Set([
  * @returns True if the keydown event should clear the typing context, false otherwise
  */
 export function clearTypingContextOnKeyDown(
-  event: any,
+  event: unknown,
   ctx: ReturnType<typeof createTypingContext>
 ) {
-  const e = event?.nativeEvent ?? event;
-  if (e instanceof KeyboardEvent) {
+  const e = keyboardEventFromTypingEvent(event);
+  if (e) {
     // Mobile virtual keyboards and IME/composition frequently report keys like
     // "Unidentified"/"Process". Clearing context here breaks typing on Android/iOS.
     if (e.isComposing) return false;

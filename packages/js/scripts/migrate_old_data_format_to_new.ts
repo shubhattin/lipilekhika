@@ -165,13 +165,13 @@ try {
   console.error('Prettier format failed:', e);
 }
 
-function get_script_data(lang: script_list_type, data: any) {
+function get_script_data(lang: script_list_type, data: Record<string, unknown>) {
   const out: InputBrahmicScriptType = {
     script_type: 'brahmic',
     script_name: lang,
     script_id: script_list_obj[lang],
-    halant: data['.']['.x'][0],
-    nuqta: data['.']['.z']?.[0] ?? undefined,
+    halant: (data['.'] as Record<string, string[][]>)['.x'][0],
+    nuqta: (data['.'] as Record<string, string[][]>)['.z']?.[0] ?? undefined,
     schwa_property: false,
     manual_krama_text_map: {},
     list: []
@@ -179,7 +179,7 @@ function get_script_data(lang: script_list_type, data: any) {
 
   for (const key in data) {
     if (['range', 'sa', 'antar', 'kram'].includes(key)) continue;
-    for (const [char, value] of Object.entries(data[key]) as unknown as [string, any[]]) {
+    for (const [, value] of Object.entries(data[key] as Record<string, (string | number)[]>)) {
       // determining the type
       if (value.at(-1) === 2) {
         // anya
@@ -235,7 +235,7 @@ function get_script_data(lang: script_list_type, data: any) {
     accessor: (arr, i) => arr[i].text
   });
   out.manual_krama_text_map = Object.fromEntries(
-    sortArray(Object.entries(out.manual_krama_text_map!), { accessor: (arr, i) => arr[1] })
+    sortArray(Object.entries(out.manual_krama_text_map!), { accessor: (arr, i) => arr[i][1] })
   );
   return out;
 }

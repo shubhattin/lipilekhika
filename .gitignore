@@ -12,6 +12,8 @@ target
 **/tmp/
 **/a.dart
 
+.codex
+
 # Script Data Ignore (Built Output)
 packages/js/src/script_data
 packages/js/src/custom_options.json
