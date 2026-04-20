@@ -24,8 +24,8 @@ describe('Emulate Typing', () => {
           if (test.from !== 'Normal' || test.to === 'Normal') continue;
           const testFn = test.todo ? it.skip : it;
           testFn(`${test.index} - ${test.to}`, async () => {
-            let input = test.input;
-            let result = await emulateTyping(input, test.to as script_and_lang_list_type);
+            const input = test.input;
+            const result = await emulateTyping(input, test.to as script_and_lang_list_type);
             const errorMessage =
               `Emulate Typing failed:\n` +
               `  From: ${test.from}\n` +

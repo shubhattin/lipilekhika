@@ -59,7 +59,6 @@ function getTestData() {
   const data: TransliterationTestData[][] = [];
   const allYamlFiles: string[] = [];
   function scanYamlFiles(dir: string) {
-    const fs = require('fs');
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.resolve(dir, entry.name);
@@ -81,7 +80,6 @@ function getTypingTestData() {
   const data: TypingTestData[][] = [];
   const allYamlFiles: string[] = [];
   function scanYamlFiles(dir: string) {
-    const fs = require('fs');
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.resolve(dir, entry.name);

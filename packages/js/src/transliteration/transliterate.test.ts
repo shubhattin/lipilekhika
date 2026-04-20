@@ -47,8 +47,8 @@ describe('Transliteration', () => {
       for (const test_data_item of test_data) {
         preloadScriptData(test_data_item.from as script_input_name_type);
         preloadScriptData(test_data_item.to as script_input_name_type);
-        let input1 = test_data_item.input;
-        let result = await transliterate_fn(
+        const input1 = test_data_item.input;
+        const result = await transliterate_fn(
           input1,
           test_data_item.from as script_input_name_type,
           test_data_item.to as script_input_name_type,
@@ -81,9 +81,9 @@ describe('Transliteration', () => {
           testFn(
             `${test_data_item.index} : ${test_data_item.to} ← ${test_data_item.from}`,
             async () => {
-              if (['Normal', 'Romanized'].includes(test_data_item.to)) {
-              }
-              let result_reversed = await transliterate_fn(
+              // if (['Normal', 'Romanized'].includes(test_data_item.to)) {
+              // }
+              const result_reversed = await transliterate_fn(
                 result,
                 test_data_item.to as script_input_name_type,
                 test_data_item.from as script_input_name_type,

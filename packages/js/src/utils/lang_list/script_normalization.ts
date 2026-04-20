@@ -7,7 +7,8 @@ import {
   SCRIPT_LIST
 } from '.';
 
-const ALTERNATES = [
+/** Script and language short codes used to derive {@link alternate_script_type}. */
+export const ALTERNATES = [
   /* Script Alternates */
   'de', // Devanagari
   'dev', // Devanagari

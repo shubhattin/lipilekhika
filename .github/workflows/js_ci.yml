@@ -100,3 +100,6 @@ jobs:
       - name: Test and Coverage
         working-directory: packages/js
         run: bun test --coverage --concurrent --only-failures
+      - name: Lint
+        working-directory: packages/js
+        run: bun lint

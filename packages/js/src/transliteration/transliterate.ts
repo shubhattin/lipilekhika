@@ -334,7 +334,7 @@ export const apply_custom_replace_rules = (
     if (rule.use_replace !== true || rule.check_in !== allowed_input_rule_type) continue;
     if (rule.type === 'replace_prev_krama_keys') {
       const prev_string = rule.prev.map((prev) => kramaTextOrEmpty(script_data, prev)).join('');
-      for (let follow_krama_index of rule.following) {
+      for (const follow_krama_index of rule.following) {
         const follow_krama_string = kramaTextOrEmpty(script_data, follow_krama_index);
         if (!follow_krama_string) continue;
         const replace_string = get_rule_replace_text(rule, script_data) + follow_krama_string;
@@ -342,7 +342,7 @@ export const apply_custom_replace_rules = (
       }
     } else if (rule.type === 'direct_replace') {
       const replace_with = rule.replace_text ?? get_rule_replace_text(rule, script_data);
-      for (let grp of rule.to_replace) {
+      for (const grp of rule.to_replace) {
         const to_replace_string = grp
           .map((to_replace_item) => kramaTextOrEmpty(script_data, to_replace_item))
           .join('');
@@ -416,7 +416,7 @@ export const transliterate_text_core = (
   text = apply_custom_replace_rules(text, from_script_data, custom_rules, 'input');
 
   const result = string_builder();
-  let text_index = 0;
+  let text_index: number;
   const cursor = make_input_cursor(text);
 
   /** It stores the previous attribute types of the brahmic scripts
@@ -530,7 +530,7 @@ export const transliterate_text_core = (
     }
 
     // Step 1: Search for the character in the text_to_krama_map
-    let text_to_krama_item: TextToKramaItem | null = null;
+    let text_to_krama_item: TextToKramaItem | null;
     {
       // Iterative matching with retraction support for vyanjana+vowel context
       // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
@@ -784,7 +784,7 @@ export const transliterate_text_core = (
             from_script_data.script_type === 'brahmic' &&
             to_script_data.script_type === 'other'
           ) {
-            let item: (typeof from_script_data.list)[number] | null | undefined = null;
+            let item: (typeof from_script_data.list)[number] | null | undefined;
             if (
               !use_typing_chars &&
               text_to_krama_item[1].fallback_list_ref !== undefined &&
@@ -795,9 +795,9 @@ export const transliterate_text_core = (
             // if otherwise then follow the the last kram ref
             // use last as that is prev which will be used to decide svara or vyanjana
             // This condition very well may change in the future so be careful
-            else if (!text_to_krama_item[1].krama || text_to_krama_item[1].krama.length === 0)
-              item = null;
-            else {
+            // else if (!text_to_krama_item[1].krama || text_to_krama_item[1].krama.length === 0)
+            //   item = null;
+            else if (text_to_krama_item[1].krama && text_to_krama_item[1].krama.length > 0) {
               const list_refs = text_to_krama_item[1].krama.map(
                 (krama_index) =>
                   from_script_data.list[from_script_data.krama_text_arr[krama_index]?.[1] ?? -1]
@@ -818,13 +818,15 @@ export const transliterate_text_core = (
               } else {
                 item = list_refs[0];
               }
+            } else {
+              item = null;
             }
             result_concat_status = prev_context_cleanup(ctx, [text_to_krama_item[0], item]);
           } else if (
             to_script_data.script_type === 'brahmic' &&
             from_script_data.script_type === 'other'
           ) {
-            let item: (typeof to_script_data.list)[number] | null | undefined = null;
+            let item: (typeof to_script_data.list)[number] | null | undefined;
             if (
               text_to_krama_item[1].fallback_list_ref !== undefined &&
               text_to_krama_item[1].fallback_list_ref !== null

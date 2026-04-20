@@ -56,7 +56,7 @@ export const kramaTextOrEmpty = (script: ScriptData, idx: number): string => {
 };
 
 export const string_builder = () => {
-  let result: string[] = [];
+  const result: string[] = [];
 
   // Domain-level output ops (prefer these in transliteration logic)
   // like emit, tail can be used

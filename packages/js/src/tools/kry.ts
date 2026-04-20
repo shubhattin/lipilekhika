@@ -23,8 +23,10 @@ export function get_permutations(range: [number, number], count: number = 1): nu
 /**
  * This replaces `{key}` with the corresponding value in `options`
  */
-export function format_string_text(text: string, options: Record<string, any>) {
-  return text.replace(/{(\w+)}/g, (_, key) => options[key] ?? `{${key}}`);
+export function format_string_text(text: string, options: Record<string, unknown>) {
+  return text.replace(/{(\w+)}/g, (_, key) =>
+    options[key] !== undefined && options[key] !== null ? String(options[key]) : `{${key}}`
+  );
 }
 
 export function cleanUpWhitespace(input: string, replace_multiple_white_spaces = true): string {

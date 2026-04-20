@@ -270,9 +270,8 @@ function get_out_script_data(
           resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
         )
       );
-      // @ts-ignore
+      // @ts-expect-error Dev-only `text` field is not in the published schema type
       res.list.push({
-        // @ts-ignore
         ...(IS_DEV_MODE ? { text: item.text } : {}),
         krama_ref: krama_key_list_index_list,
         type: item.type
@@ -296,7 +295,6 @@ function get_out_script_data(
           )
         );
         res.list.push({
-          // @ts-ignore
           ...(IS_DEV_MODE ? { text: item.mAtrA } : {}),
           krama_ref: mAtrA_krama_ref_index_list,
           type: 'mAtrA'
@@ -375,7 +373,7 @@ function get_out_script_data(
         const text_char = text.substring(0, j + 1);
         const krama_key_references = (() => {
           const arr: number[] = [];
-          for (let char_code_point of text_char) {
+          for (const char_code_point of text_char) {
             // accessing non-bmp chars via this method does not resolve into surrogate pairs
             arr.push(res.krama_text_arr.findIndex((item) => item[0] === char_code_point));
           }
@@ -558,11 +556,11 @@ function get_out_script_data(
   // and also add unicode escaped strings for better debugging (hopefully)
   if (IS_DEV_MODE) {
     for (let i = 0; i < res.text_to_krama_map.length; i++) {
-      // @ts-ignore
+      // @ts-expect-error Dev-only `uni` field for debuggin
       res.text_to_krama_map[i][1].uni = toUnicodeEscapes(res.text_to_krama_map[i][0]);
     }
     for (let i = 0; i < res.list.length; i++) {
-      // @ts-ignore
+      // @ts-expect-error Dev-only `text_uni` field for debugging
       res.list[i].text_uni = toUnicodeEscapes(res.list[i].text);
     }
     for (let i = 0; i < KramaKeysArray.length; i++) {

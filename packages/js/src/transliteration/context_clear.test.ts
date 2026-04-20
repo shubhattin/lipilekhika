@@ -20,7 +20,7 @@ const schema = z.object({
 const data_folder = path.join(__dirname, '../../../../test_data/typing/context');
 
 describe('Context Clear (Typing Mode)', () => {
-  for (let file of fs.readdirSync(data_folder)) {
+  for (const file of fs.readdirSync(data_folder)) {
     if (!file.endsWith('.yaml')) continue;
     describe(`${file.split('.')[0]}`, () => {
       const test_data = schema
