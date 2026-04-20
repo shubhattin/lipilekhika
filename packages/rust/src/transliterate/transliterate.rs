@@ -117,15 +117,19 @@ where
         .is_some_and(|k| k.is_vyanjana())
         && (item_type.is_some_and(|k| k.is_matra()) || item_type.is_some_and(|k| k.is_svara()))
       {
-        let linked_matra: String = match item_type {
-          Some(List::Svara {
-            matra_krama_ref, ..
-          }) => self
-            .to_script_data
-            .krama_text_or_empty(*matra_krama_ref.first().unwrap_or(&-1))
-            .to_owned(),
-          _ => item_text.unwrap_or("").to_owned(),
-        };
+        let linked_matra: String = item_type
+          .and_then(|item_type| match item_type {
+            List::Svara {
+              matra_krama_ref, ..
+            } => Some(
+              self
+                .to_script_data
+                .krama_text_or_empty(*matra_krama_ref.first().unwrap_or(&-1))
+                .to_owned(),
+            ),
+            _ => None,
+          })
+          .unwrap_or_else(|| item_text.unwrap_or("").to_owned());
 
         if let ScriptData::Brahmic { halant, .. } = self.to_script_data {
           self.result.emit_pieces_with_reorder(
@@ -291,26 +295,24 @@ where
               &prev_arr_as_usize,
             );
 
-            if prev_match.matched {
-              let next_char_info = self.cursor.peek_at(text_index as usize);
-              if let Some(next_ch) = next_char_info {
-                let next_ch_str = next_ch.to_string();
-                if let Some(next_idx) = self.from_script_data.krama_index_of_text(&next_ch_str) {
-                  let next_i16 = next_idx as i16;
-                  if following.contains(&next_i16) {
-                    let pieces = self.to_script_data.replace_with_pieces(replace_with);
-                    self
-                      .result
-                      .rewrite_tail_pieces(prev_match.matched_len, &pieces);
-                  }
+            if prev_match.matched
+              && let Some(next_ch) = self.cursor.peek_at(text_index as usize)
+            {
+              let next_ch_str = next_ch.to_string();
+              if let Some(next_idx) = self.from_script_data.krama_index_of_text(&next_ch_str) {
+                let next_i16 = next_idx as i16;
+                if following.contains(&next_i16) {
+                  let pieces = self.to_script_data.replace_with_pieces(replace_with);
+                  self
+                    .result
+                    .rewrite_tail_pieces(prev_match.matched_len, &pieces);
                 }
               }
             }
           } else {
             // output
-            let last_piece = match self.result.last_piece() {
-              Some(v) => v,
-              None => continue,
+            let Some(last_piece) = self.result.last_piece() else {
+              continue;
             };
 
             if let Some(following_idx) = self.to_script_data.krama_index_of_text(&last_piece) {
@@ -387,10 +389,7 @@ fn custom_option_script_type_matches(
   expected: CustomOptionScriptTypeEnum,
   actual: CustomOptionScriptTypeEnum,
 ) -> bool {
-  match expected {
-    CustomOptionScriptTypeEnum::All => true,
-    _ => expected == actual,
-  }
+  matches!(expected, CustomOptionScriptTypeEnum::All) || expected == actual
 }
 pub fn get_active_custom_options(
   from_script_data: &ScriptData,
@@ -414,34 +413,33 @@ pub fn get_active_custom_options(
       continue;
     };
 
-    let from_all = option_info.from_script_type.as_ref()
-      == Some(&crate::script_data::CustomOptionScriptTypeEnum::All);
-    let to_all = option_info.to_script_type.as_ref()
-      == Some(&crate::script_data::CustomOptionScriptTypeEnum::All);
-    if from_all && to_all {
-      active.insert(key.clone(), *enabled);
-    } else if (option_info
+    if option_info
       .from_script_type
       .as_ref()
-      .map(|t| custom_option_script_type_matches(*t, from_type))
-      .unwrap_or(false))
-      || (option_info
-        .from_script_name
-        .as_ref()
-        .map(|names| names.iter().any(|n| n == from_script_name))
-        .unwrap_or(false))
-    // ^ from matches
-    {
-      let to_matches = (option_info
+      .is_some_and(|t| matches!(t, crate::script_data::CustomOptionScriptTypeEnum::All))
+      && option_info
         .to_script_type
         .as_ref()
-        .map(|t| custom_option_script_type_matches(*t, to_type))
-        .unwrap_or(false))
-        || (option_info
+        .is_some_and(|t| matches!(t, crate::script_data::CustomOptionScriptTypeEnum::All))
+    {
+      active.insert(key.clone(), *enabled);
+    } else if option_info
+      .from_script_type
+      .as_ref()
+      .is_some_and(|t| custom_option_script_type_matches(*t, from_type))
+      || option_info
+        .from_script_name
+        .as_ref()
+        .is_some_and(|names| names.iter().any(|n| n == from_script_name))
+    {
+      let to_matches = option_info
+        .to_script_type
+        .as_ref()
+        .is_some_and(|t| custom_option_script_type_matches(*t, to_type))
+        || option_info
           .to_script_name
           .as_ref()
-          .map(|names| names.iter().any(|n| n == to_script_name))
-          .unwrap_or(false));
+          .is_some_and(|names| names.iter().any(|n| n == to_script_name));
       if to_matches {
         active.insert(key.clone(), *enabled);
       }

@@ -10,20 +10,23 @@ impl ScriptData {
     if idx < 0 {
       return None;
     }
-    match &self.get_common_attr().krama_text_arr.get(idx as usize) {
-      Some(item) => Some(&item.0),
-      None => None,
-    }
+    self
+      .get_common_attr()
+      .krama_text_arr
+      .get(idx as usize)
+      .map(|item| item.0.as_str())
   }
 
   pub fn krama_text_or_empty(&self, idx: i16) -> &str {
     if idx < 0 {
-      return &"";
+      return "";
     }
-    match &self.get_common_attr().krama_text_arr.get(idx as usize) {
-      Some(item) => &item.0,
-      None => &"",
-    }
+    self
+      .get_common_attr()
+      .krama_text_arr
+      .get(idx as usize)
+      .map(|item| item.0.as_str())
+      .unwrap_or("")
   }
 
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
@@ -41,6 +44,7 @@ impl ResultStringBuilder {
     ResultStringBuilder { result: Vec::new() }
   }
   pub fn emit<S: Into<String>>(&mut self, text: S) {
+    // Into<String> to have more wide support for &str and  Cow<&str>
     let text = text.into();
     if text.is_empty() {
       return;
@@ -99,6 +103,7 @@ impl ResultStringBuilder {
 
   /// index can be -ve
   pub fn peek_at(&self, index: isize) -> Option<&str> {
+    // ^ no need for a specific cursor return type over here
     let len = self.result.len() as isize;
     if len == 0 {
       return None;
@@ -182,7 +187,7 @@ impl<'a> PrevContextBuilder<'a> {
       Some(idx) => self.arr.get(idx),
     }
   }
-  #[allow(dead_code)]
+
   pub fn last(&self) -> Option<&PrevContextItem<'a>> {
     self.arr.back()
   }
@@ -190,7 +195,6 @@ impl<'a> PrevContextBuilder<'a> {
   pub fn last_text(&self) -> Option<&str> {
     self.last().and_then(|(text_opt, _)| text_opt.as_deref())
   }
-  #[allow(dead_code)]
   pub fn last_type(&self) -> Option<&List> {
     self.last().and_then(|(_, list_opt)| list_opt.as_deref())
   }
@@ -212,8 +216,7 @@ impl<'a> PrevContextBuilder<'a> {
 
   /// Push a new context item, enforcing `max_len` and skipping empty/None text.
   pub fn push(&mut self, item: PrevContextItem<'a>) {
-    let text_ok = item.0.as_ref().map(|s| !s.is_empty()).unwrap_or(false);
-    if !text_ok {
+    if !item.0.as_ref().is_some_and(|s| !s.is_empty()) {
       return;
     }
     self.arr.push_back(item);
@@ -228,6 +231,12 @@ pub struct InputTextCursor {
   chars: Vec<char>,
   pos: usize,
 }
+
+// pub struct InputCursor {
+//   pub ch: String,
+//   // no cp(codepoint) or width needed here in rust
+// }
+// ^ No need for InputCursor here in the rust implementation
 
 impl InputTextCursor {
   pub fn new(text: &str) -> InputTextCursor {
@@ -296,8 +305,8 @@ impl ScriptData {
     prev: &[usize], // indices(number) array
   ) -> MatchPrevKramaSequenceResult
   where
-    F: Fn(isize) -> Option<T>,
     T: AsRef<str>,
+    F: Fn(isize) -> Option<T>,
   {
     for i in 0..prev.len() {
       let expected_krama_index = prev[prev.len() - 1 - i];
