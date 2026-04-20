@@ -73,7 +73,7 @@ pub struct TypingContext {
   from_script_data: &'static ScriptData,
   to_script_data: &'static ScriptData,
   trans_options: HashMap<String, bool>,
-  custom_rules: Vec<crate::script_data::Rule>,
+  custom_rules: Vec<&'static crate::script_data::Rule>,
 }
 
 impl TypingContext {

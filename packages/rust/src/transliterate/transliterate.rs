@@ -1,8 +1,9 @@
 use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::transliterate::helpers::{
-  self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, is_script_tamil_ext,
-  is_ta_ext_superscript_tail, is_vedic_svara_tail,
+  self, InputTextCursor, PrevContextBuilder, PrevContextItem, ResultStringBuilder,
+  is_script_tamil_ext, is_ta_ext_superscript_tail, is_vedic_svara_tail,
 };
+use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 
 /// Compare a char with a &str without heap allocation.
@@ -13,31 +14,32 @@ fn char_eq_str(c: char, s: &str) -> bool {
   encoded == s
 }
 
-struct TransliterateCtx<'a> {
+struct TransliterateCtx<'a, R> {
   #[allow(dead_code)]
   from_script_name: &'a str,
   to_script_name: &'a str,
   from_script_data: &'a ScriptData,
   to_script_data: &'a ScriptData,
   trans_options: &'a HashMap<String, bool>,
-  custom_rules: &'a [Rule],
+  custom_rules: &'a [R],
   cursor: &'a mut InputTextCursor,
   result: &'a mut ResultStringBuilder,
-  prev_context: &'a mut PrevContextBuilder,
+  prev_context: &'a mut PrevContextBuilder<'a>,
   prev_context_in_use: bool,
-  brahmic_halant: &'a Option<String>,
-  brahmic_nuqta: &'a Option<String>,
+  brahmic_halant: Option<&'a str>,
+  brahmic_nuqta: Option<&'a str>,
   typing_mode: bool,
   include_inherent_vowels: bool,
 }
 
-type PrevContextItem = (Option<String>, Option<List>);
-
-impl<'a> TransliterateCtx<'a> {
+impl<'a, R> TransliterateCtx<'a, R>
+where
+  R: Borrow<Rule>,
+{
   /// Returns `true` when the current write already handled concatenation/reordering.
   fn prev_context_cleanup(
     &mut self,
-    item: Option<PrevContextItem>,
+    item: Option<PrevContextItem<'a>>,
     next: Option<&[String]>,
     last_extra_call: Option<bool>,
   ) -> bool {
@@ -47,11 +49,11 @@ impl<'a> TransliterateCtx<'a> {
     };
     let mut result_str_concat_status = false;
 
-    let brahmic_halant = self.brahmic_halant.as_deref();
-    let brahmic_nuqta = self.brahmic_nuqta.as_deref();
+    let brahmic_halant = self.brahmic_halant;
+    let brahmic_nuqta = self.brahmic_nuqta;
 
     let item_text = item.as_ref().and_then(|(t, _)| t.as_deref()); // [0]
-    let item_type = item.as_ref().and_then(|(_, t)| t.as_ref()); // [1]
+    let item_type = item.as_ref().and_then(|(_, t)| t.as_deref()); // [1]
 
     // custom cleanup logic/cases
     if ((brahmic_nuqta.is_some()
@@ -76,16 +78,12 @@ impl<'a> TransliterateCtx<'a> {
     {
       let ta_ext_case = if is_script_tamil_ext(self.from_script_name) {
         item_text.and_then(|k| k.chars().nth(0))
-          != self
-            .brahmic_halant
-            .as_deref()
-            .and_then(|k| k.chars().next())
+          != self.brahmic_halant.and_then(|k| k.chars().next())
       } else {
         true
       };
       // vyanjana + nuqta
-      let vyanjana_case = (self.brahmic_nuqta.is_none()
-        || item_text != self.brahmic_nuqta.as_deref())
+      let vyanjana_case = (self.brahmic_nuqta.is_none() || item_text != self.brahmic_nuqta)
         && (self
           .prev_context
           .type_at(-1)
@@ -95,22 +93,18 @@ impl<'a> TransliterateCtx<'a> {
               .prev_context
               .type_at(-2)
               .is_some_and(|k| k.is_vyanjana())
-            && self.prev_context.text_at(-1) == brahmic_nuqta.as_deref()));
+            && self.prev_context.text_at(-1) == brahmic_nuqta));
       let to_anya_or_null = (!item_type.is_some_and(|k| k.is_matra())
-        && item_text != brahmic_halant.as_deref())
+        && item_text != brahmic_halant)
         || item_type.is_some_and(|k| k.is_anya())
         || item_type.is_none();
       // custom logic when converting from brahmic to other
-      if item_text != self.brahmic_halant.as_deref()
-        && ta_ext_case
-        && vyanjana_case
-        && to_anya_or_null
-      {
+      if item_text != self.brahmic_halant && ta_ext_case && vyanjana_case && to_anya_or_null {
         if let ScriptData::Other {
           schwa_character, ..
         } = self.to_script_data
         {
-          self.result.emit(schwa_character.clone());
+          self.result.emit(schwa_character);
         }
       }
     } else if matches!(self.from_script_data, ScriptData::Other { .. })
@@ -158,11 +152,9 @@ impl<'a> TransliterateCtx<'a> {
         {
           let should_reorder = is_script_tamil_ext(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
-          self.result.emit_pieces_with_reorder(
-            &[brahmic_halant.to_owned()],
-            to_halant,
-            should_reorder,
-          );
+          self
+            .result
+            .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
 
           if self.to_script_name == "Sinhala"
             && *self
@@ -200,11 +192,9 @@ impl<'a> TransliterateCtx<'a> {
         {
           let should_reorder = is_script_tamil_ext(self.to_script_name)
             && is_ta_ext_superscript_tail(self.result.last_char());
-          self.result.emit_pieces_with_reorder(
-            &[brahmic_halant.to_owned()],
-            to_halant,
-            should_reorder,
-          );
+          self
+            .result
+            .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
 
           if self.to_script_name == "Sinhala"
             && *self
@@ -266,7 +256,8 @@ impl<'a> TransliterateCtx<'a> {
   fn apply_custom_trans_rules(&mut self, text_index: isize, delta: isize) {
     let current_text_index = text_index + delta;
 
-    for rule in self.custom_rules.iter() {
+    for rule_ref in self.custom_rules.iter() {
+      let rule = rule_ref.borrow();
       match rule {
         Rule::DirectReplace { use_replace, .. }
         | Rule::ReplacePrevKramaKeys { use_replace, .. } => {
@@ -327,13 +318,13 @@ impl<'a> TransliterateCtx<'a> {
                 continue;
               }
               let prev_match = self.to_script_data.match_prev_krama_sequence(
-                |i| self.result.peek_at(i).map(|c| c.ch),
+                |i| self.result.peek_at(i),
                 -2,
                 &prev_arr_as_usize,
               );
               if prev_match.matched {
                 let mut pieces = self.to_script_data.replace_with_pieces(replace_with);
-                pieces.push(last_piece); // instead [...pices, last_piece]
+                pieces.push(last_piece.to_owned()); // instead [...pices, last_piece]
                 self
                   .result
                   .rewrite_tail_pieces(prev_match.matched_len + 1, &pieces);
@@ -359,18 +350,15 @@ impl<'a> TransliterateCtx<'a> {
               Some(v) => v,
               None => continue,
             };
-            let matched = lookup_data.match_prev_krama_sequence(
-              |i| self.result.peek_at(i).map(|c| c.ch),
-              -1,
-              &sg_usize,
-            );
+            let matched =
+              lookup_data.match_prev_krama_sequence(|i| self.result.peek_at(i), -1, &sg_usize);
             if !matched.matched {
               continue;
             }
             if let Some(replace_text) = replace_text {
               self
                 .result
-                .rewrite_tail_pieces(matched.matched_len, &[replace_text.clone()]);
+                .rewrite_tail_pieces(matched.matched_len, std::slice::from_ref(replace_text));
             } else {
               let pieces = lookup_data.replace_with_pieces(replace_with);
               self
@@ -466,7 +454,7 @@ pub fn get_active_custom_options(
 #[derive(Debug, Clone)]
 pub struct ResolvedTransliterationRules {
   pub trans_options: HashMap<String, bool>,
-  pub custom_rules: Vec<Rule>,
+  pub custom_rules: Vec<&'static Rule>,
 }
 /// Resolves active options once and flattens enabled rules into a single list.
 pub fn resolve_transliteration_rules(
@@ -481,14 +469,14 @@ pub fn resolve_transliteration_rules(
   );
 
   let custom_options_map = crate::script_data::get_custom_options_map();
-  let mut custom_rules: Vec<Rule> = Vec::new();
+  let mut custom_rules: Vec<&'static Rule> = Vec::new();
 
   for (key, enabled) in trans_options.iter() {
     if !*enabled {
       continue;
     }
     if let Some(opt) = custom_options_map.get(key) {
-      custom_rules.extend(opt.rules.clone());
+      custom_rules.extend(opt.rules.iter());
     }
   }
 
@@ -534,17 +522,18 @@ fn get_rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
   }
 }
 /// Only applies rules marked with `use_replace=true` (fast replaceAll pass).
-fn apply_custom_replace_rules(
+fn apply_custom_replace_rules<R: Borrow<Rule>>(
   mut text: String,
   script_data: &ScriptData,
-  rules: &[Rule],
+  rules: &[R],
   allowed_input_rule_type: CheckInEnum,
 ) -> String {
   if rules.is_empty() {
     return text;
   }
 
-  for rule in rules.iter() {
+  for rule_ref in rules.iter() {
+    let rule = rule_ref.borrow();
     if !rule.check_should_use_replace(allowed_input_rule_type) {
       continue;
     }
@@ -646,7 +635,7 @@ pub fn transliterate_text_core(
   from_script_data: &ScriptData,
   to_script_data: &ScriptData,
   trans_options_in: &HashMap<String, bool>,
-  custom_rules: &[Rule],
+  custom_rules: &[impl Borrow<Rule>],
   options: Option<TransliterationFnOptions>,
 ) -> Result<TransliterationOutput, String> {
   let opts = options.unwrap_or_default();
@@ -689,10 +678,10 @@ pub fn transliterate_text_core(
 
   let (brahmic_nuqta, brahmic_halant) = match (from_script_data, to_script_data) {
     (ScriptData::Brahmic { nuqta, halant, .. }, ScriptData::Other { .. }) => {
-      (nuqta.clone(), Some(halant.clone()))
+      (nuqta.as_deref(), Some(halant.as_str()))
     }
     (ScriptData::Other { .. }, ScriptData::Brahmic { nuqta, halant, .. }) => {
-      (nuqta.clone(), Some(halant.clone()))
+      (nuqta.as_deref(), Some(halant.as_str()))
     }
     _ => (None, None),
   };
@@ -726,8 +715,8 @@ pub fn transliterate_text_core(
     result: &mut result,
     prev_context: &mut prev_context,
     prev_context_in_use,
-    brahmic_halant: &brahmic_halant,
-    brahmic_nuqta: &brahmic_nuqta,
+    brahmic_halant,
+    brahmic_nuqta,
     typing_mode: opts.typing_mode,
     include_inherent_vowels: opts.include_inherent_vowel,
   };
@@ -753,7 +742,7 @@ pub fn transliterate_text_core(
     if CHARS_TO_SKIP.contains(&ch) {
       ctx.cursor.advance(1);
       if ctx.prev_context_in_use {
-        ctx.prev_context_cleanup(Some((Some(" ".to_owned()), None)), None, None);
+        ctx.prev_context_cleanup(Some((Some(Cow::Borrowed(" ")), None)), None, None);
         ctx.prev_context.clear();
       }
       ctx.result.emit(ch.to_string());
@@ -765,7 +754,7 @@ pub fn transliterate_text_core(
       let ch_str = ch.to_string();
       ctx.result.emit(ch_str.clone());
       ctx.cursor.advance(1);
-      let _ = ctx.prev_context_cleanup(Some((Some(ch_str), None)), None, None);
+      let _ = ctx.prev_context_cleanup(Some((Some(Cow::Owned(ch_str)), None)), None, None);
       continue;
     }
 
@@ -780,8 +769,12 @@ pub fn transliterate_text_core(
           &from_script_data.get_common_attr().custom_script_chars_arr[custom_idx];
         let list_item = list_ref_opt
           .and_then(|i| from_script_data.get_common_attr().list.get(i as usize))
-          .cloned();
-        ctx.prev_context_cleanup(Some((Some(custom_text.clone()), list_item)), None, None);
+          .map(Cow::Borrowed);
+        ctx.prev_context_cleanup(
+          Some((Some(Cow::Borrowed(custom_text.as_str())), list_item)),
+          None,
+          None,
+        );
 
         let normal_text = back_ref_opt
           .and_then(|i| {
@@ -790,7 +783,7 @@ pub fn transliterate_text_core(
               .typing_text_to_krama_map
               .get(i as usize)
           })
-          .map(|(s, _)| s.clone())
+          .map(|(s, _)| s.as_str())
           .unwrap_or_default();
         ctx.result.emit(normal_text);
         ctx.cursor.advance(custom_text.chars().count());
@@ -815,7 +808,7 @@ pub fn transliterate_text_core(
               .prev_context
               .type_at(-2)
               .is_some_and(|k| k.is_vyanjana())
-            && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta.as_deref()));
+            && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta));
 
       loop {
         let next = ctx.cursor.peek_at(text_index + scan_units + 1);
@@ -1094,13 +1087,13 @@ pub fn transliterate_text_core(
               .custom_script_chars_arr
               .get(custom_back_ref as usize)
             {
-              ctx.result.emit(custom_item.0.clone());
+              ctx.result.emit(custom_item.0.as_str());
               let list_item = custom_item
                 .1
                 .and_then(|li| to_script_data.get_common_attr().list.get(li as usize))
-                .cloned();
+                .map(Cow::Borrowed);
               ctx.prev_context_cleanup(
-                Some((Some(matched_text.clone()), list_item)),
+                Some((Some(Cow::Borrowed(matched_text.as_str())), list_item)),
                 map.next.as_deref(),
                 None,
               );
@@ -1134,7 +1127,7 @@ pub fn transliterate_text_core(
                     .get_common_attr()
                     .list
                     .get(i as usize)
-                    .cloned()
+                    .map(Cow::Borrowed)
                 } else {
                   None
                 }
@@ -1165,10 +1158,8 @@ pub fn transliterate_text_core(
                       .get_common_attr()
                       .list
                       .get(*list_ref as usize)
-                      .clone()
-                      .map(|k| k.clone())
                   })
-                  .collect::<Vec<Option<List>>>();
+                  .collect::<Vec<Option<&List>>>();
                   if is_script_tamil_ext(from_script_name)
                     && list_refs
                       .iter()
@@ -1178,12 +1169,11 @@ pub fn transliterate_text_core(
                       .any(|k| k.as_ref().is_some_and(|k| k.is_vyanjana()))
                   {
                     if let Some(first) = list_refs.get(0) {
-                      item = Some(List::Anya {
+                      item = Some(Cow::Owned(List::Anya {
                         krama_ref: first
-                          .clone()
                           .map(|x| x.get_krama_ref().clone())
                           .unwrap_or(Vec::new()),
-                      });
+                      }));
                     }
                   } else if is_script_tamil_ext(from_script_name)
                     && list_refs.len() > 1
@@ -1195,7 +1185,7 @@ pub fn transliterate_text_core(
                           item = None;
                         }
                         Some(v) => {
-                          item = Some(v.clone());
+                          item = Some(Cow::Borrowed(v));
                         }
                       }
                     }
@@ -1207,7 +1197,7 @@ pub fn transliterate_text_core(
                           item = None;
                         }
                         Some(v) => {
-                          item = Some(v.clone());
+                          item = Some(Cow::Borrowed(v));
                         }
                       }
                     }
@@ -1215,18 +1205,21 @@ pub fn transliterate_text_core(
                 }
               }
 
-              result_concat_status =
-                ctx.prev_context_cleanup(Some((Some(matched_text.clone()), item)), None, None);
+              result_concat_status = ctx.prev_context_cleanup(
+                Some((Some(Cow::Borrowed(matched_text.as_str())), item)),
+                None,
+                None,
+              );
             } else if matches!(to_script_data, ScriptData::Brahmic { .. })
               && matches!(from_script_data, ScriptData::Other { .. })
             {
-              let item: Option<List>;
+              let item: Option<Cow<'_, List>>;
               if let Some(f) = map.fallback_list_ref {
                 item = to_script_data
                   .get_common_attr()
                   .list
                   .get(f as usize)
-                  .cloned();
+                  .map(Cow::Borrowed);
               } else {
                 item = if krama.is_empty() {
                   None
@@ -1243,7 +1236,7 @@ pub fn transliterate_text_core(
                       Some(i) => to_script_data.get_common_attr().list.get(i as usize),
                       None => None,
                     })
-                    .map(|k| k.to_owned())
+                    .map(Cow::Borrowed)
                 };
               }
 
@@ -1252,14 +1245,17 @@ pub fn transliterate_text_core(
               } else {
                 None
               };
-              result_concat_status =
-                ctx.prev_context_cleanup(Some((Some(matched_text.clone()), item)), next_list, None);
+              result_concat_status = ctx.prev_context_cleanup(
+                Some((Some(Cow::Borrowed(matched_text.as_str())), item)),
+                next_list,
+                None,
+              );
             } else if opts.typing_mode
               && from_script_name == "Normal"
               && matches!(to_script_data, ScriptData::Other { .. })
             {
               result_concat_status = ctx.prev_context_cleanup(
-                Some((Some(matched_text.clone()), None)),
+                Some((Some(Cow::Borrowed(matched_text.as_str())), None)),
                 map.next.as_deref(),
                 None,
               );
@@ -1315,10 +1311,10 @@ pub fn transliterate_text_core(
         } else
         // typing-mode special case when krama contains -1 entries: emit raw match
         if krama.iter().any(|&k| k == -1) {
-          ctx.result.emit(matched_text.clone());
+          ctx.result.emit(matched_text.as_str());
           if opts.typing_mode {
             ctx.prev_context_cleanup(
-              Some((Some(matched_text.clone()), None)),
+              Some((Some(Cow::Borrowed(matched_text.as_str())), None)),
               map.next.as_deref(),
               None,
             );
@@ -1338,7 +1334,11 @@ pub fn transliterate_text_core(
     let idx = from_script_data.krama_index_of_text(&char_to_search);
     let Some(index) = idx else {
       if ctx.prev_context_in_use {
-        ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
+        ctx.prev_context_cleanup(
+          Some((Some(Cow::Owned(char_to_search.clone())), None)),
+          None,
+          None,
+        );
         ctx.prev_context.clear();
       }
       ctx.result.emit(char_to_search);
@@ -1358,10 +1358,10 @@ pub fn transliterate_text_core(
             .get_common_attr()
             .list
             .get(li as usize)
-            .cloned()
+            .map(Cow::Borrowed)
         });
         result_concat_status =
-          ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
+          ctx.prev_context_cleanup(Some((Some(Cow::Owned(char_to_search)), item)), None, None);
       } else if matches!(to_script_data, ScriptData::Brahmic { .. }) {
         let list_idx = to_script_data
           .get_common_attr()
@@ -1373,16 +1373,15 @@ pub fn transliterate_text_core(
             .get_common_attr()
             .list
             .get(li as usize)
-            .cloned()
+            .map(Cow::Borrowed)
         });
         result_concat_status =
-          ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), item)), None, None);
+          ctx.prev_context_cleanup(Some((Some(Cow::Owned(char_to_search)), item)), None, None);
       }
     }
 
     if !result_concat_status {
-      let to_add_text = to_script_data.krama_text_or_empty(index as i16).to_string();
-      let pieces = [to_add_text.to_owned()];
+      let pieces = [to_script_data.krama_text_or_empty(index as i16)];
       if let ScriptData::Brahmic {
         halant: to_halant, ..
       } = to_script_data

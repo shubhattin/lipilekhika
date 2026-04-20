@@ -1,4 +1,5 @@
 use crate::script_data::{List, ScriptData};
+use std::borrow::Cow;
 use std::collections::VecDeque;
 
 // pub fn krama_index_of_text()
@@ -39,59 +40,49 @@ impl ResultStringBuilder {
   pub fn new() -> ResultStringBuilder {
     ResultStringBuilder { result: Vec::new() }
   }
-  pub fn emit(&mut self, text: String) {
+  pub fn emit<S: Into<String>>(&mut self, text: S) {
+    let text = text.into();
     if text.is_empty() {
       return;
     }
     self.result.push(text);
   }
-  pub fn emit_pieces(&mut self, pieces: &[String]) {
+  pub fn emit_pieces<S: AsRef<str>>(&mut self, pieces: &[S]) {
     for p in pieces {
-      self.emit(p.to_owned());
+      self.emit(p.as_ref());
     }
   }
-  pub fn last_piece(&self) -> Option<String> {
-    let last = self.result.last().cloned();
-    return last;
+  pub fn last_piece(&self) -> Option<&str> {
+    self.result.last().map(String::as_str)
   }
   pub fn last_char(&self) -> Option<char> {
-    match self.last_piece() {
-      Some(v) => v.chars().last(),
-      None => None,
-    }
+    self.result.last().and_then(|v| v.chars().last())
   }
   pub fn pop_last_char(&mut self) -> Option<char> {
-    let result_len = self.result.len();
-    let lp = self.last_piece();
-    match lp {
-      Some(mut lp) => {
-        if lp.len() == 0 {
-          // handling the panic case
-          return None;
-        }
-        let ch = lp.pop();
-        // ^ slice(0, -1) done with pop inself
-        if let Some(ch) = ch {
-          self.result[result_len - 1] = lp;
-          return Some(ch);
-        }
-        return None;
-      }
-      None => None,
+    let lp = self.result.last_mut()?;
+    if lp.is_empty() {
+      // handling the panic case
+      return None;
     }
+    lp.pop()
   }
-  pub fn rewrite_tail_pieces(&mut self, count: usize, new_pieces: &[String]) {
+  pub fn rewrite_tail_pieces<S: AsRef<str>>(&mut self, count: usize, new_pieces: &[S]) {
     let len = self.result.len();
     let start = len.saturating_sub(count); // -count but safe
     self.result.truncate(start);
     for p in new_pieces {
+      let p = p.as_ref();
       if !p.is_empty() {
         self.result.push(p.to_owned());
       }
     }
   }
 
-  pub fn with_last_char_moved_after(&mut self, before_pieces: &[String], after_pieces: &[String]) {
+  pub fn with_last_char_moved_after<S: AsRef<str>, T: AsRef<str>>(
+    &mut self,
+    before_pieces: &[S],
+    after_pieces: &[T],
+  ) {
     let ch = self.pop_last_char();
     match ch {
       None => {
@@ -107,7 +98,7 @@ impl ResultStringBuilder {
   }
 
   /// index can be -ve
-  pub fn peek_at(&self, index: isize) -> Option<InputCursor> {
+  pub fn peek_at(&self, index: isize) -> Option<&str> {
     let len = self.result.len() as isize;
     if len == 0 {
       return None;
@@ -121,15 +112,7 @@ impl ResultStringBuilder {
       return None;
     }
 
-    let item = self.result.get(i as usize);
-    match item {
-      Some(item) => {
-        return Some(InputCursor {
-          ch: item.to_owned(),
-        });
-      }
-      None => None,
-    }
+    self.result.get(i as usize).map(String::as_str)
   }
 
   pub fn rewrite_at(&mut self, index: isize, new_piece: String) {
@@ -153,15 +136,15 @@ impl ResultStringBuilder {
   }
 }
 
-type PrevContextItem = (Option<String>, Option<List>);
+pub(crate) type PrevContextItem<'a> = (Option<Cow<'a, str>>, Option<Cow<'a, List>>);
 
-pub struct PrevContextBuilder {
-  arr: VecDeque<PrevContextItem>,
+pub struct PrevContextBuilder<'a> {
+  arr: VecDeque<PrevContextItem<'a>>,
   max_len: usize,
 }
 
-impl PrevContextBuilder {
-  pub fn new(max_len: usize) -> PrevContextBuilder {
+impl<'a> PrevContextBuilder<'a> {
+  pub fn new(max_len: usize) -> PrevContextBuilder<'a> {
     PrevContextBuilder {
       arr: VecDeque::new(),
       max_len,
@@ -193,14 +176,14 @@ impl PrevContextBuilder {
     }
   }
 
-  pub fn at(&self, i: isize) -> Option<&PrevContextItem> {
+  pub fn at(&self, i: isize) -> Option<&PrevContextItem<'a>> {
     match self.resolve_arr_index(i) {
       None => None,
       Some(idx) => self.arr.get(idx),
     }
   }
   #[allow(dead_code)]
-  pub fn last(&self) -> Option<&PrevContextItem> {
+  pub fn last(&self) -> Option<&PrevContextItem<'a>> {
     self.arr.back()
   }
   #[allow(dead_code)]
@@ -209,11 +192,11 @@ impl PrevContextBuilder {
   }
   #[allow(dead_code)]
   pub fn last_type(&self) -> Option<&List> {
-    self.last().and_then(|(_, list_opt)| list_opt.as_ref())
+    self.last().and_then(|(_, list_opt)| list_opt.as_deref())
   }
 
   pub fn type_at(&self, i: isize) -> Option<&List> {
-    self.at(i).and_then(|(_, list_opt)| list_opt.as_ref())
+    self.at(i).and_then(|(_, list_opt)| list_opt.as_deref())
   }
 
   /// Text at a given index (supports -ve indices).
@@ -228,7 +211,7 @@ impl PrevContextBuilder {
   }
 
   /// Push a new context item, enforcing `max_len` and skipping empty/None text.
-  pub fn push(&mut self, item: PrevContextItem) {
+  pub fn push(&mut self, item: PrevContextItem<'a>) {
     let text_ok = item.0.as_ref().map(|s| !s.is_empty()).unwrap_or(false);
     if !text_ok {
       return;
@@ -244,11 +227,6 @@ pub struct InputTextCursor {
   /// Pre-computed char array for O(1) indexed access (like Go's []rune).
   chars: Vec<char>,
   pos: usize,
-}
-
-pub struct InputCursor {
-  pub ch: String,
-  // no cp(codepoint) or width needed here in rust
 }
 
 impl InputTextCursor {
@@ -311,14 +289,15 @@ pub struct MatchPrevKramaSequenceResult {
 impl ScriptData {
   /// Match a sequence of krama items against previous context.
   /// `peek_at` returns the text at a given index as a String.
-  pub fn match_prev_krama_sequence<F>(
+  pub fn match_prev_krama_sequence<F, T>(
     &self,
     peek_at: F,
     anchor_index: isize,
     prev: &[usize], // indices(number) array
   ) -> MatchPrevKramaSequenceResult
   where
-    F: Fn(isize) -> Option<String>,
+    F: Fn(isize) -> Option<T>,
+    T: AsRef<str>,
   {
     for i in 0..prev.len() {
       let expected_krama_index = prev[prev.len() - 1 - i];
@@ -332,7 +311,7 @@ impl ScriptData {
         }
       };
 
-      let got_krama_index = self.krama_index_of_text(&info);
+      let got_krama_index = self.krama_index_of_text(info.as_ref());
       match got_krama_index {
         Some(got) if got == expected_krama_index => {}
         _ => {
@@ -379,9 +358,9 @@ pub fn is_vedic_svara_tail(ch: Option<char>) -> bool {
 }
 
 impl ResultStringBuilder {
-  pub fn emit_pieces_with_reorder(
+  pub fn emit_pieces_with_reorder<S: AsRef<str>>(
     &mut self,
-    pieces: &[String],
+    pieces: &[S],
     halant: &str,
     should_reorder: bool,
   ) {
@@ -393,19 +372,19 @@ impl ResultStringBuilder {
       return;
     }
 
-    let first_piece = pieces.first().map(|s| s.as_str()).unwrap_or("");
+    let first_piece = pieces.first().map(|s| s.as_ref()).unwrap_or("");
     if first_piece.starts_with(halant) {
       let rest_first = first_piece.strip_prefix(halant).unwrap_or("");
       let mut after_pieces: Vec<String> = Vec::new();
       if !rest_first.is_empty() {
         after_pieces.push(rest_first.to_owned());
       }
-      for p in pieces.into_iter().skip(1) {
-        after_pieces.push(p.to_owned());
+      for p in pieces.iter().skip(1) {
+        after_pieces.push(p.as_ref().to_owned());
       }
-      self.with_last_char_moved_after(&[halant.to_owned()], &after_pieces);
+      self.with_last_char_moved_after(&[halant], &after_pieces);
     } else {
-      self.with_last_char_moved_after(pieces, &[]);
+      self.with_last_char_moved_after(pieces, &[] as &[String]);
     }
   }
 }
