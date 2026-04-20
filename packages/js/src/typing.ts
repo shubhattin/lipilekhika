@@ -171,6 +171,13 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   };
 }
 
+function isTextInputElement(value: unknown): value is HTMLInputElement | HTMLTextAreaElement {
+  return (
+    (typeof HTMLInputElement !== 'undefined' && value instanceof HTMLInputElement) ||
+    (typeof HTMLTextAreaElement !== 'undefined' && value instanceof HTMLTextAreaElement)
+  );
+}
+
 function inputElementFromTypingEvent(
   event: unknown
 ): HTMLInputElement | HTMLTextAreaElement | null {
@@ -181,35 +188,32 @@ function inputElementFromTypingEvent(
     nativeEvent?: { target?: unknown };
   };
   const fromCurrent = o.currentTarget;
-  if (fromCurrent instanceof HTMLInputElement || fromCurrent instanceof HTMLTextAreaElement) {
+  if (isTextInputElement(fromCurrent)) {
     return fromCurrent;
   }
   const fromNativeTarget = o.nativeEvent?.target;
-  if (
-    fromNativeTarget instanceof HTMLInputElement ||
-    fromNativeTarget instanceof HTMLTextAreaElement
-  ) {
+  if (isTextInputElement(fromNativeTarget)) {
     return fromNativeTarget;
   }
   const fromTarget = o.target;
-  if (fromTarget instanceof HTMLInputElement || fromTarget instanceof HTMLTextAreaElement) {
+  if (isTextInputElement(fromTarget)) {
     return fromTarget;
   }
   return null;
 }
 
 function inputEventFromTypingEvent(event: unknown): InputEvent | null {
-  if (event instanceof InputEvent) return event;
+  if (typeof InputEvent !== 'undefined' && event instanceof InputEvent) return event;
   if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
   const n = (event as { nativeEvent: unknown }).nativeEvent;
-  return n instanceof InputEvent ? n : null;
+  return typeof InputEvent !== 'undefined' && n instanceof InputEvent ? n : null;
 }
 
 function keyboardEventFromTypingEvent(event: unknown): KeyboardEvent | null {
-  if (event instanceof KeyboardEvent) return event;
+  if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return event;
   if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
   const n = (event as { nativeEvent: unknown }).nativeEvent;
-  return n instanceof KeyboardEvent ? n : null;
+  return typeof KeyboardEvent !== 'undefined' && n instanceof KeyboardEvent ? n : null;
 }
 
 /**
