@@ -21,7 +21,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.es2022,
-        ...globals.nodeBuiltin,
+        ...globals.node,
         ...globals.browser
       }
     }
