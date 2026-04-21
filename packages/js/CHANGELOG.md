@@ -1,5 +1,9 @@
 # Changelog
 
+## js-lib@1.0.10
+
+- Improve performance of `transliterate_wasm` and `transliterate/node` (N-API) (Rust based)
+
 ## js-lib@v1.0.9
 
 - Added a native `lipilekhika/node` binding for transliterate and create_typing_context functions
