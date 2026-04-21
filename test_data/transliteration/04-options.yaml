@@ -85,13 +85,13 @@
   output: க³ஂகா³
   options:
     "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
-- index: 9
+- index: 10
   from: Normal
   to: Romanized
   input: saa
   output: saa
   reversible: false
-- index: 10
+- index: 11
   from: Normal
   to: Romanized
   input: naa
