@@ -6,6 +6,7 @@ on:
       - "packages/js/**"
       - "packages/go/**"
       - ".github/workflows/go_ci.yml"
+      - "test_data/**"
   workflow_dispatch:
 
 jobs:

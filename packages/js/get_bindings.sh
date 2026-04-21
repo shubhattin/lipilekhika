@@ -1,13 +1,18 @@
 #!/bin/bash
+set -euo pipefail
 
-cd wasm
-rm -rf pkg
-./gen_wasm.sh
-echo "WASM generated"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-cd ../binding
-rm -rf pkg
-./gen_node_bind.sh
-echo "N-API Binding generated"
+(
+  cd "$SCRIPT_DIR/wasm" || exit 1
+  rm -rf pkg
+  ./gen_wasm.sh
+  echo "WASM generated"
+)
 
-cd ..
+(
+  cd "$SCRIPT_DIR/binding" || exit 1
+  rm -rf pkg
+  ./gen_node_bind.sh
+  echo "N-API Binding generated"
+)
