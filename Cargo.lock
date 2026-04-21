@@ -1586,7 +1586,7 @@ name = "dart_binding"
 version = "0.1.0"
 dependencies = [
  "flutter_rust_bridge",
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
 ]
 
 [[package]]
@@ -4002,7 +4002,7 @@ dependencies = [
 
 [[package]]
 name = "lipilekhika"
-version = "1.0.7"
+version = "1.0.8"
 dependencies = [
  "bincode",
  "clap",
@@ -4035,7 +4035,7 @@ dependencies = [
  "iced_aw",
  "iced_futures",
  "image",
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
  "octocrab",
  "posthog-rs",
  "reqwest 0.12.28",
@@ -4053,7 +4053,7 @@ name = "lipilekhika-wasm"
 version = "0.1.0"
 dependencies = [
  "js-sys",
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
  "wasm-bindgen",
 ]
 
@@ -4061,7 +4061,7 @@ dependencies = [
 name = "lipiparivartaka"
 version = "0.1.0"
 dependencies = [
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
  "serde",
  "serde_json",
  "tauri",
@@ -4491,7 +4491,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 name = "node_binding"
 version = "0.1.0"
 dependencies = [
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
  "napi",
  "napi-build",
  "napi-derive",
@@ -5781,7 +5781,7 @@ dependencies = [
 name = "python_binding"
 version = "0.1.0"
 dependencies = [
- "lipilekhika 1.0.7",
+ "lipilekhika 1.0.8",
  "pyo3",
 ]
 

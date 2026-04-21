@@ -1,5 +1,9 @@
 # Changelog
 
+## rust-lib@1.0.8
+
+- Performance improvements in transliteration and typing emulation
+
 ## rust-lib@v1.0.7
 
 - Use `HashMap` for faster Performance instead of Sorted array + Binary Search lookup

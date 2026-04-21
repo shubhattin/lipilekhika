@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased (python-lib@v1.0.4)
+## python-lib@1.0.5
+
+- Add performace improvements for transliteration and typing emulation (rust based)
+
+## python-lib@v1.0.4
 
 - Use faster Rust backend for even faster performance due to `HashMap`
 
