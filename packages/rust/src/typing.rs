@@ -134,6 +134,10 @@ impl TypingContext {
       });
     };
 
+    self.take_key_input_char(ch)
+  }
+
+  pub fn take_key_input_char(&mut self, ch: char) -> Result<TypingDiff, String> {
     let now = Instant::now();
     if let Some(last) = self.last_time {
       if now.duration_since(last) > self.auto_context_clear_time {
@@ -142,10 +146,10 @@ impl TypingContext {
     }
 
     self.curr_input.push(ch);
-    let prev_output = self.curr_output.clone();
+    let prev_output = self.curr_output.as_str();
 
     let result = transliterate_text_core(
-      self.curr_input.clone(),
+      &self.curr_input,
       "Normal",
       &self.normalized_typing_lang,
       self.from_script_data,
@@ -158,16 +162,16 @@ impl TypingContext {
     let context_length = result.context_length;
     let output = result.output;
 
+    // Calculate the diff between previous and current output, by common prefix length.
+    let (to_delete_chars_count, diff_add_text) = compute_diff(prev_output, &output);
+
     if context_length > 0 {
-      self.curr_output = output.clone();
-    } else if context_length == 0 {
+      self.curr_output = output;
+    } else {
       self.clear_context();
     }
 
-    // Calculate the diff between previous and current output, by common prefix length.
-    let (to_delete_chars_count, diff_add_text) = compute_diff(&prev_output, &output);
-
-    self.last_time = Some(Instant::now());
+    self.last_time = Some(now);
 
     Ok(TypingDiff {
       to_delete_chars_count,
@@ -230,7 +234,7 @@ pub fn emulate_typing(
   let mut result = String::new();
 
   for ch in text.chars() {
-    let diff = ctx.take_key_input(&ch.to_string())?;
+    let diff = ctx.take_key_input_char(ch)?;
 
     if diff.to_delete_chars_count > 0 {
       truncate_last_chars(&mut result, diff.to_delete_chars_count);

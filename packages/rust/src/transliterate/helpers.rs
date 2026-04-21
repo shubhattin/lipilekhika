@@ -226,9 +226,13 @@ impl<'a> PrevContextBuilder<'a> {
   }
 }
 
-pub struct InputTextCursor {
+pub struct InputTextCursor<'a> {
   /// Pre-computed char array for O(1) indexed access (like Go's []rune).
   chars: Vec<char>,
+  /// Byte offsets for each character plus the string end.
+  char_byte_offsets: Vec<usize>,
+  /// also storing it, be to used with `char_byte_offsets`
+  text: &'a str,
   pos: usize,
 }
 
@@ -238,10 +242,21 @@ pub struct InputTextCursor {
 // }
 // ^ No need for InputCursor here in the rust implementation
 
-impl InputTextCursor {
-  pub fn new(text: &str) -> InputTextCursor {
+impl<'a> InputTextCursor<'a> {
+  pub fn new(text: &'a str) -> InputTextCursor<'a> {
+    let mut chars = Vec::with_capacity(text.chars().count());
+    let mut char_byte_offsets = Vec::with_capacity(chars.capacity() + 1);
+
+    for (byte_idx, ch) in text.char_indices() {
+      chars.push(ch);
+      char_byte_offsets.push(byte_idx);
+    }
+    char_byte_offsets.push(text.len());
+
     InputTextCursor {
-      chars: text.chars().collect(),
+      text,
+      chars,
+      char_byte_offsets,
       pos: 0,
     }
   }
@@ -270,8 +285,13 @@ impl InputTextCursor {
 
   /// Peek and return as a String (for APIs that need &str).
   /// Only call when you actually need the String form.
-  pub fn peek_at_str(&self, index_units: usize) -> Option<String> {
-    self.chars.get(index_units).map(|c| c.to_string())
+  pub fn peek_at_str(&self, index_units: usize) -> Option<&'a str> {
+    // self.chars.get(index_units).map(|c| c.to_string())
+    // ^ we avoid creating a new string everytimr
+    // this makes it allocation free
+    let start = *self.char_byte_offsets.get(index_units)?;
+    let end = *self.char_byte_offsets.get(index_units + 1)?;
+    self.text.get(start..end)
   }
 
   /// units here is for char (and not bytes)
@@ -281,11 +301,14 @@ impl InputTextCursor {
     self.pos += units;
   }
 
-  pub fn slice(&self, start: usize, end: usize) -> Option<String> {
+  pub fn slice(&self, start: usize, end: usize) -> Option<&'a str> {
     if start > end || end > self.chars.len() {
       return None;
     }
-    Some(self.chars[start..end].iter().collect())
+    // by using char_byte_offsets, we avoid unnecessary string allocations
+    let start_byte = *self.char_byte_offsets.get(start)?;
+    let end_byte = *self.char_byte_offsets.get(end)?;
+    self.text.get(start_byte..end_byte)
   }
 }
 

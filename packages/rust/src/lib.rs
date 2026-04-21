@@ -38,7 +38,7 @@ pub fn transliterate(
   }
 
   let result = transliterate_text(
-    text.to_string(),
+    text,
     &normalized_from,
     &normalized_to,
     trans_options,

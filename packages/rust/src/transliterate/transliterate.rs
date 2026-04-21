@@ -21,7 +21,7 @@ struct TransliterateCtx<'a, R> {
   to_script_data: &'a ScriptData,
   trans_options: &'a HashMap<String, bool>,
   custom_rules: &'a [R],
-  cursor: &'a mut InputTextCursor,
+  cursor: &'a mut InputTextCursor<'a>,
   result: &'a mut ResultStringBuilder,
   prev_context: &'a mut PrevContextBuilder<'a>,
   prev_context_in_use: bool,
@@ -519,16 +519,17 @@ fn get_rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
   }
 }
 /// Only applies rules marked with `use_replace=true` (fast replaceAll pass).
-fn apply_custom_replace_rules<R: Borrow<Rule>>(
-  mut text: String,
+fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
+  text: &'a str,
   script_data: &ScriptData,
   rules: &[R],
   allowed_input_rule_type: CheckInEnum,
-) -> String {
+) -> Cow<'a, str> {
   if rules.is_empty() {
-    return text;
+    return Cow::Borrowed(text);
   }
 
+  let mut text = text.to_owned();
   for rule_ref in rules.iter() {
     let rule = rule_ref.borrow();
     if !rule.check_should_use_replace(allowed_input_rule_type) {
@@ -582,7 +583,7 @@ fn apply_custom_replace_rules<R: Borrow<Rule>>(
     }
   }
 
-  text
+  Cow::Owned(text)
 }
 
 const DEFAULT_USE_NATIVE_NUMERALS_MODE: bool = true;
@@ -620,13 +621,10 @@ pub struct TransliterationOutput {
 fn is_single_ascii_digit(s: &str) -> bool {
   s.len() == 1 && s.chars().next().is_some_and(|c| c.is_ascii_digit())
 }
-fn trans_opt<'a>(trans_options: &'a HashMap<String, bool>, key: &str) -> &'a bool {
-  trans_options.get(key).unwrap_or(&false)
-}
 
 /// Synchronous core transliterator
-pub fn transliterate_text_core(
-  mut text: String,
+pub fn transliterate_text_core<'a>(
+  text: &'a str,
   from_script_name: &str,
   to_script_name: &str,
   from_script_data: &ScriptData,
@@ -643,26 +641,28 @@ pub fn transliterate_text_core(
 
   // Only clone trans_options when we actually need to insert a key (typing mode).
   // In the common (non-typing) path this avoids a full HashMap allocation per call.
-  let owned_trans_options: Option<HashMap<String, bool>>;
-  let trans_options: &HashMap<String, bool>;
-  if opts.typing_mode {
-    let mut cloned = trans_options_in.clone();
-    cloned.insert("normal_to_all:use_typing_chars".to_string(), true);
-    owned_trans_options = Some(cloned);
-    trans_options = owned_trans_options.as_ref().unwrap();
+  let trans_options = trans_options_in;
+  // ^ now we use this flag itself for adding custom
+  // `normal_to_all:use_typing_chars` rule used to modidy the behaviour
+
+  let text = if opts.typing_mode && from_script_name == "Normal" {
+    Cow::Owned(helpers::apply_typing_input_aliases(
+      text.to_owned(),
+      to_script_name,
+    ))
   } else {
-    // owned_trans_options = None;
-    trans_options = trans_options_in;
-  }
+    Cow::Borrowed(text)
+  };
 
-  if opts.typing_mode && from_script_name == "Normal" {
-    text = helpers::apply_typing_input_aliases(text, to_script_name);
-  }
-
-  text = apply_custom_replace_rules(text, from_script_data, custom_rules, CheckInEnum::Input);
+  let text = apply_custom_replace_rules(
+    text.as_ref(),
+    from_script_data,
+    custom_rules,
+    CheckInEnum::Input,
+  );
 
   let mut result = ResultStringBuilder::new();
-  let mut cursor = InputTextCursor::new(&text);
+  let mut cursor = InputTextCursor::new(text.as_ref());
   let mut prev_context = PrevContextBuilder::new(MAX_CONTEXT_LENGTH as usize);
 
   let prev_context_in_use = (matches!(from_script_data, ScriptData::Brahmic { .. })
@@ -683,10 +683,13 @@ pub fn transliterate_text_core(
     _ => (None, None),
   };
 
+  let trans_opt_normal_to_all_use_typing_chars: bool = trans_options
+    .get("normal_to_all:use_typing_chars")
+    .copied()
+    .unwrap_or(false);
   // choose matching map
-  let use_typing_map = (*trans_opt(&trans_options, "normal_to_all:use_typing_chars")
-    || opts.typing_mode)
-    && from_script_name == "Normal";
+  let use_typing_map =
+    (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) && from_script_name == "Normal";
   let text_to_krama_lookup_script_data = if use_typing_map {
     to_script_data
   } else {
@@ -756,7 +759,9 @@ pub fn transliterate_text_core(
     }
 
     // Preserve mode: custom script chars when converting to Normal
-    if *trans_opt(&trans_options, "all_to_normal:preserve_specific_chars")
+    if *trans_options
+      .get("all_to_normal:preserve_specific_chars")
+      .unwrap_or(&false)
       && to_script_name == "Normal"
     {
       let ch_str = ch.to_string();
@@ -819,7 +824,7 @@ pub fn transliterate_text_core(
         }
 
         let end_index = text_index + scan_units + 1;
-        let char_to_search = if ignore_ta_ext_sup_num_text_index != -1 {
+        let char_to_search: Cow<'_, str> = if ignore_ta_ext_sup_num_text_index != -1 {
           let a = ctx
             .cursor
             .slice(text_index, ignore_ta_ext_sup_num_text_index as usize)
@@ -830,15 +835,15 @@ pub fn transliterate_text_core(
               .slice((ignore_ta_ext_sup_num_text_index as usize) + 1, end_index)
               .unwrap_or_default()
           } else {
-            String::new()
+            ""
           };
-          format!("{}{}", a, b)
+          Cow::Owned(format!("{}{}", a, b))
         } else {
-          ctx.cursor.slice(text_index, end_index).unwrap_or_default()
+          Cow::Borrowed(ctx.cursor.slice(text_index, end_index).unwrap_or_default())
         };
 
-        let potential_match_index =
-          text_to_krama_lookup_script_data.text_to_krama_map_index(&char_to_search, use_typing_map);
+        let potential_match_index = text_to_krama_lookup_script_data
+          .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map);
 
         let Some(potential_match_index) = potential_match_index else {
           text_to_krama_item_index = None;
@@ -1076,7 +1081,7 @@ pub fn transliterate_text_core(
       let matched_len_units = matched_text.chars().count() - index_delete_length;
       ctx.cursor.advance(matched_len_units);
 
-      if *trans_opt(&trans_options, "normal_to_all:use_typing_chars") {
+      if opts.typing_mode || trans_opt_normal_to_all_use_typing_chars {
         if let Some(custom_back_ref) = map.custom_back_ref {
           if custom_back_ref >= 0 {
             if let Some(custom_item) = to_script_data
@@ -1119,7 +1124,7 @@ pub fn transliterate_text_core(
             {
               // pick a brahmic list item (from-script) if available
               let mut item = map.fallback_list_ref.and_then(|i| {
-                if !trans_opt(&trans_options, "normal_to_all:use_typing_chars") {
+                if !(trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) {
                   from_script_data
                     .get_common_attr()
                     .list
@@ -1325,20 +1330,16 @@ pub fn transliterate_text_core(
     }
 
     // Step 2: Search in krama_text_arr
-    let char_to_search = text_to_krama_item
-      .map(|k| k.0.clone())
-      .unwrap_or_else(|| ch.to_string());
-    let idx = from_script_data.krama_index_of_text(&char_to_search);
+    let char_to_search: Cow<'_, str> = text_to_krama_item
+      .map(|k| Cow::Borrowed(k.0.as_str()))
+      .unwrap_or_else(|| Cow::Owned(ch.into()));
+    let idx = from_script_data.krama_index_of_text(char_to_search.as_ref());
     let Some(index) = idx else {
       if ctx.prev_context_in_use {
-        ctx.prev_context_cleanup(
-          Some((Some(Cow::Owned(char_to_search.clone())), None)),
-          None,
-          None,
-        );
+        ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
         ctx.prev_context.clear();
       }
-      ctx.result.emit(char_to_search);
+      ctx.result.emit(char_to_search.as_ref());
       continue;
     };
 
@@ -1358,7 +1359,7 @@ pub fn transliterate_text_core(
             .map(Cow::Borrowed)
         });
         result_concat_status =
-          ctx.prev_context_cleanup(Some((Some(Cow::Owned(char_to_search)), item)), None, None);
+          ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
       } else if matches!(to_script_data, ScriptData::Brahmic { .. }) {
         let list_idx = to_script_data
           .get_common_attr()
@@ -1373,7 +1374,7 @@ pub fn transliterate_text_core(
             .map(Cow::Borrowed)
         });
         result_concat_status =
-          ctx.prev_context_cleanup(Some((Some(Cow::Owned(char_to_search)), item)), None, None);
+          ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
       }
     }
 
@@ -1427,17 +1428,22 @@ pub fn transliterate_text_core(
     let _ = ctx.prev_context_cleanup(None, None, Some(true));
   }
 
-  let mut output = ctx.result.to_string();
-  output = apply_custom_replace_rules(output, to_script_data, custom_rules, CheckInEnum::Output);
+  let output = ctx.result.to_string();
+  let output = apply_custom_replace_rules(
+    output.as_str(),
+    to_script_data,
+    custom_rules,
+    CheckInEnum::Output,
+  );
 
   Ok(TransliterationOutput {
-    output,
+    output: output.into_owned(),
     context_length: ctx.prev_context.length(),
   })
 }
 
 pub fn transliterate_text(
-  text: String,
+  text: &str,
   from_script_name: &str,
   to_script_name: &str,
   transliteration_input_options: Option<&HashMap<String, bool>>,
