@@ -52,8 +52,14 @@ const OVERRIDE_ENV_VARS = [
 ] as const;
 const SUPPORTED_BINARY_FILES = {
   linux: {
-    x64: 'index.linux-x64-gnu.node',
-    arm64: 'index.linux-arm64-gnu.node'
+    x64: {
+      gnu: 'index.linux-x64-gnu.node',
+      musl: 'index.linux-x64-musl.node'
+    },
+    arm64: {
+      gnu: 'index.linux-arm64-gnu.node',
+      musl: 'index.linux-arm64-musl.node'
+    }
   },
   darwin: {
     x64: 'index.darwin-x64.node',
@@ -64,6 +70,13 @@ const SUPPORTED_BINARY_FILES = {
     arm64: 'index.win32-arm64-msvc.node'
   }
 } as const;
+
+type LinuxLibc = 'gnu' | 'musl';
+type ProcessReportWithHeader = {
+  header?: {
+    glibcVersionRuntime?: string;
+  };
+};
 
 let nativeBinding: NativeModule | null = null;
 
@@ -109,24 +122,46 @@ function resolveNativeBinaryPath() {
   return path.join(getNativeDirCandidates()[0], nativeBinaryFileName);
 }
 
-function getNativeBinaryFileName() {
+function getNativeBinaryFileName(): string {
   const platformBinaries =
     SUPPORTED_BINARY_FILES[process.platform as keyof typeof SUPPORTED_BINARY_FILES];
-  const nativeBinaryFileName = platformBinaries?.[process.arch as keyof typeof platformBinaries];
+  const archBinaries = platformBinaries?.[process.arch as keyof typeof platformBinaries];
 
-  if (!nativeBinaryFileName) {
+  if (!archBinaries) {
     throw new Error(
       `Unsupported platform for Lipilekhika native binding: ${process.platform}-${process.arch}. ` +
         `Supported targets: ${getSupportedTargetList()}.`
     );
   }
 
-  return nativeBinaryFileName;
+  if (typeof archBinaries === 'string') {
+    return archBinaries;
+  }
+
+  if (process.platform === 'linux') {
+    return archBinaries[getLinuxLibc()];
+  }
+
+  throw new Error(
+    `Unsupported platform for Lipilekhika native binding: ${process.platform}-${process.arch}. ` +
+      `Supported targets: ${getSupportedTargetList()}.`
+  );
+}
+
+function getLinuxLibc(): LinuxLibc {
+  const report = process.report?.getReport() as ProcessReportWithHeader | undefined;
+  return report?.header?.glibcVersionRuntime ? 'gnu' : 'musl';
 }
 
 function getSupportedTargetList() {
   return Object.entries(SUPPORTED_BINARY_FILES)
-    .flatMap(([platform, arches]) => Object.keys(arches).map((arch) => `${platform}-${arch}`))
+    .flatMap(([platform, arches]) =>
+      Object.entries(arches).flatMap(([arch, binary]) =>
+        typeof binary === 'object'
+          ? Object.keys(binary).map((libc) => `${platform}-${arch}-${libc}`)
+          : `${platform}-${arch}`
+      )
+    )
     .join(', ');
 }
 

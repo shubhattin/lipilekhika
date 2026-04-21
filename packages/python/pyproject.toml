@@ -11,6 +11,10 @@ license = "MIT"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.urls]
+Homepage = "https://lipilekhika.in"
+Repository = "https://github.com/shubhattin/lipilekhika"
+
 [tool.maturin]
 bindings = "pyo3"
 module-name = "lipilekhika._lipilekhika"
