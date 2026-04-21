@@ -40,10 +40,10 @@ pub struct ResultStringBuilder {
 }
 
 impl ResultStringBuilder {
-  pub fn new() -> ResultStringBuilder {
+  pub fn new() -> Self {
     ResultStringBuilder { result: Vec::new() }
   }
-  pub fn emit<S: Into<String>>(&mut self, text: S) {
+  pub fn emit(&mut self, text: impl Into<String>) {
     // Into<String> to have more wide support for &str and  Cow<&str>
     let text = text.into();
     if text.is_empty() {
@@ -51,7 +51,7 @@ impl ResultStringBuilder {
     }
     self.result.push(text);
   }
-  pub fn emit_pieces<S: AsRef<str>>(&mut self, pieces: &[S]) {
+  pub fn emit_pieces(&mut self, pieces: &[impl AsRef<str>]) {
     for p in pieces {
       self.emit(p.as_ref());
     }
