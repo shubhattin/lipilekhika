@@ -227,11 +227,8 @@ impl<'a> PrevContextBuilder<'a> {
 }
 
 pub struct InputTextCursor<'a> {
-  /// Pre-computed char array for O(1) indexed access (like Go's []rune).
-  chars: Vec<char>,
-  /// Byte offsets for each character plus the string end.
-  char_byte_offsets: Vec<usize>,
-  /// also storing it, be to used with `char_byte_offsets`
+  /// Pre-computed character table with byte offsets for O(1) indexed access.
+  chars: Vec<(char, usize)>,
   text: &'a str,
   pos: usize,
 }
@@ -244,19 +241,18 @@ pub struct InputTextCursor<'a> {
 
 impl<'a> InputTextCursor<'a> {
   pub fn new(text: &'a str) -> InputTextCursor<'a> {
-    let mut chars = Vec::with_capacity(text.chars().count());
-    let mut char_byte_offsets = Vec::with_capacity(chars.capacity() + 1);
+    let mut chars = Vec::with_capacity(text.chars().count() + 1);
 
     for (byte_idx, ch) in text.char_indices() {
-      chars.push(ch);
-      char_byte_offsets.push(byte_idx);
+      chars.push((ch, byte_idx));
     }
-    char_byte_offsets.push(text.len());
+    chars.push(('\0', text.len()));
+    // ^ needed for the last character to be accessible via the `peek_at` method
+    // stores the char offsets
 
     InputTextCursor {
       text,
       chars,
-      char_byte_offsets,
       pos: 0,
     }
   }
@@ -266,12 +262,12 @@ impl<'a> InputTextCursor<'a> {
   }
 
   pub fn char_count(&self) -> usize {
-    self.chars.len()
+    self.chars.len().saturating_sub(1)
   }
 
   /// Returns the character at the given index without heap allocation.
   pub fn peek_at(&self, index_units: usize) -> Option<char> {
-    self.chars.get(index_units).copied()
+    self.chars.get(index_units).map(|(ch, _)| *ch)
   }
 
   pub fn peek(&self) -> Option<char> {
@@ -286,11 +282,12 @@ impl<'a> InputTextCursor<'a> {
   /// Peek and return as a String (for APIs that need &str).
   /// Only call when you actually need the String form.
   pub fn peek_at_str(&self, index_units: usize) -> Option<&'a str> {
-    // self.chars.get(index_units).map(|c| c.to_string())
-    // ^ we avoid creating a new string everytimr
-    // this makes it allocation free
-    let start = *self.char_byte_offsets.get(index_units)?;
-    let end = *self.char_byte_offsets.get(index_units + 1)?;
+    // by using character offsets and slice of text we avoid unnecessary string allocations
+    let start = self.chars.get(index_units).map(|(_, byte_idx)| *byte_idx)?;
+    let end = self
+      .chars
+      .get(index_units + 1)
+      .map(|(_, byte_idx)| *byte_idx)?;
     self.text.get(start..end)
   }
 
@@ -302,12 +299,11 @@ impl<'a> InputTextCursor<'a> {
   }
 
   pub fn slice(&self, start: usize, end: usize) -> Option<&'a str> {
-    if start > end || end > self.chars.len() {
+    if start > end || end > self.char_count() {
       return None;
     }
-    // by using char_byte_offsets, we avoid unnecessary string allocations
-    let start_byte = *self.char_byte_offsets.get(start)?;
-    let end_byte = *self.char_byte_offsets.get(end)?;
+    let start_byte = self.chars.get(start).map(|(_, byte_idx)| *byte_idx)?;
+    let end_byte = self.chars.get(end).map(|(_, byte_idx)| *byte_idx)?;
     self.text.get(start_byte..end_byte)
   }
 }
