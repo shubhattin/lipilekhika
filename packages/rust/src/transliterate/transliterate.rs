@@ -15,7 +15,6 @@ fn char_eq_str(c: char, s: &str) -> bool {
 }
 
 struct TransliterateCtx<'a, R> {
-  #[allow(dead_code)]
   from_script_name: &'a str,
   to_script_name: &'a str,
   from_script_data: &'a ScriptData,
