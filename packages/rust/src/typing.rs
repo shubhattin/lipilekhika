@@ -460,6 +460,16 @@ mod tests {
   use std::io::Write;
   use std::path::{Path, PathBuf};
 
+  fn assert_send_sync<T: Send + Sync>() {}
+
+  #[test]
+  fn public_typing_types_are_send_sync() {
+    assert_send_sync::<TypingContext>();
+    assert_send_sync::<TypingContextOptions>();
+    assert_send_sync::<TypingDiff>();
+    assert_send_sync::<ScriptTypingDataMap>();
+  }
+
   /// For transliteration auto tests, `index` can be string or number in YAML.
   fn de_index<'de, D>(deserializer: D) -> Result<String, D::Error>
   where

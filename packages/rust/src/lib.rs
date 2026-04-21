@@ -59,9 +59,11 @@ pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, St
   }
 }
 
-/// preload script data
-pub fn preload_script_data(_script_name: &str) {
-  ScriptData::get_script_data("Devanagari");
+/// Preload script data for a normalized script, alias, or language name.
+pub fn preload_script_data(script_name: &str) {
+  if let Some(normalized_script_name) = get_normalized_script_name(script_name) {
+    ScriptData::get_script_data(&normalized_script_name);
+  }
 }
 
 #[cfg(test)]

@@ -64,12 +64,11 @@ impl ResultStringBuilder {
   }
   pub fn pop_last_char(&mut self) -> Option<char> {
     let lp = self.result.last_mut()?;
-    let ch = lp.pop();
     if lp.is_empty() {
       // handling the panic case
       return None;
     }
-    ch
+    lp.pop()
   }
   pub fn rewrite_tail_pieces<S: AsRef<str>>(&mut self, count: usize, new_pieces: &[S]) {
     let len = self.result.len();
