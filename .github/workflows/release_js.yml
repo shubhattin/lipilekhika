@@ -151,14 +151,6 @@ jobs:
             runner: windows-11-arm
             target: aarch64-pc-windows-msvc
             node_file: index.win32-arm64-msvc.node
-          - name: linux-x64-musl
-            runner: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            node_file: index.linux-x64-musl.node
-          - name: linux-arm64-musl
-            runner: ubuntu-24.04-arm
-            target: aarch64-unknown-linux-musl
-            node_file: index.linux-arm64-musl.node
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -215,8 +207,6 @@ jobs:
       REQUIRED_NATIVE_NODE_FILES: |
         index.linux-x64-gnu.node
         index.linux-arm64-gnu.node
-        index.linux-x64-musl.node
-        index.linux-arm64-musl.node
         index.darwin-x64.node
         index.darwin-arm64.node
         index.win32-x64-msvc.node

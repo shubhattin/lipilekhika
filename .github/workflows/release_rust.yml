@@ -102,9 +102,10 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           cd packages/rust
-          # temporarily ignore src/data in .gitignore if necessary
+          # Cargo still omits gitignored paths from the crate even with [package] include;
+          # comment out src/data/ so generated files are packaged, then allow publish with a dirty tree.
           sed -i '/^src\/data\// s/^/#/' .gitignore || true
-          cargo publish
+          cargo publish --allow-dirty
 
   build-binaries:
     runs-on: ${{ matrix.os }}
