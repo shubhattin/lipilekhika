@@ -3989,19 +3989,6 @@ checksum = "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039"
 
 [[package]]
 name = "lipilekhika"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a82fb56d1f669768c3f60ca0980e6dab80583ccdf8950dec1e7a42455cbbc974"
-dependencies = [
- "bincode",
- "clap",
- "indexmap 2.12.1",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "lipilekhika"
 version = "1.0.8"
 dependencies = [
  "bincode",
@@ -4015,16 +4002,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipilekhika"
+version = "1.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce6ccbf99b124badb607ee82333eb0263e71375c51001009399e6208aed128bb"
+dependencies = [
+ "bincode",
+ "clap",
+ "indexmap 2.12.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "lipilekhika-fcitx5-binding"
 version = "0.1.0"
 dependencies = [
  "cbindgen",
- "lipilekhika 1.0.6",
+ "lipilekhika 1.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "lipilekhika-ui"
-version = "1.0.9"
+version = "1.0.10"
 dependencies = [
  "crossbeam-channel",
  "dark-light",

@@ -16,9 +16,10 @@
 - 🌐 **Multi-platform** - Use on multiple devices. Web, Andoid, Windows, Linux
 
 ## Apps
+
 - 🌐 **Web App** - Try it instantly at [lipilekhika.in/app](https://lipilekhika.in/app)
 - 🪟 **Windows** - Download the [latest MSI installer](https://lipilekhika.in/redirect/pc-app-release-win-download)
-- 🤖 **Android** - Get it on [Google Play Store](https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika) or download the [latest APK](https://lipilekhika.in/redirect/mobile-app-release-page)
+- 🤖 **Android** - download the [latest APK](https://lipilekhika.in/redirect/mobile-app-release-page)
 - 🐧 **Linux** - Install the [fcitx5 plugin](https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md)
 
 ## 📦 Packages

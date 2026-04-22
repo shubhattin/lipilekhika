@@ -1,5 +1,7 @@
 # Changelog
 
+## mobile-app@v0.2.6+9
+
 ## mobile-app@v0.2.5+8
 
 - Performance Improvement (in rust-lib)

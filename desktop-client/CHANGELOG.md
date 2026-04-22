@@ -1,5 +1,9 @@
 # Changelog
 
+## pc-app@v1.0.10
+
+- Performance Imrpovements
+
 ## pc-app@v1.0.9
 
 - Performance improvements
