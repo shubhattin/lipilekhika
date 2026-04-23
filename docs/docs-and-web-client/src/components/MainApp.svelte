@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, untrack, type Snippet } from 'svelte';
   import {
-    transliterate,
+    type transliterate,
     preloadScriptData,
     getAllOptions,
     type ScriptListType,
@@ -39,7 +39,7 @@
     typing_script = $bindable(),
     to_script = $bindable(),
     pwa_snippet,
-    transliterate_func = transliterate,
+    transliterate_func,
     current_preset = $bindable('none')
   }: {
     input_text: string;
