@@ -25,12 +25,34 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - uses: jetli/wasm-pack-action@v0.4.0
+
       # Generate script data
       - name: Generate Script Data
         run: |
           cd packages/js
           bun install
           bun run make-script-data
+
+      - name: Build WASM
+        run: |
+          cd packages/js/wasm
+          wasm-pack build --release --target web
+
       - name: Build Site
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

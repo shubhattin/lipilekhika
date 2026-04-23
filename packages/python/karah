@@ -31,8 +31,9 @@ def build_bindings():
 @app.command()
 def test():
     """Build bindings using maturin."""
-    result = subprocess.run(["uvx", "pytest"])
+    result = subprocess.run(["uv", "run", "pytest"])
     raise typer.Exit(code=result.returncode)
+
 
 if __name__ == "__main__":
     app()
