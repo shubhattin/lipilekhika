@@ -2,7 +2,7 @@
   import MainApp from './MainApp.svelte';
   import { input_text_atom, typing_script_atom, current_preset_atom } from './script/state';
   import PlatformDownload from './PlatformDownload.svelte';
-  import { transliterate } from 'lipilekhika';
+  import { transliterate_wasm } from 'lipilekhika/index_wasm';
 
   let to_script = $state('Romanized');
 </script>
@@ -12,7 +12,7 @@
   bind:typing_script={$typing_script_atom}
   bind:to_script
   bind:current_preset={$current_preset_atom}
-  transliterate_func={transliterate}
+  transliterate_func={transliterate_wasm}
 >
   {#snippet pwa_snippet()}
     <div class="mt-8">
