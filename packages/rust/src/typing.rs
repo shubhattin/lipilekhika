@@ -199,8 +199,8 @@ impl TypingContext {
   }
 
   /// returns normalized script name
-  pub fn get_normalized_script(&self) -> String {
-    self.normalized_typing_lang.clone()
+  pub fn get_normalized_script(&self) -> &str {
+    &self.normalized_typing_lang
   }
 }
 
@@ -208,17 +208,16 @@ impl TypingContext {
 ///
 /// Returns `(to_delete_chars_count, diff_add_text)`.
 fn compute_diff(prev_output: &str, output: &str) -> (usize, String) {
-  let mut common_chars = 0usize;
+  // Single pass: compute common prefix length in bytes using chars
+  let common_bytes: usize = prev_output
+    .chars()
+    .zip(output.chars())
+    .take_while(|(a, b)| a == b)
+    .map(|(a, _)| a.len_utf8())
+    .sum();
 
-  for (a, b) in prev_output.chars().zip(output.chars()) {
-    if a != b {
-      break;
-    }
-    common_chars += 1;
-  }
-
-  let to_delete_chars_count = prev_output.chars().count().saturating_sub(common_chars);
-  let diff_add_text: String = output.chars().skip(common_chars).collect();
+  let to_delete_chars_count = prev_output[common_bytes..].chars().count();
+  let diff_add_text = output[common_bytes..].to_string();
 
   (to_delete_chars_count, diff_add_text)
 }
@@ -248,12 +247,12 @@ pub fn emulate_typing(
 
 /// Truncate the last `n` characters from a UTF-8 string (character-wise, not bytes).
 fn truncate_last_chars(s: &mut String, n: usize) {
-  for _ in 0..n {
-    if let Some((idx, _)) = s.char_indices().rev().next() {
-      s.truncate(idx);
-    } else {
-      break;
-    }
+  let char_count = s.chars().count();
+  let new_len = char_count.saturating_sub(n);
+  if new_len == 0 {
+    s.clear();
+  } else if let Some((byte_pos, _)) = s.char_indices().nth(new_len) {
+    s.truncate(byte_pos);
   }
 }
 
