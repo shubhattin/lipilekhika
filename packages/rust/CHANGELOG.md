@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (rust-lib@1.0.9)
+
+- Minor performance improvements
+
 ## rust-lib@1.0.8
 
 - Performance improvements in transliteration and typing emulation

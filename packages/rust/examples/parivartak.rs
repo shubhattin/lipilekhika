@@ -1,3 +1,7 @@
+//! CLI transliteration helper (dev / local use). `clap` is a dev-dependency.
+//!
+//! Run: `cargo run --example parivartak --release -p lipilekhika -- --help`
+
 use clap::Parser;
 use lipilekhika::transliterate;
 

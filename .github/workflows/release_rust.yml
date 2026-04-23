@@ -114,19 +114,15 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            binary_name: parivartak
             asset_name: parivartak-linux-x86_64
           - os: macos-latest
             target: x86_64-apple-darwin
-            binary_name: parivartak
             asset_name: parivartak-macos-x86_64
           - os: macos-latest
             target: aarch64-apple-darwin
-            binary_name: parivartak
             asset_name: parivartak-macos-aarch64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            binary_name: parivartak.exe
             asset_name: parivartak-windows-x86_64.exe
 
     steps:
@@ -166,17 +162,17 @@ jobs:
       - name: Build binary
         run: |
           cd packages/rust
-          cargo build --release --bin parivartak --target ${{ matrix.target }}
+          cargo build --release --example parivartak --target ${{ matrix.target }}
 
       - name: Rename binary (Unix)
         if: runner.os != 'Windows'
         run: |
-          mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+          mv "target/${{ matrix.target }}/release/examples/parivartak" "${{ matrix.asset_name }}"
 
       - name: Rename binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          mv target/${{ matrix.target }}/release/${{ matrix.binary_name }} ${{ matrix.asset_name }}
+          mv "target/${{ matrix.target }}/release/examples/parivartak.exe" "${{ matrix.asset_name }}"
 
       # Extract package version (each job runs independently)
       - name: Get version

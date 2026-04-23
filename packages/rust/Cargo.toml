@@ -16,13 +16,13 @@ include = ["src/**/*", "build.rs", "Cargo.toml", "LICENSE*", "README*"]
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 bincode = "1.3.3"
-clap = { version = "4.5.54", features = ["derive"] }
 indexmap = { version = "2", features = ["serde"] }
 
 [dev-dependencies]
+clap = { version = "4.5.54", features = ["derive"] }
+criterion = { version = "0.5.1", default-features = true }
 owo-colors = "4.2.0"
 serde_yaml_ng = "0.10.0"
-criterion = { version = "0.5.1", default-features = true }
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -32,10 +32,6 @@ indexmap = { version = "2", features = ["serde"] }
 
 [lib]
 crate-type = ["rlib"]
-
-[[bin]]
-name = "parivartak"
-path = "src/bin/parivartak.rs"
 
 [[bench]]
 name = "benchmark"
