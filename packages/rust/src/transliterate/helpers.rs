@@ -51,6 +51,13 @@ impl ResultStringBuilder {
     }
     self.result.push(text);
   }
+  /// Emit a single character without heap-allocating a String.
+  pub fn emit_char(&mut self, c: char) {
+    // 4 byte buffer to store a possible utf-8 character (max 4 bytes)
+    let mut buf = [0u8; 4];
+    let s = c.encode_utf8(&mut buf);
+    self.result.push(s.to_owned());
+  }
   pub fn emit_pieces(&mut self, pieces: &[impl AsRef<str>]) {
     for p in pieces {
       self.emit(p.as_ref());
@@ -95,7 +102,7 @@ impl ResultStringBuilder {
       }
       Some(c) => {
         self.emit_pieces(before_pieces);
-        self.emit(c.to_string());
+        self.emit_char(c);
         self.emit_pieces(after_pieces);
       }
     }
@@ -241,7 +248,7 @@ pub struct InputTextCursor<'a> {
 
 impl<'a> InputTextCursor<'a> {
   pub fn new(text: &'a str) -> InputTextCursor<'a> {
-    let mut chars = Vec::with_capacity(text.chars().count() + 1);
+    let mut chars = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
 
     for (byte_idx, ch) in text.char_indices() {
       chars.push((ch, byte_idx));
@@ -357,12 +364,11 @@ impl ScriptData {
     }
   }
 
-  pub fn replace_with_pieces(&self, replace_with: &[i16]) -> Vec<String> {
+  pub fn replace_with_pieces(&self, replace_with: &[i16]) -> Vec<&str> {
     replace_with
       .iter()
       .map(|&k| self.krama_text_or_empty(k))
       .filter(|s| !s.is_empty())
-      .map(|s| s.to_owned())
       .collect()
   }
 }
@@ -403,16 +409,16 @@ impl ResultStringBuilder {
     let first_piece = pieces.first().map(|s| s.as_ref()).unwrap_or("");
     if first_piece.starts_with(halant) {
       let rest_first = first_piece.strip_prefix(halant).unwrap_or("");
-      let mut after_pieces: Vec<String> = Vec::new();
+      let mut after_pieces: Vec<&str> = Vec::new();
       if !rest_first.is_empty() {
-        after_pieces.push(rest_first.to_owned());
+        after_pieces.push(rest_first);
       }
       for p in pieces.iter().skip(1) {
-        after_pieces.push(p.as_ref().to_owned());
+        after_pieces.push(p.as_ref());
       }
       self.with_last_char_moved_after(&[halant], &after_pieces);
     } else {
-      self.with_last_char_moved_after(pieces, &[] as &[String]);
+      self.with_last_char_moved_after(pieces, &[] as &[&str]);
     }
   }
 }

@@ -140,7 +140,7 @@ impl TypingContext {
     self
       .inner
       .read()
-      .map(|inner| inner.get_normalized_script())
+      .map(|inner| inner.get_normalized_script().to_string())
       .unwrap_or_default()
   }
 }
