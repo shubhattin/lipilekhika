@@ -40,7 +40,9 @@
     to_script = $bindable(),
     pwa_snippet,
     transliterate_func,
-    current_preset = $bindable('none')
+    current_preset = $bindable('none'),
+    useNativeNumerals = $bindable(DEFAULT_USE_NATIVE_NUMERALS),
+    includeInherentVowel = $bindable(DEFAULT_INCLUDE_INHERENT_VOWEL)
   }: {
     input_text: string;
     typing_script: ScriptListType;
@@ -48,6 +50,8 @@
     pwa_snippet?: Snippet;
     transliterate_func: typeof transliterate;
     current_preset?: PresetListType;
+    useNativeNumerals: boolean;
+    includeInherentVowel: boolean;
   } = $props();
 
   let outputText = $state('');
@@ -57,8 +61,6 @@
   let timeoutId: NodeJS.Timeout | undefined;
 
   let typing_enabled = $state(true);
-  let useNativeNumerals = $state(DEFAULT_USE_NATIVE_NUMERALS);
-  let includeInherentVowel = $state(DEFAULT_INCLUDE_INHERENT_VOWEL);
 
   let from_input_typing_context = $derived(createTypingContext(typing_script));
 
