@@ -1,5 +1,5 @@
-use napi::bindgen_prelude::Result;
 use napi::Error;
+use napi::bindgen_prelude::Result;
 use napi_derive::napi;
 use std::collections::HashMap;
 
@@ -68,7 +68,10 @@ impl NativeTypingContext {
 
   #[napi(js_name = "take_key_input")]
   pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
-    let diff = self.inner.take_key_input(&key).map_err(Error::from_reason)?;
+    let diff = self
+      .inner
+      .take_key_input(&key)
+      .map_err(Error::from_reason)?;
     Ok(TypingDiffOutput {
       to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
         .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,
@@ -85,7 +88,8 @@ impl NativeTypingContext {
 
   #[napi(js_name = "update_include_inherent_vowel")]
   pub fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
-    self.inner
+    self
+      .inner
       .update_include_inherent_vowel(include_inherent_vowel);
   }
 
@@ -101,6 +105,6 @@ impl NativeTypingContext {
 
   #[napi(js_name = "get_normalized_script")]
   pub fn get_normalized_script(&self) -> String {
-    self.inner.get_normalized_script()
+    self.inner.get_normalized_script().to_string()
   }
 }

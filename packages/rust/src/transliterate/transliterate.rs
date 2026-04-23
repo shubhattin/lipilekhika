@@ -296,6 +296,7 @@ where
             if prev_match.matched
               && let Some(next_ch) = self.cursor.peek_at(text_index as usize)
             {
+              // char buffer to store utf-8 (no heap allocation)
               let mut buf = [0u8; 4];
               let next_ch_str = next_ch.encode_utf8(&mut buf);
               if let Some(next_idx) = self.from_script_data.krama_index_of_text(next_ch_str) {
@@ -313,10 +314,10 @@ where
             let Some(last_piece) = self.result.last_piece() else {
               continue;
             };
-            // Clone last_piece early to release the borrow on self.result
+
             let last_piece_owned = last_piece.to_owned();
 
-            if let Some(following_idx) = self.to_script_data.krama_index_of_text(&last_piece_owned) {
+            if let Some(following_idx) = self.to_script_data.krama_index_of_text(&last_piece) {
               if !following.contains(&(following_idx as i16)) {
                 continue;
               }
@@ -326,12 +327,11 @@ where
                 &prev_arr_as_usize,
               );
               if prev_match.matched {
-                let pieces = self.to_script_data.replace_with_pieces(replace_with);
-                // Combine pieces + last_piece for rewrite
-                let combined: Vec<&str> = pieces.iter().copied().chain(std::iter::once(last_piece_owned.as_str())).collect();
+                let mut pieces = self.to_script_data.replace_with_pieces(replace_with);
+                pieces.push(last_piece_owned.as_str()); // instead [...pices, last_piece]
                 self
                   .result
-                  .rewrite_tail_pieces(prev_match.matched_len + 1, &combined);
+                  .rewrite_tail_pieces(prev_match.matched_len + 1, &pieces);
               }
             }
           }
@@ -516,6 +516,8 @@ fn get_rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
             script_data.krama_text_or_empty(k)
           }
         })
+        // .collect::<Vec<&str>>()
+        // .join("")
         .collect::<String>()
     }
   }
@@ -543,10 +545,10 @@ fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
       Rule::ReplacePrevKramaKeys {
         prev, following, ..
       } => {
-        let prev_string: String = prev
+        let prev_string = prev
           .iter()
           .map(|&p| script_data.krama_text_or_empty(p))
-          .collect();
+          .collect::<String>();
 
         let repl_text = get_rule_replace_text(rule, script_data);
 
@@ -557,7 +559,7 @@ fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
           }
 
           let search = format!("{}{}", prev_string, follow_krama_string);
-          if text.contains(&*search) {
+          if text.contains(&search) {
             let replace = format!("{}{}", repl_text, follow_krama_string);
             text = Cow::Owned(text.replace(&search, &replace));
           }
@@ -575,10 +577,10 @@ fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
         };
 
         for grp in to_replace.iter() {
-          let to_replace_string: String = grp
+          let to_replace_string = grp
             .iter()
             .map(|&k| script_data.krama_text_or_empty(k))
-            .collect();
+            .collect::<String>();
 
           if !to_replace_string.is_empty() && text.contains(&*to_replace_string) {
             text = Cow::Owned(text.replace(&to_replace_string, &*replace_with));
@@ -760,7 +762,11 @@ pub fn transliterate_text_core<'a>(
       ctx.cursor.advance(1);
       let mut buf = [0u8; 4];
       let ch_str = ch.encode_utf8(&mut buf);
-      let _ = ctx.prev_context_cleanup(Some((Some(Cow::Owned(ch_str.to_owned())), None)), None, None);
+      let _ = ctx.prev_context_cleanup(
+        Some((Some(Cow::Owned(ch_str.to_owned())), None)),
+        None,
+        None,
+      );
       continue;
     }
 

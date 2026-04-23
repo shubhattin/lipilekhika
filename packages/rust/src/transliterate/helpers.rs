@@ -53,6 +53,7 @@ impl ResultStringBuilder {
   }
   /// Emit a single character without heap-allocating a String.
   pub fn emit_char(&mut self, c: char) {
+    // 4 byte buffer to store a possible utf-8 character (max 4 bytes)
     let mut buf = [0u8; 4];
     let s = c.encode_utf8(&mut buf);
     self.result.push(s.to_owned());
@@ -119,8 +120,7 @@ impl ResultStringBuilder {
     if i < 0 {
       // handle negative indexes
       i = len + i;
-    }
-    if i < 0 || i >= len {
+    } else if i < 0 || i >= len {
       return None;
     }
 
@@ -136,8 +136,7 @@ impl ResultStringBuilder {
     let mut i = index;
     if i < 0 {
       i = len + i;
-    }
-    if i < 0 || i >= len {
+    } else if i < 0 || i >= len {
       return;
     }
 
