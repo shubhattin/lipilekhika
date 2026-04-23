@@ -12,7 +12,9 @@ export default defineConfig({
   plugins: [
     dts({ include: ['src'], outDir: 'dist/types' }),
     MacroPlugin(),
-    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNativeBinariesPlugin()])
+    ...(IS_UMD_BUILD_MODE
+      ? [copyAndMinifyJsonPlugin()]
+      : [copyNativeBinariesPlugin(), copyWasmFilePlugin()])
   ],
   build: {
     lib: {
@@ -21,12 +23,13 @@ export default defineConfig({
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
+            typing: path.resolve(__dirname, 'src/typing.ts'),
+            slim: path.resolve(__dirname, 'src/index_slim.ts')
           },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
       // formats: ["es", "cjs", "iife", "umd"],
       fileName: (format, entryName) => {
-        // For multi-entry ESM/CJS builds, emit `index.*` and `typing.*`
+        // For multi-entry ESM/CJS builds, emit `index.*`, `typing.*`, `slim.*`
         const base = entryName ?? 'index';
         return `${base}.${format === 'es' ? 'mjs' : 'cjs'}`;
       }
@@ -38,7 +41,8 @@ export default defineConfig({
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
+            typing: path.resolve(__dirname, 'src/typing.ts'),
+            slim: path.resolve(__dirname, 'src/index_slim.ts')
           },
       output: !IS_UMD_BUILD_MODE
         ? [
@@ -88,6 +92,30 @@ function copyNativeBinariesPlugin(): Plugin {
       for (const nativeBinaryFile of nativeBinaryFiles) {
         fs.copyFileSync(path.join(srcDir, nativeBinaryFile), path.join(destDir, nativeBinaryFile));
       }
+    }
+  };
+}
+
+/**
+ * Copies the .wasm binary into dist/esm and dist/cjs so consumers of the
+ * `lipilekhika/slim` entrypoint (and the `lipilekhika/wasm` export) can
+ * reference it as a static asset without bundling it inline.
+ */
+function copyWasmFilePlugin(): Plugin {
+  return {
+    name: 'copy-wasm-file',
+    closeBundle: async () => {
+      const wasmSrc = path.resolve(__dirname, 'wasm/pkg/lipilekhika_wasm_bg.wasm');
+      if (!fs.existsSync(wasmSrc)) return;
+
+      const destESM = path.resolve(__dirname, 'dist/esm/lipilekhika_wasm_bg.wasm');
+      const destCJS = path.resolve(__dirname, 'dist/cjs/lipilekhika_wasm_bg.wasm');
+
+      fs.mkdirSync(path.dirname(destESM), { recursive: true });
+      fs.mkdirSync(path.dirname(destCJS), { recursive: true });
+
+      fs.copyFileSync(wasmSrc, destESM);
+      fs.copyFileSync(wasmSrc, destCJS);
     }
   };
 }

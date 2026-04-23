@@ -36,7 +36,13 @@
       "types": "./dist/typing.d.ts",
       "import": "./dist/esm/typing.mjs",
       "require": "./dist/cjs/typing.cjs"
-    }
+    },
+    "./slim": {
+      "types": "./dist/index_slim.d.ts",
+      "import": "./dist/esm/slim.mjs",
+      "require": "./dist/cjs/slim.cjs"
+    },
+    "./wasm": "./dist/esm/lipilekhika_wasm_bg.wasm"
   },
   "files": [
     "dist"
