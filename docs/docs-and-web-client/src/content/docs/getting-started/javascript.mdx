@@ -66,37 +66,6 @@ The package includes a blazing-fast 🦀 Rust-based WASM implementation that wor
   description="Detailed guide on using the WASM module for high-performance transliteration"
 />
 
-### Node.js Native Module
-
-The package also ships a native Rust-based N-API binding accessible via `lipilekhika/node`. This gives you near-native performance without the overhead of WASM instantiation.
-
-```ts
-import { transliterate_node, preloadNode } from 'lipilekhika/node';
-import { createTypingContext } from 'lipilekhika/node';
-
-// Optional: preload the native module
-await preloadNode();
-
-const result = await transliterate_node('na jAyatE mriyatE vA', 'Normal', 'Devanagari');
-console.log(result); // न जायते म्रियते वा
-
-// Typing context (same API as the TS version)
-const ctx = createTypingContext('Telugu');
-await ctx.ready;
-const diff = ctx.takeKeyInput('k');
-```
-
-<Aside type="note">
-  The native module **only works in server-side JavaScript runtimes** — Node.js, Bun, and Deno. It does **not** work in browsers.
-
-  Prebuilt binaries are provided for the following platforms:
-  - **Linux** — x86_64, aarch64
-  - **macOS** — x86_64 (Intel), aarch64 (Apple Silicon)
-  - **Windows** — x86_64, aarch64
-
-  If your platform is not listed above, the import will fail at runtime.
-</Aside>
-
 ### Other Exports
 
 The package also exports the following constants and utilities:
@@ -172,3 +141,40 @@ An environment-agnostic reference guide to implement Realtime typing is any envi
   href="/reference/realtime_typing"
   description="Reference Guide to implement Realtime typing"
 />
+ 
+## Node.js Native Module
+
+The package also ships a native Rust-based N-API binding accessible via `lipilekhika/node`. This gives you near-native performance without the overhead of WASM instantiation.
+
+```ts
+import { transliterate_node, preloadNode } from 'lipilekhika/node';
+import { createTypingContext } from 'lipilekhika/node';
+
+// Optional: preload the native module
+await preloadNode();
+
+const result = await transliterate_node('na jAyatE mriyatE vA', 'Normal', 'Devanagari');
+console.log(result); // न जायते म्रियते वा
+
+// Typing context (same API as the TS version)
+const ctx = createTypingContext('Telugu');
+await ctx.ready;
+const diff = ctx.takeKeyInput('k');
+```
+
+<Aside type="note">
+  The native module **only works in server-side JavaScript runtimes** — Node.js, Bun, and Deno. It does **not** work in browsers.
+
+  Prebuilt binaries are provided for the following platforms:
+  - **Linux** — x86_64, aarch64
+  - **macOS** — x86_64 (Intel), aarch64 (Apple Silicon)
+  - **Windows** — x86_64, aarch64
+
+  If your platform is not listed above, the import will fail at runtime.
+</Aside>
+
+<Aside type="caution">
+  Some **bundler + framework** stacks mis-handle the native module (e.g. Next.js with Turbopack, TanStack Start + Nitro). Vite + React/SvelteKit/Astro has been verified to work. 
+  
+  **Exercise a production-like build** before relying on it in production.
+</Aside>
