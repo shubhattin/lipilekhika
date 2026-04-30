@@ -209,6 +209,44 @@ function inputEventFromTypingEvent(event: unknown): InputEvent | null {
   return typeof InputEvent !== 'undefined' && n instanceof InputEvent ? n : null;
 }
 
+type BeforeInputEventLike = Pick<
+  InputEvent,
+  'data' | 'inputType' | 'isComposing' | 'preventDefault' | 'type'
+>;
+
+function isBeforeInputEventLike(value: unknown): value is BeforeInputEventLike {
+  if (!value || typeof value !== 'object') return false;
+  const o = value as { data?: unknown; inputType?: unknown; type?: unknown };
+  return (
+    typeof o.data === 'string' ||
+    o.inputType === 'insertText' ||
+    o.type === 'beforeinput' ||
+    o.type === 'textInput'
+  );
+}
+
+function beforeInputEventFromTypingEvent(event: unknown): BeforeInputEventLike | null {
+  if (typeof InputEvent !== 'undefined' && event instanceof InputEvent) return event;
+  if (!event || typeof event !== 'object') return null;
+
+  const o = event as { nativeEvent?: unknown };
+  const nativeEvent = o.nativeEvent;
+  if (typeof InputEvent !== 'undefined' && nativeEvent instanceof InputEvent) {
+    return nativeEvent;
+  }
+
+  // React polyfills `onBeforeInput`, so the synthetic wrapper can expose the
+  // useful `data`/`type`/`preventDefault` fields even when `nativeEvent` is not
+  // a real `InputEvent`.
+  if (isBeforeInputEventLike(event)) {
+    return event;
+  }
+  if (isBeforeInputEventLike(nativeEvent)) {
+    return nativeEvent;
+  }
+  return null;
+}
+
 function keyboardEventFromTypingEvent(event: unknown): KeyboardEvent | null {
   if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return event;
   if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
@@ -322,22 +360,25 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  const nativeEvent = inputEventFromTypingEvent(event);
+  const beforeInputEvent = beforeInputEventFromTypingEvent(event);
   const inputElement = inputElementFromTypingEvent(event);
 
-  if (!nativeEvent || !inputElement) return;
+  if (!beforeInputEvent || !inputElement) return;
 
   // Don’t interfere with IME/composition; this breaks mobile/IME typing.
-  if (nativeEvent.isComposing) return;
+  if (beforeInputEvent.isComposing) return;
 
   // Only handle actual text insertions. Let the browser do everything else.
+  // React's synthetic `onBeforeInput` reports `type === "beforeinput"` on the
+  // wrapper even when the underlying native event is a polyfilled `textInput`.
   // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
   if (
-    (!nativeEvent.inputType || nativeEvent.inputType !== 'insertText') &&
-    (!nativeEvent.type || nativeEvent.type !== 'textInput')
+    beforeInputEvent.inputType !== 'insertText' &&
+    beforeInputEvent.type !== 'beforeinput' &&
+    beforeInputEvent.type !== 'textInput'
   )
     return;
-  const inputData: unknown = nativeEvent.data;
+  const inputData: unknown = beforeInputEvent.data;
   if (typeof inputData !== 'string' || inputData.length === 0) return;
 
   // Only intercept real single-character typing.
@@ -358,7 +399,7 @@ export async function handleTypingBeforeInputEvent(
   }
 
   // Suppress the default browser insertion.
-  nativeEvent.preventDefault?.();
+  beforeInputEvent.preventDefault?.();
 
   await typingContext.ready;
 
