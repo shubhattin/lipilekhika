@@ -1,5 +1,9 @@
 # Changelog
 
+## js-lib@1.0.11
+
+- fix typing in react apps, handle synthetic events properly
+
 ## js-lib@1.0.10
 
 - Improve performance of `transliterate_wasm` and `transliterate/node` (N-API) (Rust based)
