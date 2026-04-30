@@ -48,10 +48,12 @@ jobs:
           bun install
           bun run make-script-data
 
+      # wasm-pack bundles a wasm-opt that can choke on current rustc output ("Only 1 table
+      # definition allowed in MVP"). Skip wasm-opt here only; npm release still optimizes.
       - name: Build WASM
         run: |
           cd packages/js/wasm
-          wasm-pack build --release --target web
+          wasm-pack build --release --target web --no-opt
 
       - name: Build Site
         env:
