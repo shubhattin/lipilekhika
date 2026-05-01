@@ -5,8 +5,10 @@
     clearTypingContextOnKeyDown,
     handleTypingBeforeInputEvent
   } from 'lipilekhika/typing';
+  import MirrorTextareaTyping from './MirrorTextareaTyping.svelte';
 
   let text = $state('');
+  let mirrorValue = $state('');
 
   let script = $state<ScriptListType>('Devanagari');
 
@@ -49,5 +51,20 @@
       onkeydown={(e) => clearTypingContextOnKeyDown(e, ctx)}
       class="min-h-[150px] w-full resize-y rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-base leading-relaxed text-slate-200 transition-all duration-200 placeholder:text-slate-500 hover:border-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
     ></textarea>
+  </div>
+
+  <div class="mb-7">
+    <label
+      for="mirror-textarea"
+      class="text-md mb-2 block font-semibold tracking-wide text-slate-300"
+      >Rich Text Usage Example</label
+    >
+    <MirrorTextareaTyping
+      bind:value={mirrorValue}
+      {script}
+      shikiMarkdown={true}
+      textareaId="mirror-textarea"
+      placeholder="Try ## Heading and transliteration — all source is still the textarea..."
+    />
   </div>
 </div>
