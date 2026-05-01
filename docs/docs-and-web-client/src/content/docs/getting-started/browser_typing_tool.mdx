@@ -184,3 +184,35 @@ In Vanilla JS approach you will have to bind the events manually yourself.
   [Demo Page](/typing_tool_examples/vanila_umd)
 - **ESM** - [Code Example](https://github.com/shubhattin/lipilekhika/blob/main/docs/typing_tool_usage/src/pages/vanila_esm.astro), 
   [Demo Page](/typing_tool_examples/vanila_esm)
+
+## Rich Text Typing
+
+Transliteration and even Rich text typing is usually built around real **`<textarea>`** and **`<input>`** elements. Wiring it directly to **contenteditable** is usually impractical: the DOM is not one simple string, and selection, IME, and paste are harder to keep consistent.
+
+Rich editors typically use a **mirror** (or **underlay**) instead: a read-only layer shows colors, styling and other rich elements. All typing—including `handleTypingBeforeInputEvent`—targets that textarea. 
+
+So if the Rich Text editing library you are using provides a interface to underlyiing textarea element then you should be able to integrate Lipi Lekhika typing. For example in [crata-md](https://beartocode.github.io/carta/) svelte library a textarea element is exposed for use.
+
+```svelte
+<MarkdownEditor
+  {carta}
+  bind:value={content}
+  mode="tabs"
+  scroll="async"
+  placeholder="Write markdown…"
+  selectedTab="write"
+  textarea={{
+    onbeforeinput: (e: Event) =>
+      handleTypingBeforeInputEvent(ctx, e, (v) => (content = v), typing_enabled),
+    onblur: () => ctx.clearContext(),
+    onkeydown: (e: KeyboardEvent) => clearTypingContextOnKeyDown(e, ctx)
+  }}
+/>
+```
+
+### Minimal Example
+
+- It demonstartes a mininal example of a shadow textarea element to enable rich text typing
+- [Demo Link](https://lipilekhika.in/typing_tool_examples/svelte)
+- [Source Code](https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/RichTextareaTyping.svelte)
+

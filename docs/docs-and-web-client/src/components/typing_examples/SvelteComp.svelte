@@ -5,7 +5,7 @@
     clearTypingContextOnKeyDown,
     handleTypingBeforeInputEvent
   } from 'lipilekhika/typing';
-  import MirrorTextareaTyping from './MirrorTextareaTyping.svelte';
+  import RichTextareaTyping from './RichTextareaTyping.svelte';
 
   let text = $state('');
   let mirrorValue = $state('');
@@ -59,7 +59,22 @@
       class="text-md mb-2 block font-semibold tracking-wide text-slate-300"
       >Rich Text Usage Example</label
     >
-    <MirrorTextareaTyping
+    <p>
+      See implemenetation <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://github.com/shubhattin/lipilekhika/blob/main/docs/docs-and-web-client/src/components/typing_examples/MirrorTextareaTyping.svelte"
+        class="text-blue-500 hover:text-blue-600">here</a
+      >
+      and
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://lipilekhika.shubhattin.com/docs/getting-started/browser_typing_tool#rich-text-typing"
+        class="text-blue-500 hover:text-blue-600">guide here</a
+      >
+    </p>
+    <RichTextareaTyping
       bind:value={mirrorValue}
       {script}
       shikiMarkdown={true}
