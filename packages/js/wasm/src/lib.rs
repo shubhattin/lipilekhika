@@ -1,6 +1,31 @@
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
+fn parse_trans_options(
+  trans_options: Option<js_sys::Object>,
+) -> Result<Option<HashMap<String, bool>>, JsError> {
+  let Some(obj) = trans_options else {
+    return Ok(None);
+  };
+
+  let entries = js_sys::Object::entries(&obj);
+  let mut map = HashMap::with_capacity(entries.length() as usize);
+
+  for i in 0..entries.length() {
+    let entry = js_sys::Array::from(&entries.get(i));
+    let key = entry
+      .get(0)
+      .as_string()
+      .ok_or_else(|| JsError::new("trans_options keys must be strings"))?;
+    let value = entry.get(1).as_bool().ok_or_else(|| {
+      JsError::new(&format!("trans_options[{key}] must be a boolean"))
+    })?;
+    map.insert(key, value);
+  }
+
+  if map.is_empty() { Ok(None) } else { Ok(Some(map)) }
+}
+
 /// Transliterates text from one script to another.
 ///
 /// - `text`: The text to transliterate
@@ -16,20 +41,7 @@ pub fn transliterate(
   to: &str,
   trans_options: Option<js_sys::Object>,
 ) -> Result<String, JsError> {
-  let options: Option<HashMap<String, bool>> = match trans_options {
-    Some(obj) => {
-      let mut map = HashMap::new();
-      let entries = js_sys::Object::entries(&obj);
-      for i in 0..entries.length() {
-        let entry = js_sys::Array::from(&entries.get(i));
-        if let (Some(key), Some(val)) = (entry.get(0).as_string(), entry.get(1).as_bool()) {
-          map.insert(key, val);
-        }
-      }
-      if map.is_empty() { None } else { Some(map) }
-    }
-    None => None,
-  };
+  let options = parse_trans_options(trans_options)?;
 
   lipilekhika::transliterate(text, from, to, options.as_ref()).map_err(|e| JsError::new(&e))
 }

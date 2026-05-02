@@ -1,6 +1,10 @@
 use flutter_rust_bridge::frb;
 use std::sync::RwLock;
 
+fn lock_poisoned(operation: &str) -> String {
+  format!("TypingContext lock poisoned during {operation}")
+}
+
 /// Default time in milliseconds after which the context will be cleared automatically.
 #[frb(sync)]
 pub fn default_auto_context_clear_time_ms() -> u64 {
@@ -81,10 +85,13 @@ impl TypingContext {
 
   /// Clears all internal state and contexts.
   #[frb(sync)]
-  pub fn clear_context(&self) {
-    if let Ok(mut inner) = self.inner.write() {
-      inner.clear_context();
-    }
+  pub fn clear_context(&self) -> Result<(), String> {
+    let mut inner = self
+      .inner
+      .write()
+      .map_err(|_| lock_poisoned("clear_context"))?;
+    inner.clear_context();
+    Ok(())
   }
 
   /// Accepts character-by-character input and returns the diff relative to the previous output.
@@ -100,48 +107,57 @@ impl TypingContext {
 
   /// Updates whether native numerals should be used for subsequent typing.
   #[frb(sync)]
-  pub fn update_use_native_numerals(&self, use_native_numerals: bool) {
-    if let Ok(mut inner) = self.inner.write() {
-      inner.update_use_native_numerals(use_native_numerals);
-    }
+  pub fn update_use_native_numerals(&self, use_native_numerals: bool) -> Result<(), String> {
+    let mut inner = self
+      .inner
+      .write()
+      .map_err(|_| lock_poisoned("update_use_native_numerals"))?;
+    inner.update_use_native_numerals(use_native_numerals);
+    Ok(())
   }
 
   /// Updates whether inherent vowels should be included for subsequent typing.
   #[frb(sync)]
-  pub fn update_include_inherent_vowel(&self, include_inherent_vowel: bool) {
-    if let Ok(mut inner) = self.inner.write() {
-      inner.update_include_inherent_vowel(include_inherent_vowel);
-    }
+  pub fn update_include_inherent_vowel(
+    &self,
+    include_inherent_vowel: bool,
+  ) -> Result<(), String> {
+    let mut inner = self
+      .inner
+      .write()
+      .map_err(|_| lock_poisoned("update_include_inherent_vowel"))?;
+    inner.update_include_inherent_vowel(include_inherent_vowel);
+    Ok(())
   }
 
   /// Gets whether native numerals are currently enabled.
   #[frb(sync)]
-  pub fn get_use_native_numerals(&self) -> bool {
+  pub fn get_use_native_numerals(&self) -> Result<bool, String> {
     self
       .inner
       .read()
       .map(|inner| inner.get_use_native_numerals())
-      .unwrap_or(lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS)
+      .map_err(|_| lock_poisoned("get_use_native_numerals"))
   }
 
   /// Gets whether inherent vowels are currently included.
   #[frb(sync)]
-  pub fn get_include_inherent_vowel(&self) -> bool {
+  pub fn get_include_inherent_vowel(&self) -> Result<bool, String> {
     self
       .inner
       .read()
       .map(|inner| inner.get_include_inherent_vowel())
-      .unwrap_or(false)
+      .map_err(|_| lock_poisoned("get_include_inherent_vowel"))
   }
 
   /// Returns the normalized script name.
   #[frb(sync)]
-  pub fn get_normalized_script(&self) -> String {
+  pub fn get_normalized_script(&self) -> Result<String, String> {
     self
       .inner
       .read()
       .map(|inner| inner.get_normalized_script().to_string())
-      .unwrap_or_default()
+      .map_err(|_| lock_poisoned("get_normalized_script"))
   }
 }
 
