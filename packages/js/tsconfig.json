@@ -13,6 +13,10 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@lipilekhika/script-data-source": ["./src/utils/script_data_source_esm.ts"]
+    },
 
     /* Linting */
     "strict": true,

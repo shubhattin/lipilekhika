@@ -38,6 +38,10 @@ yarn add lipilekhika
 
 </details>
 
+## Building from source
+
+This package uses **Vite 8**, which expects **Node.js 20.19+** or **22.12+** when running Vite (for example `bun run build` / `vite build`). Bun is used for scripts in this repo; ensure your toolchain meets Vite’s Node version expectations if you hit engine-related errors.
+
 ## 🚀 Quick Start
 
 ### Basic Transliteration
