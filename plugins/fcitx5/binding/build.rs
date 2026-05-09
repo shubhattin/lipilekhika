@@ -21,4 +21,3 @@ fn main() {
     .expect("generate bindings")
     .write_to_file(out_file);
 }
-

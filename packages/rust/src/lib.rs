@@ -37,13 +37,7 @@ pub fn transliterate(
     return Ok(text.to_string());
   }
 
-  let result = transliterate_text(
-    text,
-    &normalized_from,
-    &normalized_to,
-    trans_options,
-    None,
-  )?;
+  let result = transliterate_text(text, &normalized_from, &normalized_to, trans_options, None)?;
 
   Ok(result.output)
 }
