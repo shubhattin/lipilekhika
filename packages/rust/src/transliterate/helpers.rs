@@ -85,7 +85,7 @@ impl ResultStringBuilder {
     Some(&self.buf[self.piece_range(i)])
   }
   pub fn last_char(&self) -> Option<char> {
-    self.buf.chars().last()
+    self.buf.chars().next_back()
   }
   pub fn pop_last_char(&mut self) -> Option<char> {
     let c = self.buf.pop()?;
@@ -158,7 +158,7 @@ impl ResultStringBuilder {
     Some(&self.buf[self.piece_range(idx)])
   }
 
-  pub fn rewrite_at(&mut self, index: isize, new_piece: String) {
+  pub fn rewrite_at(&mut self, index: isize, new_piece: &str) {
     let len = self.offsets.len() as isize;
     if len == 0 {
       return;
@@ -180,7 +180,7 @@ impl ResultStringBuilder {
     let new_len = new_piece.len();
     let diff = new_len as isize - old_len as isize;
 
-    self.buf.replace_range(range, &new_piece);
+    self.buf.replace_range(range, new_piece);
 
     // Adjust offsets for all pieces after the rewritten one
     for off in self.offsets.iter_mut().skip(idx + 1) {
@@ -205,7 +205,7 @@ pub struct PrevContextBuilder<'a> {
 impl<'a> PrevContextBuilder<'a> {
   pub fn new(max_len: usize) -> PrevContextBuilder<'a> {
     PrevContextBuilder {
-      arr: VecDeque::new(),
+      arr: VecDeque::with_capacity(max_len),
       max_len,
     }
   }
@@ -430,20 +430,14 @@ impl ScriptData {
 pub const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS: [char; 3] = ['²', '³', '⁴'];
 
 pub fn is_ta_ext_superscript_tail(ch: Option<char>) -> bool {
-  match ch {
-    Some(c) => TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.contains(&c),
-    None => false,
-  }
+  ch.is_some_and(|c| TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.contains(&c))
 }
 
 pub const VEDIC_SVARAS: [char; 4] = ['॒', '॑', '᳚', '᳛'];
 
 #[inline]
 pub fn is_vedic_svara_tail(ch: Option<char>) -> bool {
-  match ch {
-    Some(c) => VEDIC_SVARAS.contains(&c),
-    None => false,
-  }
+  ch.is_some_and(|c| VEDIC_SVARAS.contains(&c))
 }
 
 impl ResultStringBuilder {
@@ -499,10 +493,12 @@ pub fn apply_typing_input_aliases<'a>(text: &'a str, to_script_name: &str) -> Co
   }
 
   if is_script_tamil_ext(to_script_name) {
-    for i in 0..VEDIC_SVARAS_TYPING_SYMBOLS.len() {
-      let symbol = VEDIC_SVARAS_TYPING_SYMBOLS[i];
+    for (symbol, normal) in VEDIC_SVARAS_TYPING_SYMBOLS
+      .iter()
+      .zip(VEDIC_SVARAS_NORMAL_SYMBOLS.iter())
+    {
       if result.contains(symbol) {
-        result = Cow::Owned(result.replace(symbol, VEDIC_SVARAS_NORMAL_SYMBOLS[i]));
+        result = Cow::Owned(result.replace(symbol, normal));
       }
     }
   }

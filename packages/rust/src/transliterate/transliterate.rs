@@ -164,9 +164,12 @@ where
               .unwrap_or(&false)
             && let Some(last_piece) = self.result.last_piece()
           {
-            self
-              .result
-              .rewrite_at(-1, format!("{}\u{200D}", last_piece));
+            self.result.rewrite_at(-1, &{
+              let mut s = String::with_capacity(last_piece.len() + 3);
+              s.push_str(last_piece);
+              s.push('\u{200D}');
+              s
+            });
           }
         }
       } else if self.include_inherent_vowels
@@ -202,9 +205,12 @@ where
             .unwrap_or(&false)
           && let Some(last_piece) = self.result.last_piece()
         {
-          self
-            .result
-            .rewrite_at(-1, format!("{}\u{200D}", last_piece));
+          self.result.rewrite_at(-1, &{
+            let mut s = String::with_capacity(last_piece.len() + 3);
+            s.push_str(last_piece);
+            s.push('\u{200D}');
+            s
+          });
         }
       }
     }
@@ -529,9 +535,19 @@ fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
             continue;
           }
 
-          let search = format!("{}{}", prev_string, follow_krama_string);
+          let search = {
+            let mut s = String::with_capacity(prev_string.len() + follow_krama_string.len());
+            s.push_str(&prev_string);
+            s.push_str(follow_krama_string);
+            s
+          };
           if text.contains(&search) {
-            let replace = format!("{}{}", repl_text, follow_krama_string);
+            let replace = {
+              let mut s = String::with_capacity(repl_text.len() + follow_krama_string.len());
+              s.push_str(&repl_text);
+              s.push_str(follow_krama_string);
+              s
+            };
             text = Cow::Owned(text.replace(&search, &replace));
           }
         }
@@ -1270,7 +1286,7 @@ pub fn transliterate_text_core(
               if is_script_tamil_ext(to_script_name)
                 && is_ta_ext_superscript_tail(ctx.result.last_char())
               {
-                if pieces.concat() == *to_halant
+                if pieces.join("") == *to_halant
                   || match &map.krama {
                     Some(krama) => match krama.last() {
                       Some(last_i) => to_script_data
@@ -1386,7 +1402,7 @@ pub fn transliterate_text_core(
       {
         if is_script_tamil_ext(to_script_name) && is_ta_ext_superscript_tail(ctx.result.last_char())
         {
-          if pieces.concat() == *to_halant
+          if pieces.join("") == *to_halant
             || match to_script_data.get_common_attr().krama_text_arr.get(index) {
               Some(krama) => match krama.1 {
                 Some(i) => to_script_data

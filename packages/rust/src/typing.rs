@@ -246,14 +246,19 @@ pub fn emulate_typing(
 }
 
 /// Truncate the last `n` characters from a UTF-8 string (character-wise, not bytes).
+/// Iterates from the end for O(n) instead of O(string_length).
 fn truncate_last_chars(s: &mut String, n: usize) {
-  let char_count = s.chars().count();
-  let new_len = char_count.saturating_sub(n);
-  if new_len == 0 {
-    s.clear();
-  } else if let Some((byte_pos, _)) = s.char_indices().nth(new_len) {
-    s.truncate(byte_pos);
+  if n == 0 {
+    return;
   }
+  // Walk backwards n chars to find the byte boundary
+  let new_byte_len = s
+    .char_indices()
+    .rev()
+    .nth(n - 1)
+    .map(|(byte_pos, _)| byte_pos)
+    .unwrap_or(0);
+  s.truncate(new_byte_len);
 }
 
 /// Type of a character in a script's list.
