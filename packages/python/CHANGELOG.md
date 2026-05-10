@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (python-lib@1.0.6)
+
+- Add android build target (via zig cross compiler and linker)
+
 ## python-lib@1.0.5
 
 - Add performace improvements for transliteration and typing emulation (rust based)

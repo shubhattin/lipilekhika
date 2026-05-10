@@ -4,9 +4,10 @@ members = [
     "packages/rust",
     "desktop-client/lipiparivartaka/src-tauri",
     "packages/js/wasm",
+    "packages/js/binding",
     "packages/python/binding",
     "packages/dart/binding",
-    "plugins/fcitx5/binding", "packages/js/binding",
+    "plugins/fcitx5/binding",
 ]
 resolver = "3"
 

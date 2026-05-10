@@ -118,10 +118,7 @@ impl TypingContext {
 
   /// Updates whether inherent vowels should be included for subsequent typing.
   #[frb(sync)]
-  pub fn update_include_inherent_vowel(
-    &self,
-    include_inherent_vowel: bool,
-  ) -> Result<(), String> {
+  pub fn update_include_inherent_vowel(&self, include_inherent_vowel: bool) -> Result<(), String> {
     let mut inner = self
       .inner
       .write()

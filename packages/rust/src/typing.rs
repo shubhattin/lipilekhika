@@ -139,10 +139,10 @@ impl TypingContext {
 
   pub fn take_key_input_char(&mut self, ch: char) -> Result<TypingDiff, String> {
     let now = Instant::now();
-    if let Some(last) = self.last_time {
-      if now.duration_since(last) > self.auto_context_clear_time {
-        self.clear_context();
-      }
+    if let Some(last) = self.last_time
+      && now.duration_since(last) > self.auto_context_clear_time
+    {
+      self.clear_context();
     }
 
     self.curr_input.push(ch);
@@ -394,10 +394,10 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
       // Ignore entries with length > 1 (intermediate typing states)
       if krama.len() == 1 {
         let krama_index = krama[0];
-        if krama_index >= 0 {
-          if let Some(entry) = common_krama_map.get_mut(krama_index as usize) {
-            entry.2.push(normal_text_map.clone());
-          }
+        if krama_index >= 0
+          && let Some(entry) = common_krama_map.get_mut(krama_index as usize)
+        {
+          entry.2.push(normal_text_map.clone());
         }
       }
     }

@@ -186,7 +186,7 @@ pub unsafe extern "C" fn lipi_typing_context_new(
     Some(map_options(Some(*opts)))
   };
 
-  let result = std::panic::catch_unwind(|| RustTypingContext::new(&lang, rust_opts).map_err(|e| e));
+  let result = std::panic::catch_unwind(|| RustTypingContext::new(&lang, rust_opts));
 
   match result {
     Err(_) => {
@@ -256,7 +256,7 @@ pub unsafe extern "C" fn lipi_typing_context_take_key_input(
 
   let result = std::panic::catch_unwind(|| {
     let ctx = ctx_from_ptr(ctx).map_err(|e| format!("{e:?}"))?;
-    ctx.take_key_input(&key).map_err(|e| e)
+    ctx.take_key_input(&key)
   });
 
   match result {

@@ -24,7 +24,7 @@ fn transliterate(
   });
 
   lipilekhika::transliterate(text, from_script, to_script, options.as_ref())
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+    .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
 #[pyfunction]
@@ -38,7 +38,7 @@ fn preload_script_data(script_name: &str) {
 fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
   lipilekhika::get_schwa_status_for_script(script_name)
     .map(|status| status.unwrap_or(false))
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+    .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
 #[pyfunction]
@@ -46,7 +46,7 @@ fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
 fn get_all_options(from_script: &str, to_script: &str) -> PyResult<Vec<String>> {
   lipilekhika::get_all_options(from_script, to_script)
     .map(|options| options.into_iter().collect::<Vec<String>>())
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e))
+    .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
 #[pyfunction]

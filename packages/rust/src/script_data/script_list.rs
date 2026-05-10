@@ -92,10 +92,10 @@ pub fn get_normalized_script_name(script_name: &str) -> Option<String> {
   }
 
   // Language -> script mapping
-  if data.langs.contains(&capitalized_name) {
-    if let Some(script) = data.lang_script_map.get(&capitalized_name) {
-      return Some(script.clone());
-    }
+  if data.langs.contains(&capitalized_name)
+    && let Some(script) = data.lang_script_map.get(&capitalized_name)
+  {
+    return Some(script.clone());
   }
 
   // Alternate to script mapping (always use lowercase key)

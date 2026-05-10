@@ -12,7 +12,7 @@ impl ScriptData {
       }
       | ScriptData::Other {
         common_script_attr, ..
-      } => &common_script_attr,
+      } => common_script_attr,
     }
   }
 

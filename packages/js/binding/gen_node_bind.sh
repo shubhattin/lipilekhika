@@ -4,6 +4,7 @@ set -euo pipefail
 
 OUTPUT_DIR="${OUTPUT_DIR:-pkg}"
 TARGET="${TARGET:-}"
+CROSS_COMPILE="${CROSS_COMPILE:-false}"
 
 NAPI_BUILD_ARGS=(
   --platform
@@ -16,6 +17,10 @@ NAPI_BUILD_ARGS=(
 
 if [[ -n "$TARGET" ]]; then
   NAPI_BUILD_ARGS+=(--target "$TARGET")
+fi
+
+if [[ "$CROSS_COMPILE" == "true" ]]; then
+  NAPI_BUILD_ARGS+=(--cross-compile)
 fi
 
 rm -rf "$OUTPUT_DIR"

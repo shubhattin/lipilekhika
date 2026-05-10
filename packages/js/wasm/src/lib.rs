@@ -17,13 +17,18 @@ fn parse_trans_options(
       .get(0)
       .as_string()
       .ok_or_else(|| JsError::new("trans_options keys must be strings"))?;
-    let value = entry.get(1).as_bool().ok_or_else(|| {
-      JsError::new(&format!("trans_options[{key}] must be a boolean"))
-    })?;
+    let value = entry
+      .get(1)
+      .as_bool()
+      .ok_or_else(|| JsError::new(&format!("trans_options[{key}] must be a boolean")))?;
     map.insert(key, value);
   }
 
-  if map.is_empty() { Ok(None) } else { Ok(Some(map)) }
+  if map.is_empty() {
+    Ok(None)
+  } else {
+    Ok(Some(map))
+  }
 }
 
 /// Transliterates text from one script to another.

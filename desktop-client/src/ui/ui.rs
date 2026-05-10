@@ -1111,11 +1111,11 @@ impl App {
                                 }
                               }
                             ),
-                            text("Updating...")
-                              .size(11)
-                              .style(|_theme: &Theme| iced::widget::text::Style {
+                            text("Updating...").size(11).style(|_theme: &Theme| {
+                              iced::widget::text::Style {
                                 color: Some(iced::Color::from_rgba(1.0, 1.0, 1.0, 0.5)),
-                              }),
+                              }
+                            }),
                           ]
                           .spacing(6)
                           .align_y(iced::Alignment::Center),

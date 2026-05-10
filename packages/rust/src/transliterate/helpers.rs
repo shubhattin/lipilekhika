@@ -119,7 +119,7 @@ impl ResultStringBuilder {
     let mut i = index;
     if i < 0 {
       // handle negative indexes
-      i = len + i;
+      i += len;
     } else if i < 0 || i >= len {
       return None;
     }
@@ -135,7 +135,7 @@ impl ResultStringBuilder {
 
     let mut i = index;
     if i < 0 {
-      i = len + i;
+      i += len;
     } else if i < 0 || i >= len {
       return;
     }
@@ -179,7 +179,7 @@ impl<'a> PrevContextBuilder<'a> {
     let len = self.arr.len() as isize;
     let mut idx = i;
     if idx < 0 {
-      idx = len + idx;
+      idx += len;
     }
     if idx < 0 || idx >= len {
       None
@@ -223,7 +223,7 @@ impl<'a> PrevContextBuilder<'a> {
 
   /// Push a new context item, enforcing `max_len` and skipping empty/None text.
   pub fn push(&mut self, item: PrevContextItem<'a>) {
-    if !item.0.as_ref().is_some_and(|s| !s.is_empty()) {
+    if item.0.as_ref().is_none_or(|s| s.is_empty()) {
       return;
     }
     self.arr.push_back(item);
