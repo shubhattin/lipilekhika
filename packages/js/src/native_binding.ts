@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -50,10 +51,22 @@ const OVERRIDE_ENV_VARS = [
   'LIPILEKHIKA_NATIVE_LIBRARY_PATH',
   'NAPI_RS_NATIVE_LIBRARY_PATH'
 ] as const;
+
+type LinuxBinaryEntry = { gnu: string; musl: string };
+
 const SUPPORTED_BINARY_FILES = {
   linux: {
-    x64: 'index.linux-x64-gnu.node',
-    arm64: 'index.linux-arm64-gnu.node'
+    x64: {
+      gnu: 'index.linux-x64-gnu.node',
+      musl: 'index.linux-x64-musl.node'
+    },
+    arm64: {
+      gnu: 'index.linux-arm64-gnu.node',
+      musl: 'index.linux-arm64-musl.node'
+    }
+  },
+  android: {
+    arm64: 'index.android-arm64.node'
   },
   darwin: {
     x64: 'index.darwin-x64.node',
@@ -64,6 +77,62 @@ const SUPPORTED_BINARY_FILES = {
     arm64: 'index.win32-arm64-msvc.node'
   }
 } as const;
+
+// --- Musl detection (mirrors the logic from NAPI-RS generated index.cjs) ---
+
+function isMuslFromFilesystem(): boolean | null {
+  try {
+    return readFileSync('/usr/bin/ldd', 'utf-8').includes('musl');
+  } catch {
+    return null;
+  }
+}
+
+function isMuslFromReport(): boolean | null {
+  if (typeof process.report?.getReport !== 'function') {
+    return null;
+  }
+  const report = process.report.getReport() as Record<string, unknown>;
+  if (!report) {
+    return null;
+  }
+  const header = report.header as Record<string, unknown> | undefined;
+  if (header?.glibcVersionRuntime) {
+    return false;
+  }
+  const sharedObjects = report.sharedObjects as string[] | undefined;
+  if (Array.isArray(sharedObjects)) {
+    if (sharedObjects.some((f) => f.includes('libc.musl-') || f.includes('ld-musl-'))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isMuslFromChildProcess(): boolean {
+  try {
+    return execSync('ldd --version', { encoding: 'utf8' }).includes('musl');
+  } catch {
+    // If we can't determine, fall back to false (assume glibc)
+    return false;
+  }
+}
+
+function isMusl(): boolean {
+  if (process.platform !== 'linux') {
+    return false;
+  }
+  let result: boolean | null = isMuslFromFilesystem();
+  if (result === null) {
+    result = isMuslFromReport();
+  }
+  if (result === null) {
+    result = isMuslFromChildProcess();
+  }
+  return result;
+}
+
+// --- End musl detection ---
 
 let nativeBinding: NativeModule | null = null;
 
@@ -109,19 +178,33 @@ function resolveNativeBinaryPath() {
   return path.join(getNativeDirCandidates()[0], nativeBinaryFileName);
 }
 
-function getNativeBinaryFileName() {
-  const platformBinaries =
-    SUPPORTED_BINARY_FILES[process.platform as keyof typeof SUPPORTED_BINARY_FILES];
-  const nativeBinaryFileName = platformBinaries?.[process.arch as keyof typeof platformBinaries];
+function getNativeBinaryFileName(): string {
+  const platform = process.platform as keyof typeof SUPPORTED_BINARY_FILES;
+  const arch = process.arch;
+  const platformBinaries = SUPPORTED_BINARY_FILES[platform];
 
-  if (!nativeBinaryFileName) {
+  if (!platformBinaries) {
     throw new Error(
       `Unsupported platform for Lipilekhika native binding: ${process.platform}-${process.arch}. ` +
         `Supported targets: ${getSupportedTargetList()}.`
     );
   }
 
-  return nativeBinaryFileName;
+  const archEntry = (platformBinaries as Record<string, string | LinuxBinaryEntry>)[arch];
+
+  if (!archEntry) {
+    throw new Error(
+      `Unsupported platform for Lipilekhika native binding: ${process.platform}-${process.arch}. ` +
+        `Supported targets: ${getSupportedTargetList()}.`
+    );
+  }
+
+  // Linux has libc variants (gnu/musl)
+  if (typeof archEntry === 'object' && 'gnu' in archEntry) {
+    return isMusl() ? archEntry.musl : archEntry.gnu;
+  }
+
+  return archEntry;
 }
 
 function getSupportedTargetList() {
@@ -133,3 +216,4 @@ function getSupportedTargetList() {
 function getNativeDirCandidates() {
   return [path.join(CURRENT_DIR, '..', 'native'), path.join(CURRENT_DIR, '..', 'binding', 'pkg')];
 }
+
