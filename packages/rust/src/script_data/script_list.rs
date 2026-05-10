@@ -37,11 +37,9 @@ pub struct ScriptListData {
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
 fn get_ordered_script_list(map: &HashMap<String, u8>) -> Vec<String> {
-  let mut scripts: Vec<(String, u8)> = map.clone().into_iter().collect();
-
-  scripts.sort_by(|a, b| a.1.cmp(&b.1));
-
-  scripts.into_iter().map(|(key, _)| key).collect()
+  let mut entries: Vec<(&String, &u8)> = map.iter().collect();
+  entries.sort_by_key(|(_, v)| **v);
+  entries.into_iter().map(|(k, _)| k.clone()).collect()
 }
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
@@ -69,10 +67,10 @@ fn capitalize_first_and_after_dash(input: &str) -> String {
       result.push(ch);
     } else if capitalize_next && ch.is_ascii_alphabetic() {
       // Mirror TS behavior which only uppercases a–z
-      result.extend(ch.to_uppercase());
+      result.push(ch.to_ascii_uppercase());
       capitalize_next = false;
     } else {
-      result.extend(ch.to_lowercase());
+      result.push(ch.to_ascii_lowercase());
       capitalize_next = false;
     }
   }
