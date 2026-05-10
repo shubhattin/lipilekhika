@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (js-lib@1.0.12)
+
+- Added `musl` build targets for napi-rs bindings for nodejs
+- Added android support via zig corss compile
+
 ## js-lib@1.0.11
 
 - fix typing in react apps, handle synthetic events properly
