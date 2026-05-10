@@ -13,3 +13,9 @@ resolver = "3"
 [profile.bench]
 lto = true
 codegen-units = 1
+
+[profile.release]
+lto = true          # Cross-crate link-time optimization — smaller AND faster
+codegen-units = 1   # Single codegen unit for maximum optimization
+strip = true        # Strip debug symbols — significant size reduction, zero runtime cost
+panic = "abort"     # No unwinding tables — smaller binary, no speed impact

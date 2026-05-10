@@ -267,11 +267,51 @@ jobs:
           name: wheels-sdist
           path: packages/python/dist
 
-  # Job 6: Publish to PyPI
+  # Job 6: Build Android wheels (aarch64)
+  build-android:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+
+      - name: Generate Script Data
+        run: |
+          cd packages/js
+          bun install
+          bun run make-script-data
+
+      - name: Prepare Rust package
+        run: |
+          cd packages/rust
+          sed -i '/^src\/data\// s/^/#/' .gitignore
+
+      - name: Prepare Python package
+        run: |
+          cd packages/python
+          sed -i '/^lipilekhika\/types.py/ s/^/#/' .gitignore
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: aarch64-linux-android
+          args: --release --out dist --find-interpreter --zig
+          working-directory: packages/python
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-android-arm64
+          path: packages/python/dist
+
+  # Job 7: Publish to PyPI
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: [build-linux, build-macos, build-windows, build-sdist]
+    needs: [build-linux, build-macos, build-windows, build-sdist, build-android]
     environment:
       name: release
       url: https://pypi.org/project/lipilekhika/
