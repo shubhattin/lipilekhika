@@ -4,18 +4,13 @@ members = [
     "packages/rust",
     "desktop-client/lipiparivartaka/src-tauri",
     "packages/js/wasm",
+    "packages/js/binding",
     "packages/python/binding",
     "packages/dart/binding",
-    "plugins/fcitx5/binding", "packages/js/binding",
+    "plugins/fcitx5/binding",
 ]
 resolver = "3"
 
 [profile.bench]
 lto = true
 codegen-units = 1
-
-[profile.release]
-lto = true          # Cross-crate link-time optimization — smaller AND faster
-codegen-units = 1   # Single codegen unit for maximum optimization
-strip = true        # Strip debug symbols — significant size reduction, zero runtime cost
-panic = "abort"     # No unwinding tables — smaller binary, no speed impact
