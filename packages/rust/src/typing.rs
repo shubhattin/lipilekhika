@@ -706,10 +706,7 @@ mod tests {
   }
 
   fn build_typing_options(opts: &Option<TypingOptionsYaml>) -> Option<TypingContextOptions> {
-    let some_opts = match opts {
-      None => return None,
-      Some(o) => o,
-    };
+    let some_opts = opts.as_ref()?;
 
     let mut rust_opts = TypingContextOptions::default();
     if let Some(v) = some_opts.use_native_numerals {

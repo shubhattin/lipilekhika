@@ -557,10 +557,10 @@ fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
         ..
       } => {
         // Use as_deref() to avoid cloning the Option<String>
-        let replace_with: Cow<str> = match replace_text.as_deref() {
-          Some(rt) => Cow::Borrowed(rt),
-          None => Cow::Owned(get_rule_replace_text(rule, script_data)),
-        };
+        let replace_with: Cow<str> = replace_text.as_deref().map_or_else(
+          || Cow::Owned(get_rule_replace_text(rule, script_data)),
+          Cow::Borrowed,
+        );
 
         for grp in to_replace.iter() {
           let to_replace_string = grp
@@ -1147,12 +1147,7 @@ pub fn transliterate_text_core(
                   None
                 }
               });
-              if item.is_none()
-                && match &map.krama {
-                  None => true,
-                  Some(krama) => krama.is_empty(),
-                }
-              {
+              if item.is_none() && map.krama.as_ref().is_none_or(|krama| krama.is_empty()) {
                 item = None;
               } else if item.is_none()
                 && let Some(krama) = &map.krama
@@ -1244,9 +1239,9 @@ pub fn transliterate_text_core(
                         .krama_text_arr
                         .get(*k as usize)
                     })
-                    .and_then(|k| match k.1 {
-                      Some(i) => to_script_data.get_common_attr().list.get(i as usize),
-                      None => None,
+                    .and_then(|k| {
+                      k.1
+                        .and_then(|i| to_script_data.get_common_attr().list.get(i as usize))
                     })
                     .map(Cow::Borrowed)
                 };
@@ -1282,17 +1277,15 @@ pub fn transliterate_text_core(
             {
               if is_to_tamil_ext_ && is_ta_ext_superscript_tail(ctx.result.last_char()) {
                 if pieces.len() == 1 && pieces[0] == to_halant
-                  || match &map.krama {
-                    Some(krama) => match krama.last() {
-                      Some(last_i) => to_script_data
+                  || map.krama.as_ref().is_some_and(|krama| {
+                    krama.last().is_some_and(|last_i| {
+                      to_script_data
                         .get_common_attr()
                         .list
                         .get(*last_i as usize)
-                        .is_some_and(|k| k.is_matra()),
-                      None => false,
-                    },
-                    None => false,
-                  }
+                        .is_some_and(|k| k.is_matra())
+                    })
+                  })
                 {
                   ctx
                     .result
@@ -1397,17 +1390,19 @@ pub fn transliterate_text_core(
       {
         if is_to_tamil_ext_ && is_ta_ext_superscript_tail(ctx.result.last_char()) {
           if pieces[0] == to_halant
-            || match to_script_data.get_common_attr().krama_text_arr.get(index) {
-              Some(krama) => match krama.1 {
-                Some(i) => to_script_data
-                  .get_common_attr()
-                  .list
-                  .get(i as usize)
-                  .is_some_and(|k| k.is_matra()),
-                None => false,
-              },
-              None => false,
-            }
+            || to_script_data
+              .get_common_attr()
+              .krama_text_arr
+              .get(index)
+              .is_some_and(|krama| {
+                krama.1.is_some_and(|i| {
+                  to_script_data
+                    .get_common_attr()
+                    .list
+                    .get(i as usize)
+                    .is_some_and(|k| k.is_matra())
+                })
+              })
           {
             ctx
               .result
