@@ -306,8 +306,6 @@ where
               continue;
             };
 
-            let last_piece_owned = last_piece.to_owned();
-
             if let Some(following_idx) = self.to_script_data.krama_index_of_text(last_piece) {
               if !following.contains(&(following_idx as i16)) {
                 continue;
@@ -317,6 +315,7 @@ where
                   .to_script_data
                   .match_prev_krama_sequence(|i| self.result.peek_at(i), -2, prev);
               if prev_match.matched {
+                let last_piece_owned = last_piece.to_owned();
                 let mut pieces = self.to_script_data.replace_with_pieces(replace_with);
                 pieces.push(last_piece_owned.as_str()); // instead [...pices, last_piece]
                 self
@@ -394,7 +393,7 @@ pub fn get_active_custom_options(
   let from_script_name = &from_script_data.get_common_attr().script_name;
   let to_script_name = &to_script_data.get_common_attr().script_name;
   let custom_options_map = crate::script_data::get_custom_options_map();
-  let mut active: HashMap<String, bool> = HashMap::new();
+  let mut active: HashMap<String, bool> = HashMap::with_capacity(input_options.len());
 
   let from_type = custom_option_script_type_of(from_script_data);
   let to_type = custom_option_script_type_of(to_script_data);
@@ -702,6 +701,13 @@ pub fn transliterate_text_core(
   // Used when converting from Tamil-Extended (superscript numbers)
   let mut ignore_ta_ext_sup_num_text_index: isize = -1;
 
+  let is_from_tamil_ext_ = is_script_tamil_ext(from_script_name);
+  let is_to_tamil_ext_ = is_script_tamil_ext(to_script_name);
+  let opt_preserve_specific_chars_ = *trans_options
+    .get("all_to_normal:preserve_specific_chars")
+    .unwrap_or(&false)
+    && to_script_name == "Normal";
+
   let mut ctx = TransliterateCtx {
     from_script_name,
     to_script_name,
@@ -751,22 +757,15 @@ pub fn transliterate_text_core(
     if ch.is_ascii_digit() && !opts.use_native_numerals {
       ctx.result.emit_char(ch);
       ctx.cursor.advance(1);
-      let mut buf = [0u8; 4];
-      let ch_str = ch.encode_utf8(&mut buf);
-      let _ = ctx.prev_context_cleanup(
-        Some((Some(Cow::Owned(ch_str.to_owned())), None)),
-        None,
-        None,
-      );
+      // ASCII digits: use a static table to avoid heap allocation for Cow::Borrowed
+      const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
+      let _ = ctx.prev_context_cleanup(Some((Some(Cow::Borrowed(digit_str)), None)), None, None);
       continue;
     }
 
     // Preserve mode: custom script chars when converting to Normal
-    if *trans_options
-      .get("all_to_normal:preserve_specific_chars")
-      .unwrap_or(&false)
-      && to_script_name == "Normal"
-    {
+    if opt_preserve_specific_chars_ {
       let mut ch_buf = [0u8; 4];
       let ch_str = ch.encode_utf8(&mut ch_buf);
       let idx = from_script_data.custom_script_char_index_of_text(ch_str);
@@ -893,9 +892,7 @@ pub fn transliterate_text_core(
           let nth_next_character: Option<char> = nth_next;
 
           // Tamil-Extended special handling (superscript numbers after matra/halant)
-          if is_script_tamil_ext(from_script_name)
-            && matches!(from_script_data, ScriptData::Brahmic { .. })
-          {
+          if is_from_tamil_ext_ && matches!(from_script_data, ScriptData::Brahmic { .. }) {
             let n_1_th_next = if nth_next.is_some() {
               ctx.cursor.peek_at(end_index + 1)
             } else {
@@ -1124,7 +1121,7 @@ pub fn transliterate_text_core(
       // If krama exists and has at least one non -1, emit directly
       if let Some(krama) = &map.krama {
         if krama.iter().any(|&k| k != -1) {
-          let mut pieces: Vec<&str> = Vec::new();
+          let mut pieces: Vec<&str> = Vec::with_capacity(krama.len());
           for &k in krama.iter() {
             if k < 0 {
               continue;
@@ -1176,7 +1173,7 @@ pub fn transliterate_text_core(
                       })
                   })
                   .collect();
-                if is_script_tamil_ext(from_script_name)
+                if is_from_tamil_ext_
                   && list_refs
                     .iter()
                     .any(|k| k.as_ref().is_some_and(|k| k.is_matra()))
@@ -1191,7 +1188,7 @@ pub fn transliterate_text_core(
                         .unwrap_or(Vec::new()),
                     }));
                   }
-                } else if is_script_tamil_ext(from_script_name)
+                } else if is_from_tamil_ext_
                   && list_refs.len() > 1
                   && list_refs.iter().any(|k| k.is_none())
                 {
@@ -1283,10 +1280,8 @@ pub fn transliterate_text_core(
               halant: to_halant, ..
             } = to_script_data
             {
-              if is_script_tamil_ext(to_script_name)
-                && is_ta_ext_superscript_tail(ctx.result.last_char())
-              {
-                if pieces.join("") == *to_halant
+              if is_to_tamil_ext_ && is_ta_ext_superscript_tail(ctx.result.last_char()) {
+                if pieces.len() == 1 && pieces[0] == to_halant
                   || match &map.krama {
                     Some(krama) => match krama.last() {
                       Some(last_i) => to_script_data
@@ -1400,9 +1395,8 @@ pub fn transliterate_text_core(
         halant: to_halant, ..
       } = to_script_data
       {
-        if is_script_tamil_ext(to_script_name) && is_ta_ext_superscript_tail(ctx.result.last_char())
-        {
-          if pieces.join("") == *to_halant
+        if is_to_tamil_ext_ && is_ta_ext_superscript_tail(ctx.result.last_char()) {
+          if pieces[0] == to_halant
             || match to_script_data.get_common_attr().krama_text_arr.get(index) {
               Some(krama) => match krama.1 {
                 Some(i) => to_script_data

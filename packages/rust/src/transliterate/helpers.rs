@@ -17,6 +17,7 @@ impl ScriptData {
       .map(|item| item.0.as_str())
   }
 
+  #[inline]
   pub fn krama_text_or_empty(&self, idx: i16) -> &str {
     if idx < 0 {
       return "";
@@ -29,6 +30,7 @@ impl ScriptData {
       .unwrap_or("")
   }
 
+  #[inline]
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
     self.get_common_attr().krama_text_lookup.get(text).copied()
   }
@@ -429,6 +431,7 @@ impl ScriptData {
 }
 pub const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS: [char; 3] = ['²', '³', '⁴'];
 
+#[inline]
 pub fn is_ta_ext_superscript_tail(ch: Option<char>) -> bool {
   ch.is_some_and(|c| TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.contains(&c))
 }
@@ -473,7 +476,7 @@ impl ResultStringBuilder {
 }
 
 #[inline]
-pub(crate) fn is_script_tamil_ext(var: &str) -> bool {
+pub fn is_script_tamil_ext(var: &str) -> bool {
   var == "Tamil-Extended"
 }
 

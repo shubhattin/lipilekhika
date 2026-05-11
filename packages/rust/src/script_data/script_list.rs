@@ -13,15 +13,19 @@ impl List {
       | List::Svara { krama_ref, .. } => krama_ref,
     }
   }
+  #[inline]
   pub fn is_svara(&self) -> bool {
     matches!(self, List::Svara { .. })
   }
+  #[inline]
   pub fn is_matra(&self) -> bool {
     matches!(self, List::Matra { .. })
   }
+  #[inline]
   pub fn is_vyanjana(&self) -> bool {
     matches!(self, List::Vyanjana { .. })
   }
+  #[inline]
   pub fn is_anya(&self) -> bool {
     matches!(self, List::Anya { .. })
   }
