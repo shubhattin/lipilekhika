@@ -216,4 +216,3 @@ function getSupportedTargetList() {
 function getNativeDirCandidates() {
   return [path.join(CURRENT_DIR, '..', 'native'), path.join(CURRENT_DIR, '..', 'binding', 'pkg')];
 }
-

@@ -1,15 +1,8 @@
-import type { script_list_type } from './lang_list';
-import type { OutputScriptData } from '../make_script_data/output_script_data_schema';
-import {
-  get_package_current_version_macro,
-  get_is_umd_build_mode_macro
-} from './runtime_macros' with { type: 'macro' };
+import type { script_list_type } from '../../utils/lang_list';
+import type { OutputScriptData } from '../../make_script_data/output_script_data_schema';
+import { fetchScriptDataPayload } from '@lipilekhika/script-data-source';
 
-const IS_UMD_BUILD_MODE = get_is_umd_build_mode_macro();
-
-const UMD_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
-
-const ESM_SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
+const SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
 
 type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
 // type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
@@ -35,7 +28,7 @@ export type ScriptData = OutputScriptData & {
   >;
 };
 
-export const get_runtime_script_data = async (
+const get_runtime_script_data = async (
   script_data_: Promise<OutputScriptData>
 ): Promise<ScriptData> => {
   const script_data = await script_data_;
@@ -66,22 +59,13 @@ export const get_runtime_script_data = async (
  * @returns The script data
  */
 export const getScriptData = async (script_name: script_list_type): Promise<ScriptData> => {
-  if (IS_UMD_BUILD_MODE) {
-    if (UMD_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
-      return UMD_SCRIPT_DATA_PROMISE_CACHE[script_name];
-    }
-    const package_current_version = get_package_current_version_macro();
-    const SCRIPT_DATA_URL = `https://cdn.jsdelivr.net/npm/lipilekhika@${package_current_version}/dist/umd_json/script_data/${script_name}.json`;
-    const response = await fetch(SCRIPT_DATA_URL);
-    const data = response.json() as Promise<OutputScriptData>;
-    const runtime_data = get_runtime_script_data(data);
-    UMD_SCRIPT_DATA_PROMISE_CACHE[script_name] = runtime_data;
-    return runtime_data;
+  if (!SCRIPT_DATA_PROMISE_CACHE[script_name]) {
+    SCRIPT_DATA_PROMISE_CACHE[script_name] = get_runtime_script_data(
+      fetchScriptDataPayload(script_name)
+    ).catch((error) => {
+      delete SCRIPT_DATA_PROMISE_CACHE[script_name];
+      throw error;
+    });
   }
-  if (!ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]) {
-    ESM_SCRIPT_DATA_PROMISE_CACHE[script_name] = get_runtime_script_data(
-      import(`../script_data/${script_name}.json`).then((m) => m.default as OutputScriptData)
-    );
-  }
-  return ESM_SCRIPT_DATA_PROMISE_CACHE[script_name]!;
+  return SCRIPT_DATA_PROMISE_CACHE[script_name]!;
 };
