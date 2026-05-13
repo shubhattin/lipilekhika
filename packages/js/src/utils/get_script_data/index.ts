@@ -28,7 +28,7 @@ export type ScriptData = OutputScriptData & {
   >;
 };
 
-export const get_runtime_script_data = async (
+const get_runtime_script_data = async (
   script_data_: Promise<OutputScriptData>
 ): Promise<ScriptData> => {
   const script_data = await script_data_;
