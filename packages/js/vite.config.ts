@@ -1,7 +1,7 @@
 // vite.config.ts
 import { defineConfig } from 'vite';
 import path from 'node:path';
-import dts from 'vite-plugin-dts';
+import dts from 'unplugin-dts/vite';
 import MacroPlugin from 'unplugin-macros/vite';
 import fs from 'node:fs';
 import type { Plugin } from 'vite';
@@ -9,13 +9,24 @@ import type { Plugin } from 'vite';
 const IS_UMD_BUILD_MODE = process.env.VITE_IS_UMD_BUILD_MODE === 'true';
 
 export default defineConfig({
+  resolve: {
+    // UMD must not see dynamic JSON imports — Rolldown still resolves them even when branched away.
+    alias: {
+      '@lipilekhika/script-data-source': IS_UMD_BUILD_MODE
+        ? path.resolve(__dirname, 'src/utils/get_script_data/get_umd.ts')
+        : path.resolve(__dirname, 'src/utils/get_script_data/get_esm.ts')
+    }
+  },
   plugins: [
-    dts({ include: ['src'], outDir: 'dist/types' }),
+    // unplugin-dts uses `outDirs` (string | …); maps to former vite-plugin-dts `outDir`.
+    dts({ include: ['src'], outDirs: 'dist/types' }),
     MacroPlugin(),
     ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNativeBinariesPlugin()])
   ],
   build: {
     lib: {
+      // Duplicates rolldownOptions.input; kept because unplugin-dts reads
+      // config.build.lib.entry in configResolved (see unplugin-dts source).
       entry: IS_UMD_BUILD_MODE
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
@@ -31,7 +42,7 @@ export default defineConfig({
         return `${base}.${format === 'es' ? 'mjs' : 'cjs'}`;
       }
     },
-    rollupOptions: {
+    rolldownOptions: {
       external: (id) => id.startsWith('node:'),
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
