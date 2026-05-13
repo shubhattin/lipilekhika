@@ -7,7 +7,8 @@
       "$components/*": ["./src/components/*"],
       "~/*": ["./src/*"],
       "lipilekhika/*": ["../../packages/js/src/*"],
-      "lipilekhika": ["../../packages/js/src/index_main.ts"]
+      "lipilekhika": ["../../packages/js/src/index_main.ts"],
+      "@lipilekhika/script-data-source": ["../../packages/js/src/utils/get_script_data/get_esm.ts"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"
