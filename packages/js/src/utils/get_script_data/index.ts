@@ -1,5 +1,5 @@
-import type { script_list_type } from './lang_list';
-import type { OutputScriptData } from '../make_script_data/output_script_data_schema';
+import type { script_list_type } from '../../utils/lang_list';
+import type { OutputScriptData } from '../../make_script_data/output_script_data_schema';
 import { fetchScriptDataPayload } from '@lipilekhika/script-data-source';
 
 const SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
@@ -62,7 +62,10 @@ export const getScriptData = async (script_name: script_list_type): Promise<Scri
   if (!SCRIPT_DATA_PROMISE_CACHE[script_name]) {
     SCRIPT_DATA_PROMISE_CACHE[script_name] = get_runtime_script_data(
       fetchScriptDataPayload(script_name)
-    );
+    ).catch((error) => {
+      delete SCRIPT_DATA_PROMISE_CACHE[script_name];
+      throw error;
+    });
   }
   return SCRIPT_DATA_PROMISE_CACHE[script_name]!;
 };

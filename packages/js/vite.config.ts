@@ -13,8 +13,8 @@ export default defineConfig({
     // UMD must not see dynamic JSON imports — Rolldown still resolves them even when branched away.
     alias: {
       '@lipilekhika/script-data-source': IS_UMD_BUILD_MODE
-        ? path.resolve(__dirname, 'src/utils/script_data_source_umd.ts')
-        : path.resolve(__dirname, 'src/utils/script_data_source_esm.ts')
+        ? path.resolve(__dirname, 'src/utils/get_script_data/get_umd.ts')
+        : path.resolve(__dirname, 'src/utils/get_script_data/get_esm.ts')
     }
   },
   plugins: [
@@ -30,10 +30,10 @@ export default defineConfig({
       entry: IS_UMD_BUILD_MODE
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
-            index: path.resolve(__dirname, 'src/index.ts'),
-            node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
-          },
+          index: path.resolve(__dirname, 'src/index.ts'),
+          node: path.resolve(__dirname, 'src/node.ts'),
+          typing: path.resolve(__dirname, 'src/typing.ts')
+        },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
       // formats: ["es", "cjs", "iife", "umd"],
       fileName: (format, entryName) => {
@@ -47,36 +47,36 @@ export default defineConfig({
       input: IS_UMD_BUILD_MODE
         ? { index: path.resolve(__dirname, 'src/index.umd.ts') }
         : {
-            index: path.resolve(__dirname, 'src/index.ts'),
-            node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
-          },
+          index: path.resolve(__dirname, 'src/index.ts'),
+          node: path.resolve(__dirname, 'src/node.ts'),
+          typing: path.resolve(__dirname, 'src/typing.ts')
+        },
       output: !IS_UMD_BUILD_MODE
         ? [
-            {
-              format: 'es',
-              dir: 'dist/esm',
-              entryFileNames: '[name].mjs',
-              preserveModules: false
-            },
-            {
-              format: 'cjs',
-              dir: 'dist/cjs',
-              entryFileNames: '[name].cjs',
-              exports: 'named',
-              preserveModules: false
-            }
-          ]
+          {
+            format: 'es',
+            dir: 'dist/esm',
+            entryFileNames: '[name].mjs',
+            preserveModules: false
+          },
+          {
+            format: 'cjs',
+            dir: 'dist/cjs',
+            entryFileNames: '[name].cjs',
+            exports: 'named',
+            preserveModules: false
+          }
+        ]
         : [
-            {
-              format: 'umd',
-              dir: 'dist',
-              entryFileNames: 'lipilekhika.umd.js',
-              name: 'lipilekhika',
-              exports: 'named',
-              preserveModules: false
-            }
-          ]
+          {
+            format: 'umd',
+            dir: 'dist',
+            entryFileNames: 'lipilekhika.umd.js',
+            name: 'lipilekhika',
+            exports: 'named',
+            preserveModules: false
+          }
+        ]
     }
   }
 });
