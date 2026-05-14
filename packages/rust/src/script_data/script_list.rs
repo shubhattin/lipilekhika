@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use indexmap::IndexMap;
 use std::sync::OnceLock;
 
 use super::generated;
@@ -34,17 +34,12 @@ impl List {
 pub struct ScriptListData {
   pub scripts: Vec<String>,
   pub langs: Vec<String>,
-  pub lang_script_map: HashMap<String, String>,
-  pub script_alternates_map: HashMap<String, String>,
+  pub lang_script_map: IndexMap<String, String>,
+  pub script_alternates_map: IndexMap<String, String>,
 }
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
-fn get_ordered_script_list(map: &HashMap<String, u8>) -> Vec<String> {
-  let mut entries: Vec<(&String, &u8)> = map.iter().collect();
-  entries.sort_by_key(|(_, v)| **v);
-  entries.into_iter().map(|(k, _)| k.clone()).collect()
-}
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
@@ -52,8 +47,8 @@ pub fn get_script_list_data() -> &'static ScriptListData {
     let data: ScriptListDataJson =
       bincode::deserialize(bytes).expect("bincode decode failed for script_list");
     ScriptListData {
-      scripts: get_ordered_script_list(&data.scripts),
-      langs: get_ordered_script_list(&data.langs),
+      scripts: data.scripts.iter().map(|k| k.0.clone()).collect(),
+      langs: data.langs.iter().map(|k| k.0.clone()).collect(),
       lang_script_map: data.lang_script_map.clone(),
       script_alternates_map: data.script_alternates_map.clone(),
     }
