@@ -1,8 +1,7 @@
-use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use super::generated;
-use super::schema::{List, ScriptListDataJson};
+use super::schema::{List, ScriptListData};
 
 impl List {
   pub fn get_krama_ref(&self) -> &Vec<i16> {
@@ -31,27 +30,15 @@ impl List {
   }
 }
 
-pub struct ScriptListData {
-  pub scripts: Vec<String>,
-  pub langs: Vec<String>,
-  pub lang_script_map: HashMap<String, String>,
-  pub script_alternates_map: HashMap<String, String>,
-}
-
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
 
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
   SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
     let bytes = generated::SCRIPT_LIST_BYTES;
-    let data: ScriptListDataJson =
+    let data: ScriptListData =
       bincode::deserialize(bytes).expect("bincode decode failed for script_list");
-    ScriptListData {
-      scripts: data.scripts.iter().map(|k| k.0.clone()).collect(),
-      langs: data.langs.iter().map(|k| k.0.clone()).collect(),
-      lang_script_map: data.lang_script_map.clone(),
-      script_alternates_map: data.script_alternates_map.clone(),
-    }
+    data
   })
 }
 

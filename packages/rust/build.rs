@@ -12,7 +12,8 @@ mod schema {
 }
 
 use schema::{
-  CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListDataJson,
+  CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
+  ScriptListDataJson,
 };
 
 fn read_json_file(path: &Path) -> String {
@@ -70,8 +71,9 @@ fn main() {
   let script_list_json = read_json_file(script_list_path);
   let script_list: ScriptListDataJson = serde_json::from_str(&script_list_json)
     .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
+  let script_list_raw: ScriptListData = script_list.into();
   let script_list_bytes =
-    bincode::serialize(&script_list).expect("bincode encode failed for script_list");
+    bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
   let script_list_bin_path = out_dir.join("script_list.bin");
   fs::write(&script_list_bin_path, script_list_bytes)
     .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));

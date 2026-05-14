@@ -346,3 +346,21 @@ pub struct ScriptListDataJson {
   /// contains aliases which map to script
   pub script_alternates_map: HashMap<String, String>,
 }
+#[derive(Serialize, Deserialize)]
+pub struct ScriptListData {
+  pub scripts: Vec<String>,
+  pub langs: Vec<String>,
+  pub lang_script_map: HashMap<String, String>,
+  pub script_alternates_map: HashMap<String, String>,
+}
+
+impl From<ScriptListDataJson> for ScriptListData {
+  fn from(value: ScriptListDataJson) -> Self {
+    Self {
+      scripts: value.scripts.iter().map(|k| k.0.clone()).collect(),
+      langs: value.langs.iter().map(|k| k.0.clone()).collect(),
+      lang_script_map: value.lang_script_map.clone(),
+      script_alternates_map: value.script_alternates_map.clone(),
+    }
+  }
+}
