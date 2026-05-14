@@ -1,4 +1,4 @@
-use indexmap::IndexMap;
+use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use super::generated;
@@ -34,8 +34,8 @@ impl List {
 pub struct ScriptListData {
   pub scripts: Vec<String>,
   pub langs: Vec<String>,
-  pub lang_script_map: IndexMap<String, String>,
-  pub script_alternates_map: IndexMap<String, String>,
+  pub lang_script_map: HashMap<String, String>,
+  pub script_alternates_map: HashMap<String, String>,
 }
 
 static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
