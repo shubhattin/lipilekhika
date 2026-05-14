@@ -346,6 +346,7 @@ pub struct ScriptListDataJson {
   /// contains aliases which map to script
   pub script_alternates_map: HashMap<String, String>,
 }
+
 #[derive(Serialize, Deserialize)]
 pub struct ScriptListData {
   pub scripts: Vec<String>,
