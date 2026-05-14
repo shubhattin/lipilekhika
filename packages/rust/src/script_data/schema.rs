@@ -336,11 +336,10 @@ pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScriptListDataJson {
-  // here for these two we are using Hashmap instead of IndexMap as we can recover the order from the `u8`
-  pub scripts: IndexMap<String, u8>,
-  pub langs: IndexMap<String, u8>,
   // only `scripts`, `langs` and custom otion name `key` needs order preservation
   // so we use IndexMap only only for those
+  pub scripts: IndexMap<String, u8>,
+  pub langs: IndexMap<String, u8>,
   /// all langs are mapped to a script
   pub lang_script_map: HashMap<String, String>,
   /// contains aliases which map to script
