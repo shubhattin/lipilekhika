@@ -313,7 +313,6 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
   }
 
   let script_data = ScriptData::get_script_data(&normalized_typing_lang);
-  let common_attr = script_data.get_common_attr();
 
   /// Merges items that end up with the same displayed text (and type),
   /// and keeps mappings unique.
@@ -359,12 +358,12 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
   }
 
   // Initialize common_krama_map from krama_text_arr
-  let mut common_krama_map: Vec<TypingDataMapItem> = common_attr
+  let mut common_krama_map: Vec<TypingDataMapItem> = script_data
     .krama_text_arr
     .iter()
     .map(|(text, list_index)| {
       let list_type = list_index
-        .and_then(|idx| common_attr.list.get(idx as usize))
+        .and_then(|idx| script_data.list.get(idx as usize))
         .map(ListType::from_list)
         .unwrap_or(ListType::Anya);
       (text.clone(), list_type, Vec::new())
@@ -372,12 +371,12 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
     .collect();
 
   // Initialize script_specific_krama_map from custom_script_chars_arr
-  let mut script_specific_krama_map: Vec<TypingDataMapItem> = common_attr
+  let mut script_specific_krama_map: Vec<TypingDataMapItem> = script_data
     .custom_script_chars_arr
     .iter()
     .map(|(text, list_index, _)| {
       let list_type = list_index
-        .and_then(|idx| common_attr.list.get(idx as usize))
+        .and_then(|idx| script_data.list.get(idx as usize))
         .map(ListType::from_list)
         .unwrap_or(ListType::Anya);
       (text.clone(), list_type, Vec::new())
@@ -385,7 +384,7 @@ pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, S
     .collect();
 
   // Populate mappings from typing_text_to_krama_map
-  for (normal_text_map, item) in &common_attr.typing_text_to_krama_map {
+  for (normal_text_map, item) in &script_data.typing_text_to_krama_map {
     if normal_text_map.is_empty() {
       continue;
     }
@@ -440,15 +439,14 @@ pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, String>
   }
 
   let script_data = ScriptData::get_script_data(&normalized);
-  let common_attr = script_data.get_common_attr();
 
   Ok(
-    common_attr
+    script_data
       .krama_text_arr
       .iter()
       .map(|(text, list_idx)| {
         let list_type = list_idx
-          .and_then(|idx| common_attr.list.get(idx as usize))
+          .and_then(|idx| script_data.list.get(idx as usize))
           .map(ListType::from_list)
           .unwrap_or(ListType::Anya);
         (text.clone(), list_type)

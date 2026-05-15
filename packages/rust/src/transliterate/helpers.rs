@@ -11,7 +11,6 @@ impl ScriptData {
       return None;
     }
     self
-      .get_common_attr()
       .krama_text_arr
       .get(idx as usize)
       .map(|item| item.0.as_str())
@@ -23,7 +22,6 @@ impl ScriptData {
       return "";
     }
     self
-      .get_common_attr()
       .krama_text_arr
       .get(idx as usize)
       .map(|item| item.0.as_str())
@@ -32,7 +30,7 @@ impl ScriptData {
 
   #[inline]
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
-    self.get_common_attr().krama_text_lookup.get(text).copied()
+    self.krama_text_lookup.get(text).copied()
   }
 }
 
