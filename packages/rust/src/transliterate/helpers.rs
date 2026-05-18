@@ -56,7 +56,7 @@ impl ResultStringBuilder {
   #[inline]
   fn piece_range(&self, i: usize) -> std::ops::Range<usize> {
     let start = self.offsets[i];
-    let end = self.offsets.get(i + 1).copied().unwrap_or(self.buf.len());
+    let end = *self.offsets.get(i + 1).unwrap_or(&self.buf.len());
     start..end
   }
 
@@ -383,14 +383,12 @@ impl ScriptData {
     F: Fn(isize) -> Option<T>,
   {
     for i in 0..prev.len() {
-      let raw = prev[prev.len() - 1 - i];
-      if raw < 0 {
+      let Some(expected_krama_index) = prev.get(prev.len() - 1 - i as usize) else {
         return MatchPrevKramaSequenceResult {
           matched: false,
           matched_len: 0,
         };
-      }
-      let expected_krama_index = raw as usize;
+      };
       let info = match peek_at(anchor_index - i as isize) {
         Some(v) => v,
         None => {
@@ -403,7 +401,7 @@ impl ScriptData {
 
       let got_krama_index = self.krama_index_of_text(info.as_ref());
       match got_krama_index {
-        Some(got) if got == expected_krama_index => {}
+        Some(got) if got == *expected_krama_index as usize => {}
         _ => {
           return MatchPrevKramaSequenceResult {
             matched: false,

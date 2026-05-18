@@ -16,8 +16,8 @@ impl Deref for ScriptData {
     match &self {
       ScriptData::Brahmic {
         common_script_attr, ..
-      } => common_script_attr,
-      ScriptData::Other {
+      }
+      | ScriptData::Other {
         common_script_attr, ..
       } => common_script_attr,
     }

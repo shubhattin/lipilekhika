@@ -410,6 +410,9 @@ pub fn get_active_custom_options(
         .from_script_name
         .as_ref()
         .is_some_and(|names| names.iter().any(|n| n == from_script_name));
+    if !from_matches {
+      continue;
+    }
 
     let to_matches = option_info
       .to_script_type
