@@ -7,8 +7,10 @@ pub use crate::typing::{
   KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
   get_script_typing_data_map,
 };
+use errors::TransliterationError;
 use std::collections::HashMap;
 
+mod errors;
 mod script_data;
 mod transliterate;
 mod utils;
@@ -27,11 +29,9 @@ pub fn transliterate(
   from: &str,
   to: &str,
   trans_options: Option<&HashMap<String, bool>>,
-) -> Result<String, String> {
-  let normalized_from = get_normalized_script_name(from)
-    .ok_or_else(|| format!("Invalid from script name: {}", from))?;
-  let normalized_to =
-    get_normalized_script_name(to).ok_or_else(|| format!("Invalid to script name: {}", to))?;
+) -> Result<String, TransliterationError> {
+  let normalized_from = get_normalized_script_name(from)?;
+  let normalized_to = get_normalized_script_name(to)?;
 
   if normalized_from == normalized_to {
     return Ok(text.to_string());
@@ -41,9 +41,10 @@ pub fn transliterate(
 }
 
 /// Returns the schwa deletion characteristic of the script provided.
-pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, String> {
-  let normalized_script_name = get_normalized_script_name(script_name)
-    .ok_or_else(|| format!("Invalid script name: {}", script_name))?;
+pub fn get_schwa_status_for_script(
+  script_name: &str,
+) -> Result<Option<bool>, TransliterationError> {
+  let normalized_script_name = get_normalized_script_name(script_name)?;
   let script_data = ScriptData::get_script_data(&normalized_script_name);
   if let ScriptData::Brahmic { schwa_property, .. } = script_data {
     Ok(Some(*schwa_property))
@@ -53,10 +54,10 @@ pub fn get_schwa_status_for_script(script_name: &str) -> Result<Option<bool>, St
 }
 
 /// Preload script data for a normalized script, alias, or language name.
-pub fn preload_script_data(script_name: &str) {
-  if let Some(normalized_script_name) = get_normalized_script_name(script_name) {
-    ScriptData::get_script_data(&normalized_script_name);
-  }
+pub fn preload_script_data(script_name: &str) -> Result<(), TransliterationError> {
+  let normalized_script_name = get_normalized_script_name(script_name)?;
+  ScriptData::get_script_data(&normalized_script_name);
+  Ok(())
 }
 
 #[cfg(test)]
@@ -262,7 +263,7 @@ mod tests {
               input: case.input.clone(),
               expected: Some(case.output.clone()),
               actual: None,
-              error: Some(e),
+              error: Some(e.to_string()),
             },
           );
           continue;
@@ -337,7 +338,7 @@ mod tests {
                 input: result.clone(),
                 expected: Some(case.input.clone()),
                 actual: None,
-                error: Some(e),
+                error: Some(e.to_string()),
               },
             );
           }

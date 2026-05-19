@@ -1406,18 +1406,15 @@ pub fn transliterate_text(
   transliteration_input_options: Option<&HashMap<String, bool>>,
   options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
-  let from_norm = from_script_name;
-  let to_norm = to_script_name;
-
-  let from_data = ScriptData::get_script_data(&from_norm);
-  let to_data = ScriptData::get_script_data(&to_norm);
+  let from_data = ScriptData::get_script_data(from_script_name);
+  let to_data = ScriptData::get_script_data(to_script_name);
 
   let resolved = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
 
   transliterate_text_core(
     text,
-    &from_norm,
-    &to_norm,
+    from_script_name,
+    to_script_name,
     from_data,
     to_data,
     &resolved.trans_options,

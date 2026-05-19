@@ -1,3 +1,4 @@
+use crate::errors::TransliterationError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
@@ -81,11 +82,12 @@ impl TypingContext {
   ///
   /// - `typing_lang` can be a script or language name/alias (normalized via `get_normalized_script_name`).
   /// - `options` configures timing and inherent vowel / numeral behavior.
-  pub fn new(typing_lang: &str, options: Option<TypingContextOptions>) -> Result<Self, String> {
+  pub fn new(
+    typing_lang: &str,
+    options: Option<TypingContextOptions>,
+  ) -> Result<Self, TransliterationError> {
     let opts = options.unwrap_or_default();
-
-    let normalized_typing_lang = get_normalized_script_name(typing_lang)
-      .ok_or_else(|| format!("Invalid script name: {}", typing_lang))?;
+    let normalized_typing_lang = get_normalized_script_name(typing_lang)?;
 
     let from_script_data = ScriptData::get_script_data("Normal");
     let to_script_data = ScriptData::get_script_data(&normalized_typing_lang);
@@ -228,7 +230,7 @@ pub fn emulate_typing(
   text: &str,
   typing_lang: &str,
   options: Option<TypingContextOptions>,
-) -> Result<String, String> {
+) -> Result<String, TransliterationError> {
   let mut ctx = TypingContext::new(typing_lang, options)?;
   let mut result = String::new();
 
@@ -304,12 +306,13 @@ pub struct ScriptTypingDataMap {
 /// both common characters and script-specific characters.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, String> {
-  let normalized_typing_lang =
-    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
+pub fn get_script_typing_data_map(
+  script: &str,
+) -> Result<ScriptTypingDataMap, TransliterationError> {
+  let normalized_typing_lang = get_normalized_script_name(script)?;
 
   if normalized_typing_lang == "Normal" {
-    return Err(format!("Invalid script name: {}", script));
+    return Err(TransliterationError::InvalidScriptName(script.to_string()));
   }
 
   let script_data = ScriptData::get_script_data(&normalized_typing_lang);
@@ -430,12 +433,11 @@ pub type KramaDataItem = (String, ListType);
 /// - `script` - The script/language name to get krama data for.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, String> {
-  let normalized =
-    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
+pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, TransliterationError> {
+  let normalized = get_normalized_script_name(script)?;
 
   if normalized == "Normal" {
-    return Err(format!("Invalid script name: {}", script));
+    return Err(TransliterationError::InvalidScriptName(script.to_string()));
   }
 
   let script_data = ScriptData::get_script_data(&normalized);

@@ -1,5 +1,7 @@
 use std::sync::OnceLock;
 
+use crate::errors::TransliterationError;
+
 use super::generated;
 use super::schema::{List, ScriptListData};
 
@@ -65,30 +67,32 @@ fn capitalize_first_and_after_dash(input: &str) -> String {
 }
 
 /// Returns the normalized script/language name.
-pub fn get_normalized_script_name(script_name: &str) -> Option<String> {
+pub fn get_normalized_script_name(script_name: &str) -> Result<String, TransliterationError> {
   let data = get_script_list_data();
 
   let capitalized_name = capitalize_first_and_after_dash(script_name);
 
   // Direct script name match
   if data.scripts.contains(&capitalized_name) {
-    return Some(capitalized_name);
+    return Ok(capitalized_name);
   }
 
   // Language -> script mapping
   if data.langs.contains(&capitalized_name)
     && let Some(script) = data.lang_script_map.get(&capitalized_name)
   {
-    return Some(script.clone());
+    return Ok(script.clone());
   }
 
   // Alternate to script mapping (always use lowercase key)
   let lower_name = script_name.to_lowercase();
   if let Some(script) = data.script_alternates_map.get(&lower_name) {
-    return Some(script.clone());
+    return Ok(script.clone());
   }
 
-  None
+  Err(TransliterationError::InvalidScriptName(
+    script_name.to_string(),
+  ))
 }
 
 #[cfg(test)]

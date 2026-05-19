@@ -11,6 +11,8 @@ pub use custom_options::*;
 pub use schema::*;
 pub use script_list::*;
 
+use crate::errors::TransliterationError;
+
 /// Returns the list of all supported custom options for
 /// transliterations for the provided script pair
 ///
@@ -22,12 +24,9 @@ pub use script_list::*;
 pub fn get_all_options(
   from_script_name: &str,
   to_script_name: &str,
-) -> Result<Vec<String>, String> {
-  let normalized_from = get_normalized_script_name(from_script_name)
-    .ok_or_else(|| format!("Invalid script name: {}", from_script_name))?;
-
-  let normalized_to = get_normalized_script_name(to_script_name)
-    .ok_or_else(|| format!("Invalid script name: {}", to_script_name))?;
+) -> Result<Vec<String>, TransliterationError> {
+  let normalized_from = get_normalized_script_name(from_script_name)?;
+  let normalized_to = get_normalized_script_name(to_script_name)?;
 
   let from_script_data = ScriptData::get_script_data(&normalized_from);
   let to_script_data = ScriptData::get_script_data(&normalized_to);
