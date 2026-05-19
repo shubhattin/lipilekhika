@@ -28,17 +28,16 @@ pub fn transliterate(
   to: &str,
   trans_options: Option<&HashMap<String, bool>>,
 ) -> Result<String, String> {
-  let normalized_from =
-    get_normalized_script_name(from).ok_or_else(|| format!("Invalid script name: {}", from))?;
+  let normalized_from = get_normalized_script_name(from)
+    .ok_or_else(|| format!("Invalid from script name: {}", from))?;
   let normalized_to =
-    get_normalized_script_name(to).ok_or_else(|| format!("Invalid script name: {}", to))?;
+    get_normalized_script_name(to).ok_or_else(|| format!("Invalid to script name: {}", to))?;
 
   if normalized_from == normalized_to {
     return Ok(text.to_string());
   }
 
-  transliterate_text(text, &normalized_from, &normalized_to, trans_options, None)
-    .map(|result| result.output)
+  Ok(transliterate_text(text, &normalized_from, &normalized_to, trans_options, None).output)
 }
 
 /// Returns the schwa deletion characteristic of the script provided.

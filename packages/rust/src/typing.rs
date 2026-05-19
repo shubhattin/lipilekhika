@@ -124,20 +124,20 @@ impl TypingContext {
   }
 
   /// Accepts character-by-character input and returns the diff relative to the previous output.
-  pub fn take_key_input(&mut self, key: &str) -> Result<TypingDiff, String> {
+  pub fn take_key_input(&mut self, key: &str) -> TypingDiff {
     // If key is empty, nothing to do.
     let Some(ch) = key.chars().next() else {
-      return Ok(TypingDiff {
+      return TypingDiff {
         to_delete_chars_count: 0,
         diff_add_text: String::new(),
         context_length: 0,
-      });
+      };
     };
 
     self.take_key_input_char(ch)
   }
 
-  pub fn take_key_input_char(&mut self, ch: char) -> Result<TypingDiff, String> {
+  pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
     let now = Instant::now();
     if let Some(last) = self.last_time
       && now.duration_since(last) > self.auto_context_clear_time
@@ -157,7 +157,7 @@ impl TypingContext {
       &self.trans_options,
       &self.custom_rules,
       Some(self.build_translit_options()),
-    )?;
+    );
 
     let context_length = result.context_length;
     let output = result.output;
@@ -173,11 +173,11 @@ impl TypingContext {
 
     self.last_time = Some(now);
 
-    Ok(TypingDiff {
+    TypingDiff {
       to_delete_chars_count,
       diff_add_text,
       context_length,
-    })
+    }
   }
 
   /// Updates whether native numerals should be used for subsequent typing.
@@ -233,7 +233,7 @@ pub fn emulate_typing(
   let mut result = String::new();
 
   for ch in text.chars() {
-    let diff = ctx.take_key_input_char(ch)?;
+    let diff = ctx.take_key_input_char(ch);
 
     if diff.to_delete_chars_count > 0 {
       truncate_last_chars(&mut result, diff.to_delete_chars_count);

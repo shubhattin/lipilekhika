@@ -635,11 +635,11 @@ pub fn transliterate_text_core(
   trans_options_in: &HashMap<String, bool>,
   custom_rules: &[impl Borrow<Rule>],
   options: Option<TransliterationFnOptions>,
-) -> Result<TransliterationOutput, String> {
+) -> TransliterationOutput {
   let opts = options.unwrap_or_default();
 
   if opts.typing_mode && from_script_name != "Normal" {
-    return Err("Typing mode is only supported with Normal script as the input".to_owned());
+    panic!("Typing mode is only supported with Normal script as the input");
   }
 
   // Only clone trans_options when we actually need to insert a key (typing mode).
@@ -1256,9 +1256,7 @@ pub fn transliterate_text_core(
                     })
                   })
                 {
-                  ctx
-                    .result
-                    .emit_pieces_with_reorder(pieces, to_halant, true);
+                  ctx.result.emit_pieces_with_reorder(pieces, to_halant, true);
                 } else if pieces
                   .last()
                   .and_then(|k| k.chars().last())
@@ -1395,10 +1393,10 @@ pub fn transliterate_text_core(
     CheckInEnum::Output,
   );
 
-  Ok(TransliterationOutput {
+  TransliterationOutput {
     output: output.into_owned(),
     context_length: ctx.prev_context.length(),
-  })
+  }
 }
 
 pub fn transliterate_text(
@@ -1407,11 +1405,9 @@ pub fn transliterate_text(
   to_script_name: &str,
   transliteration_input_options: Option<&HashMap<String, bool>>,
   options: Option<TransliterationFnOptions>,
-) -> Result<TransliterationOutput, String> {
-  let from_norm = crate::script_data::get_normalized_script_name(from_script_name)
-    .ok_or_else(|| format!("Unknown from-script `{}`", from_script_name))?;
-  let to_norm = crate::script_data::get_normalized_script_name(to_script_name)
-    .ok_or_else(|| format!("Unknown to-script `{}`", to_script_name))?;
+) -> TransliterationOutput {
+  let from_norm = from_script_name;
+  let to_norm = to_script_name;
 
   let from_data = ScriptData::get_script_data(&from_norm);
   let to_data = ScriptData::get_script_data(&to_norm);
