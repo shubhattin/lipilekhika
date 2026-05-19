@@ -24,13 +24,14 @@ fn transliterate(
   });
 
   lipilekhika::transliterate(text, from_script, to_script, options.as_ref())
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
-fn preload_script_data(script_name: &str) {
-  lipilekhika::preload_script_data(script_name);
+fn preload_script_data(script_name: &str) -> PyResult<()> {
+  lipilekhika::preload_script_data(script_name)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]
@@ -38,7 +39,7 @@ fn preload_script_data(script_name: &str) {
 fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
   lipilekhika::get_schwa_status_for_script(script_name)
     .map(|status| status.unwrap_or(false))
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]
@@ -46,15 +47,14 @@ fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
 fn get_all_options(from_script: &str, to_script: &str) -> PyResult<Vec<String>> {
   lipilekhika::get_all_options(from_script, to_script)
     .map(|options| options.into_iter().collect::<Vec<String>>())
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
 fn get_normalized_script_name(script_name: &str) -> PyResult<String> {
-  lipilekhika::get_normalized_script_name(script_name).ok_or_else(|| {
-    pyo3::exceptions::PyValueError::new_err(format!("Invalid script name: {}", script_name))
-  })
+  lipilekhika::get_normalized_script_name(script_name)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]

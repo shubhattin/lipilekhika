@@ -473,7 +473,7 @@ type ListType = 'svara' | 'vyanjana' | 'anya' | 'mAtrA';
  */
 export async function getScriptKramaData(script: ScriptLangType) {
   const normalized_typing_lang = getNormalizedScriptName(script);
-  if (!normalized_typing_lang || normalized_typing_lang === 'Normal') {
+  if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${script}`);
   }
   const script_data = await getScriptData(normalized_typing_lang);
@@ -491,7 +491,7 @@ export async function getScriptKramaData(script: ScriptLangType) {
  */
 export async function getScriptTypingDataMap(script: ScriptLangType) {
   const normalized_typing_lang = getNormalizedScriptName(script);
-  if (!normalized_typing_lang || normalized_typing_lang === 'Normal') {
+  if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${script}`);
   }
   const script_data = await getScriptData(normalized_typing_lang);

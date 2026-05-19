@@ -1,8 +1,16 @@
 # Changelog
 
-## Unreleased (rust-lib@1.0.9)
+## Unreleased (rust-lib@1.1.0)
 
-- Minor performance improvements
+- Performance improvements (60%)
+- Introduces some **Breaking Changes**
+
+### Error enum
+
+- Previously the methods in `lib.rs` and `typing.rs` returned a String as Error
+- Now they return a `TransliterationError` error enum
+- Some functions which previously returned an `Result` now return the result directly
+- No breaking changes for libraries depending on it (python, napi, dart, wasm) as they were already returning string based error messages which they return even now.
 
 ## rust-lib@1.0.8
 

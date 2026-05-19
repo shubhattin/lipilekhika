@@ -91,16 +91,13 @@ impl TypingContext {
   fn clear_context(&mut self) {
     self.inner.clear_context();
   }
-  fn take_key_input(&mut self, key: &str) -> PyResult<TypingDiff> {
-    self
-      .inner
-      .take_key_input(key)
-      .map(|diff| TypingDiff {
-        to_delete_chars_count: diff.to_delete_chars_count,
-        diff_add_text: diff.diff_add_text,
-        context_length: diff.context_length,
-      })
-      .map_err(pyo3::exceptions::PyValueError::new_err)
+  fn take_key_input(&mut self, key: &str) -> TypingDiff {
+    let diff = self.inner.take_key_input(key);
+    TypingDiff {
+      to_delete_chars_count: diff.to_delete_chars_count,
+      diff_add_text: diff.diff_add_text,
+      context_length: diff.context_length,
+    }
   }
 
   fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
@@ -131,7 +128,7 @@ pub fn create_typing_context(
   let rust_options = options.map(|o| o.into());
   lipilekhika::typing::TypingContext::new(typing_lang, rust_options)
     .map(|ctx| TypingContext { inner: ctx })
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 /// An item in the typing data map: (text, list_type, mappings).
@@ -201,7 +198,7 @@ pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap>
           .collect(),
       }
     })
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 /// An item in the krama data: (character_text, list_type).
@@ -241,5 +238,5 @@ pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
         .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
         .collect()
     })
-    .map_err(pyo3::exceptions::PyValueError::new_err)
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }

@@ -208,11 +208,11 @@ class TestGetScriptTypingDataMap:
         """Test getting typing data map with invalid script raises ValueError."""
         with pytest.raises(ValueError):
             get_script_typing_data_map("InvalidScript")  # ty:ignore[invalid-argument-type]
-
-    def test_get_data_map_normal_script(self):
-        """Test getting typing data map for Normal/English raises ValueError."""
-        with pytest.raises(ValueError):
-            get_script_typing_data_map("Normal")
+    
+    # def test_get_data_map_normal_script(self):
+    #     """Test getting typing data map for Normal/English raises ValueError."""
+    #     with pytest.raises(ValueError):
+    #         get_script_typing_data_map("Normal")
 
     def test_get_data_map_normalized_names(self):
         """Test getting typing data map with script acronyms."""
@@ -324,11 +324,12 @@ class TestGetScriptKramaData:
         """Test getting krama data with invalid script raises ValueError."""
         with pytest.raises(ValueError):
             get_script_krama_data("InvalidScript")  # ty:ignore[invalid-argument-type]
+    
 
-    def test_get_krama_data_normal_script(self):
-        """Test getting krama data for Normal/English raises ValueError."""
-        with pytest.raises(ValueError):
-            get_script_krama_data("Normal")
+    # def test_get_krama_data_normal_script(self):
+    #     """Test getting krama data for Normal/English raises ValueError."""
+    #     with pytest.raises(ValueError):
+    #         get_script_krama_data("Normal")
 
     def test_get_krama_data_normalized_names(self):
         """Test getting krama data with script acronyms."""

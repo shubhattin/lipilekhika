@@ -1,3 +1,4 @@
+use crate::errors::TransliterationError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
@@ -81,11 +82,12 @@ impl TypingContext {
   ///
   /// - `typing_lang` can be a script or language name/alias (normalized via `get_normalized_script_name`).
   /// - `options` configures timing and inherent vowel / numeral behavior.
-  pub fn new(typing_lang: &str, options: Option<TypingContextOptions>) -> Result<Self, String> {
+  pub fn new(
+    typing_lang: &str,
+    options: Option<TypingContextOptions>,
+  ) -> Result<Self, TransliterationError> {
     let opts = options.unwrap_or_default();
-
-    let normalized_typing_lang = get_normalized_script_name(typing_lang)
-      .ok_or_else(|| format!("Invalid script name: {}", typing_lang))?;
+    let normalized_typing_lang = get_normalized_script_name(typing_lang)?;
 
     let from_script_data = ScriptData::get_script_data("Normal");
     let to_script_data = ScriptData::get_script_data(&normalized_typing_lang);
@@ -124,20 +126,20 @@ impl TypingContext {
   }
 
   /// Accepts character-by-character input and returns the diff relative to the previous output.
-  pub fn take_key_input(&mut self, key: &str) -> Result<TypingDiff, String> {
+  pub fn take_key_input(&mut self, key: &str) -> TypingDiff {
     // If key is empty, nothing to do.
     let Some(ch) = key.chars().next() else {
-      return Ok(TypingDiff {
+      return TypingDiff {
         to_delete_chars_count: 0,
         diff_add_text: String::new(),
         context_length: 0,
-      });
+      };
     };
 
     self.take_key_input_char(ch)
   }
 
-  pub fn take_key_input_char(&mut self, ch: char) -> Result<TypingDiff, String> {
+  pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
     let now = Instant::now();
     if let Some(last) = self.last_time
       && now.duration_since(last) > self.auto_context_clear_time
@@ -157,7 +159,7 @@ impl TypingContext {
       &self.trans_options,
       &self.custom_rules,
       Some(self.build_translit_options()),
-    )?;
+    );
 
     let context_length = result.context_length;
     let output = result.output;
@@ -173,11 +175,11 @@ impl TypingContext {
 
     self.last_time = Some(now);
 
-    Ok(TypingDiff {
+    TypingDiff {
       to_delete_chars_count,
       diff_add_text,
       context_length,
-    })
+    }
   }
 
   /// Updates whether native numerals should be used for subsequent typing.
@@ -228,12 +230,12 @@ pub fn emulate_typing(
   text: &str,
   typing_lang: &str,
   options: Option<TypingContextOptions>,
-) -> Result<String, String> {
+) -> Result<String, TransliterationError> {
   let mut ctx = TypingContext::new(typing_lang, options)?;
   let mut result = String::new();
 
   for ch in text.chars() {
-    let diff = ctx.take_key_input_char(ch)?;
+    let diff = ctx.take_key_input_char(ch);
 
     if diff.to_delete_chars_count > 0 {
       truncate_last_chars(&mut result, diff.to_delete_chars_count);
@@ -304,13 +306,10 @@ pub struct ScriptTypingDataMap {
 /// both common characters and script-specific characters.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_typing_data_map(script: &str) -> Result<ScriptTypingDataMap, String> {
-  let normalized_typing_lang =
-    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
-
-  if normalized_typing_lang == "Normal" {
-    return Err(format!("Invalid script name: {}", script));
-  }
+pub fn get_script_typing_data_map(
+  script: &str,
+) -> Result<ScriptTypingDataMap, TransliterationError> {
+  let normalized_typing_lang = get_normalized_script_name(script)?;
 
   let script_data = ScriptData::get_script_data(&normalized_typing_lang);
 
@@ -430,13 +429,8 @@ pub type KramaDataItem = (String, ListType);
 /// - `script` - The script/language name to get krama data for.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, String> {
-  let normalized =
-    get_normalized_script_name(script).ok_or_else(|| format!("Invalid script name: {}", script))?;
-
-  if normalized == "Normal" {
-    return Err(format!("Invalid script name: {}", script));
-  }
+pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, TransliterationError> {
+  let normalized = get_normalized_script_name(script)?;
 
   let script_data = ScriptData::get_script_data(&normalized);
 
@@ -846,16 +840,22 @@ mod tests {
   fn test_get_script_typing_data_map_invalid_script() {
     let result = get_script_typing_data_map("InvalidScript");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
+    assert_eq!(
+      result.unwrap_err(),
+      TransliterationError::InvalidScriptName("InvalidScript".to_string())
+    );
   }
 
-  #[test]
-  fn test_get_script_typing_data_map_normal_script() {
-    // Should reject Normal/English
-    let result = get_script_typing_data_map("Normal");
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: Normal");
-  }
+  // #[test]
+  // fn test_get_script_typing_data_map_normal_script() {
+  //   // Should reject Normal/English
+  //   let result = get_script_typing_data_map("Normal");
+  //   assert!(result.is_err());
+  //   assert_eq!(
+  //     result.unwrap_err().to_string(),
+  //     "Invalid script name: Normal"
+  //   );
+  // }
 
   #[test]
   fn test_get_script_typing_data_map_mappings_populated() {

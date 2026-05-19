@@ -35,7 +35,8 @@ pub fn transliterate(
   to: String,
   trans_options: Option<HashMap<String, bool>>,
 ) -> Result<String> {
-  lipilekhika::transliterate(&text, &from, &to, trans_options.as_ref()).map_err(Error::from_reason)
+  lipilekhika::transliterate(&text, &from, &to, trans_options.as_ref())
+    .map_err(|e| Error::from_reason(e.to_string()))
 }
 
 #[napi]
@@ -56,7 +57,7 @@ impl NativeTypingContext {
     });
 
     let inner = lipilekhika::typing::TypingContext::new(&typing_lang, typing_options)
-      .map_err(Error::from_reason)?;
+      .map_err(|e| Error::from_reason(e.to_string()))?;
 
     Ok(Self { inner })
   }
@@ -68,10 +69,7 @@ impl NativeTypingContext {
 
   #[napi(js_name = "take_key_input")]
   pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
-    let diff = self
-      .inner
-      .take_key_input(&key)
-      .map_err(Error::from_reason)?;
+    let diff = self.inner.take_key_input(&key);
     Ok(TypingDiffOutput {
       to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
         .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,

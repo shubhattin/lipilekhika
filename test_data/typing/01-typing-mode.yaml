@@ -81,3 +81,7 @@
   text: chaa chhe CA ChE
   output: चा छे चा छे
   script: Devanagari
+- index: 15
+  text: kAlO na jAnAti
+  output: kAlO na jAnAti
+  script: Normal
