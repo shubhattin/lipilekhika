@@ -20,8 +20,13 @@ class FontConfig {
 
   /// Get the font family name for a given script
   static String _getFontFamilyForScript(String script) {
-    // Normalize the script name
-    final normalizedScript = getNormalizedScriptName(script);
+    // Normalize the script name (unknown aliases throw — fall back like the old null path).
+    final String normalizedScript;
+    try {
+      normalizedScript = getNormalizedScriptName(script);
+    } catch (_) {
+      return GoogleFonts.notoSans().fontFamily!;
+    }
 
     switch (normalizedScript) {
       // Base / Romanized

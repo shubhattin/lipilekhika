@@ -56,6 +56,8 @@ String transliterate({
 /// you want to ensure the script data is loaded before use.
 ///
 /// [scriptName] - The name of the script/language to preload
+///
+/// Throws if [scriptName] cannot be resolved (same rules as transliteration).
 void preloadScriptData(String scriptName) {
   rust_main.preloadScriptData(scriptName: scriptName);
 }
@@ -103,8 +105,8 @@ List<String> getAllOptions({
 ///
 /// [scriptName] - The script/language name to normalize
 ///
-/// Returns the normalized script name, or null if invalid.
-String? getNormalizedScriptName(String scriptName) {
+/// Throws if [scriptName] is not a recognized script or language alias.
+String getNormalizedScriptName(String scriptName) {
   return rust_main.getNormalizedScriptName(scriptName: scriptName);
 }
 

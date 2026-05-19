@@ -136,9 +136,11 @@ void main() {
       }
     });
 
-    test('should return null for invalid script name', () {
-      final result = getNormalizedScriptName('InvalidScript');
-      expect(result, isNull);
+    test('should throw for invalid script name', () {
+      expect(
+        () => getNormalizedScriptName('InvalidScript'),
+        throwsA(anything),
+      );
     });
 
     test('should normalize all scripts in scriptList', () {

@@ -48,5 +48,6 @@ pub fn transliterate(
 ) -> Result<String, JsError> {
   let options = parse_trans_options(trans_options)?;
 
-  lipilekhika::transliterate(text, from, to, options.as_ref()).map_err(|e| JsError::new(&e))
+  lipilekhika::transliterate(text, from, to, options.as_ref())
+    .map_err(|e| JsError::new(&e.to_string()))
 }

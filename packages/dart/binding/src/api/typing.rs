@@ -78,9 +78,11 @@ impl TypingContext {
   #[frb(sync)]
   pub fn new(typing_lang: String, options: Option<TypingContextOptions>) -> Result<Self, String> {
     let rust_options = options.map(|o| o.into());
-    lipilekhika::typing::TypingContext::new(&typing_lang, rust_options).map(|ctx| TypingContext {
-      inner: RwLock::new(ctx),
-    })
+    lipilekhika::typing::TypingContext::new(&typing_lang, rust_options)
+      .map(|ctx| TypingContext {
+        inner: RwLock::new(ctx),
+      })
+      .map_err(|e| e.to_string())
   }
 
   /// Clears all internal state and contexts.
@@ -214,26 +216,28 @@ pub struct ScriptTypingDataMap {
 /// Returns an error if the script name is invalid or is 'Normal' (English).
 #[frb(sync)]
 pub fn get_script_typing_data_map(script: String) -> Result<ScriptTypingDataMap, String> {
-  lipilekhika::typing::get_script_typing_data_map(&script).map(|data| ScriptTypingDataMap {
-    common_krama_map: data
-      .common_krama_map
-      .into_iter()
-      .map(|(text, list_type, mappings)| TypingDataMapItem {
-        text,
-        list_type: ListType::from(&list_type),
-        mappings,
-      })
-      .collect(),
-    script_specific_krama_map: data
-      .script_specific_krama_map
-      .into_iter()
-      .map(|(text, list_type, mappings)| TypingDataMapItem {
-        text,
-        list_type: ListType::from(&list_type),
-        mappings,
-      })
-      .collect(),
-  })
+  lipilekhika::typing::get_script_typing_data_map(&script)
+    .map(|data| ScriptTypingDataMap {
+      common_krama_map: data
+        .common_krama_map
+        .into_iter()
+        .map(|(text, list_type, mappings)| TypingDataMapItem {
+          text,
+          list_type: ListType::from(&list_type),
+          mappings,
+        })
+        .collect(),
+      script_specific_krama_map: data
+        .script_specific_krama_map
+        .into_iter()
+        .map(|(text, list_type, mappings)| TypingDataMapItem {
+          text,
+          list_type: ListType::from(&list_type),
+          mappings,
+        })
+        .collect(),
+    })
+    .map_err(|e| e.to_string())
 }
 
 /// An item in the krama data.
@@ -261,13 +265,15 @@ pub struct KramaDataItem {
 /// Returns an error if the script name is invalid or is 'Normal' (English).
 #[frb(sync)]
 pub fn get_script_krama_data(script: String) -> Result<Vec<KramaDataItem>, String> {
-  lipilekhika::typing::get_script_krama_data(&script).map(|data| {
-    data
-      .into_iter()
-      .map(|(text, list_type)| KramaDataItem {
-        character_text: text,
-        list_type: ListType::from(&list_type),
-      })
-      .collect()
-  })
+  lipilekhika::typing::get_script_krama_data(&script)
+    .map(|data| {
+      data
+        .into_iter()
+        .map(|(text, list_type)| KramaDataItem {
+          character_text: text,
+          list_type: ListType::from(&list_type),
+        })
+        .collect()
+    })
+    .map_err(|e| e.to_string())
 }
