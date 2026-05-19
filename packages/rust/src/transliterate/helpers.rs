@@ -383,7 +383,7 @@ impl ScriptData {
     F: Fn(isize) -> Option<T>,
   {
     for i in 0..prev.len() {
-      let Some(expected_krama_index) = prev.get(prev.len() - 1 - i as usize) else {
+      let Some(expected_krama_index) = prev.get(prev.len() - 1 - i) else {
         return MatchPrevKramaSequenceResult {
           matched: false,
           matched_len: 0,
@@ -488,10 +488,7 @@ pub fn apply_typing_input_aliases<'a>(text: &'a str, to_script_name: &str) -> Co
   let is_ta_ext = is_script_tamil_ext(to_script_name);
 
   // For Tamil-Extended check whether any vedic typing symbol is present.
-  let needs_vedic = is_ta_ext
-    && VEDIC_SVARAS_TYPING_SYMBOLS
-      .iter()
-      .any(|s| text.contains(s));
+  let needs_vedic = is_ta_ext && VEDIC_SVARAS_TYPING_SYMBOLS.iter().any(|s| text.contains(s));
 
   // Fast path: nothing to do, return the original slice without allocating.
   if !needs_x && !needs_vedic {
