@@ -846,6 +846,17 @@ mod tests {
     );
   }
 
+  // #[test]
+  // fn test_get_script_typing_data_map_normal_script() {
+  //   // Should reject Normal/English
+  //   let result = get_script_typing_data_map("Normal");
+  //   assert!(result.is_err());
+  //   assert_eq!(
+  //     result.unwrap_err().to_string(),
+  //     "Invalid script name: Normal"
+  //   );
+  // }
+
   #[test]
   fn test_get_script_typing_data_map_mappings_populated() {
     let result = get_script_typing_data_map("Telugu");
