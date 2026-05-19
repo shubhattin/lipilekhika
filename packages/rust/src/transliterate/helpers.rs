@@ -484,23 +484,37 @@ pub fn apply_typing_input_aliases<'a>(text: &'a str, to_script_name: &str) -> Co
     return Cow::Borrowed(text);
   }
 
-  let mut result: Cow<'a, str> = Cow::Borrowed(text);
+  let needs_x = text.contains('x');
+  let is_ta_ext = is_script_tamil_ext(to_script_name);
 
-  // ITRANS-style shortcut: x -> kSh (क्ष)
-  if result.contains('x') {
-    result = Cow::Owned(result.replace("x", "kSh"));
+  // For Tamil-Extended check whether any vedic typing symbol is present.
+  let needs_vedic = is_ta_ext
+    && VEDIC_SVARAS_TYPING_SYMBOLS
+      .iter()
+      .any(|s| text.contains(s));
+
+  // Fast path: nothing to do, return the original slice without allocating.
+  if !needs_x && !needs_vedic {
+    return Cow::Borrowed(text);
   }
 
-  if is_script_tamil_ext(to_script_name) {
+  // Single allocation: apply all replacements to one owned String.
+  let mut result = if needs_x {
+    text.replace('x', "kSh")
+  } else {
+    text.to_owned()
+  };
+
+  if needs_vedic {
     for (symbol, normal) in VEDIC_SVARAS_TYPING_SYMBOLS
       .iter()
       .zip(VEDIC_SVARAS_NORMAL_SYMBOLS.iter())
     {
       if result.contains(symbol) {
-        result = Cow::Owned(result.replace(symbol, normal));
+        result = result.replace(symbol, normal);
       }
     }
   }
 
-  result
+  Cow::Owned(result)
 }

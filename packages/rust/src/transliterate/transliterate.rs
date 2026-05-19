@@ -1106,13 +1106,20 @@ pub fn transliterate_text_core(
       // If krama exists and has at least one non -1, emit directly
       if let Some(krama) = &map.krama {
         if krama.iter().any(|&k| k != -1) {
-          let mut pieces: Vec<&str> = Vec::with_capacity(krama.len());
+          // Use a stack-allocated buffer to avoid a heap allocation on every matched character.
+          // krama sequences are at most ~4 entries in practice; 8 is a safe upper bound.
+          let mut pieces_buf = [""; 8];
+          let mut pieces_len = 0usize;
           for &k in krama.iter() {
             if k < 0 {
               continue;
             }
-            pieces.push(ctx.to_script_data.krama_text_or_empty(k));
+            if pieces_len < pieces_buf.len() {
+              pieces_buf[pieces_len] = ctx.to_script_data.krama_text_or_empty(k);
+              pieces_len += 1;
+            }
           }
+          let pieces = &pieces_buf[..pieces_len];
 
           // prev-context bookkeeping
           let mut result_concat_status = false;
