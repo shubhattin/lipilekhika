@@ -168,7 +168,9 @@ def measure_individual_typing(
     for transliteration_case in normal_to_others:
         emulate_typing(transliteration_case["input"], transliteration_case["to"])
     for typing_case in typing_test_data:
-        emulate_typing(typing_case["text"], typing_case["script"], typing_case.get("options"))
+        emulate_typing(
+            typing_case["text"], typing_case["script"], typing_case.get("options")
+        )
     end = time.perf_counter()
     return (end - start) * 1000
 
