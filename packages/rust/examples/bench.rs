@@ -311,7 +311,7 @@ fn build_typing_batches(
 
 fn preload_data() {
   for script in &get_script_list_data().scripts {
-    preload_script_data(script);
+    let _ = preload_script_data(script);
   }
 }
 

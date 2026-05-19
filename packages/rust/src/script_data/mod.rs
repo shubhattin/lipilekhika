@@ -80,13 +80,23 @@ mod tests {
   fn test_get_all_option_invalid_from_script() {
     let result = get_all_options("InvalidScript", "Telugu");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
+    assert_eq!(
+      result,
+      Err(TransliterationError::InvalidScriptName(
+        "InvalidScript".to_string()
+      ))
+    );
   }
 
   #[test]
   fn test_get_all_option_invalid_to_script() {
     let result = get_all_options("Devanagari", "InvalidScript");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
+    assert_eq!(
+      result,
+      Err(TransliterationError::InvalidScriptName(
+        "InvalidScript".to_string()
+      ))
+    );
   }
 }

@@ -848,7 +848,10 @@ mod tests {
   fn test_get_script_typing_data_map_invalid_script() {
     let result = get_script_typing_data_map("InvalidScript");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: InvalidScript");
+    assert_eq!(
+      result.unwrap_err(),
+      TransliterationError::InvalidScriptName("InvalidScript".to_string())
+    );
   }
 
   #[test]
@@ -856,7 +859,10 @@ mod tests {
     // Should reject Normal/English
     let result = get_script_typing_data_map("Normal");
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), "Invalid script name: Normal");
+    assert_eq!(
+      result.unwrap_err().to_string(),
+      "Invalid script name: Normal"
+    );
   }
 
   #[test]

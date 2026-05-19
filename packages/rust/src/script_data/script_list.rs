@@ -110,94 +110,61 @@ mod tests {
     // Script acronyms
     assert_eq!(
       get_normalized_script_name("dev"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
 
-    assert_eq!(get_normalized_script_name("te"), Some("Telugu".to_string()));
-    assert_eq!(
-      get_normalized_script_name("tel"),
-      Some("Telugu".to_string())
-    );
-    assert_eq!(get_normalized_script_name("tam"), Some("Tamil".to_string()));
+    assert_eq!(get_normalized_script_name("te"), Ok("Telugu".to_string()));
+    assert_eq!(get_normalized_script_name("tel"), Ok("Telugu".to_string()));
+    assert_eq!(get_normalized_script_name("tam"), Ok("Tamil".to_string()));
     assert_eq!(
       get_normalized_script_name("tam-ext"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("ben"),
-      Some("Bengali".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("be"),
-      Some("Bengali".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("ka"),
-      Some("Kannada".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("kan"),
-      Some("Kannada".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("gu"),
-      Some("Gujarati".to_string())
-    );
+    assert_eq!(get_normalized_script_name("ben"), Ok("Bengali".to_string()));
+    assert_eq!(get_normalized_script_name("be"), Ok("Bengali".to_string()));
+    assert_eq!(get_normalized_script_name("ka"), Ok("Kannada".to_string()));
+    assert_eq!(get_normalized_script_name("kan"), Ok("Kannada".to_string()));
+    assert_eq!(get_normalized_script_name("gu"), Ok("Gujarati".to_string()));
     assert_eq!(
       get_normalized_script_name("guj"),
-      Some("Gujarati".to_string())
+      Ok("Gujarati".to_string())
     );
     assert_eq!(
       get_normalized_script_name("mal"),
-      Some("Malayalam".to_string())
+      Ok("Malayalam".to_string())
     );
-    assert_eq!(get_normalized_script_name("or"), Some("Odia".to_string()));
-    assert_eq!(get_normalized_script_name("od"), Some("Odia".to_string()));
-    assert_eq!(
-      get_normalized_script_name("oriya"),
-      Some("Odia".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("si"),
-      Some("Sinhala".to_string())
-    );
+    assert_eq!(get_normalized_script_name("or"), Ok("Odia".to_string()));
+    assert_eq!(get_normalized_script_name("od"), Ok("Odia".to_string()));
+    assert_eq!(get_normalized_script_name("oriya"), Ok("Odia".to_string()));
+    assert_eq!(get_normalized_script_name("si"), Ok("Sinhala".to_string()));
     assert_eq!(
       get_normalized_script_name("sinh"),
-      Some("Sinhala".to_string())
+      Ok("Sinhala".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("sin"),
-      Some("Sinhala".to_string())
-    );
-    assert_eq!(get_normalized_script_name("en"), Some("Normal".to_string()));
+    assert_eq!(get_normalized_script_name("sin"), Ok("Sinhala".to_string()));
+    assert_eq!(get_normalized_script_name("en"), Ok("Normal".to_string()));
     assert_eq!(
       get_normalized_script_name("rom"),
-      Some("Romanized".to_string())
+      Ok("Romanized".to_string())
     );
     assert_eq!(
       get_normalized_script_name("gur"),
-      Some("Gurumukhi".to_string())
+      Ok("Gurumukhi".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("as"),
-      Some("Assamese".to_string())
-    );
+    assert_eq!(get_normalized_script_name("as"), Ok("Assamese".to_string()));
   }
 
   #[test]
   fn test_script_acronyms_case_insensitive() {
     assert_eq!(
       get_normalized_script_name("DEV"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
-    assert_eq!(get_normalized_script_name("Te"), Some("Telugu".to_string()));
-    assert_eq!(
-      get_normalized_script_name("TEL"),
-      Some("Telugu".to_string())
-    );
+    assert_eq!(get_normalized_script_name("Te"), Ok("Telugu".to_string()));
+    assert_eq!(get_normalized_script_name("TEL"), Ok("Telugu".to_string()));
     assert_eq!(
       get_normalized_script_name("TAM-EXT"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
   }
 
@@ -205,35 +172,35 @@ mod tests {
   fn test_language_acronyms() {
     assert_eq!(
       get_normalized_script_name("sa"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("san"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("hin"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("hi"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("mar"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("ne"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("nep"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("pun"),
-      Some("Gurumukhi".to_string())
+      Ok("Gurumukhi".to_string())
     );
   }
 
@@ -241,15 +208,15 @@ mod tests {
   fn test_language_acronyms_case_insensitive() {
     assert_eq!(
       get_normalized_script_name("SA"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("San"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("HIN"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
   }
 
@@ -257,56 +224,53 @@ mod tests {
   fn test_full_script_names() {
     assert_eq!(
       get_normalized_script_name("Devanagari"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Telugu"),
-      Some("Telugu".to_string())
+      Ok("Telugu".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("Tamil"),
-      Some("Tamil".to_string())
-    );
+    assert_eq!(get_normalized_script_name("Tamil"), Ok("Tamil".to_string()));
     assert_eq!(
       get_normalized_script_name("Tamil-Extended"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Bengali"),
-      Some("Bengali".to_string())
+      Ok("Bengali".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Kannada"),
-      Some("Kannada".to_string())
+      Ok("Kannada".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Gujarati"),
-      Some("Gujarati".to_string())
+      Ok("Gujarati".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Malayalam"),
-      Some("Malayalam".to_string())
+      Ok("Malayalam".to_string())
     );
-    assert_eq!(get_normalized_script_name("Odia"), Some("Odia".to_string()));
+    assert_eq!(get_normalized_script_name("Odia"), Ok("Odia".to_string()));
     assert_eq!(
       get_normalized_script_name("Sinhala"),
-      Some("Sinhala".to_string())
+      Ok("Sinhala".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Normal"),
-      Some("Normal".to_string())
+      Ok("Normal".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Romanized"),
-      Some("Romanized".to_string())
+      Ok("Romanized".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Gurumukhi"),
-      Some("Gurumukhi".to_string())
+      Ok("Gurumukhi".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Assamese"),
-      Some("Assamese".to_string())
+      Ok("Assamese".to_string())
     );
   }
 
@@ -314,60 +278,57 @@ mod tests {
   fn test_full_language_names() {
     assert_eq!(
       get_normalized_script_name("Sanskrit"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Hindi"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Marathi"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Nepali"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Punjabi"),
-      Some("Gurumukhi".to_string())
+      Ok("Gurumukhi".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Bengali"),
-      Some("Bengali".to_string())
+      Ok("Bengali".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Gujarati"),
-      Some("Gujarati".to_string())
+      Ok("Gujarati".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Kannada"),
-      Some("Kannada".to_string())
+      Ok("Kannada".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Malayalam"),
-      Some("Malayalam".to_string())
+      Ok("Malayalam".to_string())
     );
-    assert_eq!(get_normalized_script_name("Odia"), Some("Odia".to_string()));
+    assert_eq!(get_normalized_script_name("Odia"), Ok("Odia".to_string()));
     assert_eq!(
       get_normalized_script_name("Sinhala"),
-      Some("Sinhala".to_string())
+      Ok("Sinhala".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("Tamil"),
-      Some("Tamil".to_string())
-    );
+    assert_eq!(get_normalized_script_name("Tamil"), Ok("Tamil".to_string()));
     assert_eq!(
       get_normalized_script_name("Telugu"),
-      Some("Telugu".to_string())
+      Ok("Telugu".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Assamese"),
-      Some("Assamese".to_string())
+      Ok("Assamese".to_string())
     );
     assert_eq!(
       get_normalized_script_name("English"),
-      Some("Normal".to_string())
+      Ok("Normal".to_string())
     );
   }
 
@@ -376,25 +337,25 @@ mod tests {
     // Lowercase script names
     assert_eq!(
       get_normalized_script_name("devanagari"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("telugu"),
-      Some("Telugu".to_string())
+      Ok("Telugu".to_string())
     );
     assert_eq!(
       get_normalized_script_name("tamil-extended"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
 
     // Mixed case
     assert_eq!(
       get_normalized_script_name("Devanagari"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("DEvanagari"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
   }
 
@@ -402,34 +363,67 @@ mod tests {
   fn test_case_variations_for_languages() {
     assert_eq!(
       get_normalized_script_name("sanskrit"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("hindi"),
-      Some("Devanagari".to_string())
+      Ok("Devanagari".to_string())
     );
     assert_eq!(
       get_normalized_script_name("punjabi"),
-      Some("Gurumukhi".to_string())
+      Ok("Gurumukhi".to_string())
     );
   }
 
   #[test]
   fn test_invalid_inputs() {
     // Unknown acronyms
-    assert_eq!(get_normalized_script_name("xyz"), None);
-    assert_eq!(get_normalized_script_name("unknown"), None);
-    assert_eq!(get_normalized_script_name("abc"), None);
+    assert_eq!(
+      get_normalized_script_name("xyz").unwrap_err().to_string(),
+      "Invalid script name: xyz"
+    );
+    assert_eq!(
+      get_normalized_script_name("unknown")
+        .unwrap_err()
+        .to_string(),
+      "Invalid script name: unknown"
+    );
+    assert_eq!(
+      get_normalized_script_name("abc").unwrap_err().to_string(),
+      "Invalid script name: abc"
+    );
 
     // Unknown script names
-    assert_eq!(get_normalized_script_name("UnknownScript"), None);
-    assert_eq!(get_normalized_script_name("Latin"), None);
-    assert_eq!(get_normalized_script_name("Cyrillic"), None);
+    assert_eq!(
+      get_normalized_script_name("UnknownScript"),
+      Err(TransliterationError::InvalidScriptName(
+        "UnknownScript".to_string()
+      ))
+    );
+    assert_eq!(
+      get_normalized_script_name("Latin"),
+      Err(TransliterationError::InvalidScriptName("Latin".to_string()))
+    );
+    assert_eq!(
+      get_normalized_script_name("Cyrillic"),
+      Err(TransliterationError::InvalidScriptName(
+        "Cyrillic".to_string()
+      ))
+    );
 
     // Empty string and non-alphabetic
-    assert_eq!(get_normalized_script_name(""), None);
-    assert_eq!(get_normalized_script_name("123"), None);
-    assert_eq!(get_normalized_script_name("!@#"), None);
+    assert_eq!(
+      get_normalized_script_name("").unwrap_err().to_string(),
+      "Invalid script name: "
+    );
+    assert_eq!(
+      get_normalized_script_name("123").unwrap_err().to_string(),
+      "Invalid script name: 123"
+    );
+    assert_eq!(
+      get_normalized_script_name("!@#").unwrap_err().to_string(),
+      "Invalid script name: !@#"
+    );
   }
 
   #[test]
@@ -437,25 +431,22 @@ mod tests {
     // Acronyms with dashes
     assert_eq!(
       get_normalized_script_name("tam-ext"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
     assert_eq!(
       get_normalized_script_name("TAM-EXT"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
     assert_eq!(
       get_normalized_script_name("Tam-Ext"),
-      Some("Tamil-Extended".to_string())
+      Ok("Tamil-Extended".to_string())
     );
 
     // Prioritize exact script matches over acronyms
     assert_eq!(
       get_normalized_script_name("Telugu"),
-      Some("Telugu".to_string())
+      Ok("Telugu".to_string())
     );
-    assert_eq!(
-      get_normalized_script_name("tel"),
-      Some("Telugu".to_string())
-    );
+    assert_eq!(get_normalized_script_name("tel"), Ok("Telugu".to_string()));
   }
 }

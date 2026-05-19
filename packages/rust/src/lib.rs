@@ -10,12 +10,12 @@ pub use crate::typing::{
 use errors::TransliterationError;
 use std::collections::HashMap;
 
-mod errors;
 mod script_data;
 mod transliterate;
 mod utils;
 
 // will be publically exported
+pub mod errors;
 pub mod typing;
 
 /// Transliterates `text` from `from` to `to`.
