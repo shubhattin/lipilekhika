@@ -97,8 +97,12 @@ impl TypingContext {
   /// Accepts character-by-character input and returns the diff relative to the previous output.
   #[frb(sync)]
   pub fn take_key_input(&self, key: String) -> Result<TypingDiff, String> {
-    let mut inner = self.inner.write().map_err(|e| e.to_string())?;
-    inner.take_key_input(&key).map(|diff| TypingDiff {
+    let mut inner = self
+      .inner
+      .write()
+      .map_err(|_| lock_poisoned("take_key_input"))?;
+    let diff = inner.take_key_input(&key);
+    Ok(TypingDiff {
       to_delete_chars_count: diff.to_delete_chars_count,
       diff_add_text: diff.diff_add_text,
       context_length: diff.context_length,

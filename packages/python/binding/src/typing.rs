@@ -91,16 +91,13 @@ impl TypingContext {
   fn clear_context(&mut self) {
     self.inner.clear_context();
   }
-  fn take_key_input(&mut self, key: &str) -> PyResult<TypingDiff> {
-    self
-      .inner
-      .take_key_input(key)
-      .map(|diff| TypingDiff {
-        to_delete_chars_count: diff.to_delete_chars_count,
-        diff_add_text: diff.diff_add_text,
-        context_length: diff.context_length,
-      })
-      .map_err(pyo3::exceptions::PyValueError::new_err)
+  fn take_key_input(&mut self, key: &str) -> TypingDiff {
+    let diff = self.inner.take_key_input(key);
+    TypingDiff {
+      to_delete_chars_count: diff.to_delete_chars_count,
+      diff_add_text: diff.diff_add_text,
+      context_length: diff.context_length,
+    }
   }
 
   fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
