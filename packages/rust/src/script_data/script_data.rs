@@ -1,10 +1,31 @@
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::sync::OnceLock;
 
 use super::generated;
 use super::schema::{CommonScriptAttr, ScriptData};
 
+impl Deref for ScriptData {
+  type Target = CommonScriptAttr;
+  /// Acts as a trick to access the common attributes as the compiles performs
+  /// auto deref, eg :- data.script_id -> (*data).deref().script_id.
+  ///
+  /// avoids calling the `self.get_common_attr`. Acts as a shorthand.
+  /// Does not seem to have any performance issues so keeping it.
+  fn deref(&self) -> &Self::Target {
+    match &self {
+      ScriptData::Brahmic {
+        common_script_attr, ..
+      }
+      | ScriptData::Other {
+        common_script_attr, ..
+      } => common_script_attr,
+    }
+  }
+}
+
 impl ScriptData {
+  #[allow(dead_code)]
   pub fn get_common_attr(&self) -> &CommonScriptAttr {
     match self {
       ScriptData::Brahmic {
@@ -91,26 +112,14 @@ impl ScriptData {
 
   pub fn text_to_krama_map_index(&self, text: &str, use_typing_map: bool) -> Option<usize> {
     if use_typing_map {
-      self
-        .get_common_attr()
-        .typing_text_to_krama_lookup
-        .get(text)
-        .copied()
+      self.typing_text_to_krama_lookup.get(text).copied()
     } else {
-      self
-        .get_common_attr()
-        .text_to_krama_lookup
-        .get(text)
-        .copied()
+      self.text_to_krama_lookup.get(text).copied()
     }
   }
 
   pub fn custom_script_char_index_of_text(&self, text: &str) -> Option<usize> {
-    self
-      .get_common_attr()
-      .custom_script_chars_lookup
-      .get(text)
-      .copied()
+    self.custom_script_chars_lookup.get(text).copied()
   }
 }
 

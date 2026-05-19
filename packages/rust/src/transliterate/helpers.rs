@@ -11,52 +11,66 @@ impl ScriptData {
       return None;
     }
     self
-      .get_common_attr()
       .krama_text_arr
       .get(idx as usize)
       .map(|item| item.0.as_str())
   }
 
+  #[inline]
   pub fn krama_text_or_empty(&self, idx: i16) -> &str {
     if idx < 0 {
       return "";
     }
     self
-      .get_common_attr()
       .krama_text_arr
       .get(idx as usize)
       .map(|item| item.0.as_str())
       .unwrap_or("")
   }
 
+  #[inline]
   pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
-    self.get_common_attr().krama_text_lookup.get(text).copied()
+    self.krama_text_lookup.get(text).copied()
   }
 }
 
-/// custom struct to construct output string
+/// Custom struct to construct output string.
+///
+/// Uses a contiguous `String` buffer with piece boundary offsets for O(1)
+/// piece-level access while avoiding per-piece heap allocations.
 pub struct ResultStringBuilder {
-  result: Vec<String>,
+  buf: String,
+  /// Byte offsets marking the start of each "piece" within `buf`.
+  offsets: Vec<usize>,
 }
 
 impl ResultStringBuilder {
   pub fn new() -> Self {
-    ResultStringBuilder { result: Vec::new() }
+    ResultStringBuilder {
+      buf: String::with_capacity(128),
+      offsets: Vec::new(),
+    }
   }
-  pub fn emit(&mut self, text: impl Into<String>) {
-    // Into<String> to have more wide support for &str and  Cow<&str>
-    let text = text.into();
+
+  /// Returns the byte range for the i-th piece.
+  #[inline]
+  fn piece_range(&self, i: usize) -> std::ops::Range<usize> {
+    let start = self.offsets[i];
+    let end = *self.offsets.get(i + 1).unwrap_or(&self.buf.len());
+    start..end
+  }
+
+  pub fn emit(&mut self, text: &str) {
     if text.is_empty() {
       return;
     }
-    self.result.push(text);
+    self.offsets.push(self.buf.len());
+    self.buf.push_str(text);
   }
   /// Emit a single character without heap-allocating a String.
   pub fn emit_char(&mut self, c: char) {
-    // 4 byte buffer to store a possible utf-8 character (max 4 bytes)
-    let mut buf = [0u8; 4];
-    let s = c.encode_utf8(&mut buf);
-    self.result.push(s.to_owned());
+    self.offsets.push(self.buf.len());
+    self.buf.push(c);
   }
   pub fn emit_pieces(&mut self, pieces: &[impl AsRef<str>]) {
     for p in pieces {
@@ -64,27 +78,42 @@ impl ResultStringBuilder {
     }
   }
   pub fn last_piece(&self) -> Option<&str> {
-    self.result.last().map(String::as_str)
-  }
-  pub fn last_char(&self) -> Option<char> {
-    self.result.last().and_then(|v| v.chars().last())
-  }
-  pub fn pop_last_char(&mut self) -> Option<char> {
-    let lp = self.result.last_mut()?;
-    if lp.is_empty() {
-      // handling the panic case
+    if self.offsets.is_empty() {
       return None;
     }
-    lp.pop()
+    let i = self.offsets.len() - 1;
+    Some(&self.buf[self.piece_range(i)])
+  }
+  pub fn last_char(&self) -> Option<char> {
+    self.buf.chars().next_back()
+  }
+  pub fn pop_last_char(&mut self) -> Option<char> {
+    let c = self.buf.pop()?;
+    // If popping made the last piece empty, remove its offset
+    if let Some(&last_off) = self.offsets.last()
+      && last_off >= self.buf.len()
+      && last_off > 0
+    {
+      self.offsets.pop();
+    }
+    Some(c)
   }
   pub fn rewrite_tail_pieces<S: AsRef<str>>(&mut self, count: usize, new_pieces: &[S]) {
-    let len = self.result.len();
-    let start = len.saturating_sub(count); // -count but safe
-    self.result.truncate(start);
+    let piece_count = self.offsets.len();
+    let start = piece_count.saturating_sub(count);
+    // Truncate buffer to the start of the removed region
+    let buf_start = if start < self.offsets.len() {
+      self.offsets[start]
+    } else {
+      self.buf.len()
+    };
+    self.buf.truncate(buf_start);
+    self.offsets.truncate(start);
     for p in new_pieces {
       let p = p.as_ref();
       if !p.is_empty() {
-        self.result.push(p.to_owned());
+        self.offsets.push(self.buf.len());
+        self.buf.push_str(p);
       }
     }
   }
@@ -110,25 +139,27 @@ impl ResultStringBuilder {
 
   /// index can be -ve
   pub fn peek_at(&self, index: isize) -> Option<&str> {
-    // ^ no need for a specific cursor return type over here
-    let len = self.result.len() as isize;
+    let len = self.offsets.len() as isize;
     if len == 0 {
       return None;
     }
 
     let mut i = index;
     if i < 0 {
-      // handle negative indexes
       i += len;
-    } else if i < 0 || i >= len {
+      if i < 0 {
+        return None;
+      }
+    } else if i >= len {
       return None;
     }
 
-    self.result.get(i as usize).map(String::as_str)
+    let idx = i as usize;
+    Some(&self.buf[self.piece_range(idx)])
   }
 
-  pub fn rewrite_at(&mut self, index: isize, new_piece: String) {
-    let len = self.result.len() as isize;
+  pub fn rewrite_at(&mut self, index: isize, new_piece: &str) {
+    let len = self.offsets.len() as isize;
     if len == 0 {
       return;
     }
@@ -136,15 +167,31 @@ impl ResultStringBuilder {
     let mut i = index;
     if i < 0 {
       i += len;
-    } else if i < 0 || i >= len {
+      if i < 0 {
+        return;
+      }
+    } else if i >= len {
       return;
     }
 
-    self.result[i as usize] = new_piece;
-  }
+    let idx = i as usize;
+    let range = self.piece_range(idx);
+    let old_len = range.end - range.start;
+    let new_len = new_piece.len();
+    let diff = new_len as isize - old_len as isize;
 
-  pub fn to_string(&self) -> String {
-    self.result.concat()
+    self.buf.replace_range(range, new_piece);
+
+    // Adjust offsets for all pieces after the rewritten one
+    for off in self.offsets.iter_mut().skip(idx + 1) {
+      *off = (*off as isize + diff) as usize;
+    }
+  }
+}
+
+impl std::fmt::Display for ResultStringBuilder {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    f.write_str(&self.buf)
   }
 }
 
@@ -158,7 +205,7 @@ pub struct PrevContextBuilder<'a> {
 impl<'a> PrevContextBuilder<'a> {
   pub fn new(max_len: usize) -> PrevContextBuilder<'a> {
     PrevContextBuilder {
-      arr: VecDeque::new(),
+      arr: VecDeque::with_capacity(max_len),
       max_len,
     }
   }
@@ -323,19 +370,25 @@ pub struct MatchPrevKramaSequenceResult {
 
 impl ScriptData {
   /// Match a sequence of krama items against previous context.
-  /// `peek_at` returns the text at a given index as a String.
+  /// `peek_at` returns the text at a given index.
+  /// `prev` contains krama indices as `i16`; negative values cause an immediate non-match.
   pub fn match_prev_krama_sequence<F, T>(
     &self,
     peek_at: F,
     anchor_index: isize,
-    prev: &[usize], // indices(number) array
+    prev: &[i16],
   ) -> MatchPrevKramaSequenceResult
   where
     T: AsRef<str>,
     F: Fn(isize) -> Option<T>,
   {
     for i in 0..prev.len() {
-      let expected_krama_index = prev[prev.len() - 1 - i];
+      let Some(expected_krama_index) = prev.get(prev.len() - 1 - i) else {
+        return MatchPrevKramaSequenceResult {
+          matched: false,
+          matched_len: 0,
+        };
+      };
       let info = match peek_at(anchor_index - i as isize) {
         Some(v) => v,
         None => {
@@ -348,7 +401,7 @@ impl ScriptData {
 
       let got_krama_index = self.krama_index_of_text(info.as_ref());
       match got_krama_index {
-        Some(got) if got == expected_krama_index => {}
+        Some(got) if got == *expected_krama_index as usize => {}
         _ => {
           return MatchPrevKramaSequenceResult {
             matched: false,
@@ -374,21 +427,16 @@ impl ScriptData {
 }
 pub const TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS: [char; 3] = ['²', '³', '⁴'];
 
+#[inline]
 pub fn is_ta_ext_superscript_tail(ch: Option<char>) -> bool {
-  match ch {
-    Some(c) => TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.contains(&c),
-    None => false,
-  }
+  ch.is_some_and(|c| TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS.contains(&c))
 }
 
 pub const VEDIC_SVARAS: [char; 4] = ['॒', '॑', '᳚', '᳛'];
 
 #[inline]
 pub fn is_vedic_svara_tail(ch: Option<char>) -> bool {
-  match ch {
-    Some(c) => VEDIC_SVARAS.contains(&c),
-    None => false,
-  }
+  ch.is_some_and(|c| VEDIC_SVARAS.contains(&c))
 }
 
 impl ResultStringBuilder {
@@ -424,31 +472,46 @@ impl ResultStringBuilder {
 }
 
 #[inline]
-pub(crate) fn is_script_tamil_ext(var: &str) -> bool {
+pub fn is_script_tamil_ext(var: &str) -> bool {
   var == "Tamil-Extended"
 }
 
 const VEDIC_SVARAS_TYPING_SYMBOLS: [&str; 4] = ["_", "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS: [&str; 4] = ["↓", "↑↑↑", "↑↑", "↑"];
 
-pub fn apply_typing_input_aliases(mut text: String, to_script_name: &str) -> String {
+pub fn apply_typing_input_aliases<'a>(text: &'a str, to_script_name: &str) -> Cow<'a, str> {
   if text.is_empty() {
-    return text;
+    return Cow::Borrowed(text);
   }
 
-  // ITRANS-style shortcut: x -> kSh (क्ष)
-  if text.contains('x') {
-    text = text.replace("x", "kSh");
+  let needs_x = text.contains('x');
+  let is_ta_ext = is_script_tamil_ext(to_script_name);
+
+  // For Tamil-Extended check whether any vedic typing symbol is present.
+  let needs_vedic = is_ta_ext && VEDIC_SVARAS_TYPING_SYMBOLS.iter().any(|s| text.contains(s));
+
+  // Fast path: nothing to do, return the original slice without allocating.
+  if !needs_x && !needs_vedic {
+    return Cow::Borrowed(text);
   }
 
-  if is_script_tamil_ext(to_script_name) {
-    for i in 0..VEDIC_SVARAS_TYPING_SYMBOLS.len() {
-      let symbol = VEDIC_SVARAS_TYPING_SYMBOLS[i];
-      if text.contains(symbol) {
-        text = text.replace(symbol, VEDIC_SVARAS_NORMAL_SYMBOLS[i]);
+  // Single allocation: apply all replacements to one owned String.
+  let mut result = if needs_x {
+    text.replace('x', "kSh")
+  } else {
+    text.to_owned()
+  };
+
+  if needs_vedic {
+    for (symbol, normal) in VEDIC_SVARAS_TYPING_SYMBOLS
+      .iter()
+      .zip(VEDIC_SVARAS_NORMAL_SYMBOLS.iter())
+    {
+      if result.contains(symbol) {
+        result = result.replace(symbol, normal);
       }
     }
   }
 
-  text
+  Cow::Owned(result)
 }

@@ -1,6 +1,5 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-
 /*
 We are pre parsing the json, this eliminated the need for serde_json parser.
 serde is stil needed for bincode serialization.
@@ -11,6 +10,11 @@ mod schema {
   // Re-use the exact same schema types as the library.
   include!("src/script_data/schema.rs");
 }
+
+use schema::{
+  CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
+  ScriptListDataJson,
+};
 
 fn read_json_file(path: &Path) -> String {
   fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path.display(), e))
@@ -48,10 +52,10 @@ fn main() {
       .to_string();
 
     let json = read_json_file(&path);
-    let data_json: schema::ScriptDataJson =
+    let data_json: ScriptDataJson =
       serde_json::from_str(&json).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
 
-    let data: schema::ScriptData = data_json.into();
+    let data: ScriptData = data_json.into();
     let bytes = bincode::serialize(&data).expect("bincode encode failed for script_data");
 
     let out_path = script_bins_dir.join(format!("{}.bin", stem));
@@ -65,19 +69,21 @@ fn main() {
 
   // 2) script_list.json -> script_list.bin
   let script_list_json = read_json_file(script_list_path);
-  let script_list: schema::ScriptListDataJson = serde_json::from_str(&script_list_json)
+  let script_list: ScriptListDataJson = serde_json::from_str(&script_list_json)
     .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
+  // let script_list_raw = Into::<ScriptListData>::into(script_list);
+  let script_list_raw: ScriptListData = script_list.into();
   let script_list_bytes =
-    bincode::serialize(&script_list).expect("bincode encode failed for script_list");
+    bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
   let script_list_bin_path = out_dir.join("script_list.bin");
   fs::write(&script_list_bin_path, script_list_bytes)
     .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));
 
   // 3) custom_options.json -> custom_options.bin
   let custom_options_json = read_json_file(custom_options_path);
-  let custom_options_raw: schema::CustomOptionMapJson = serde_json::from_str(&custom_options_json)
+  let custom_options_raw: CustomOptionMapJson = serde_json::from_str(&custom_options_json)
     .unwrap_or_else(|e| panic!("{}: {}", custom_options_path.display(), e));
-  let custom_options_map: schema::CustomOptionMap = custom_options_raw
+  let custom_options_map: CustomOptionMap = custom_options_raw
     .into_iter()
     .map(|(k, v)| (k, v.into()))
     .collect();

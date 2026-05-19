@@ -2,6 +2,14 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/*
+In this file in places there are ...Json version and non-json version
+The reasons are :-
+- Deserializing `json` and `bincode` has some differences
+- Json part is used for reading from *.json files and non-Json for bincode serailize/deserialize
+- The non-Json also contains the final structure used at runtime, runtime added fields `serde(skip)`
+ */
+
 /// This will be used both for transliteration and typing.
 ///
 /// Common struct for both `text_to_krama_map` and `typing_text_to_krama_map`
@@ -328,10 +336,31 @@ pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScriptListDataJson {
-  pub scripts: HashMap<String, u8>,
-  pub langs: HashMap<String, u8>,
+  // only `scripts`, `langs` and custom otion name `key` needs order preservation
+  // so we use IndexMap only only for those
+  pub scripts: IndexMap<String, u8>,
+  pub langs: IndexMap<String, u8>,
   /// all langs are mapped to a script
   pub lang_script_map: HashMap<String, String>,
   /// contains aliases which map to script
   pub script_alternates_map: HashMap<String, String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ScriptListData {
+  pub scripts: Vec<String>,
+  pub langs: Vec<String>,
+  pub lang_script_map: HashMap<String, String>,
+  pub script_alternates_map: HashMap<String, String>,
+}
+
+impl From<ScriptListDataJson> for ScriptListData {
+  fn from(value: ScriptListDataJson) -> Self {
+    Self {
+      scripts: value.scripts.iter().map(|k| k.0.clone()).collect(),
+      langs: value.langs.iter().map(|k| k.0.clone()).collect(),
+      lang_script_map: value.lang_script_map.clone(),
+      script_alternates_map: value.script_alternates_map.clone(),
+    }
+  }
 }

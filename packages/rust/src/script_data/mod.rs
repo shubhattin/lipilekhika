@@ -1,6 +1,7 @@
 mod custom_options;
 mod generated;
 mod schema;
+#[allow(clippy::module_inception)]
 mod script_data;
 mod script_list;
 
