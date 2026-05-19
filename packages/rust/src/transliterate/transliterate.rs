@@ -640,6 +640,8 @@ pub fn transliterate_text_core(
 
   if opts.typing_mode && from_script_name != "Normal" {
     panic!("Typing mode is only supported with Normal script as the input");
+    // ^ this is just a assertion, this will never be done in this codebase
+    // as it is only called internally in `typing.rs` with from always being "Normal"
   }
 
   // Only clone trans_options when we actually need to insert a key (typing mode).

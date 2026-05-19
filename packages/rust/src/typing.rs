@@ -311,10 +311,6 @@ pub fn get_script_typing_data_map(
 ) -> Result<ScriptTypingDataMap, TransliterationError> {
   let normalized_typing_lang = get_normalized_script_name(script)?;
 
-  if normalized_typing_lang == "Normal" {
-    return Err(TransliterationError::InvalidScriptName(script.to_string()));
-  }
-
   let script_data = ScriptData::get_script_data(&normalized_typing_lang);
 
   /// Merges items that end up with the same displayed text (and type),
@@ -435,10 +431,6 @@ pub type KramaDataItem = (String, ListType);
 /// Returns an error if the script name is invalid or is 'Normal' (English).
 pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, TransliterationError> {
   let normalized = get_normalized_script_name(script)?;
-
-  if normalized == "Normal" {
-    return Err(TransliterationError::InvalidScriptName(script.to_string()));
-  }
 
   let script_data = ScriptData::get_script_data(&normalized);
 
