@@ -16,6 +16,7 @@ mod utils;
 
 // will be publically exported
 pub mod errors;
+pub mod scripts;
 pub mod typing;
 
 /// Transliterates `text` from `from` to `to`.

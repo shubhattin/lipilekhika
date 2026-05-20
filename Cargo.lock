@@ -3996,6 +3996,7 @@ dependencies = [
  "criterion",
  "indexmap 2.12.1",
  "owo-colors",
+ "quote",
  "serde",
  "serde_json",
  "serde_yaml_ng",
