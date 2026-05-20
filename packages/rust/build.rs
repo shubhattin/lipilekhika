@@ -1,5 +1,3 @@
-use quote::{format_ident, quote};
-use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 /*
@@ -13,10 +11,13 @@ mod schema {
   include!("src/script_data/schema.rs");
 }
 
+mod scripts_rs_builder;
+
 use schema::{
   CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
   ScriptListDataJson,
 };
+use scripts_rs_builder::render_scripts_rs;
 
 fn read_json_file(path: &Path) -> String {
   fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path.display(), e))
@@ -30,6 +31,7 @@ fn main() {
   println!("cargo:rerun-if-changed={}", script_data_dir.display());
   println!("cargo:rerun-if-changed={}", script_list_path.display());
   println!("cargo:rerun-if-changed={}", custom_options_path.display());
+  println!("cargo:rerun-if-changed=scripts_rs_builder.rs");
 
   let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").expect("OUT_DIR missing"));
 
@@ -69,12 +71,11 @@ fn main() {
 
   script_names.sort();
 
-  // 2) script_list.json -> script_list.bin
+  // 2) script_list.json -> script_list.bin + src/scripts.rs
   let script_list_json = read_json_file(script_list_path);
   let script_list: ScriptListDataJson = serde_json::from_str(&script_list_json)
     .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
-  let scripts_rs = render_enum_module(&script_list);
-  // let script_list_raw = Into::<ScriptListData>::into(script_list);
+  let scripts_rs = render_scripts_rs(&script_list);
   let script_list_raw: ScriptListData = script_list.into();
   let script_list_bytes =
     bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
@@ -82,7 +83,6 @@ fn main() {
   fs::write(&script_list_bin_path, script_list_bytes)
     .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));
 
-  // write src/sripts.rs
   let manifest_dir =
     PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR missing"));
   let scripts_rs_path = manifest_dir.join("src/scripts.rs");
@@ -141,182 +141,4 @@ fn main() {
   let generated_rs_path = out_dir.join("lipilekhika_generated_data.rs");
   fs::write(&generated_rs_path, out_rs)
     .unwrap_or_else(|e| panic!("Failed to write {}: {}", generated_rs_path.display(), e));
-}
-
-fn to_pascal_case_ident(value: &str) -> String {
-  let mut ident = String::new();
-  let mut uppercase_next = true;
-
-  for ch in value.chars() {
-    if ch.is_ascii_alphanumeric() {
-      if uppercase_next {
-        ident.push(ch.to_ascii_uppercase());
-        uppercase_next = false;
-      } else {
-        ident.push(ch.to_ascii_lowercase());
-      }
-    } else {
-      uppercase_next = true;
-    }
-  }
-
-  if ident.is_empty() {
-    ident.push_str("Value");
-  }
-
-  if ident
-    .chars()
-    .next()
-    .is_some_and(|first| first.is_ascii_digit())
-  {
-    ident.insert_str(0, "Value");
-  }
-
-  if matches!(
-    ident.as_str(),
-    "As"
-      | "Break"
-      | "Const"
-      | "Continue"
-      | "Crate"
-      | "Else"
-      | "Enum"
-      | "Extern"
-      | "False"
-      | "Fn"
-      | "For"
-      | "If"
-      | "Impl"
-      | "In"
-      | "Let"
-      | "Loop"
-      | "Match"
-      | "Mod"
-      | "Move"
-      | "Mut"
-      | "Pub"
-      | "Ref"
-      | "Return"
-      | "Self"
-      | "SelfType"
-      | "Static"
-      | "Struct"
-      | "Super"
-      | "Trait"
-      | "True"
-      | "Type"
-      | "Unsafe"
-      | "Use"
-      | "Where"
-      | "While"
-      | "Async"
-      | "Await"
-      | "Dyn"
-      | "Abstract"
-      | "Become"
-      | "Box"
-      | "Do"
-      | "Final"
-      | "Macro"
-      | "Override"
-      | "Priv"
-      | "Try"
-      | "Typeof"
-      | "Unsized"
-      | "Virtual"
-      | "Yield"
-  ) {
-    ident.insert_str(0, "Value");
-  }
-
-  ident
-}
-
-fn make_unique_variant_ident(value: &str, used: &mut HashSet<String>) -> String {
-  let base = to_pascal_case_ident(value);
-  let mut candidate = base.clone();
-  let mut suffix = 2usize;
-
-  while used.contains(&candidate) {
-    candidate = format!("{base}{suffix}");
-    suffix += 1;
-  }
-
-  used.insert(candidate.clone());
-  candidate
-}
-
-fn render_enum_module(script_list: &ScriptListDataJson) -> String {
-  let mut used_script_idents = HashSet::new();
-  let script_variants: Vec<_> = script_list
-    .scripts
-    .keys()
-    .map(|name| {
-      (
-        format_ident!(
-          "{}",
-          make_unique_variant_ident(name, &mut used_script_idents)
-        ),
-        name.as_str(),
-      )
-    })
-    .collect();
-
-  let mut script_lang_values: Vec<&str> = Vec::new();
-  let mut seen_script_lang_values = HashSet::new();
-  for value in script_list
-    .scripts
-    .keys()
-    .map(String::as_str)
-    .chain(script_list.langs.keys().map(String::as_str))
-    .chain(script_list.script_alternates_map.keys().map(String::as_str))
-  {
-    if seen_script_lang_values.insert(value) {
-      script_lang_values.push(value);
-    }
-  }
-
-  let mut used_script_lang_idents = HashSet::new();
-  let script_lang_variants: Vec<_> = script_lang_values
-    .into_iter()
-    .map(|value| {
-      (
-        format_ident!(
-          "{}",
-          make_unique_variant_ident(value, &mut used_script_lang_idents)
-        ),
-        value,
-      )
-    })
-    .collect();
-
-  let script_enum_variants = script_variants.iter().map(|(variant, label)| {
-    quote! {
-      #[strum(serialize = #label)]
-      #variant,
-    }
-  });
-
-  let script_lang_enum_variants = script_lang_variants.iter().map(|(variant, label)| {
-    quote! {
-      #[strum(serialize = #label)]
-      #variant,
-    }
-  });
-
-  let tokens = quote! {
-    use strum::{AsRefStr, Display};
-
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display)]
-    pub enum ScriptEnum {
-      #(#script_enum_variants)*
-    }
-
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display)]
-    pub enum ScriptLangEnum {
-      #(#script_lang_enum_variants)*
-    }
-  };
-
-  format!("// @generated by build.rs — do not edit.\n\n{tokens}\n")
 }
