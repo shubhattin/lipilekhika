@@ -4,3 +4,6 @@ pkg
 test_log/
 src/main.rs
 # ^ main.rs is a treated as a temporary file for testing
+
+# build.rs generated files
+src/scripts.rs
