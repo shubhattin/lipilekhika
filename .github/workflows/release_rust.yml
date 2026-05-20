@@ -103,8 +103,9 @@ jobs:
         run: |
           cd packages/rust
           # Cargo still omits gitignored paths from the crate even with [package] include;
-          # comment out src/data/ so generated files are packaged, then allow publish with a dirty tree.
+          # comment out generated-file entries so generated files are packaged, then allow publish with a dirty tree.
           sed -i '/^src\/data\// s/^/#/' .gitignore || true
+          sed -i '/^src\/scripts\.rs$/ s/^/#/' .gitignore || true
           cargo publish --allow-dirty
 
   build-binaries:
