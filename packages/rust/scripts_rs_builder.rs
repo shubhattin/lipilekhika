@@ -85,7 +85,7 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
     // `EnumString` automatically implements `FromStr` for the enum.
     // which allows calling `Script::from_str("script")` -> `Result<Script, Error>``
 
-    /// The list of all supported scripts (interal resolved type)
+    /// The list of all supported scripts (internal resolved type)
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display, EnumString)]
     #[strum(ascii_case_insensitive)]
     pub enum ScriptListEnum {

@@ -6,7 +6,7 @@ pub use crate::typing::{
   get_script_typing_data_map,
 };
 pub use scripts::{Script, ScriptListEnum};
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 mod script_data;
 mod transliterate;
@@ -20,20 +20,21 @@ pub mod typing;
 /// - `from` / `to` can be script or language names/aliases
 /// - `trans_options` are the custom transliteration options
 ///
-pub fn transliterate(
-  text: &str,
+pub fn transliterate<'a>(
+  text: &'a (impl AsRef<str> + ?Sized),
   from: Script,
   to: Script,
   trans_options: Option<&HashMap<String, bool>>,
-) -> String {
-  let normalized_from: ScriptListEnum = from.into();
-  let normalized_to: ScriptListEnum = to.into();
+) -> Cow<'a, str> {
+  let text = text.as_ref();
+  let from: ScriptListEnum = from.into();
+  let to: ScriptListEnum = to.into();
 
-  if normalized_from == normalized_to {
-    return text.to_string();
+  if from == to {
+    return Cow::Borrowed(text);
   }
 
-  transliterate_text(text, normalized_from, normalized_to, trans_options, None).output
+  Cow::Owned(transliterate_text(text, from, to, trans_options, None).output)
 }
 
 /// Returns the schwa deletion characteristic of the script provided.
@@ -310,7 +311,7 @@ mod tests {
             kind: FailureKind::ForwardMismatch,
             input: case.input.clone(),
             expected: Some(case.output.clone()),
-            actual: Some(result.clone()),
+            actual: Some(result.to_string()),
             error: None,
           },
         );
@@ -332,9 +333,9 @@ mod tests {
               from: case.to.clone(),
               to: case.from.clone(),
               kind: FailureKind::ReverseMismatch,
-              input: result.clone(),
+              input: result.to_string(),
               expected: Some(case.input.clone()),
-              actual: Some(reversed),
+              actual: Some(reversed.to_string()),
               error: None,
             },
           );
