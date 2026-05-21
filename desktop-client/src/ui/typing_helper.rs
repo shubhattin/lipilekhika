@@ -289,10 +289,10 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   ]
   .align_y(Alignment::Center);
 
-  // Filter out current script and Normal from comparison options
+  // Filter out current script only (Normal remains available as a compare target)
   let compare_scripts: Vec<ScriptDisplay> = scripts
     .into_iter()
-    .filter(|s| s.script_name != state.current_script && s.script_name != ScriptListEnum::Normal)
+    .filter(|s| s.script_name != state.current_script)
     .collect();
 
   let compare_selector = row![
@@ -391,16 +391,17 @@ pub enum TypingHelperMessage {
 pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   state: &TypingHelperState,
 ) -> Element<'a, Message> {
-  let scripts = get_ordered_script_list();
+  let all_scripts = get_ordered_script_list();
 
-  // Filter out "Normal" script to match Compare Scripts behavior
-  let scripts: Vec<ScriptDisplay> = scripts
-    .into_iter()
+  // Hide Normal from the main script picker only; Compare Scripts tab may include Normal.
+  let scripts_for_header: Vec<ScriptDisplay> = all_scripts
+    .iter()
     .filter(|s| s.script_name != ScriptListEnum::Normal)
+    .cloned()
     .collect();
 
   // Find current script display
-  let current_script_display = scripts
+  let current_script_display = scripts_for_header
     .iter()
     .find(|sd| sd.script_name == state.current_script)
     .cloned();
@@ -410,9 +411,11 @@ pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
     text("Typing help").size(18),
     Space::new().width(Length::Fill),
     text("Select Script").size(13),
-    pick_list(scripts.clone(), current_script_display, |selected| {
-      Message::from(TypingHelperMessage::SetScript(selected))
-    })
+    pick_list(
+      scripts_for_header.clone(),
+      current_script_display,
+      |selected| { Message::from(TypingHelperMessage::SetScript(selected)) },
+    )
     .width(Length::Fixed(180.0)),
   ]
   .spacing(12)
@@ -435,7 +438,7 @@ pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   // Tab content
   let tab_content: Element<'a, Message> = match state.active_tab {
     TypingHelperTab::TypingMap => view_typing_map(state.current_script),
-    TypingHelperTab::CompareScripts => view_compare_scripts(state, scripts),
+    TypingHelperTab::CompareScripts => view_compare_scripts(state, all_scripts),
   };
 
   container(
