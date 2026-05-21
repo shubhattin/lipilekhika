@@ -1,12 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 // ^ hides console in windows release builds
 
-use crossbeam_channel;
+use lipilekhika::Script;
 use lipilekhika::typing::{
   DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, TypingContext, TypingContextOptions,
 };
 use persistent_state::PersitentState;
 use std::{
+  str::FromStr,
   sync::{Arc, Mutex, atomic::AtomicBool},
   thread,
 };
@@ -63,15 +64,15 @@ fn main() {
 
   let persitent_state = PersitentState::read_app_config();
 
+  let script = Script::from_str(&persitent_state.script).unwrap_or(Script::Devanagari);
   let typing_context = TypingContext::new(
-    &persitent_state.script,
+    script,
     Some(TypingContextOptions {
       auto_context_clear_time_ms: DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
       use_native_numerals: persitent_state.native_numerals,
       include_inherent_vowel: persitent_state.inherent_vowel,
     }),
-  )
-  .expect("Failed to create typing context");
+  );
   let app_state = Arc::new(AppState {
     typing_context: Mutex::new(typing_context),
     typing_enabled: AtomicBool::new(false),

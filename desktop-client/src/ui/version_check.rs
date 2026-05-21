@@ -7,21 +7,11 @@ pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 // pub const CURRENT_VERSION: &str = "0.0.1";
 
 /// Result of a version check
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct VersionCheckResult {
   pub update_available: bool,
   pub latest_version: Option<String>,
   pub windows_msi_download_url: Option<String>,
-}
-
-impl Default for VersionCheckResult {
-  fn default() -> Self {
-    Self {
-      update_available: false,
-      latest_version: None,
-      windows_msi_download_url: None,
-    }
-  }
 }
 
 fn parse_pc_app_tag(tag: &str) -> Option<&str> {

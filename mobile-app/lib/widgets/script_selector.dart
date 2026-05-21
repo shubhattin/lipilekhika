@@ -74,27 +74,32 @@ class ScriptInfo {
 class ScriptSelector extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
+  final bool haveNormalScript;
 
   const ScriptSelector({
     super.key,
     required this.value,
     required this.onChanged,
+    this.haveNormalScript = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final scripts = orderedScripts
+    final visibleScripts = orderedScripts.where(
+      (scriptInfo) => haveNormalScript || scriptInfo.name != 'Normal',
+    );
+
+    final scripts = visibleScripts
         .map((scriptInfo) => scriptInfo.name)
         .toList(growable: false);
-    final String? initialValue = scripts.contains(value)
-        ? value
-        : (scripts.contains('Normal') ? 'Normal' : null);
+    final String? initialValue =
+        scripts.contains(value) ? value : (scripts.isNotEmpty ? scripts.first : null);
 
     // Group scripts by category using the ordered list
     final groupedScripts = <ScriptCategory, List<String>>{};
-    for (final scriptInfo in orderedScripts) {
+    for (final scriptInfo in visibleScripts) {
       groupedScripts
           .putIfAbsent(scriptInfo.category, () => [])
           .add(scriptInfo.name);

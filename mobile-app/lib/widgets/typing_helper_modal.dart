@@ -56,7 +56,7 @@ class _TypingHelperModalState extends State<TypingHelperModal>
         final baseKrama = getScriptKramaData(_selectedScript);
 
         List<KramaDataItem>? compareKrama;
-        if (_compareScript != null && _compareScript != 'Normal') {
+        if (_compareScript != null) {
           compareKrama = getScriptKramaData(_compareScript!);
         }
 
@@ -157,6 +157,7 @@ class _TypingHelperModalState extends State<TypingHelperModal>
                       child: ScriptSelector(
                         value: _selectedScript,
                         onChanged: _onScriptChanged,
+                        haveNormalScript: false,
                       ),
                     ),
                   ],
@@ -353,12 +354,6 @@ class _TypingHelperModalState extends State<TypingHelperModal>
   Widget _buildCompareScriptsTab(ScrollController scrollController) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Get scripts list excluding Normal and current script, using the ordered list
-    final scriptsForCompare = orderedScripts
-        .map((s) => s.name)
-        .where((s) => s != 'Normal' && s != _selectedScript)
-        .toList();
-
     return ListView(
       controller: scrollController,
       padding: const EdgeInsets.all(16),
@@ -388,13 +383,9 @@ class _TypingHelperModalState extends State<TypingHelperModal>
             const SizedBox(width: 12),
             Expanded(
               child: ScriptSelector(
-                value: _compareScript != null &&
-                        scriptsForCompare.contains(_compareScript)
-                    ? _compareScript!
-                    : scriptsForCompare.first,
-                onChanged: (value) {
-                  _onCompareScriptChanged(value);
-                },
+                value: _compareScript ?? 'Romanized',
+                onChanged: _onCompareScriptChanged,
+                haveNormalScript: true,
               ),
             ),
           ],

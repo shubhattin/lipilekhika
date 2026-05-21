@@ -12,8 +12,7 @@ pub fn run(
 ) -> Result<(), Box<dyn std::error::Error>> {
   #[cfg(windows)]
   {
-    return win::run(_app_state, _tx_ui, _tx_tray)
-      .map_err(|e| Box::new(e) as Box<dyn std::error::Error>);
+    win::run(_app_state, _tx_ui, _tx_tray).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
   }
 
   #[cfg(not(windows))]

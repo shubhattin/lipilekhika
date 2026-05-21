@@ -1,7 +1,8 @@
-use lipilekhika::get_normalized_script_name;
+use lipilekhika::Script;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use std::str::FromStr;
 use toml::from_str;
 
 fn app_config_path() -> PathBuf {
@@ -59,9 +60,9 @@ impl PersitentState {
 
     match fs::read_to_string(&config_path) {
       Ok(content) => match from_str::<PersitentState>(&content) {
-        Ok(mut config) => match get_normalized_script_name(&config.script) {
-          Some(_) => config,
-          None => {
+        Ok(mut config) => match Script::from_str(&config.script) {
+          Ok(_) => config,
+          Err(_) => {
             config.script = default_script();
             config
           }

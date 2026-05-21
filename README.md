@@ -48,11 +48,29 @@
 - [Supported Scripts](https://lipilekhika.in/reference/supported_scripts) - Full list of scripts
 - [Browser Typing Tool](https://lipilekhika.in/getting-started/browser_typing_tool) - Real-time typing setup
 
+## ⚡ Performance
+
+Transliteration benchmarks on the shared [`test_data`](./test_data) corpus (lower is better).
+
+The Rust implementation is **~7.3× faster** than pure JavaScript (63 ms vs 464 ms).
+
+| Implementation | Time (ms) |
+| --- | ---: |
+| JavaScript | 464 |
+| **Rust** | **63** |
+| Python *(via Rust)* | 82 |
+| Node.js N-API *(via Rust)* | 93 |
+| WebAssembly *(via Rust)* | 130 |
+| Dart *(via Rust)* | 140 |
+
+**Benchmark scripts:** [JavaScript](./packages/js/src/scripts/benchmark.ts) (also covers N-API & WASM) · [Rust](./packages/rust/src/benches/benchmark.rs) · [Python](./packages/python/scripts/benchmark.py) · [Dart](./packages/dart/lipilekhika/scripts/benchmark.dart) · [Go](./packages/go/lipilekhika/bench/benchmark.go)
+
 ## 🤝 Contributing
 
 Contributions are welcome! Help us improve Lipi Lekhika through bug reports, feature requests, or code contributions.
 
 **GitHub Repository**: [github.com/shubhattin/lipilekhika](https://github.com/shubhattin/lipilekhika) · **Issues**: [Report here](https://github.com/shubhattin/lipilekhika/issues)
+
 
 ---
 

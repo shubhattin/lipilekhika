@@ -235,7 +235,7 @@
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >From</span
               >
-              <ScriptSeleector bind:script={typing_script} />
+              <ScriptSeleector bind:script={typing_script} have_normal_script={false} />
             </div>
             <div class="hidden items-center justify-center lg:flex">
               <Button
@@ -360,7 +360,7 @@
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >To</span
               >
-              <ScriptSeleector bind:script={to_script} />
+              <ScriptSeleector bind:script={to_script} have_normal_script={true} />
             </div>
             <div class="flex items-center justify-center lg:hidden">
               <Button

@@ -5,9 +5,11 @@
   import { getScriptAvatar } from '$components/script/script_avatar';
 
   let {
-    script = $bindable()
+    script = $bindable(),
+    have_normal_script = true
   }: {
     script: ScriptListType;
+    have_normal_script?: boolean;
   } = $props();
 
   const CATEGORIES = {
@@ -57,12 +59,14 @@
       <Select.Group>
         <Select.Label>{name}</Select.Label>
         {#each Object.entries(scripts).filter(([, cat]) => cat === category) as [script_]}
-          <Select.Item value={script_} label={script_} aria-label={script_}>
-            <Avatar.Root>
-              <Avatar.Fallback>{getScriptAvatar(script_ as ScriptListType)}</Avatar.Fallback>
-            </Avatar.Root>
-            {script_}
-          </Select.Item>
+          {#if have_normal_script || script_ !== 'Normal'}
+            <Select.Item value={script_} label={script_} aria-label={script_}>
+              <Avatar.Root>
+                <Avatar.Fallback>{getScriptAvatar(script_ as ScriptListType)}</Avatar.Fallback>
+              </Avatar.Root>
+              {script_}
+            </Select.Item>
+          {/if}
         {/each}
       </Select.Group>
     {/each}

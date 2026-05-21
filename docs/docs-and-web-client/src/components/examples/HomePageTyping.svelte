@@ -11,7 +11,7 @@
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { BsCopy } from 'svelte-icons-pack/bs';
   import Button from '~/lib/components/ui/button/button.svelte';
-  import ScriptSeleector from '$components/script/ScriptSelector.svelte';
+  import ScriptSelector from '$components/script/ScriptSelector.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
@@ -49,7 +49,7 @@
     <span class="hidden shrink-0 text-xs font-semibold text-muted-foreground sm:inline-block"
       >Script:</span
     >
-    <ScriptSeleector bind:script={$typing_script_atom} />
+    <ScriptSelector bind:script={$typing_script_atom} have_normal_script={false} />
     <Button
       variant="ghost"
       size="icon"

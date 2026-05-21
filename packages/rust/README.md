@@ -20,6 +20,10 @@
 - ⌨️ **Typing Mode** — Stateful context for real-time character-by-character input
 - 📦 **Embedded Script Data** — All script data bundled at compile time
 
+## ⚡ Performance
+
+The fastest Lipi Lekhika implementation—about **7.3× faster** than pure JavaScript on the shared benchmark suite. [See the full benchmark table →](https://github.com/shubhattin/lipilekhika#-performance)
+
 ## 📥 Installation
 
 ```bash

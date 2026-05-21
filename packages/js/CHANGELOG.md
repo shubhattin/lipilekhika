@@ -5,6 +5,7 @@
 - Added `musl` build targets for napi-rs bindings for nodejs
 - Added android support via zig corss compile
 - Updated to vite v8 (rollup -> rolldown), _this does not affact bundled package_
+- Use updated `wasm` and `napi-rs` bindings (`rust-lib@v1.1.0`)
 
 ## js-lib@1.0.11
 
