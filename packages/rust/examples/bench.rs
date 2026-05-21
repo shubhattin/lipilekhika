@@ -7,6 +7,7 @@
 use indexmap::IndexMap;
 use lipilekhika::get_script_list_data;
 use lipilekhika::preload_script_data;
+use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
 use serde::Deserialize;
@@ -14,9 +15,14 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::time::Instant;
 
 const BULK_SEPARATOR: &str = "\n";
+
+fn parse_script(name: &str) -> Script {
+  Script::from_str(name).unwrap_or_else(|e| panic!("invalid script name {name:?}: {e}"))
+}
 
 fn de_index<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
@@ -311,14 +317,19 @@ fn build_typing_batches(
 
 fn preload_data() {
   for script in &get_script_list_data().scripts {
-    let _ = preload_script_data(script);
+    let _ = preload_script_data(parse_script(script));
   }
 }
 
 fn measure_individual_transliteration(test_data: &[TransliterationTestCase]) -> f64 {
   let start = Instant::now();
   for td in test_data {
-    let _ = transliterate(&td.input, &td.from, &td.to, td.options.as_ref());
+    let _ = transliterate(
+      &td.input,
+      parse_script(&td.from),
+      parse_script(&td.to),
+      td.options.as_ref(),
+    );
   }
   start.elapsed().as_secs_f64() * 1000.0
 }
@@ -326,7 +337,12 @@ fn measure_individual_transliteration(test_data: &[TransliterationTestCase]) -> 
 fn measure_bulk_transliteration(batches: &[TransliterationBatch]) -> f64 {
   let start = Instant::now();
   for batch in batches {
-    let _ = transliterate(&batch.input, &batch.from, &batch.to, None);
+    let _ = transliterate(
+      &batch.input,
+      parse_script(&batch.from),
+      parse_script(&batch.to),
+      None,
+    );
   }
   start.elapsed().as_secs_f64() * 1000.0
 }
@@ -338,12 +354,12 @@ fn measure_individual_typing(
   let start = Instant::now();
   for case in test_data {
     if case.from == "Normal" {
-      let _ = emulate_typing(&case.input, &case.to, None);
+      let _ = emulate_typing(&case.input, parse_script(&case.to), None);
     }
   }
   for case in typing_test_data {
     let opts = build_typing_options(&case.options);
-    let _ = emulate_typing(&case.text, &case.script, opts);
+    let _ = emulate_typing(&case.text, parse_script(&case.script), opts);
   }
   start.elapsed().as_secs_f64() * 1000.0
 }
@@ -351,7 +367,7 @@ fn measure_individual_typing(
 fn measure_bulk_typing(batches: &[TypingBatch]) -> f64 {
   let start = Instant::now();
   for batch in batches {
-    let _ = emulate_typing(&batch.input, &batch.script, None);
+    let _ = emulate_typing(&batch.input, parse_script(&batch.script), None);
   }
   start.elapsed().as_secs_f64() * 1000.0
 }

@@ -1,3 +1,4 @@
+use crate::ScriptListEnum;
 use crate::script_data::{List, ScriptData};
 use std::borrow::Cow;
 use std::collections::VecDeque;
@@ -195,7 +196,7 @@ impl std::fmt::Display for ResultStringBuilder {
   }
 }
 
-pub(crate) type PrevContextItem<'a> = (Option<Cow<'a, str>>, Option<Cow<'a, List>>);
+pub type PrevContextItem<'a> = (Option<Cow<'a, str>>, Option<Cow<'a, List>>);
 
 pub struct PrevContextBuilder<'a> {
   arr: VecDeque<PrevContextItem<'a>>,
@@ -472,14 +473,17 @@ impl ResultStringBuilder {
 }
 
 #[inline]
-pub fn is_script_tamil_ext(var: &str) -> bool {
-  var == "Tamil-Extended"
+pub fn is_script_tamil_ext(var: &ScriptListEnum) -> bool {
+  var == &ScriptListEnum::TamilExtended
 }
 
 const VEDIC_SVARAS_TYPING_SYMBOLS: [&str; 4] = ["_", "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS: [&str; 4] = ["↓", "↑↑↑", "↑↑", "↑"];
 
-pub fn apply_typing_input_aliases<'a>(text: &'a str, to_script_name: &str) -> Cow<'a, str> {
+pub fn apply_typing_input_aliases<'a>(
+  text: &'a str,
+  to_script_name: &ScriptListEnum,
+) -> Cow<'a, str> {
   if text.is_empty() {
     return Cow::Borrowed(text);
   }

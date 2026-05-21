@@ -51,6 +51,7 @@ jobs:
       - run: |
           cd packages/rust
           sed -i '/^src\/data\// s/^/#/' .gitignore
+          sed -i '/^src\/scripts\.rs$/ s/^/#/' .gitignore
 
       # Setup Flutter
       - name: Setup Flutter

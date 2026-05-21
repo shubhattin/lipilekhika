@@ -42,6 +42,7 @@ jobs:
       - run: |
           cd packages/rust
           sed -i '/^src\/data\// s/^/#/' .gitignore
+          sed -i '/^src\/scripts\.rs$/ s/^/#/' .gitignore
   
       - name: Build and Check
         run: |

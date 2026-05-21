@@ -3,7 +3,9 @@
 //! Run: `cargo run --example parivartak --release -p lipilekhika -- --help`
 
 use clap::Parser;
+use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
+use std::str::FromStr;
 
 #[derive(Parser)]
 #[command(name = "parivartak")]
@@ -25,11 +27,15 @@ struct Args {
 fn main() {
   let args = Args::parse();
 
-  match transliterate(&args.text, &args.from, &args.to, None) {
-    Ok(result) => println!("{}", result),
-    Err(error) => {
-      eprintln!("Error: {}", error);
-      std::process::exit(1);
-    }
-  }
+  let from = Script::from_str(&args.from).unwrap_or_else(|e| {
+    eprintln!("Error: invalid --from {:?}: {}", args.from, e);
+    std::process::exit(1);
+  });
+  let to = Script::from_str(&args.to).unwrap_or_else(|e| {
+    eprintln!("Error: invalid --to {:?}: {}", args.to, e);
+    std::process::exit(1);
+  });
+
+  let result = transliterate(&args.text, from, to, None);
+  println!("{}", result);
 }

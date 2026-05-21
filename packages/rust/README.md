@@ -31,15 +31,15 @@ cargo add lipilekhika
 ### Basic Transliteration
 
 ```rust
-use lipilekhika::transliterate;
+use lipilekhika::{transliterate, Script};
 
 fn main() {
     let result = transliterate(
         "namaskAraH",
-        "Normal",
-        "Devanagari",
+        Script::Normal,
+        Script::Devanagari,
         None
-    ).unwrap();
+    );
     
     println!("{}", result); // नमस्कारः
 }
@@ -48,7 +48,7 @@ fn main() {
 ### With Custom Options
 
 ```rust
-use lipilekhika::transliterate;
+use lipilekhika::{transliterate, Script};
 use std::collections::HashMap;
 
 fn main() {
@@ -60,10 +60,10 @@ fn main() {
     
     let result = transliterate(
         "గంగా",
-        "Telugu",
-        "Gujarati",
+        Script::Telugu,
+        Script::Gujarati,
         Some(&options)
-    ).unwrap();
+    );
     
     println!("{}", result); // ગંગા (instead of ગઙ્ગા)
 }
@@ -73,74 +73,118 @@ fn main() {
 
 ### Core Functions
 
+#### `Script` Enum
+
+All script/language parameters use the `Script` enum instead of strings. You can use full names or shorthand aliases:
+
+```rust
+use lipilekhika::Script;
+
+// Full names
+Script::Devanagari
+Script::Telugu
+Script::Normal
+
+// Language names
+Script::Hindi      // resolves to Devanagari
+Script::Sanskrit   // resolves to Devanagari
+Script::English    // resolves to Normal
+
+// Shorthand aliases
+Script::Dev        // Devanagari
+Script::Tel        // Telugu
+Script::Tam        // Tamil
+```
+
+Convert to string with `to_string()`. Parse from string with `FromStr`:
+
+```rust
+use std::str::FromStr;
+use lipilekhika::Script;
+
+let s = Script::Devanagari.to_string(); // "Devanagari"
+let parsed = Script::from_str("dev").unwrap(); // Script::Dev
+```
+
+Get the normalized/resolved script using `.into()`:
+
+```rust
+use lipilekhika::{Script, ScriptListEnum};
+
+let resolved: ScriptListEnum = Script::Hindi.into();    // ScriptListEnum::Devanagari
+let resolved: ScriptListEnum = Script::Dev.into();      // ScriptListEnum::Devanagari
+let resolved: ScriptListEnum = Script::English.into();  // ScriptListEnum::Normal
+```
+
 #### `transliterate`
 
 ```rust
-pub fn transliterate(
-    text: &str,
-    from: &str,
-    to: &str,
+pub fn transliterate<'a>(
+    text: &'a (impl AsRef<str> + ?Sized),
+    from: Script,
+    to: Script,
     trans_options: Option<&HashMap<String, bool>>,
-) -> Result<String, String>
+) -> Cow<'a, str>
 ```
 
 Transliterates text from one script to another.
 
 **Parameters:**
 - `text` — Text to transliterate
-- `from` — Source script/language name (e.g., "Normal", "Devanagari", "Telugu")
-- `to` — Target script/language name
+- `from` — Source script (`Script` enum)
+- `to` — Target script (`Script` enum)
 - `trans_options` — Optional custom transliteration options
 
-**Returns:** `Result<String, String>` — Transliterated text or error message
+**Returns:** `Cow<'a, str>` — Transliterated text (borrows input when `from == to`)
 
-#### `get_all_option`
+#### `get_all_options`
 
 ```rust
-pub fn get_all_option(
-    from_script_name: &str,
-    to_script_name: &str,
-) -> Result<Vec<String>, String>
+pub fn get_all_options(
+    from_script: Script,
+    to_script: Script,
+) -> Vec<String>
 ```
 
 Gets all available custom options for a script pair.
 
 **Parameters:**
-- `from_script_name` — Source script/language name
-- `to_script_name` — Target script/language name
+- `from_script` — Source script
+- `to_script` — Target script
 
-**Returns:** `Result<Vec<String>, String>` — List of option keys or error message
+**Returns:** `Vec<String>` — List of option keys
 
 #### `get_script_typing_data_map`
 
 ```rust
 pub fn get_script_typing_data_map(
-    script: &str,
-) -> Result<ScriptTypingDataMap, String>
+    typing_script: Script,
+) -> ScriptTypingDataMap
 ```
 
 Gets typing data mappings for a script (for building custom input methods).
 
 **Parameters:**
-- `script` — Script/language name
+- `typing_script` — Script (`Script` enum)
 
-**Returns:** `Result<ScriptTypingDataMap, String>` — Typing data or error message
+**Returns:** `ScriptTypingDataMap` — Typing data
 
 ### Typing Module
 
 For character-by-character real-time input:
 
 ```rust
+use lipilekhika::Script;
 use lipilekhika::typing::{TypingContext, TypingContextOptions};
 
 fn main() {
-    let mut ctx = TypingContext::new("Devanagari", None).unwrap();
+    let mut ctx = TypingContext::new(Script::Devanagari, None);
     
     // Process character-by-character input
-    let diff = ctx.take_key_input("n").unwrap();
+    let diff = ctx.take_key_input("n");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
     
-    let diff = ctx.take_key_input("a").unwrap();
+    let diff = ctx.take_key_input("a");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
     
     // Clear context when needed
@@ -151,7 +195,7 @@ fn main() {
 #### Types
 
 - **`TypingContext`** — Stateful context for typing mode
-  - `new(typing_lang: &str, options: Option<TypingContextOptions>)` — Create new context
+  - `new(typing_script: Script, options: Option<TypingContextOptions>)` — Create new context
   - `take_key_input(&mut self, key: &str)` — Process single character input
   - `clear_context(&mut self)` — Clear internal state
 

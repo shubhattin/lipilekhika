@@ -1,21 +1,18 @@
 use crate::script_data::ScriptData;
-pub use crate::script_data::{
-  ScriptListData, get_all_options, get_normalized_script_name, get_script_list_data,
-};
+pub use crate::script_data::{ScriptListData, get_all_options, get_script_list_data};
 use crate::transliterate::transliterate_text;
 pub use crate::typing::{
   KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
   get_script_typing_data_map,
 };
-use errors::TransliterationError;
-use std::collections::HashMap;
+pub use scripts::{Script, ScriptListEnum};
+use std::{borrow::Cow, collections::HashMap};
 
 mod script_data;
 mod transliterate;
 mod utils;
 
-// will be publically exported
-pub mod errors;
+pub mod scripts;
 pub mod typing;
 
 /// Transliterates `text` from `from` to `to`.
@@ -23,52 +20,51 @@ pub mod typing;
 /// - `from` / `to` can be script or language names/aliases
 /// - `trans_options` are the custom transliteration options
 ///
-/// Returns the transliterated text, or an error string if script names are invalid.
-pub fn transliterate(
-  text: &str,
-  from: &str,
-  to: &str,
+pub fn transliterate<'a>(
+  text: &'a (impl AsRef<str> + ?Sized),
+  from: Script,
+  to: Script,
   trans_options: Option<&HashMap<String, bool>>,
-) -> Result<String, TransliterationError> {
-  let normalized_from = get_normalized_script_name(from)?;
-  let normalized_to = get_normalized_script_name(to)?;
+) -> Cow<'a, str> {
+  let text = text.as_ref();
+  let from: ScriptListEnum = from.into();
+  let to: ScriptListEnum = to.into();
 
-  if normalized_from == normalized_to {
-    return Ok(text.to_string());
+  if from == to {
+    return Cow::Borrowed(text);
   }
 
-  Ok(transliterate_text(text, &normalized_from, &normalized_to, trans_options, None).output)
+  Cow::Owned(transliterate_text(text, from, to, trans_options, None).output)
 }
 
 /// Returns the schwa deletion characteristic of the script provided.
-pub fn get_schwa_status_for_script(
-  script_name: &str,
-) -> Result<Option<bool>, TransliterationError> {
-  let normalized_script_name = get_normalized_script_name(script_name)?;
-  let script_data = ScriptData::get_script_data(&normalized_script_name);
+pub fn get_schwa_status_for_script(script: Script) -> Option<bool> {
+  let normalized_script: ScriptListEnum = script.into();
+  let script_data = ScriptData::get_script_data(&normalized_script);
   if let ScriptData::Brahmic { schwa_property, .. } = script_data {
-    Ok(Some(*schwa_property))
+    Some(*schwa_property)
   } else {
-    Ok(None)
+    None
   }
 }
 
-/// Preload script data for a normalized script, alias, or language name.
-pub fn preload_script_data(script_name: &str) -> Result<(), TransliterationError> {
-  let normalized_script_name = get_normalized_script_name(script_name)?;
-  ScriptData::get_script_data(&normalized_script_name);
-  Ok(())
+/// Preload script data for a script or language.
+pub fn preload_script_data(script: Script) -> &'static ScriptData {
+  let normalized_script: ScriptListEnum = script.into();
+  ScriptData::get_script_data(&normalized_script)
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
 
+  use crate::scripts::Script;
   use owo_colors::OwoColorize;
   use serde::Deserialize;
   use std::fs;
   use std::io::Write;
   use std::path::{Path, PathBuf};
+  use std::str::FromStr;
   use std::time::Instant;
 
   fn de_index<'de, D>(deserializer: D) -> Result<String, D::Error>
@@ -183,7 +179,7 @@ mod tests {
   enum FailureKind {
     ForwardError,
     ForwardMismatch,
-    ReverseError,
+    // ReverseError,
     ReverseMismatch,
   }
 
@@ -245,10 +241,8 @@ mod tests {
         continue;
       }
 
-      let result = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
-
-      let result = match result {
-        Ok(r) => r,
+      let from = match Script::from_str(case.from.as_str()) {
+        Ok(s) => s,
         Err(e) => {
           stats.forward_asserts += 1;
           stats.failures_total += 1;
@@ -263,12 +257,36 @@ mod tests {
               input: case.input.clone(),
               expected: Some(case.output.clone()),
               actual: None,
-              error: Some(e.to_string()),
+              error: Some(format!("invalid `from` script: {e}")),
             },
           );
           continue;
         }
       };
+      let to = match Script::from_str(case.to.as_str()) {
+        Ok(s) => s,
+        Err(e) => {
+          stats.forward_asserts += 1;
+          stats.failures_total += 1;
+          push_failure(
+            &mut failures,
+            Failure {
+              file: rel_s.clone(),
+              index: case.index.clone(),
+              from: case.from.clone(),
+              to: case.to.clone(),
+              kind: FailureKind::ForwardError,
+              input: case.input.clone(),
+              expected: Some(case.output.clone()),
+              actual: None,
+              error: Some(format!("invalid `to` script: {e}")),
+            },
+          );
+          continue;
+        }
+      };
+
+      let result = transliterate(&case.input, from, to, case.options.as_ref());
 
       if file_name.starts_with("auto")
         && case.to == "Tamil-Extended"
@@ -293,7 +311,7 @@ mod tests {
             kind: FailureKind::ForwardMismatch,
             input: case.input.clone(),
             expected: Some(case.output.clone()),
-            actual: Some(result.clone()),
+            actual: Some(result.to_string()),
             error: None,
           },
         );
@@ -301,47 +319,26 @@ mod tests {
 
       if case.reversible.unwrap_or(false) {
         stats.reverse_asserts += 1;
-        let reversed = transliterate(&result, &case.to, &case.from, case.options.as_ref());
+        let reversed = transliterate(&result, to, from, case.options.as_ref());
 
-        match reversed {
-          Ok(rev) => {
-            if rev == case.input {
-              stats.reverse_passed += 1;
-            } else {
-              stats.failures_total += 1;
-              push_failure(
-                &mut failures,
-                Failure {
-                  file: rel_s.clone(),
-                  index: case.index.clone(),
-                  from: case.to.clone(),
-                  to: case.from.clone(),
-                  kind: FailureKind::ReverseMismatch,
-                  input: result.clone(),
-                  expected: Some(case.input.clone()),
-                  actual: Some(rev),
-                  error: None,
-                },
-              );
-            }
-          }
-          Err(e) => {
-            stats.failures_total += 1;
-            push_failure(
-              &mut failures,
-              Failure {
-                file: rel_s.clone(),
-                index: case.index.clone(),
-                from: case.to.clone(),
-                to: case.from.clone(),
-                kind: FailureKind::ReverseError,
-                input: result.clone(),
-                expected: Some(case.input.clone()),
-                actual: None,
-                error: Some(e.to_string()),
-              },
-            );
-          }
+        if reversed == case.input {
+          stats.reverse_passed += 1;
+        } else {
+          stats.failures_total += 1;
+          push_failure(
+            &mut failures,
+            Failure {
+              file: rel_s.clone(),
+              index: case.index.clone(),
+              from: case.to.clone(),
+              to: case.from.clone(),
+              kind: FailureKind::ReverseMismatch,
+              input: result.to_string(),
+              expected: Some(case.input.clone()),
+              actual: Some(reversed.to_string()),
+              error: None,
+            },
+          );
         }
       }
     }
@@ -550,15 +547,15 @@ mod tests {
             if let Some(error) = &f.error {
               msg.push_str(&format!("     Error: {}\n", error));
             }
-          }
-          FailureKind::ReverseError => {
-            msg.push_str("   Reverse transliteration error:\n");
-            msg.push_str(&format!("     From: {}\n", f.from));
-            msg.push_str(&format!("     To: {}\n", f.to));
-            msg.push_str(&format!("     Input: \"{}\"\n", f.input));
-            if let Some(error) = &f.error {
-              msg.push_str(&format!("     Error: {}\n", error));
-            }
+            // }
+            // FailureKind::ReverseError => {
+            //   msg.push_str("   Reverse transliteration error:\n");
+            //   msg.push_str(&format!("     From: {}\n", f.from));
+            //   msg.push_str(&format!("     To: {}\n", f.to));
+            //   msg.push_str(&format!("     Input: \"{}\"\n", f.input));
+            //   if let Some(error) = &f.error {
+            //     msg.push_str(&format!("     Error: {}\n", error));
+            //   }
           }
         }
       }

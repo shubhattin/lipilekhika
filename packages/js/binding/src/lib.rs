@@ -1,7 +1,9 @@
+use lipilekhika::scripts::Script;
 use napi::Error;
 use napi::bindgen_prelude::Result;
 use napi_derive::napi;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 #[napi(object)]
 pub struct TypingContextOptionsInput {
@@ -35,8 +37,12 @@ pub fn transliterate(
   to: String,
   trans_options: Option<HashMap<String, bool>>,
 ) -> Result<String> {
-  lipilekhika::transliterate(&text, &from, &to, trans_options.as_ref())
-    .map_err(|e| Error::from_reason(e.to_string()))
+  let from_script = Script::from_str(from.trim())
+    .map_err(|e| Error::from_reason(format!("invalid from script: {e}")))?;
+  let to_script = Script::from_str(to.trim())
+    .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
+
+  Ok(lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref()).into_owned())
 }
 
 #[napi]
@@ -56,8 +62,11 @@ impl NativeTypingContext {
         .unwrap_or(lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL),
     });
 
-    let inner = lipilekhika::typing::TypingContext::new(&typing_lang, typing_options)
-      .map_err(|e| Error::from_reason(e.to_string()))?;
+    let typing_script = Script::from_str(typing_lang.trim()).map_err(|e| {
+      Error::from_reason(format!("invalid typing_lang script {typing_lang:?}: {e}"))
+    })?;
+
+    let inner = lipilekhika::typing::TypingContext::new(typing_script, typing_options);
 
     Ok(Self { inner })
   }

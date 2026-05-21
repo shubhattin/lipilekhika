@@ -1,9 +1,9 @@
-use crate::errors::TransliterationError;
+use crate::scripts::{Script, ScriptListEnum};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-use crate::script_data::{List, ScriptData, get_normalized_script_name};
+use crate::script_data::{List, ScriptData};
 use crate::transliterate::transliterate::{
   TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
 };
@@ -60,7 +60,7 @@ pub struct TypingDiff {
 /// synchronous and uses Rust's internal script data cache.
 #[derive(Debug)]
 pub struct TypingContext {
-  normalized_typing_lang: String,
+  typing_script: ScriptListEnum,
 
   use_native_numerals: bool,
   include_inherent_vowel: bool,
@@ -79,23 +79,17 @@ pub struct TypingContext {
 
 impl TypingContext {
   /// Creates a new typing context for the given script/language.
-  ///
-  /// - `typing_lang` can be a script or language name/alias (normalized via `get_normalized_script_name`).
-  /// - `options` configures timing and inherent vowel / numeral behavior.
-  pub fn new(
-    typing_lang: &str,
-    options: Option<TypingContextOptions>,
-  ) -> Result<Self, TransliterationError> {
+  pub fn new(typing_script: Script, options: Option<TypingContextOptions>) -> Self {
     let opts = options.unwrap_or_default();
-    let normalized_typing_lang = get_normalized_script_name(typing_lang)?;
+    let typing_script: ScriptListEnum = typing_script.into();
 
-    let from_script_data = ScriptData::get_script_data("Normal");
-    let to_script_data = ScriptData::get_script_data(&normalized_typing_lang);
+    let from_script_data = ScriptData::get_script_data(&ScriptListEnum::Normal);
+    let to_script_data = ScriptData::get_script_data(&typing_script);
 
     let resolved = resolve_transliteration_rules(from_script_data, to_script_data, None);
 
-    Ok(Self {
-      normalized_typing_lang,
+    Self {
+      typing_script,
       use_native_numerals: opts.use_native_numerals,
       include_inherent_vowel: opts.include_inherent_vowel,
       curr_input: String::new(),
@@ -106,7 +100,7 @@ impl TypingContext {
       to_script_data,
       trans_options: resolved.trans_options,
       custom_rules: resolved.custom_rules,
-    })
+    }
   }
 
   /// Clears all internal state and contexts.
@@ -126,7 +120,8 @@ impl TypingContext {
   }
 
   /// Accepts character-by-character input and returns the diff relative to the previous output.
-  pub fn take_key_input(&mut self, key: &str) -> TypingDiff {
+  pub fn take_key_input<T: AsRef<str>>(&mut self, key: T) -> TypingDiff {
+    let key = key.as_ref();
     // If key is empty, nothing to do.
     let Some(ch) = key.chars().next() else {
       return TypingDiff {
@@ -152,8 +147,8 @@ impl TypingContext {
 
     let result = transliterate_text_core(
       &self.curr_input,
-      "Normal",
-      &self.normalized_typing_lang,
+      &ScriptListEnum::Normal,
+      &self.typing_script,
       self.from_script_data,
       self.to_script_data,
       &self.trans_options,
@@ -200,9 +195,9 @@ impl TypingContext {
     self.include_inherent_vowel
   }
 
-  /// returns normalized script name
+  /// Returns the normalized script name for this typing context.
   pub fn get_normalized_script(&self) -> &str {
-    &self.normalized_typing_lang
+    self.to_script_data.script_name.as_str()
   }
 }
 
@@ -227,11 +222,12 @@ fn compute_diff(prev_output: &str, output: &str) -> (usize, String) {
 /// Helper used in tests to emulate per-key typing and accumulate the final output.
 ///
 pub fn emulate_typing(
-  text: &str,
-  typing_lang: &str,
+  text: impl AsRef<str>,
+  typing_lang: Script,
   options: Option<TypingContextOptions>,
-) -> Result<String, TransliterationError> {
-  let mut ctx = TypingContext::new(typing_lang, options)?;
+) -> String {
+  let text = text.as_ref();
+  let mut ctx = TypingContext::new(typing_lang, options);
   let mut result = String::new();
 
   for ch in text.chars() {
@@ -244,7 +240,7 @@ pub fn emulate_typing(
     result.push_str(&diff.diff_add_text);
   }
 
-  Ok(result)
+  result
 }
 
 /// Truncate the last `n` characters from a UTF-8 string (character-wise, not bytes).
@@ -306,12 +302,10 @@ pub struct ScriptTypingDataMap {
 /// both common characters and script-specific characters.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_typing_data_map(
-  script: &str,
-) -> Result<ScriptTypingDataMap, TransliterationError> {
-  let normalized_typing_lang = get_normalized_script_name(script)?;
+pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap {
+  let typing_script: ScriptListEnum = typing_script.into();
 
-  let script_data = ScriptData::get_script_data(&normalized_typing_lang);
+  let script_data = ScriptData::get_script_data(&typing_script);
 
   /// Merges items that end up with the same displayed text (and type),
   /// and keeps mappings unique.
@@ -410,10 +404,10 @@ pub fn get_script_typing_data_map(
   common_krama_map = merge_duplicate_text_mappings(common_krama_map);
   script_specific_krama_map = merge_duplicate_text_mappings(script_specific_krama_map);
 
-  Ok(ScriptTypingDataMap {
+  ScriptTypingDataMap {
     common_krama_map,
     script_specific_krama_map,
-  })
+  }
 }
 
 /// Type alias for krama data items used in script comparison.
@@ -429,36 +423,36 @@ pub type KramaDataItem = (String, ListType);
 /// - `script` - The script/language name to get krama data for.
 ///
 /// Returns an error if the script name is invalid or is 'Normal' (English).
-pub fn get_script_krama_data(script: &str) -> Result<Vec<KramaDataItem>, TransliterationError> {
-  let normalized = get_normalized_script_name(script)?;
+pub fn get_script_krama_data(script: Script) -> Vec<KramaDataItem> {
+  let normalized: ScriptListEnum = script.into();
 
   let script_data = ScriptData::get_script_data(&normalized);
 
-  Ok(
-    script_data
-      .krama_text_arr
-      .iter()
-      .map(|(text, list_idx)| {
-        let list_type = list_idx
-          .and_then(|idx| script_data.list.get(idx as usize))
-          .map(ListType::from_list)
-          .unwrap_or(ListType::Anya);
-        (text.clone(), list_type)
-      })
-      .collect(),
-  )
+  script_data
+    .krama_text_arr
+    .iter()
+    .map(|(text, list_idx)| {
+      let list_type = list_idx
+        .and_then(|idx| script_data.list.get(idx as usize))
+        .map(ListType::from_list)
+        .unwrap_or(ListType::Anya);
+      (text.clone(), list_type)
+    })
+    .collect()
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
 
+  use crate::scripts::Script;
   use crate::transliterate::helpers::VEDIC_SVARAS;
   use serde::Deserialize;
   use std::fs;
   use std::fs::OpenOptions;
   use std::io::Write;
   use std::path::{Path, PathBuf};
+  use std::str::FromStr;
 
   fn assert_send_sync<T: Send + Sync>() {}
 
@@ -596,8 +590,9 @@ mod tests {
 
           let input = &case.input;
           total_emulations += 1;
-          let result = emulate_typing(input, &case.to, None)
-            .unwrap_or_else(|e| panic!("emulate_typing error for {}: {}", path.display(), e));
+          let to_script = Script::from_str(case.to.as_str())
+            .unwrap_or_else(|e| panic!("invalid script {:?} in {}: {e}", case.to, path.display()));
+          let result = emulate_typing(input, to_script, None);
 
           let error_message = format!(
             "Emulate Typing failed:\n  From: {}\n  To: {}\n  Input: \"{}\"\n  Expected: \"{}\"\n  Actual: \"{}\"",
@@ -746,15 +741,16 @@ mod tests {
         }
 
         let opts = build_typing_options(&case.options);
-        total_emulations += 1;
-        let result = emulate_typing(&case.text, &case.script, opts.clone()).unwrap_or_else(|e| {
+        let script = Script::from_str(case.script.as_str()).unwrap_or_else(|e| {
           panic!(
-            "emulate_typing error in `{}` index {}: {}",
+            "invalid script {:?} in `{}` index {}: {e}",
+            case.script,
             file.display(),
-            case.index,
-            e
+            case.index
           )
         });
+        total_emulations += 1;
+        let result = emulate_typing(&case.text, script, opts.clone());
 
         assert_eq!(
           result,
@@ -773,15 +769,7 @@ mod tests {
           trans_options.insert("all_to_normal:preserve_specific_chars".to_string(), true);
 
           let preserved =
-            crate::transliterate(&result, &case.script, "Normal", Some(&trans_options))
-              .unwrap_or_else(|e| {
-                panic!(
-                  "transliterate (preserve check) error in `{}` index {}: {}",
-                  file.display(),
-                  case.index,
-                  e
-                )
-              });
+            crate::transliterate(&result, script, Script::Normal, Some(&trans_options));
 
           assert_eq!(
             preserved,
@@ -816,14 +804,10 @@ mod tests {
 
   #[test]
   fn test_get_script_typing_data_map_valid_script() {
-    let result = get_script_typing_data_map("Devanagari");
-    assert!(result.is_ok());
-    let data = result.unwrap();
+    let data = get_script_typing_data_map(Script::Devanagari);
 
-    // Should have some entries in both maps
     assert!(!data.common_krama_map.is_empty());
 
-    // Verify structure: each item should be (text, type, mappings)
     for (text, _list_type, _mappings) in &data.common_krama_map {
       assert!(!text.is_empty());
     }
@@ -831,43 +815,14 @@ mod tests {
 
   #[test]
   fn test_get_script_typing_data_map_normalized_names() {
-    // Test with acronym that should be normalized
-    let result = get_script_typing_data_map("dev");
-    assert!(result.is_ok());
+    let _ = get_script_typing_data_map(Script::from_str("dev").unwrap());
   }
-
-  #[test]
-  fn test_get_script_typing_data_map_invalid_script() {
-    let result = get_script_typing_data_map("InvalidScript");
-    assert!(result.is_err());
-    assert_eq!(
-      result.unwrap_err(),
-      TransliterationError::InvalidScriptName("InvalidScript".to_string())
-    );
-  }
-
-  // #[test]
-  // fn test_get_script_typing_data_map_normal_script() {
-  //   // Should reject Normal/English
-  //   let result = get_script_typing_data_map("Normal");
-  //   assert!(result.is_err());
-  //   assert_eq!(
-  //     result.unwrap_err().to_string(),
-  //     "Invalid script name: Normal"
-  //   );
-  // }
 
   #[test]
   fn test_get_script_typing_data_map_mappings_populated() {
-    let result = get_script_typing_data_map("Telugu");
-    assert!(result.is_ok());
-    let data = result.unwrap();
+    let data = get_script_typing_data_map(Script::Telugu);
 
-    // At least some entries should have mappings populated
-    let has_mappings = data
-      .common_krama_map
-      .iter()
-      .any(|(_, _, mappings)| !mappings.is_empty());
+    let has_mappings = data.common_krama_map.iter().any(|item| !item.2.is_empty());
 
     assert!(
       has_mappings,

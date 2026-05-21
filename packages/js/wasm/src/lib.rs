@@ -1,4 +1,6 @@
+use lipilekhika::scripts::Script;
 use std::collections::HashMap;
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 fn parse_trans_options(
@@ -48,6 +50,10 @@ pub fn transliterate(
 ) -> Result<String, JsError> {
   let options = parse_trans_options(trans_options)?;
 
-  lipilekhika::transliterate(text, from, to, options.as_ref())
-    .map_err(|e| JsError::new(&e.to_string()))
+  let from = Script::from_str(from)
+    .map_err(|e| JsError::new(&format!("invalid source script {from:?}: {e}")))?;
+  let to = Script::from_str(to)
+    .map_err(|e| JsError::new(&format!("invalid target script {to:?}: {e}")))?;
+
+  Ok(lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned())
 }

@@ -11,25 +11,13 @@ pub use custom_options::*;
 pub use schema::*;
 pub use script_list::*;
 
-use crate::errors::TransliterationError;
+use crate::scripts::Script;
 
 /// Returns the list of all supported custom options for
-/// transliterations for the provided script pair
-///
-/// - `from_script_name` - The script/language to transliterate from
-/// - `to_script_name` - The script/language to transliterate to
-///
-/// Returns the list of all supported custom option keys for the provided script pair,
-/// or an error string if script names are invalid.
-pub fn get_all_options(
-  from_script_name: &str,
-  to_script_name: &str,
-) -> Result<Vec<String>, TransliterationError> {
-  let normalized_from = get_normalized_script_name(from_script_name)?;
-  let normalized_to = get_normalized_script_name(to_script_name)?;
-
-  let from_script_data = ScriptData::get_script_data(&normalized_from);
-  let to_script_data = ScriptData::get_script_data(&normalized_to);
+/// transliterations for the provided script pair.
+pub fn get_all_options(from_script: Script, to_script: Script) -> Vec<String> {
+  let from_script_data = ScriptData::get_script_data(&from_script.into());
+  let to_script_data = ScriptData::get_script_data(&to_script.into());
 
   // Create a HashMap with all custom options set to true.
   // `custom_options_map` is insertion-ordered (same as `custom_options.json`),
@@ -54,49 +42,24 @@ pub fn get_all_options(
     }
   }
 
-  Ok(ordered)
+  ordered
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::scripts::Script;
+  use std::str::FromStr;
 
   #[test]
   fn test_get_all_option_valid_scripts() {
-    let result = get_all_options("Devanagari", "Telugu");
-    assert!(result.is_ok());
-    // The result should be a list of option keys
-    // We just verify it returns without error (could be 0 or more options)
+    let _ = get_all_options(Script::Devanagari, Script::Telugu);
   }
 
   #[test]
   fn test_get_all_option_normalized_names() {
-    // Test with acronyms that should be normalized
-    let result = get_all_options("dev", "tel");
-    assert!(result.is_ok());
-  }
-
-  #[test]
-  fn test_get_all_option_invalid_from_script() {
-    let result = get_all_options("InvalidScript", "Telugu");
-    assert!(result.is_err());
-    assert_eq!(
-      result,
-      Err(TransliterationError::InvalidScriptName(
-        "InvalidScript".to_string()
-      ))
-    );
-  }
-
-  #[test]
-  fn test_get_all_option_invalid_to_script() {
-    let result = get_all_options("Devanagari", "InvalidScript");
-    assert!(result.is_err());
-    assert_eq!(
-      result,
-      Err(TransliterationError::InvalidScriptName(
-        "InvalidScript".to_string()
-      ))
-    );
+    let from = Script::from_str("dev").unwrap().into();
+    let to = Script::from_str("tel").unwrap().into();
+    let _ = get_all_options(from, to);
   }
 }
