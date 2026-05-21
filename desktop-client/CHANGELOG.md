@@ -1,5 +1,10 @@
 # Changelog
 
+## pc-app@v1.0.11
+
+- Use updated rust package `v1.1.0`. It introduces changes in Error and Script name handling
+- Also 60-70% faster
+
 ## pc-app@v1.0.10
 
 - Performance Imrpovements

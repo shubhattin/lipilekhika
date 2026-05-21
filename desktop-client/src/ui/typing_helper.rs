@@ -1,4 +1,4 @@
-use crate::data::{ScriptDisplay, get_ordered_script_list};
+use crate::data::{ScriptDisplay, get_ordered_script_list, script_list_to_typing_script};
 use iced::{
   Alignment, Background, Color, Element, Length, Task,
   theme::Theme,
@@ -6,9 +6,8 @@ use iced::{
   window,
 };
 use iced_aw::tab_bar::{TabBar, TabLabel};
-use lipilekhika::Script;
+use lipilekhika::ScriptListEnum;
 use lipilekhika::typing::{ListType, get_script_krama_data, get_script_typing_data_map};
-use std::str::FromStr;
 
 /// Size of the Typing Helper window
 pub const WINDOW_WIDTH: f32 = 700.0;
@@ -23,21 +22,27 @@ pub enum TypingHelperTab {
 }
 
 /// State for the Typing Helper window
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct TypingHelperState {
-  pub current_script: String,
+  pub current_script: ScriptListEnum,
   pub active_tab: TypingHelperTab,
   pub compare_script: Option<ScriptDisplay>,
 }
 
+impl Default for TypingHelperState {
+  fn default() -> Self {
+    Self::new(ScriptListEnum::Devanagari)
+  }
+}
+
 impl TypingHelperState {
-  pub fn new(script: &str) -> Self {
+  pub fn new(script: ScriptListEnum) -> Self {
     let compare_script = get_ordered_script_list()
       .into_iter()
-      .find(|s| s.script_name == "Romanized");
+      .find(|s| s.script_name == ScriptListEnum::Romanized);
 
     Self {
-      current_script: script.to_string(),
+      current_script: script,
       active_tab: TypingHelperTab::TypingMap,
       compare_script,
     }
@@ -225,16 +230,10 @@ fn section<'a, Message: 'a + Clone>(
 }
 
 /// Renders the Typing Map tab content
-fn view_typing_map<'a, Message: 'a + Clone>(current_script: &str) -> Element<'a, Message> {
-  let script = match Script::from_str(current_script) {
-    Ok(script) => script,
-    Err(_) => {
-      return container(text("Failed to load typing data...").size(14))
-        .center_x(Length::Fill)
-        .center_y(Length::Fill)
-        .into();
-    }
-  };
+fn view_typing_map<'a, Message: 'a + Clone>(
+  current_script: ScriptListEnum,
+) -> Element<'a, Message> {
+  let script = script_list_to_typing_script(current_script);
   let typing_data = get_script_typing_data_map(script);
 
   let svara_items = filter_items_by_type(typing_data.common_krama_map.clone(), "svara");
@@ -283,17 +282,17 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   state: &TypingHelperState,
   scripts: Vec<ScriptDisplay>,
 ) -> Element<'a, Message> {
-  let current_script = state.current_script.clone();
+  let current_script = state.current_script;
   let current_script_label = row![
     text("Current script: ").size(13),
-    text(current_script.clone()).size(13),
+    text(current_script.to_string()).size(13),
   ]
   .align_y(Alignment::Center);
 
   // Filter out current script and Normal from comparison options
   let compare_scripts: Vec<ScriptDisplay> = scripts
     .into_iter()
-    .filter(|s| s.script_name != state.current_script && s.script_name != "Normal")
+    .filter(|s| s.script_name != state.current_script && s.script_name != ScriptListEnum::Normal)
     .collect();
 
   let compare_selector = row![
@@ -315,12 +314,12 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   .padding([0, 0]);
 
   let content: Element<'a, Message> = if let Some(compare_script) = &state.compare_script {
-    let base_krama = Script::from_str(&current_script)
-      .ok()
-      .map(get_script_krama_data);
-    let compare_krama = Script::from_str(&compare_script.script_name)
-      .ok()
-      .map(get_script_krama_data);
+    let base_krama = Some(get_script_krama_data(script_list_to_typing_script(
+      current_script,
+    )));
+    let compare_krama = Some(get_script_krama_data(script_list_to_typing_script(
+      compare_script.script_name,
+    )));
 
     match (base_krama, compare_krama) {
       (Some(base), Some(compare)) => {
@@ -397,7 +396,7 @@ pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   // Filter out "Normal" script to match Compare Scripts behavior
   let scripts: Vec<ScriptDisplay> = scripts
     .into_iter()
-    .filter(|s| s.script_name != "Normal")
+    .filter(|s| s.script_name != ScriptListEnum::Normal)
     .collect();
 
   // Find current script display
@@ -435,7 +434,7 @@ pub fn view_typing_helper<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
 
   // Tab content
   let tab_content: Element<'a, Message> = match state.active_tab {
-    TypingHelperTab::TypingMap => view_typing_map(&state.current_script),
+    TypingHelperTab::TypingMap => view_typing_map(state.current_script),
     TypingHelperTab::CompareScripts => view_compare_scripts(state, scripts),
   };
 

@@ -1,4 +1,6 @@
-use crate::data::{ScriptDisplay, get_ordered_script_list};
+use crate::data::{
+  ScriptDisplay, get_ordered_script_list, script_from_normalized_name, script_list_to_typing_script,
+};
 use crate::ui::notification::{self, NotificationConfig};
 use crate::ui::thread_receive::{ThreadRx, thread_message_stream};
 use crate::ui::typing_helper::{
@@ -20,12 +22,11 @@ use iced::{
   window,
 };
 use iced_aw::menu::{Item, Menu, MenuBar};
-use lipilekhika::Script;
+use lipilekhika::ScriptListEnum;
 use lipilekhika::typing::TypingContext;
 use std::env;
 use std::path::PathBuf;
 use std::process::Command;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex, atomic::Ordering};
 
 #[derive(Clone, Debug)]
@@ -139,7 +140,7 @@ impl App {
         about_modal_open: false,
         inherent_vowel_info_open: false,
         typing_helper_window: None,
-        typing_helper_state: TypingHelperState::new("Devanagari"),
+        typing_helper_state: TypingHelperState::new(ScriptListEnum::Devanagari),
         version_check_result: None,
         update_notification_dismissed: false,
         update_in_progress: false,
@@ -170,27 +171,23 @@ impl App {
           })
         };
 
-        let script_name = script_display.script_name.as_str();
-        if let Ok(script) = Script::from_str(script_name) {
-          let new_script_context = TypingContext::new(script, current_options);
-          {
-            let mut ctx = self.global_app_state.typing_context.lock().unwrap();
-            *ctx = new_script_context;
-          }
-          // Update persistent state and save asynchronously
-          {
-            let mut state = self.global_app_state.persitent_state.lock().unwrap();
-            state.script = script_display.script_name.clone();
-          }
-          let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
-            origin: ThreadMessageOrigin::UI,
-            msg: ThreadMessageType::RerenderTray,
-          });
-          // Return async save task
-          Self::save_persistent_state_async(Arc::clone(&self.global_app_state))
-        } else {
-          Task::none()
+        let script = script_list_to_typing_script(script_display.script_name);
+        let new_script_context = TypingContext::new(script, current_options);
+        {
+          let mut ctx = self.global_app_state.typing_context.lock().unwrap();
+          *ctx = new_script_context;
         }
+        // Update persistent state and save asynchronously
+        {
+          let mut state = self.global_app_state.persitent_state.lock().unwrap();
+          state.script = script_display.script_name.to_string();
+        }
+        let _ = self.tx_tray.lock().unwrap().send(ThreadMessage {
+          origin: ThreadMessageOrigin::UI,
+          msg: ThreadMessageType::RerenderTray,
+        });
+        // Return async save task
+        Self::save_persistent_state_async(Arc::clone(&self.global_app_state))
       }
       UIMessage::ToggleTypingMode(enabled) => {
         self
@@ -444,9 +441,11 @@ impl App {
         // Sync script from current context
         let curr_script = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
-          ctx.get_normalized_script().to_string()
+          script_from_normalized_name(ctx.get_normalized_script())
         };
-        self.typing_helper_state.current_script = curr_script;
+        if let Some(curr_script) = curr_script {
+          self.typing_helper_state.current_script = curr_script;
+        }
 
         let (new_id, open_task) = open_typing_helper_window(Some(self.window_icon.clone()));
         self.typing_helper_window = Some(new_id);
@@ -466,9 +465,11 @@ impl App {
         // Sync script from current context
         let curr_script = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
-          ctx.get_normalized_script().to_string()
+          script_from_normalized_name(ctx.get_normalized_script())
         };
-        self.typing_helper_state.current_script = curr_script;
+        if let Some(curr_script) = curr_script {
+          self.typing_helper_state.current_script = curr_script;
+        }
         // Set active tab to Compare Scripts
         self.typing_helper_state.active_tab = TypingHelperTab::CompareScripts;
 
@@ -508,13 +509,14 @@ impl App {
           && let (Some(url), Some(version)) = (
             result.windows_msi_download_url.clone(),
             result.latest_version.clone(),
-          ) {
-            self.update_in_progress = true;
-            return Task::future(async move {
-              let result = version_check::download_and_install_update(url, version).await;
-              UIMessage::UpdateAppResult(result)
-            });
-          }
+          )
+        {
+          self.update_in_progress = true;
+          return Task::future(async move {
+            let result = version_check::download_and_install_update(url, version).await;
+            UIMessage::UpdateAppResult(result)
+          });
+        }
         Task::none()
       }
       UIMessage::UpdateAppResult(result) => {
@@ -556,19 +558,27 @@ impl App {
       keyboard::listen().filter_map(|event| {
         if let keyboard::Event::KeyPressed { key, modifiers, .. } = event {
           // Alt+X or Alt+C: Toggle typing mode
-          if modifiers.alt() && !modifiers.control() && !modifiers.logo() && !modifiers.shift()
-            && let Key::Character(ref c) = key {
-              let c_lower = c.to_lowercase();
-              if c_lower == "x" || c_lower == "c" {
-                // Toggle typing mode and trigger notification
-                return Some(UIMessage::KeyboardToggleTypingMode);
-              }
+          if modifiers.alt()
+            && !modifiers.control()
+            && !modifiers.logo()
+            && !modifiers.shift()
+            && let Key::Character(ref c) = key
+          {
+            let c_lower = c.to_lowercase();
+            if c_lower == "x" || c_lower == "c" {
+              // Toggle typing mode and trigger notification
+              return Some(UIMessage::KeyboardToggleTypingMode);
             }
+          }
           // Win+Esc: Close the application
-          if modifiers.logo() && !modifiers.alt() && !modifiers.control() && !modifiers.shift()
-            && key == Key::Named(Named::Escape) {
-              return Some(UIMessage::CloseApp);
-            }
+          if modifiers.logo()
+            && !modifiers.alt()
+            && !modifiers.control()
+            && !modifiers.shift()
+            && key == Key::Named(Named::Escape)
+          {
+            return Some(UIMessage::CloseApp);
+          }
         }
         None
       }),
@@ -587,7 +597,7 @@ impl App {
       let scripts = get_ordered_script_list();
       let scripts: Vec<ScriptDisplay> = scripts
         .into_iter()
-        .filter(|s| s.script_name != "Normal")
+        .filter(|s| s.script_name != ScriptListEnum::Normal)
         .collect();
 
       let typing_enabled = self.global_app_state.typing_enabled.load(Ordering::SeqCst);
@@ -597,16 +607,18 @@ impl App {
         (
           ctx.get_use_native_numerals(),
           ctx.get_include_inherent_vowel(),
-          ctx.get_normalized_script().to_string(),
+          script_from_normalized_name(ctx.get_normalized_script()),
         )
         // auto drops lock
       };
 
       // Find the ScriptDisplay that matches the current script
-      let current_script_display = scripts
-        .iter()
-        .find(|sd| sd.script_name == curr_script)
-        .cloned();
+      let current_script_display = curr_script.and_then(|curr_script| {
+        scripts
+          .iter()
+          .find(|sd| sd.script_name == curr_script)
+          .cloned()
+      });
 
       let main_content = container(column![
         row![

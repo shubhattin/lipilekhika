@@ -1,10 +1,11 @@
-use crate::data::{ScriptDisplay, get_ordered_script_list};
+use crate::data::{
+  ScriptDisplay, get_ordered_script_list, script_from_normalized_name, script_list_to_typing_script,
+};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
-use lipilekhika::Script;
+use lipilekhika::ScriptListEnum;
 use lipilekhika::typing::TypingContext;
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::{Arc, atomic::Ordering};
 use tray_icon::{
   Icon, TrayIcon, TrayIconBuilder, TrayIconEvent,
@@ -18,7 +19,7 @@ enum TrayMenuEvent {
   InherentVowel,
   Quit,
   OpenApp,
-  ScriptSelected(String),
+  ScriptSelected(ScriptListEnum),
 }
 
 struct MenuEventMapper {
@@ -70,7 +71,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalized_script().to_string(),
+        script_from_normalized_name(ctx.get_normalized_script()),
       )
     };
     let mut event_mapper = MenuEventMapper::new();
@@ -97,9 +98,11 @@ impl TrayManager {
 
     let mut script_items = Vec::new();
     for script_display in scripts {
-      let script_name = script_display.script_name.clone();
-      let item_id = format!("{}{}", MENU_ID_SCRIPT_PREFIX, script_name);
-      let is_current = script_name == current_script;
+      let script_ident = script_display.script_name;
+      let item_id = format!("{}{}", MENU_ID_SCRIPT_PREFIX, script_ident);
+      let is_current = current_script
+        .map(|current_script| current_script == script_ident)
+        .unwrap_or(false);
       let item = CheckMenuItem::with_id(
         &item_id,
         &script_display.display_label,
@@ -109,10 +112,7 @@ impl TrayManager {
       );
       script_submenu.append(&item)?;
       // Register event with script name as associated data
-      event_mapper.register(
-        item_id,
-        TrayMenuEvent::ScriptSelected(script_name.to_string()),
-      );
+      event_mapper.register(item_id, TrayMenuEvent::ScriptSelected(script_ident));
       script_items.push((item, script_display));
     }
     tray_menu.append(&script_submenu)?;
@@ -200,7 +200,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalized_script().to_string(),
+        script_from_normalized_name(ctx.get_normalized_script()),
       )
     };
 
@@ -209,7 +209,9 @@ impl TrayManager {
     self.inherent_vowel_item.set_checked(include_inherent_vowel);
 
     for (item, script_display) in &self.script_items {
-      let is_selected = script_display.script_name == current_script;
+      let is_selected = current_script
+        .map(|current_script| script_display.script_name == current_script)
+        .unwrap_or(false);
       item.set_checked(is_selected);
     }
 
@@ -264,7 +266,7 @@ impl TrayManager {
         // Send message to UI to restore the minimized window
         messages.push(ThreadMessageType::MaximizeUI);
       }
-      TrayMenuEvent::ScriptSelected(script_name) => {
+      TrayMenuEvent::ScriptSelected(script) => {
         let current_options = {
           let ctx = self.app_state.typing_context.lock().unwrap();
           Some(lipilekhika::typing::TypingContextOptions {
@@ -274,24 +276,23 @@ impl TrayManager {
           })
         };
 
-        if let Ok(script) = Script::from_str(&script_name) {
-          let new_ctx = TypingContext::new(script, current_options);
-          {
-            let mut ctx = self.app_state.typing_context.lock().unwrap();
-            *ctx = new_ctx;
-          }
-
-          // Update checkmarks on all script items (without holding lock)
-          for (item, script_display) in &self.script_items {
-            let is_selected = script_display.script_name == script_name;
-            item.set_checked(is_selected);
-          }
-
-          // update_tooltip() also locks typing_context, so must be called after dropping lock
-          self.update_tooltip();
-          // Notify UI to rerender
-          messages.push(ThreadMessageType::RerenderUI);
+        let script_typing = script_list_to_typing_script(script);
+        let new_ctx = TypingContext::new(script_typing, current_options);
+        {
+          let mut ctx = self.app_state.typing_context.lock().unwrap();
+          *ctx = new_ctx;
         }
+
+        // Update checkmarks on all script items (without holding lock)
+        for (item, script_display) in &self.script_items {
+          let is_selected = script_display.script_name == script;
+          item.set_checked(is_selected);
+        }
+
+        // update_tooltip() also locks typing_context, so must be called after dropping lock
+        self.update_tooltip();
+        // Notify UI to rerender
+        messages.push(ThreadMessageType::RerenderUI);
       }
     };
     messages
