@@ -6,7 +6,9 @@ use iced::{
   window,
 };
 use iced_aw::tab_bar::{TabBar, TabLabel};
+use lipilekhika::Script;
 use lipilekhika::typing::{ListType, get_script_krama_data, get_script_typing_data_map};
+use std::str::FromStr;
 
 /// Size of the Typing Helper window
 pub const WINDOW_WIDTH: f32 = 700.0;
@@ -224,8 +226,8 @@ fn section<'a, Message: 'a + Clone>(
 
 /// Renders the Typing Map tab content
 fn view_typing_map<'a, Message: 'a + Clone>(current_script: &str) -> Element<'a, Message> {
-  let typing_data = match get_script_typing_data_map(current_script) {
-    Ok(data) => data,
+  let script = match Script::from_str(current_script) {
+    Ok(script) => script,
     Err(_) => {
       return container(text("Failed to load typing data...").size(14))
         .center_x(Length::Fill)
@@ -233,6 +235,7 @@ fn view_typing_map<'a, Message: 'a + Clone>(current_script: &str) -> Element<'a,
         .into();
     }
   };
+  let typing_data = get_script_typing_data_map(script);
 
   let svara_items = filter_items_by_type(typing_data.common_krama_map.clone(), "svara");
   let vyanjana_items = filter_items_by_type(typing_data.common_krama_map.clone(), "vyanjana");
@@ -312,9 +315,12 @@ fn view_compare_scripts<'a, Message: 'a + Clone + From<TypingHelperMessage>>(
   .padding([0, 0]);
 
   let content: Element<'a, Message> = if let Some(compare_script) = &state.compare_script {
-    // Get krama data for both scripts
-    let base_krama = get_script_krama_data(&current_script).ok();
-    let compare_krama = get_script_krama_data(&compare_script.script_name).ok();
+    let base_krama = Script::from_str(&current_script)
+      .ok()
+      .map(get_script_krama_data);
+    let compare_krama = Script::from_str(&compare_script.script_name)
+      .ok()
+      .map(get_script_krama_data);
 
     match (base_krama, compare_krama) {
       (Some(base), Some(compare)) => {

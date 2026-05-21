@@ -436,16 +436,9 @@ unsafe extern "system" fn low_level_keyboard_proc(
 
           for ch in text.chars() {
             let key = ch.to_string();
-            match guard.take_key_input(&key) {
-              Ok(diff) => {
-                total_delete += diff.to_delete_chars_count;
-                combined_add.push_str(&diff.diff_add_text);
-              }
-              Err(_e) => {
-                guard.clear_context();
-                return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
-              }
-            }
+            let diff = guard.take_key_input(&key);
+            total_delete += diff.to_delete_chars_count;
+            combined_add.push_str(&diff.diff_add_text);
           }
 
           (total_delete, combined_add)

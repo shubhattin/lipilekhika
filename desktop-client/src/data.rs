@@ -1,7 +1,15 @@
-use lipilekhika::{get_normalized_script_name, get_script_list_data};
+use lipilekhika::{Script, ScriptListEnum, get_script_list_data};
 use std::collections::HashMap;
 use std::fmt;
+use std::str::FromStr;
 use std::sync::OnceLock;
+
+/// Resolves a script name or alias to its canonical display name (e.g. `"dev"` → `"Devanagari"`).
+pub fn normalize_script_name(script: &str) -> Option<String> {
+  Script::from_str(script)
+    .ok()
+    .map(|script| ScriptListEnum::from(script).to_string())
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ScriptDisplay {
@@ -51,14 +59,13 @@ fn get_script_avatar_map() -> &'static HashMap<String, String> {
 }
 
 pub fn get_script_avatar(script: &str) -> String {
-  let normalized_script = get_normalized_script_name(script);
-  match normalized_script {
+  match normalize_script_name(script) {
     Some(script_name) => {
       let avatar_map = get_script_avatar_map();
       avatar_map
         .get(&script_name)
-        .unwrap_or(&"अ".to_string())
-        .clone()
+        .cloned()
+        .unwrap_or_else(|| "अ".to_string())
     }
     None => "अ".to_string(),
   }

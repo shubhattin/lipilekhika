@@ -20,10 +20,12 @@ use iced::{
   window,
 };
 use iced_aw::menu::{Item, Menu, MenuBar};
+use lipilekhika::Script;
 use lipilekhika::typing::TypingContext;
 use std::env;
 use std::path::PathBuf;
 use std::process::Command;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex, atomic::Ordering};
 
 #[derive(Clone, Debug)]
@@ -169,8 +171,8 @@ impl App {
         };
 
         let script_name = script_display.script_name.as_str();
-        let new_script_context = TypingContext::new(script_name, current_options);
-        if let Ok(new_script_context) = new_script_context {
+        if let Ok(script) = Script::from_str(script_name) {
+          let new_script_context = TypingContext::new(script, current_options);
           {
             let mut ctx = self.global_app_state.typing_context.lock().unwrap();
             *ctx = new_script_context;
@@ -442,7 +444,7 @@ impl App {
         // Sync script from current context
         let curr_script = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
-          ctx.get_normalized_script()
+          ctx.get_normalized_script().to_string()
         };
         self.typing_helper_state.current_script = curr_script;
 
@@ -464,7 +466,7 @@ impl App {
         // Sync script from current context
         let curr_script = {
           let ctx = self.global_app_state.typing_context.lock().unwrap();
-          ctx.get_normalized_script()
+          ctx.get_normalized_script().to_string()
         };
         self.typing_helper_state.current_script = curr_script;
         // Set active tab to Compare Scripts
@@ -598,7 +600,7 @@ impl App {
         (
           ctx.get_use_native_numerals(),
           ctx.get_include_inherent_vowel(),
-          ctx.get_normalized_script(),
+          ctx.get_normalized_script().to_string(),
         )
         // auto drops lock
       };

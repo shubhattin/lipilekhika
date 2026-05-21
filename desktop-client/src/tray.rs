@@ -1,7 +1,10 @@
 use crate::data::{ScriptDisplay, get_ordered_script_list};
 use crate::{AppState, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
+use lipilekhika::Script;
+use lipilekhika::typing::TypingContext;
 use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::{Arc, atomic::Ordering};
 use tray_icon::{
   Icon, TrayIcon, TrayIconBuilder, TrayIconEvent,
@@ -67,7 +70,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalized_script(),
+        ctx.get_normalized_script().to_string(),
       )
     };
     let mut event_mapper = MenuEventMapper::new();
@@ -174,7 +177,7 @@ impl TrayManager {
     let current_script = {
       let ctx = app_state.typing_context.lock().unwrap();
       // ^ auto drops in this scope
-      ctx.get_normalized_script()
+      ctx.get_normalized_script().to_string()
     };
 
     format!(
@@ -197,7 +200,7 @@ impl TrayManager {
       (
         ctx.get_use_native_numerals(),
         ctx.get_include_inherent_vowel(),
-        ctx.get_normalized_script(),
+        ctx.get_normalized_script().to_string(),
       )
     };
 
@@ -271,8 +274,8 @@ impl TrayManager {
           })
         };
 
-        let new_context = lipilekhika::typing::TypingContext::new(&script_name, current_options);
-        if let Ok(new_ctx) = new_context {
+        if let Ok(script) = Script::from_str(&script_name) {
+          let new_ctx = TypingContext::new(script, current_options);
           {
             let mut ctx = self.app_state.typing_context.lock().unwrap();
             *ctx = new_ctx;
