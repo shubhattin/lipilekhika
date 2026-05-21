@@ -3,14 +3,13 @@
 ## Unreleased (rust-lib@1.1.0)
 
 - Performance improvements (60%)
-- Introduces some **Breaking Changes**
+- Instroduces a major **Breaking Change**
+- `get_normalised_script` function removed.
 
-### Error enum
+### Script enums
 
-- Previously the methods in `lib.rs` and `typing.rs` returned a String as Error
-- Now they return a `TransliterationError` error enum
-- Some functions which previously returned an `Result` now return the result directly
-- No breaking changes for libraries depending on it (python, napi, dart, wasm) as they were already returning string based error messages which they return even now.
+- The input script/language/alias are now a enum
+- This also means that now we dont return the `Result` as the only error that was there was about script parsing.
 
 ## rust-lib@1.0.8
 

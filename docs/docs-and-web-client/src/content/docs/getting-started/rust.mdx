@@ -24,37 +24,37 @@ cargo add lipilekhika
 
 ### Transliteration
 
-The `transliterate` function is the primary API for converting text between scripts. It returns a `Result<String, String>`.
+The `transliterate` function is the primary API for converting text between scripts. It takes `Script` enum values and returns a `Cow<str>` directly (no `Result`).
 
 ```rust
-use lipilekhika::transliterate;
+use lipilekhika::{transliterate, Script};
 
 fn main() {
     let result = transliterate(
         "na jAyatE mriyatE vA",
-        "Normal",
-        "Devanagari",
+        Script::Normal,
+        Script::Devanagari,
         None
-    ).unwrap();
+    );
     
     println!("{}", result); // न जायते म्रियते वा
 }
 ```
 
 **Parameters:**
-- `text: &str` — Text to transliterate
-- `from: &str` — Source script/language name
-- `to: &str` — Target script/language name  
+- `text: &(impl AsRef<str> + ?Sized)` — Text to transliterate
+- `from: Script` — Source script/language
+- `to: Script` — Target script/language  
 - `trans_options: Option<&HashMap<String, bool>>` — Optional custom transliteration options
 
-**Returns:** `Result<String, String>` — Transliterated text or error message
+**Returns:** `Cow<'a, str>` — Transliterated text (borrows input when `from == to`)
 
 ### With Custom Transliteration Options
 
 You can pass custom options as the fourth argument to fine-tune transliteration behavior:
 
 ```rust
-use lipilekhika::transliterate;
+use lipilekhika::{transliterate, Script};
 use std::collections::HashMap;
 
 fn main() {
@@ -66,10 +66,10 @@ fn main() {
     
     let result = transliterate(
         "గంగా",
-        "Telugu",
-        "Gujarati",
+        Script::Telugu,
+        Script::Gujarati,
         Some(&options)
-    ).unwrap();
+    );
     
     println!("{}", result); // ગંગા (instead of ગઙ્ગા)
 }
@@ -86,17 +86,82 @@ fn main() {
    description="List of all supported scripts/languages and their aliases"
 />
 
+## Script Enum
+
+All script/language parameters use the `Script` enum instead of raw strings. You can use full script names, language names, or shorthand aliases:
+
+```rust
+use lipilekhika::Script;
+
+// Full script names
+Script::Devanagari
+Script::Telugu
+Script::Normal       // Romanized input scheme
+
+// Language names (resolve to their script)
+Script::Hindi        // → Devanagari
+Script::Sanskrit     // → Devanagari
+Script::English      // → Normal
+Script::Punjabi      // → Gurumukhi
+
+// Shorthand aliases
+Script::Dev          // → Devanagari
+Script::Tel          // → Telugu
+Script::Tam          // → Tamil
+Script::Kan          // → Kannada
+```
+
+### Script Display
+
+Get the string representation using `to_string()`:
+
+```rust
+use lipilekhika::Script;
+
+let name = Script::Devanagari.to_string(); // "Devanagari"
+let alias = Script::Dev.to_string();       // "dev"
+```
+
+### Script Parsing
+
+Parse a `&str` into a `Script` using `FromStr` (case-insensitive):
+
+```rust
+use std::str::FromStr;
+use lipilekhika::Script;
+
+let script = Script::from_str("Devanagari").unwrap(); // Script::Devanagari
+let script = Script::from_str("dev").unwrap();         // Script::Dev
+let script = Script::from_str("hindi").unwrap();       // Script::Hindi
+```
+
+<Aside type="note">
+  `Script::from_str` returns a `Result` since the input string may not match any known script. This is the **only** place where error handling is needed — all other APIs accept `Script` directly.
+</Aside>
+
+### Resolved Script
+
+Get the normalized/resolved script using `.into()` to convert a `Script` (which may be a language or alias) into the underlying `ScriptListEnum`:
+
+```rust
+use lipilekhika::{Script, ScriptListEnum};
+
+let resolved: ScriptListEnum = Script::Hindi.into();    // ScriptListEnum::Devanagari
+let resolved: ScriptListEnum = Script::Dev.into();      // ScriptListEnum::Devanagari
+let resolved: ScriptListEnum = Script::English.into();  // ScriptListEnum::Normal
+```
+
 ## Utility Functions
 
 ### Getting Available Options
 
-Use `get_all_option` to discover which custom options are available for a specific script pair:
+Use `get_all_options` to discover which custom options are available for a specific script pair:
 
 ```rust
-use lipilekhika::get_all_option;
+use lipilekhika::{get_all_options, Script};
 
 fn main() {
-    let options = get_all_option("Devanagari", "Telugu").unwrap();
+    let options = get_all_options(Script::Devanagari, Script::Telugu);
     
     for option in options {
         println!("Available option: {}", option);
@@ -105,10 +170,10 @@ fn main() {
 ```
 
 **Parameters:**
-- `from_script_name: &str` — Source script/language name
-- `to_script_name: &str` — Target script/language name
+- `from_script: Script` — Source script
+- `to_script: Script` — Target script
 
-**Returns:** `Result<Vec<String>, String>` — List of option keys or error message
+**Returns:** `Vec<String>` — List of option keys
 
 ### Getting Script List Data
 
@@ -132,10 +197,10 @@ Each call is zero-cost after the first because the data is stored in a `OnceLock
 Use `get_script_typing_data_map` to get typing mappings for a script (useful for building custom input methods):
 
 ```rust
-use lipilekhika::get_script_typing_data_map;
+use lipilekhika::{get_script_typing_data_map, Script};
 
 fn main() {
-    let typing_data = get_script_typing_data_map("Devanagari").unwrap();
+    let typing_data = get_script_typing_data_map(Script::Devanagari);
     
     // Access common character mappings
     for (text, list_type, mappings) in &typing_data.common_krama_map {
@@ -154,9 +219,9 @@ fn main() {
 ```
 
 **Parameters:**
-- `script: &str` — Script/language name
+- `typing_script: Script` — Script
 
-**Returns:** `Result<ScriptTypingDataMap, String>` — Typing data containing:
+**Returns:** `ScriptTypingDataMap` — Typing data containing:
 - `common_krama_map` — Mappings for common characters
 - `script_specific_krama_map` — Mappings for script-specific characters
 
@@ -169,17 +234,18 @@ For real-time character-by-character input, use the `typing` module which provid
 ### Basic Typing Context
 
 ```rust
+use lipilekhika::Script;
 use lipilekhika::typing::{TypingContext, TypingContextOptions};
 
 fn main() {
-    let mut ctx = TypingContext::new("Devanagari", None).unwrap();
+    let mut ctx = TypingContext::new(Script::Devanagari, None);
     
     // Process character-by-character input
-    let diff = ctx.take_key_input("n").unwrap();
+    let diff = ctx.take_key_input("n");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
     // Output: Delete: 0, Add: 'न्'
     
-    let diff = ctx.take_key_input("a").unwrap();
+    let diff = ctx.take_key_input("a");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
     // Output: Delete: 2, Add: 'न'
     
@@ -191,6 +257,7 @@ fn main() {
 ### With Custom Options
 
 ```rust
+use lipilekhika::Script;
 use lipilekhika::typing::{TypingContext, TypingContextOptions};
 
 fn main() {
@@ -200,9 +267,9 @@ fn main() {
         include_inherent_vowel: true, // For Hindi/Bengali style typing
     };
     
-    let mut ctx = TypingContext::new("Devanagari", Some(options)).unwrap();
+    let mut ctx = TypingContext::new(Script::Devanagari, Some(options));
     
-    let diff = ctx.take_key_input("k").unwrap();
+    let diff = ctx.take_key_input("k");
     println!("{}", diff.diff_add_text); // क (with inherent vowel)
 }
 ```
@@ -219,7 +286,7 @@ After creating a typing context, you can dynamically update typing options:
 ### Typing Module Types
 
 - **`TypingContext`** — Stateful context for typing mode
-  - `new(typing_lang: &str, options: Option<TypingContextOptions>)` — Create new context
+  - `new(typing_script: Script, options: Option<TypingContextOptions>)` — Create new context
   - `take_key_input(&mut self, key: &str)` — Process single character input
   - `clear_context(&mut self)` — Clear internal state
 
@@ -249,19 +316,19 @@ After creating a typing context, you can dynamically update typing options:
 
 ## Error Handling
 
-The library uses `Result<T, String>` for error handling. Common errors include:
-
-- Invalid script/language names
-- Unsupported script combinations (rare)
-
-Always handle errors appropriately:
+Most APIs accept `Script` enum values directly and **do not return `Result`**. The only place where error handling is needed is when parsing a string into a `Script`:
 
 ```rust
-match transliterate("text", "InvalidScript", "Devanagari", None) {
-    Ok(result) => println!("Success: {}", result),
-    Err(e) => eprintln!("Error: {}", e),
+use std::str::FromStr;
+use lipilekhika::Script;
+
+match Script::from_str("InvalidScript") {
+    Ok(script) => println!("Parsed: {:?}", script),
+    Err(e) => eprintln!("Unknown script: {}", e),
 }
 ```
+
+Once you have a valid `Script`, all other functions (`transliterate`, `get_all_options`, `TypingContext::new`, etc.) are infallible.
 
 ## Additional Resources
 
