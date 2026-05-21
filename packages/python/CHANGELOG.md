@@ -3,6 +3,7 @@
 ## Unreleased (python-lib@1.0.6)
 
 - Add android build target (via zig cross compiler and linker)
+- Use updated rust lib version `rust-lib@v1.1.0` (also faster)
 
 ## python-lib@1.0.5
 
