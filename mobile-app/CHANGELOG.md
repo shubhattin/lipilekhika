@@ -1,6 +1,8 @@
 # Changelog
 
-## mobile-app@v0.2.6+9
+## mobile-app@v0.2.7+10
+
+- Performance Improvement
 
 ## mobile-app@v0.2.5+8
 

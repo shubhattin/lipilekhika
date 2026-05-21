@@ -21,6 +21,10 @@
 - 🌍 **Universal Runtime** — Works in Node.js, browsers, Deno, Bun, and more
 - 🪶 **Lightweight** — Only 7 KB gzipped
 
+## ⚡ Performance
+
+Fast enough for most web and Node apps out of the box. When you need more throughput, use the [WebAssembly](https://lipilekhika.in/getting-started/wasm/) (`transliterate_wasm`) or native [N-API](https://lipilekhika.in/getting-started/javascript/#nodejs-native-module) (`transliterate_node`) bindings—both are Rust-powered. [Compare all implementations →](https://github.com/shubhattin/lipilekhika#-performance)
+
 ## 📥 Installation
 
 ```bash
