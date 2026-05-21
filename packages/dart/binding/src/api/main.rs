@@ -20,6 +20,8 @@ impl From<&lipilekhika::ScriptListData> for ScriptListData {
   }
 }
 
+use super::parse_script;
+
 /// Transliterates text from one script/language to another.
 ///
 /// # Arguments
@@ -40,8 +42,9 @@ pub fn transliterate(
   to_script: String,
   options: Option<HashMap<String, bool>>,
 ) -> Result<String, String> {
-  lipilekhika::transliterate(&text, &from_script, &to_script, options.as_ref())
-    .map_err(|e| e.to_string())
+  let from = parse_script("from_script", &from_script)?;
+  let to = parse_script("to_script", &to_script)?;
+  Ok(lipilekhika::transliterate(&text, from, to, options.as_ref()).into_owned())
 }
 
 /// Preloads the script data for the given script/language.
@@ -50,7 +53,9 @@ pub fn transliterate(
 /// you want to ensure the script data is loaded before use.
 #[flutter_rust_bridge::frb(sync)]
 pub fn preload_script_data(script_name: String) -> Result<(), String> {
-  lipilekhika::preload_script_data(&script_name).map_err(|e| e.to_string())
+  let script = parse_script("script_name", &script_name)?;
+  lipilekhika::preload_script_data(script);
+  Ok(())
 }
 
 /// Returns the schwa deletion characteristic of the script provided.
@@ -64,7 +69,8 @@ pub fn preload_script_data(script_name: String) -> Result<(), String> {
 /// * `None` - if the script is not a brahmic script
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_schwa_status_for_script(script_name: String) -> Result<Option<bool>, String> {
-  lipilekhika::get_schwa_status_for_script(&script_name).map_err(|e| e.to_string())
+  let script = parse_script("script_name", &script_name)?;
+  Ok(lipilekhika::get_schwa_status_for_script(script))
 }
 
 /// Returns the list of all supported custom options for transliterations.
@@ -73,9 +79,9 @@ pub fn get_schwa_status_for_script(script_name: String) -> Result<Option<bool>, 
 /// script pair that can be used in the transliterate function.
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_all_options(from_script: String, to_script: String) -> Result<Vec<String>, String> {
-  lipilekhika::get_all_options(&from_script, &to_script)
-    .map(|options| options.into_iter().collect::<Vec<String>>())
-    .map_err(|e| e.to_string())
+  let from = parse_script("from_script", &from_script)?;
+  let to = parse_script("to_script", &to_script)?;
+  Ok(lipilekhika::get_all_options(from, to))
 }
 
 /// Get the normalized script name for the given script/language.
@@ -84,7 +90,9 @@ pub fn get_all_options(from_script: String, to_script: String) -> Result<Vec<Str
 /// and validates that the provided name is a valid script/language.
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_normalized_script_name(script_name: String) -> Result<String, String> {
-  lipilekhika::get_normalized_script_name(&script_name).map_err(|e| e.to_string())
+  let script = parse_script("script_name", &script_name)?;
+  let normalized: lipilekhika::ScriptListEnum = script.into();
+  Ok(normalized.to_string())
 }
 
 /// Returns the script list data containing all script and language mappings.
