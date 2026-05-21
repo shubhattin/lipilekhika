@@ -1,7 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 // ^ hides console in windows release builds
 
-use crossbeam_channel;
 use lipilekhika::Script;
 use lipilekhika::typing::{
   DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS, TypingContext, TypingContextOptions,
@@ -65,7 +64,7 @@ fn main() {
 
   let persitent_state = PersitentState::read_app_config();
 
-  let script = Script::from_str(&persitent_state.script).unwrap_or_else(|_| Script::Devanagari);
+  let script = Script::from_str(&persitent_state.script).unwrap_or(Script::Devanagari);
   let typing_context = TypingContext::new(
     script,
     Some(TypingContextOptions {

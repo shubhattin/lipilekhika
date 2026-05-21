@@ -8,21 +8,13 @@ pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Result of a version check
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub struct VersionCheckResult {
   pub update_available: bool,
   pub latest_version: Option<String>,
   pub windows_msi_download_url: Option<String>,
 }
 
-impl Default for VersionCheckResult {
-  fn default() -> Self {
-    Self {
-      update_available: false,
-      latest_version: None,
-      windows_msi_download_url: None,
-    }
-  }
-}
 
 fn parse_pc_app_tag(tag: &str) -> Option<&str> {
   if tag.starts_with("pc-app@v") {

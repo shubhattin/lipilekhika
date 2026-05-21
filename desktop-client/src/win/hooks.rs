@@ -20,7 +20,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 
 thread_local! {
-  static STATE: RefCell<Option<Arc<WinAppState>>> = RefCell::new(None);
+  static STATE: RefCell<Option<Arc<WinAppState>>> = const { RefCell::new(None) };
 }
 
 pub fn set_state_for_current_thread(state: Arc<WinAppState>) {

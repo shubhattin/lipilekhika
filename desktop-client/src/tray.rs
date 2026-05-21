@@ -340,11 +340,8 @@ pub fn run_tray_thread(
         while let Ok(thread_msg) = rx.try_recv() {
           if !matches!(thread_msg.origin, ThreadMessageOrigin::Tray) {
             // println!("Tray thread_msg: {:?}", thread_msg);
-            match thread_msg.msg {
-              ThreadMessageType::RerenderTray => {
-                tray_manager.update_ui();
-              }
-              _ => {}
+            if let ThreadMessageType::RerenderTray = thread_msg.msg {
+              tray_manager.update_ui();
             }
           }
         }

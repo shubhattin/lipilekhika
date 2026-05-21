@@ -504,8 +504,8 @@ impl App {
           return Task::none();
         }
         // Download and install the update asynchronously
-        if let Some(ref result) = self.version_check_result {
-          if let (Some(url), Some(version)) = (
+        if let Some(ref result) = self.version_check_result
+          && let (Some(url), Some(version)) = (
             result.windows_msi_download_url.clone(),
             result.latest_version.clone(),
           ) {
@@ -515,7 +515,6 @@ impl App {
               UIMessage::UpdateAppResult(result)
             });
           }
-        }
         Task::none()
       }
       UIMessage::UpdateAppResult(result) => {
@@ -557,21 +556,19 @@ impl App {
       keyboard::listen().filter_map(|event| {
         if let keyboard::Event::KeyPressed { key, modifiers, .. } = event {
           // Alt+X or Alt+C: Toggle typing mode
-          if modifiers.alt() && !modifiers.control() && !modifiers.logo() && !modifiers.shift() {
-            if let Key::Character(ref c) = key {
+          if modifiers.alt() && !modifiers.control() && !modifiers.logo() && !modifiers.shift()
+            && let Key::Character(ref c) = key {
               let c_lower = c.to_lowercase();
               if c_lower == "x" || c_lower == "c" {
                 // Toggle typing mode and trigger notification
                 return Some(UIMessage::KeyboardToggleTypingMode);
               }
             }
-          }
           // Win+Esc: Close the application
-          if modifiers.logo() && !modifiers.alt() && !modifiers.control() && !modifiers.shift() {
-            if key == Key::Named(Named::Escape) {
+          if modifiers.logo() && !modifiers.alt() && !modifiers.control() && !modifiers.shift()
+            && key == Key::Named(Named::Escape) {
               return Some(UIMessage::CloseApp);
             }
-          }
         }
         None
       }),
