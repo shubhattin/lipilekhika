@@ -1,5 +1,7 @@
+use lipilekhika::{transliterate as transliterate_impl, Script};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::str::FromStr;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Payload {
@@ -12,13 +14,9 @@ struct Payload {
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command(rename_all = "snake_case")]
 fn transliterate(payload: Payload) -> String {
-  lipilekhika::transliterate(
-    &payload.text,
-    &payload.from,
-    &payload.to,
-    payload.options.as_ref(),
-  )
-  .unwrap_or_else(|e| e.to_string())
+  let from = Script::from_str(&payload.from).unwrap();
+  let to = Script::from_str(&payload.to).unwrap();
+  transliterate_impl(&payload.text, from, to, payload.options.as_ref()).into_owned()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
