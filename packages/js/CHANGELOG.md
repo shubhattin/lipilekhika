@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (js-lib@1.0.12)
+## js-lib@1.0.12
 
 - Added `musl` build targets for napi-rs bindings for nodejs
 - Added android support via zig corss compile

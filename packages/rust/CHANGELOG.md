@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (rust-lib@1.1.0)
+## rust-lib@1.1.0
 
 - Performance improvements (60%)
 - Instroduces a major **Breaking Change**
