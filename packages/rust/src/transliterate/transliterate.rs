@@ -16,8 +16,8 @@ fn char_eq_str(c: char, s: &str) -> bool {
 }
 
 struct TransliterateCtx<'a, R> {
-  from_script_name: &'a str,
-  to_script_name: &'a str,
+  from_script: &'a ScriptListEnum,
+  to_script: &'a ScriptListEnum,
   from_script_data: &'a ScriptData,
   to_script_data: &'a ScriptData,
   trans_options: &'a HashMap<String, bool>,
@@ -73,7 +73,7 @@ where
     if matches!(self.from_script_data, ScriptData::Brahmic { .. })
       && matches!(self.to_script_data, ScriptData::Other { .. })
     {
-      let ta_ext_case = if is_script_tamil_ext(self.from_script_name) {
+      let ta_ext_case = if is_script_tamil_ext(self.from_script) {
         item_text.and_then(|k| k.chars().next())
           != self.brahmic_halant.and_then(|k| k.chars().next())
       } else {
@@ -133,7 +133,7 @@ where
           self.result.emit_pieces_with_reorder(
             &[linked_matra],
             halant,
-            is_script_tamil_ext(self.to_script_name)
+            is_script_tamil_ext(self.to_script)
               && is_ta_ext_superscript_tail(self.result.last_char()),
           );
           result_str_concat_status = true;
@@ -152,13 +152,13 @@ where
           },
         ) = (brahmic_halant, self.to_script_data)
         {
-          let should_reorder = is_script_tamil_ext(self.to_script_name)
+          let should_reorder = is_script_tamil_ext(self.to_script)
             && is_ta_ext_superscript_tail(self.result.last_char());
           self
             .result
             .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
 
-          if self.to_script_name == "Sinhala"
+          if self.to_script == &ScriptListEnum::Sinhala
             && *self
               .trans_options
               .get("all_to_sinhala:use_conjunct_enabling_halant")
@@ -193,13 +193,13 @@ where
           },
         ) = (brahmic_halant, self.to_script_data)
       {
-        let should_reorder = is_script_tamil_ext(self.to_script_name)
+        let should_reorder = is_script_tamil_ext(self.to_script)
           && is_ta_ext_superscript_tail(self.result.last_char());
         self
           .result
           .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
 
-        if self.to_script_name == "Sinhala"
+        if *self.to_script == ScriptListEnum::Sinhala
           && *self
             .trans_options
             .get("all_to_sinhala:use_conjunct_enabling_halant")
@@ -223,7 +223,7 @@ where
             && next.map(|n| n.is_empty()).unwrap_or(true)
             && !last_extra_call
             // the case below is to enable typing of _, ' (Vedic svara chihnas too)
-            && !(is_script_tamil_ext(self.to_script_name)
+            && !(is_script_tamil_ext(self.to_script)
                 && is_ta_ext_superscript_tail(self.result.last_char()))
     {
       to_clear_context = true;
@@ -629,8 +629,8 @@ fn is_single_ascii_digit(s: &str) -> bool {
 #[allow(clippy::too_many_arguments)]
 pub fn transliterate_text_core(
   text: &str,
-  _from_script: &ScriptListEnum,
-  _to_script: &ScriptListEnum,
+  from_script: &ScriptListEnum,
+  to_script: &ScriptListEnum,
   from_script_data: &ScriptData,
   to_script_data: &ScriptData,
   trans_options_in: &HashMap<String, bool>,
@@ -639,10 +639,7 @@ pub fn transliterate_text_core(
 ) -> TransliterationOutput {
   let opts = options.unwrap_or_default();
 
-  let from_script_name = _from_script.as_ref();
-  let to_script_name = _to_script.as_ref();
-
-  if opts.typing_mode && from_script_name != "Normal" {
+  if opts.typing_mode && *from_script != ScriptListEnum::Normal {
     panic!("Typing mode is only supported with Normal script as the input");
     // ^ this is just a assertion, this will never be done in this codebase
     // as it is only called internally in `typing.rs` with from always being "Normal"
@@ -654,8 +651,8 @@ pub fn transliterate_text_core(
   // ^ now we use this flag itself for adding custom
   // `normal_to_all:use_typing_chars` rule used to modidy the behaviour
 
-  let text = if opts.typing_mode && from_script_name == "Normal" {
-    helpers::apply_typing_input_aliases(text, to_script_name)
+  let text = if opts.typing_mode && *from_script == ScriptListEnum::Normal {
+    helpers::apply_typing_input_aliases(text, to_script)
   } else {
     Cow::Borrowed(text)
   };
@@ -676,7 +673,7 @@ pub fn transliterate_text_core(
     || (matches!(from_script_data, ScriptData::Other { .. })
       && matches!(to_script_data, ScriptData::Brahmic { .. }))
     || (opts.typing_mode
-      && from_script_name == "Normal"
+      && *from_script == ScriptListEnum::Normal
       && matches!(to_script_data, ScriptData::Other { .. }));
 
   let (brahmic_nuqta, brahmic_halant) = match (from_script_data, to_script_data) {
@@ -694,8 +691,8 @@ pub fn transliterate_text_core(
     .copied()
     .unwrap_or(false);
   // choose matching map
-  let use_typing_map =
-    (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) && from_script_name == "Normal";
+  let use_typing_map = (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode)
+    && *from_script == ScriptListEnum::Normal;
   let text_to_krama_lookup_script_data = if use_typing_map {
     to_script_data
   } else {
@@ -710,16 +707,16 @@ pub fn transliterate_text_core(
   // Used when converting from Tamil-Extended (superscript numbers)
   let mut ignore_ta_ext_sup_num_text_index: isize = -1;
 
-  let is_from_tamil_ext_ = is_script_tamil_ext(from_script_name);
-  let is_to_tamil_ext_ = is_script_tamil_ext(to_script_name);
+  let is_from_tamil_ext_ = is_script_tamil_ext(from_script);
+  let is_to_tamil_ext_ = is_script_tamil_ext(to_script);
   let opt_preserve_specific_chars_ = *trans_options
     .get("all_to_normal:preserve_specific_chars")
     .unwrap_or(&false)
-    && to_script_name == "Normal";
+    && *to_script == ScriptListEnum::Normal;
 
   let mut ctx = TransliterateCtx {
-    from_script_name,
-    to_script_name,
+    from_script,
+    to_script,
     from_script_data,
     to_script_data,
     trans_options,
@@ -1223,7 +1220,7 @@ pub fn transliterate_text_core(
                 };
               }
 
-              let next_list = if opts.typing_mode && from_script_name == "Normal" {
+              let next_list = if opts.typing_mode && *from_script == ScriptListEnum::Normal {
                 map.next.as_deref()
               } else {
                 None
@@ -1234,7 +1231,7 @@ pub fn transliterate_text_core(
                 None,
               );
             } else if opts.typing_mode
-              && from_script_name == "Normal"
+              && *from_script == ScriptListEnum::Normal
               && matches!(to_script_data, ScriptData::Other { .. })
             {
               result_concat_status = ctx.prev_context_cleanup(
@@ -1406,12 +1403,14 @@ pub fn transliterate_text_core(
 }
 
 pub fn transliterate_text(
-  text: &str,
+  text: impl AsRef<str>,
   from_script: ScriptListEnum,
   to_script: ScriptListEnum,
   transliteration_input_options: Option<&HashMap<String, bool>>,
   options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
+  let text = text.as_ref();
+
   let from_data = ScriptData::get_script_data(&from_script);
   let to_data = ScriptData::get_script_data(&to_script);
 

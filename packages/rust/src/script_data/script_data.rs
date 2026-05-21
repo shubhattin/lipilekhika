@@ -95,19 +95,14 @@ impl ScriptData {
         .unwrap_or_else(|e| panic!("bincode decode failed for script `{}`: {}", script_name, e));
 
       data.init_lookups();
-      let script = ScriptListEnum::from_str(script_name).unwrap_or_else(|_| {
-        panic!("unknown script data name: `{script_name}`")
-      });
+      let script = ScriptListEnum::from_str(script_name)
+        .unwrap_or_else(|_| panic!("unknown script data name: `{script_name}`"));
       map.insert(script, data);
     }
 
     map
   }
 
-  /// this method assumes that the script name is already normalized,
-  /// if not then it will panic.
-  ///
-  /// Normalize script before calling this
   pub fn get_script_data(script: &ScriptListEnum) -> &'static ScriptData {
     let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
 

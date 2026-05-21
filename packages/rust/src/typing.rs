@@ -120,7 +120,8 @@ impl TypingContext {
   }
 
   /// Accepts character-by-character input and returns the diff relative to the previous output.
-  pub fn take_key_input(&mut self, key: &str) -> TypingDiff {
+  pub fn take_key_input<T: AsRef<str>>(&mut self, key: T) -> TypingDiff {
+    let key = key.as_ref();
     // If key is empty, nothing to do.
     let Some(ch) = key.chars().next() else {
       return TypingDiff {
@@ -221,10 +222,11 @@ fn compute_diff(prev_output: &str, output: &str) -> (usize, String) {
 /// Helper used in tests to emulate per-key typing and accumulate the final output.
 ///
 pub fn emulate_typing(
-  text: &str,
+  text: impl AsRef<str>,
   typing_lang: Script,
   options: Option<TypingContextOptions>,
 ) -> String {
+  let text = text.as_ref();
   let mut ctx = TypingContext::new(typing_lang, options);
   let mut result = String::new();
 

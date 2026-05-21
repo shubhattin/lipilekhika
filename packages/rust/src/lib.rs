@@ -5,7 +5,7 @@ pub use crate::typing::{
   KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
   get_script_typing_data_map,
 };
-use scripts::{Script, ScriptListEnum};
+pub use scripts::{Script, ScriptListEnum};
 use std::collections::HashMap;
 
 mod script_data;
@@ -48,9 +48,9 @@ pub fn get_schwa_status_for_script(script: Script) -> Option<bool> {
 }
 
 /// Preload script data for a script or language.
-pub fn preload_script_data(script: Script) {
+pub fn preload_script_data(script: Script) -> &'static ScriptData {
   let normalized_script: ScriptListEnum = script.into();
-  ScriptData::get_script_data(&normalized_script);
+  ScriptData::get_script_data(&normalized_script)
 }
 
 #[cfg(test)]
