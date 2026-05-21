@@ -1,8 +1,16 @@
+use lipilekhika::ScriptListEnum;
+use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 mod typing;
+
+fn py_parse_script(name: &str, label: &str) -> PyResult<Script> {
+  Script::from_str(name.trim())
+    .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("invalid {label} {name:?}: {e}")))
+}
 
 #[pyfunction]
 #[pyo3(signature = (text, from_script, to_script, trans_options=None))]
@@ -23,38 +31,41 @@ fn transliterate(
       .collect()
   });
 
-  lipilekhika::transliterate(text, from_script, to_script, options.as_ref())
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let from = py_parse_script(from_script, "from_script")?;
+  let to = py_parse_script(to_script, "to_script")?;
+
+  Ok(lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned())
 }
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
 fn preload_script_data(script_name: &str) -> PyResult<()> {
-  lipilekhika::preload_script_data(script_name)
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let script = py_parse_script(script_name, "script_name")?;
+  lipilekhika::preload_script_data(script);
+  Ok(())
 }
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
 fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
-  lipilekhika::get_schwa_status_for_script(script_name)
-    .map(|status| status.unwrap_or(false))
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let script = py_parse_script(script_name, "script_name")?;
+  Ok(lipilekhika::get_schwa_status_for_script(script).unwrap_or(false))
 }
 
 #[pyfunction]
 #[pyo3(signature = (from_script, to_script))]
 fn get_all_options(from_script: &str, to_script: &str) -> PyResult<Vec<String>> {
-  lipilekhika::get_all_options(from_script, to_script)
-    .map(|options| options.into_iter().collect::<Vec<String>>())
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let from = py_parse_script(from_script, "from_script")?;
+  let to = py_parse_script(to_script, "to_script")?;
+  Ok(lipilekhika::get_all_options(from, to))
 }
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
 fn get_normalized_script_name(script_name: &str) -> PyResult<String> {
-  lipilekhika::get_normalized_script_name(script_name)
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let script = py_parse_script(script_name, "script_name")?;
+  let normalized: ScriptListEnum = script.into();
+  Ok(normalized.to_string())
 }
 
 #[pyfunction]

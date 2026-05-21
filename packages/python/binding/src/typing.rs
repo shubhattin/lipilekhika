@@ -1,4 +1,6 @@
+use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
+use std::str::FromStr;
 
 #[pyfunction]
 pub fn default_auto_context_clear_time_ms() -> u64 {
@@ -120,15 +122,18 @@ impl TypingContext {
 }
 
 #[pyfunction]
-#[pyo3(signature = (typing_lang, options=None))]
+#[pyo3(signature = (typing_script, options=None))]
 pub fn create_typing_context(
-  typing_lang: &str,
+  typing_script: &str,
   options: Option<TypingContextOptions>,
 ) -> PyResult<TypingContext> {
+  let script = Script::from_str(typing_script.trim()).map_err(|e| {
+    pyo3::exceptions::PyValueError::new_err(format!("invalid typing_script {typing_script:?}: {e}"))
+  })?;
   let rust_options = options.map(|o| o.into());
-  lipilekhika::typing::TypingContext::new(typing_lang, rust_options)
-    .map(|ctx| TypingContext { inner: ctx })
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  Ok(TypingContext {
+    inner: lipilekhika::typing::TypingContext::new(script, rust_options),
+  })
 }
 
 /// An item in the typing data map: (text, list_type, mappings).
@@ -173,32 +178,33 @@ impl ScriptTypingDataMap {
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap> {
-  lipilekhika::typing::get_script_typing_data_map(script)
-    .map(|data| {
-      // Convert ListType enum to lowercase string
-      fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
-        match lt {
-          lipilekhika::typing::ListType::Anya => "anya".to_string(),
-          lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
-          lipilekhika::typing::ListType::Matra => "matra".to_string(),
-          lipilekhika::typing::ListType::Svara => "svara".to_string(),
-        }
-      }
+  let script = Script::from_str(script.trim()).map_err(|e| {
+    pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
+  })?;
 
-      ScriptTypingDataMap {
-        common_krama_map: data
-          .common_krama_map
-          .into_iter()
-          .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
-          .collect(),
-        script_specific_krama_map: data
-          .script_specific_krama_map
-          .into_iter()
-          .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
-          .collect(),
-      }
-    })
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let data = lipilekhika::typing::get_script_typing_data_map(script);
+
+  fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+    match lt {
+      lipilekhika::typing::ListType::Anya => "anya".to_string(),
+      lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+      lipilekhika::typing::ListType::Matra => "matra".to_string(),
+      lipilekhika::typing::ListType::Svara => "svara".to_string(),
+    }
+  }
+
+  Ok(ScriptTypingDataMap {
+    common_krama_map: data
+      .common_krama_map
+      .into_iter()
+      .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+      .collect(),
+    script_specific_krama_map: data
+      .script_specific_krama_map
+      .into_iter()
+      .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+      .collect(),
+  })
 }
 
 /// An item in the krama data: (character_text, list_type).
@@ -221,22 +227,25 @@ pub type KramaDataItem = (String, String);
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
-  lipilekhika::typing::get_script_krama_data(script)
-    .map(|data| {
-      // Convert ListType enum to lowercase string
-      fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
-        match lt {
-          lipilekhika::typing::ListType::Anya => "anya".to_string(),
-          lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
-          lipilekhika::typing::ListType::Matra => "matra".to_string(),
-          lipilekhika::typing::ListType::Svara => "svara".to_string(),
-        }
-      }
+  let script = Script::from_str(script.trim()).map_err(|e| {
+    pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
+  })?;
 
-      data
-        .into_iter()
-        .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
-        .collect()
-    })
-    .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
+  let data = lipilekhika::typing::get_script_krama_data(script);
+
+  fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+    match lt {
+      lipilekhika::typing::ListType::Anya => "anya".to_string(),
+      lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+      lipilekhika::typing::ListType::Matra => "matra".to_string(),
+      lipilekhika::typing::ListType::Svara => "svara".to_string(),
+    }
+  }
+
+  Ok(
+    data
+      .into_iter()
+      .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
+      .collect(),
+  )
 }

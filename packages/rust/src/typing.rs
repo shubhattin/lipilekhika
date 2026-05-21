@@ -79,9 +79,9 @@ pub struct TypingContext {
 
 impl TypingContext {
   /// Creates a new typing context for the given script/language.
-  pub fn new(typing_lang: Script, options: Option<TypingContextOptions>) -> Self {
+  pub fn new(typing_script: Script, options: Option<TypingContextOptions>) -> Self {
     let opts = options.unwrap_or_default();
-    let typing_script: ScriptListEnum = typing_lang.into();
+    let typing_script: ScriptListEnum = typing_script.into();
 
     let from_script_data = ScriptData::get_script_data(&ScriptListEnum::Normal);
     let to_script_data = ScriptData::get_script_data(&typing_script);
