@@ -7,6 +7,9 @@
 use core::ffi::c_void;
 use std::ffi::CStr;
 use std::os::raw::c_char;
+use std::str::FromStr;
+
+use lipilekhika::scripts::Script;
 
 type RustTypingContext = lipilekhika::typing::TypingContext;
 type RustTypingContextOptions = lipilekhika::typing::TypingContextOptions;
@@ -186,18 +189,22 @@ pub unsafe extern "C" fn lipi_typing_context_new(
     Some(map_options(Some(*opts)))
   };
 
-  let result = std::panic::catch_unwind(|| RustTypingContext::new(&lang, rust_opts));
+  let typing_script = match Script::from_str(lang.trim()) {
+    Ok(s) => s,
+    Err(_) => {
+      set_out_string(out_err, Some(format!("unknown typing script/language: {lang}")));
+      return LipiStatus::Error;
+    }
+  };
+
+  let result = std::panic::catch_unwind(|| RustTypingContext::new(typing_script, rust_opts));
 
   match result {
     Err(_) => {
       set_out_string(out_err, Some("panic across FFI boundary".to_string()));
       LipiStatus::Panic
     }
-    Ok(Err(err_msg)) => {
-      set_out_string(out_err, Some(err_msg));
-      LipiStatus::Error
-    }
-    Ok(Ok(ctx)) => {
+    Ok(ctx) => {
       let boxed = Box::new(ctx);
       *out_ctx = Box::into_raw(boxed) as *mut LipiTypingContext;
       LipiStatus::Ok
@@ -254,9 +261,9 @@ pub unsafe extern "C" fn lipi_typing_context_take_key_input(
     }
   };
 
-  let result = std::panic::catch_unwind(|| {
-    let ctx = ctx_from_ptr(ctx).map_err(|e| format!("{e:?}"))?;
-    ctx.take_key_input(&key)
+  let result = std::panic::catch_unwind(|| match ctx_from_ptr(ctx) {
+    Err(e) => Err(format!("{e:?}")),
+    Ok(ctx) => Ok(ctx.take_key_input(&key)),
   });
 
   match result {
