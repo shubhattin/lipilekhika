@@ -1,7 +1,5 @@
 use std::sync::OnceLock;
 
-use crate::errors::TransliterationError;
-
 use super::generated;
 use super::schema::{List, ScriptListData};
 
@@ -43,61 +41,16 @@ pub fn get_script_list_data() -> &'static ScriptListData {
     data
   })
 }
-
-fn capitalize_first_and_after_dash(input: &str) -> String {
-  // Lowercase the string first, then capitalize first and after dash
-  let mut result = String::with_capacity(input.len());
-  let mut capitalize_next = true;
-
-  for ch in input.chars() {
-    if ch == '-' {
-      capitalize_next = true;
-      result.push(ch);
-    } else if capitalize_next && ch.is_ascii_alphabetic() {
-      // Mirror TS behavior which only uppercases a–z
-      result.push(ch.to_ascii_uppercase());
-      capitalize_next = false;
-    } else {
-      result.push(ch.to_ascii_lowercase());
-      capitalize_next = false;
-    }
-  }
-
-  result
-}
-
-/// Returns the normalized script/language name.
-pub fn get_normalized_script_name(script_name: &str) -> Result<String, TransliterationError> {
-  let data = get_script_list_data();
-
-  let capitalized_name = capitalize_first_and_after_dash(script_name);
-
-  // Direct script name match
-  if data.scripts.contains(&capitalized_name) {
-    return Ok(capitalized_name);
-  }
-
-  // Language -> script mapping
-  if data.langs.contains(&capitalized_name)
-    && let Some(script) = data.lang_script_map.get(&capitalized_name)
-  {
-    return Ok(script.clone());
-  }
-
-  // Alternate to script mapping (always use lowercase key)
-  let lower_name = script_name.to_lowercase();
-  if let Some(script) = data.script_alternates_map.get(&lower_name) {
-    return Ok(script.clone());
-  }
-
-  Err(TransliterationError::InvalidScriptName(
-    script_name.to_string(),
-  ))
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::scripts::{Script, ScriptListEnum};
+  use std::str::FromStr;
+
+  /// User-facing script/language strings (from `Script`) → internal `ScriptListEnum`.
+  fn resolve(s: &str) -> Result<ScriptListEnum, <Script as FromStr>::Err> {
+    Script::from_str(s).map(Into::into)
+  }
 
   #[test]
   fn test_get_script_list_data_parses() {
@@ -107,346 +60,133 @@ mod tests {
 
   #[test]
   fn test_script_acronyms() {
-    // Script acronyms
-    assert_eq!(
-      get_normalized_script_name("dev"),
-      Ok("Devanagari".to_string())
-    );
-
-    assert_eq!(get_normalized_script_name("te"), Ok("Telugu".to_string()));
-    assert_eq!(get_normalized_script_name("tel"), Ok("Telugu".to_string()));
-    assert_eq!(get_normalized_script_name("tam"), Ok("Tamil".to_string()));
-    assert_eq!(
-      get_normalized_script_name("tam-ext"),
-      Ok("Tamil-Extended".to_string())
-    );
-    assert_eq!(get_normalized_script_name("ben"), Ok("Bengali".to_string()));
-    assert_eq!(get_normalized_script_name("be"), Ok("Bengali".to_string()));
-    assert_eq!(get_normalized_script_name("ka"), Ok("Kannada".to_string()));
-    assert_eq!(get_normalized_script_name("kan"), Ok("Kannada".to_string()));
-    assert_eq!(get_normalized_script_name("gu"), Ok("Gujarati".to_string()));
-    assert_eq!(
-      get_normalized_script_name("guj"),
-      Ok("Gujarati".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("mal"),
-      Ok("Malayalam".to_string())
-    );
-    assert_eq!(get_normalized_script_name("or"), Ok("Odia".to_string()));
-    assert_eq!(get_normalized_script_name("od"), Ok("Odia".to_string()));
-    assert_eq!(get_normalized_script_name("oriya"), Ok("Odia".to_string()));
-    assert_eq!(get_normalized_script_name("si"), Ok("Sinhala".to_string()));
-    assert_eq!(
-      get_normalized_script_name("sinh"),
-      Ok("Sinhala".to_string())
-    );
-    assert_eq!(get_normalized_script_name("sin"), Ok("Sinhala".to_string()));
-    assert_eq!(get_normalized_script_name("en"), Ok("Normal".to_string()));
-    assert_eq!(
-      get_normalized_script_name("rom"),
-      Ok("Romanized".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("gur"),
-      Ok("Gurumukhi".to_string())
-    );
-    assert_eq!(get_normalized_script_name("as"), Ok("Assamese".to_string()));
+    assert_eq!(resolve("dev"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("te"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("tel"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("tam"), Ok(ScriptListEnum::Tamil));
+    assert_eq!(resolve("tam-ext"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("ben"), Ok(ScriptListEnum::Bengali));
+    assert_eq!(resolve("be"), Ok(ScriptListEnum::Bengali));
+    assert_eq!(resolve("ka"), Ok(ScriptListEnum::Kannada));
+    assert_eq!(resolve("kan"), Ok(ScriptListEnum::Kannada));
+    assert_eq!(resolve("gu"), Ok(ScriptListEnum::Gujarati));
+    assert_eq!(resolve("guj"), Ok(ScriptListEnum::Gujarati));
+    assert_eq!(resolve("mal"), Ok(ScriptListEnum::Malayalam));
+    assert_eq!(resolve("or"), Ok(ScriptListEnum::Odia));
+    assert_eq!(resolve("od"), Ok(ScriptListEnum::Odia));
+    assert_eq!(resolve("oriya"), Ok(ScriptListEnum::Odia));
+    assert_eq!(resolve("si"), Ok(ScriptListEnum::Sinhala));
+    assert_eq!(resolve("sinh"), Ok(ScriptListEnum::Sinhala));
+    assert_eq!(resolve("sin"), Ok(ScriptListEnum::Sinhala));
+    assert_eq!(resolve("en"), Ok(ScriptListEnum::Normal));
+    assert_eq!(resolve("rom"), Ok(ScriptListEnum::Romanized));
+    assert_eq!(resolve("gur"), Ok(ScriptListEnum::Gurumukhi));
+    assert_eq!(resolve("as"), Ok(ScriptListEnum::Assamese));
   }
 
   #[test]
   fn test_script_acronyms_case_insensitive() {
-    assert_eq!(
-      get_normalized_script_name("DEV"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(get_normalized_script_name("Te"), Ok("Telugu".to_string()));
-    assert_eq!(get_normalized_script_name("TEL"), Ok("Telugu".to_string()));
-    assert_eq!(
-      get_normalized_script_name("TAM-EXT"),
-      Ok("Tamil-Extended".to_string())
-    );
+    assert_eq!(resolve("DEV"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Te"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("TEL"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("TAM-EXT"), Ok(ScriptListEnum::TamilExtended));
   }
 
   #[test]
   fn test_language_acronyms() {
-    assert_eq!(
-      get_normalized_script_name("sa"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("san"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("hin"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("hi"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("mar"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("ne"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("nep"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("pun"),
-      Ok("Gurumukhi".to_string())
-    );
+    assert_eq!(resolve("sa"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("san"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("hin"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("hi"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("mar"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("ne"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("nep"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("pun"), Ok(ScriptListEnum::Gurumukhi));
   }
 
   #[test]
   fn test_language_acronyms_case_insensitive() {
-    assert_eq!(
-      get_normalized_script_name("SA"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("San"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("HIN"),
-      Ok("Devanagari".to_string())
-    );
+    assert_eq!(resolve("SA"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("San"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("HIN"), Ok(ScriptListEnum::Devanagari));
   }
 
   #[test]
   fn test_full_script_names() {
-    assert_eq!(
-      get_normalized_script_name("Devanagari"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Telugu"),
-      Ok("Telugu".to_string())
-    );
-    assert_eq!(get_normalized_script_name("Tamil"), Ok("Tamil".to_string()));
-    assert_eq!(
-      get_normalized_script_name("Tamil-Extended"),
-      Ok("Tamil-Extended".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Bengali"),
-      Ok("Bengali".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Kannada"),
-      Ok("Kannada".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Gujarati"),
-      Ok("Gujarati".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Malayalam"),
-      Ok("Malayalam".to_string())
-    );
-    assert_eq!(get_normalized_script_name("Odia"), Ok("Odia".to_string()));
-    assert_eq!(
-      get_normalized_script_name("Sinhala"),
-      Ok("Sinhala".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Normal"),
-      Ok("Normal".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Romanized"),
-      Ok("Romanized".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Gurumukhi"),
-      Ok("Gurumukhi".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Assamese"),
-      Ok("Assamese".to_string())
-    );
+    assert_eq!(resolve("Devanagari"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Telugu"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("Tamil"), Ok(ScriptListEnum::Tamil));
+    assert_eq!(resolve("Tamil-Extended"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("Bengali"), Ok(ScriptListEnum::Bengali));
+    assert_eq!(resolve("Kannada"), Ok(ScriptListEnum::Kannada));
+    assert_eq!(resolve("Gujarati"), Ok(ScriptListEnum::Gujarati));
+    assert_eq!(resolve("Malayalam"), Ok(ScriptListEnum::Malayalam));
+    assert_eq!(resolve("Odia"), Ok(ScriptListEnum::Odia));
+    assert_eq!(resolve("Sinhala"), Ok(ScriptListEnum::Sinhala));
+    assert_eq!(resolve("Normal"), Ok(ScriptListEnum::Normal));
+    assert_eq!(resolve("Romanized"), Ok(ScriptListEnum::Romanized));
+    assert_eq!(resolve("Gurumukhi"), Ok(ScriptListEnum::Gurumukhi));
+    assert_eq!(resolve("Assamese"), Ok(ScriptListEnum::Assamese));
   }
 
   #[test]
   fn test_full_language_names() {
-    assert_eq!(
-      get_normalized_script_name("Sanskrit"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Hindi"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Marathi"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Nepali"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Punjabi"),
-      Ok("Gurumukhi".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Bengali"),
-      Ok("Bengali".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Gujarati"),
-      Ok("Gujarati".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Kannada"),
-      Ok("Kannada".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Malayalam"),
-      Ok("Malayalam".to_string())
-    );
-    assert_eq!(get_normalized_script_name("Odia"), Ok("Odia".to_string()));
-    assert_eq!(
-      get_normalized_script_name("Sinhala"),
-      Ok("Sinhala".to_string())
-    );
-    assert_eq!(get_normalized_script_name("Tamil"), Ok("Tamil".to_string()));
-    assert_eq!(
-      get_normalized_script_name("Telugu"),
-      Ok("Telugu".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Assamese"),
-      Ok("Assamese".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("English"),
-      Ok("Normal".to_string())
-    );
+    assert_eq!(resolve("Sanskrit"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Hindi"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Marathi"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Nepali"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("Punjabi"), Ok(ScriptListEnum::Gurumukhi));
+    assert_eq!(resolve("Bengali"), Ok(ScriptListEnum::Bengali));
+    assert_eq!(resolve("Gujarati"), Ok(ScriptListEnum::Gujarati));
+    assert_eq!(resolve("Kannada"), Ok(ScriptListEnum::Kannada));
+    assert_eq!(resolve("Malayalam"), Ok(ScriptListEnum::Malayalam));
+    assert_eq!(resolve("Odia"), Ok(ScriptListEnum::Odia));
+    assert_eq!(resolve("Sinhala"), Ok(ScriptListEnum::Sinhala));
+    assert_eq!(resolve("Tamil"), Ok(ScriptListEnum::Tamil));
+    assert_eq!(resolve("Telugu"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("Assamese"), Ok(ScriptListEnum::Assamese));
+    assert_eq!(resolve("English"), Ok(ScriptListEnum::Normal));
   }
 
   #[test]
   fn test_case_variations_for_scripts() {
-    // Lowercase script names
-    assert_eq!(
-      get_normalized_script_name("devanagari"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("telugu"),
-      Ok("Telugu".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("tamil-extended"),
-      Ok("Tamil-Extended".to_string())
-    );
-
-    // Mixed case
-    assert_eq!(
-      get_normalized_script_name("Devanagari"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("DEvanagari"),
-      Ok("Devanagari".to_string())
-    );
+    assert_eq!(resolve("devanagari"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("telugu"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("tamil-extended"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("Devanagari"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("DEvanagari"), Ok(ScriptListEnum::Devanagari));
   }
 
   #[test]
   fn test_case_variations_for_languages() {
-    assert_eq!(
-      get_normalized_script_name("sanskrit"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("hindi"),
-      Ok("Devanagari".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("punjabi"),
-      Ok("Gurumukhi".to_string())
-    );
+    assert_eq!(resolve("sanskrit"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("hindi"), Ok(ScriptListEnum::Devanagari));
+    assert_eq!(resolve("punjabi"), Ok(ScriptListEnum::Gurumukhi));
   }
 
   #[test]
   fn test_invalid_inputs() {
-    // Unknown acronyms
-    assert_eq!(
-      get_normalized_script_name("xyz").unwrap_err().to_string(),
-      "Invalid script name: xyz"
-    );
-    assert_eq!(
-      get_normalized_script_name("unknown")
-        .unwrap_err()
-        .to_string(),
-      "Invalid script name: unknown"
-    );
-    assert_eq!(
-      get_normalized_script_name("abc").unwrap_err().to_string(),
-      "Invalid script name: abc"
-    );
-
-    // Unknown script names
-    assert_eq!(
-      get_normalized_script_name("UnknownScript"),
-      Err(TransliterationError::InvalidScriptName(
-        "UnknownScript".to_string()
-      ))
-    );
-    assert_eq!(
-      get_normalized_script_name("Latin"),
-      Err(TransliterationError::InvalidScriptName("Latin".to_string()))
-    );
-    assert_eq!(
-      get_normalized_script_name("Cyrillic"),
-      Err(TransliterationError::InvalidScriptName(
-        "Cyrillic".to_string()
-      ))
-    );
-
-    // Empty string and non-alphabetic
-    assert_eq!(
-      get_normalized_script_name("").unwrap_err().to_string(),
-      "Invalid script name: "
-    );
-    assert_eq!(
-      get_normalized_script_name("123").unwrap_err().to_string(),
-      "Invalid script name: 123"
-    );
-    assert_eq!(
-      get_normalized_script_name("!@#").unwrap_err().to_string(),
-      "Invalid script name: !@#"
-    );
+    for bad in [
+      "xyz",
+      "unknown",
+      "abc",
+      "UnknownScript",
+      "Latin",
+      "Cyrillic",
+      "",
+      "123",
+      "!@#",
+    ] {
+      assert!(resolve(bad).is_err(), "expected parse failure for `{bad}`");
+    }
   }
 
   #[test]
   fn test_edge_cases() {
-    // Acronyms with dashes
-    assert_eq!(
-      get_normalized_script_name("tam-ext"),
-      Ok("Tamil-Extended".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("TAM-EXT"),
-      Ok("Tamil-Extended".to_string())
-    );
-    assert_eq!(
-      get_normalized_script_name("Tam-Ext"),
-      Ok("Tamil-Extended".to_string())
-    );
-
-    // Prioritize exact script matches over acronyms
-    assert_eq!(
-      get_normalized_script_name("Telugu"),
-      Ok("Telugu".to_string())
-    );
-    assert_eq!(get_normalized_script_name("tel"), Ok("Telugu".to_string()));
+    assert_eq!(resolve("tam-ext"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("TAM-EXT"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("Tam-Ext"), Ok(ScriptListEnum::TamilExtended));
+    assert_eq!(resolve("Telugu"), Ok(ScriptListEnum::Telugu));
+    assert_eq!(resolve("tel"), Ok(ScriptListEnum::Telugu));
   }
 }

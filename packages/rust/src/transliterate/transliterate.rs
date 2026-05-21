@@ -1,4 +1,5 @@
 use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
+use crate::scripts::ScriptListEnum;
 use crate::transliterate::helpers::{
   self, InputTextCursor, PrevContextBuilder, PrevContextItem, ResultStringBuilder,
   is_script_tamil_ext, is_ta_ext_superscript_tail, is_vedic_svara_tail,
@@ -628,8 +629,8 @@ fn is_single_ascii_digit(s: &str) -> bool {
 #[allow(clippy::too_many_arguments)]
 pub fn transliterate_text_core(
   text: &str,
-  from_script_name: &str,
-  to_script_name: &str,
+  _from_script: &ScriptListEnum,
+  _to_script: &ScriptListEnum,
   from_script_data: &ScriptData,
   to_script_data: &ScriptData,
   trans_options_in: &HashMap<String, bool>,
@@ -637,6 +638,9 @@ pub fn transliterate_text_core(
   options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
   let opts = options.unwrap_or_default();
+
+  let from_script_name = _from_script.as_ref();
+  let to_script_name = _to_script.as_ref();
 
   if opts.typing_mode && from_script_name != "Normal" {
     panic!("Typing mode is only supported with Normal script as the input");
@@ -1403,20 +1407,20 @@ pub fn transliterate_text_core(
 
 pub fn transliterate_text(
   text: &str,
-  from_script_name: &str,
-  to_script_name: &str,
+  from_script: ScriptListEnum,
+  to_script: ScriptListEnum,
   transliteration_input_options: Option<&HashMap<String, bool>>,
   options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
-  let from_data = ScriptData::get_script_data(from_script_name);
-  let to_data = ScriptData::get_script_data(to_script_name);
+  let from_data = ScriptData::get_script_data(&from_script);
+  let to_data = ScriptData::get_script_data(&to_script);
 
   let resolved = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
 
   transliterate_text_core(
     text,
-    from_script_name,
-    to_script_name,
+    &from_script,
+    &to_script,
     from_data,
     to_data,
     &resolved.trans_options,

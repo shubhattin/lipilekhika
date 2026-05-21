@@ -1,4 +1,5 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
 use serde::Deserialize;
@@ -6,6 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::sync::OnceLock;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -262,8 +264,13 @@ fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
     if case.todo.unwrap_or(false) {
       continue;
     }
-    let out = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
-    black_box(out).ok();
+    let out = transliterate(
+      &case.input,
+      Script::from_str(&case.from).unwrap(),
+      Script::from_str(&case.to).unwrap(),
+      case.options.as_ref(),
+    );
+    black_box(out);
   }
 }
 
@@ -282,8 +289,13 @@ fn run_transliteration_multi_pass(cases: &[TransliterationTestCase]) {
     for chunk in active_cases.chunks(chunk_size) {
       scope.spawn(move || {
         for case in chunk {
-          let out = transliterate(&case.input, &case.from, &case.to, case.options.as_ref());
-          black_box(out).ok();
+          let out = transliterate(
+            &case.input,
+            Script::from_str(&case.from).unwrap(),
+            Script::from_str(&case.to).unwrap(),
+            case.options.as_ref(),
+          );
+          black_box(out);
         }
       });
     }
@@ -298,8 +310,8 @@ fn run_typing_normal_to_others_pass(cases: &[TransliterationTestCase]) {
     if case.from != "Normal" {
       continue;
     }
-    let out = emulate_typing(&case.input, &case.to, None);
-    black_box(out).ok();
+    let out = emulate_typing(&case.input, Script::from_str(&case.to).unwrap(), None);
+    black_box(out);
   }
 }
 
@@ -309,8 +321,8 @@ fn run_typing_others_to_normal_pass(cases: &[TypingTestCase]) {
       continue;
     }
     let opts = build_typing_options(&case.options);
-    let out = emulate_typing(&case.text, &case.script, opts);
-    black_box(out).ok();
+    let out = emulate_typing(&case.text, Script::from_str(&case.script).unwrap(), opts);
+    black_box(out);
   }
 }
 

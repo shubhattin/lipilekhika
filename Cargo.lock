@@ -4003,7 +4003,6 @@ dependencies = [
  "serde_yaml_ng",
  "strum",
  "syn 2.0.114",
- "thiserror 2.0.18",
 ]
 
 [[package]]

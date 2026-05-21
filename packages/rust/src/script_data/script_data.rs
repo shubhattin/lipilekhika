@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::ops::Deref;
+use std::str::FromStr;
 use std::sync::OnceLock;
+
+use crate::scripts::ScriptListEnum;
 
 use super::generated;
 use super::schema::{CommonScriptAttr, ScriptData};
@@ -79,9 +82,9 @@ impl ScriptData {
 }
 
 /// currently for simplicity using a single cache for all script data
-static SCRIPT_DATA_CACHE: OnceLock<HashMap<String, ScriptData>> = OnceLock::new();
+static SCRIPT_DATA_CACHE: OnceLock<HashMap<ScriptListEnum, ScriptData>> = OnceLock::new();
 impl ScriptData {
-  fn load_all() -> HashMap<String, ScriptData> {
+  fn load_all() -> HashMap<ScriptListEnum, ScriptData> {
     let mut map = HashMap::new();
 
     for &script_name in generated::SCRIPT_DATA_NAMES {
@@ -92,7 +95,10 @@ impl ScriptData {
         .unwrap_or_else(|e| panic!("bincode decode failed for script `{}`: {}", script_name, e));
 
       data.init_lookups();
-      map.insert(script_name.to_string(), data);
+      let script = ScriptListEnum::from_str(script_name).unwrap_or_else(|_| {
+        panic!("unknown script data name: `{script_name}`")
+      });
+      map.insert(script, data);
     }
 
     map
@@ -102,7 +108,7 @@ impl ScriptData {
   /// if not then it will panic.
   ///
   /// Normalize script before calling this
-  pub fn get_script_data(script: &str) -> &'static ScriptData {
+  pub fn get_script_data(script: &ScriptListEnum) -> &'static ScriptData {
     let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
 
     cache
@@ -128,6 +134,7 @@ mod tests {
   use super::*;
   use std::fs;
   use std::path::Path;
+  use std::str::FromStr;
 
   #[test]
   fn all_script_data_json_files_must_parse() {
@@ -147,7 +154,7 @@ mod tests {
           .expect("Invalid filename");
         println!("{}", script_name);
 
-        let _ = ScriptData::get_script_data(script_name);
+        let _ = ScriptData::get_script_data(&ScriptListEnum::from_str(script_name).unwrap());
       }
     }
   }

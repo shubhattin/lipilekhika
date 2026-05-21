@@ -75,7 +75,7 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
         )
       });
     quote! {
-      ScriptLangEnum::#lang_variant => Script::#script_variant,
+      Script::#lang_variant => ScriptListEnum::#script_variant,
     }
   });
 
@@ -85,18 +85,22 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
     // `EnumString` automatically implements `FromStr` for the enum.
     // which allows calling `Script::from_str("script")` -> `Result<Script, Error>``
 
+    /// The list of all supported scripts (interal resolved type)
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display, EnumString)]
-    pub enum Script {
+    #[strum(ascii_case_insensitive)]
+    pub enum ScriptListEnum {
       #(#script_enum_variants)*
     }
 
+    /// List of all supported scripts, languages and their aliases
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display, EnumString)]
-    pub enum ScriptLangEnum {
+    #[strum(ascii_case_insensitive)]
+    pub enum Script {
       #(#script_lang_enum_variants)*
     }
 
-    impl From<ScriptLangEnum> for Script {
-      fn from(lang: ScriptLangEnum) -> Self {
+    impl From<Script> for ScriptListEnum {
+      fn from(lang: Script) -> Self {
         match lang {
           #(#from_script_lang_arms)*
         }
