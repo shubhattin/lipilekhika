@@ -15,6 +15,7 @@ const config = {
     alias: {
       '$components/*': '../../docs/docs-and-web-client/src/components/*',
       'lipilekhika/*': '../../packages/js/src/*',
+      '@lipilekhika/script-data-source': '../../packages/js/src/utils/get_script_data/get_esm.ts',
       lipilekhika: '../../packages/js/src/index_main.ts',
       '~/*': '../../docs/docs-and-web-client/src/*'
     }
