@@ -239,6 +239,18 @@ See the full list of custom transliteration options:
 - **[Custom Options](https://lipilekhika.in/reference/custom_trans_options)** — Transliteration options reference
 - **[GitHub Repository](https://github.com/shubhattin/lipilekhika)** — Source code and issues
 
+## 🛠 Building from Source
+
+> **Do not build from a plain `git clone`.** Script data and `src/scripts.rs` are generated and not checked in — a fresh checkout will not compile.
+
+Use the published crate instead:
+
+```bash
+cargo add lipilekhika
+```
+
+If you need to build locally (e.g. for contributing), follow the steps in [`.github/workflows/release_rust.yml`](https://github.com/shubhattin/lipilekhika/blob/main/.github/workflows/release_rust.yml)
+
 ## 📝 License
 
 MIT License — See [LICENSE](./LICENCE) for details

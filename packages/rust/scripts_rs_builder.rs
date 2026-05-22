@@ -80,6 +80,8 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
   });
 
   let tokens = quote! {
+    // generated file, do not edit
+    #[rustfmt::skip]
     use strum::{AsRefStr, Display, EnumString};
 
     // `EnumString` automatically implements `FromStr` for the enum.
