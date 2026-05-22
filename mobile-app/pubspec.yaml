@@ -14,7 +14,7 @@ dependencies:
 
   lipilekhika:
     path: ../packages/dart/lipilekhika
-  lucide_icons: ^0.257.0
+  lucide_icons_flutter: ^3.1.14+1
   provider: ^6.1.2
   shared_preferences: ^2.3.3
   package_info_plus: ^8.1.2

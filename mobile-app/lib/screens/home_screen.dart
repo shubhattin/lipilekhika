@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/theme_provider.dart';
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             ListTile(
-              leading: const Icon(LucideIcons.github, size: 20),
+              leading: const Icon(LucideIcons.gitFork, size: 20),
               title: const Text('GitHub'),
               dense: true,
               visualDensity: VisualDensity.compact,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -209,7 +209,7 @@ class AboutScreen extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(LucideIcons.github),
+                    leading: const Icon(LucideIcons.gitFork),
                     title: const Text('GitHub'),
                     subtitle: const Text('shubhattin/lipilekhika'),
                     contentPadding: EdgeInsets.zero,
