@@ -65,6 +65,10 @@ The Rust implementation is **~7.3× faster** than pure JavaScript (63 ms vs 464 
 
 **Benchmark scripts:** [JavaScript](./packages/js/src/scripts/benchmark.ts) (also covers N-API & WASM) · [Rust](./packages/rust/src/benches/benchmark.rs) · [Python](./packages/python/scripts/benchmark.py) · [Dart](./packages/dart/lipilekhika/scripts/benchmark.dart) · [Go](./packages/go/lipilekhika/bench/benchmark.go)
 
+> Even the initial Rust rewrite (almost line by line) was _439 ms_ (JS : 740 ms). But after some simple optmization like
+using `HashMap` (over binary search for lookups) and `Vec<char>` (to iterate in string) it was at _155 ms_ (JS : 460 ms). But now after optimizations
+(like avoid heap allocations and better data structures). The performance is at **63 ms**.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Help us improve Lipi Lekhika through bug reports, feature requests, or code contributions.
