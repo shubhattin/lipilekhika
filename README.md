@@ -52,6 +52,8 @@
 
 Transliteration benchmarks on the shared [`test_data`](./test_data) corpus (lower is better).
 
+`Benchmark machine: Intel Core i5-12450H (12 threads, up to 4.40 GHz)`
+
 The Rust implementation is **~7.3× faster** than pure JavaScript (63 ms vs 464 ms).
 
 | Implementation | Time (ms) |
