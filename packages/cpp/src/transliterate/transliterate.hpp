@@ -14,6 +14,9 @@ struct TransliterationFnOptions {
     bool typing_mode = false;
     bool use_native_numerals = true;
     bool include_inherent_vowel = false;
+    bool use_conjunct_enabling_halant = false;
+    bool use_typing_chars = false;
+    bool preserve_specific_chars = false;
 };
 
 struct TransliterationOutput {
@@ -44,9 +47,8 @@ TransliterationOutput transliterate_text_core(
     ScriptListEnum to_script,
     const ScriptData& from_script_data,
     const ScriptData& to_script_data,
-    const std::unordered_map<std::string, bool>& trans_options,
     const std::vector<const Rule*>& custom_rules,
-    std::optional<TransliterationFnOptions> options = std::nullopt
+    TransliterationFnOptions options
 );
 
 TransliterationOutput transliterate_text(

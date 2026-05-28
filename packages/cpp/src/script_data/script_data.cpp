@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
 #ifndef LIPILEKHIKA_DATA_DIR
 #define LIPILEKHIKA_DATA_DIR "../rust/src/data"
@@ -47,12 +48,21 @@ void init_lookups(ScriptData& data) {
 }
 
 const ScriptData& get_script_data(ScriptListEnum script) {
-    static std::unordered_map<ScriptListEnum, ScriptData> cache;
+    static ScriptData* cache_arr[32] = { nullptr };
+    int idx = static_cast<int>(script);
+    if (idx >= 0 && idx < 32 && cache_arr[idx] != nullptr) {
+        return *cache_arr[idx];
+    }
+
+    static std::unordered_map<ScriptListEnum, ScriptData> cache_map;
     static std::mutex cache_mutex;
 
     std::lock_guard<std::mutex> lock(cache_mutex);
-    auto it = cache.find(script);
-    if (it != cache.end()) {
+    auto it = cache_map.find(script);
+    if (it != cache_map.end()) {
+        if (idx >= 0 && idx < 32) {
+            cache_arr[idx] = &it->second;
+        }
         return it->second;
     }
 
@@ -67,11 +77,14 @@ const ScriptData& get_script_data(ScriptListEnum script) {
     ScriptData data = j.get<ScriptData>();
     init_lookups(data);
     
-    auto inserted = cache.emplace(script, std::move(data));
+    auto inserted = cache_map.emplace(script, std::move(data));
+    if (idx >= 0 && idx < 32) {
+        cache_arr[idx] = &inserted.first->second;
+    }
     return inserted.first->second;
 }
 
-std::optional<size_t> krama_index_of_text(const ScriptData& data, const std::string& text) {
+std::optional<size_t> krama_index_of_text(const ScriptData& data, std::string_view text) {
     const CommonScriptAttr& attr = get_common_attr(data);
     auto it = attr.krama_text_lookup.find(text);
     if (it != attr.krama_text_lookup.end()) {
@@ -80,7 +93,7 @@ std::optional<size_t> krama_index_of_text(const ScriptData& data, const std::str
     return std::nullopt;
 }
 
-std::optional<size_t> text_to_krama_map_index(const ScriptData& data, const std::string& text, bool use_typing_map) {
+std::optional<size_t> text_to_krama_map_index(const ScriptData& data, std::string_view text, bool use_typing_map) {
     const CommonScriptAttr& attr = get_common_attr(data);
     const auto& lookup = use_typing_map ? attr.typing_text_to_krama_lookup : attr.text_to_krama_lookup;
     auto it = lookup.find(text);
@@ -90,7 +103,7 @@ std::optional<size_t> text_to_krama_map_index(const ScriptData& data, const std:
     return std::nullopt;
 }
 
-std::optional<size_t> custom_script_char_index_of_text(const ScriptData& data, const std::string& text) {
+std::optional<size_t> custom_script_char_index_of_text(const ScriptData& data, std::string_view text) {
     const CommonScriptAttr& attr = get_common_attr(data);
     auto it = attr.custom_script_chars_lookup.find(text);
     if (it != attr.custom_script_chars_lookup.end()) {

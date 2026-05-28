@@ -139,10 +139,10 @@ struct CommonScriptAttr {
     std::vector<List> list;
 
     // Lookup tables built on initialization
-    std::unordered_map<std::string, size_t> krama_text_lookup;
-    std::unordered_map<std::string, size_t> text_to_krama_lookup;
-    std::unordered_map<std::string, size_t> typing_text_to_krama_lookup;
-    std::unordered_map<std::string, size_t> custom_script_chars_lookup;
+    std::unordered_map<std::string_view, size_t> krama_text_lookup;
+    std::unordered_map<std::string_view, size_t> text_to_krama_lookup;
+    std::unordered_map<std::string_view, size_t> typing_text_to_krama_lookup;
+    std::unordered_map<std::string_view, size_t> custom_script_chars_lookup;
 };
 
 inline void from_json(const nlohmann::json& j, CommonScriptAttr& attr) {

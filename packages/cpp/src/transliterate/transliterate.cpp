@@ -1,5 +1,6 @@
 #include "transliterate.hpp"
 #include "../script_data/script_list.hpp"
+#include "../utils/strings.hpp"
 #include "../script_data/custom_options.hpp"
 #include <stdexcept>
 #include <algorithm>
@@ -130,17 +131,16 @@ static std::string get_rule_replace_text(const Rule* rule, const ScriptData& scr
     }, *rule);
 }
 
-static std::string apply_custom_replace_rules(
-    const std::string& text,
+static void apply_custom_replace_rules_inplace(
+    std::string& res,
     const ScriptData& script_data,
     const std::vector<const Rule*>& rules,
     CheckInEnum allowed_input_rule_type
 ) {
     if (rules.empty()) {
-        return text;
+        return;
     }
 
-    std::string res = text;
     for (const Rule* rule : rules) {
         if (!check_should_use_replace(rule, allowed_input_rule_type)) {
             continue;
@@ -190,8 +190,6 @@ static std::string apply_custom_replace_rules(
             }
         }, *rule);
     }
-
-    return res;
 }
 
 struct TransliterateCtx {
@@ -199,7 +197,6 @@ struct TransliterateCtx {
     ScriptListEnum to_script;
     const ScriptData& from_script_data;
     const ScriptData& to_script_data;
-    const std::unordered_map<std::string, bool>& trans_options;
     const std::vector<const Rule*>& custom_rules;
     InputTextCursor& cursor;
     ResultStringBuilder& result;
@@ -209,6 +206,8 @@ struct TransliterateCtx {
     std::optional<std::string_view> brahmic_nuqta;
     bool typing_mode;
     bool include_inherent_vowels;
+    bool use_conjunct_enabling_halant;
+    bool use_typing_map;
 
     bool prev_context_cleanup(
         std::optional<PrevContextItem> item,
@@ -219,10 +218,10 @@ struct TransliterateCtx {
         bool result_str_concat_status = false;
 
         std::optional<std::string_view> item_text = std::nullopt;
-        std::optional<List> item_type = std::nullopt;
+        const List* item_type = nullptr;
         if (item) {
             if (item->first) item_text = *(item->first);
-            if (item->second) item_type = *(item->second);
+            item_type = item->second;
         }
 
         // custom cleanup logic/cases
@@ -246,13 +245,13 @@ struct TransliterateCtx {
         {
             bool ta_ext_case = true;
             if (is_script_tamil_ext(from_script)) {
-                std::optional<std::string> item_first_char = std::nullopt;
+                std::optional<std::string_view> item_first_char = std::nullopt;
                 if (item_text && !item_text->empty()) {
-                    item_first_char = InputTextCursor(std::string(*item_text)).peek();
+                    item_first_char = get_first_utf8_char(*item_text);
                 }
-                std::optional<std::string> halant_first_char = std::nullopt;
+                std::optional<std::string_view> halant_first_char = std::nullopt;
                 if (brahmic_halant && !brahmic_halant->empty()) {
-                    halant_first_char = InputTextCursor(std::string(*brahmic_halant)).peek();
+                    halant_first_char = get_first_utf8_char(*brahmic_halant);
                 }
                 ta_ext_case = (item_first_char != halant_first_char);
             }
@@ -314,12 +313,9 @@ struct TransliterateCtx {
                         should_reorder
                     );
 
-                    if (to_script == ScriptListEnum::Sinhala) {
-                        auto opt_sinh = trans_options.find("all_to_sinhala:use_conjunct_enabling_halant");
-                        if (opt_sinh != trans_options.end() && opt_sinh->second) {
-                            if (auto last_piece = result.last_piece()) {
-                                result.rewrite_at(-1, std::string(*last_piece) + "\u200D");
-                            }
+                    if (to_script == ScriptListEnum::Sinhala && use_conjunct_enabling_halant) {
+                        if (auto last_piece = result.last_piece()) {
+                            result.rewrite_at(-1, std::string(*last_piece) + "\u200D");
                         }
                     }
                 }
@@ -341,12 +337,9 @@ struct TransliterateCtx {
                         should_reorder
                     );
 
-                    if (to_script == ScriptListEnum::Sinhala) {
-                        auto opt_sinh = trans_options.find("all_to_sinhala:use_conjunct_enabling_halant");
-                        if (opt_sinh != trans_options.end() && opt_sinh->second) {
-                            if (auto last_piece = result.last_piece()) {
-                                result.rewrite_at(-1, std::string(*last_piece) + "\u200D");
-                            }
+                    if (to_script == ScriptListEnum::Sinhala && use_conjunct_enabling_halant) {
+                        if (auto last_piece = result.last_piece()) {
+                            result.rewrite_at(-1, std::string(*last_piece) + "\u200D");
                         }
                     }
                 }
@@ -413,9 +406,8 @@ struct TransliterateCtx {
 
                         if (prev_match.matched) {
                             if (auto next_ch = cursor.peek_at(static_cast<size_t>(text_index))) {
-                                auto next_idx = get_common_attr(from_script_data).krama_text_lookup.find(std::string(*next_ch));
-                                if (next_idx != get_common_attr(from_script_data).krama_text_lookup.end()) {
-                                    int16_t next_i16 = static_cast<int16_t>(next_idx->second);
+                                if (auto next_idx = krama_index_of_text(from_script_data, *next_ch)) {
+                                    int16_t next_i16 = static_cast<int16_t>(*next_idx);
                                     bool found_following = false;
                                     for (int16_t f : r.following) {
                                         if (f == next_i16) { found_following = true; break; }
@@ -432,10 +424,8 @@ struct TransliterateCtx {
                         auto last_piece = result.last_piece();
                         if (!last_piece) return;
 
-                        const auto& to_lookup = get_common_attr(to_script_data).krama_text_lookup;
-                        auto following_idx = to_lookup.find(std::string(*last_piece));
-                        if (following_idx != to_lookup.end()) {
-                            int16_t following_i16 = static_cast<int16_t>(following_idx->second);
+                        if (auto following_idx = krama_index_of_text(to_script_data, *last_piece)) {
+                            int16_t following_i16 = static_cast<int16_t>(*following_idx);
                             bool found_following = false;
                             for (int16_t f : r.following) {
                                 if (f == following_i16) { found_following = true; break; }
@@ -499,23 +489,31 @@ TransliterationOutput transliterate_text_core(
     ScriptListEnum to_script,
     const ScriptData& from_script_data,
     const ScriptData& to_script_data,
-    const std::unordered_map<std::string, bool>& trans_options_in,
     const std::vector<const Rule*>& custom_rules,
-    std::optional<TransliterationFnOptions> options
+    TransliterationFnOptions opts
 ) {
-    TransliterationFnOptions opts = options.value_or(TransliterationFnOptions{});
+    std::string modified_text_buf;
+    std::string_view text;
 
-    const auto* trans_options = &trans_options_in;
+    if (opts.typing_mode && from_script == ScriptListEnum::Normal) {
+        modified_text_buf = apply_typing_input_aliases(input_text, to_script);
+        text = modified_text_buf;
+    } else {
+        text = input_text;
+    }
 
-    std::string text = (opts.typing_mode && from_script == ScriptListEnum::Normal) ?
-        apply_typing_input_aliases(input_text, to_script) : input_text;
-
-    text = apply_custom_replace_rules(
-        text,
-        from_script_data,
-        custom_rules,
-        CheckInEnum::Input
-    );
+    if (!custom_rules.empty()) {
+        if (modified_text_buf.empty()) {
+            modified_text_buf = input_text;
+        }
+        apply_custom_replace_rules_inplace(
+            modified_text_buf,
+            from_script_data,
+            custom_rules,
+            CheckInEnum::Input
+        );
+        text = modified_text_buf;
+    }
 
     ResultStringBuilder result;
     InputTextCursor cursor(text);
@@ -538,13 +536,7 @@ TransliterationOutput transliterate_text_core(
         brahmic_halant = b.halant;
     }
 
-    bool trans_opt_normal_to_all_use_typing_chars = false;
-    auto normal_to_all_it = trans_options->find("normal_to_all:use_typing_chars");
-    if (normal_to_all_it != trans_options->end() && normal_to_all_it->second) {
-        trans_opt_normal_to_all_use_typing_chars = true;
-    }
-
-    bool use_typing_map = (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) && from_script == ScriptListEnum::Normal;
+    bool use_typing_map = (opts.use_typing_chars || opts.typing_mode) && from_script == ScriptListEnum::Normal;
 
     const ScriptData& text_to_krama_lookup_script_data = use_typing_map ? to_script_data : from_script_data;
     const auto& from_text_to_krama_map = use_typing_map ? get_common_attr(to_script_data).typing_text_to_krama_map : get_common_attr(from_script_data).text_to_krama_map;
@@ -554,18 +546,13 @@ TransliterationOutput transliterate_text_core(
     bool is_from_tamil_ext_ = is_script_tamil_ext(from_script);
     bool is_to_tamil_ext_ = is_script_tamil_ext(to_script);
 
-    bool opt_preserve_specific_chars_ = false;
-    auto opt_preserve = trans_options->find("all_to_normal:preserve_specific_chars");
-    if (opt_preserve != trans_options->end() && opt_preserve->second && to_script == ScriptListEnum::Normal) {
-        opt_preserve_specific_chars_ = true;
-    }
+    bool opt_preserve_specific_chars_ = opts.preserve_specific_chars && to_script == ScriptListEnum::Normal;
 
     TransliterateCtx ctx = {
         from_script,
         to_script,
         from_script_data,
         to_script_data,
-        *trans_options,
         custom_rules,
         cursor,
         result,
@@ -574,7 +561,9 @@ TransliterationOutput transliterate_text_core(
         brahmic_halant,
         brahmic_nuqta,
         opts.typing_mode,
-        opts.include_inherent_vowel
+        opts.include_inherent_vowel,
+        opts.use_conjunct_enabling_halant,
+        use_typing_map
     };
 
     size_t chars_len = ctx.cursor.char_count();
@@ -584,7 +573,7 @@ TransliterationOutput transliterate_text_core(
         size_t text_index = ctx.cursor.pos();
         auto ch_opt = ctx.cursor.peek();
         if (!ch_opt) break;
-        std::string ch = std::string(*ch_opt);
+        std::string_view ch = *ch_opt;
 
         if (ignore_ta_ext_sup_num_text_index != -1 && static_cast<ssize_t>(text_index) >= ignore_ta_ext_sup_num_text_index) {
             ignore_ta_ext_sup_num_text_index = -1;
@@ -595,7 +584,7 @@ TransliterationOutput transliterate_text_core(
         if (is_skip_char(ch)) {
             ctx.cursor.advance(1);
             if (ctx.prev_context_in_use) {
-                ctx.prev_context_cleanup(PrevContextItem{ " ", std::nullopt }, std::nullopt);
+                ctx.prev_context_cleanup(PrevContextItem{ " ", nullptr }, std::nullopt);
                 ctx.prev_context.clear();
             }
             ctx.result.emit(ch);
@@ -605,7 +594,7 @@ TransliterationOutput transliterate_text_core(
         if (ch.length() == 1 && std::isdigit(ch[0]) && !opts.use_native_numerals) {
             ctx.result.emit(ch);
             ctx.cursor.advance(1);
-            ctx.prev_context_cleanup(PrevContextItem{ ch, std::nullopt }, std::nullopt);
+            ctx.prev_context_cleanup(PrevContextItem{ ch, nullptr }, std::nullopt);
             continue;
         }
 
@@ -613,9 +602,9 @@ TransliterationOutput transliterate_text_core(
             auto idx = custom_script_char_index_of_text(from_script_data, ch);
             if (idx) {
                 const auto& custom_item = get_common_attr(from_script_data).custom_script_chars_arr[*idx];
-                std::optional<List> list_item = std::nullopt;
+                const List* list_item = nullptr;
                 if (custom_item.val1) {
-                    list_item = get_common_attr(from_script_data).list[*custom_item.val1];
+                    list_item = &get_common_attr(from_script_data).list[*custom_item.val1];
                 }
                 ctx.prev_context_cleanup(PrevContextItem{ custom_item.text, list_item }, std::nullopt);
 
@@ -624,7 +613,7 @@ TransliterationOutput transliterate_text_core(
                     normal_text = get_common_attr(from_script_data).typing_text_to_krama_map[*custom_item.val2].text;
                 }
                 ctx.result.emit(normal_text);
-                ctx.cursor.advance(InputTextCursor(custom_item.text).char_count());
+                ctx.cursor.advance(utf8_char_count(custom_item.text));
                 continue;
             }
         }
@@ -650,14 +639,16 @@ TransliterationOutput transliterate_text_core(
                 }
 
                 size_t end_index = text_index + scan_units + 1;
-                std::string char_to_search;
+                std::string_view char_to_search;
+                std::string temp_search_buf;
                 if (ignore_ta_ext_sup_num_text_index != -1) {
                     auto a = ctx.cursor.slice(text_index, ignore_ta_ext_sup_num_text_index);
                     auto b = (end_index > static_cast<size_t>(ignore_ta_ext_sup_num_text_index)) ?
                         ctx.cursor.slice(ignore_ta_ext_sup_num_text_index + 1, end_index) : std::nullopt;
-                    char_to_search = std::string(a.value_or("")) + std::string(b.value_or(""));
+                    temp_search_buf = std::string(a.value_or("")) + std::string(b.value_or(""));
+                    char_to_search = temp_search_buf;
                 } else {
-                    char_to_search = std::string(ctx.cursor.slice(text_index, end_index).value_or(""));
+                    char_to_search = ctx.cursor.slice(text_index, end_index).value_or("");
                 }
 
                 auto potential_match_index = text_to_krama_map_index(text_to_krama_lookup_script_data, char_to_search, use_typing_map);
@@ -703,12 +694,12 @@ TransliterationOutput transliterate_text_core(
                         {
                             std::string search_str = std::string(char_to_search) + std::string(*n_1_th_next);
                             auto char_index = text_to_krama_map_index(from_script_data, search_str, false);
-                            auto nth_char_text_index = nth_next ? get_common_attr(from_script_data).krama_text_lookup.find(std::string(*nth_next)) : get_common_attr(from_script_data).krama_text_lookup.end();
+                            auto nth_char_text_index = nth_next ? krama_index_of_text(from_script_data, *nth_next) : std::nullopt;
 
-                            if (char_index && nth_char_text_index != get_common_attr(from_script_data).krama_text_lookup.end()) {
+                            if (char_index && nth_char_text_index) {
                                 text_to_krama_item_index = char_index;
 
-                                auto list_ref = get_common_attr(from_script_data).krama_text_arr[nth_char_text_index->second].value;
+                                auto list_ref = get_common_attr(from_script_data).krama_text_arr[*nth_char_text_index].value;
                                 const List* nth_char_type = list_ref ? &get_common_attr(from_script_data).list[*list_ref] : nullptr;
 
                                 const auto& from_brahmic = std::get<BrahmicScriptData>(from_script_data);
@@ -730,19 +721,17 @@ TransliterationOutput transliterate_text_core(
                             std::string search_str = std::string(char_to_search) + std::string(*n_2_th_next);
                             auto char_index = text_to_krama_map_index(from_script_data, search_str, false);
                             
-                            auto nth_char_text_index = nth_next ? get_common_attr(from_script_data).krama_text_lookup.find(std::string(*nth_next)) : get_common_attr(from_script_data).krama_text_lookup.end();
-                            auto n1_char_text_index = n_1_th_next ? get_common_attr(from_script_data).krama_text_lookup.find(std::string(*n_1_th_next)) : get_common_attr(from_script_data).krama_text_lookup.end();
+                            auto nth_char_text_index = nth_next ? krama_index_of_text(from_script_data, *nth_next) : std::nullopt;
+                            auto n1_char_text_index = n_1_th_next ? krama_index_of_text(from_script_data, *n_1_th_next) : std::nullopt;
 
-                            if (char_index &&
-                                nth_char_text_index != get_common_attr(from_script_data).krama_text_lookup.end() &&
-                                n1_char_text_index != get_common_attr(from_script_data).krama_text_lookup.end())
+                            if (char_index && nth_char_text_index && n1_char_text_index)
                             {
                                 text_to_krama_item_index = char_index;
 
-                                auto list_ref_nth = get_common_attr(from_script_data).krama_text_arr[nth_char_text_index->second].value;
+                                auto list_ref_nth = get_common_attr(from_script_data).krama_text_arr[*nth_char_text_index].value;
                                 const List* nth_char_type = list_ref_nth ? &get_common_attr(from_script_data).list[*list_ref_nth] : nullptr;
 
-                                auto list_ref_n1 = get_common_attr(from_script_data).krama_text_arr[n1_char_text_index->second].value;
+                                auto list_ref_n1 = get_common_attr(from_script_data).krama_text_arr[*n1_char_text_index].value;
                                 const List* n_1_th_char_type = list_ref_n1 ? &get_common_attr(from_script_data).list[*list_ref_n1] : nullptr;
 
                                 if (nth_char_type && is_matra(*nth_char_type) && n_1_th_char_type && is_matra(*n_1_th_char_type)) {
@@ -763,9 +752,8 @@ TransliterationOutput transliterate_text_core(
                                      return false;
                                  }())
                         {
-                            auto nth_char_text_index = get_common_attr(from_script_data).krama_text_lookup.find(std::string(*nth_next));
-                            if (nth_char_text_index != get_common_attr(from_script_data).krama_text_lookup.end()) {
-                                auto list_ref_nth = get_common_attr(from_script_data).krama_text_arr[nth_char_text_index->second].value;
+                            if (auto nth_char_text_index = krama_index_of_text(from_script_data, *nth_next)) {
+                                auto list_ref_nth = get_common_attr(from_script_data).krama_text_arr[*nth_char_text_index].value;
                                 const List* nth_char_type = list_ref_nth ? &get_common_attr(from_script_data).list[*list_ref_nth] : nullptr;
 
                                 if (nth_char_type && is_matra(*nth_char_type)) {
@@ -813,10 +801,10 @@ TransliterationOutput transliterate_text_core(
                 }
             }
 
-            size_t matched_char_count = InputTextCursor(matched_text).char_count();
+            size_t matched_char_count = utf8_char_count(matched_text);
             size_t index_delete_length = 0;
             if (ignore_ta_ext_sup_num_text_index != -1 && matched_char_count > 1 && is_type_vyanjana) {
-                auto last_ch = InputTextCursor(matched_text).peek_at(matched_char_count - 1);
+                auto last_ch = get_last_utf8_char(matched_text);
                 if (is_ta_ext_superscript_tail(last_ch)) {
                     index_delete_length = 1;
                 }
@@ -824,12 +812,12 @@ TransliterationOutput transliterate_text_core(
             size_t matched_len_units = matched_char_count - index_delete_length;
             ctx.cursor.advance(matched_len_units);
 
-            if ((opts.typing_mode || trans_opt_normal_to_all_use_typing_chars) && map.custom_back_ref && *map.custom_back_ref >= 0) {
+            if ((ctx.typing_mode || ctx.use_typing_map) && map.custom_back_ref && *map.custom_back_ref >= 0) {
                 const auto& custom_item = get_common_attr(to_script_data).custom_script_chars_arr[*map.custom_back_ref];
                 ctx.result.emit(custom_item.text);
-                std::optional<List> list_item = std::nullopt;
+                const List* list_item = nullptr;
                 if (custom_item.val1) {
-                    list_item = get_common_attr(to_script_data).list[*custom_item.val1];
+                    list_item = &get_common_attr(to_script_data).list[*custom_item.val1];
                 }
                 const std::vector<std::string>* next_ptr = map.next ? &(*map.next) : nullptr;
                 ctx.prev_context_cleanup(
@@ -846,10 +834,10 @@ TransliterationOutput transliterate_text_core(
                 }
 
                 if (has_valid_krama) {
-                    std::vector<std::string> pieces;
+                    SmallStringViewVector pieces;
                     for (int16_t k : *map.krama) {
                         if (k >= 0) {
-                            pieces.push_back(std::string(krama_text_or_empty(ctx.to_script_data, k)));
+                            pieces.push_back(krama_text_or_empty(ctx.to_script_data, k));
                         }
                     }
 
@@ -858,25 +846,25 @@ TransliterationOutput transliterate_text_core(
                         if (std::holds_alternative<BrahmicScriptData>(from_script_data) &&
                             std::holds_alternative<OtherScriptData>(to_script_data))
                         {
-                            std::optional<List> item = std::nullopt;
-                            if (map.fallback_list_ref && !(trans_opt_normal_to_all_use_typing_chars || opts.typing_mode)) {
+                            const List* item = nullptr;
+                            if (map.fallback_list_ref && !(ctx.use_typing_map || ctx.typing_mode)) {
                                 if (static_cast<size_t>(*map.fallback_list_ref) < get_common_attr(from_script_data).list.size()) {
-                                    item = get_common_attr(from_script_data).list[*map.fallback_list_ref];
+                                    item = &get_common_attr(from_script_data).list[*map.fallback_list_ref];
                                 }
                             }
 
                             if (!item && (!map.krama || map.krama->empty())) {
-                                item = std::nullopt;
+                                item = nullptr;
                             } else if (!item && map.krama) {
-                                std::vector<std::optional<List>> list_refs;
+                                std::vector<const List*> list_refs;
                                 for (int16_t x : *map.krama) {
-                                    std::optional<List> r = std::nullopt;
+                                    const List* r = nullptr;
                                     if (x >= 0) {
                                         const auto& arr = get_common_attr(from_script_data).krama_text_arr;
                                         if (static_cast<size_t>(x) < arr.size()) {
                                             auto list_ref = arr[x].value;
                                             if (list_ref) {
-                                                r = get_common_attr(from_script_data).list[*list_ref];
+                                                r = &get_common_attr(from_script_data).list[*list_ref];
                                             }
                                         }
                                     }
@@ -892,18 +880,19 @@ TransliterationOutput transliterate_text_core(
                                     return has_matra && has_vyanjana;
                                 }()) {
                                     if (!list_refs.empty() && list_refs.front()) {
-                                        item = ListAnya{ get_krama_ref(*list_refs.front()) };
+                                        static const List static_anya_list = ListAnya{ {} };
+                                        item = &static_anya_list;
                                     }
                                 } else if (is_from_tamil_ext_ && list_refs.size() > 1 && [&list_refs]() {
                                     for (const auto& r : list_refs) if (!r) return true;
                                     return false;
                                 }()) {
                                     if (!list_refs.empty() && list_refs.back()) {
-                                        item = *list_refs.back();
+                                        item = list_refs.back();
                                     }
                                 } else {
                                     if (!list_refs.empty() && list_refs.front()) {
-                                        item = *list_refs.front();
+                                        item = list_refs.front();
                                     }
                                 }
                             }
@@ -916,15 +905,15 @@ TransliterationOutput transliterate_text_core(
                         else if (std::holds_alternative<BrahmicScriptData>(to_script_data) &&
                                  std::holds_alternative<OtherScriptData>(from_script_data))
                         {
-                            std::optional<List> item = std::nullopt;
+                            const List* item = nullptr;
                             if (map.fallback_list_ref) {
-                                item = get_common_attr(to_script_data).list[*map.fallback_list_ref];
+                                item = &get_common_attr(to_script_data).list[*map.fallback_list_ref];
                             } else if (map.krama && !map.krama->empty()) {
                                 int16_t first_k = (*map.krama)[0];
                                 if (first_k >= 0) {
                                     auto list_idx = get_common_attr(to_script_data).krama_text_arr[first_k].value;
                                     if (list_idx) {
-                                        item = get_common_attr(to_script_data).list[*list_idx];
+                                        item = &get_common_attr(to_script_data).list[*list_idx];
                                     }
                                 }
                             }
@@ -943,7 +932,7 @@ TransliterationOutput transliterate_text_core(
                         {
                             const std::vector<std::string>* next_list_ptr = map.next ? &(*map.next) : nullptr;
                             result_concat_status = ctx.prev_context_cleanup(
-                                PrevContextItem{ matched_text, std::nullopt },
+                                PrevContextItem{ matched_text, nullptr },
                                 next_list_ptr
                             );
                         }
@@ -995,7 +984,7 @@ TransliterationOutput transliterate_text_core(
                         if (opts.typing_mode) {
                             const std::vector<std::string>* next_ptr = map.next ? &(*map.next) : nullptr;
                             ctx.prev_context_cleanup(
-                                PrevContextItem{ matched_text, std::nullopt },
+                                PrevContextItem{ matched_text, nullptr },
                                 next_ptr
                             );
                         }
@@ -1008,11 +997,11 @@ TransliterationOutput transliterate_text_core(
             text_index = ctx.cursor.pos();
         }
 
-        std::string char_to_search = text_to_krama_item ? text_to_krama_item->text : ch;
+        std::string_view char_to_search = text_to_krama_item ? std::string_view(text_to_krama_item->text) : ch;
         auto idx = krama_index_of_text(from_script_data, char_to_search);
         if (!idx) {
             if (ctx.prev_context_in_use) {
-                ctx.prev_context_cleanup(PrevContextItem{ char_to_search, std::nullopt }, std::nullopt);
+                ctx.prev_context_cleanup(PrevContextItem{ char_to_search, nullptr }, std::nullopt);
                 ctx.prev_context.clear();
             }
             ctx.result.emit(char_to_search);
@@ -1023,13 +1012,13 @@ TransliterationOutput transliterate_text_core(
         if (ctx.prev_context_in_use) {
             if (std::holds_alternative<BrahmicScriptData>(from_script_data)) {
                 auto list_idx = get_common_attr(from_script_data).krama_text_arr[*idx].value;
-                std::optional<List> item = std::nullopt;
-                if (list_idx) item = get_common_attr(from_script_data).list[*list_idx];
+                const List* item = nullptr;
+                if (list_idx) item = &get_common_attr(from_script_data).list[*list_idx];
                 result_concat_status = ctx.prev_context_cleanup(PrevContextItem{ char_to_search, item }, std::nullopt);
             } else if (std::holds_alternative<BrahmicScriptData>(to_script_data)) {
                 auto list_idx = get_common_attr(to_script_data).krama_text_arr[*idx].value;
-                std::optional<List> item = std::nullopt;
-                if (list_idx) item = get_common_attr(to_script_data).list[*list_idx];
+                const List* item = nullptr;
+                if (list_idx) item = &get_common_attr(to_script_data).list[*list_idx];
                 result_concat_status = ctx.prev_context_cleanup(PrevContextItem{ char_to_search, item }, std::nullopt);
             }
         }
@@ -1075,7 +1064,7 @@ TransliterationOutput transliterate_text_core(
     }
 
     std::string output = ctx.result.str();
-    output = apply_custom_replace_rules(
+    apply_custom_replace_rules_inplace(
         output,
         to_script_data,
         custom_rules,
@@ -1083,6 +1072,66 @@ TransliterationOutput transliterate_text_core(
     );
 
     return TransliterationOutput{ output, ctx.prev_context.length() };
+}
+
+static bool is_option_active_for_scripts(
+    const CustomOptions& option_info,
+    const ScriptData& from_script_data,
+    const ScriptData& to_script_data
+) {
+    auto from_type = custom_option_script_type_of(from_script_data);
+    auto to_type = custom_option_script_type_of(to_script_data);
+    const std::string& from_script_name = get_common_attr(from_script_data).script_name;
+    const std::string& to_script_name = get_common_attr(to_script_data).script_name;
+
+    bool from_matches = false;
+    if (option_info.from_script_type && custom_option_script_type_matches(*option_info.from_script_type, from_type)) {
+        from_matches = true;
+    } else if (option_info.from_script_name) {
+        for (const auto& name : *option_info.from_script_name) {
+            if (name == from_script_name) {
+                from_matches = true;
+                break;
+            }
+        }
+    }
+
+    if (!from_matches) {
+        return false;
+    }
+
+    bool to_matches = false;
+    if (option_info.to_script_type && custom_option_script_type_matches(*option_info.to_script_type, to_type)) {
+        to_matches = true;
+    } else if (option_info.to_script_name) {
+        for (const auto& name : *option_info.to_script_name) {
+            if (name == to_script_name) {
+                to_matches = true;
+                break;
+            }
+        }
+    }
+
+    return from_matches && to_matches;
+}
+
+static bool is_option_enabled_and_active(
+    const std::string& key,
+    const std::unordered_map<std::string, bool>& input_options,
+    const ScriptData& from_script_data,
+    const ScriptData& to_script_data
+) {
+    auto it = input_options.find(key);
+    if (it == input_options.end() || !it->second) {
+        return false;
+    }
+    const auto& custom_options_map = get_custom_options_map();
+    for (const auto& pair : custom_options_map) {
+        if (pair.first == key) {
+            return is_option_active_for_scripts(pair.second, from_script_data, to_script_data);
+        }
+    }
+    return false;
 }
 
 TransliterationOutput transliterate_text(
@@ -1095,7 +1144,25 @@ TransliterationOutput transliterate_text(
     const auto& from_data = get_script_data(from_script);
     const auto& to_data = get_script_data(to_script);
 
-    auto resolved = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
+    std::vector<const Rule*> custom_rules;
+    if (!transliteration_input_options.empty()) {
+        const auto& custom_options_map = get_custom_options_map();
+        for (const auto& pair : custom_options_map) {
+            auto it = transliteration_input_options.find(pair.first);
+            if (it != transliteration_input_options.end() && it->second) {
+                if (is_option_active_for_scripts(pair.second, from_data, to_data)) {
+                    for (const auto& r : pair.second.rules) {
+                        custom_rules.push_back(&r);
+                    }
+                }
+            }
+        }
+    }
+
+    TransliterationFnOptions opts = options.value_or(TransliterationFnOptions{});
+    opts.use_conjunct_enabling_halant = is_option_enabled_and_active("all_to_sinhala:use_conjunct_enabling_halant", transliteration_input_options, from_data, to_data);
+    opts.use_typing_chars = is_option_enabled_and_active("normal_to_all:use_typing_chars", transliteration_input_options, from_data, to_data);
+    opts.preserve_specific_chars = is_option_enabled_and_active("all_to_normal:preserve_specific_chars", transliteration_input_options, from_data, to_data);
 
     return transliterate_text_core(
         text,
@@ -1103,9 +1170,8 @@ TransliterationOutput transliterate_text(
         to_script,
         from_data,
         to_data,
-        resolved.trans_options,
-        resolved.custom_rules,
-        options
+        custom_rules,
+        opts
     );
 }
 
