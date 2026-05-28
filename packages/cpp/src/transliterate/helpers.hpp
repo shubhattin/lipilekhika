@@ -8,6 +8,7 @@
 #include <utility>
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include "../script_data/script_data.hpp"
 
 namespace lipilekhika {
@@ -45,6 +46,25 @@ public:
         other.m_capacity = 128;
     }
 
+    SmallOffsets& operator=(SmallOffsets&& other) noexcept {
+        if (this == &other) return *this;
+        if (arr != inline_arr) {
+            delete[] arr;
+        }
+        m_size = other.m_size;
+        m_capacity = other.m_capacity;
+        if (other.arr == other.inline_arr) {
+            arr = inline_arr;
+            std::copy(other.inline_arr, other.inline_arr + m_size, inline_arr);
+        } else {
+            arr = other.arr;
+            other.arr = other.inline_arr;
+        }
+        other.m_size = 0;
+        other.m_capacity = 128;
+        return *this;
+    }
+
     void reserve(size_t new_cap) {
         if (new_cap <= m_capacity) return;
         size_t* new_arr = new size_t[new_cap];
@@ -71,10 +91,14 @@ public:
         if (n > m_capacity) {
             reserve(n);
         }
+        if (n > m_size) {
+            std::fill(arr + m_size, arr + n, 0);
+        }
         m_size = n;
     }
 
     size_t back() const {
+        assert(m_size > 0);
         return arr[m_size - 1];
     }
 
@@ -83,8 +107,14 @@ public:
     }
 
     size_t size() const { return m_size; }
-    size_t& operator[](size_t idx) { return arr[idx]; }
-    size_t operator[](size_t idx) const { return arr[idx]; }
+    size_t& operator[](size_t idx) {
+        assert(idx < m_size);
+        return arr[idx];
+    }
+    size_t operator[](size_t idx) const {
+        assert(idx < m_size);
+        return arr[idx];
+    }
 };
 
 class SmallStringViewVector {
@@ -120,6 +150,25 @@ public:
         other.m_capacity = 16;
     }
 
+    SmallStringViewVector& operator=(SmallStringViewVector&& other) noexcept {
+        if (this == &other) return *this;
+        if (arr != inline_arr) {
+            delete[] arr;
+        }
+        m_size = other.m_size;
+        m_capacity = other.m_capacity;
+        if (other.arr == other.inline_arr) {
+            arr = inline_arr;
+            std::copy(other.inline_arr, other.inline_arr + m_size, inline_arr);
+        } else {
+            arr = other.arr;
+            other.arr = other.inline_arr;
+        }
+        other.m_size = 0;
+        other.m_capacity = 16;
+        return *this;
+    }
+
     void reserve(size_t new_cap) {
         if (new_cap <= m_capacity) return;
         std::string_view* new_arr = new std::string_view[new_cap];
@@ -146,14 +195,19 @@ public:
         if (n > m_capacity) {
             reserve(n);
         }
+        if (n > m_size) {
+            std::fill(arr + m_size, arr + n, std::string_view{});
+        }
         m_size = n;
     }
 
     std::string_view back() const {
+        assert(m_size > 0);
         return arr[m_size - 1];
     }
 
     std::string_view front() const {
+        assert(m_size > 0);
         return arr[0];
     }
 
@@ -162,8 +216,14 @@ public:
     }
 
     size_t size() const { return m_size; }
-    std::string_view operator[](size_t idx) const { return arr[idx]; }
-    std::string_view& operator[](size_t idx) { return arr[idx]; }
+    std::string_view operator[](size_t idx) const {
+        assert(idx < m_size);
+        return arr[idx];
+    }
+    std::string_view& operator[](size_t idx) {
+        assert(idx < m_size);
+        return arr[idx];
+    }
 
     const std::string_view* begin() const { return arr; }
     const std::string_view* end() const { return arr + m_size; }
@@ -208,6 +268,7 @@ private:
     SmallOffsets offsets;
 
     std::pair<size_t, size_t> piece_range(size_t i) const {
+        assert(i < offsets.size());
         size_t start = offsets[i];
         size_t end = (i + 1 < offsets.size()) ? offsets[i + 1] : buf.length();
         return {start, end};

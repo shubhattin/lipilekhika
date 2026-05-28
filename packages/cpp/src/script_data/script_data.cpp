@@ -1,5 +1,6 @@
 #include "script_data.hpp"
 #include <mutex>
+#include <atomic>
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -48,10 +49,13 @@ void init_lookups(ScriptData& data) {
 }
 
 const ScriptData& get_script_data(ScriptListEnum script) {
-    static ScriptData* cache_arr[32] = { nullptr };
+    static std::atomic<const ScriptData*> cache_arr[32] = { nullptr };
     int idx = static_cast<int>(script);
-    if (idx >= 0 && idx < 32 && cache_arr[idx] != nullptr) {
-        return *cache_arr[idx];
+    if (idx >= 0 && idx < 32) {
+        const ScriptData* ptr = cache_arr[idx].load(std::memory_order_acquire);
+        if (ptr != nullptr) {
+            return *ptr;
+        }
     }
 
     static std::unordered_map<ScriptListEnum, ScriptData> cache_map;
@@ -61,7 +65,7 @@ const ScriptData& get_script_data(ScriptListEnum script) {
     auto it = cache_map.find(script);
     if (it != cache_map.end()) {
         if (idx >= 0 && idx < 32) {
-            cache_arr[idx] = &it->second;
+            cache_arr[idx].store(&it->second, std::memory_order_release);
         }
         return it->second;
     }
@@ -79,7 +83,7 @@ const ScriptData& get_script_data(ScriptListEnum script) {
     
     auto inserted = cache_map.emplace(script, std::move(data));
     if (idx >= 0 && idx < 32) {
-        cache_arr[idx] = &inserted.first->second;
+        cache_arr[idx].store(&inserted.first->second, std::memory_order_release);
     }
     return inserted.first->second;
 }
