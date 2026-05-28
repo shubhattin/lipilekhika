@@ -5,7 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Force-include cstdint to fix GCC 16 compatibility with third-party libraries like yaml-cpp
-add_compile_options(-include cstdint -O3)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_compile_options(-include cstdint)
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-O3)
+  endif()
+endif()
 
 # Configure data path
 set(LIPILEKHIKA_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../rust/src/data"

@@ -11,7 +11,7 @@ static std::pair<size_t, std::string> compute_diff(std::string_view prev_output,
         common_bytes++;
     }
     // Adjust common_bytes to point to the start of a UTF-8 character boundary.
-    while (common_bytes > 0 && (static_cast<unsigned char>(prev_output[common_bytes]) & 0xC0) == 0x80) {
+    while (common_bytes > 0 && common_bytes < prev_output.length() && (static_cast<unsigned char>(prev_output[common_bytes]) & 0xC0) == 0x80) {
         common_bytes--;
     }
 

@@ -281,7 +281,7 @@ struct TransliterateCtx {
                   is_vyanjana(*(prev_context.type_at(-2))) &&
                   prev_context.text_at(-1) == brahmic_nuqta));
 
-            bool to_anya_or_null = (!item_type || !is_matra(*item_type) && item_text != brahmic_halant) ||
+            bool to_anya_or_null = (!item_type || (!is_matra(*item_type) && item_text != brahmic_halant)) ||
                 (item_type && is_anya(*item_type));
 
             if (item_text != brahmic_halant &&
