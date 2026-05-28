@@ -7,6 +7,7 @@
 #include <string_view>
 #include <utility>
 #include <algorithm>
+#include <array>
 #include "../script_data/script_data.hpp"
 
 namespace lipilekhika {
@@ -250,8 +251,8 @@ public:
         return std::string_view(buf).substr(range.first, range.second - range.first);
     }
 
-    std::optional<std::string_view> last_char() const {
-        if (buf.empty()) return std::nullopt;
+    std::string_view last_char() const {
+        if (buf.empty()) return "";
         size_t idx = buf.length();
         while (idx > 0) {
             idx--;
@@ -260,7 +261,7 @@ public:
                 return std::string_view(buf).substr(idx);
             }
         }
-        return std::nullopt;
+        return "";
     }
 
     std::optional<std::string> pop_last_char() {
@@ -548,30 +549,28 @@ MatchPrevKramaSequenceResult match_prev_krama_sequence(
     return {true, prev.size()};
 }
 
-const std::vector<std::string> TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS = {"²", "³", "⁴"};
-inline bool is_ta_ext_superscript_tail(const std::optional<std::string_view>& ch) {
-    if (!ch) return false;
-    for (const auto& s : TAMIL_EXTENDED_SUPERSCRIPT_NUMBERS) {
-        if (*ch == s) return true;
-    }
-    return false;
+inline bool is_ta_ext_superscript_tail(std::string_view ch) {
+    return ch == "²" || ch == "³" || ch == "⁴";
 }
 
-const std::vector<std::string> VEDIC_SVARAS = {"॒", "॑", "᳚", "᳛"};
+inline bool is_ta_ext_superscript_tail(const std::optional<std::string_view>& ch) {
+    return ch && is_ta_ext_superscript_tail(*ch);
+}
+
+inline bool is_vedic_svara_tail(std::string_view ch) {
+    return ch == "॒" || ch == "॑" || ch == "᳚" || ch == "᳛";
+}
+
 inline bool is_vedic_svara_tail(const std::optional<std::string_view>& ch) {
-    if (!ch) return false;
-    for (const auto& s : VEDIC_SVARAS) {
-        if (*ch == s) return true;
-    }
-    return false;
+    return ch && is_vedic_svara_tail(*ch);
 }
 
 inline bool is_script_tamil_ext(ScriptListEnum var) {
     return var == ScriptListEnum::TamilExtended;
 }
 
-const std::vector<std::string> VEDIC_SVARAS_TYPING_SYMBOLS = {"_", "'''", "''", "'"};
-const std::vector<std::string> VEDIC_SVARAS_NORMAL_SYMBOLS = {"↓", "↑↑↑", "↑↑", "↑"};
+static const std::array<std::string_view, 4> VEDIC_SVARAS_TYPING_SYMBOLS = {"_", "'''", "''", "'"};
+static const std::array<std::string_view, 4> VEDIC_SVARAS_NORMAL_SYMBOLS = {"↓", "↑↑↑", "↑↑", "↑"};
 
 inline std::string apply_typing_input_aliases(const std::string& text, ScriptListEnum to_script_name) {
     if (text.empty()) {

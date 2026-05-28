@@ -5,13 +5,28 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include <array>
 
 namespace lipilekhika {
 
 static bool is_skip_char(std::string_view c) {
     if (c.empty()) return false;
-    char ch = c[0];
-    return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t' || ch == ',' || ch == '~' || ch == '!' || ch == '@' || ch == '?' || ch == '%';
+    unsigned char ch = static_cast<unsigned char>(c[0]);
+    static const std::array<bool, 256> skip_table = []() {
+        std::array<bool, 256> t = { false };
+        t[' '] = true;
+        t['\n'] = true;
+        t['\r'] = true;
+        t['\t'] = true;
+        t[','] = true;
+        t['~'] = true;
+        t['!'] = true;
+        t['@'] = true;
+        t['?'] = true;
+        t['%'] = true;
+        return t;
+    }();
+    return skip_table[ch];
 }
 
 static CustomOptionScriptTypeEnum custom_option_script_type_of(const ScriptData& script_data) {
@@ -31,6 +46,9 @@ std::unordered_map<std::string, bool> get_active_custom_options(
     const ScriptData& to_script_data,
     const std::unordered_map<std::string, bool>& input_options
 ) {
+    if (input_options.empty()) {
+        return {};
+    }
     std::unordered_map<std::string, bool> active;
     const std::string& from_script_name = get_common_attr(from_script_data).script_name;
     const std::string& to_script_name = get_common_attr(to_script_data).script_name;
@@ -1121,6 +1139,9 @@ static bool is_option_enabled_and_active(
     const ScriptData& from_script_data,
     const ScriptData& to_script_data
 ) {
+    if (input_options.empty()) {
+        return false;
+    }
     auto it = input_options.find(key);
     if (it == input_options.end() || !it->second) {
         return false;
