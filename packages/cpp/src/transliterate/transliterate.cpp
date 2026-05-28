@@ -367,7 +367,7 @@ struct TransliterateCtx {
         // custom typing mode context clear logic
         bool to_clear_context = false;
         if (typing_mode &&
-            (!next || (*next)->empty()) &&
+            (!next || !(*next) || (*next)->empty()) &&
             !last_call &&
             !(is_script_tamil_ext(to_script) && is_ta_ext_superscript_tail(result.last_char())))
         {

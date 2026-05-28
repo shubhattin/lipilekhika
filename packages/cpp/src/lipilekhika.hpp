@@ -9,6 +9,7 @@
 #include "script_data/script_list.hpp"
 #include "script_data/custom_options.hpp"
 #include "transliterate/transliterate.hpp"
+#include "typing.hpp"
 
 namespace lipilekhika {
 

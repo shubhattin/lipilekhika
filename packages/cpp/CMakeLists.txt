@@ -36,6 +36,7 @@ add_library(lipilekhika
   src/script_data/custom_options.cpp
   src/transliterate/transliterate.cpp
   src/transliterate/helpers.cpp
+  src/typing.cpp
   src/lipilekhika.cpp
 )
 target_include_directories(lipilekhika PUBLIC src/)
