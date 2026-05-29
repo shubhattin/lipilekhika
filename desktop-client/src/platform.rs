@@ -17,12 +17,12 @@ pub fn run(
 
   #[cfg(not(windows))]
   {
-    return Err(
+    Err(
       std::io::Error::new(
         std::io::ErrorKind::Unsupported,
         "lipilekhika-ui desktop client is not supported on this platform yet",
       )
       .into(),
-    );
+    )
   }
 }

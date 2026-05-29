@@ -4,136 +4,138 @@ use std::str::FromStr;
 
 #[pyfunction]
 pub fn default_auto_context_clear_time_ms() -> u64 {
-  lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS
+    lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS
 }
 
 #[pyfunction]
 pub fn default_use_native_numerals() -> bool {
-  lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS
+    lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS
 }
 
 #[pyfunction]
 pub fn default_include_inherent_vowel() -> bool {
-  lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL
+    lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL
 }
 
 #[pyclass]
 #[derive(Clone)]
 pub struct TypingContextOptions {
-  #[pyo3(get, set)]
-  auto_context_clear_time_ms: u64,
-  #[pyo3(get, set)]
-  use_native_numerals: bool,
-  #[pyo3(get, set)]
-  include_inherent_vowel: bool,
+    #[pyo3(get, set)]
+    auto_context_clear_time_ms: u64,
+    #[pyo3(get, set)]
+    use_native_numerals: bool,
+    #[pyo3(get, set)]
+    include_inherent_vowel: bool,
 }
 
 #[pymethods]
 impl TypingContextOptions {
-  #[new]
-  #[pyo3(signature = (auto_context_clear_time_ms=None, use_native_numerals=None, include_inherent_vowel=None))]
-  pub fn new(
-    auto_context_clear_time_ms: Option<u64>,
-    use_native_numerals: Option<bool>,
-    include_inherent_vowel: Option<bool>,
-  ) -> Self {
-    let defaults = lipilekhika::typing::TypingContextOptions::default();
-    Self {
-      auto_context_clear_time_ms: auto_context_clear_time_ms
-        .unwrap_or(defaults.auto_context_clear_time_ms),
-      use_native_numerals: use_native_numerals.unwrap_or(defaults.use_native_numerals),
-      include_inherent_vowel: include_inherent_vowel.unwrap_or(defaults.include_inherent_vowel),
+    #[new]
+    #[pyo3(signature = (auto_context_clear_time_ms=None, use_native_numerals=None, include_inherent_vowel=None))]
+    pub fn new(
+        auto_context_clear_time_ms: Option<u64>,
+        use_native_numerals: Option<bool>,
+        include_inherent_vowel: Option<bool>,
+    ) -> Self {
+        let defaults = lipilekhika::typing::TypingContextOptions::default();
+        Self {
+            auto_context_clear_time_ms: auto_context_clear_time_ms
+                .unwrap_or(defaults.auto_context_clear_time_ms),
+            use_native_numerals: use_native_numerals.unwrap_or(defaults.use_native_numerals),
+            include_inherent_vowel: include_inherent_vowel
+                .unwrap_or(defaults.include_inherent_vowel),
+        }
     }
-  }
 }
 
 impl From<TypingContextOptions> for lipilekhika::typing::TypingContextOptions {
-  fn from(opts: TypingContextOptions) -> Self {
-    Self {
-      auto_context_clear_time_ms: opts.auto_context_clear_time_ms,
-      use_native_numerals: opts.use_native_numerals,
-      include_inherent_vowel: opts.include_inherent_vowel,
+    fn from(opts: TypingContextOptions) -> Self {
+        Self {
+            auto_context_clear_time_ms: opts.auto_context_clear_time_ms,
+            use_native_numerals: opts.use_native_numerals,
+            include_inherent_vowel: opts.include_inherent_vowel,
+        }
     }
-  }
 }
 
 /// Result of processing a single key in a typing context.
 #[pyclass]
 #[derive(Clone)]
 pub struct TypingDiff {
-  /// Number of characters that should be deleted from the current input state.
-  #[pyo3(get)]
-  pub to_delete_chars_count: usize,
-  /// Text that should be inserted into the current input state.
-  #[pyo3(get)]
-  pub diff_add_text: String,
-  /// Remaining internal context length (0 means context was cleared).
-  #[pyo3(get)]
-  pub context_length: usize,
+    /// Number of characters that should be deleted from the current input state.
+    #[pyo3(get)]
+    pub to_delete_chars_count: usize,
+    /// Text that should be inserted into the current input state.
+    #[pyo3(get)]
+    pub diff_add_text: String,
+    /// Remaining internal context length (0 means context was cleared).
+    #[pyo3(get)]
+    pub context_length: usize,
 }
 
 #[pymethods]
 impl TypingDiff {
-  fn __repr__(&self) -> String {
-    format!(
-      "TypingDiff(to_delete_chars_count={}, diff_add_text={:?})",
-      self.to_delete_chars_count, self.diff_add_text
-    )
-  }
+    fn __repr__(&self) -> String {
+        format!(
+            "TypingDiff(to_delete_chars_count={}, diff_add_text={:?})",
+            self.to_delete_chars_count, self.diff_add_text
+        )
+    }
 }
 
 /// Stateful isolated context for character-by-character input typing.
 #[pyclass]
 pub struct TypingContext {
-  pub inner: lipilekhika::typing::TypingContext,
+    pub inner: lipilekhika::typing::TypingContext,
 }
 
 #[pymethods]
 impl TypingContext {
-  fn clear_context(&mut self) {
-    self.inner.clear_context();
-  }
-  fn take_key_input(&mut self, key: &str) -> TypingDiff {
-    let diff = self.inner.take_key_input(key);
-    TypingDiff {
-      to_delete_chars_count: diff.to_delete_chars_count,
-      diff_add_text: diff.diff_add_text,
-      context_length: diff.context_length,
+    fn clear_context(&mut self) {
+        self.inner.clear_context();
     }
-  }
+    fn take_key_input(&mut self, key: &str) -> TypingDiff {
+        let diff = self.inner.take_key_input(key);
+        TypingDiff {
+            to_delete_chars_count: diff.to_delete_chars_count,
+            diff_add_text: diff.diff_add_text,
+            context_length: diff.context_length,
+        }
+    }
 
-  fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
-    self.inner.update_use_native_numerals(use_native_numerals);
-  }
+    fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
+        self.inner.update_use_native_numerals(use_native_numerals);
+    }
 
-  fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
-    self
-      .inner
-      .update_include_inherent_vowel(include_inherent_vowel);
-  }
+    fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
+        self.inner
+            .update_include_inherent_vowel(include_inherent_vowel);
+    }
 
-  fn get_use_native_numerals(&self) -> bool {
-    self.inner.get_use_native_numerals()
-  }
+    fn get_use_native_numerals(&self) -> bool {
+        self.inner.get_use_native_numerals()
+    }
 
-  fn get_include_inherent_vowel(&self) -> bool {
-    self.inner.get_include_inherent_vowel()
-  }
+    fn get_include_inherent_vowel(&self) -> bool {
+        self.inner.get_include_inherent_vowel()
+    }
 }
 
 #[pyfunction]
 #[pyo3(signature = (typing_script, options=None))]
 pub fn create_typing_context(
-  typing_script: &str,
-  options: Option<TypingContextOptions>,
+    typing_script: &str,
+    options: Option<TypingContextOptions>,
 ) -> PyResult<TypingContext> {
-  let script = Script::from_str(typing_script.trim()).map_err(|e| {
-    pyo3::exceptions::PyValueError::new_err(format!("invalid typing_script {typing_script:?}: {e}"))
-  })?;
-  let rust_options = options.map(|o| o.into());
-  Ok(TypingContext {
-    inner: lipilekhika::typing::TypingContext::new(script, rust_options),
-  })
+    let script = Script::from_str(typing_script.trim()).map_err(|e| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "invalid typing_script {typing_script:?}: {e}"
+        ))
+    })?;
+    let rust_options = options.map(|o| o.into());
+    Ok(TypingContext {
+        inner: lipilekhika::typing::TypingContext::new(script, rust_options),
+    })
 }
 
 /// An item in the typing data map: (text, list_type, mappings).
@@ -146,23 +148,23 @@ pub type TypingDataMapItem = (String, String, Vec<String>);
 #[pyclass]
 #[derive(Clone)]
 pub struct ScriptTypingDataMap {
-  /// Mappings for common characters across scripts (from krama_text_arr).
-  #[pyo3(get)]
-  pub common_krama_map: Vec<TypingDataMapItem>,
-  /// Mappings for script-specific characters (from custom_script_chars_arr).
-  #[pyo3(get)]
-  pub script_specific_krama_map: Vec<TypingDataMapItem>,
+    /// Mappings for common characters across scripts (from krama_text_arr).
+    #[pyo3(get)]
+    pub common_krama_map: Vec<TypingDataMapItem>,
+    /// Mappings for script-specific characters (from custom_script_chars_arr).
+    #[pyo3(get)]
+    pub script_specific_krama_map: Vec<TypingDataMapItem>,
 }
 
 #[pymethods]
 impl ScriptTypingDataMap {
-  fn __repr__(&self) -> String {
-    format!(
-      "ScriptTypingDataMap(common_krama_map={} items, script_specific_krama_map={} items)",
-      self.common_krama_map.len(),
-      self.script_specific_krama_map.len()
-    )
-  }
+    fn __repr__(&self) -> String {
+        format!(
+            "ScriptTypingDataMap(common_krama_map={} items, script_specific_krama_map={} items)",
+            self.common_krama_map.len(),
+            self.script_specific_krama_map.len()
+        )
+    }
 }
 
 /// Returns the typing data map for a script.
@@ -178,33 +180,33 @@ impl ScriptTypingDataMap {
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap> {
-  let script = Script::from_str(script.trim()).map_err(|e| {
-    pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
-  })?;
+    let script = Script::from_str(script.trim()).map_err(|e| {
+        pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
+    })?;
 
-  let data = lipilekhika::typing::get_script_typing_data_map(script);
+    let data = lipilekhika::typing::get_script_typing_data_map(script);
 
-  fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
-    match lt {
-      lipilekhika::typing::ListType::Anya => "anya".to_string(),
-      lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
-      lipilekhika::typing::ListType::Matra => "matra".to_string(),
-      lipilekhika::typing::ListType::Svara => "svara".to_string(),
+    fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+        match lt {
+            lipilekhika::typing::ListType::Anya => "anya".to_string(),
+            lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+            lipilekhika::typing::ListType::Matra => "matra".to_string(),
+            lipilekhika::typing::ListType::Svara => "svara".to_string(),
+        }
     }
-  }
 
-  Ok(ScriptTypingDataMap {
-    common_krama_map: data
-      .common_krama_map
-      .into_iter()
-      .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
-      .collect(),
-    script_specific_krama_map: data
-      .script_specific_krama_map
-      .into_iter()
-      .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
-      .collect(),
-  })
+    Ok(ScriptTypingDataMap {
+        common_krama_map: data
+            .common_krama_map
+            .into_iter()
+            .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+            .collect(),
+        script_specific_krama_map: data
+            .script_specific_krama_map
+            .into_iter()
+            .map(|(text, list_type, mappings)| (text, list_type_to_string(&list_type), mappings))
+            .collect(),
+    })
 }
 
 /// An item in the krama data: (character_text, list_type).
@@ -227,25 +229,23 @@ pub type KramaDataItem = (String, String);
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
-  let script = Script::from_str(script.trim()).map_err(|e| {
-    pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
-  })?;
+    let script = Script::from_str(script.trim()).map_err(|e| {
+        pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
+    })?;
 
-  let data = lipilekhika::typing::get_script_krama_data(script);
+    let data = lipilekhika::typing::get_script_krama_data(script);
 
-  fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
-    match lt {
-      lipilekhika::typing::ListType::Anya => "anya".to_string(),
-      lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
-      lipilekhika::typing::ListType::Matra => "matra".to_string(),
-      lipilekhika::typing::ListType::Svara => "svara".to_string(),
+    fn list_type_to_string(lt: &lipilekhika::typing::ListType) -> String {
+        match lt {
+            lipilekhika::typing::ListType::Anya => "anya".to_string(),
+            lipilekhika::typing::ListType::Vyanjana => "vyanjana".to_string(),
+            lipilekhika::typing::ListType::Matra => "matra".to_string(),
+            lipilekhika::typing::ListType::Svara => "svara".to_string(),
+        }
     }
-  }
 
-  Ok(
-    data
-      .into_iter()
-      .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
-      .collect(),
-  )
+    Ok(data
+        .into_iter()
+        .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
+        .collect())
 }

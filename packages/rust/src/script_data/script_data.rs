@@ -9,148 +9,151 @@ use super::generated;
 use super::schema::{CommonScriptAttr, ScriptData};
 
 impl Deref for ScriptData {
-  type Target = CommonScriptAttr;
-  /// Acts as a trick to access the common attributes as the compiles performs
-  /// auto deref, eg :- data.script_id -> (*data).deref().script_id.
-  ///
-  /// avoids calling the `self.get_common_attr`. Acts as a shorthand.
-  /// Does not seem to have any performance issues so keeping it.
-  fn deref(&self) -> &Self::Target {
-    match &self {
-      ScriptData::Brahmic {
-        common_script_attr, ..
-      }
-      | ScriptData::Other {
-        common_script_attr, ..
-      } => common_script_attr,
+    type Target = CommonScriptAttr;
+    /// Acts as a trick to access the common attributes as the compiles performs
+    /// auto deref, eg :- data.script_id -> (*data).deref().script_id.
+    ///
+    /// avoids calling the `self.get_common_attr`. Acts as a shorthand.
+    /// Does not seem to have any performance issues so keeping it.
+    fn deref(&self) -> &Self::Target {
+        match &self {
+            ScriptData::Brahmic {
+                common_script_attr, ..
+            }
+            | ScriptData::Other {
+                common_script_attr, ..
+            } => common_script_attr,
+        }
     }
-  }
 }
 
 impl ScriptData {
-  #[allow(dead_code)]
-  pub fn get_common_attr(&self) -> &CommonScriptAttr {
-    match self {
-      ScriptData::Brahmic {
-        common_script_attr, ..
-      }
-      | ScriptData::Other {
-        common_script_attr, ..
-      } => common_script_attr,
+    #[allow(dead_code)]
+    pub fn get_common_attr(&self) -> &CommonScriptAttr {
+        match self {
+            ScriptData::Brahmic {
+                common_script_attr, ..
+            }
+            | ScriptData::Other {
+                common_script_attr, ..
+            } => common_script_attr,
+        }
     }
-  }
 
-  pub fn get_common_attr_mut(&mut self) -> &mut CommonScriptAttr {
-    match self {
-      ScriptData::Brahmic {
-        common_script_attr, ..
-      }
-      | ScriptData::Other {
-        common_script_attr, ..
-      } => common_script_attr,
+    pub fn get_common_attr_mut(&mut self) -> &mut CommonScriptAttr {
+        match self {
+            ScriptData::Brahmic {
+                common_script_attr, ..
+            }
+            | ScriptData::Other {
+                common_script_attr, ..
+            } => common_script_attr,
+        }
     }
-  }
 
-  pub fn init_lookups(&mut self) {
-    let attr = self.get_common_attr_mut();
+    pub fn init_lookups(&mut self) {
+        let attr = self.get_common_attr_mut();
 
-    let mut krama_text_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
-    for (i, (text, _)) in attr.krama_text_arr.iter().enumerate() {
-      krama_text_lookup.entry(text.clone()).or_insert(i);
+        let mut krama_text_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
+        for (i, (text, _)) in attr.krama_text_arr.iter().enumerate() {
+            krama_text_lookup.entry(text.clone()).or_insert(i);
+        }
+        attr.krama_text_lookup = krama_text_lookup;
+
+        let mut text_to_krama_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
+        for (i, (text, _)) in attr.text_to_krama_map.iter().enumerate() {
+            text_to_krama_lookup.entry(text.clone()).or_insert(i);
+        }
+        attr.text_to_krama_lookup = text_to_krama_lookup;
+
+        let mut typing_text_to_krama_lookup =
+            HashMap::with_capacity(attr.typing_text_to_krama_map.len());
+        for (i, (text, _)) in attr.typing_text_to_krama_map.iter().enumerate() {
+            typing_text_to_krama_lookup.entry(text.clone()).or_insert(i);
+        }
+        attr.typing_text_to_krama_lookup = typing_text_to_krama_lookup;
+
+        let mut custom_script_chars_lookup =
+            HashMap::with_capacity(attr.custom_script_chars_arr.len());
+        for (i, (text, _, _)) in attr.custom_script_chars_arr.iter().enumerate() {
+            custom_script_chars_lookup.entry(text.clone()).or_insert(i);
+        }
+        attr.custom_script_chars_lookup = custom_script_chars_lookup;
     }
-    attr.krama_text_lookup = krama_text_lookup;
-
-    let mut text_to_krama_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
-    for (i, (text, _)) in attr.text_to_krama_map.iter().enumerate() {
-      text_to_krama_lookup.entry(text.clone()).or_insert(i);
-    }
-    attr.text_to_krama_lookup = text_to_krama_lookup;
-
-    let mut typing_text_to_krama_lookup =
-      HashMap::with_capacity(attr.typing_text_to_krama_map.len());
-    for (i, (text, _)) in attr.typing_text_to_krama_map.iter().enumerate() {
-      typing_text_to_krama_lookup.entry(text.clone()).or_insert(i);
-    }
-    attr.typing_text_to_krama_lookup = typing_text_to_krama_lookup;
-
-    let mut custom_script_chars_lookup = HashMap::with_capacity(attr.custom_script_chars_arr.len());
-    for (i, (text, _, _)) in attr.custom_script_chars_arr.iter().enumerate() {
-      custom_script_chars_lookup.entry(text.clone()).or_insert(i);
-    }
-    attr.custom_script_chars_lookup = custom_script_chars_lookup;
-  }
 }
 
 /// currently for simplicity using a single cache for all script data
 static SCRIPT_DATA_CACHE: OnceLock<HashMap<ScriptListEnum, ScriptData>> = OnceLock::new();
 impl ScriptData {
-  fn load_all() -> HashMap<ScriptListEnum, ScriptData> {
-    let mut map = HashMap::new();
+    fn load_all() -> HashMap<ScriptListEnum, ScriptData> {
+        let mut map = HashMap::new();
 
-    for &script_name in generated::SCRIPT_DATA_NAMES {
-      let bytes = generated::get_script_data_bytes(script_name)
-        .unwrap_or_else(|| panic!("Generated bytes missing for script `{}`", script_name));
+        for &script_name in generated::SCRIPT_DATA_NAMES {
+            let bytes = generated::get_script_data_bytes(script_name)
+                .unwrap_or_else(|| panic!("Generated bytes missing for script `{}`", script_name));
 
-      let mut data: ScriptData = bincode::deserialize(bytes)
-        .unwrap_or_else(|e| panic!("bincode decode failed for script `{}`: {}", script_name, e));
+            let mut data: ScriptData = bincode::deserialize(bytes).unwrap_or_else(|e| {
+                panic!("bincode decode failed for script `{}`: {}", script_name, e)
+            });
 
-      data.init_lookups();
-      let script = ScriptListEnum::from_str(script_name)
-        .unwrap_or_else(|_| panic!("unknown script data name: `{script_name}`"));
-      map.insert(script, data);
+            data.init_lookups();
+            let script = ScriptListEnum::from_str(script_name)
+                .unwrap_or_else(|_| panic!("unknown script data name: `{script_name}`"));
+            map.insert(script, data);
+        }
+
+        map
     }
 
-    map
-  }
+    pub fn get_script_data(script: &ScriptListEnum) -> &'static ScriptData {
+        let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
 
-  pub fn get_script_data(script: &ScriptListEnum) -> &'static ScriptData {
-    let cache = SCRIPT_DATA_CACHE.get_or_init(Self::load_all);
-
-    cache
-      .get(script)
-      .unwrap_or_else(|| panic!("Script `{}` not found", script))
-  }
-
-  pub fn text_to_krama_map_index(&self, text: &str, use_typing_map: bool) -> Option<usize> {
-    if use_typing_map {
-      self.typing_text_to_krama_lookup.get(text).copied()
-    } else {
-      self.text_to_krama_lookup.get(text).copied()
+        cache
+            .get(script)
+            .unwrap_or_else(|| panic!("Script `{}` not found", script))
     }
-  }
 
-  pub fn custom_script_char_index_of_text(&self, text: &str) -> Option<usize> {
-    self.custom_script_chars_lookup.get(text).copied()
-  }
+    pub fn text_to_krama_map_index(&self, text: &str, use_typing_map: bool) -> Option<usize> {
+        if use_typing_map {
+            self.typing_text_to_krama_lookup.get(text).copied()
+        } else {
+            self.text_to_krama_lookup.get(text).copied()
+        }
+    }
+
+    pub fn custom_script_char_index_of_text(&self, text: &str) -> Option<usize> {
+        self.custom_script_chars_lookup.get(text).copied()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use std::fs;
-  use std::path::Path;
-  use std::str::FromStr;
+    use super::*;
+    use std::fs;
+    use std::path::Path;
+    use std::str::FromStr;
 
-  #[test]
-  fn all_script_data_json_files_must_parse() {
-    let dir = Path::new("src/data/script_data");
+    #[test]
+    fn all_script_data_json_files_must_parse() {
+        let dir = Path::new("src/data/script_data");
 
-    let entries = fs::read_dir(dir).expect("Failed to read script_data directory");
+        let entries = fs::read_dir(dir).expect("Failed to read script_data directory");
 
-    for entry in entries {
-      let entry = entry.expect("Failed to read directory entry");
-      let path = entry.path();
+        for entry in entries {
+            let entry = entry.expect("Failed to read directory entry");
+            let path = entry.path();
 
-      // Only test *.json files
-      if path.extension().and_then(|e| e.to_str()) == Some("json") {
-        let script_name = path
-          .file_stem()
-          .and_then(|s| s.to_str())
-          .expect("Invalid filename");
-        println!("{}", script_name);
+            // Only test *.json files
+            if path.extension().and_then(|e| e.to_str()) == Some("json") {
+                let script_name = path
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .expect("Invalid filename");
+                println!("{}", script_name);
 
-        let _ = ScriptData::get_script_data(&ScriptListEnum::from_str(script_name).unwrap());
-      }
+                let _ =
+                    ScriptData::get_script_data(&ScriptListEnum::from_str(script_name).unwrap());
+            }
+        }
     }
-  }
 }

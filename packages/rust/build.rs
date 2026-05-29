@@ -7,138 +7,138 @@ The resulting binary is smaller and faster to load.
 */
 
 mod schema {
-  // Re-use the exact same schema types as the library.
-  include!("src/script_data/schema.rs");
+    // Re-use the exact same schema types as the library.
+    include!("src/script_data/schema.rs");
 }
 
 mod scripts_rs_builder;
 
 use schema::{
-  CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
-  ScriptListDataJson,
+    CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
+    ScriptListDataJson,
 };
 use scripts_rs_builder::render_scripts_rs;
 
 fn read_json_file(path: &Path) -> String {
-  fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path.display(), e))
+    fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read {}: {}", path.display(), e))
 }
 
 fn main() {
-  let script_data_dir = Path::new("src/data/script_data");
-  let script_list_path = Path::new("src/data/script_list.json");
-  let custom_options_path = Path::new("src/data/custom_options.json");
+    let script_data_dir = Path::new("src/data/script_data");
+    let script_list_path = Path::new("src/data/script_list.json");
+    let custom_options_path = Path::new("src/data/custom_options.json");
 
-  println!("cargo:rerun-if-changed={}", script_data_dir.display());
-  println!("cargo:rerun-if-changed={}", script_list_path.display());
-  println!("cargo:rerun-if-changed={}", custom_options_path.display());
-  println!("cargo:rerun-if-changed=scripts_rs_builder.rs");
+    println!("cargo:rerun-if-changed={}", script_data_dir.display());
+    println!("cargo:rerun-if-changed={}", script_list_path.display());
+    println!("cargo:rerun-if-changed={}", custom_options_path.display());
+    println!("cargo:rerun-if-changed=scripts_rs_builder.rs");
 
-  let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").expect("OUT_DIR missing"));
+    let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").expect("OUT_DIR missing"));
 
-  let script_bins_dir = out_dir.join("script_data_bins");
-  fs::create_dir_all(&script_bins_dir).expect("Failed to create OUT_DIR/script_data_bins");
+    let script_bins_dir = out_dir.join("script_data_bins");
+    fs::create_dir_all(&script_bins_dir).expect("Failed to create OUT_DIR/script_data_bins");
 
-  // 1) Script data directory (*.json -> *.bin)
-  let mut script_names: Vec<String> = Vec::new();
-  let entries = fs::read_dir(script_data_dir).expect("Failed to read src/data/script_data");
-  for entry in entries {
-    let entry = entry.expect("Failed to read directory entry");
-    let path = entry.path();
+    // 1) Script data directory (*.json -> *.bin)
+    let mut script_names: Vec<String> = Vec::new();
+    let entries = fs::read_dir(script_data_dir).expect("Failed to read src/data/script_data");
+    for entry in entries {
+        let entry = entry.expect("Failed to read directory entry");
+        let path = entry.path();
 
-    if path.extension().and_then(|e| e.to_str()) != Some("json") {
-      continue;
+        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+            continue;
+        }
+
+        let stem = path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_else(|| panic!("Invalid filename: {}", path.display()))
+            .to_string();
+
+        let json = read_json_file(&path);
+        let data_json: ScriptDataJson =
+            serde_json::from_str(&json).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
+
+        let data: ScriptData = data_json.into();
+        let bytes = bincode::serialize(&data).expect("bincode encode failed for script_data");
+
+        let out_path = script_bins_dir.join(format!("{}.bin", stem));
+        fs::write(&out_path, bytes)
+            .unwrap_or_else(|e| panic!("Failed to write {}: {}", out_path.display(), e));
+
+        script_names.push(stem);
     }
 
-    let stem = path
-      .file_stem()
-      .and_then(|s| s.to_str())
-      .unwrap_or_else(|| panic!("Invalid filename: {}", path.display()))
-      .to_string();
+    script_names.sort();
 
-    let json = read_json_file(&path);
-    let data_json: ScriptDataJson =
-      serde_json::from_str(&json).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
+    // 2) script_list.json -> script_list.bin + src/scripts.rs
+    let script_list_json = read_json_file(script_list_path);
+    let script_list: ScriptListDataJson = serde_json::from_str(&script_list_json)
+        .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
+    let scripts_rs = render_scripts_rs(&script_list);
+    let script_list_raw: ScriptListData = script_list.into();
+    let script_list_bytes =
+        bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
+    let script_list_bin_path = out_dir.join("script_list.bin");
+    fs::write(&script_list_bin_path, script_list_bytes)
+        .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));
 
-    let data: ScriptData = data_json.into();
-    let bytes = bincode::serialize(&data).expect("bincode encode failed for script_data");
+    let manifest_dir =
+        PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR missing"));
+    let scripts_rs_path = manifest_dir.join("src/scripts.rs");
+    fs::write(&scripts_rs_path, scripts_rs)
+        .unwrap_or_else(|e| panic!("Failed to write {}: {}", scripts_rs_path.display(), e));
 
-    let out_path = script_bins_dir.join(format!("{}.bin", stem));
-    fs::write(&out_path, bytes)
-      .unwrap_or_else(|e| panic!("Failed to write {}: {}", out_path.display(), e));
+    // 3) custom_options.json -> custom_options.bin
+    let custom_options_json = read_json_file(custom_options_path);
+    let custom_options_raw: CustomOptionMapJson = serde_json::from_str(&custom_options_json)
+        .unwrap_or_else(|e| panic!("{}: {}", custom_options_path.display(), e));
+    let custom_options_map: CustomOptionMap = custom_options_raw
+        .into_iter()
+        .map(|(k, v)| (k, v.into()))
+        .collect();
+    let custom_options_bytes =
+        bincode::serialize(&custom_options_map).expect("bincode encode failed for custom_options");
+    let custom_options_bin_path = out_dir.join("custom_options.bin");
+    fs::write(&custom_options_bin_path, custom_options_bytes).unwrap_or_else(|e| {
+        panic!(
+            "Failed to write {}: {}",
+            custom_options_bin_path.display(),
+            e
+        )
+    });
 
-    script_names.push(stem);
-  }
+    // 4) Generate a tiny Rust module that maps script name -> include_bytes!.
+    let mut out_rs = String::new();
+    out_rs.push_str("// @generated by build.rs — do not edit.\n");
+    out_rs.push('\n');
 
-  script_names.sort();
+    out_rs.push_str("pub const SCRIPT_DATA_NAMES: &[&str] = &[\n");
+    for name in &script_names {
+        out_rs.push_str(&format!("  {:?},\n", name));
+    }
+    out_rs.push_str("];\n\n");
 
-  // 2) script_list.json -> script_list.bin + src/scripts.rs
-  let script_list_json = read_json_file(script_list_path);
-  let script_list: ScriptListDataJson = serde_json::from_str(&script_list_json)
-    .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
-  let scripts_rs = render_scripts_rs(&script_list);
-  let script_list_raw: ScriptListData = script_list.into();
-  let script_list_bytes =
-    bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
-  let script_list_bin_path = out_dir.join("script_list.bin");
-  fs::write(&script_list_bin_path, script_list_bytes)
-    .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));
-
-  let manifest_dir =
-    PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR missing"));
-  let scripts_rs_path = manifest_dir.join("src/scripts.rs");
-  fs::write(&scripts_rs_path, scripts_rs)
-    .unwrap_or_else(|e| panic!("Failed to write {}: {}", scripts_rs_path.display(), e));
-
-  // 3) custom_options.json -> custom_options.bin
-  let custom_options_json = read_json_file(custom_options_path);
-  let custom_options_raw: CustomOptionMapJson = serde_json::from_str(&custom_options_json)
-    .unwrap_or_else(|e| panic!("{}: {}", custom_options_path.display(), e));
-  let custom_options_map: CustomOptionMap = custom_options_raw
-    .into_iter()
-    .map(|(k, v)| (k, v.into()))
-    .collect();
-  let custom_options_bytes =
-    bincode::serialize(&custom_options_map).expect("bincode encode failed for custom_options");
-  let custom_options_bin_path = out_dir.join("custom_options.bin");
-  fs::write(&custom_options_bin_path, custom_options_bytes).unwrap_or_else(|e| {
-    panic!(
-      "Failed to write {}: {}",
-      custom_options_bin_path.display(),
-      e
-    )
-  });
-
-  // 4) Generate a tiny Rust module that maps script name -> include_bytes!.
-  let mut out_rs = String::new();
-  out_rs.push_str("// @generated by build.rs — do not edit.\n");
-  out_rs.push('\n');
-
-  out_rs.push_str("pub const SCRIPT_DATA_NAMES: &[&str] = &[\n");
-  for name in &script_names {
-    out_rs.push_str(&format!("  {:?},\n", name));
-  }
-  out_rs.push_str("];\n\n");
-
-  out_rs.push_str("pub fn get_script_data_bytes(name: &str) -> Option<&'static [u8]> {\n");
-  out_rs.push_str("  match name {\n");
-  for name in &script_names {
-    out_rs.push_str(&format!(
+    out_rs.push_str("pub fn get_script_data_bytes(name: &str) -> Option<&'static [u8]> {\n");
+    out_rs.push_str("  match name {\n");
+    for name in &script_names {
+        out_rs.push_str(&format!(
       "    {n:?} => Some(include_bytes!(concat!(env!(\"OUT_DIR\"), \"/script_data_bins/{n}.bin\")) as &'static [u8]),\n",
       n = name
     ));
-  }
-  out_rs.push_str("    _ => None,\n");
-  out_rs.push_str("  }\n");
-  out_rs.push_str("}\n\n");
+    }
+    out_rs.push_str("    _ => None,\n");
+    out_rs.push_str("  }\n");
+    out_rs.push_str("}\n\n");
 
-  out_rs.push_str(
+    out_rs.push_str(
     "pub const SCRIPT_LIST_BYTES: &'static [u8] = include_bytes!(concat!(env!(\"OUT_DIR\"), \"/script_list.bin\"));\n",
   );
-  out_rs.push_str(
+    out_rs.push_str(
     "pub const CUSTOM_OPTIONS_BYTES: &'static [u8] = include_bytes!(concat!(env!(\"OUT_DIR\"), \"/custom_options.bin\"));\n",
   );
 
-  let generated_rs_path = out_dir.join("lipilekhika_generated_data.rs");
-  fs::write(&generated_rs_path, out_rs)
-    .unwrap_or_else(|e| panic!("Failed to write {}: {}", generated_rs_path.display(), e));
+    let generated_rs_path = out_dir.join("lipilekhika_generated_data.rs");
+    fs::write(&generated_rs_path, out_rs)
+        .unwrap_or_else(|e| panic!("Failed to write {}: {}", generated_rs_path.display(), e));
 }

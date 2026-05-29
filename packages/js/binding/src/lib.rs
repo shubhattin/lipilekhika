@@ -7,111 +7,113 @@ use std::str::FromStr;
 
 #[napi(object)]
 pub struct TypingContextOptionsInput {
-  #[napi(js_name = "auto_context_clear_time_ms")]
-  pub auto_context_clear_time_ms: Option<u32>,
-  #[napi(js_name = "use_native_numerals")]
-  pub use_native_numerals: Option<bool>,
-  #[napi(js_name = "include_inherent_vowel")]
-  pub include_inherent_vowel: Option<bool>,
+    #[napi(js_name = "auto_context_clear_time_ms")]
+    pub auto_context_clear_time_ms: Option<u32>,
+    #[napi(js_name = "use_native_numerals")]
+    pub use_native_numerals: Option<bool>,
+    #[napi(js_name = "include_inherent_vowel")]
+    pub include_inherent_vowel: Option<bool>,
 }
 
 #[napi(object)]
 pub struct TypingDiffOutput {
-  #[napi(js_name = "to_delete_chars_count")]
-  pub to_delete_chars_count: u32,
-  #[napi(js_name = "diff_add_text")]
-  pub diff_add_text: String,
-  #[napi(js_name = "context_length")]
-  pub context_length: u32,
+    #[napi(js_name = "to_delete_chars_count")]
+    pub to_delete_chars_count: u32,
+    #[napi(js_name = "diff_add_text")]
+    pub diff_add_text: String,
+    #[napi(js_name = "context_length")]
+    pub context_length: u32,
 }
 
 #[napi]
 pub struct NativeTypingContext {
-  inner: lipilekhika::typing::TypingContext,
+    inner: lipilekhika::typing::TypingContext,
 }
 
 #[napi]
 pub fn transliterate(
-  text: String,
-  from: String,
-  to: String,
-  trans_options: Option<HashMap<String, bool>>,
+    text: String,
+    from: String,
+    to: String,
+    trans_options: Option<HashMap<String, bool>>,
 ) -> Result<String> {
-  let from_script = Script::from_str(from.trim())
-    .map_err(|e| Error::from_reason(format!("invalid from script: {e}")))?;
-  let to_script = Script::from_str(to.trim())
-    .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
+    let from_script = Script::from_str(from.trim())
+        .map_err(|e| Error::from_reason(format!("invalid from script: {e}")))?;
+    let to_script = Script::from_str(to.trim())
+        .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
-  Ok(lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref()).into_owned())
+    Ok(
+        lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref())
+            .into_owned(),
+    )
 }
 
 #[napi]
 impl NativeTypingContext {
-  #[napi(constructor)]
-  pub fn new(typing_lang: String, options: Option<TypingContextOptionsInput>) -> Result<Self> {
-    let typing_options = options.map(|opts| lipilekhika::typing::TypingContextOptions {
-      auto_context_clear_time_ms: opts
-        .auto_context_clear_time_ms
-        .map(u64::from)
-        .unwrap_or(lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS),
-      use_native_numerals: opts
-        .use_native_numerals
-        .unwrap_or(lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS),
-      include_inherent_vowel: opts
-        .include_inherent_vowel
-        .unwrap_or(lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL),
-    });
+    #[napi(constructor)]
+    pub fn new(typing_lang: String, options: Option<TypingContextOptionsInput>) -> Result<Self> {
+        let typing_options = options.map(|opts| lipilekhika::typing::TypingContextOptions {
+            auto_context_clear_time_ms: opts
+                .auto_context_clear_time_ms
+                .map(u64::from)
+                .unwrap_or(lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS),
+            use_native_numerals: opts
+                .use_native_numerals
+                .unwrap_or(lipilekhika::typing::DEFAULT_USE_NATIVE_NUMERALS),
+            include_inherent_vowel: opts
+                .include_inherent_vowel
+                .unwrap_or(lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL),
+        });
 
-    let typing_script = Script::from_str(typing_lang.trim()).map_err(|e| {
-      Error::from_reason(format!("invalid typing_lang script {typing_lang:?}: {e}"))
-    })?;
+        let typing_script = Script::from_str(typing_lang.trim()).map_err(|e| {
+            Error::from_reason(format!("invalid typing_lang script {typing_lang:?}: {e}"))
+        })?;
 
-    let inner = lipilekhika::typing::TypingContext::new(typing_script, typing_options);
+        let inner = lipilekhika::typing::TypingContext::new(typing_script, typing_options);
 
-    Ok(Self { inner })
-  }
+        Ok(Self { inner })
+    }
 
-  #[napi(js_name = "clear_context")]
-  pub fn clear_context(&mut self) {
-    self.inner.clear_context();
-  }
+    #[napi(js_name = "clear_context")]
+    pub fn clear_context(&mut self) {
+        self.inner.clear_context();
+    }
 
-  #[napi(js_name = "take_key_input")]
-  pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
-    let diff = self.inner.take_key_input(&key);
-    Ok(TypingDiffOutput {
-      to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
-        .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,
-      diff_add_text: diff.diff_add_text,
-      context_length: u32::try_from(diff.context_length)
-        .map_err(|_| Error::from_reason("context_length exceeds u32 range"))?,
-    })
-  }
+    #[napi(js_name = "take_key_input")]
+    pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
+        let diff = self.inner.take_key_input(&key);
+        Ok(TypingDiffOutput {
+            to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
+                .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,
+            diff_add_text: diff.diff_add_text,
+            context_length: u32::try_from(diff.context_length)
+                .map_err(|_| Error::from_reason("context_length exceeds u32 range"))?,
+        })
+    }
 
-  #[napi(js_name = "update_use_native_numerals")]
-  pub fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
-    self.inner.update_use_native_numerals(use_native_numerals);
-  }
+    #[napi(js_name = "update_use_native_numerals")]
+    pub fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
+        self.inner.update_use_native_numerals(use_native_numerals);
+    }
 
-  #[napi(js_name = "update_include_inherent_vowel")]
-  pub fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
-    self
-      .inner
-      .update_include_inherent_vowel(include_inherent_vowel);
-  }
+    #[napi(js_name = "update_include_inherent_vowel")]
+    pub fn update_include_inherent_vowel(&mut self, include_inherent_vowel: bool) {
+        self.inner
+            .update_include_inherent_vowel(include_inherent_vowel);
+    }
 
-  #[napi(js_name = "get_use_native_numerals")]
-  pub fn get_use_native_numerals(&self) -> bool {
-    self.inner.get_use_native_numerals()
-  }
+    #[napi(js_name = "get_use_native_numerals")]
+    pub fn get_use_native_numerals(&self) -> bool {
+        self.inner.get_use_native_numerals()
+    }
 
-  #[napi(js_name = "get_include_inherent_vowel")]
-  pub fn get_include_inherent_vowel(&self) -> bool {
-    self.inner.get_include_inherent_vowel()
-  }
+    #[napi(js_name = "get_include_inherent_vowel")]
+    pub fn get_include_inherent_vowel(&self) -> bool {
+        self.inner.get_include_inherent_vowel()
+    }
 
-  #[napi(js_name = "get_normalized_script")]
-  pub fn get_normalized_script(&self) -> String {
-    self.inner.get_normalized_script().to_string()
-  }
+    #[napi(js_name = "get_normalized_script")]
+    pub fn get_normalized_script(&self) -> String {
+        self.inner.get_normalized_script().to_string()
+    }
 }
