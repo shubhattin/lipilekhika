@@ -9,7 +9,7 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
     let script_variants: Vec<_> = script_list
         .scripts
         .keys()
-        .map(|name| {
+        .map(|name: &String| {
             (
                 format_ident!(
                     "{}",

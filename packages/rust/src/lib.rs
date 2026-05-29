@@ -1,3 +1,14 @@
+#![no_std]
+
+extern crate alloc;
+
+#[cfg(test)]
+extern crate std;
+
+use alloc::borrow::Cow;
+use alloc::string::String;
+use hashbrown::HashMap;
+
 use crate::script_data::ScriptData;
 pub use crate::script_data::{ScriptListData, get_all_options, get_script_list_data};
 use crate::transliterate::transliterate_text;
@@ -6,8 +17,6 @@ pub use crate::typing::{
     get_script_typing_data_map,
 };
 pub use scripts::{Script, ScriptListEnum};
-use std::{borrow::Cow, collections::HashMap};
-
 mod script_data;
 mod transliterate;
 mod utils;
@@ -58,11 +67,13 @@ pub fn preload_script_data(script: Script) -> &'static ScriptData {
 mod tests {
     use super::*;
 
+    use alloc::{format, string::ToString, vec::Vec};
     use crate::scripts::Script;
     use owo_colors::OwoColorize;
     use serde::Deserialize;
     use std::fs;
     use std::io::Write;
+    use std::{print, println};
     use std::path::{Path, PathBuf};
     use std::str::FromStr;
     use std::time::Instant;

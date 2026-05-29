@@ -1,6 +1,11 @@
-use indexmap::IndexMap;
+use alloc::string::String;
+use alloc::vec::Vec;
+use foldhash::fast::RandomState as IndexMapHasher;
+use hashbrown::HashMap;
+use indexmap::IndexMap as IndexMapImpl;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
+type IndexMap<K, V> = IndexMapImpl<K, V, IndexMapHasher>;
 
 /*
 In this file in places there are ...Json version and non-json version

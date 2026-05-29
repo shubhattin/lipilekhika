@@ -11,7 +11,7 @@ use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
 use serde::Deserialize;
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};

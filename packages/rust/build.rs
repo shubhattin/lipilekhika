@@ -7,6 +7,7 @@ The resulting binary is smaller and faster to load.
 */
 
 mod schema {
+    extern crate alloc;
     // Re-use the exact same schema types as the library.
     include!("src/script_data/schema.rs");
 }
@@ -60,7 +61,8 @@ fn main() {
             serde_json::from_str(&json).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
 
         let data: ScriptData = data_json.into();
-        let bytes = bincode::serialize(&data).expect("bincode encode failed for script_data");
+        let bytes = bincode::serde::encode_to_vec(&data, bincode::config::standard())
+            .expect("bincode encode failed for script_data");
 
         let out_path = script_bins_dir.join(format!("{}.bin", stem));
         fs::write(&out_path, bytes)
@@ -77,8 +79,8 @@ fn main() {
         .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
     let scripts_rs = render_scripts_rs(&script_list);
     let script_list_raw: ScriptListData = script_list.into();
-    let script_list_bytes =
-        bincode::serialize(&script_list_raw).expect("bincode encode failed for script_list");
+    let script_list_bytes = bincode::serde::encode_to_vec(&script_list_raw, bincode::config::standard())
+        .expect("bincode encode failed for script_list");
     let script_list_bin_path = out_dir.join("script_list.bin");
     fs::write(&script_list_bin_path, script_list_bytes)
         .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));
@@ -98,7 +100,8 @@ fn main() {
         .map(|(k, v)| (k, v.into()))
         .collect();
     let custom_options_bytes =
-        bincode::serialize(&custom_options_map).expect("bincode encode failed for custom_options");
+        bincode::serde::encode_to_vec(&custom_options_map, bincode::config::standard())
+            .expect("bincode encode failed for custom_options");
     let custom_options_bin_path = out_dir.join("custom_options.bin");
     fs::write(&custom_options_bin_path, custom_options_bytes).unwrap_or_else(|e| {
         panic!(

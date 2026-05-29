@@ -4,8 +4,12 @@ use crate::transliterate::helpers::{
     self, InputTextCursor, PrevContextBuilder, PrevContextItem, ResultStringBuilder,
     is_script_tamil_ext, is_ta_ext_superscript_tail, is_vedic_svara_tail,
 };
-use std::borrow::{Borrow, Cow};
-use std::collections::HashMap;
+use alloc::borrow::{Cow, ToOwned};
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+use core::borrow::Borrow;
+use core::slice;
+use hashbrown::HashMap;
 
 /// Compare a char with a &str without heap allocation.
 #[inline]
@@ -360,7 +364,7 @@ where
                         if let Some(replace_text) = replace_text {
                             self.result.rewrite_tail_pieces(
                                 matched.matched_len,
-                                std::slice::from_ref(replace_text),
+                                slice::from_ref(replace_text),
                             );
                         } else {
                             let pieces = lookup_data.replace_with_pieces(replace_with);

@@ -5,7 +5,9 @@ mod schema;
 mod script_data;
 mod script_list;
 
-use std::collections::HashMap;
+use alloc::string::String;
+use alloc::vec::Vec;
+use hashbrown::HashMap;
 
 pub use custom_options::*;
 pub use schema::*;
