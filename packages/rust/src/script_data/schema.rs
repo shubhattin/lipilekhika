@@ -341,22 +341,21 @@ pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScriptListDataJson {
-    // only `scripts`, `langs` and custom otion name `key` needs order preservation
-    // so we use IndexMap only only for those
+    // IndexMap used to preserve order of keys
     pub scripts: IndexMap<String, u8>,
     pub langs: IndexMap<String, u8>,
     /// all langs are mapped to a script
-    pub lang_script_map: HashMap<String, String>,
+    pub lang_script_map: IndexMap<String, String>,
     /// contains aliases which map to script
-    pub script_alternates_map: HashMap<String, String>,
+    pub script_alternates_map: IndexMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ScriptListData {
     pub scripts: Vec<String>,
     pub langs: Vec<String>,
-    pub lang_script_map: HashMap<String, String>,
-    pub script_alternates_map: HashMap<String, String>,
+    pub lang_script_map: IndexMap<String, String>,
+    pub script_alternates_map: IndexMap<String, String>,
 }
 
 impl From<ScriptListDataJson> for ScriptListData {

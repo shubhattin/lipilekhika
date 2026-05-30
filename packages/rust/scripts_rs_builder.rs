@@ -79,6 +79,30 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
     }
   });
 
+    let script_from_id_arms: Vec<_> = script_variants
+        .iter()
+        .map(|(variant, label)| {
+            let id = script_list
+                .scripts
+                .get(*label)
+                .copied()
+                .unwrap_or_else(|| panic!("missing script id for {label:?}"));
+            (id, variant.clone())
+        })
+        .collect();
+
+    let script_list_from_id_arms = script_from_id_arms.iter().map(|(id, variant)| {
+        quote! {
+            #id => Some(Self::#variant),
+        }
+    });
+
+    let script_from_id_arms = script_from_id_arms.iter().map(|(id, variant)| {
+        quote! {
+            #id => Some(Self::#variant),
+        }
+    });
+
     let tokens = quote! {
       // generated file, do not edit
       #[rustfmt::skip]
@@ -94,11 +118,33 @@ pub fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
         #(#script_enum_variants)*
       }
 
+      impl ScriptListEnum {
+          /// Resolves a canonical `script_list.json` script id to the internal script enum.
+          #[inline]
+          pub const fn from_id(id: u8) -> Option<Self> {
+              match id {
+                  #(#script_list_from_id_arms)*
+                  _ => None,
+              }
+          }
+      }
+
       /// List of all supported scripts, languages and their aliases
       #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, AsRefStr, Display, EnumString)]
       #[strum(ascii_case_insensitive)]
       pub enum Script {
         #(#script_lang_enum_variants)*
+      }
+
+      impl Script {
+          /// Resolves a canonical `script_list.json` script id to the canonical script variant.
+          #[inline]
+          pub const fn from_id(id: u8) -> Option<Self> {
+              match id {
+                  #(#script_from_id_arms)*
+                  _ => None,
+              }
+          }
       }
 
       impl From<Script> for ScriptListEnum {
@@ -197,7 +243,7 @@ fn to_pascal_case_ident(value: &str) -> String {
             | "Virtual"
             | "Yield"
     ) {
-        ident.insert_str(0, "Value");
+        ident.push('_');
     }
 
     ident

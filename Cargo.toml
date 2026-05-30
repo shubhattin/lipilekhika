@@ -14,3 +14,10 @@ resolver = "3"
 [profile.bench]
 lto = true
 codegen-units = 1
+
+# Speed-first release builds (used by WASM and other bindings).
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+panic = "abort"

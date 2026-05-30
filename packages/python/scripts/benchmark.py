@@ -28,7 +28,7 @@ BULK_SEPARATOR = "\n"
 
 def get_test_data() -> list[dict[str, Any]]:
     """Load all transliteration test data from YAML files."""
-    data = []
+    data: list[dict[str, Any]] = []
 
     def scan_yaml_files(directory: Path) -> list[Path]:
         yaml_files = []
@@ -50,7 +50,7 @@ def get_test_data() -> list[dict[str, Any]]:
 
 def get_typing_test_data() -> list[dict[str, Any]]:
     """Load all typing test data from YAML files."""
-    data = []
+    data: list[dict[str, Any]] = []
 
     def scan_yaml_files(directory: Path) -> list[Path]:
         yaml_files = []

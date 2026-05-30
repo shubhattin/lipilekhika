@@ -1,8 +1,21 @@
 // binding for vite-node and bun
-import init, { transliterate as wasmTransliterate, initSync } from './pkg/lipilekhika_wasm.js';
+import init, {
+  transliterate_no_options,
+  transliterate_with_options,
+  initSync
+} from './pkg/lipilekhika_wasm.js';
 import type { TransliterationOptions } from '../src/index';
+import { script_list_obj } from '../src/utils/lang_list';
 
 let initPromise: Promise<void> | null = null;
+
+function scriptId(scriptName: string): number {
+  const id = script_list_obj[scriptName as keyof typeof script_list_obj];
+  if (id === undefined) {
+    throw new Error(`Unknown script: ${scriptName}`);
+  }
+  return id;
+}
 
 /**
  * Initialize the WASM module
@@ -43,7 +56,14 @@ export async function transliterate(
   trans_options?: TransliterationOptions | null
 ): Promise<string> {
   await initWasm();
-  return wasmTransliterate(text, from, to, trans_options);
+  const fromId = scriptId(from);
+  const toId = scriptId(to);
+
+  if (trans_options == null || trans_options == undefined) {
+    return transliterate_no_options(text, fromId, toId);
+  }
+
+  return transliterate_with_options(text, fromId, toId, trans_options);
 }
 
 /**

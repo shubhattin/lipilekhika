@@ -1,4 +1,3 @@
-use core::str::FromStr;
 use lipilekhika::HashMap;
 use lipilekhika::scripts::Script;
 use wasm_bindgen::prelude::*;
@@ -22,7 +21,7 @@ fn parse_trans_options(
         let value = entry
             .get(1)
             .as_bool()
-            .ok_or_else(|| JsError::new(&format!("trans_options[{key}] must be a boolean")))?;
+            .ok_or_else(|| JsError::new("trans_options value must be a boolean"))?;
         map.insert(key, value);
     }
 
@@ -33,27 +32,32 @@ fn parse_trans_options(
     }
 }
 
-/// Transliterates text from one script to another.
-///
-/// - `text`: The text to transliterate
-/// - `from`: Source script name/alias
-/// - `to`: Target script name/alias
-/// - `trans_options`: Optional JSON object with transliteration options (e.g., {"option_name": true})
-///
-/// Returns the transliterated text or throws an error if script names are invalid.
-#[wasm_bindgen]
-pub fn transliterate(
+fn transliterate_by_id(
     text: &str,
-    from: &str,
-    to: &str,
-    trans_options: Option<js_sys::Object>,
+    from_id: u8,
+    to_id: u8,
+    trans_options: Option<&HashMap<String, bool>>,
 ) -> Result<String, JsError> {
-    let options = parse_trans_options(trans_options)?;
+    let from = Script::from_id(from_id).ok_or_else(|| JsError::new("invalid source script id"))?;
+    let to = Script::from_id(to_id).ok_or_else(|| JsError::new("invalid target script id"))?;
 
-    let from = Script::from_str(from)
-        .map_err(|e| JsError::new(&format!("invalid source script {from:?}: {e}")))?;
-    let to = Script::from_str(to)
-        .map_err(|e| JsError::new(&format!("invalid target script {to:?}: {e}")))?;
+    Ok(lipilekhika::transliterate(text, from, to, trans_options).into_owned())
+}
 
-    Ok(lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned())
+/// Fast path: transliterate without custom options (no JS object parsing).
+#[wasm_bindgen]
+pub fn transliterate_no_options(text: &str, from_id: u8, to_id: u8) -> Result<String, JsError> {
+    transliterate_by_id(text, from_id, to_id, None)
+}
+
+/// Transliterate with custom options from a JS object.
+#[wasm_bindgen]
+pub fn transliterate_with_options(
+    text: &str,
+    from_id: u8,
+    to_id: u8,
+    trans_options: js_sys::Object,
+) -> Result<String, JsError> {
+    let options = parse_trans_options(Some(trans_options))?;
+    transliterate_by_id(text, from_id, to_id, options.as_ref())
 }
