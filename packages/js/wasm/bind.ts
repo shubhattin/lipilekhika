@@ -20,16 +20,24 @@ function scriptId(scriptName: string): number {
   return id;
 }
 
-/** Pack strings into one buffer + [start, end) offset pairs for a single WASM crossing. */
+const utf8Encoder = new TextEncoder();
+
+/** UTF-8 byte length; wasm-bindgen passes `&str` as UTF-8, so offsets must be byte-based. */
+function utf8ByteLength(text: string): number {
+  return utf8Encoder.encode(text).length;
+}
+
+/** Pack strings into one buffer + [start, end) UTF-8 byte offset pairs for a single WASM crossing. */
 function packStrings(texts: readonly string[]): { joined: string; offsets: Uint32Array } {
   const offsets = new Uint32Array(texts.length * 2);
   let pos = 0;
   const parts: string[] = [];
   for (let i = 0; i < texts.length; i++) {
     const t = texts[i];
+    const byteLen = utf8ByteLength(t);
     offsets[i * 2] = pos;
-    offsets[i * 2 + 1] = pos + t.length;
-    pos += t.length;
+    offsets[i * 2 + 1] = pos + byteLen;
+    pos += byteLen;
     parts.push(t);
   }
   return { joined: parts.join(''), offsets };
