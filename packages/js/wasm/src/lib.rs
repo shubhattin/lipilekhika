@@ -1,5 +1,5 @@
-use lipilekhika::scripts::Script;
 use lipilekhika::HashMap;
+use lipilekhika::scripts::Script;
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 

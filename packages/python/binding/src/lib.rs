@@ -1,8 +1,8 @@
+use lipilekhika::HashMap;
 use lipilekhika::ScriptListEnum;
 use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use lipilekhika::HashMap;
 use std::collections::HashMap as StdHashMap;
 use std::str::FromStr;
 
@@ -106,7 +106,11 @@ impl From<&lipilekhika::ScriptListData> for PyScriptListData {
         Self {
             scripts: data.scripts.clone(),
             langs: data.langs.clone(),
-            lang_script_map: data.lang_script_map.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            lang_script_map: data
+                .lang_script_map
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
             script_alternates_map: data
                 .script_alternates_map
                 .iter()

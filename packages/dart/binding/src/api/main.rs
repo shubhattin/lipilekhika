@@ -14,7 +14,11 @@ impl From<&lipilekhika::ScriptListData> for ScriptListData {
         Self {
             scripts: data.scripts.clone(),
             langs: data.langs.clone(),
-            lang_script_map: data.lang_script_map.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            lang_script_map: data
+                .lang_script_map
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
             script_alternates_map: data
                 .script_alternates_map
                 .iter()

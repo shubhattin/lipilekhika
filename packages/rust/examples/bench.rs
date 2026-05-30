@@ -4,6 +4,7 @@
 //! Run: `cargo run --example bench --release -p lipilekhika`
 //! (from workspace root; from `packages/rust` omit `-p lipilekhika` if that crate is default).
 
+use hashbrown::HashMap;
 use indexmap::IndexMap;
 use lipilekhika::get_script_list_data;
 use lipilekhika::preload_script_data;
@@ -11,7 +12,6 @@ use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
 use serde::Deserialize;
-use hashbrown::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};

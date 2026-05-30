@@ -79,8 +79,9 @@ fn main() {
         .unwrap_or_else(|e| panic!("{}: {}", script_list_path.display(), e));
     let scripts_rs = render_scripts_rs(&script_list);
     let script_list_raw: ScriptListData = script_list.into();
-    let script_list_bytes = bincode::serde::encode_to_vec(&script_list_raw, bincode::config::standard())
-        .expect("bincode encode failed for script_list");
+    let script_list_bytes =
+        bincode::serde::encode_to_vec(&script_list_raw, bincode::config::standard())
+            .expect("bincode encode failed for script_list");
     let script_list_bin_path = out_dir.join("script_list.bin");
     fs::write(&script_list_bin_path, script_list_bytes)
         .unwrap_or_else(|e| panic!("Failed to write {}: {}", script_list_bin_path.display(), e));

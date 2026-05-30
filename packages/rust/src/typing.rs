@@ -3,8 +3,8 @@ use alloc::vec::Vec;
 use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
-use crate::scripts::{Script, ScriptListEnum};
 use crate::script_data::{List, ScriptData};
+use crate::scripts::{Script, ScriptListEnum};
 use crate::transliterate::transliterate::{
     TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
 };
@@ -469,15 +469,15 @@ pub fn get_script_krama_data(script: Script) -> Vec<KramaDataItem> {
 mod tests {
     use super::*;
 
-    use alloc::{format, string::ToString, vec::Vec};
     use crate::scripts::Script;
     use crate::transliterate::helpers::VEDIC_SVARAS;
+    use alloc::{format, string::ToString, vec::Vec};
     use serde::Deserialize;
     use std::fs;
-    use std::println;
     use std::fs::OpenOptions;
     use std::io::Write;
     use std::path::{Path, PathBuf};
+    use std::println;
     use std::str::FromStr;
 
     fn assert_send_sync<T: Send + Sync>() {}

@@ -1,9 +1,9 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use hashbrown::HashMap;
 use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
 use serde::Deserialize;
-use hashbrown::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
