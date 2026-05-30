@@ -7,7 +7,7 @@ publish = false
 [dependencies]
 iced = { version = "0.14.0", features = ["image", "advanced", "svg"] }
 iced_aw = { version = "0.13.0", features = ["full"] }
-lipilekhika = { path = "../packages/rust" }
+lipilekhika = { path = "../packages/rust", features = ["std"] }
 iced_futures = "0.14.0"
 crossbeam-channel = "0.5.15"
 tray-icon = "0.21.3"

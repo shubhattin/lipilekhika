@@ -32,6 +32,7 @@ strum = { version = "0.28.0", default-features = false, features = ["derive"] }
 
 [features]
 default = []
+# Uses `std::time` for `TypingContext` idle auto-clear (`auto_context_clear_time_ms`).
 std = []
 
 [dev-dependencies]

@@ -1,10 +1,19 @@
+//! Per-key typing emulation: stateful [`TypingContext`], diffs for incremental UI updates,
+//! and script typing-data helpers. Enable the crate `std` feature for idle auto-clear via
+//! `std::time`; otherwise clear context explicitly.
+
+use crate::scripts::{Script, ScriptListEnum};
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "std")]
+use core::time::Duration;
+#[cfg(feature = "std")]
+use std::time::Instant;
+
 use crate::script_data::{List, ScriptData};
-use crate::scripts::{Script, ScriptListEnum};
 use crate::transliterate::transliterate::{
     TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
 };
@@ -58,7 +67,9 @@ pub struct TypingDiff {
 
 /// Stateful isolated context for character-by-character input typing.
 ///
-/// synchronous and uses Rust's internal script data cache.
+/// With the `std` feature, idle time between keys (via `std::time`) can auto-clear the
+/// context per [`TypingContextOptions::auto_context_clear_time_ms`]; without `std`, call
+/// [`Self::clear_context`] yourself.
 #[derive(Debug)]
 pub struct TypingContext {
     typing_script: ScriptListEnum,
@@ -69,8 +80,10 @@ pub struct TypingContext {
     curr_input: String,
     curr_output: String,
 
-    auto_context_clear_time_ms: u64,
-    last_time_ms: Option<u64>,
+    #[cfg(feature = "std")]
+    auto_context_clear_time: Duration,
+    #[cfg(feature = "std")]
+    last_time: Option<Instant>,
 
     from_script_data: &'static ScriptData,
     to_script_data: &'static ScriptData,
@@ -95,8 +108,10 @@ impl TypingContext {
             include_inherent_vowel: opts.include_inherent_vowel,
             curr_input: String::new(),
             curr_output: String::new(),
-            auto_context_clear_time_ms: opts.auto_context_clear_time_ms,
-            last_time_ms: None,
+            #[cfg(feature = "std")]
+            auto_context_clear_time: Duration::from_millis(opts.auto_context_clear_time_ms),
+            #[cfg(feature = "std")]
+            last_time: None,
             from_script_data,
             to_script_data,
             trans_options: resolved.trans_options,
@@ -106,7 +121,10 @@ impl TypingContext {
 
     /// Clears all internal state and contexts.
     pub fn clear_context(&mut self) {
-        self.last_time_ms = None;
+        #[cfg(feature = "std")]
+        {
+            self.last_time = None;
+        }
         self.curr_input.clear();
         self.curr_output.clear();
     }
@@ -132,18 +150,25 @@ impl TypingContext {
             };
         };
 
-        self.take_key_input_char_at(ch, None)
+        self.take_key_input_char(ch)
     }
 
-    /// Process one character with an optional monotonic clock value in milliseconds.
+    /// Process one character of typing input.
     ///
-    /// When `now_ms` is `Some`, auto context clear runs if the elapsed time since the
-    /// previous key exceeds [`TypingContextOptions::auto_context_clear_time_ms`].
-    pub fn take_key_input_char_at(&mut self, ch: char, now_ms: Option<u64>) -> TypingDiff {
-        if let (Some(now), Some(last)) = (now_ms, self.last_time_ms) {
-            if now.saturating_sub(last) > self.auto_context_clear_time_ms {
-                self.clear_context();
-            }
+    /// When the `std` feature is enabled, the context is cleared automatically if the
+    /// elapsed time since the previous key exceeds
+    /// [`TypingContextOptions::auto_context_clear_time_ms`].
+    ///
+    /// Without the `std` feature, there is no automatic time-based context clearing; (relies on wall clock time)
+    /// you must call [`Self::clear_context`] to clear context manually.
+    pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
+        #[cfg(feature = "std")]
+        let now = Instant::now();
+        #[cfg(feature = "std")]
+        if let Some(last) = self.last_time
+            && now.duration_since(last) > self.auto_context_clear_time
+        {
+            self.clear_context();
         }
 
         self.curr_input.push(ch);
@@ -172,26 +197,15 @@ impl TypingContext {
             self.clear_context();
         }
 
-        if let Some(now) = now_ms {
-            self.last_time_ms = Some(now);
+        #[cfg(feature = "std")]
+        {
+            self.last_time = Some(now);
         }
 
         TypingDiff {
             to_delete_chars_count,
             diff_add_text,
             context_length,
-        }
-    }
-
-    /// Process one character, using the system clock when the `std` feature is enabled.
-    pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
-        #[cfg(feature = "std")]
-        {
-            return self.take_key_input_char_at(ch, wall_clock_ms());
-        }
-        #[cfg(not(feature = "std"))]
-        {
-            self.take_key_input_char_at(ch, None)
         }
     }
 
@@ -237,15 +251,6 @@ fn compute_diff(prev_output: &str, output: &str) -> (usize, String) {
     (to_delete_chars_count, diff_add_text)
 }
 
-#[cfg(feature = "std")]
-fn wall_clock_ms() -> Option<u64> {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .ok()
-        .map(|d| d.as_millis() as u64)
-}
-
 /// Helper used in tests to emulate per-key typing and accumulate the final output.
 ///
 pub fn emulate_typing(
@@ -258,7 +263,7 @@ pub fn emulate_typing(
     let mut result = String::new();
 
     for ch in text.chars() {
-        let diff = ctx.take_key_input_char_at(ch, None);
+        let diff = ctx.take_key_input_char(ch);
 
         if diff.to_delete_chars_count > 0 {
             truncate_last_chars(&mut result, diff.to_delete_chars_count);
@@ -471,7 +476,8 @@ mod tests {
 
     use crate::scripts::Script;
     use crate::transliterate::helpers::VEDIC_SVARAS;
-    use alloc::{format, string::ToString, vec::Vec};
+    use alloc::format;
+    use hashbrown::HashMap;
     use serde::Deserialize;
     use std::fs;
     use std::fs::OpenOptions;

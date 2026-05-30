@@ -10,7 +10,7 @@
 
 extern crate alloc;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "std"))]
 extern crate std;
 
 use crate::script_data::ScriptData;
