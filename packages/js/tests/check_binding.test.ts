@@ -81,6 +81,16 @@ describe('node binding smoke checks', () => {
     }
   });
 
+  describe('transliterate_node works for an array of strings', () => {
+    it.each(EXAMPLES.batchTransliterate)(
+      'returns an array of results for $from -> $to',
+      async ({ texts, from, to, outputs }) => {
+        const out_arr = await transliterate_node(texts, from, to);
+        expect(out_arr).toEqual(outputs);
+      }
+    );
+  });
+
   it('createTypingContext works for a basic typing case', async () => {
     for (const { script, text, out } of EXAMPLES.emulateTyping) {
       const ctx = createTypingContext(script);

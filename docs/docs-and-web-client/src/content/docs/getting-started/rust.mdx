@@ -12,6 +12,8 @@ import { Aside } from '@astrojs/starlight/components';
 
 Lipi Lekhika offers a high-performance, type-safe transliteration library for Rust. All script data is embedded at compile time for zero runtime overhead.
 
+The crate is **`no_std` compatible** by default: it uses `alloc` and does not require the Rust standard library, which suits WASM, embedded, and other constrained targets.
+
 ## Installation
 
 The recommended way to install is using `cargo add`:
@@ -231,6 +233,18 @@ Each mapping is a tuple of `(text: String, type: ListType, input_mappings: Vec<S
 
 For real-time character-by-character input, use the `typing` module which provides a stateful context for handling keyboard input.
 
+### Idle context clearing (`std` feature)
+
+- **`take_key_input`** / **`take_key_input_char`**: With the crate **`std`** feature enabled, `take_key_input_char` records wall-clock time between keys and may call `clear_context()` when the idle period exceeds `auto_context_clear_time_ms`.
+- **Without `std`**: Timing fields are not compiled in; you must clear context explicitly (for example on focus loss or with your host’s own clock).
+- **`clear_context()`** is always available regardless of features.
+
+Enable timed auto-clear in your `Cargo.toml`:
+
+```toml
+lipilekhika = { version = "1.1", features = ["std"] }
+```
+
 ### Basic Typing Context
 
 ```rust
@@ -291,7 +305,7 @@ After creating a typing context, you can dynamically update typing options:
   - `clear_context(&mut self)` — Clear internal state
 
 - **`TypingContextOptions`** — Configuration for typing behavior
-  - `auto_context_clear_time_ms: u64` — Auto-clear timeout (default: 4500ms)
+  - `auto_context_clear_time_ms: u64` — Idle timeout for auto-clear (**only when the `std` feature is enabled**; default: 4500ms)
   - `use_native_numerals: bool` — Use script-native numerals (default: true)
   - `include_inherent_vowel: bool` — Include inherent vowel/schwa (default: false)
 

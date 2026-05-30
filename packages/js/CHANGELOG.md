@@ -1,5 +1,11 @@
 # Changelog
 
+## js-lib@1.0.13
+
+- now the `transliterate`, `transliterate_wasm` and `transliterate_node` accept `string | string[]` for `text` input
+- Reduced wasm size to 244Kb (base64 gzipped :- 117 kb), as now the `rust-lib` is `no_std` compatible
+- The performance of the `napi-rs` and `wasm` bindings have improved
+
 ## js-lib@1.0.12
 
 - Added `musl` build targets for napi-rs bindings for nodejs

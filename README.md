@@ -54,22 +54,24 @@ Transliteration benchmarks on the shared [`test_data`](./test_data) corpus (lowe
 
 `Benchmark machine: Intel Core i5-12450H (12 threads, up to 4.40 GHz)`
 
-The Rust implementation is **~7.3× faster** than pure JavaScript (63 ms vs 464 ms).
+The Rust implementation is **~9× faster** than pure JavaScript (51 ms vs 464 ms). And with multiple threads its **42x** faster.
 
 | Implementation | Time (ms) |
 | --- | ---: |
 | JavaScript | 464 |
-| **Rust** | **63** |
-| Python *(via Rust)* | 82 |
-| Node.js N-API *(via Rust)* | 93 |
-| WebAssembly *(via Rust)* | 130 |
-| Dart *(via Rust)* | 140 |
+| **Rust** | **51** |
+| Python *(via Rust)* | 64 |
+| Node.js N-API *(via Rust)* | 78 |
+| WebAssembly *(via Rust)* | 120 |
+| Dart *(via Rust)* | 130 |
+| **Rust (Multi thread)** | 11 |
 
 **Benchmark scripts:** [JavaScript](./packages/js/src/scripts/benchmark.ts) (also covers N-API & WASM) · [Rust](./packages/rust/src/benches/benchmark.rs) · [Python](./packages/python/scripts/benchmark.py) · [Dart](./packages/dart/lipilekhika/scripts/benchmark.dart) · [Go](./packages/go/lipilekhika/bench/benchmark.go)
 
 > Even the initial Rust rewrite (almost line by line) was _439 ms_ (JS : 740 ms). But after some simple optmization like
 using `HashMap` (over binary search for lookups) and `Vec<char>` (to iterate in string) it was at _155 ms_ (JS : 460 ms). But now after optimizations
-(like avoid heap allocations and better data structures). The performance is at **63 ms**.
+(like avoid heap allocations and better data structures). Moving to `no_std` also  improved performance (-12ms) for some reason.
+The performance now is at **51 ms**.
 
 ## 🤝 Contributing
 
