@@ -7,8 +7,6 @@ extern crate std;
 
 use alloc::borrow::Cow;
 use alloc::string::String;
-use hashbrown::HashMap;
-
 use crate::script_data::ScriptData;
 pub use crate::script_data::{ScriptListData, get_all_options, get_script_list_data};
 use crate::transliterate::transliterate_text;
@@ -16,6 +14,7 @@ pub use crate::typing::{
     KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
     get_script_typing_data_map,
 };
+pub use hashbrown::HashMap;
 pub use scripts::{Script, ScriptListEnum};
 mod script_data;
 mod transliterate;

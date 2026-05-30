@@ -14,8 +14,12 @@ impl From<&lipilekhika::ScriptListData> for ScriptListData {
         Self {
             scripts: data.scripts.clone(),
             langs: data.langs.clone(),
-            lang_script_map: data.lang_script_map.clone(),
-            script_alternates_map: data.script_alternates_map.clone(),
+            lang_script_map: data.lang_script_map.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            script_alternates_map: data
+                .script_alternates_map
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
         }
     }
 }
@@ -44,6 +48,8 @@ pub fn transliterate(
 ) -> Result<String, String> {
     let from = parse_script("from_script", &from_script)?;
     let to = parse_script("to_script", &to_script)?;
+    let options: Option<lipilekhika::HashMap<String, bool>> =
+        options.map(|m| m.into_iter().collect());
     Ok(lipilekhika::transliterate(&text, from, to, options.as_ref()).into_owned())
 }
 

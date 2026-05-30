@@ -42,6 +42,9 @@ pub fn transliterate(
     let to_script = Script::from_str(to.trim())
         .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
+    let trans_options: Option<lipilekhika::HashMap<String, bool>> =
+        trans_options.map(|m| m.into_iter().collect());
+
     Ok(
         lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref())
             .into_owned(),
