@@ -159,8 +159,8 @@ impl TypingContext {
     /// elapsed time since the previous key exceeds
     /// [`TypingContextOptions::auto_context_clear_time_ms`].
     ///
-    /// Without the `std` feature, there is no automatic time-based context clearing; (relies on wall clock time)
-    /// you must call [`Self::clear_context`] to clear context manually.
+    /// Without the `std` feature, there is no automatic time-based context clearing; call
+    /// [`Self::clear_context`] yourself when the session should reset.
     pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
         #[cfg(feature = "std")]
         let now = Instant::now();
