@@ -23,6 +23,42 @@ const EXAMPLES = {
       output: '𑀕𑀗𑁆𑀕𑀸'
     }
   ],
+  /** Bulk cases: every item shares the same from/to script pair. */
+  batchTransliterate: [
+    {
+      texts: ['गङ्गा', 'नमस्ते 𑀫 as', 'गङ्गा'],
+      from: 'Devanagari',
+      to: 'Gujarati',
+      outputs: ['ગઙ્ગા', 'નમસ્તે 𑀫 as', 'ગઙ્ગા']
+    },
+    {
+      texts: ['𑀕𑀗𑁆𑀕𑀸 👨‍👩‍👧‍👦 m', '𑀦𑀫'],
+      from: 'Brahmi',
+      to: 'Devanagari',
+      outputs: ['गङ्गा 👨‍👩‍👧‍👦 m', 'नम']
+    },
+    {
+      texts: ['गङ्गा 🕉️ 𑀫 as', '🎉नम🎉'],
+      from: 'Devanagari',
+      to: 'Brahmi',
+      outputs: ['𑀕𑀗𑁆𑀕𑀸 🕉️ 𑀫 as', '🎉𑀦𑀫🎉']
+    }
+  ],
+  /**
+   * Strings with mixed UTF-8 widths (3-byte Indic, 4-byte ancient scripts, emoji/ZWJ).
+   * Round-trip via from === to verifies pack/unpack byte offsets at the WASM FFI boundary.
+   */
+  wasmBoundary: [
+    'गङ्गा',
+    '𑀕𑀗𑁆𑀕𑀸',
+    '𑆑𑆮',
+    'hello',
+    '😀🎉',
+    '👨‍👩‍👧‍👦',
+    '🇮🇳',
+    '🙏🏽',
+    'mixed: 🕉️ 𑀕 गङ्गा abc'
+  ],
   emulateTyping: [
     {
       script: 'Devanagari',
@@ -71,24 +107,29 @@ describe('wasm binding smoke check', () => {
     }
   });
 
-  describe('transliterate_wasm works for an array of strings', () => {
-    it('returns an array of results', async () => {
-      const out_arr = await transliterate_wasm(
-        EXAMPLES.transliterate.map(({ text }) => text),
-        'Devanagari',
-        'Gujarati'
-      );
-      expect(out_arr).toEqual(EXAMPLES.transliterate.map(({ output }) => output));
-    });
+  it('preserves mixed-width strings through the WASM FFI boundary', async () => {
+    const texts = [...EXAMPLES.wasmBoundary];
+    const out = await transliterate_wasm(texts, 'Devanagari', 'Devanagari');
+    expect(out).toEqual(texts);
   });
+
+  describe('transliterate_wasm works for an array of strings', () => {
+    it.each(EXAMPLES.batchTransliterate)(
+      'returns an array of results for $from -> $to',
+      async ({ texts, from, to, outputs }) => {
+        const out_arr = await transliterate_wasm(texts, from, to);
+        expect(out_arr).toEqual(outputs);
+      }
+    );
+  });
+
   describe('general transliterate works for an array of strings', () => {
-    it('returns an array of results', async () => {
-      const out_arr = await transliterate(
-        EXAMPLES.transliterate.map(({ text }) => text),
-        'Devanagari',
-        'Gujarati'
-      );
-      expect(out_arr).toEqual(EXAMPLES.transliterate.map(({ output }) => output));
-    });
+    it.each(EXAMPLES.batchTransliterate)(
+      'returns an array of results for $from -> $to',
+      async ({ texts, from, to, outputs }) => {
+        const out_arr = await transliterate(texts, from, to);
+        expect(out_arr).toEqual(outputs);
+      }
+    );
   });
 });
