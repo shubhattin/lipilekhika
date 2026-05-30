@@ -1,3 +1,11 @@
+//! Lipi Lekhika — transliteration for Indian Brahmic scripts.
+//!
+//! Converts text between scripts and languages (Roman, Devanagari, Bengali, Tamil,
+//! and others) using embedded script data. Exposes transliteration, per-script
+//! typing emulation, and custom transliteration options.
+//!
+//! np_std compatible.
+
 #![no_std]
 
 extern crate alloc;
@@ -15,6 +23,7 @@ pub use crate::typing::{
 use alloc::borrow::Cow;
 use alloc::string::String;
 pub use hashbrown::HashMap;
+// ^ only exposed for internal use in bindings
 pub use scripts::{Script, ScriptListEnum};
 mod script_data;
 mod transliterate;

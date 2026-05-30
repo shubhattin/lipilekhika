@@ -1,5 +1,8 @@
 use alloc::string::String;
 use alloc::vec::Vec;
+// indexmap is built with `default-features = false` for no_std; without `std` there is no
+// default hasher, so `indexmap::IndexMap<K, V>` needs a third type param. foldhash matches
+// hashbrown's default hasher in this crate.
 use foldhash::fast::RandomState as IndexMapHasher;
 use hashbrown::HashMap;
 use indexmap::IndexMap as IndexMapImpl;
@@ -13,7 +16,7 @@ The reasons are :-
 - Deserializing `json` and `bincode` has some differences
 - Json part is used for reading from *.json files and non-Json for bincode serailize/deserialize
 - The non-Json also contains the final structure used at runtime, runtime added fields `serde(skip)`
- */
+*/
 
 /// This will be used both for transliteration and typing.
 ///

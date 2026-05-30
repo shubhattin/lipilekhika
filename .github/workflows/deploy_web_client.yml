@@ -53,7 +53,7 @@ jobs:
       - name: Build WASM
         run: |
           cd packages/js/wasm
-          wasm-pack build --release --target web --no-opt
+          wasm-pack build --profile wasm-release --target web --no-opt
 
       - name: Build Site
         env:

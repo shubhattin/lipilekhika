@@ -104,7 +104,7 @@ jobs:
       - name: Build WASM
         run: |
           cd packages/js/wasm
-          wasm-pack build --release --target web
+          wasm-pack build --profile wasm-release --target web
 
       - name: Build Node Binding
         run: |
@@ -295,7 +295,7 @@ jobs:
       - name: Build WASM
         run: |
           cd packages/js/wasm
-          wasm-pack build --release --target web
+          wasm-pack build --profile wasm-release --target web
 
       - name: Build package with merged native artifacts
         run: |

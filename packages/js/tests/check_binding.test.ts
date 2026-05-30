@@ -9,6 +9,18 @@ const EXAMPLES = {
       from: 'Devanagari',
       to: 'Gujarati',
       output: 'ગઙ્ગા'
+    },
+    {
+      text: '𑀕𑀗𑁆𑀕𑀸',
+      from: 'Brahmi',
+      to: 'Gujarati',
+      output: 'ગઙ્ગા'
+    },
+    {
+      text: 'गङ्गा',
+      from: 'Devanagari',
+      to: 'Brahmi',
+      output: '𑀕𑀗𑁆𑀕𑀸'
     }
   ],
   emulateTyping: [
