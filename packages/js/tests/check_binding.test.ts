@@ -1,19 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { transliterate_node, createTypingContext } from '../src/node';
-import { transliterate_wasm } from '../src/index';
+import { transliterate, transliterate_wasm } from '../src/index';
 
 const EXAMPLES = {
-  transliterate: {
-    text: 'गङ्गा',
-    from: 'Devanagari',
-    to: 'Gujarati',
-    output: 'ગઙ્ગા'
-  },
-  emulateTyping: {
-    script: 'Devanagari',
-    text: 'na jAyatE mriyate vA',
-    out: 'न जायते म्रियते वा'
-  }
+  transliterate: [
+    {
+      text: 'गङ्गा',
+      from: 'Devanagari',
+      to: 'Gujarati',
+      output: 'ગઙ્ગા'
+    }
+  ],
+  emulateTyping: [
+    {
+      script: 'Devanagari',
+      text: 'na jAyatE mriyate vA',
+      out: 'न जायते म्रियते वा'
+    }
+  ]
 } as const;
 
 describe('node binding smoke checks', () => {
@@ -23,32 +27,56 @@ describe('node binding smoke checks', () => {
   });
 
   it('transliterate_node works for a basic case', async () => {
-    const { text, from, to, output } = EXAMPLES.transliterate;
-    const res = await transliterate_node(text, from, to);
-    expect(res).toBe(output);
+    for (const { text, from, to, output } of EXAMPLES.transliterate) {
+      const res = await transliterate_node(text, from, to);
+      expect(res).toBe(output);
+    }
   });
 
   it('createTypingContext works for a basic typing case', async () => {
-    const { script, text, out } = EXAMPLES.emulateTyping;
-    const ctx = createTypingContext(script);
-    await ctx.ready;
-    let result = '';
-    for (const ch of text) {
-      const { diff_add_text, to_delete_chars_count } = ctx.takeKeyInput(ch);
-      if (to_delete_chars_count > 0) {
-        result = result.slice(0, -to_delete_chars_count);
+    for (const { script, text, out } of EXAMPLES.emulateTyping) {
+      const ctx = createTypingContext(script);
+      await ctx.ready;
+      let result = '';
+      for (const ch of text) {
+        const { diff_add_text, to_delete_chars_count } = ctx.takeKeyInput(ch);
+        if (to_delete_chars_count > 0) {
+          result = result.slice(0, -to_delete_chars_count);
+        }
+        result += diff_add_text;
       }
-      result += diff_add_text;
+      expect(result).toBe(out);
     }
-    expect(result).toBe(out);
   });
 });
 
 describe('wasm binding smoke check', () => {
   it('exports transliterate_wasm and returns output', async () => {
     expect(typeof transliterate_wasm).toBe('function');
-    const { text, from, to, output } = EXAMPLES.transliterate;
-    const res = await transliterate_wasm(text, from, to);
-    expect(res).toBe(output);
+    for (const { text, from, to, output } of EXAMPLES.transliterate) {
+      const res = await transliterate_wasm(text, from, to);
+      expect(res).toBe(output);
+    }
+  });
+
+  describe('transliterate_wasm works for an array of strings', () => {
+    it('returns an array of results', async () => {
+      const out_arr = await transliterate_wasm(
+        EXAMPLES.transliterate.map(({ text }) => text),
+        'Devanagari',
+        'Gujarati'
+      );
+      expect(out_arr).toEqual(EXAMPLES.transliterate.map(({ output }) => output));
+    });
+  });
+  describe('general transliterate works for an array of strings', () => {
+    it('returns an array of results', async () => {
+      const out_arr = await transliterate(
+        EXAMPLES.transliterate.map(({ text }) => text),
+        'Devanagari',
+        'Gujarati'
+      );
+      expect(out_arr).toEqual(EXAMPLES.transliterate.map(({ output }) => output));
+    });
   });
 });

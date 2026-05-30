@@ -2,9 +2,12 @@
 import init, {
   transliterate_no_options,
   transliterate_with_options,
+  transliterate_many_no_options,
+  transliterate_many_with_options,
   initSync
 } from './pkg/lipilekhika_wasm.js';
 import type { TransliterationOptions } from '../src/index';
+import type { TransliterateInput, TransliterateOutput } from '../src/types';
 import { script_list_obj } from '../src/utils/lang_list';
 
 let initPromise: Promise<void> | null = null;
@@ -15,6 +18,21 @@ function scriptId(scriptName: string): number {
     throw new Error(`Unknown script: ${scriptName}`);
   }
   return id;
+}
+
+/** Pack strings into one buffer + [start, end) offset pairs for a single WASM crossing. */
+function packStrings(texts: readonly string[]): { joined: string; offsets: Uint32Array } {
+  const offsets = new Uint32Array(texts.length * 2);
+  let pos = 0;
+  const parts: string[] = [];
+  for (let i = 0; i < texts.length; i++) {
+    const t = texts[i];
+    offsets[i * 2] = pos;
+    offsets[i * 2 + 1] = pos + t.length;
+    pos += t.length;
+    parts.push(t);
+  }
+  return { joined: parts.join(''), offsets };
 }
 
 /**
@@ -49,21 +67,58 @@ async function initWasm(): Promise<void> {
   return initPromise;
 }
 
-export async function transliterate(
+async function transliterateOne(
   text: string,
+  fromId: number,
+  toId: number,
+  trans_options?: TransliterationOptions | null
+): Promise<string> {
+  if (trans_options == null) {
+    return transliterate_no_options(text, fromId, toId);
+  }
+  return transliterate_with_options(text, fromId, toId, trans_options);
+}
+
+async function transliterateMany(
+  texts: string[],
+  fromId: number,
+  toId: number,
+  trans_options?: TransliterationOptions | null
+): Promise<string[]> {
+  if (texts.length === 0) {
+    return [];
+  }
+  if (texts.length === 1) {
+    return [await transliterateOne(texts[0], fromId, toId, trans_options)];
+  }
+
+  const { joined, offsets } = packStrings(texts);
+  if (trans_options == null) {
+    return transliterate_many_no_options(joined, offsets, fromId, toId);
+  }
+  return transliterate_many_with_options(joined, offsets, fromId, toId, trans_options);
+}
+
+export async function transliterate<T extends TransliterateInput>(
+  text: T,
   from: string,
   to: string,
   trans_options?: TransliterationOptions | null
-): Promise<string> {
+): Promise<TransliterateOutput<T>> {
   await initWasm();
   const fromId = scriptId(from);
   const toId = scriptId(to);
 
-  if (trans_options == null || trans_options == undefined) {
-    return transliterate_no_options(text, fromId, toId);
+  if (typeof text === 'string') {
+    return (await transliterateOne(text, fromId, toId, trans_options)) as TransliterateOutput<T>;
   }
 
-  return transliterate_with_options(text, fromId, toId, trans_options);
+  return (await transliterateMany(
+    [...text],
+    fromId,
+    toId,
+    trans_options
+  )) as TransliterateOutput<T>;
 }
 
 /**
