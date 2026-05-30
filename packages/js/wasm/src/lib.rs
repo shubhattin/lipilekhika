@@ -1,6 +1,6 @@
+use core::str::FromStr;
 use lipilekhika::HashMap;
 use lipilekhika::scripts::Script;
-use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 fn parse_trans_options(
