@@ -12,9 +12,20 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         })
         .collect();
 
-    let struct_fields = fields.iter().map(|(field_ident, _)| {
+    let struct_fields = fields.iter().map(|(field_ident, raw_key)| {
+        let doc = format!("`{raw_key}`");
         quote! {
+            #[doc = #doc]
             pub #field_ident: bool,
+        }
+    });
+
+    let try_set_arms = fields.iter().map(|(field_ident, raw_key)| {
+        quote! {
+            #raw_key => {
+                self.#field_ident = value;
+                Ok(())
+            }
         }
     });
 
@@ -23,17 +34,36 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         #[rustfmt::skip]
         use derive_builder::Builder;
 
-        /// Enabled/disabled flags for each transliteration custom option key
+        /// Returned when [`CustomOptions::try_set`] is called with an unknown option key.
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub struct UnknownCustomOptionKey;
+
+        /// Custom transliteration options struct
         ///
         /// Use [`CustomOptionsBuilder::default`] and `<category>_<option>(bool)` setters, or
         /// [`CustomOptions::default`] for all options disabled.
         ///
-        /// for list of supported options you can visit [Custom Options](https://lipilekhika.in/reference/custom_trans_options/)
+        /// For a list of supported options visit [Custom Options](https://lipilekhika.in/reference/custom_trans_options/).
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Builder)]
         #[builder(no_std, default, pattern = "owned", build_fn(name = "try_build"))]
         #[allow(non_snake_case)]
         pub struct CustomOptions {
             #(#struct_fields)*
+        }
+
+        impl CustomOptions {
+            /// Sets an option by its canonical `category:option` key.
+            #[inline]
+            pub fn try_set(
+                &mut self,
+                key: &str,
+                value: bool,
+            ) -> Result<(), UnknownCustomOptionKey> {
+                match key {
+                    #(#try_set_arms)*
+                    _ => Err(UnknownCustomOptionKey),
+                }
+            }
         }
 
         impl CustomOptionsBuilder {

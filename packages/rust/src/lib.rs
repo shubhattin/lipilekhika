@@ -24,7 +24,7 @@ use alloc::borrow::Cow;
 use alloc::string::String;
 pub use hashbrown::HashMap;
 // ^ only exposed for internal use in bindings
-pub use custom_options::{CustomOptions, CustomOptionsBuilder};
+pub use custom_options::{CustomOptions, CustomOptionsBuilder, UnknownCustomOptionKey};
 pub use scripts::{Script, ScriptListEnum};
 mod script_data;
 mod transliterate;
