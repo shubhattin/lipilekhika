@@ -96,11 +96,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Sets an option by its canonical `category:option` key.
             #[inline]
-            pub fn try_set(
-                &mut self,
-                key: &str,
-                value: bool,
-            ) -> Result<(), UnknownCustomOptionKey> {
+            pub fn try_set(&mut self, key: &str, value: bool) -> Result<(), UnknownCustomOptionKey> {
                 match key {
                     #(#try_set_arms)*
                     _ => Err(UnknownCustomOptionKey),

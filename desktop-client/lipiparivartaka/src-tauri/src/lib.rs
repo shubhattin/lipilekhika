@@ -16,13 +16,10 @@ struct Payload {
 fn transliterate(payload: Payload) -> String {
   let from = Script::from_str(&payload.from).unwrap();
   let to = Script::from_str(&payload.to).unwrap();
-  let options = payload
-    .options
-    .as_ref()
-    .map(|options| {
-      lipilekhika::CustomOptions::try_from_map(options)
+  let options = payload.options.as_ref().map(|options| {
+    lipilekhika::CustomOptions::try_from_map(options)
       .expect("desktop payload custom option keys must be canonical")
-    });
+  });
   transliterate_impl(&payload.text, from, to, options.as_ref()).into_owned()
 }
 

@@ -52,7 +52,9 @@ fn piece_at<'a>(joined: &'a str, offsets: &[u32], index: usize) -> Result<&'a st
     let start = offsets[index * 2] as usize;
     let end = offsets[index * 2 + 1] as usize;
     if !joined.is_char_boundary(start) {
-        return Err(JsError::new("text offset start is not a UTF-8 char boundary"));
+        return Err(JsError::new(
+            "text offset start is not a UTF-8 char boundary",
+        ));
     }
     if !joined.is_char_boundary(end) {
         return Err(JsError::new("text offset end is not a UTF-8 char boundary"));
