@@ -1,4 +1,5 @@
 use quote::{format_ident, quote};
+use syn::Index;
 
 use crate::schema::CustomOptionMapJson;
 
@@ -12,6 +13,9 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         })
         .collect();
 
+    let entry_count = fields.len();
+    let entry_count_lit = Index::from(entry_count);
+
     let struct_fields = fields.iter().map(|(field_ident, raw_key)| {
         let doc = format!("`{raw_key}`");
         quote! {
@@ -19,6 +23,17 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
             pub #field_ident: bool,
         }
     });
+
+    let option_keys = fields.iter().map(|(_, raw_key)| quote! { #raw_key, });
+
+    let entry_tuples: Vec<_> = fields
+        .iter()
+        .map(|(field_ident, raw_key)| {
+            quote! {
+                (#raw_key, self.#field_ident),
+            }
+        })
+        .collect();
 
     let try_set_arms = fields.iter().map(|(field_ident, raw_key)| {
         quote! {
@@ -29,14 +44,17 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         }
     });
 
+    let get_arms = fields.iter().map(|(field_ident, raw_key)| {
+        quote! {
+            #raw_key => Ok(self.#field_ident),
+        }
+    });
+
     let tokens = quote! {
         // generated file, do not edit
         #[rustfmt::skip]
+        use alloc::string::{String, ToString};
         use derive_builder::Builder;
-
-        /// Returned when [`CustomOptions::try_set`] is called with an unknown option key.
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub struct UnknownCustomOptionKey;
 
         /// Custom transliteration options struct
         ///
@@ -51,7 +69,17 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
             #(#struct_fields)*
         }
 
+        /// Returned when [`CustomOptions::try_set`] or [`CustomOptions::get`] is called with an unknown option key.
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub struct UnknownCustomOptionKey;
+
         impl CustomOptions {
+            /// Number of supported custom options.
+            pub const ENTRY_COUNT: usize = #entry_count_lit;
+
+            /// Canonical keys in `custom_options.json` insertion order.
+            pub const KEYS: &'static [&'static str] = &[#(#option_keys)*];
+
             /// Sets an option by its canonical `category:option` key.
             #[inline]
             pub fn try_set(
@@ -63,6 +91,34 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
                     #(#try_set_arms)*
                     _ => Err(UnknownCustomOptionKey),
                 }
+            }
+
+            /// Reads an option by its canonical `category:option` key.
+            #[inline]
+            pub fn get(&self, key: &str) -> Result<bool, UnknownCustomOptionKey> {
+                match key {
+                    #(#get_arms)*
+                    _ => Err(UnknownCustomOptionKey),
+                }
+            }
+
+            /// Fixed-size array of canonical key/value pairs (`&opts.as_entries()` for a slice).
+            #[inline]
+            pub fn as_entries(&self) -> [(&'static str, bool); Self::ENTRY_COUNT] {
+                [#(#entry_tuples)*]
+            }
+
+            /// Builds a hash map from canonical option keys (supports any `FromIterator<(String, bool)>` map, e.g. hashbrown or std).
+            #[inline]
+            pub fn to_options_map<M>(&self) -> M
+            where
+                M: FromIterator<(String, bool)>,
+            {
+                self.as_entries()
+                    .iter()
+                    .copied()
+                    .map(|(key, enabled)| (key.to_string(), enabled))
+                    .collect()
             }
         }
 

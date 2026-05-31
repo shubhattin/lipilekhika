@@ -43,7 +43,7 @@ pub fn transliterate<'a>(
     text: &'a (impl AsRef<str> + ?Sized),
     from: Script,
     to: Script,
-    trans_options: Option<&HashMap<String, bool>>,
+    trans_options: Option<&CustomOptions>,
 ) -> Cow<'a, str> {
     let text = text.as_ref();
     let from: ScriptListEnum = from.into();
