@@ -17,7 +17,7 @@ Lipi Lekhika includes a blazing-fast 🦀 **Rust-based WebAssembly (WASM) module
 The WASM module offers several advantages over the pure JavaScript implementation:
 
 - **⚡ Superior Performance** — Rust's compiled WASM code executes significantly faster than JavaScript
-- **📦 Compact Size** — Only 142 KB gzipped, including all script data embedded
+- **📦 Compact Size** — Only 117 KB gzipped (base64), including all script data embedded
 - **🌍 Universal Compatibility** — Works seamlessly in Node.js, browsers, Deno, Bun, and more
 - **🔒 Type Safety** — Built with Rust's type system for reliability
 - **🎯 Same API** — Drop-in replacement for the standard `transliterate` function
@@ -210,7 +210,7 @@ console.log(result);
 
 ## Bundle Size
 
-The WASM module adds only **142 KB (gzipped)** to your bundle, which includes:
+The WASM module adds only **117 KB (gzipped base64)** to your bundle, which includes:
 - The compiled Rust WASM binary
 - All script data embedded (no external data files needed)
 - Complete transliteration logic
