@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (pc-app@v1.0.12)
+
+- Performance improvements (rust-lib@v1.1.2)
+
 ## pc-app@v1.0.11
 
 - Use updated rust package `v1.1.0`. It introduces changes in Error and Script name handling
