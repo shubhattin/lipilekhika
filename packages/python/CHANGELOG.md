@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (python-lib@1.0.7)
+## python-lib@1.0.7
 
 - Performance Improvements (via rust-lib@@1.1.2)
 

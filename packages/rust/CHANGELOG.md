@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (rust-lib@v1.1.2)
+## rust-lib@v1.1.2
 
 - Add `no_std` support
 - Now the `typing` module has `std` feature which can be enabled to have automatic context clear logic.
