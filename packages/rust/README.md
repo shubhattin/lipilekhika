@@ -17,12 +17,13 @@
 - ⚡ **High Performance** — Zero-overhead abstractions and optimized algorithms
 - 🛡️ **Type Safe** — Leverages Rust's type system for safety and correctness
 - 🎯 **Customizable Options** — Fine-tune transliteration and typing behaviour
-- ⌨️ **Typing Mode** — Stateful context for real-time character-by-character input
+- ⌨️ **Typing Mode** — Stateful context for real-time character-by-character input (enable `std` for timed auto-clear between keys)
+- 🧱 **no_std** — Default build needs no standard library; embeddable on WASM and similar targets
 - 📦 **Embedded Script Data** — All script data bundled at compile time
 
 ## ⚡ Performance
 
-The fastest Lipi Lekhika implementation—about **7.3× faster** than pure JavaScript on the shared benchmark suite. [See the full benchmark table →](https://github.com/shubhattin/lipilekhika#-performance)
+The fastest Lipi Lekhika implementation—about **9× faster** than pure JavaScript on the shared benchmark suite. [See the full benchmark table →](https://github.com/shubhattin/lipilekhika#-performance)
 
 ## 📥 Installation
 
@@ -175,7 +176,15 @@ Gets typing data mappings for a script (for building custom input methods).
 
 ### Typing Module
 
-For character-by-character real-time input:
+For character-by-character real-time input. **Without** the `std` feature, call `clear_context()` yourself when the user pauses or switches fields. **With** `std`, gaps longer than `auto_context_clear_time_ms` (default 4.5s) clear the context automatically in `take_key_input_char`.
+
+Enable in `Cargo.toml`:
+
+```toml
+lipilekhika = { version = "1.1", features = ["std"] }
+```
+
+Example:
 
 ```rust
 use lipilekhika::Script;

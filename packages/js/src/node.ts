@@ -1,6 +1,7 @@
 import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import { loadNativeBinding, type NativeModule } from './native_binding';
 import type { CustomOptionType } from './transliteration/transliterate';
+import type { TransliterateInput, TransliterateOutput } from './types';
 import {
   DEFAULT_INCLUDE_INHERENT_VOWEL,
   DEFAULT_USE_NATIVE_NUMERALS,
@@ -102,18 +103,18 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
  * Node.js native(Rust + N-API) based transliteration.
  *
  * Transliterates `text` from `from` to `to`.
- * @param text - The text to transliterate
+ * @param text - `string | string[]` — text to transliterate (same options for all items in an array)
  * @param from - The script/language to transliterate from
  * @param to - The script/language to transliterate to
  * @param trans_options - The custom transliteration options to use for the transliteration
- * @returns The transliterated text
+ * @returns `string` or `string[]` — same shape as `text`
  */
-export async function transliterate_node(
-  text: string,
+export async function transliterate_node<T extends TransliterateInput>(
+  text: T,
   from: ScriptLangType,
   to: ScriptLangType,
   trans_options?: CustomOptionType
-) {
+): Promise<TransliterateOutput<T>> {
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
     throw new Error(`Invalid script name: ${from}`);
@@ -122,8 +123,26 @@ export async function transliterate_node(
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to}`);
   }
-  if (normalized_from === normalized_to) return text;
+
+  if (normalized_from === normalized_to) {
+    return (typeof text === 'string' ? text : [...text]) as TransliterateOutput<T>;
+  }
 
   const nativeMod = await loadNativeModule();
-  return nativeMod.transliterate(text, normalized_from, normalized_to, trans_options);
+
+  if (typeof text === 'string') {
+    return (await nativeMod.transliterate(
+      text,
+      normalized_from,
+      normalized_to,
+      trans_options
+    )) as TransliterateOutput<T>;
+  }
+
+  const outputs = await Promise.all(
+    text.map((piece) =>
+      nativeMod.transliterate(piece, normalized_from, normalized_to, trans_options)
+    )
+  );
+  return outputs as TransliterateOutput<T>;
 }

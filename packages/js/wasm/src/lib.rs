@@ -1,6 +1,5 @@
+use lipilekhika::HashMap;
 use lipilekhika::scripts::Script;
-use std::collections::HashMap;
-use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
 fn parse_trans_options(
@@ -22,7 +21,7 @@ fn parse_trans_options(
         let value = entry
             .get(1)
             .as_bool()
-            .ok_or_else(|| JsError::new(&format!("trans_options[{key}] must be a boolean")))?;
+            .ok_or_else(|| JsError::new("trans_options value must be a boolean"))?;
         map.insert(key, value);
     }
 
@@ -33,27 +32,115 @@ fn parse_trans_options(
     }
 }
 
-/// Transliterates text from one script to another.
-///
-/// - `text`: The text to transliterate
-/// - `from`: Source script name/alias
-/// - `to`: Target script name/alias
-/// - `trans_options`: Optional JSON object with transliteration options (e.g., {"option_name": true})
-///
-/// Returns the transliterated text or throws an error if script names are invalid.
-#[wasm_bindgen]
-pub fn transliterate(
+fn transliterate_by_id(
     text: &str,
-    from: &str,
-    to: &str,
-    trans_options: Option<js_sys::Object>,
+    from_id: u8,
+    to_id: u8,
+    trans_options: Option<&HashMap<String, bool>>,
 ) -> Result<String, JsError> {
-    let options = parse_trans_options(trans_options)?;
+    let from = Script::from_id(from_id).ok_or_else(|| JsError::new("invalid source script id"))?;
+    let to = Script::from_id(to_id).ok_or_else(|| JsError::new("invalid target script id"))?;
 
-    let from = Script::from_str(from)
-        .map_err(|e| JsError::new(&format!("invalid source script {from:?}: {e}")))?;
-    let to = Script::from_str(to)
-        .map_err(|e| JsError::new(&format!("invalid target script {to:?}: {e}")))?;
+    Ok(lipilekhika::transliterate(text, from, to, trans_options).into_owned())
+}
 
-    Ok(lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned())
+fn piece_at<'a>(joined: &'a str, offsets: &[u32], index: usize) -> Result<&'a str, JsError> {
+    let start = offsets[index * 2] as usize;
+    let end = offsets[index * 2 + 1] as usize;
+    if !joined.is_char_boundary(start) {
+        return Err(JsError::new("text offset start is not a UTF-8 char boundary"));
+    }
+    if !joined.is_char_boundary(end) {
+        return Err(JsError::new("text offset end is not a UTF-8 char boundary"));
+    }
+    joined
+        .get(start..end)
+        .ok_or_else(|| JsError::new("invalid text offsets"))
+}
+
+/// Borrow slices from `joined` using `[start, end)` pairs in `offsets`.
+fn slices_from_joined<'a>(joined: &'a str, offsets: &[u32]) -> Result<Vec<&'a str>, JsError> {
+    if offsets.len() % 2 != 0 {
+        return Err(JsError::new("offsets length must be a multiple of 2"));
+    }
+
+    let count = offsets.len() / 2;
+    let mut out = Vec::with_capacity(count);
+    for i in 0..count {
+        out.push(piece_at(joined, offsets, i)?);
+    }
+    Ok(out)
+}
+
+fn transliterate_many_by_id(
+    joined: &str,
+    offsets: &[u32],
+    from_id: u8,
+    to_id: u8,
+    trans_options: Option<&HashMap<String, bool>>,
+) -> Result<Vec<String>, JsError> {
+    if from_id == to_id {
+        return Ok(slices_from_joined(joined, offsets)?
+            .into_iter()
+            .map(str::to_owned)
+            .collect());
+    }
+
+    if offsets.len() % 2 != 0 {
+        return Err(JsError::new("offsets length must be a multiple of 2"));
+    }
+
+    let from = Script::from_id(from_id).ok_or_else(|| JsError::new("invalid source script id"))?;
+    let to = Script::from_id(to_id).ok_or_else(|| JsError::new("invalid target script id"))?;
+
+    let count = offsets.len() / 2;
+    let mut out = Vec::with_capacity(count);
+    for i in 0..count {
+        let piece = piece_at(joined, offsets, i)?;
+        out.push(lipilekhika::transliterate(piece, from, to, trans_options).into_owned());
+    }
+
+    Ok(out)
+}
+
+/// Fast path: transliterate without custom options (no JS object parsing).
+#[wasm_bindgen]
+pub fn transliterate_no_options(text: &str, from_id: u8, to_id: u8) -> Result<String, JsError> {
+    transliterate_by_id(text, from_id, to_id, None)
+}
+
+/// Transliterate with custom options from a JS object.
+#[wasm_bindgen]
+pub fn transliterate_with_options(
+    text: &str,
+    from_id: u8,
+    to_id: u8,
+    trans_options: js_sys::Object,
+) -> Result<String, JsError> {
+    let options = parse_trans_options(Some(trans_options))?;
+    transliterate_by_id(text, from_id, to_id, options.as_ref())
+}
+
+/// Bulk transliterate without custom options. `offsets` is `[start0, end0, start1, end1, ...]`.
+#[wasm_bindgen]
+pub fn transliterate_many_no_options(
+    joined_text: &str,
+    offsets: &[u32],
+    from_id: u8,
+    to_id: u8,
+) -> Result<Vec<String>, JsError> {
+    transliterate_many_by_id(joined_text, offsets, from_id, to_id, None)
+}
+
+/// Bulk transliterate with custom options from a JS object.
+#[wasm_bindgen]
+pub fn transliterate_many_with_options(
+    joined_text: &str,
+    offsets: &[u32],
+    from_id: u8,
+    to_id: u8,
+    trans_options: js_sys::Object,
+) -> Result<Vec<String>, JsError> {
+    let options = parse_trans_options(Some(trans_options))?;
+    transliterate_many_by_id(joined_text, offsets, from_id, to_id, options.as_ref())
 }

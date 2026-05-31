@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use core::cmp::Ordering;
 
 #[allow(dead_code)]
 pub fn binary_search_lower_with_index<'a, T, K, F, C>(
@@ -77,6 +77,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec::Vec;
 
     #[test]
     fn binary_search_lower_finds_existing_element() {

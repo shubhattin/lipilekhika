@@ -8,7 +8,12 @@ import { getScriptData } from './utils/get_script_data';
 import { getNormalizedScriptName } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
-import type { ScriptLangType, ScriptListType } from './types';
+import type {
+  ScriptLangType,
+  ScriptListType,
+  TransliterateInput,
+  TransliterateOutput
+} from './types';
 
 export * from './types';
 
@@ -43,18 +48,18 @@ export const preloadScriptData = async (name: ScriptLangType) => {
 
 /**
  * Transliterates `text` from `from` to `to`.
- * @param text - The text to transliterate
+ * @param text - `string | string[]` — text to transliterate (same options for all items in an array)
  * @param from - The script/language to transliterate from
  * @param to - The script/language to transliterate to
  * @param trans_options - The custom transliteration options to use for the transliteration
- * @returns The transliterated text
+ * @returns `string` or `string[]` — same shape as `text`
  */
-export async function transliterate(
-  text: string,
+export async function transliterate<T extends TransliterateInput>(
+  text: T,
   from: ScriptLangType,
   to: ScriptLangType,
   trans_options?: CustomOptionType
-) {
+): Promise<TransliterateOutput<T>> {
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
     throw new Error(`Invalid script name: ${from}`);
@@ -63,9 +68,24 @@ export async function transliterate(
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to}`);
   }
-  if (normalized_from === normalized_to) return text;
-  const result = await transliterate_text(text, normalized_from, normalized_to, trans_options);
-  return result.output;
+
+  if (normalized_from === normalized_to) {
+    return (typeof text === 'string' ? text : [...text]) as TransliterateOutput<T>;
+  }
+
+  if (typeof text === 'string') {
+    const result = await transliterate_text(text, normalized_from, normalized_to, trans_options);
+    return result.output as TransliterateOutput<T>;
+  }
+
+  const outputs = await Promise.all(
+    text.map((piece) =>
+      transliterate_text(piece, normalized_from, normalized_to, trans_options).then(
+        (result) => result.output
+      )
+    )
+  );
+  return outputs as TransliterateOutput<T>;
 }
 
 /**

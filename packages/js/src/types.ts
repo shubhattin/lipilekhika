@@ -26,3 +26,11 @@ export type ScriptLangType = script_input_name_type;
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
+
+/** Input accepted by transliterate APIs: one string or many (shared options). */
+export type TransliterateInput = string | readonly string[];
+
+/** Return type of transliterate APIs, inferred from {@link TransliterateInput}. */
+export type TransliterateOutput<T extends TransliterateInput> = T extends string
+  ? string
+  : string[];

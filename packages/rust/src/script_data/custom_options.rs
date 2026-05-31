@@ -1,14 +1,18 @@
-use std::sync::OnceLock;
+use alloc::boxed::Box;
+use once_cell::race::OnceBox;
 
 use super::CustomOptionMap;
 use super::generated;
 
-static CUSTOM_OPTIONS_CACHE: OnceLock<CustomOptionMap> = OnceLock::new();
+static CUSTOM_OPTIONS_CACHE: OnceBox<CustomOptionMap> = OnceBox::new();
 
 pub fn get_custom_options_map() -> &'static CustomOptionMap {
     CUSTOM_OPTIONS_CACHE.get_or_init(|| {
         let bytes = generated::CUSTOM_OPTIONS_BYTES;
-        bincode::deserialize(bytes).expect("bincode decode failed for custom_options")
+        let (map, _): (CustomOptionMap, usize) =
+            bincode::serde::decode_from_slice(bytes, bincode::config::standard())
+                .expect("bincode decode failed for custom_options");
+        Box::new(map)
     })
 }
 

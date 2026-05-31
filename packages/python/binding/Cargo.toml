@@ -9,7 +9,7 @@ name = "_lipilekhika"
 crate-type = ["cdylib"]
 
 [dependencies]
-lipilekhika = { path = "../../rust" }
+lipilekhika = { path = "../../rust", features = ["std"] }
 pyo3 = { version = "0.27.2", features = [
     "extension-module",
     "generate-import-lib",

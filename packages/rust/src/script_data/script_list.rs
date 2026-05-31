@@ -1,4 +1,6 @@
-use std::sync::OnceLock;
+use alloc::boxed::Box;
+use alloc::vec::Vec;
+use once_cell::race::OnceBox;
 
 use super::generated;
 use super::schema::{List, ScriptListData};
@@ -30,15 +32,16 @@ impl List {
     }
 }
 
-static SCRIPT_LIST_DATA_CACHE: OnceLock<ScriptListData> = OnceLock::new();
+static SCRIPT_LIST_DATA_CACHE: OnceBox<ScriptListData> = OnceBox::new();
 
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
     SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
         let bytes = generated::SCRIPT_LIST_BYTES;
-        let data: ScriptListData =
-            bincode::deserialize(bytes).expect("bincode decode failed for script_list");
-        data
+        let (data, _): (ScriptListData, usize) =
+            bincode::serde::decode_from_slice(bytes, bincode::config::standard())
+                .expect("bincode decode failed for script_list");
+        Box::new(data)
     })
 }
 #[cfg(test)]

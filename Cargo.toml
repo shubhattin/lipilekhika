@@ -14,3 +14,14 @@ resolver = "3"
 [profile.bench]
 lto = true
 codegen-units = 1
+
+# Speed-first release builds (native bindings, desktop). Default panic is unwind.
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+
+# WASM-only release: inherits tuning above; abort (no unwinding on wasm32).
+[profile.wasm-release]
+inherits = "release"
+panic = "abort"

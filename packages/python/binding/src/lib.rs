@@ -1,8 +1,9 @@
+use lipilekhika::HashMap;
 use lipilekhika::ScriptListEnum;
 use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use std::collections::HashMap;
+use std::collections::HashMap as StdHashMap;
 use std::str::FromStr;
 
 mod typing;
@@ -82,9 +83,9 @@ struct PyScriptListData {
     #[pyo3(get)]
     langs: Vec<String>,
     #[pyo3(get)]
-    lang_script_map: HashMap<String, String>,
+    lang_script_map: StdHashMap<String, String>,
     #[pyo3(get)]
-    script_alternates_map: HashMap<String, String>,
+    script_alternates_map: StdHashMap<String, String>,
 }
 
 #[pymethods]
@@ -105,8 +106,16 @@ impl From<&lipilekhika::ScriptListData> for PyScriptListData {
         Self {
             scripts: data.scripts.clone(),
             langs: data.langs.clone(),
-            lang_script_map: data.lang_script_map.clone(),
-            script_alternates_map: data.script_alternates_map.clone(),
+            lang_script_map: data
+                .lang_script_map
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
+            script_alternates_map: data
+                .script_alternates_map
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
         }
     }
 }

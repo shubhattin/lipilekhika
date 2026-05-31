@@ -1,3 +1,18 @@
+//! Lipi Lekhika — transliteration for Indian Brahmic scripts.
+//!
+//! Converts text between scripts and languages (Roman, Devanagari, Bengali, Tamil,
+//! and others) using embedded script data. Exposes transliteration, per-script
+//! typing emulation, and custom transliteration options.
+//!
+//! np_std compatible.
+
+#![no_std]
+
+extern crate alloc;
+
+#[cfg(any(test, feature = "std"))]
+extern crate std;
+
 use crate::script_data::ScriptData;
 pub use crate::script_data::{ScriptListData, get_all_options, get_script_list_data};
 use crate::transliterate::transliterate_text;
@@ -5,9 +20,11 @@ pub use crate::typing::{
     KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
     get_script_typing_data_map,
 };
+use alloc::borrow::Cow;
+use alloc::string::String;
+pub use hashbrown::HashMap;
+// ^ only exposed for internal use in bindings
 pub use scripts::{Script, ScriptListEnum};
-use std::{borrow::Cow, collections::HashMap};
-
 mod script_data;
 mod transliterate;
 mod utils;
@@ -59,6 +76,7 @@ mod tests {
     use super::*;
 
     use crate::scripts::Script;
+    use alloc::{format, string::ToString, vec::Vec};
     use owo_colors::OwoColorize;
     use serde::Deserialize;
     use std::fs;
@@ -66,6 +84,7 @@ mod tests {
     use std::path::{Path, PathBuf};
     use std::str::FromStr;
     use std::time::Instant;
+    use std::{print, println};
 
     fn de_index<'de, D>(deserializer: D) -> Result<String, D::Error>
     where

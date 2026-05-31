@@ -1,7 +1,17 @@
+//! Per-key typing emulation: stateful [`TypingContext`], diffs for incremental UI updates,
+//! and script typing-data helpers. Enable the crate `std` feature for idle auto-clear via
+//! `std::time`; otherwise clear context explicitly.
+
 use crate::scripts::{Script, ScriptListEnum};
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::time::{Duration, Instant};
+
+#[cfg(feature = "std")]
+use core::time::Duration;
+#[cfg(feature = "std")]
+use std::time::Instant;
 
 use crate::script_data::{List, ScriptData};
 use crate::transliterate::transliterate::{
@@ -57,7 +67,9 @@ pub struct TypingDiff {
 
 /// Stateful isolated context for character-by-character input typing.
 ///
-/// synchronous and uses Rust's internal script data cache.
+/// With the `std` feature, idle time between keys (via `std::time`) can auto-clear the
+/// context per [`TypingContextOptions::auto_context_clear_time_ms`]; without `std`, call
+/// [`Self::clear_context`] yourself.
 #[derive(Debug)]
 pub struct TypingContext {
     typing_script: ScriptListEnum,
@@ -68,7 +80,9 @@ pub struct TypingContext {
     curr_input: String,
     curr_output: String,
 
+    #[cfg(feature = "std")]
     auto_context_clear_time: Duration,
+    #[cfg(feature = "std")]
     last_time: Option<Instant>,
 
     from_script_data: &'static ScriptData,
@@ -94,7 +108,9 @@ impl TypingContext {
             include_inherent_vowel: opts.include_inherent_vowel,
             curr_input: String::new(),
             curr_output: String::new(),
+            #[cfg(feature = "std")]
             auto_context_clear_time: Duration::from_millis(opts.auto_context_clear_time_ms),
+            #[cfg(feature = "std")]
             last_time: None,
             from_script_data,
             to_script_data,
@@ -105,7 +121,10 @@ impl TypingContext {
 
     /// Clears all internal state and contexts.
     pub fn clear_context(&mut self) {
-        self.last_time = None;
+        #[cfg(feature = "std")]
+        {
+            self.last_time = None;
+        }
         self.curr_input.clear();
         self.curr_output.clear();
     }
@@ -134,8 +153,18 @@ impl TypingContext {
         self.take_key_input_char(ch)
     }
 
+    /// Process one character of typing input.
+    ///
+    /// When the `std` feature is enabled, the context is cleared automatically if the
+    /// elapsed time since the previous key exceeds
+    /// [`TypingContextOptions::auto_context_clear_time_ms`].
+    ///
+    /// Without the `std` feature, there is no automatic time-based context clearing; call
+    /// [`Self::clear_context`] yourself when the session should reset.
     pub fn take_key_input_char(&mut self, ch: char) -> TypingDiff {
+        #[cfg(feature = "std")]
         let now = Instant::now();
+        #[cfg(feature = "std")]
         if let Some(last) = self.last_time
             && now.duration_since(last) > self.auto_context_clear_time
         {
@@ -168,7 +197,10 @@ impl TypingContext {
             self.clear_context();
         }
 
-        self.last_time = Some(now);
+        #[cfg(feature = "std")]
+        {
+            self.last_time = Some(now);
+        }
 
         TypingDiff {
             to_delete_chars_count,
@@ -310,8 +342,6 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
     /// Merges items that end up with the same displayed text (and type),
     /// and keeps mappings unique.
     fn merge_duplicate_text_mappings(items: Vec<TypingDataMapItem>) -> Vec<TypingDataMapItem> {
-        use std::collections::{HashMap, HashSet};
-
         let mut key_to_index: HashMap<(String, ListType), usize> = HashMap::new();
         let mut mapping_sets: Vec<HashSet<String>> = Vec::new();
         let mut out: Vec<TypingDataMapItem> = Vec::new();
@@ -446,11 +476,14 @@ mod tests {
 
     use crate::scripts::Script;
     use crate::transliterate::helpers::VEDIC_SVARAS;
+    use alloc::format;
+    use hashbrown::HashMap;
     use serde::Deserialize;
     use std::fs;
     use std::fs::OpenOptions;
     use std::io::Write;
     use std::path::{Path, PathBuf};
+    use std::println;
     use std::str::FromStr;
 
     fn assert_send_sync<T: Send + Sync>() {}
@@ -528,7 +561,7 @@ mod tests {
         output: String,
         #[serde(default)]
         #[allow(dead_code)]
-        options: Option<std::collections::HashMap<String, bool>>,
+        options: Option<HashMap<String, bool>>,
         #[serde(default)]
         #[allow(dead_code)]
         reversible: Option<bool>,
@@ -769,7 +802,7 @@ mod tests {
                 if case.preserve_check {
                     preserve_checks += 1;
                     // Transliterate back to Normal with `all_to_normal:preserve_specific_chars`
-                    let mut trans_options = std::collections::HashMap::new();
+                    let mut trans_options = HashMap::new();
                     trans_options.insert("all_to_normal:preserve_specific_chars".to_string(), true);
 
                     let preserved =

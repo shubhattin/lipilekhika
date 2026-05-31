@@ -1,7 +1,11 @@
 use crate::ScriptListEnum;
 use crate::script_data::{List, ScriptData};
-use std::borrow::Cow;
-use std::collections::VecDeque;
+use alloc::borrow::{Cow, ToOwned};
+use alloc::collections::VecDeque;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::fmt;
+use core::ops::Range;
 
 // pub fn krama_index_of_text()
 
@@ -53,7 +57,7 @@ impl ResultStringBuilder {
 
     /// Returns the byte range for the i-th piece.
     #[inline]
-    fn piece_range(&self, i: usize) -> std::ops::Range<usize> {
+    fn piece_range(&self, i: usize) -> Range<usize> {
         let start = self.offsets[i];
         let end = *self.offsets.get(i + 1).unwrap_or(&self.buf.len());
         start..end
@@ -188,8 +192,8 @@ impl ResultStringBuilder {
     }
 }
 
-impl std::fmt::Display for ResultStringBuilder {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ResultStringBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.buf)
     }
 }

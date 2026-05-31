@@ -1,6 +1,14 @@
-use indexmap::IndexMap;
+use alloc::string::String;
+use alloc::vec::Vec;
+// indexmap is built with `default-features = false` for no_std; without `std` there is no
+// default hasher, so `indexmap::IndexMap<K, V>` needs a third type param. foldhash matches
+// hashbrown's default hasher in this crate.
+use foldhash::fast::RandomState as IndexMapHasher;
+use hashbrown::HashMap;
+use indexmap::IndexMap as IndexMapImpl;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
+type IndexMap<K, V> = IndexMapImpl<K, V, IndexMapHasher>;
 
 /*
 In this file in places there are ...Json version and non-json version
@@ -8,7 +16,7 @@ The reasons are :-
 - Deserializing `json` and `bincode` has some differences
 - Json part is used for reading from *.json files and non-Json for bincode serailize/deserialize
 - The non-Json also contains the final structure used at runtime, runtime added fields `serde(skip)`
- */
+*/
 
 /// This will be used both for transliteration and typing.
 ///
@@ -336,22 +344,21 @@ pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScriptListDataJson {
-    // only `scripts`, `langs` and custom otion name `key` needs order preservation
-    // so we use IndexMap only only for those
+    // IndexMap used to preserve order of keys
     pub scripts: IndexMap<String, u8>,
     pub langs: IndexMap<String, u8>,
     /// all langs are mapped to a script
-    pub lang_script_map: HashMap<String, String>,
+    pub lang_script_map: IndexMap<String, String>,
     /// contains aliases which map to script
-    pub script_alternates_map: HashMap<String, String>,
+    pub script_alternates_map: IndexMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ScriptListData {
     pub scripts: Vec<String>,
     pub langs: Vec<String>,
-    pub lang_script_map: HashMap<String, String>,
-    pub script_alternates_map: HashMap<String, String>,
+    pub lang_script_map: IndexMap<String, String>,
+    pub script_alternates_map: IndexMap<String, String>,
 }
 
 impl From<ScriptListDataJson> for ScriptListData {

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (rust-lib@v1.1.2)
+
+- Add `no_std` support
+- Now the `typing` module has `std` feature which can be enabled to have automatic context clear logic.
+- Now 9x faster over the JS version (previosuly 7x, ~63ms -> ~51ms)
+- The wasm build is also smaller (as no `std` bloat)
+
 ## rust-lib@1.1.0
 
 - Performance improvements (60%)

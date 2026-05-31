@@ -53,7 +53,7 @@ The WASM module is included in the main `lipilekhika` package — no additional 
 
 ### Simple Transliteration
 
-The `transliterate_wasm` function provides the same interface as the standard `transliterate` function:
+The `transliterate_wasm` function provides the same interface as `transliterate` (`text`: `string | string[]`):
 
 ```typescript
 import { transliterate_wasm } from 'lipilekhika';
@@ -110,12 +110,12 @@ console.log(result); // नमस्ते
 WASM-based transliteration using the Rust implementation.
 
 **Parameters:**
-- `text: string` — Text to transliterate
+- `text: string | string[]` — One string or many (same options for all)
 - `from: ScriptLangType` — Source script/language name
 - `to: ScriptLangType` — Target script/language name
 - `options?: TransliterationOptions` — Optional custom transliteration options
 
-**Returns:** `Promise<string>` — The transliterated text
+**Returns:** `Promise<string | string[]>` — shape matches `text`
 
 **Example:**
 ```typescript
