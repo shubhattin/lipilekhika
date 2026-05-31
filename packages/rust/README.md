@@ -64,8 +64,8 @@ fn main() {
     );
     
     let result = transliterate(
-        "గంగా",
-        Script::Telugu,
+        "गङ्गा",
+        Script::Devanagari,
         Script::Gujarati,
         Some(&options)
     );

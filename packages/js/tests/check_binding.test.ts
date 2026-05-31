@@ -142,4 +142,21 @@ describe('wasm binding smoke check', () => {
       }
     );
   });
+
+  describe('transliterate works with custom options', () => {
+    it('returns an array of results for $from -> $to', async () => {
+      {
+        const result = await transliterate_node('गङ्गा', 'Devanagari', 'Gujarati', {
+          'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
+        });
+        expect(result).toBe('ગંગા');
+      }
+      {
+        const result = await transliterate_wasm('गङ्गा', 'Devanagari', 'Gujarati', {
+          'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
+        });
+        expect(result).toBe('ગંગા');
+      }
+    });
+  });
 });
