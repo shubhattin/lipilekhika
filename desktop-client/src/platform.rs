@@ -2,6 +2,10 @@
 #[path = "win/mod.rs"]
 mod win;
 
+#[cfg(target_os = "macos")]
+#[path = "mac/mod.rs"]
+mod mac;
+
 use crossbeam_channel::Sender;
 use std::sync::Arc;
 
@@ -15,7 +19,12 @@ pub fn run(
     win::run(_app_state, _tx_ui, _tx_tray).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
   }
 
-  #[cfg(not(windows))]
+  #[cfg(target_os = "macos")]
+  {
+    mac::run(_app_state, _tx_ui, _tx_tray)
+  }
+
+  #[cfg(not(any(windows, target_os = "macos")))]
   {
     Err(
       std::io::Error::new(
