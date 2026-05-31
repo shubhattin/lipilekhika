@@ -68,55 +68,65 @@ fn tag_injected(event: &CGEvent) {
 }
 
 /// Post a key down+up pair for `keycode`, optionally setting the Unicode string.
-fn post_key(source: CGEventSource, keycode: u16, text: Option<&str>) {
-  if let Ok(down) = CGEvent::new_keyboard_event(source.clone(), keycode, true) {
-    if let Some(s) = text {
-      down.set_string(s);
-    }
-    tag_injected(&down);
-    down.post(CGEventTapLocation::HID);
+fn post_key(source: CGEventSource, keycode: u16, text: Option<&str>) -> bool {
+  let Ok(down) = CGEvent::new_keyboard_event(source.clone(), keycode, true) else {
+    return false;
+  };
+  if let Some(s) = text {
+    down.set_string(s);
   }
-  if let Ok(up) = CGEvent::new_keyboard_event(source, keycode, false) {
-    tag_injected(&up);
-    up.post(CGEventTapLocation::HID);
-  }
+  let Ok(up) = CGEvent::new_keyboard_event(source, keycode, false) else {
+    return false;
+  };
+
+  tag_injected(&down);
+  tag_injected(&up);
+
+  down.post(CGEventTapLocation::HID);
+  up.post(CGEventTapLocation::HID);
+
+  true
 }
 
 /// Send a Unicode string via a single SPACE key event with the string attached.
-fn send_unicode_text(s: &str) {
+fn send_unicode_text(s: &str) -> bool {
   let Some(source) = CGEventSource::new(CGEventSourceStateID::Private).ok() else {
-    return;
+    return false;
   };
-  post_key(source, KeyCode::SPACE, Some(s));
+  post_key(source, KeyCode::SPACE, Some(s))
 }
 
 /// Send backspace key n times.
-fn send_backspaces(n: usize) {
+fn send_backspaces(n: usize) -> bool {
   let Some(source) = CGEventSource::new(CGEventSourceStateID::Private).ok() else {
-    return;
+    return false;
   };
 
   for _ in 0..n {
-    post_key(source.clone(), KeyCode::DELETE, None);
+    if !post_key(source.clone(), KeyCode::DELETE, None) {
+      return false;
+    }
   }
+
+  true
 }
 
 /// Read the Unicode string from a keyboard event via CGEventKeyboardGetUnicodeString.
 fn get_event_string(event: &CGEvent) -> Option<String> {
   unsafe {
-    let mut buf = [0u16; 8];
     let mut len: core::ffi::c_ulong = 0;
-    CGEventKeyboardGetUnicodeString(
-      event.as_ptr(),
-      buf.len() as core::ffi::c_ulong,
-      &mut len,
-      buf.as_mut_ptr(),
-    );
-    if len > 0 {
-      Some(String::from_utf16_lossy(&buf[..len as usize]))
-    } else {
-      None
+    CGEventKeyboardGetUnicodeString(event.as_ptr(), 0, &mut len, std::ptr::null_mut());
+
+    if len == 0 {
+      return None;
     }
+
+    let mut buf = vec![0u16; len as usize];
+    CGEventKeyboardGetUnicodeString(event.as_ptr(), len, &mut len, buf.as_mut_ptr());
+    let len = len.min(buf.len() as core::ffi::c_ulong);
+    buf.truncate(len as usize);
+
+    Some(String::from_utf16_lossy(&buf))
   }
 }
 
@@ -189,6 +199,8 @@ pub fn build_event_tap_callback(
     if is_keydown
       && (keycode == VK_X || keycode == VK_C)
       && flags.contains(CGEventFlags::CGEventFlagAlternate)
+      && !flags.contains(CGEventFlags::CGEventFlagCommand)
+      && !flags.contains(CGEventFlags::CGEventFlagControl)
     {
       // a xor 1 = !a
       let now_enabled = !state
@@ -290,13 +302,13 @@ pub fn build_event_tap_callback(
       (total_delete, combined_add)
     };
 
-    if total_delete > 0 {
-      send_backspaces(total_delete);
-    }
-    if !combined_add.is_empty() {
-      send_unicode_text(&combined_add);
-    }
+    let deleted = total_delete == 0 || send_backspaces(total_delete);
+    let added = combined_add.is_empty() || send_unicode_text(&combined_add);
 
-    CallbackResult::Drop
+    if deleted && added {
+      CallbackResult::Drop
+    } else {
+      CallbackResult::Keep
+    }
   }
 }
