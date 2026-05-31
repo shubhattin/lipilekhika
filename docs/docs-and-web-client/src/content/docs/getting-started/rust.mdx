@@ -47,33 +47,57 @@ fn main() {
 - `text: &(impl AsRef<str> + ?Sized)` — Text to transliterate
 - `from: Script` — Source script/language
 - `to: Script` — Target script/language  
-- `trans_options: Option<&HashMap<String, bool>>` — Optional custom transliteration options
+- `trans_options: Option<&CustomOptions>` — Optional custom transliteration options
 
 **Returns:** `Cow<'a, str>` — Transliterated text (borrows input when `from == to`)
 
 ### With Custom Transliteration Options
 
-You can pass custom options as the fourth argument to fine-tune transliteration behavior:
+The fourth argument accepts a [`CustomOptions`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptions.html) value. The recommended way to construct one is with [`CustomOptionsBuilder`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptionsBuilder.html): call `CustomOptionsBuilder::default()`, enable options with `<category>_<option>(bool)` setters (replace `:` in canonical keys with `_`), then `.build()`.
 
 ```rust
-use lipilekhika::{transliterate, Script};
-use std::collections::HashMap;
+use lipilekhika::{transliterate, CustomOptionsBuilder, Script};
 
 fn main() {
-    let mut options = HashMap::new();
-    options.insert(
-        "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra".to_string(),
-        true
-    );
-    
+    let options = CustomOptionsBuilder::default()
+        .brahmic_to_brahmic_replace_pancham_varga_varna_with_anusvAra(true)
+        .build();
+
     let result = transliterate(
         "गङ्गा",
         Script::Devanagari,
         Script::Gujarati,
-        Some(&options)
+        Some(&options),
     );
-    
+
     println!("{}", result); // ગંગા (instead of ગઙ્ગા)
+}
+```
+
+<Aside type="tip">
+  `CustomOptions::default()` leaves every option disabled. Use `CustomOptions::all_enabled()` when you need all flags on.
+</Aside>
+
+### From or to a hash map
+
+If your configuration already lives in a map (for example from JSON or another language binding), convert with [`CustomOptions::try_from_map`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptions.html#method.try_from_map) and export with [`CustomOptions::to_options_map`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptions.html#method.to_options_map). Unknown keys return `UnknownCustomOptionKey`.
+
+```rust
+use lipilekhika::{transliterate, CustomOptions, Script};
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(
+        "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra".to_string(),
+        true,
+    );
+
+    let options = CustomOptions::try_from_map(&map).unwrap();
+    let result = transliterate("गङ्गा", Script::Devanagari, Script::Gujarati, Some(&options));
+    println!("{}", result);
+
+    let exported: HashMap<String, bool> = options.to_options_map();
 }
 ```
 

@@ -96,6 +96,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Sets an option by its canonical `category:option` key.
             #[inline]
+            #[rustfmt::skip]
             pub fn try_set(&mut self, key: &str, value: bool) -> Result<(), UnknownCustomOptionKey> {
                 match key {
                     #(#try_set_arms)*
@@ -114,6 +115,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Fixed-size array of canonical key/value pairs (`&opts.as_entries()` for a slice).
             #[inline]
+            #[rustfmt::skip]
             pub fn as_entries(&self) -> [(&'static str, bool); Self::ENTRY_COUNT] {
                 [#(#entry_tuples)*]
             }

@@ -57,7 +57,12 @@ impl CustomOptions {
     }
     /// Sets an option by its canonical `category:option` key.
     #[inline]
-    pub fn try_set(&mut self, key: &str, value: bool) -> Result<(), UnknownCustomOptionKey> {
+    #[rustfmt::skip]
+    pub fn try_set(
+        &mut self,
+        key: &str,
+        value: bool,
+    ) -> Result<(), UnknownCustomOptionKey> {
         match key {
             "all_to_normal:replace_pancham_varga_varna_with_n" => {
                 self.all_to_normal_replace_pancham_varga_varna_with_n = value;
@@ -118,6 +123,7 @@ impl CustomOptions {
     }
     /// Fixed-size array of canonical key/value pairs (`&opts.as_entries()` for a slice).
     #[inline]
+    #[rustfmt::skip]
     pub fn as_entries(&self) -> [(&'static str, bool); Self::ENTRY_COUNT] {
         [
             (
@@ -140,10 +146,7 @@ impl CustomOptions {
                 "all_to_normal:replace_avagraha_with_a",
                 self.all_to_normal_replace_avagraha_with_a,
             ),
-            (
-                "normal_to_all:use_typing_chars",
-                self.normal_to_all_use_typing_chars,
-            ),
+            ("normal_to_all:use_typing_chars", self.normal_to_all_use_typing_chars),
             (
                 "all_to_normal:preserve_specific_chars",
                 self.all_to_normal_preserve_specific_chars,
