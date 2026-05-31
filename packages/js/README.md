@@ -76,12 +76,12 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 
 **Parameters:**
 
-- `text: string` — Text to transliterate
+- `text: string | string[]` — Text to transliterate (one string or many; same options for all)
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
 - `options?: TransliterationOptions` — Custom transliteration options
 
-**Returns:** `Promise<string>`
+**Returns:** `Promise<string | string[]>` — matches the shape of `text`
 
 </details>
 
@@ -117,12 +117,12 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 **Parameters:**
 
-- `text: string` — Text to transliterate
+- `text: string | string[]` — Same as `transliterate`
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
 - `options?: TransliterationOptions` — Custom transliteration options
 
-**Returns:** `Promise<string>`
+**Returns:** `Promise<string | string[]>`
 
 **Note:** Uses the fast Rust-based WASM implementation for improved performance. Works in all JavaScript environments (Node.js, browsers, Deno, Bun).
 
@@ -142,9 +142,9 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 Available via `lipilekhika/node`. Uses a native Rust N-API binding for near-native performance. Only works in **Node.js, Bun, and Deno** on **Linux/macOS/Windows (x86_64 & aarch64)**.
 
-**Parameters:** Same as `transliterate`.
+**Parameters:** Same as `transliterate` (including `text: string | string[]`).
 
-**Returns:** `Promise<string>`
+**Returns:** `Promise<string | string[]>`
 
 </details>
 

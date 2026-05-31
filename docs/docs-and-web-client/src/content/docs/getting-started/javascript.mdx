@@ -32,7 +32,7 @@ Lipi Lekhika offers a typesafe, tree-shakable package for JavaScript/TypeScript.
 
 ## Usage
 
-For transliteration use the `transliterate` function. It returns a `Promise<string>`.
+For transliteration use the `transliterate` function. Pass `text` as `string | string[]`; the result is a `Promise<string>` or `Promise<string[]>` with the same shape.
 
 ```ts
 import { transliterate } from 'lipilekhika';

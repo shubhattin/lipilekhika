@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (python-lib@1.0.7)
+
+- Performance Improvements (via rust-lib@@1.1.2)
+
 ## python-lib@1.0.6
 
 - Add android build target (via zig cross compiler and linker)

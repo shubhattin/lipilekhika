@@ -48,11 +48,11 @@ export const preloadScriptData = async (name: ScriptLangType) => {
 
 /**
  * Transliterates `text` from `from` to `to`.
- * @param text - The text to transliterate, or an array of strings (same options for all)
+ * @param text - `string | string[]` — text to transliterate (same options for all items in an array)
  * @param from - The script/language to transliterate from
  * @param to - The script/language to transliterate to
  * @param trans_options - The custom transliteration options to use for the transliteration
- * @returns The transliterated text, or an array of results when `text` is an array
+ * @returns `string` or `string[]` — same shape as `text`
  */
 export async function transliterate<T extends TransliterateInput>(
   text: T,
