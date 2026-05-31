@@ -59,7 +59,7 @@ console.log(result); // न जायते म्रियते वा
 ```typescript
 import { transliterate } from 'lipilekhika';
 
-const result = await transliterate('గంగా', 'Devanagari', 'Gujarati', {
+const result = await transliterate('गङ्गा', 'Devanagari', 'Gujarati', {
   'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
 });
 console.log(result); // ગંગા (instead of ગઙ્ગા)
@@ -76,12 +76,12 @@ console.log(result); // ગંગા (instead of ગઙ્ગા)
 
 **Parameters:**
 
-- `text: string | string[]` — Text to transliterate (one string or many; same options for all)
+- `text: string | string[]` — Text to transliterate (see `TransliterateInput`)
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
 - `options?: TransliterationOptions` — Custom transliteration options
 
-**Returns:** `Promise<string | string[]>` — matches the shape of `text`
+**Returns:** `Promise<TransliterateOutput<T>>` — `string` when `text` is a string, `string[]` when `text` is an array
 
 </details>
 
@@ -117,12 +117,12 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 **Parameters:**
 
-- `text: string | string[]` — Same as `transliterate`
+- `text: string | string[]` — Text to transliterate (see `TransliterateInput`)
 - `from: ScriptLangType` — Source script/language
 - `to: ScriptLangType` — Target script/language
 - `options?: TransliterationOptions` — Custom transliteration options
 
-**Returns:** `Promise<string | string[]>`
+**Returns:** `Promise<TransliterateOutput<T>>` — `string` when `text` is a string, `string[]` when `text` is an array
 
 **Note:** Uses the fast Rust-based WASM implementation for improved performance. Works in all JavaScript environments (Node.js, browsers, Deno, Bun).
 
@@ -142,9 +142,9 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 Available via `lipilekhika/node`. Uses a native Rust N-API binding for near-native performance. Only works in **Node.js, Bun, and Deno** on **Linux/macOS/Windows (x86_64 & aarch64)**.
 
-**Parameters:** Same as `transliterate` (including `text: string | string[]`).
+**Parameters:** Same as `transliterate` (`text: string | string[]`, etc.).
 
-**Returns:** `Promise<string | string[]>`
+**Returns:** `Promise<TransliterateOutput<T>>` — `string` when `text` is a string, `string[]` when `text` is an array
 
 </details>
 
@@ -161,7 +161,12 @@ Available via `lipilekhika/node`.
 
 ```typescript
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from 'lipilekhika';
-import type { ScriptLangType, TransliterationOptions } from 'lipilekhika';
+import type {
+  ScriptLangType,
+  TransliterateInput,
+  TransliterateOutput,
+  TransliterationOptions
+} from 'lipilekhika';
 ```
 
 | Export                   | Description                                             |
@@ -170,6 +175,8 @@ import type { ScriptLangType, TransliterationOptions } from 'lipilekhika';
 | `LANG_LIST`              | Array of all supported language names mapped to scripts |
 | `ALL_LANG_SCRIPT_LIST`   | Combined list of all scripts and languages              |
 | `ScriptLangType`         | Type for script/language identifiers (includes aliases) |
+| `TransliterateInput`     | `string | readonly string[]` accepted by transliterate APIs |
+| `TransliterateOutput<T>` | Return type inferred from input (`string` or `string[]`) |
 | `TransliterationOptions` | Type for custom transliteration options                 |
 | `ScriptListType`         | Type for the script list                                |
 | `LangListType`           | Type for the language list                              |

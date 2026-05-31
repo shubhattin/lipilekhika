@@ -6,6 +6,7 @@
 
 use hashbrown::HashMap;
 use indexmap::IndexMap;
+use lipilekhika::CustomOptions;
 use lipilekhika::get_script_list_data;
 use lipilekhika::preload_script_data;
 use lipilekhika::scripts::Script;
@@ -86,6 +87,8 @@ struct TransliterationTestCase {
     input: String,
     #[serde(default)]
     options: Option<HashMap<String, bool>>,
+    #[serde(skip)]
+    parsed_options: Option<CustomOptions>,
     #[serde(default)]
     #[allow(dead_code)]
     todo: Option<bool>,
@@ -136,6 +139,13 @@ fn build_typing_options(opts: &Option<TypingOptionsYaml>) -> Option<TypingContex
     }
 
     Some(rust_opts)
+}
+
+fn options_from_map(map: Option<&HashMap<String, bool>>) -> Option<CustomOptions> {
+    map.map(|options| {
+        CustomOptions::try_from_map(options)
+            .expect("benchmark example options must use canonical keys")
+    })
 }
 
 // ----------------------------
@@ -214,6 +224,9 @@ fn get_test_data() -> Vec<TransliterationTestCase> {
             .unwrap_or_else(|e| panic!("Failed reading `{}`: {e}", file.display()));
         let mut cases: Vec<TransliterationTestCase> = yaml::from_str(&s)
             .unwrap_or_else(|e| panic!("Failed parsing `{}`: {e}", file.display()));
+        for case in &mut cases {
+            case.parsed_options = options_from_map(case.options.as_ref());
+        }
         data.append(&mut cases);
     }
     data
@@ -328,7 +341,7 @@ fn measure_individual_transliteration(test_data: &[TransliterationTestCase]) -> 
             &td.input,
             parse_script(&td.from),
             parse_script(&td.to),
-            td.options.as_ref(),
+            td.parsed_options.as_ref(),
         );
     }
     start.elapsed().as_secs_f64() * 1000.0

@@ -52,24 +52,23 @@ fn main() {
 
 ### With Custom Options
 
+Pass a [`CustomOptions`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptions.html) value as the fourth argument. The recommended way to build one is with [`CustomOptionsBuilder`](https://docs.rs/lipilekhika/latest/lipilekhika/struct.CustomOptionsBuilder.html):
+
 ```rust
-use lipilekhika::{transliterate, Script};
-use std::collections::HashMap;
+use lipilekhika::{transliterate, CustomOptionsBuilder, Script};
 
 fn main() {
-    let mut options = HashMap::new();
-    options.insert(
-        "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra".to_string(),
-        true
-    );
-    
+    let options = CustomOptionsBuilder::default()
+        .brahmic_to_brahmic_replace_pancham_varga_varna_with_anusvAra(true)
+        .build();
+
     let result = transliterate(
-        "గంగా",
-        Script::Telugu,
+        "गङ्गा",
+        Script::Devanagari,
         Script::Gujarati,
-        Some(&options)
+        Some(&options),
     );
-    
+
     println!("{}", result); // ગંગા (instead of ગઙ્ગા)
 }
 ```
@@ -128,7 +127,7 @@ pub fn transliterate<'a>(
     text: &'a (impl AsRef<str> + ?Sized),
     from: Script,
     to: Script,
-    trans_options: Option<&HashMap<String, bool>>,
+    trans_options: Option<&CustomOptions>,
 ) -> Cow<'a, str>
 ```
 
@@ -138,7 +137,7 @@ Transliterates text from one script to another.
 - `text` — Text to transliterate
 - `from` — Source script (`Script` enum)
 - `to` — Target script (`Script` enum)
-- `trans_options` — Optional custom transliteration options
+- `trans_options` — Optional [`CustomOptions`] (use [`CustomOptionsBuilder`] to construct)
 
 **Returns:** `Cow<'a, str>` — Transliterated text (borrows input when `from == to`)
 
@@ -236,6 +235,8 @@ Devanagari, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Odia, Gurmukhi
 📖 Full list: [lipilekhika.in/reference/supported_scripts](https://lipilekhika.in/reference/supported_scripts)
 
 ## 🔧 Custom Options
+
+Build a [`CustomOptions`] with [`CustomOptionsBuilder::default`] and `<category>_<option>(bool)` setters (replace `:` in option keys with `_`). For map-based sources, use [`CustomOptions::try_from_map`] to parse and [`CustomOptions::to_options_map`] to export.
 
 See the full list of custom transliteration options:
 

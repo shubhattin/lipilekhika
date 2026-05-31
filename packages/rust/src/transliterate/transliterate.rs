@@ -1,3 +1,4 @@
+use crate::custom_options::CustomOptions;
 use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
 use crate::scripts::ScriptListEnum;
 use crate::transliterate::helpers::{
@@ -9,7 +10,6 @@ use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::slice;
-use hashbrown::HashMap;
 
 /// Compare a char with a &str without heap allocation.
 #[inline]
@@ -24,7 +24,7 @@ struct TransliterateCtx<'a, R> {
     to_script: &'a ScriptListEnum,
     from_script_data: &'a ScriptData,
     to_script_data: &'a ScriptData,
-    trans_options: &'a HashMap<String, bool>,
+    trans_options: &'a CustomOptions,
     custom_rules: &'a [R],
     cursor: &'a mut InputTextCursor<'a>,
     result: &'a mut ResultStringBuilder,
@@ -165,10 +165,9 @@ where
                     );
 
                     if self.to_script == &ScriptListEnum::Sinhala
-                        && *self
+                        && self
                             .trans_options
-                            .get("all_to_sinhala:use_conjunct_enabling_halant")
-                            .unwrap_or(&false)
+                            .all_to_sinhala_use_conjunct_enabling_halant
                         && let Some(last_piece) = self.result.last_piece()
                     {
                         self.result.rewrite_at(-1, &{
@@ -205,10 +204,9 @@ where
                     .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
 
                 if *self.to_script == ScriptListEnum::Sinhala
-                    && *self
+                    && self
                         .trans_options
-                        .get("all_to_sinhala:use_conjunct_enabling_halant")
-                        .unwrap_or(&false)
+                        .all_to_sinhala_use_conjunct_enabling_halant
                     && let Some(last_piece) = self.result.last_piece()
                 {
                     self.result.rewrite_at(-1, &{
@@ -398,21 +396,21 @@ fn custom_option_script_type_matches(
 pub fn get_active_custom_options(
     from_script_data: &ScriptData,
     to_script_data: &ScriptData,
-    input_options: Option<&HashMap<String, bool>>,
-) -> HashMap<String, bool> {
+    input_options: Option<&CustomOptions>,
+) -> CustomOptions {
     let Some(input_options) = input_options else {
-        return HashMap::new();
+        return CustomOptions::default();
     };
 
     let from_script_name = &from_script_data.script_name;
     let to_script_name = &to_script_data.script_name;
     let custom_options_map = crate::script_data::get_custom_options_map();
-    let mut active: HashMap<String, bool> = HashMap::with_capacity(input_options.len());
+    let mut active = CustomOptions::default();
 
     let from_type = custom_option_script_type_of(from_script_data);
     let to_type = custom_option_script_type_of(to_script_data);
 
-    for (key, enabled) in input_options.iter() {
+    for (key, enabled) in input_options.as_entries() {
         let Some(option_info) = custom_options_map.get(key) else {
             continue;
         };
@@ -437,7 +435,9 @@ pub fn get_active_custom_options(
                 .is_some_and(|names| names.iter().any(|n| n == to_script_name));
 
         if from_matches && to_matches {
-            active.insert(key.clone(), *enabled);
+            active
+                .try_set(key, enabled)
+                .expect("CustomOptions keys must remain in sync with custom_options.json");
         }
     }
 
@@ -446,14 +446,14 @@ pub fn get_active_custom_options(
 
 #[derive(Debug, Clone)]
 pub struct ResolvedTransliterationRules {
-    pub trans_options: HashMap<String, bool>,
+    pub trans_options: CustomOptions,
     pub custom_rules: Vec<&'static Rule>,
 }
 /// Resolves active options once and flattens enabled rules into a single list.
 pub fn resolve_transliteration_rules(
     from_script_data: &ScriptData,
     to_script_data: &ScriptData,
-    transliteration_input_options: Option<&HashMap<String, bool>>,
+    transliteration_input_options: Option<&CustomOptions>,
 ) -> ResolvedTransliterationRules {
     let trans_options = get_active_custom_options(
         from_script_data,
@@ -464,8 +464,8 @@ pub fn resolve_transliteration_rules(
     let custom_options_map = crate::script_data::get_custom_options_map();
     let mut custom_rules: Vec<&'static Rule> = Vec::new();
 
-    for (key, enabled) in trans_options.iter() {
-        if !*enabled {
+    for (key, enabled) in trans_options.as_entries() {
+        if !enabled {
             continue;
         }
         if let Some(opt) = custom_options_map.get(key) {
@@ -649,7 +649,7 @@ pub fn transliterate_text_core(
     to_script: &ScriptListEnum,
     from_script_data: &ScriptData,
     to_script_data: &ScriptData,
-    trans_options_in: &HashMap<String, bool>,
+    trans_options_in: &CustomOptions,
     custom_rules: &[impl Borrow<Rule>],
     options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
@@ -661,8 +661,6 @@ pub fn transliterate_text_core(
         // as it is only called internally in `typing.rs` with from always being "Normal"
     }
 
-    // Only clone trans_options when we actually need to insert a key (typing mode).
-    // In the common (non-typing) path this avoids a full HashMap allocation per call.
     let trans_options = trans_options_in;
     // ^ now we use this flag itself for adding custom
     // `normal_to_all:use_typing_chars` rule used to modidy the behaviour
@@ -702,10 +700,7 @@ pub fn transliterate_text_core(
         _ => (None, None),
     };
 
-    let trans_opt_normal_to_all_use_typing_chars: bool = trans_options
-        .get("normal_to_all:use_typing_chars")
-        .copied()
-        .unwrap_or(false);
+    let trans_opt_normal_to_all_use_typing_chars = trans_options.normal_to_all_use_typing_chars;
     // choose matching map
     let use_typing_map = (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode)
         && *from_script == ScriptListEnum::Normal;
@@ -725,10 +720,8 @@ pub fn transliterate_text_core(
 
     let is_from_tamil_ext_ = is_script_tamil_ext(from_script);
     let is_to_tamil_ext_ = is_script_tamil_ext(to_script);
-    let opt_preserve_specific_chars_ = *trans_options
-        .get("all_to_normal:preserve_specific_chars")
-        .unwrap_or(&false)
-        && *to_script == ScriptListEnum::Normal;
+    let opt_preserve_specific_chars_ =
+        trans_options.all_to_normal_preserve_specific_chars && *to_script == ScriptListEnum::Normal;
 
     let mut ctx = TransliterateCtx {
         from_script,
@@ -1455,7 +1448,7 @@ pub fn transliterate_text(
     text: impl AsRef<str>,
     from_script: ScriptListEnum,
     to_script: ScriptListEnum,
-    transliteration_input_options: Option<&HashMap<String, bool>>,
+    transliteration_input_options: Option<&CustomOptions>,
     options: Option<TransliterationFnOptions>,
 ) -> TransliterationOutput {
     let text = text.as_ref();

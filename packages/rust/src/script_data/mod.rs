@@ -7,7 +7,6 @@ mod script_list;
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use hashbrown::HashMap;
 
 pub use custom_options::*;
 pub use schema::*;
@@ -20,15 +19,8 @@ use crate::scripts::Script;
 pub fn get_all_options(from_script: Script, to_script: Script) -> Vec<String> {
     let from_script_data = ScriptData::get_script_data(&from_script.into());
     let to_script_data = ScriptData::get_script_data(&to_script.into());
-
-    // Create a HashMap with all custom options set to true.
-    // `custom_options_map` is insertion-ordered (same as `custom_options.json`),
-    // but `HashMap` is not. We only use this for lookup below.
     let custom_options_map = get_custom_options_map();
-    let all_options_enabled: HashMap<String, bool> = custom_options_map
-        .keys()
-        .map(|key| (key.clone(), true))
-        .collect();
+    let all_options_enabled = crate::CustomOptions::all_enabled();
 
     let active_options = crate::transliterate::transliterate::get_active_custom_options(
         from_script_data,
@@ -39,7 +31,7 @@ pub fn get_all_options(from_script: Script, to_script: Script) -> Vec<String> {
     // Preserve `custom_options.json` order by filtering in that key order.
     let mut ordered: Vec<String> = Vec::new();
     for key in custom_options_map.keys() {
-        if active_options.contains_key(key) {
+        if active_options.get(key.as_str()).unwrap_or(false) {
             ordered.push(key.clone());
         }
     }

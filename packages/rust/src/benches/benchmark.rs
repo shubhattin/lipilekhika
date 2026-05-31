@@ -1,5 +1,6 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use hashbrown::HashMap;
+use lipilekhika::CustomOptions;
 use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
@@ -80,6 +81,8 @@ struct TransliterationTestCase {
     input: String,
     #[serde(default)]
     options: Option<HashMap<String, bool>>,
+    #[serde(skip)]
+    parsed_options: Option<CustomOptions>,
     #[serde(default)]
     todo: Option<bool>,
 }
@@ -131,6 +134,13 @@ fn build_typing_options(opts: &Option<TypingOptionsYaml>) -> Option<TypingContex
     }
 
     Some(rust_opts)
+}
+
+fn options_from_map(map: Option<&HashMap<String, bool>>) -> Option<CustomOptions> {
+    map.map(|options| {
+        CustomOptions::try_from_map(options)
+            .expect("benchmark fixture options must use canonical keys")
+    })
 }
 
 // ----------------------------
@@ -211,6 +221,9 @@ fn load_transliteration_cases() -> Vec<TransliterationTestCase> {
             .unwrap_or_else(|e| panic!("Failed reading `{}`: {e}", file.display()));
         let mut cases: Vec<TransliterationTestCase> = yaml::from_str(&yaml_text)
             .unwrap_or_else(|e| panic!("Failed parsing `{}`: {e}", file.display()));
+        for case in &mut cases {
+            case.parsed_options = options_from_map(case.options.as_ref());
+        }
         all.append(&mut cases);
     }
     all
@@ -268,7 +281,7 @@ fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
             &case.input,
             Script::from_str(&case.from).unwrap(),
             Script::from_str(&case.to).unwrap(),
-            case.options.as_ref(),
+            case.parsed_options.as_ref(),
         );
         black_box(out);
     }
@@ -293,7 +306,7 @@ fn run_transliteration_multi_pass(cases: &[TransliterationTestCase]) {
                         &case.input,
                         Script::from_str(&case.from).unwrap(),
                         Script::from_str(&case.to).unwrap(),
-                        case.options.as_ref(),
+                        case.parsed_options.as_ref(),
                     );
                     black_box(out);
                 }

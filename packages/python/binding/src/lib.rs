@@ -1,4 +1,3 @@
-use lipilekhika::HashMap;
 use lipilekhika::ScriptListEnum;
 use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
@@ -22,15 +21,21 @@ fn transliterate(
     to_script: &str,
     trans_options: Option<&Bound<'_, PyDict>>,
 ) -> PyResult<String> {
-    let options: Option<HashMap<String, bool>> = trans_options.map(|dict| {
-        dict.iter()
-            .filter_map(|(k, v)| {
-                let key = k.extract::<String>().ok()?;
-                let value = v.extract::<bool>().ok()?;
-                Some((key, value))
-            })
-            .collect()
-    });
+    let options = trans_options
+        .map(|dict| -> PyResult<lipilekhika::CustomOptions> {
+            let mut options = lipilekhika::CustomOptions::default();
+            for (k, v) in dict.iter() {
+                let key = k.extract::<String>()?;
+                let value = v.extract::<bool>()?;
+                options.try_set(&key, value).map_err(|_| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "unknown trans_options key {key:?}"
+                    ))
+                })?;
+            }
+            Ok(options)
+        })
+        .transpose()?;
 
     let from = py_parse_script(from_script, "from_script")?;
     let to = py_parse_script(to_script, "to_script")?;
