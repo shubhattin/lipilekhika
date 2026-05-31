@@ -15,6 +15,7 @@ include = [
     "src/**/*",
     "build.rs",
     "scripts_rs_builder.rs",
+    "custom_options_rs_builder.rs",
     "Cargo.toml",
     "LICENSE*",
     "README*",
@@ -42,6 +43,7 @@ once_cell = { version = "1.21", default-features = false, features = [
     "race",
 ] }
 strum = { version = "0.28.0", default-features = false, features = ["derive"] }
+derive_builder = { version = "0.20.2", default-features = false, features = ["alloc"] }
 
 [features]
 default = []

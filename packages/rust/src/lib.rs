@@ -24,11 +24,13 @@ use alloc::borrow::Cow;
 use alloc::string::String;
 pub use hashbrown::HashMap;
 // ^ only exposed for internal use in bindings
+pub use custom_options::{CustomOptions, CustomOptionsBuilder};
 pub use scripts::{Script, ScriptListEnum};
 mod script_data;
 mod transliterate;
 mod utils;
 
+pub mod custom_options;
 pub mod scripts;
 pub mod typing;
 

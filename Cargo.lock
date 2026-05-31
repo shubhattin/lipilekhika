@@ -3999,6 +3999,7 @@ dependencies = [
  "bincode",
  "clap",
  "criterion",
+ "derive_builder",
  "foldhash 0.1.5",
  "hashbrown 0.15.5",
  "indexmap 2.12.1",

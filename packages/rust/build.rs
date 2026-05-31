@@ -12,12 +12,14 @@ mod schema {
     include!("src/script_data/schema.rs");
 }
 
+mod custom_options_rs_builder;
 mod scripts_rs_builder;
 
 use schema::{
     CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
     ScriptListDataJson,
 };
+use custom_options_rs_builder::render_custom_options_rs;
 use scripts_rs_builder::render_scripts_rs;
 
 fn read_json_file(path: &Path) -> String {
@@ -33,6 +35,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}", script_list_path.display());
     println!("cargo:rerun-if-changed={}", custom_options_path.display());
     println!("cargo:rerun-if-changed=scripts_rs_builder.rs");
+    println!("cargo:rerun-if-changed=custom_options_rs_builder.rs");
 
     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").expect("OUT_DIR missing"));
 
@@ -92,10 +95,11 @@ fn main() {
     fs::write(&scripts_rs_path, scripts_rs)
         .unwrap_or_else(|e| panic!("Failed to write {}: {}", scripts_rs_path.display(), e));
 
-    // 3) custom_options.json -> custom_options.bin
+    // 3) custom_options.json -> custom_options.bin + src/custom_options.rs
     let custom_options_json = read_json_file(custom_options_path);
     let custom_options_raw: CustomOptionMapJson = serde_json::from_str(&custom_options_json)
         .unwrap_or_else(|e| panic!("{}: {}", custom_options_path.display(), e));
+    let custom_options_rs = render_custom_options_rs(&custom_options_raw);
     let custom_options_map: CustomOptionMap = custom_options_raw
         .into_iter()
         .map(|(k, v)| (k, v.into()))
@@ -108,6 +112,15 @@ fn main() {
         panic!(
             "Failed to write {}: {}",
             custom_options_bin_path.display(),
+            e
+        )
+    });
+
+    let custom_options_rs_path = manifest_dir.join("src/custom_options.rs");
+    fs::write(&custom_options_rs_path, custom_options_rs).unwrap_or_else(|e| {
+        panic!(
+            "Failed to write {}: {}",
+            custom_options_rs_path.display(),
             e
         )
     });
