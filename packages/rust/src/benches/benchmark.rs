@@ -1,5 +1,6 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use hashbrown::HashMap;
+use lipilekhika::CustomOptions;
 use lipilekhika::scripts::Script;
 use lipilekhika::transliterate;
 use lipilekhika::typing::{TypingContextOptions, emulate_typing};
@@ -268,7 +269,12 @@ fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
             &case.input,
             Script::from_str(&case.from).unwrap(),
             Script::from_str(&case.to).unwrap(),
-            case.options.as_ref(),
+            case.options
+                .as_ref()
+                .map(CustomOptions::try_from_map)
+                .transpose()
+                .unwrap()
+                .as_ref(),
         );
         black_box(out);
     }
@@ -293,7 +299,12 @@ fn run_transliteration_multi_pass(cases: &[TransliterationTestCase]) {
                         &case.input,
                         Script::from_str(&case.from).unwrap(),
                         Script::from_str(&case.to).unwrap(),
-                        case.options.as_ref(),
+                        case.options
+                            .as_ref()
+                            .map(CustomOptions::try_from_map)
+                            .transpose()
+                            .unwrap()
+                            .as_ref(),
                     );
                     black_box(out);
                 }

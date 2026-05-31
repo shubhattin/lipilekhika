@@ -1,16 +1,17 @@
-use lipilekhika::HashMap;
+use lipilekhika::CustomOptions;
 use lipilekhika::scripts::Script;
 use wasm_bindgen::prelude::*;
 
 fn parse_trans_options(
     trans_options: Option<js_sys::Object>,
-) -> Result<Option<HashMap<String, bool>>, JsError> {
+) -> Result<Option<CustomOptions>, JsError> {
     let Some(obj) = trans_options else {
         return Ok(None);
     };
 
     let entries = js_sys::Object::entries(&obj);
-    let mut map = HashMap::with_capacity(entries.length() as usize);
+    let mut options = CustomOptions::default();
+    let mut saw_any = false;
 
     for i in 0..entries.length() {
         let entry = js_sys::Array::from(&entries.get(i));
@@ -22,13 +23,16 @@ fn parse_trans_options(
             .get(1)
             .as_bool()
             .ok_or_else(|| JsError::new("trans_options value must be a boolean"))?;
-        map.insert(key, value);
+        options
+            .try_set(&key, value)
+            .map_err(|_| JsError::new(&format!("unknown trans_options key: {key}")))?;
+        saw_any = true;
     }
 
-    if map.is_empty() {
+    if !saw_any {
         Ok(None)
     } else {
-        Ok(Some(map))
+        Ok(Some(options))
     }
 }
 
@@ -36,7 +40,7 @@ fn transliterate_by_id(
     text: &str,
     from_id: u8,
     to_id: u8,
-    trans_options: Option<&HashMap<String, bool>>,
+    trans_options: Option<&CustomOptions>,
 ) -> Result<String, JsError> {
     let from = Script::from_id(from_id).ok_or_else(|| JsError::new("invalid source script id"))?;
     let to = Script::from_id(to_id).ok_or_else(|| JsError::new("invalid target script id"))?;
@@ -77,7 +81,7 @@ fn transliterate_many_by_id(
     offsets: &[u32],
     from_id: u8,
     to_id: u8,
-    trans_options: Option<&HashMap<String, bool>>,
+    trans_options: Option<&CustomOptions>,
 ) -> Result<Vec<String>, JsError> {
     if from_id == to_id {
         return Ok(slices_from_joined(joined, offsets)?

@@ -50,6 +50,12 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         }
     });
 
+    let all_enabled_fields = fields.iter().map(|(field_ident, _)| {
+        quote! {
+            #field_ident: true,
+        }
+    });
+
     let tokens = quote! {
         // generated file, do not edit
         #[rustfmt::skip]
@@ -79,6 +85,14 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Canonical keys in `custom_options.json` insertion order.
             pub const KEYS: &'static [&'static str] = &[#(#option_keys)*];
+
+            /// Every option enabled (no runtime key lookup).
+            #[inline]
+            pub const fn all_enabled() -> Self {
+                Self {
+                    #(#all_enabled_fields)*
+                }
+            }
 
             /// Sets an option by its canonical `category:option` key.
             #[inline]
@@ -119,6 +133,45 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
                     .copied()
                     .map(|(key, enabled)| (key.to_string(), enabled))
                     .collect()
+            }
+            /// Builds [`CustomOptions`] from any map-like `(key, enabled)` source.
+            ///
+            /// Accepts [`hashbrown::HashMap`](hashbrown::HashMap), [`std::collections::HashMap`](std::collections::HashMap),
+            /// iterators of pairs, and other collections via [`IntoIterator`].
+            pub fn try_from_map<M, K, V>(map: M) -> Result<Self, UnknownCustomOptionKey>
+            where
+                M: IntoIterator<Item = (K, V)>,
+                K: AsRef<str>,
+                V: core::borrow::Borrow<bool>,
+            {
+                let mut options = Self::default();
+                for (key, enabled) in map {
+                    options.try_set(key.as_ref(), *enabled.borrow())?;
+                }
+                Ok(options)
+            }
+
+            /// Builds [`CustomOptions`] from a list of `(key, enabled)` pairs.
+            #[inline]
+            pub fn try_from_pairs<I, S>(pairs: I) -> Result<Self, UnknownCustomOptionKey>
+            where
+                I: IntoIterator<Item = (S, bool)>,
+                S: AsRef<str>,
+            {
+                Self::try_from_map(pairs)
+            }
+
+            /// Builds [`CustomOptions`] from an optional map-like source.
+            #[inline]
+            pub fn try_from_optional_map<M, K, V>(
+                map: Option<M>,
+            ) -> Result<Option<Self>, UnknownCustomOptionKey>
+            where
+                M: IntoIterator<Item = (K, V)>,
+                K: AsRef<str>,
+                V: core::borrow::Borrow<bool>,
+            {
+                map.map(Self::try_from_map).transpose()
             }
         }
 

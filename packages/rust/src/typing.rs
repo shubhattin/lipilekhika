@@ -2,6 +2,7 @@
 //! and script typing-data helpers. Enable the crate `std` feature for idle auto-clear via
 //! `std::time`; otherwise clear context explicitly.
 
+use crate::custom_options::CustomOptions;
 use crate::scripts::{Script, ScriptListEnum};
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
@@ -87,7 +88,7 @@ pub struct TypingContext {
 
     from_script_data: &'static ScriptData,
     to_script_data: &'static ScriptData,
-    trans_options: HashMap<String, bool>,
+    trans_options: CustomOptions,
     custom_rules: Vec<&'static crate::script_data::Rule>,
 }
 
@@ -802,8 +803,10 @@ mod tests {
                 if case.preserve_check {
                     preserve_checks += 1;
                     // Transliterate back to Normal with `all_to_normal:preserve_specific_chars`
-                    let mut trans_options = HashMap::new();
-                    trans_options.insert("all_to_normal:preserve_specific_chars".to_string(), true);
+                    let mut trans_options = CustomOptions::default();
+                    trans_options
+                        .try_set("all_to_normal:preserve_specific_chars", true)
+                        .unwrap();
 
                     let preserved =
                         crate::transliterate(&result, script, Script::Normal, Some(&trans_options));

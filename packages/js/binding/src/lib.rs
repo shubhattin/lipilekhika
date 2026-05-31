@@ -42,8 +42,10 @@ pub fn transliterate(
     let to_script = Script::from_str(to.trim())
         .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
-    let trans_options: Option<lipilekhika::HashMap<String, bool>> =
-        trans_options.map(|m| m.into_iter().collect());
+    let trans_options = trans_options
+        .map(lipilekhika::CustomOptions::try_from_map)
+        .transpose()
+        .map_err(|_| Error::from_reason("trans_options contains an unknown option key"))?;
 
     Ok(
         lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref())

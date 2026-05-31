@@ -6,6 +6,7 @@
 
 use hashbrown::HashMap;
 use indexmap::IndexMap;
+use lipilekhika::CustomOptions;
 use lipilekhika::get_script_list_data;
 use lipilekhika::preload_script_data;
 use lipilekhika::scripts::Script;
@@ -136,6 +137,13 @@ fn build_typing_options(opts: &Option<TypingOptionsYaml>) -> Option<TypingContex
     }
 
     Some(rust_opts)
+}
+
+fn options_from_map(map: Option<&HashMap<String, bool>>) -> Option<CustomOptions> {
+    map.map(|options| {
+        CustomOptions::try_from_map(options)
+            .expect("benchmark example options must use canonical keys")
+    })
 }
 
 // ----------------------------
@@ -328,7 +336,7 @@ fn measure_individual_transliteration(test_data: &[TransliterationTestCase]) -> 
             &td.input,
             parse_script(&td.from),
             parse_script(&td.to),
-            td.options.as_ref(),
+            options_from_map(td.options.as_ref()).as_ref(),
         );
     }
     start.elapsed().as_secs_f64() * 1000.0

@@ -42,13 +42,22 @@ impl CustomOptions {
         "normal_to_all:use_typing_chars",
         "all_to_normal:preserve_specific_chars",
     ];
+    /// Every option enabled (no runtime key lookup).
+    #[inline]
+    pub const fn all_enabled() -> Self {
+        Self {
+            all_to_normal_replace_pancham_varga_varna_with_n: true,
+            brahmic_to_brahmic_replace_pancham_varga_varna_with_anusvAra: true,
+            all_to_sinhala_use_conjunct_enabling_halant: true,
+            all_to_normal_remove_virAma_and_double_virAma: true,
+            all_to_normal_replace_avagraha_with_a: true,
+            normal_to_all_use_typing_chars: true,
+            all_to_normal_preserve_specific_chars: true,
+        }
+    }
     /// Sets an option by its canonical `category:option` key.
     #[inline]
-    pub fn try_set(
-        &mut self,
-        key: &str,
-        value: bool,
-    ) -> Result<(), UnknownCustomOptionKey> {
+    pub fn try_set(&mut self, key: &str, value: bool) -> Result<(), UnknownCustomOptionKey> {
         match key {
             "all_to_normal:replace_pancham_varga_varna_with_n" => {
                 self.all_to_normal_replace_pancham_varga_varna_with_n = value;
@@ -131,7 +140,10 @@ impl CustomOptions {
                 "all_to_normal:replace_avagraha_with_a",
                 self.all_to_normal_replace_avagraha_with_a,
             ),
-            ("normal_to_all:use_typing_chars", self.normal_to_all_use_typing_chars),
+            (
+                "normal_to_all:use_typing_chars",
+                self.normal_to_all_use_typing_chars,
+            ),
             (
                 "all_to_normal:preserve_specific_chars",
                 self.all_to_normal_preserve_specific_chars,
@@ -149,6 +161,43 @@ impl CustomOptions {
             .copied()
             .map(|(key, enabled)| (key.to_string(), enabled))
             .collect()
+    }
+    /// Builds [`CustomOptions`] from any map-like `(key, enabled)` source.
+    ///
+    /// Accepts [`hashbrown::HashMap`](hashbrown::HashMap), [`std::collections::HashMap`](std::collections::HashMap),
+    /// iterators of pairs, and other collections via [`IntoIterator`].
+    pub fn try_from_map<M, K, V>(map: M) -> Result<Self, UnknownCustomOptionKey>
+    where
+        M: IntoIterator<Item = (K, V)>,
+        K: AsRef<str>,
+        V: core::borrow::Borrow<bool>,
+    {
+        let mut options = Self::default();
+        for (key, enabled) in map {
+            options.try_set(key.as_ref(), *enabled.borrow())?;
+        }
+        Ok(options)
+    }
+    /// Builds [`CustomOptions`] from a list of `(key, enabled)` pairs.
+    #[inline]
+    pub fn try_from_pairs<I, S>(pairs: I) -> Result<Self, UnknownCustomOptionKey>
+    where
+        I: IntoIterator<Item = (S, bool)>,
+        S: AsRef<str>,
+    {
+        Self::try_from_map(pairs)
+    }
+    /// Builds [`CustomOptions`] from an optional map-like source.
+    #[inline]
+    pub fn try_from_optional_map<M, K, V>(
+        map: Option<M>,
+    ) -> Result<Option<Self>, UnknownCustomOptionKey>
+    where
+        M: IntoIterator<Item = (K, V)>,
+        K: AsRef<str>,
+        V: core::borrow::Borrow<bool>,
+    {
+        map.map(Self::try_from_map).transpose()
     }
 }
 impl CustomOptionsBuilder {

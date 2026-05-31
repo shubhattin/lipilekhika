@@ -52,8 +52,10 @@ pub fn transliterate(
 ) -> Result<String, String> {
     let from = parse_script("from_script", &from_script)?;
     let to = parse_script("to_script", &to_script)?;
-    let options: Option<lipilekhika::HashMap<String, bool>> =
-        options.map(|m| m.into_iter().collect());
+    let options = options
+        .map(lipilekhika::CustomOptions::try_from_map)
+        .transpose()
+        .map_err(|_| "options contains an unknown custom option key".to_string())?;
     Ok(lipilekhika::transliterate(&text, from, to, options.as_ref()).into_owned())
 }
 

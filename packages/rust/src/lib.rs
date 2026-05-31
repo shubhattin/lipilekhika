@@ -21,9 +21,6 @@ pub use crate::typing::{
     get_script_typing_data_map,
 };
 use alloc::borrow::Cow;
-use alloc::string::String;
-pub use hashbrown::HashMap;
-// ^ only exposed for internal use in bindings
 pub use custom_options::{CustomOptions, CustomOptionsBuilder, UnknownCustomOptionKey};
 pub use scripts::{Script, ScriptListEnum};
 mod script_data;
@@ -78,9 +75,14 @@ mod tests {
     use super::*;
 
     use crate::scripts::Script;
-    use alloc::{format, string::ToString, vec::Vec};
+    use alloc::{
+        format,
+        string::{String, ToString},
+        vec::Vec,
+    };
     use owo_colors::OwoColorize;
     use serde::Deserialize;
+    use std::collections::HashMap;
     use std::fs;
     use std::io::Write;
     use std::path::{Path, PathBuf};
@@ -154,6 +156,22 @@ mod tests {
         reversible: Option<bool>,
         #[serde(default)]
         todo: Option<bool>,
+    }
+
+    fn options_from_map(
+        map: Option<&HashMap<String, bool>>,
+        file: &Path,
+        index: &str,
+    ) -> Option<CustomOptions> {
+        map.map(|options| {
+            CustomOptions::try_from_map(options).unwrap_or_else(|_| {
+                panic!(
+                    "invalid custom option key in `{}` index {}",
+                    file.display(),
+                    index
+                )
+            })
+        })
     }
 
     fn list_yaml_files(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
@@ -307,7 +325,8 @@ mod tests {
                 }
             };
 
-            let result = transliterate(&case.input, from, to, case.options.as_ref());
+            let options = options_from_map(case.options.as_ref(), file_path, &case.index);
+            let result = transliterate(&case.input, from, to, options.as_ref());
 
             if file_name.starts_with("auto")
                 && case.to == "Tamil-Extended"
@@ -340,7 +359,7 @@ mod tests {
 
             if case.reversible.unwrap_or(false) {
                 stats.reverse_asserts += 1;
-                let reversed = transliterate(&result, to, from, case.options.as_ref());
+                let reversed = transliterate(&result, to, from, options.as_ref());
 
                 if reversed == case.input {
                     stats.reverse_passed += 1;
