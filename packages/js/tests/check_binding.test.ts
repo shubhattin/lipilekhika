@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { transliterate_node, createTypingContext } from '../src/node';
 import { transliterate, transliterate_wasm } from '../src/index';
+import { transliterate as transliterate_wasm_bind } from '../wasm/bind';
+
+const PACHAM_VARGA_AS_ANUSVARA = {
+  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
+} as const;
 
 const EXAMPLES = {
   transliterate: [
@@ -59,6 +64,13 @@ const EXAMPLES = {
     '🙏🏽',
     'mixed: 🕉️ 𑀕 गङ्गा abc'
   ],
+  wasmBoundaryWithEmpty: ['', 'गङ्गा', '', '𑀕𑀗𑁆𑀕𑀸', '👨‍👩‍👧‍👦', '', 'mixed: 🕉️ 𑀕 गङ्गा abc', ''],
+  batchTransliterateWithOptions: {
+    texts: ['गङ्गा', '', 'गङ्गा 🎉'],
+    from: 'Devanagari',
+    to: 'Gujarati',
+    outputs: ['ગંગા', '', 'ગંગા 🎉']
+  },
   emulateTyping: [
     {
       script: 'Devanagari',
@@ -117,9 +129,15 @@ describe('wasm binding smoke check', () => {
     }
   });
 
-  it('preserves mixed-width strings through the WASM FFI boundary', async () => {
+  it('preserves mixed-width strings through the direct WASM FFI boundary', async () => {
     const texts = [...EXAMPLES.wasmBoundary];
-    const out = await transliterate_wasm(texts, 'Devanagari', 'Devanagari');
+    const out = await transliterate_wasm_bind(texts, 'Devanagari', 'Devanagari');
+    expect(out).toEqual(texts);
+  });
+
+  it('preserves empty and mixed-width strings through the direct WASM FFI boundary', async () => {
+    const texts = [...EXAMPLES.wasmBoundaryWithEmpty];
+    const out = await transliterate_wasm_bind(texts, 'Devanagari', 'Devanagari');
     expect(out).toEqual(texts);
   });
 
@@ -146,17 +164,29 @@ describe('wasm binding smoke check', () => {
   describe('transliterate works with custom options', () => {
     it('returns an array of results for $from -> $to', async () => {
       {
-        const result = await transliterate_node('गङ्गा', 'Devanagari', 'Gujarati', {
-          'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
-        });
+        const result = await transliterate_node(
+          'गङ्गा',
+          'Devanagari',
+          'Gujarati',
+          PACHAM_VARGA_AS_ANUSVARA
+        );
         expect(result).toBe('ગંગા');
       }
       {
-        const result = await transliterate_wasm('गङ्गा', 'Devanagari', 'Gujarati', {
-          'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
-        });
+        const result = await transliterate_wasm(
+          'गङ्गा',
+          'Devanagari',
+          'Gujarati',
+          PACHAM_VARGA_AS_ANUSVARA
+        );
         expect(result).toBe('ગંગા');
       }
+    });
+
+    it('supports array transliteration with custom options in the WASM bulk path', async () => {
+      const { texts, from, to, outputs } = EXAMPLES.batchTransliterateWithOptions;
+      const result = await transliterate_wasm(texts, from, to, PACHAM_VARGA_AS_ANUSVARA);
+      expect(result).toEqual(outputs);
     });
   });
 });
