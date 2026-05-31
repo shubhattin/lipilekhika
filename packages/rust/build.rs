@@ -15,11 +15,11 @@ mod schema {
 mod custom_options_rs_builder;
 mod scripts_rs_builder;
 
+use custom_options_rs_builder::render_custom_options_rs;
 use schema::{
     CustomOptionMap, CustomOptionMapJson, ScriptData, ScriptDataJson, ScriptListData,
     ScriptListDataJson,
 };
-use custom_options_rs_builder::render_custom_options_rs;
 use scripts_rs_builder::render_scripts_rs;
 
 fn read_json_file(path: &Path) -> String {
