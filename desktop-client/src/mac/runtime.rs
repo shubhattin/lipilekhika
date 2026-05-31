@@ -1,7 +1,7 @@
 use crossbeam_channel::Sender;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
-use core_foundation::runloop::CFRunLoop;
+use core_foundation::runloop::{CFRunLoop, kCFRunLoopCommonModes};
 use core_graphics::event::{
   CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType,
 };
@@ -19,7 +19,8 @@ pub fn run(
     tx_tray,
   });
 
-  let callback = super::hooks::build_event_tap_callback(mac_state);
+  let tap_port = Arc::new(Mutex::new(None));
+  let callback = super::hooks::build_event_tap_callback(mac_state, Arc::clone(&tap_port));
 
   let events_of_interest = vec![
     CGEventType::KeyDown,
@@ -30,14 +31,15 @@ pub fn run(
     CGEventType::OtherMouseDown,
   ];
 
-  CGEventTap::with_enabled(
-    CGEventTapLocation::HID,
-    CGEventTapPlacement::HeadInsertEventTap,
-    CGEventTapOptions::Default,
-    events_of_interest,
-    callback,
-    || CFRunLoop::run_current(),
-  )
+  let event_tap = unsafe {
+    CGEventTap::new_unchecked(
+      CGEventTapLocation::HID,
+      CGEventTapPlacement::HeadInsertEventTap,
+      CGEventTapOptions::Default,
+      events_of_interest,
+      callback,
+    )
+  }
   .map_err(|()| {
     std::io::Error::new(
       std::io::ErrorKind::PermissionDenied,
@@ -46,6 +48,18 @@ pub fn run(
        System Settings → Privacy & Security → Accessibility",
     )
   })?;
+
+  if let Ok(mut guard) = tap_port.lock() {
+    *guard = Some(event_tap.mach_port().clone());
+  }
+
+  let loop_source = event_tap
+    .mach_port()
+    .create_runloop_source(0)
+    .map_err(|()| std::io::Error::other("Failed to create CGEventTap run loop source"))?;
+  CFRunLoop::get_current().add_source(&loop_source, unsafe { kCFRunLoopCommonModes });
+  event_tap.enable();
+  CFRunLoop::run_current();
 
   Ok(())
 }

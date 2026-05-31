@@ -2,7 +2,10 @@ use crate::{ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 
 use super::MacAppState;
 use super::constants::*;
+use core_foundation::base::TCFType;
+use core_foundation::mach_port::{CFMachPort, CFMachPortRef};
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::atomic::Ordering;
 
 use core_graphics::event::{
@@ -89,11 +92,12 @@ fn send_unicode_text(s: &str) {
 
 /// Send backspace key n times.
 fn send_backspaces(n: usize) {
+  let Some(source) = CGEventSource::new(CGEventSourceStateID::Private).ok() else {
+    return;
+  };
+
   for _ in 0..n {
-    let Some(source) = CGEventSource::new(CGEventSourceStateID::Private).ok() else {
-      return;
-    };
-    post_key(source, KeyCode::DELETE, None);
+    post_key(source.clone(), KeyCode::DELETE, None);
   }
 }
 
@@ -124,6 +128,8 @@ unsafe extern "C" {
     actualStringLength: *mut core::ffi::c_ulong,
     unicodeString: *mut u16,
   );
+
+  fn CGEventTapEnable(tap: CFMachPortRef, enable: bool);
 }
 
 // ---- Event tap callback ----
@@ -132,14 +138,21 @@ unsafe extern "C" {
 /// Logic mirrors `win/hooks.rs` — see comments there for rationale.
 pub fn build_event_tap_callback(
   state: Arc<MacAppState>,
-) -> impl Fn(CGEventTapProxy, CGEventType, &CGEvent) -> CallbackResult + Send + 'static {
+  tap_port: Arc<Mutex<Option<CFMachPort>>>,
+) -> impl Fn(CGEventTapProxy, CGEventType, &CGEvent) -> CallbackResult + 'static {
   move |_proxy, event_type, event| {
     // Handle tap-disabled events
     if matches!(
       event_type,
       CGEventType::TapDisabledByTimeout | CGEventType::TapDisabledByUserInput
     ) {
-      eprintln!("[lipilekhika] Event tap disabled ({event_type:?}), will be re-enabled");
+      if let Ok(guard) = tap_port.lock() {
+        if let Some(port) = guard.as_ref() {
+          unsafe {
+            CGEventTapEnable(port.as_concrete_TypeRef(), true);
+          }
+        }
+      }
       return CallbackResult::Keep;
     }
 
