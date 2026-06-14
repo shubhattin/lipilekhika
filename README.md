@@ -77,6 +77,8 @@ The performance now is at **51 ms**.
 
 Contributions are welcome! Help us improve Lipi Lekhika through bug reports, feature requests, or code contributions.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and testing setup.
+
 **GitHub Repository**: [github.com/shubhattin/lipilekhika](https://github.com/shubhattin/lipilekhika) · **Issues**: [Report here](https://github.com/shubhattin/lipilekhika/issues)
 
 
