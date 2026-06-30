@@ -5,6 +5,12 @@ import { DEFAULT_USE_NATIVE_NUMERALS, DEFAULT_INCLUDE_INHERENT_VOWEL } from 'lip
 
 const isPreset = (value: string): value is PresetListType => value in PRESETS;
 
+/** `Boolean("false")` is true — parse stored booleans explicitly. */
+const parseStoredBoolean = (value: string | null, defaultValue: boolean): boolean => {
+  if (value === null) return defaultValue;
+  return value === 'true';
+};
+
 const LOCAL_STORAGE_KEYS = {
   TYPING_SCRIPT: 'lipilekhika-app-typing-script',
   CURRENT_PRESET: 'lipilekhika-app-current-preset',
@@ -54,7 +60,7 @@ export const use_native_numerals_atom = atom<boolean>(
   (() => {
     if (typeof window === 'undefined') return DEFAULT_USE_NATIVE_NUMERALS;
     const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.USE_NATIVE_NUMERALS);
-    return localStorageValue ? Boolean(localStorageValue) : DEFAULT_USE_NATIVE_NUMERALS;
+    return parseStoredBoolean(localStorageValue, DEFAULT_USE_NATIVE_NUMERALS);
   })()
 );
 use_native_numerals_atom.subscribe((value) => {
@@ -66,7 +72,7 @@ export const include_inherent_vowel_atom = atom<boolean>(
   (() => {
     if (typeof window === 'undefined') return DEFAULT_INCLUDE_INHERENT_VOWEL;
     const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.INCLUDE_INHERENT_VOWEL);
-    return localStorageValue ? Boolean(localStorageValue) : DEFAULT_INCLUDE_INHERENT_VOWEL;
+    return parseStoredBoolean(localStorageValue, DEFAULT_INCLUDE_INHERENT_VOWEL);
   })()
 );
 include_inherent_vowel_atom.subscribe((value) => {

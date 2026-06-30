@@ -33,11 +33,11 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Getting Started',
-          autogenerate: { directory: 'getting-started' }
+          items: [{ autogenerate: { directory: 'getting-started' } }]
         },
         {
           label: 'API Reference',
-          autogenerate: { directory: 'reference' }
+          items: [{ autogenerate: { directory: 'reference' } }]
         }
       ],
       customCss: ['./src/styles/global.css']
