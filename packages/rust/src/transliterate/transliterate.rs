@@ -6,7 +6,7 @@ use crate::transliterate::helpers::{
     is_script_tamil_ext, is_ta_ext_superscript_tail, is_vedic_svara_tail,
 };
 use alloc::borrow::{Cow, ToOwned};
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::slice;
@@ -455,6 +455,15 @@ pub fn resolve_transliteration_rules(
     to_script_data: &ScriptData,
     transliteration_input_options: Option<&CustomOptions>,
 ) -> ResolvedTransliterationRules {
+    // The overwhelmingly common API call has no custom options. Avoid loading
+    // and scanning custom-option data when every option is necessarily disabled.
+    if transliteration_input_options.is_none() {
+        return ResolvedTransliterationRules {
+            trans_options: CustomOptions::default(),
+            custom_rules: Vec::new(),
+        };
+    }
+
     let trans_options = get_active_custom_options(
         from_script_data,
         to_script_data,
@@ -1318,10 +1327,12 @@ pub fn transliterate_text_core(
                         }
                     }
 
-                    ctx.apply_custom_trans_rules(
-                        ctx.cursor.pos() as isize,
-                        -(matched_len_units as isize),
-                    );
+                    if !ctx.custom_rules.is_empty() {
+                        ctx.apply_custom_trans_rules(
+                            ctx.cursor.pos() as isize,
+                            -(matched_len_units as isize),
+                        );
+                    }
                     continue;
                 } else
                 // typing-mode special case when krama contains -1 entries: emit raw match
@@ -1423,24 +1434,34 @@ pub fn transliterate_text_core(
             }
         }
 
-        ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1);
+        if !ctx.custom_rules.is_empty() {
+            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1);
+        }
     }
 
     if ctx.prev_context_in_use {
         let _ = ctx.prev_context_cleanup(None, None, Some(true));
     }
 
-    let output = ctx.result.to_string(); // via Display trait
-    let output = apply_custom_replace_rules(
-        output.as_str(),
-        to_script_data,
-        custom_rules,
-        CheckInEnum::Output,
-    );
+    let context_length = ctx.prev_context.length();
+    drop(ctx);
+
+    let output = result.into_string();
+    let output = if custom_rules.is_empty() {
+        output
+    } else {
+        apply_custom_replace_rules(
+            output.as_str(),
+            to_script_data,
+            custom_rules,
+            CheckInEnum::Output,
+        )
+        .into_owned()
+    };
 
     TransliterationOutput {
-        output: output.into_owned(),
-        context_length: ctx.prev_context.length(),
+        output,
+        context_length,
     }
 }
 

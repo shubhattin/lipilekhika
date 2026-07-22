@@ -7,8 +7,6 @@ use alloc::vec::Vec;
 use core::fmt;
 use core::ops::Range;
 
-// pub fn krama_index_of_text()
-
 impl ScriptData {
     #[allow(dead_code)]
     pub fn krama_text_or_null(&self, idx: i16) -> Option<&str> {
@@ -53,6 +51,12 @@ impl ResultStringBuilder {
             buf: String::with_capacity(128),
             offsets: Vec::new(),
         }
+    }
+
+    /// Consume the builder without copying its contiguous output buffer.
+    #[inline]
+    pub fn into_string(self) -> String {
+        self.buf
     }
 
     /// Returns the byte range for the i-th piece.

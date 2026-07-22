@@ -78,6 +78,10 @@ struct TransliterationTestCase {
     index: String,
     from: String,
     to: String,
+    #[serde(skip, default = "default_script")]
+    from_script: Script,
+    #[serde(skip, default = "default_script")]
+    to_script: Script,
     input: String,
     #[serde(default)]
     options: Option<HashMap<String, bool>>,
@@ -85,6 +89,10 @@ struct TransliterationTestCase {
     parsed_options: Option<CustomOptions>,
     #[serde(default)]
     todo: Option<bool>,
+}
+
+fn default_script() -> Script {
+    Script::Normal
 }
 
 #[derive(Clone, Debug, Deserialize, Default)]
@@ -223,6 +231,10 @@ fn load_transliteration_cases() -> Vec<TransliterationTestCase> {
             .unwrap_or_else(|e| panic!("Failed parsing `{}`: {e}", file.display()));
         for case in &mut cases {
             case.parsed_options = options_from_map(case.options.as_ref());
+            case.from_script = Script::from_str(&case.from)
+                .expect("benchmark fixture source script must be valid");
+            case.to_script = Script::from_str(&case.to)
+                .expect("benchmark fixture destination script must be valid");
         }
         all.append(&mut cases);
     }
@@ -279,8 +291,8 @@ fn run_transliteration_pass(cases: &[TransliterationTestCase]) {
         }
         let out = transliterate(
             &case.input,
-            Script::from_str(&case.from).unwrap(),
-            Script::from_str(&case.to).unwrap(),
+            case.from_script,
+            case.to_script,
             case.parsed_options.as_ref(),
         );
         black_box(out);
@@ -304,8 +316,8 @@ fn run_transliteration_multi_pass(cases: &[TransliterationTestCase]) {
                 for case in chunk {
                     let out = transliterate(
                         &case.input,
-                        Script::from_str(&case.from).unwrap(),
-                        Script::from_str(&case.to).unwrap(),
+                        case.from_script,
+                        case.to_script,
                         case.parsed_options.as_ref(),
                     );
                     black_box(out);
