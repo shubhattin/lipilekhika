@@ -53,7 +53,8 @@
     "lint": "eslint .",
     "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
     "publish:cli": "bun run build && npm publish",
-    "bench": "vite-node src/scripts/benchmark.ts"
+    "bench": "vite-node src/scripts/benchmark.ts",
+    "complexity": "vite-node src/scripts/complexity.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
