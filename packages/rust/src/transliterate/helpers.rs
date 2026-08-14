@@ -43,13 +43,21 @@ pub struct ResultStringBuilder {
     buf: String,
     /// Byte offsets marking the start of each "piece" within `buf`.
     offsets: Vec<usize>,
+    /// Most transliterations only append to the output. Avoid maintaining and
+    /// allocating the piece index unless a custom rule can rewrite prior output.
+    track_pieces: bool,
 }
 
 impl ResultStringBuilder {
-    pub fn new() -> Self {
+    pub fn new(capacity: usize, track_pieces: bool) -> Self {
         ResultStringBuilder {
-            buf: String::with_capacity(128),
-            offsets: Vec::new(),
+            buf: String::with_capacity(capacity),
+            offsets: if track_pieces {
+                Vec::with_capacity(capacity / 2)
+            } else {
+                Vec::new()
+            },
+            track_pieces,
         }
     }
 
@@ -71,12 +79,16 @@ impl ResultStringBuilder {
         if text.is_empty() {
             return;
         }
-        self.offsets.push(self.buf.len());
+        if self.track_pieces {
+            self.offsets.push(self.buf.len());
+        }
         self.buf.push_str(text);
     }
     /// Emit a single character without heap-allocating a String.
     pub fn emit_char(&mut self, c: char) {
-        self.offsets.push(self.buf.len());
+        if self.track_pieces {
+            self.offsets.push(self.buf.len());
+        }
         self.buf.push(c);
     }
     pub fn emit_pieces(&mut self, pieces: &[impl AsRef<str>]) {
@@ -328,7 +340,12 @@ impl<'a> InputTextCursor<'a> {
 
     /// Returns the character at the given index without heap allocation.
     pub fn peek_at(&self, index_units: usize) -> Option<char> {
-        self.chars.get(index_units).map(|(ch, _)| *ch)
+        if index_units >= self.char_count() {
+            return None;
+        }
+        // SAFETY: `index_units < char_count()`, which excludes only the
+        // terminal sentinel and guarantees an initialized character entry.
+        Some(unsafe { self.chars.get_unchecked(index_units).0 })
     }
 
     pub fn peek(&self) -> Option<char> {
@@ -343,13 +360,17 @@ impl<'a> InputTextCursor<'a> {
     /// Peek and return as a String (for APIs that need &str).
     /// Only call when you actually need the String form.
     pub fn peek_at_str(&self, index_units: usize) -> Option<&'a str> {
-        // by using character offsets and slice of text we avoid unnecessary string allocations
-        let start = self.chars.get(index_units).map(|(_, byte_idx)| *byte_idx)?;
-        let end = self
-            .chars
-            .get(index_units + 1)
-            .map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start..end)
+        if index_units >= self.char_count() {
+            return None;
+        }
+        // SAFETY: the table contains every `char_indices` boundary followed by
+        // `text.len()`. The checked character index therefore makes both table
+        // accesses valid and the resulting byte range valid UTF-8.
+        unsafe {
+            let start = self.chars.get_unchecked(index_units).1;
+            let end = self.chars.get_unchecked(index_units + 1).1;
+            Some(self.text.get_unchecked(start..end))
+        }
     }
 
     /// units here is for char (and not bytes)
@@ -363,9 +384,14 @@ impl<'a> InputTextCursor<'a> {
         if start > end || end > self.char_count() {
             return None;
         }
-        let start_byte = self.chars.get(start).map(|(_, byte_idx)| *byte_idx)?;
-        let end_byte = self.chars.get(end).map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start_byte..end_byte)
+        // SAFETY: `start <= end <= char_count()`. Both entries exist (the
+        // latter may be the terminal sentinel), and all stored offsets came
+        // from `char_indices` or `text.len()`, so they are UTF-8 boundaries.
+        unsafe {
+            let start_byte = self.chars.get_unchecked(start).1;
+            let end_byte = self.chars.get_unchecked(end).1;
+            Some(self.text.get_unchecked(start_byte..end_byte))
+        }
     }
 }
 
@@ -524,4 +550,33 @@ pub fn apply_typing_input_aliases<'a>(
     }
 
     Cow::Owned(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::InputTextCursor;
+
+    #[test]
+    fn input_cursor_preserves_utf8_character_boundaries() {
+        let cursor = InputTextCursor::new("aक𑀓");
+
+        assert_eq!(cursor.char_count(), 3);
+        assert_eq!(cursor.peek_at(0), Some('a'));
+        assert_eq!(cursor.peek_at(1), Some('क'));
+        assert_eq!(cursor.peek_at(2), Some('𑀓'));
+        assert_eq!(cursor.peek_at(3), None);
+        assert_eq!(cursor.peek_at_str(1), Some("क"));
+        assert_eq!(cursor.slice(0, 3), Some("aक𑀓"));
+        assert_eq!(cursor.slice(1, 3), Some("क𑀓"));
+        assert_eq!(cursor.slice(2, 2), Some(""));
+    }
+
+    #[test]
+    fn input_cursor_rejects_invalid_ranges() {
+        let cursor = InputTextCursor::new("क");
+
+        assert_eq!(cursor.peek_at_str(1), None);
+        assert_eq!(cursor.slice(1, 0), None);
+        assert_eq!(cursor.slice(0, 2), None);
+    }
 }

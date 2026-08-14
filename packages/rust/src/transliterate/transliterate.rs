@@ -687,7 +687,10 @@ pub fn transliterate_text_core(
         CheckInEnum::Input,
     );
 
-    let mut result = ResultStringBuilder::new();
+    let track_result_pieces = !custom_rules.is_empty()
+        || (*to_script == ScriptListEnum::Sinhala
+            && trans_options.all_to_sinhala_use_conjunct_enabling_halant);
+    let mut result = ResultStringBuilder::new(text.len(), track_result_pieces);
     let mut cursor = InputTextCursor::new(text.as_ref());
     let mut prev_context = PrevContextBuilder::new(MAX_CONTEXT_LENGTH as usize);
 
@@ -1357,8 +1360,11 @@ pub fn transliterate_text_core(
         let char_to_search: Cow<'_, str> = text_to_krama_item
             .map(|k| Cow::Borrowed(k.0.as_str()))
             .unwrap_or_else(|| {
-                let mut buf = [0u8; 4];
-                Cow::Owned(ch.encode_utf8(&mut buf).to_owned())
+                Cow::Borrowed(
+                    ctx.cursor
+                        .peek_at_str(ctx.cursor.pos().saturating_sub(1))
+                        .unwrap_or_default(),
+                )
             });
         let idx = from_script_data.krama_index_of_text(char_to_search.as_ref());
         let Some(index) = idx else {
