@@ -56,23 +56,48 @@ impl ScriptData {
         let attr = self.get_common_attr_mut();
 
         let mut krama_text_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
+        let mut krama_text_char_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
         for (i, (text, _)) in attr.krama_text_arr.iter().enumerate() {
             krama_text_lookup.entry(text.clone()).or_insert(i);
+            let mut chars = text.chars();
+            if let Some(ch) = chars.next()
+                && chars.next().is_none()
+            {
+                krama_text_char_lookup.entry(ch).or_insert(i);
+            }
         }
         attr.krama_text_lookup = krama_text_lookup;
+        attr.krama_text_char_lookup = krama_text_char_lookup;
 
         let mut text_to_krama_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
+        let mut text_to_krama_char_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
         for (i, (text, _)) in attr.text_to_krama_map.iter().enumerate() {
             text_to_krama_lookup.entry(text.clone()).or_insert(i);
+            let mut chars = text.chars();
+            if let Some(ch) = chars.next()
+                && chars.next().is_none()
+            {
+                text_to_krama_char_lookup.entry(ch).or_insert(i);
+            }
         }
         attr.text_to_krama_lookup = text_to_krama_lookup;
+        attr.text_to_krama_char_lookup = text_to_krama_char_lookup;
 
         let mut typing_text_to_krama_lookup =
             HashMap::with_capacity(attr.typing_text_to_krama_map.len());
+        let mut typing_text_to_krama_char_lookup =
+            HashMap::with_capacity(attr.typing_text_to_krama_map.len());
         for (i, (text, _)) in attr.typing_text_to_krama_map.iter().enumerate() {
             typing_text_to_krama_lookup.entry(text.clone()).or_insert(i);
+            let mut chars = text.chars();
+            if let Some(ch) = chars.next()
+                && chars.next().is_none()
+            {
+                typing_text_to_krama_char_lookup.entry(ch).or_insert(i);
+            }
         }
         attr.typing_text_to_krama_lookup = typing_text_to_krama_lookup;
+        attr.typing_text_to_krama_char_lookup = typing_text_to_krama_char_lookup;
 
         let mut custom_script_chars_lookup =
             HashMap::with_capacity(attr.custom_script_chars_arr.len());
@@ -127,6 +152,15 @@ impl ScriptData {
             self.typing_text_to_krama_lookup.get(text).copied()
         } else {
             self.text_to_krama_lookup.get(text).copied()
+        }
+    }
+
+    #[inline]
+    pub fn text_to_krama_map_char_index(&self, ch: char, use_typing_map: bool) -> Option<usize> {
+        if use_typing_map {
+            self.typing_text_to_krama_char_lookup.get(&ch).copied()
+        } else {
+            self.text_to_krama_char_lookup.get(&ch).copied()
         }
     }
 

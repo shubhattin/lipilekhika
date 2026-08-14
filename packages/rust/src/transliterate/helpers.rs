@@ -33,6 +33,11 @@ impl ScriptData {
     pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
         self.krama_text_lookup.get(text).copied()
     }
+
+    #[inline]
+    pub fn krama_index_of_char(&self, ch: char) -> Option<usize> {
+        self.krama_text_char_lookup.get(&ch).copied()
+    }
 }
 
 /// Custom struct to construct output string.
@@ -45,6 +50,7 @@ pub struct ResultStringBuilder {
     offsets: Vec<usize>,
     /// Most transliterations only append to the output. Avoid maintaining and
     /// allocating the piece index unless a custom rule can rewrite prior output.
+    /// This avoids keeping track of offsets for most cases
     track_pieces: bool,
 }
 
