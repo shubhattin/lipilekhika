@@ -1473,7 +1473,6 @@ pub fn transliterate_text_core(
     }
 
     let context_length = ctx.prev_context.length();
-    drop(ctx);
 
     let output = result.into_string();
     let output = if custom_rules.is_empty() {

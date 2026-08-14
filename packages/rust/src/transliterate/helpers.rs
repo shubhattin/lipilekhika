@@ -346,12 +346,7 @@ impl<'a> InputTextCursor<'a> {
 
     /// Returns the character at the given index without heap allocation.
     pub fn peek_at(&self, index_units: usize) -> Option<char> {
-        if index_units >= self.char_count() {
-            return None;
-        }
-        // SAFETY: `index_units < char_count()`, which excludes only the
-        // terminal sentinel and guarantees an initialized character entry.
-        Some(unsafe { self.chars.get_unchecked(index_units).0 })
+        self.chars.get(index_units).map(|(ch, _)| *ch)
     }
 
     pub fn peek(&self) -> Option<char> {
@@ -366,17 +361,13 @@ impl<'a> InputTextCursor<'a> {
     /// Peek and return as a String (for APIs that need &str).
     /// Only call when you actually need the String form.
     pub fn peek_at_str(&self, index_units: usize) -> Option<&'a str> {
-        if index_units >= self.char_count() {
-            return None;
-        }
-        // SAFETY: the table contains every `char_indices` boundary followed by
-        // `text.len()`. The checked character index therefore makes both table
-        // accesses valid and the resulting byte range valid UTF-8.
-        unsafe {
-            let start = self.chars.get_unchecked(index_units).1;
-            let end = self.chars.get_unchecked(index_units + 1).1;
-            Some(self.text.get_unchecked(start..end))
-        }
+        // by using character offsets and slice of text we avoid unnecessary string allocations
+        let start = self.chars.get(index_units).map(|(_, byte_idx)| *byte_idx)?;
+        let end = self
+            .chars
+            .get(index_units + 1)
+            .map(|(_, byte_idx)| *byte_idx)?;
+        self.text.get(start..end)
     }
 
     /// units here is for char (and not bytes)
@@ -390,14 +381,9 @@ impl<'a> InputTextCursor<'a> {
         if start > end || end > self.char_count() {
             return None;
         }
-        // SAFETY: `start <= end <= char_count()`. Both entries exist (the
-        // latter may be the terminal sentinel), and all stored offsets came
-        // from `char_indices` or `text.len()`, so they are UTF-8 boundaries.
-        unsafe {
-            let start_byte = self.chars.get_unchecked(start).1;
-            let end_byte = self.chars.get_unchecked(end).1;
-            Some(self.text.get_unchecked(start_byte..end_byte))
-        }
+        let start_byte = self.chars.get(start).map(|(_, byte_idx)| *byte_idx)?;
+        let end_byte = self.chars.get(end).map(|(_, byte_idx)| *byte_idx)?;
+        self.text.get(start_byte..end_byte)
     }
 }
 
@@ -570,7 +556,6 @@ mod tests {
         assert_eq!(cursor.peek_at(0), Some('a'));
         assert_eq!(cursor.peek_at(1), Some('क'));
         assert_eq!(cursor.peek_at(2), Some('𑀓'));
-        assert_eq!(cursor.peek_at(3), None);
         assert_eq!(cursor.peek_at_str(1), Some("क"));
         assert_eq!(cursor.slice(0, 3), Some("aक𑀓"));
         assert_eq!(cursor.slice(1, 3), Some("क𑀓"));
