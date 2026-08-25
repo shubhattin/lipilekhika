@@ -58,8 +58,9 @@ impl ResultStringBuilder {
     pub fn new(capacity: usize, track_pieces: bool) -> Self {
         ResultStringBuilder {
             buf: String::with_capacity(capacity),
+            // Mostly we will be delaing with 3 byte per character so this allocation seems optimum
             offsets: if track_pieces {
-                Vec::with_capacity(capacity / 2)
+                Vec::with_capacity(capacity / 3)
             } else {
                 Vec::new()
             },
