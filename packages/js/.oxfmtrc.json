@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "semi": true,
+  "endOfLine": "lf",
+  "useTabs": false,
+  "trailingComma": "none",
+  "printWidth": 100,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "node_modules",
+    "build",
+    "dist",
+    "pnpm-lock.yaml",
+    "bun.lock",
+    "src/script_data",
+    "src/custom_options.json",
+    "tmp",
+    "wasm/pkg",
+    "binding/pkg"
+  ]
+}

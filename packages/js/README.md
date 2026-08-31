@@ -169,17 +169,17 @@ import type {
 } from 'lipilekhika';
 ```
 
-| Export                   | Description                                             |
-| ------------------------ | ------------------------------------------------------- |
-| `SCRIPT_LIST`            | Array of all supported script names                     |
-| `LANG_LIST`              | Array of all supported language names mapped to scripts |
-| `ALL_LANG_SCRIPT_LIST`   | Combined list of all scripts and languages              |
-| `ScriptLangType`         | Type for script/language identifiers (includes aliases) |
-| `TransliterateInput`     | `string | readonly string[]` accepted by transliterate APIs |
+| Export                   | Description                                              |
+| ------------------------ | -------------------------------------------------------- |
+| `SCRIPT_LIST`            | Array of all supported script names                      |
+| `LANG_LIST`              | Array of all supported language names mapped to scripts  |
+| `ALL_LANG_SCRIPT_LIST`   | Combined list of all scripts and languages               |
+| `ScriptLangType`         | Type for script/language identifiers (includes aliases)  |
+| `TransliterateInput`     | `string                                                  | readonly string[]` accepted by transliterate APIs |
 | `TransliterateOutput<T>` | Return type inferred from input (`string` or `string[]`) |
-| `TransliterationOptions` | Type for custom transliteration options                 |
-| `ScriptListType`         | Type for the script list                                |
-| `LangListType`           | Type for the language list                              |
+| `TransliterationOptions` | Type for custom transliteration options                  |
+| `ScriptListType`         | Type for the script list                                 |
+| `LangListType`           | Type for the language list                               |
 
 ## ⌨️ Real-time Typing
 

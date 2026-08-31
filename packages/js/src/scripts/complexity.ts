@@ -212,7 +212,8 @@ function formatChars(n: number) {
 function confidenceLabel(best: FitResult, second: FitResult | undefined): string {
   const gap = second ? best.r2 - second.r2 : best.r2;
   // O(n) vs O(n log n) stay close over a limited size range; high R² still counts.
-  if (best.r2 >= 0.995) return gap >= 0.001 ? 'strong' : 'strong (near-linear; hard to split n vs n log n)';
+  if (best.r2 >= 0.995)
+    return gap >= 0.001 ? 'strong' : 'strong (near-linear; hard to split n vs n log n)';
   if (best.r2 >= 0.95 && gap >= 0.01) return 'likely';
   if (best.r2 >= 0.85) return 'plausible';
   return 'weak / noisy';
@@ -285,9 +286,7 @@ async function preload_data() {
 async function main() {
   console.log(chalk.cyan.bold('Transliterate — Empirical Time Complexity'));
   console.log(
-    chalk.gray(
-      'Scales bulk from→to corpora built from the same YAML fixtures as benchmarks/tests,'
-    )
+    chalk.gray('Scales bulk from→to corpora built from the same YAML fixtures as benchmarks/tests,')
   );
   console.log(
     chalk.gray(
