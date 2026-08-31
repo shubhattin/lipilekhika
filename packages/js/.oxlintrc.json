@@ -5,7 +5,10 @@
     "correctness": "error"
   },
   "env": {
-    "builtin": true
+    "builtin": true,
+    "es2022": true,
+    "node": true,
+    "browser": true
   },
   "ignorePatterns": [
     "dist/**",
@@ -18,5 +21,13 @@
     "a.js",
     "wasm/a.js"
   ],
-  "rules": {}
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "tests/**/*.ts"],
+      "rules": {
+        "typescript/ban-ts-comment": "off"
+      }
+    }
+  ]
 }
