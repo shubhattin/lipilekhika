@@ -777,14 +777,28 @@ function minify_json_file(file: string) {
 }
 
 make_script_data()
-  .then(() => {
+  .then(async () => {
     console.log(chalk.green('✔  Script data generated successfully'));
     try {
-      execSync('bunx oxfmt ./src/script_data');
-      copy_script_data_json();
-      generate_python_types_py();
+      // Directory is gitignored; oxfmt only formats those paths when files are listed
+      // explicitly (shell globs are unreliable under Bun execSync).
+      const scriptDataFiles = fs
+        .readdirSync('src/script_data')
+        .filter((f) => f.endsWith('.json'))
+        .map((f) => path.join('src/script_data', f));
+      if (scriptDataFiles.length > 0) {
+        execSync(`bunx oxfmt ${scriptDataFiles.join(' ')}`);
+      }
     } catch (e) {
       console.error(chalk.red('✖  Error formatting script data'), e);
+    }
+    // Always copy/generate downstream artifacts even if formatting fails.
+    try {
+      await copy_script_data_json();
+      generate_python_types_py();
+    } catch (e) {
+      console.error(chalk.red('✖  Error copying script data'), e);
+      throw e;
     }
   })
   .catch((err) => {
