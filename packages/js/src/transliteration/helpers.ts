@@ -149,7 +149,7 @@ export const prev_context_builder = (maxLen: number) => {
   type ContextItem = prev_context_array_type[number];
   type ContextType = OutputBrahmicScriptData['list'][number]['type'];
 
-  const buf: ContextItem[] = new Array(maxLen);
+  const buf: ContextItem[] = Array.from({ length: maxLen });
   let head = 0; // index of the oldest element
   let count = 0;
 

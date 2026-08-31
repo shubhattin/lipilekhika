@@ -156,11 +156,9 @@ function get_out_script_data(
         if (i === text.length - 1) {
           if (
             !(
-              (
-                (add_in_map[existing_entry_index][1].krama?.length ?? 0) >= 1 &&
-                !(add_in_map[existing_entry_index][1].krama ?? []).some((v) => v === -1) &&
-                val.some((v) => v === -1)
-              )
+              (add_in_map[existing_entry_index][1].krama?.length ?? 0) >= 1 &&
+              !(add_in_map[existing_entry_index][1].krama ?? []).some((v) => v === -1) &&
+              val.some((v) => v === -1)
               // custom fix to prevent resetting of C to -1 (in Normal) when a valid link exists for C
             )
           ) {
@@ -782,7 +780,7 @@ make_script_data()
   .then(() => {
     console.log(chalk.green('✔  Script data generated successfully'));
     try {
-      execSync('npx prettier --write ./src/script_data');
+      execSync('bunx oxfmt ./src/script_data');
       copy_script_data_json();
       generate_python_types_py();
     } catch (e) {

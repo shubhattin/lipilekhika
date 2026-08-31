@@ -158,11 +158,11 @@ for (const lang of SCRIPT_LIST) {
   // replacing the direct script code
   fs.writeFileSync(`../src/make_script_data/input_data/${lang}.ts`, str_out);
 }
-// Run Prettier to format the ./src/make_script_data/input_data directory
+// Format the ./src/make_script_data/input_data directory
 try {
-  execSync('npx prettier --write ../src/make_script_data/input_data', { stdio: 'inherit' });
+  execSync('bunx oxfmt ../src/make_script_data/input_data', { stdio: 'inherit' });
 } catch (e) {
-  console.error('Prettier format failed:', e);
+  console.error('oxfmt format failed:', e);
 }
 
 function get_script_data(lang: script_list_type, data: Record<string, unknown>) {

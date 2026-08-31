@@ -53,17 +53,7 @@ const EXAMPLES = {
    * Strings with mixed UTF-8 widths (3-byte Indic, 4-byte ancient scripts, emoji/ZWJ).
    * Round-trip via from === to verifies pack/unpack byte offsets at the WASM FFI boundary.
    */
-  wasmBoundary: [
-    'गङ्गा',
-    '𑀕𑀗𑁆𑀕𑀸',
-    '𑆑𑆮',
-    'hello',
-    '😀🎉',
-    '👨‍👩‍👧‍👦',
-    '🇮🇳',
-    '🙏🏽',
-    'mixed: 🕉️ 𑀕 गङ्गा abc'
-  ],
+  wasmBoundary: ['गङ्गा', '𑀕𑀗𑁆𑀕𑀸', '𑆑𑆮', 'hello', '😀🎉', '👨‍👩‍👧‍👦', '🇮🇳', '🙏🏽', 'mixed: 🕉️ 𑀕 गङ्गा abc'],
   wasmBoundaryWithEmpty: ['', 'गङ्गा', '', '𑀕𑀗𑁆𑀕𑀸', '👨‍👩‍👧‍👦', '', 'mixed: 🕉️ 𑀕 गङ्गा abc', ''],
   batchTransliterateWithOptions: {
     texts: ['गङ्गा', '', 'गङ्गा 🎉'],

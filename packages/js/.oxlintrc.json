@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "builtin": true,
+    "es2022": true,
+    "node": true,
+    "browser": true
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "coverage/**",
+    "binding/**",
+    "wasm/target/**",
+    "wasm/pkg/**",
+    "src/script_data/**",
+    "a.js",
+    "wasm/a.js"
+  ],
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "tests/**/*.ts"],
+      "rules": {
+        "typescript/ban-ts-comment": "off"
+      }
+    }
+  ]
+}
