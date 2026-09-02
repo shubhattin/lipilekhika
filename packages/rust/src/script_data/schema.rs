@@ -117,10 +117,19 @@ pub struct CommonScriptAttr {
     pub krama_text_lookup: HashMap<String, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
+    pub krama_text_char_lookup: HashMap<char, usize>,
+    #[serde(skip)]
+    #[allow(dead_code)]
     pub text_to_krama_lookup: HashMap<String, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
+    pub text_to_krama_char_lookup: HashMap<char, usize>,
+    #[serde(skip)]
+    #[allow(dead_code)]
     pub typing_text_to_krama_lookup: HashMap<String, usize>,
+    #[serde(skip)]
+    #[allow(dead_code)]
+    pub typing_text_to_krama_char_lookup: HashMap<char, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
     pub custom_script_chars_lookup: HashMap<String, usize>,
@@ -138,8 +147,11 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
             custom_script_chars_arr: value.custom_script_chars_arr,
             list: value.list.into_iter().map(Into::into).collect(),
             krama_text_lookup: HashMap::new(),
+            krama_text_char_lookup: HashMap::new(),
             text_to_krama_lookup: HashMap::new(),
+            text_to_krama_char_lookup: HashMap::new(),
             typing_text_to_krama_lookup: HashMap::new(),
+            typing_text_to_krama_char_lookup: HashMap::new(),
             custom_script_chars_lookup: HashMap::new(),
         }
     }

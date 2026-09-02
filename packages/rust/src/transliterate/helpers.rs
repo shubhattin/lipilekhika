@@ -33,6 +33,11 @@ impl ScriptData {
     pub fn krama_index_of_text(&self, text: &str) -> Option<usize> {
         self.krama_text_lookup.get(text).copied()
     }
+
+    #[inline]
+    pub fn krama_index_of_char(&self, ch: char) -> Option<usize> {
+        self.krama_text_char_lookup.get(&ch).copied()
+    }
 }
 
 /// Custom struct to construct output string.
@@ -43,13 +48,23 @@ pub struct ResultStringBuilder {
     buf: String,
     /// Byte offsets marking the start of each "piece" within `buf`.
     offsets: Vec<usize>,
+    /// Most transliterations only append to the output. Avoid maintaining and
+    /// allocating the piece index unless a custom rule can rewrite prior output.
+    /// This avoids keeping track of offsets for most cases
+    track_pieces: bool,
 }
 
 impl ResultStringBuilder {
-    pub fn new() -> Self {
+    pub fn new(capacity: usize, track_pieces: bool) -> Self {
         ResultStringBuilder {
-            buf: String::with_capacity(128),
-            offsets: Vec::new(),
+            buf: String::with_capacity(capacity),
+            // Mostly we will be delaing with 3 byte per character so this allocation seems optimum
+            offsets: if track_pieces {
+                Vec::with_capacity(capacity / 3)
+            } else {
+                Vec::new()
+            },
+            track_pieces,
         }
     }
 
@@ -71,12 +86,16 @@ impl ResultStringBuilder {
         if text.is_empty() {
             return;
         }
-        self.offsets.push(self.buf.len());
+        if self.track_pieces {
+            self.offsets.push(self.buf.len());
+        }
         self.buf.push_str(text);
     }
     /// Emit a single character without heap-allocating a String.
     pub fn emit_char(&mut self, c: char) {
-        self.offsets.push(self.buf.len());
+        if self.track_pieces {
+            self.offsets.push(self.buf.len());
+        }
         self.buf.push(c);
     }
     pub fn emit_pieces(&mut self, pieces: &[impl AsRef<str>]) {
@@ -524,4 +543,32 @@ pub fn apply_typing_input_aliases<'a>(
     }
 
     Cow::Owned(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::InputTextCursor;
+
+    #[test]
+    fn input_cursor_preserves_utf8_character_boundaries() {
+        let cursor = InputTextCursor::new("aक𑀓");
+
+        assert_eq!(cursor.char_count(), 3);
+        assert_eq!(cursor.peek_at(0), Some('a'));
+        assert_eq!(cursor.peek_at(1), Some('क'));
+        assert_eq!(cursor.peek_at(2), Some('𑀓'));
+        assert_eq!(cursor.peek_at_str(1), Some("क"));
+        assert_eq!(cursor.slice(0, 3), Some("aक𑀓"));
+        assert_eq!(cursor.slice(1, 3), Some("क𑀓"));
+        assert_eq!(cursor.slice(2, 2), Some(""));
+    }
+
+    #[test]
+    fn input_cursor_rejects_invalid_ranges() {
+        let cursor = InputTextCursor::new("क");
+
+        assert_eq!(cursor.peek_at_str(1), None);
+        assert_eq!(cursor.slice(1, 0), None);
+        assert_eq!(cursor.slice(0, 2), None);
+    }
 }
