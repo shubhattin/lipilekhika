@@ -22,7 +22,6 @@ export default defineConfig({
       favicon: 'favicon.svg',
       plugins: [starlightThemeNext()],
       title: 'Lipi Lekhika',
-      tagline: 'Type Indian Languages with Full Speed and Accuracy',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/shubhattin/lipilekhika' },
         { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/lipilekhika' }
