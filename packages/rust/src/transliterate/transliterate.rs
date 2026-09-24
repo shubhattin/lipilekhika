@@ -687,7 +687,19 @@ pub fn transliterate_text_core(
         CheckInEnum::Input,
     );
 
-    let mut result = ResultStringBuilder::new();
+    let track_result_pieces = !custom_rules.is_empty()
+        || (*to_script == ScriptListEnum::Sinhala
+            && trans_options.all_to_sinhala_use_conjunct_enabling_halant);
+    // ^ as currently we are using rewrite_at only for sinhala target
+    let result_capacity = if matches!(from_script_data, ScriptData::Other { .. })
+        && matches!(to_script_data, ScriptData::Brahmic { .. })
+    {
+        text.len().saturating_mul(3)
+        // brahmic script usually use 3x more bytes
+    } else {
+        text.len()
+    };
+    let mut result = ResultStringBuilder::new(result_capacity, track_result_pieces);
     let mut cursor = InputTextCursor::new(text.as_ref());
     let mut prev_context = PrevContextBuilder::new(MAX_CONTEXT_LENGTH as usize);
 
@@ -869,8 +881,15 @@ pub fn transliterate_text_core(
                     Cow::Borrowed(ctx.cursor.slice(text_index, end_index).unwrap_or_default())
                 };
 
-                let potential_match_index = text_to_krama_lookup_script_data
-                    .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map);
+                let potential_match_index =
+                    if scan_units == 0 && ignore_ta_ext_sup_num_text_index == -1 {
+                        // more scan units only needed in case ta-ext so safe to do
+                        text_to_krama_lookup_script_data
+                            .text_to_krama_map_char_index(ch, use_typing_map)
+                    } else {
+                        text_to_krama_lookup_script_data
+                            .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
+                    };
 
                 let Some(potential_match_index) = potential_match_index else {
                     text_to_krama_item_index = None;
@@ -1357,10 +1376,20 @@ pub fn transliterate_text_core(
         let char_to_search: Cow<'_, str> = text_to_krama_item
             .map(|k| Cow::Borrowed(k.0.as_str()))
             .unwrap_or_else(|| {
-                let mut buf = [0u8; 4];
-                Cow::Owned(ch.encode_utf8(&mut buf).to_owned())
+                Cow::Borrowed(
+                    ctx.cursor
+                        .peek_at_str(ctx.cursor.pos().saturating_sub(1))
+                        // pos - 1 as fallback consumed(advanced 1) the previous character
+                        .unwrap_or_default(),
+                )
             });
-        let idx = from_script_data.krama_index_of_text(char_to_search.as_ref());
+
+        let idx = if text_to_krama_item.is_none() {
+            from_script_data.krama_index_of_char(ch)
+            // more performanct : as searching char
+        } else {
+            from_script_data.krama_index_of_text(char_to_search.as_ref())
+        };
         let Some(index) = idx else {
             if ctx.prev_context_in_use {
                 ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
@@ -1444,7 +1473,6 @@ pub fn transliterate_text_core(
     }
 
     let context_length = ctx.prev_context.length();
-    drop(ctx);
 
     let output = result.into_string();
     let output = if custom_rules.is_empty() {
