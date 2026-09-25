@@ -398,13 +398,25 @@ pub struct InputTextCursor<'a> {
 
 impl<'a> InputTextCursor<'a> {
     pub fn new(text: &'a str) -> InputTextCursor<'a> {
-        let mut chars = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
+        let mut chars: Vec<(char, usize)> = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
 
+        let dst = chars.spare_capacity_mut().as_mut_ptr();
+        let mut len = 0;
         for (byte_idx, ch) in text.char_indices() {
-            chars.push((ch, byte_idx));
+            // SAFETY: a str has at most `text.len()` chars, so `len < text.len() + 1 <= capacity`.
+            unsafe {
+                dst.add(len)
+                    .write(core::mem::MaybeUninit::new((ch, byte_idx)))
+            };
+            len += 1;
         }
-        chars.push(('\0', text.len()));
-        // ^ needed for the last character to be accessible via the `peek_at` method
+        // SAFETY: `len <= text.len() < capacity`; all `len + 1` slots are now initialized.
+        unsafe {
+            dst.add(len)
+                .write(core::mem::MaybeUninit::new(('\0', text.len())));
+            chars.set_len(len + 1);
+        }
+        // ^ the trailing sentinel is needed for the last character to be accessible via the `peek_at` method
         // stores the char offsets
 
         InputTextCursor {
@@ -673,5 +685,15 @@ mod tests {
         assert_eq!(cursor.peek_at_str(1), None);
         assert_eq!(cursor.slice(1, 0), None);
         assert_eq!(cursor.slice(0, 2), None);
+    }
+
+    #[test]
+    fn input_cursor_handles_empty_text() {
+        let cursor = InputTextCursor::new("");
+
+        assert_eq!(cursor.char_count(), 0);
+        assert_eq!(cursor.peek(), Some('\0'));
+        assert_eq!(cursor.peek_at_str(0), None);
+        assert_eq!(cursor.slice(0, 0), Some(""));
     }
 }
