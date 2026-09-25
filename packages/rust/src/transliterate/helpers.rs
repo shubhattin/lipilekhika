@@ -373,7 +373,10 @@ impl<'a> InputTextCursor<'a> {
             .chars
             .get(index_units + 1)
             .map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start..end)
+        // SAFETY: every offset in `chars` comes from `char_indices` (or is `text.len()`),
+        // so both ends are char boundaries of `text`, and `start <= end` as offsets
+        // are strictly increasing.
+        Some(unsafe { self.text.get_unchecked(start..end) })
     }
 
     /// units here is for char (and not bytes)
@@ -389,7 +392,9 @@ impl<'a> InputTextCursor<'a> {
         }
         let start_byte = self.chars.get(start).map(|(_, byte_idx)| *byte_idx)?;
         let end_byte = self.chars.get(end).map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start_byte..end_byte)
+        // SAFETY: offsets in `chars` are char boundaries of `text` (see `peek_at_str`),
+        // and `start <= end` was checked above so `start_byte <= end_byte`.
+        Some(unsafe { self.text.get_unchecked(start_byte..end_byte) })
     }
 }
 
