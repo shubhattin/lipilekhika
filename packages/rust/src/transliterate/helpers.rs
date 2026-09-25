@@ -269,10 +269,45 @@ pub static ANYA_LIST_ITEM: List = List::Anya {
 
 pub const PREV_CONTEXT_MAX_LEN: usize = 3;
 
+/// Variant tag of a [`List`] item.
+///
+/// `List` is niche-packed into its `Vec` fields, so reading the variant through a
+/// `&List` costs a pointer chase plus niche decoding; context entries only ever need
+/// the variant, so they store this byte instead.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ListKind {
+    Anya,
+    Vyanjana,
+    Matra,
+    Svara,
+}
+
+impl ListKind {
+    #[inline]
+    pub fn of(list: &List) -> Self {
+        match list {
+            List::Anya { .. } => ListKind::Anya,
+            List::Vyanjana { .. } => ListKind::Vyanjana,
+            List::Matra { .. } => ListKind::Matra,
+            List::Svara { .. } => ListKind::Svara,
+        }
+    }
+    #[inline]
+    pub fn is_matra(self) -> bool {
+        self == ListKind::Matra
+    }
+    #[inline]
+    pub fn is_vyanjana(self) -> bool {
+        self == ListKind::Vyanjana
+    }
+}
+
+type PrevContextEntry<'a> = (Option<&'a str>, Option<ListKind>);
+
 /// Fixed-size sliding window over the last `PREV_CONTEXT_MAX_LEN` context items,
 /// kept inline to avoid a heap allocation per transliteration call.
 pub struct PrevContextBuilder<'a> {
-    arr: [PrevContextItem<'a>; PREV_CONTEXT_MAX_LEN],
+    arr: [PrevContextEntry<'a>; PREV_CONTEXT_MAX_LEN],
     len: usize,
 }
 
@@ -293,9 +328,9 @@ impl<'a> PrevContextBuilder<'a> {
         self.len
     }
 
-    /// Item at a given index (supports -ve indices).
+    /// Entry at a given index (supports -ve indices).
     #[inline]
-    pub fn at(&self, i: isize) -> Option<&PrevContextItem<'a>> {
+    fn at(&self, i: isize) -> Option<&PrevContextEntry<'a>> {
         let len = self.len as isize;
         let idx = if i < 0 { i + len } else { i };
         if idx < 0 || idx >= len {
@@ -305,22 +340,18 @@ impl<'a> PrevContextBuilder<'a> {
         }
     }
 
-    #[inline]
-    pub fn last(&self) -> Option<&PrevContextItem<'a>> {
-        self.at(-1)
-    }
     #[allow(dead_code)]
     pub fn last_text(&self) -> Option<&'a str> {
-        self.last().and_then(|(text_opt, _)| *text_opt)
+        self.text_at(-1)
     }
     #[allow(dead_code)]
-    pub fn last_type(&self) -> Option<&'a List> {
-        self.last().and_then(|(_, list_opt)| *list_opt)
+    pub fn last_type(&self) -> Option<ListKind> {
+        self.type_at(-1)
     }
 
     #[inline]
-    pub fn type_at(&self, i: isize) -> Option<&'a List> {
-        self.at(i).and_then(|(_, list_opt)| *list_opt)
+    pub fn type_at(&self, i: isize) -> Option<ListKind> {
+        self.at(i).and_then(|(_, kind)| *kind)
     }
 
     /// Text at a given index (supports -ve indices).
@@ -331,21 +362,22 @@ impl<'a> PrevContextBuilder<'a> {
 
     /// Check if the last context item has the given type.
     #[allow(dead_code)]
-    pub fn is_last_type(&self, t: &List) -> bool {
+    pub fn is_last_type(&self, t: ListKind) -> bool {
         self.last_type() == Some(t)
     }
 
     /// Push a new context item, enforcing the max length and skipping empty/None text.
     #[inline]
-    pub fn push(&mut self, item: PrevContextItem<'a>) {
-        if item.0.is_none_or(|s| s.is_empty()) {
+    pub fn push(&mut self, (text, list): PrevContextItem<'a>) {
+        if text.is_none_or(|s| s.is_empty()) {
             return;
         }
+        let entry = (text, list.map(ListKind::of));
         if self.len == PREV_CONTEXT_MAX_LEN {
             self.arr.copy_within(1.., 0);
-            self.arr[PREV_CONTEXT_MAX_LEN - 1] = item;
+            self.arr[PREV_CONTEXT_MAX_LEN - 1] = entry;
         } else {
-            self.arr[self.len] = item;
+            self.arr[self.len] = entry;
             self.len += 1;
         }
     }
