@@ -39,6 +39,46 @@ impl ScriptData {
     }
 }
 
+/// `String::push_str` specialised for the 1..=16 byte pieces that make up almost all
+/// transliteration output: overlapping fixed-size copies lower to a couple of unaligned
+/// moves instead of a call into libc `memcpy`.
+#[inline(always)]
+fn push_str_small(buf: &mut String, s: &str) {
+    let len = s.len();
+    if len == 0 || len > 16 {
+        buf.push_str(s);
+        return;
+    }
+    buf.reserve(len);
+    // SAFETY: `reserve` guarantees `len` bytes of spare capacity after `buf.len()`.
+    // Every read below stays within `s` (each fixed-size window starts at 0 or ends at
+    // `len`, and is only used when `len` covers it), and the destination windows mirror
+    // the source windows, so exactly the bytes `dst[0..len]` are written with `s`'s bytes.
+    // `s` is valid UTF-8, so the resulting `String` contents stay valid UTF-8.
+    unsafe {
+        let vec = buf.as_mut_vec();
+        let old_len = vec.len();
+        let src = s.as_ptr();
+        let dst = vec.as_mut_ptr().add(old_len);
+        if len >= 8 {
+            let head = core::ptr::read_unaligned(src as *const u64);
+            let tail = core::ptr::read_unaligned(src.add(len - 8) as *const u64);
+            core::ptr::write_unaligned(dst as *mut u64, head);
+            core::ptr::write_unaligned(dst.add(len - 8) as *mut u64, tail);
+        } else if len >= 4 {
+            let head = core::ptr::read_unaligned(src as *const u32);
+            let tail = core::ptr::read_unaligned(src.add(len - 4) as *const u32);
+            core::ptr::write_unaligned(dst as *mut u32, head);
+            core::ptr::write_unaligned(dst.add(len - 4) as *mut u32, tail);
+        } else {
+            *dst = *src;
+            *dst.add(len / 2) = *src.add(len / 2);
+            *dst.add(len - 1) = *src.add(len - 1);
+        }
+        vec.set_len(old_len + len);
+    }
+}
+
 /// Custom struct to construct output string.
 ///
 /// Uses a contiguous `String` buffer with piece boundary offsets for O(1)
@@ -88,7 +128,7 @@ impl ResultStringBuilder {
         if self.track_pieces {
             self.offsets.push(self.buf.len());
         }
-        self.buf.push_str(text);
+        push_str_small(&mut self.buf, text);
     }
     /// Emit a single character without heap-allocating a String.
     pub fn emit_char(&mut self, c: char) {
@@ -557,7 +597,28 @@ pub fn apply_typing_input_aliases<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::InputTextCursor;
+    use super::{InputTextCursor, push_str_small};
+    use alloc::string::String;
+
+    #[test]
+    fn push_str_small_matches_push_str_for_all_lengths() {
+        let source = "aक𑀓bखc²de॑fgहijklmnop";
+        for start in 0..source.len() {
+            for end in start..=source.len() {
+                let Some(piece) = source.get(start..end) else {
+                    continue;
+                };
+                for prefix in ["", "x", "नम"] {
+                    let mut expected = String::from(prefix);
+                    expected.push_str(piece);
+                    let mut actual = String::from(prefix);
+                    actual.shrink_to_fit();
+                    push_str_small(&mut actual, piece);
+                    assert_eq!(actual, expected);
+                }
+            }
+        }
+    }
 
     #[test]
     fn input_cursor_preserves_utf8_character_boundaries() {
