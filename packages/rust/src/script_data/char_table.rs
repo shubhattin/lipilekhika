@@ -62,7 +62,10 @@ impl CharIndexTable {
         blocks.sort_by(|a, b| b.2.cmp(&a.2));
         Self {
             ascii,
-            blocks: blocks.into_iter().map(|(id, table, _)| (id, table)).collect(),
+            blocks: blocks
+                .into_iter()
+                .map(|(id, table, _)| (id, table))
+                .collect(),
         }
     }
 
