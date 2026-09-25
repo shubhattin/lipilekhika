@@ -6,6 +6,7 @@ use once_cell::race::OnceBox;
 
 use crate::scripts::ScriptListEnum;
 use alloc::string::String;
+use alloc::vec::Vec;
 
 use super::char_table::CharIndexTable;
 use super::generated;
@@ -115,10 +116,11 @@ impl ScriptData {
 }
 
 /// currently for simplicity using a single cache for all script data
-static SCRIPT_DATA_CACHE: OnceBox<HashMap<ScriptListEnum, ScriptData>> = OnceBox::new();
+/// Indexed by `ScriptListEnum` discriminant.
+static SCRIPT_DATA_CACHE: OnceBox<Vec<Option<ScriptData>>> = OnceBox::new();
 impl ScriptData {
-    fn load_all() -> HashMap<ScriptListEnum, ScriptData> {
-        let mut map = HashMap::new();
+    fn load_all() -> Vec<Option<ScriptData>> {
+        let mut map: Vec<Option<ScriptData>> = Vec::new();
 
         for &script_name in generated::SCRIPT_DATA_NAMES {
             let bytes = generated::get_script_data_bytes(script_name)
@@ -139,7 +141,11 @@ impl ScriptData {
             data.init_lookups();
             let script = ScriptListEnum::from_str(script_name)
                 .unwrap_or_else(|_| panic!("unknown script data name: `{script_name}`"));
-            map.insert(script, data);
+            let idx = script as usize;
+            if map.len() <= idx {
+                map.resize_with(idx + 1, || None);
+            }
+            map[idx] = Some(data);
         }
 
         map
@@ -149,7 +155,8 @@ impl ScriptData {
         let cache = SCRIPT_DATA_CACHE.get_or_init(|| Box::new(Self::load_all()));
 
         cache
-            .get(script)
+            .get(*script as usize)
+            .and_then(Option::as_ref)
             .unwrap_or_else(|| panic!("Script `{}` not found", script))
     }
 
