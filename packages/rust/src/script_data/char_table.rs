@@ -59,7 +59,7 @@ impl CharIndexTable {
             }
         }
 
-        blocks.sort_by(|a, b| b.2.cmp(&a.2));
+        blocks.sort_by_key(|b| core::cmp::Reverse(b.2));
         Self {
             ascii,
             blocks: blocks
