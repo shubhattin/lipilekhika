@@ -30,6 +30,10 @@ pub struct TextToKramaMap {
     pub fallback_list_ref: Option<i16>,
     /// only in `typing_text_to_krama_map`
     pub custom_back_ref: Option<i16>,
+    /// Single-char entries of `next`, for allocation-free and memcmp-free membership checks.
+    #[serde(skip)]
+    #[allow(dead_code)]
+    pub next_chars: alloc::boxed::Box<[char]>,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]

@@ -69,6 +69,19 @@ impl ScriptData {
 
         let attr = self.get_common_attr_mut();
 
+        for (_, map) in attr
+            .text_to_krama_map
+            .iter_mut()
+            .chain(attr.typing_text_to_krama_map.iter_mut())
+        {
+            map.next_chars = map
+                .next
+                .iter()
+                .flatten()
+                .filter_map(|n| single_char(n))
+                .collect();
+        }
+
         let mut krama_text_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
         for (i, (text, _)) in attr.krama_text_arr.iter().enumerate() {
             krama_text_lookup.entry(text.clone()).or_insert(i);

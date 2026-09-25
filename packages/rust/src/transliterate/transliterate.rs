@@ -912,9 +912,8 @@ pub fn transliterate_text_core(
                 }
 
                 // extend match if `next` allows it
-                if let Some(next_list) = &potential_match.1.next
-                    && !next_list.is_empty()
-                {
+                let next_chars = &potential_match.1.next_chars;
+                if !next_chars.is_empty() {
                     let nth_next = ctx.cursor.peek_at(end_index);
                     let nth_next_character: Option<char> = nth_next;
 
@@ -939,8 +938,7 @@ pub fn transliterate_text_core(
                         // Case: matra/halant + superscript tail (superscript is in next list)
                         if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_1_th_next_character)
-                            && n_1_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut sup_buf = [0u8; 4];
                             let sup = n_1_th_next_character
@@ -984,8 +982,7 @@ pub fn transliterate_text_core(
                         // Case: matra + matra + superscript tail (superscript is in next list; special for gO = g + E + A)
                         else if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut sup_buf = [0u8; 4];
                             let sup = n_2_th_next_character
@@ -1048,8 +1045,7 @@ pub fn transliterate_text_core(
                             && nth_next_character.is_some()
                             && is_vedic_svara_tail(n_1_th_next_character)
                             && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut nth_buf = [0u8; 4];
                             let nth_char_text_index = nth_next_character.and_then(|c| {
@@ -1097,7 +1093,7 @@ pub fn transliterate_text_core(
 
                     // Generic: if the next character is in the next list, extend scan and continue
                     if let Some(nth_ch) = nth_next_character
-                        && next_list.iter().any(|x| char_eq_str(nth_ch, x))
+                        && next_chars.contains(&nth_ch)
                     {
                         scan_units += 1; // each char is 1 unit
                         continue;
