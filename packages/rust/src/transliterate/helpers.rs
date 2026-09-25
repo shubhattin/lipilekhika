@@ -1,7 +1,6 @@
 use crate::ScriptListEnum;
 use crate::script_data::{List, ScriptData};
 use alloc::borrow::{Cow, ToOwned};
-use alloc::collections::VecDeque;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
@@ -221,71 +220,73 @@ impl fmt::Display for ResultStringBuilder {
     }
 }
 
-pub type PrevContextItem<'a> = (Option<Cow<'a, str>>, Option<Cow<'a, List>>);
+pub type PrevContextItem<'a> = (Option<&'a str>, Option<&'a List>);
 
+/// Stand-in for list items synthesized at runtime; context consumers only inspect the variant.
+pub static ANYA_LIST_ITEM: List = List::Anya {
+    krama_ref: Vec::new(),
+};
+
+pub const PREV_CONTEXT_MAX_LEN: usize = 3;
+
+/// Fixed-size sliding window over the last `PREV_CONTEXT_MAX_LEN` context items,
+/// kept inline to avoid a heap allocation per transliteration call.
 pub struct PrevContextBuilder<'a> {
-    arr: VecDeque<PrevContextItem<'a>>,
-    max_len: usize,
+    arr: [PrevContextItem<'a>; PREV_CONTEXT_MAX_LEN],
+    len: usize,
 }
 
 impl<'a> PrevContextBuilder<'a> {
-    pub fn new(max_len: usize) -> PrevContextBuilder<'a> {
+    pub fn new() -> PrevContextBuilder<'a> {
         PrevContextBuilder {
-            arr: VecDeque::with_capacity(max_len),
-            max_len,
+            arr: [(None, None); PREV_CONTEXT_MAX_LEN],
+            len: 0,
         }
     }
 
+    #[inline]
     pub fn clear(&mut self) {
-        self.arr.clear();
+        self.len = 0;
     }
 
     pub fn length(&self) -> usize {
-        self.arr.len()
+        self.len
     }
 
-    /// resolves negative index for the `arr`
-    fn resolve_arr_index(&self, i: isize) -> Option<usize> {
-        if self.arr.is_empty() {
-            return None;
-        }
-        let len = self.arr.len() as isize;
-        let mut idx = i;
-        if idx < 0 {
-            idx += len;
-        }
+    /// Item at a given index (supports -ve indices).
+    #[inline]
+    pub fn at(&self, i: isize) -> Option<&PrevContextItem<'a>> {
+        let len = self.len as isize;
+        let idx = if i < 0 { i + len } else { i };
         if idx < 0 || idx >= len {
             None
         } else {
-            Some(idx as usize)
+            self.arr.get(idx as usize)
         }
     }
 
-    pub fn at(&self, i: isize) -> Option<&PrevContextItem<'a>> {
-        match self.resolve_arr_index(i) {
-            None => None,
-            Some(idx) => self.arr.get(idx),
-        }
-    }
-
+    #[inline]
     pub fn last(&self) -> Option<&PrevContextItem<'a>> {
-        self.arr.back()
+        self.at(-1)
     }
     #[allow(dead_code)]
-    pub fn last_text(&self) -> Option<&str> {
-        self.last().and_then(|(text_opt, _)| text_opt.as_deref())
+    pub fn last_text(&self) -> Option<&'a str> {
+        self.last().and_then(|(text_opt, _)| *text_opt)
     }
-    pub fn last_type(&self) -> Option<&List> {
-        self.last().and_then(|(_, list_opt)| list_opt.as_deref())
+    #[allow(dead_code)]
+    pub fn last_type(&self) -> Option<&'a List> {
+        self.last().and_then(|(_, list_opt)| *list_opt)
     }
 
-    pub fn type_at(&self, i: isize) -> Option<&List> {
-        self.at(i).and_then(|(_, list_opt)| list_opt.as_deref())
+    #[inline]
+    pub fn type_at(&self, i: isize) -> Option<&'a List> {
+        self.at(i).and_then(|(_, list_opt)| *list_opt)
     }
 
     /// Text at a given index (supports -ve indices).
-    pub fn text_at(&self, i: isize) -> Option<&str> {
-        self.at(i).and_then(|(text_opt, _)| text_opt.as_deref())
+    #[inline]
+    pub fn text_at(&self, i: isize) -> Option<&'a str> {
+        self.at(i).and_then(|(text_opt, _)| *text_opt)
     }
 
     /// Check if the last context item has the given type.
@@ -294,14 +295,18 @@ impl<'a> PrevContextBuilder<'a> {
         self.last_type() == Some(t)
     }
 
-    /// Push a new context item, enforcing `max_len` and skipping empty/None text.
+    /// Push a new context item, enforcing the max length and skipping empty/None text.
+    #[inline]
     pub fn push(&mut self, item: PrevContextItem<'a>) {
-        if item.0.as_ref().is_none_or(|s| s.is_empty()) {
+        if item.0.is_none_or(|s| s.is_empty()) {
             return;
         }
-        self.arr.push_back(item);
-        if self.arr.len() > self.max_len {
-            self.arr.pop_front();
+        if self.len == PREV_CONTEXT_MAX_LEN {
+            self.arr.copy_within(1.., 0);
+            self.arr[PREV_CONTEXT_MAX_LEN - 1] = item;
+        } else {
+            self.arr[self.len] = item;
+            self.len += 1;
         }
     }
 }
