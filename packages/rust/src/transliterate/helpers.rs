@@ -36,7 +36,7 @@ impl ScriptData {
 
     #[inline]
     pub fn krama_index_of_char(&self, ch: char) -> Option<usize> {
-        self.krama_text_char_lookup.get(&ch).copied()
+        self.krama_text_char_lookup.get(ch)
     }
 }
 

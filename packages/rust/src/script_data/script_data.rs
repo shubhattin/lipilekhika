@@ -5,7 +5,9 @@ use hashbrown::HashMap;
 use once_cell::race::OnceBox;
 
 use crate::scripts::ScriptListEnum;
+use alloc::string::String;
 
+use super::char_table::CharIndexTable;
 use super::generated;
 use super::schema::{CommonScriptAttr, ScriptData};
 
@@ -53,51 +55,42 @@ impl ScriptData {
     }
 
     pub fn init_lookups(&mut self) {
+        fn single_char(text: &str) -> Option<char> {
+            let mut chars = text.chars();
+            let ch = chars.next()?;
+            chars.next().is_none().then_some(ch)
+        }
+        fn char_table<'a>(keys: impl Iterator<Item = &'a String>) -> CharIndexTable {
+            CharIndexTable::from_entries(
+                keys.enumerate()
+                    .filter_map(|(i, text)| single_char(text).map(|ch| (ch, i))),
+            )
+        }
+
         let attr = self.get_common_attr_mut();
 
         let mut krama_text_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
-        let mut krama_text_char_lookup = HashMap::with_capacity(attr.krama_text_arr.len());
         for (i, (text, _)) in attr.krama_text_arr.iter().enumerate() {
             krama_text_lookup.entry(text.clone()).or_insert(i);
-            let mut chars = text.chars();
-            if let Some(ch) = chars.next()
-                && chars.next().is_none()
-            {
-                krama_text_char_lookup.entry(ch).or_insert(i);
-            }
         }
         attr.krama_text_lookup = krama_text_lookup;
-        attr.krama_text_char_lookup = krama_text_char_lookup;
+        attr.krama_text_char_lookup = char_table(attr.krama_text_arr.iter().map(|(t, _)| t));
 
         let mut text_to_krama_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
-        let mut text_to_krama_char_lookup = HashMap::with_capacity(attr.text_to_krama_map.len());
         for (i, (text, _)) in attr.text_to_krama_map.iter().enumerate() {
             text_to_krama_lookup.entry(text.clone()).or_insert(i);
-            let mut chars = text.chars();
-            if let Some(ch) = chars.next()
-                && chars.next().is_none()
-            {
-                text_to_krama_char_lookup.entry(ch).or_insert(i);
-            }
         }
         attr.text_to_krama_lookup = text_to_krama_lookup;
-        attr.text_to_krama_char_lookup = text_to_krama_char_lookup;
+        attr.text_to_krama_char_lookup = char_table(attr.text_to_krama_map.iter().map(|(t, _)| t));
 
         let mut typing_text_to_krama_lookup =
             HashMap::with_capacity(attr.typing_text_to_krama_map.len());
-        let mut typing_text_to_krama_char_lookup =
-            HashMap::with_capacity(attr.typing_text_to_krama_map.len());
         for (i, (text, _)) in attr.typing_text_to_krama_map.iter().enumerate() {
             typing_text_to_krama_lookup.entry(text.clone()).or_insert(i);
-            let mut chars = text.chars();
-            if let Some(ch) = chars.next()
-                && chars.next().is_none()
-            {
-                typing_text_to_krama_char_lookup.entry(ch).or_insert(i);
-            }
         }
         attr.typing_text_to_krama_lookup = typing_text_to_krama_lookup;
-        attr.typing_text_to_krama_char_lookup = typing_text_to_krama_char_lookup;
+        attr.typing_text_to_krama_char_lookup =
+            char_table(attr.typing_text_to_krama_map.iter().map(|(t, _)| t));
 
         let mut custom_script_chars_lookup =
             HashMap::with_capacity(attr.custom_script_chars_arr.len());
@@ -158,9 +151,9 @@ impl ScriptData {
     #[inline]
     pub fn text_to_krama_map_char_index(&self, ch: char, use_typing_map: bool) -> Option<usize> {
         if use_typing_map {
-            self.typing_text_to_krama_char_lookup.get(&ch).copied()
+            self.typing_text_to_krama_char_lookup.get(ch)
         } else {
-            self.text_to_krama_char_lookup.get(&ch).copied()
+            self.text_to_krama_char_lookup.get(ch)
         }
     }
 
