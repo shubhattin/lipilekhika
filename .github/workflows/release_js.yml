@@ -89,6 +89,10 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
+          # version verified locally instead of floating on `latest`.
+          version: 'v0.14.0'
 
       - name: Generate Test Data
         run: |
@@ -259,6 +263,10 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
+          # version verified locally instead of floating on `latest`.
+          version: 'v0.14.0'
 
       - uses: actions/setup-node@v4
         with:
