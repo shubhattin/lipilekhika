@@ -14,8 +14,8 @@ const EMPTY: u16 = u16::MAX;
 /// Blocks are ordered by population so the script's primary block is probed first.
 #[derive(Debug)]
 pub struct CharIndexTable {
-    ascii: [u16; BLOCK_SIZE],
-    blocks: Box<[(u32, [u16; BLOCK_SIZE])]>,
+    ascii: [u16; BLOCK_SIZE],                // chars 0..127 always present
+    blocks: Box<[(u32, [u16; BLOCK_SIZE])]>, // (block_id, 128-slot table) tuple
 }
 
 impl Default for CharIndexTable {
@@ -42,6 +42,7 @@ impl CharIndexTable {
             let slot = if c < BLOCK_SIZE as u32 {
                 &mut ascii[c as usize]
             } else {
+                // left over part from mask
                 let block_id = c >> BLOCK_BITS;
                 let pos = match blocks.iter().position(|(id, _, _)| *id == block_id) {
                     Some(pos) => pos,
