@@ -35,3 +35,17 @@
   input: dva q Sha S
   output: द्व q ष S
   reversible: true
+# saMkShepachihna (॰ abbreviation sign) is mapped to ° in Normal and Romanized
+# (not a dot, as . and .. are already used for । and ॥)
+- index: 7
+  from: Devanagari
+  to: Normal
+  input: लघु॰ रा॰
+  output: laghu° rA°
+  reversible: true
+- index: 8
+  from: Devanagari
+  to: Romanized
+  input: लघु॰ रा॰
+  output: laghu° rā°
+  reversible: true
