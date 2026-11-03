@@ -1,5 +1,9 @@
 # Changelog
 
+## rust-lib@1.1.2 (Unreleased)
+
+- Performance Improvements in #140
+
 ## rust-lib@v1.1.2
 
 - Add `no_std` support

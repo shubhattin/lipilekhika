@@ -1,5 +1,9 @@
 # Changelog
 
+## js-lib@1.0.14 (Unreleased)
+
+- Performance improvements for `transliterate_wasm` and `transliterate_node` (N-API) (Rust based)
+
 ## js-lib@1.0.13
 
 - now the `transliterate`, `transliterate_wasm` and `transliterate_node` accept `string | string[]` for `text` input
