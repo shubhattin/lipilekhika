@@ -53,8 +53,8 @@ where
         let brahmic_halant = self.brahmic_halant;
         let brahmic_nuqta = self.brahmic_nuqta;
 
-        let item_text = item.as_ref().and_then(|(t, _)| t.as_deref()); // [0]
-        let item_type = item.as_ref().and_then(|(_, t)| t.as_deref()); // [1]
+        let item_text = item.and_then(|(t, _)| t); // [0]
+        let item_type = item.and_then(|(_, t)| t); // [1]
 
         // custom cleanup logic/cases
         if ((brahmic_nuqta.is_some()
@@ -618,8 +618,6 @@ fn is_skip_char(c: char) -> bool {
         ' ' | '\n' | '\r' | '\t' | ',' | '~' | '!' | '@' | '?' | '%'
     )
 }
-const MAX_CONTEXT_LENGTH: u8 = 3;
-
 #[derive(Debug, Clone, Copy)]
 pub struct TransliterationFnOptions {
     pub typing_mode: bool,
@@ -687,9 +685,21 @@ pub fn transliterate_text_core(
         CheckInEnum::Input,
     );
 
-    let mut result = ResultStringBuilder::new();
+    let track_result_pieces = !custom_rules.is_empty()
+        || (*to_script == ScriptListEnum::Sinhala
+            && trans_options.all_to_sinhala_use_conjunct_enabling_halant);
+    // ^ as currently we are using rewrite_at only for sinhala target
+    let result_capacity = if matches!(from_script_data, ScriptData::Other { .. })
+        && matches!(to_script_data, ScriptData::Brahmic { .. })
+    {
+        text.len().saturating_mul(3)
+        // brahmic script usually use 3x more bytes
+    } else {
+        text.len()
+    };
+    let mut result = ResultStringBuilder::new(result_capacity, track_result_pieces);
     let mut cursor = InputTextCursor::new(text.as_ref());
-    let mut prev_context = PrevContextBuilder::new(MAX_CONTEXT_LENGTH as usize);
+    let mut prev_context = PrevContextBuilder::new();
 
     let prev_context_in_use = (matches!(from_script_data, ScriptData::Brahmic { .. })
         && matches!(to_script_data, ScriptData::Other { .. }))
@@ -770,7 +780,7 @@ pub fn transliterate_text_core(
         if is_skip_char(ch) {
             ctx.cursor.advance(1);
             if ctx.prev_context_in_use {
-                ctx.prev_context_cleanup(Some((Some(Cow::Borrowed(" ")), None)), None, None);
+                ctx.prev_context_cleanup(Some((Some(" "), None)), None, None);
                 ctx.prev_context.clear();
             }
             ctx.result.emit_char(ch);
@@ -781,11 +791,9 @@ pub fn transliterate_text_core(
         if ch.is_ascii_digit() && !opts.use_native_numerals {
             ctx.result.emit_char(ch);
             ctx.cursor.advance(1);
-            // ASCII digits: use a static table to avoid heap allocation for Cow::Borrowed
             const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
             let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
-            let _ =
-                ctx.prev_context_cleanup(Some((Some(Cow::Borrowed(digit_str)), None)), None, None);
+            let _ = ctx.prev_context_cleanup(Some((Some(digit_str), None)), None, None);
             continue;
         }
 
@@ -797,14 +805,8 @@ pub fn transliterate_text_core(
             if let Some(custom_idx) = idx {
                 let (custom_text, list_ref_opt, back_ref_opt) =
                     &from_script_data.custom_script_chars_arr[custom_idx];
-                let list_item = list_ref_opt
-                    .and_then(|i| from_script_data.list.get(i as usize))
-                    .map(Cow::Borrowed);
-                ctx.prev_context_cleanup(
-                    Some((Some(Cow::Borrowed(custom_text.as_str())), list_item)),
-                    None,
-                    None,
-                );
+                let list_item = list_ref_opt.and_then(|i| from_script_data.list.get(i as usize));
+                ctx.prev_context_cleanup(Some((Some(custom_text.as_str()), list_item)), None, None);
 
                 let normal_text = back_ref_opt
                     .and_then(|i| from_script_data.typing_text_to_krama_map.get(i as usize))
@@ -869,8 +871,15 @@ pub fn transliterate_text_core(
                     Cow::Borrowed(ctx.cursor.slice(text_index, end_index).unwrap_or_default())
                 };
 
-                let potential_match_index = text_to_krama_lookup_script_data
-                    .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map);
+                let potential_match_index =
+                    if scan_units == 0 && ignore_ta_ext_sup_num_text_index == -1 {
+                        // more scan units only needed in case ta-ext so safe to do
+                        text_to_krama_lookup_script_data
+                            .text_to_krama_map_char_index(ch, use_typing_map)
+                    } else {
+                        text_to_krama_lookup_script_data
+                            .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
+                    };
 
                 let Some(potential_match_index) = potential_match_index else {
                     text_to_krama_item_index = None;
@@ -903,9 +912,8 @@ pub fn transliterate_text_core(
                 }
 
                 // extend match if `next` allows it
-                if let Some(next_list) = &potential_match.1.next
-                    && !next_list.is_empty()
-                {
+                let next_chars = &potential_match.1.next_chars;
+                if !next_chars.is_empty() {
                     let nth_next = ctx.cursor.peek_at(end_index);
                     let nth_next_character: Option<char> = nth_next;
 
@@ -930,8 +938,7 @@ pub fn transliterate_text_core(
                         // Case: matra/halant + superscript tail (superscript is in next list)
                         if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_1_th_next_character)
-                            && n_1_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut sup_buf = [0u8; 4];
                             let sup = n_1_th_next_character
@@ -975,8 +982,7 @@ pub fn transliterate_text_core(
                         // Case: matra + matra + superscript tail (superscript is in next list; special for gO = g + E + A)
                         else if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut sup_buf = [0u8; 4];
                             let sup = n_2_th_next_character
@@ -1039,8 +1045,7 @@ pub fn transliterate_text_core(
                             && nth_next_character.is_some()
                             && is_vedic_svara_tail(n_1_th_next_character)
                             && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character
-                                .is_some_and(|c| next_list.iter().any(|x| char_eq_str(c, x)))
+                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
                             let mut nth_buf = [0u8; 4];
                             let nth_char_text_index = nth_next_character.and_then(|c| {
@@ -1088,7 +1093,7 @@ pub fn transliterate_text_core(
 
                     // Generic: if the next character is in the next list, extend scan and continue
                     if let Some(nth_ch) = nth_next_character
-                        && next_list.iter().any(|x| char_eq_str(nth_ch, x))
+                        && next_chars.contains(&nth_ch)
                     {
                         scan_units += 1; // each char is 1 unit
                         continue;
@@ -1133,10 +1138,9 @@ pub fn transliterate_text_core(
                 ctx.result.emit(custom_item.0.as_str());
                 let list_item = custom_item
                     .1
-                    .and_then(|li| to_script_data.list.get(li as usize))
-                    .map(Cow::Borrowed);
+                    .and_then(|li| to_script_data.list.get(li as usize));
                 ctx.prev_context_cleanup(
-                    Some((Some(Cow::Borrowed(matched_text.as_str())), list_item)),
+                    Some((Some(matched_text.as_str()), list_item)),
                     map.next.as_deref(),
                     None,
                 );
@@ -1170,7 +1174,7 @@ pub fn transliterate_text_core(
                             // pick a brahmic list item (from-script) if available
                             let mut item = map.fallback_list_ref.and_then(|i| {
                                 if !(trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) {
-                                    from_script_data.list.get(i as usize).map(Cow::Borrowed)
+                                    from_script_data.list.get(i as usize)
                                 } else {
                                     None
                                 }
@@ -1182,73 +1186,49 @@ pub fn transliterate_text_core(
                             } else if item.is_none()
                                 && let Some(krama) = &map.krama
                             {
-                                let list_refs: Vec<Option<&List>> = krama
-                                    .iter()
-                                    .map(|x| {
-                                        from_script_data
-                                            .krama_text_arr
-                                            .get(*x as usize)
-                                            .and_then(|k| k.1)
-                                            .and_then(|list_ref| {
-                                                from_script_data.list.get(list_ref as usize)
-                                            })
-                                    })
-                                    .collect();
+                                let list_ref_of = |x: &i16| -> Option<&List> {
+                                    from_script_data
+                                        .krama_text_arr
+                                        .get(*x as usize)
+                                        .and_then(|k| k.1)
+                                        .and_then(|list_ref| {
+                                            from_script_data.list.get(list_ref as usize)
+                                        })
+                                };
                                 if is_from_tamil_ext_
-                                    && list_refs
+                                    && krama
                                         .iter()
-                                        .any(|k| k.as_ref().is_some_and(|k| k.is_matra()))
-                                    && list_refs
+                                        .any(|x| list_ref_of(x).is_some_and(|k| k.is_matra()))
+                                    && krama
                                         .iter()
-                                        .any(|k| k.as_ref().is_some_and(|k| k.is_vyanjana()))
+                                        .any(|x| list_ref_of(x).is_some_and(|k| k.is_vyanjana()))
                                 {
-                                    if let Some(first) = list_refs.first() {
-                                        item = Some(Cow::Owned(List::Anya {
-                                            krama_ref: first
-                                                .map(|x| x.get_krama_ref().clone())
-                                                .unwrap_or(Vec::new()),
-                                        }));
+                                    if !krama.is_empty() {
+                                        item = Some(&helpers::ANYA_LIST_ITEM);
                                     }
                                 } else if is_from_tamil_ext_
-                                    && list_refs.len() > 1
-                                    && list_refs.iter().any(|k| k.is_none())
+                                    && krama.len() > 1
+                                    && krama.iter().any(|x| list_ref_of(x).is_none())
                                 {
-                                    if let Some(last) = list_refs.last() {
-                                        match last {
-                                            None => {
-                                                item = None;
-                                            }
-                                            Some(v) => {
-                                                item = Some(Cow::Borrowed(v));
-                                            }
-                                        }
+                                    if let Some(last) = krama.last() {
+                                        item = list_ref_of(last);
                                     }
-                                } else {
-                                    // first
-                                    if let Some(first) = list_refs.first() {
-                                        match first {
-                                            None => {
-                                                item = None;
-                                            }
-                                            Some(v) => {
-                                                item = Some(Cow::Borrowed(v));
-                                            }
-                                        }
-                                    }
+                                } else if let Some(first) = krama.first() {
+                                    item = list_ref_of(first);
                                 }
                             }
 
                             result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(Cow::Borrowed(matched_text.as_str())), item)),
+                                Some((Some(matched_text.as_str()), item)),
                                 None,
                                 None,
                             );
                         } else if matches!(to_script_data, ScriptData::Brahmic { .. })
                             && matches!(from_script_data, ScriptData::Other { .. })
                         {
-                            let item: Option<Cow<'_, List>>;
+                            let item: Option<&List>;
                             if let Some(f) = map.fallback_list_ref {
-                                item = to_script_data.list.get(f as usize).map(Cow::Borrowed);
+                                item = to_script_data.list.get(f as usize);
                             } else {
                                 item = if krama.is_empty() {
                                     None
@@ -1261,7 +1241,6 @@ pub fn transliterate_text_core(
                                         .and_then(|k| {
                                             k.1.and_then(|i| to_script_data.list.get(i as usize))
                                         })
-                                        .map(Cow::Borrowed)
                                 };
                             }
 
@@ -1272,7 +1251,7 @@ pub fn transliterate_text_core(
                                     None
                                 };
                             result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(Cow::Borrowed(matched_text.as_str())), item)),
+                                Some((Some(matched_text.as_str()), item)),
                                 next_list,
                                 None,
                             );
@@ -1281,7 +1260,7 @@ pub fn transliterate_text_core(
                             && matches!(to_script_data, ScriptData::Other { .. })
                         {
                             result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(Cow::Borrowed(matched_text.as_str())), None)),
+                                Some((Some(matched_text.as_str()), None)),
                                 map.next.as_deref(),
                                 None,
                             );
@@ -1340,7 +1319,7 @@ pub fn transliterate_text_core(
                     ctx.result.emit(matched_text.as_str());
                     if opts.typing_mode {
                         ctx.prev_context_cleanup(
-                            Some((Some(Cow::Borrowed(matched_text.as_str())), None)),
+                            Some((Some(matched_text.as_str()), None)),
                             map.next.as_deref(),
                             None,
                         );
@@ -1354,19 +1333,25 @@ pub fn transliterate_text_core(
         }
 
         // Step 2: Search in krama_text_arr
-        let char_to_search: Cow<'_, str> = text_to_krama_item
-            .map(|k| Cow::Borrowed(k.0.as_str()))
-            .unwrap_or_else(|| {
-                let mut buf = [0u8; 4];
-                Cow::Owned(ch.encode_utf8(&mut buf).to_owned())
-            });
-        let idx = from_script_data.krama_index_of_text(char_to_search.as_ref());
+        let char_to_search: &str = text_to_krama_item.map(|k| k.0.as_str()).unwrap_or_else(|| {
+            ctx.cursor
+                .peek_at_str(ctx.cursor.pos().saturating_sub(1))
+                // pos - 1 as fallback consumed(advanced 1) the previous character
+                .unwrap_or_default()
+        });
+
+        let idx = if text_to_krama_item.is_none() {
+            from_script_data.krama_index_of_char(ch)
+            // more performanct : as searching char
+        } else {
+            from_script_data.krama_index_of_text(char_to_search)
+        };
         let Some(index) = idx else {
             if ctx.prev_context_in_use {
-                ctx.prev_context_cleanup(Some((Some(char_to_search.clone()), None)), None, None);
+                ctx.prev_context_cleanup(Some((Some(char_to_search), None)), None, None);
                 ctx.prev_context.clear();
             }
-            ctx.result.emit(char_to_search.as_ref());
+            ctx.result.emit(char_to_search);
             continue;
         };
 
@@ -1377,8 +1362,7 @@ pub fn transliterate_text_core(
                     .krama_text_arr
                     .get(index)
                     .and_then(|(_, li)| *li);
-                let item = list_idx
-                    .and_then(|li| from_script_data.list.get(li as usize).map(Cow::Borrowed));
+                let item = list_idx.and_then(|li| from_script_data.list.get(li as usize));
                 result_concat_status =
                     ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
             } else if matches!(to_script_data, ScriptData::Brahmic { .. }) {
@@ -1386,8 +1370,7 @@ pub fn transliterate_text_core(
                     .krama_text_arr
                     .get(index)
                     .and_then(|(_, li)| *li);
-                let item =
-                    list_idx.and_then(|li| to_script_data.list.get(li as usize).map(Cow::Borrowed));
+                let item = list_idx.and_then(|li| to_script_data.list.get(li as usize));
                 result_concat_status =
                     ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
             }
@@ -1444,7 +1427,6 @@ pub fn transliterate_text_core(
     }
 
     let context_length = ctx.prev_context.length();
-    drop(ctx);
 
     let output = result.into_string();
     let output = if custom_rules.is_empty() {

@@ -435,10 +435,11 @@ fn analyze(base_batches: &[TransliterationBatch]) {
 }
 
 fn main() {
-    println!("{}", "Transliterate — Empirical Time Complexity".cyan().bold());
     println!(
-        "Scales bulk from→to corpora built from the same YAML fixtures as benchmarks/tests,"
+        "{}",
+        "Transliterate — Empirical Time Complexity".cyan().bold()
     );
+    println!("Scales bulk from→to corpora built from the same YAML fixtures as benchmarks/tests,");
     println!(
         "then fits runtime vs size against: {}.",
         COMPLEXITY_MODELS
