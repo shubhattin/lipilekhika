@@ -132,6 +132,7 @@ const Romanized: InputOtherScriptType = {
     '९': '9',
     '।': '.',
     '॥': '..',
+    '॰': '°',
     avagraha: '`'
   },
   typing_list: [

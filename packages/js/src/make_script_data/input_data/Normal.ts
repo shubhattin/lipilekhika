@@ -127,6 +127,7 @@ const Normal: InputOtherScriptType = {
     '९': '9',
     '।': '.',
     '॥': '..',
+    '॰': '°',
     avagraha: '`'
   },
   list: [
