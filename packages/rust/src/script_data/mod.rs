@@ -1,3 +1,4 @@
+mod char_table;
 mod custom_options;
 mod generated;
 mod schema;

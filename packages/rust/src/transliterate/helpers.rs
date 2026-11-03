@@ -1,7 +1,6 @@
 use crate::ScriptListEnum;
 use crate::script_data::{List, ScriptData};
 use alloc::borrow::{Cow, ToOwned};
-use alloc::collections::VecDeque;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
@@ -36,7 +35,47 @@ impl ScriptData {
 
     #[inline]
     pub fn krama_index_of_char(&self, ch: char) -> Option<usize> {
-        self.krama_text_char_lookup.get(&ch).copied()
+        self.krama_text_char_lookup.get(ch)
+    }
+}
+
+/// `String::push_str` specialised for the 1..=16 byte pieces that make up almost all
+/// transliteration output: overlapping fixed-size copies lower to a couple of unaligned
+/// moves instead of a call into libc `memcpy`.
+#[inline(always)]
+fn push_str_small(buf: &mut String, s: &str) {
+    let len = s.len();
+    if len == 0 || len > 16 {
+        buf.push_str(s);
+        return;
+    }
+    buf.reserve(len);
+    // SAFETY: `reserve` guarantees `len` bytes of spare capacity after `buf.len()`.
+    // Every read below stays within `s` (each fixed-size window starts at 0 or ends at
+    // `len`, and is only used when `len` covers it), and the destination windows mirror
+    // the source windows, so exactly the bytes `dst[0..len]` are written with `s`'s bytes.
+    // `s` is valid UTF-8, so the resulting `String` contents stay valid UTF-8.
+    unsafe {
+        let vec = buf.as_mut_vec();
+        let old_len = vec.len();
+        let src = s.as_ptr();
+        let dst = vec.as_mut_ptr().add(old_len);
+        if len >= 8 {
+            let head = core::ptr::read_unaligned(src as *const u64);
+            let tail = core::ptr::read_unaligned(src.add(len - 8) as *const u64);
+            core::ptr::write_unaligned(dst as *mut u64, head);
+            core::ptr::write_unaligned(dst.add(len - 8) as *mut u64, tail);
+        } else if len >= 4 {
+            let head = core::ptr::read_unaligned(src as *const u32);
+            let tail = core::ptr::read_unaligned(src.add(len - 4) as *const u32);
+            core::ptr::write_unaligned(dst as *mut u32, head);
+            core::ptr::write_unaligned(dst.add(len - 4) as *mut u32, tail);
+        } else {
+            *dst = *src;
+            *dst.add(len / 2) = *src.add(len / 2);
+            *dst.add(len - 1) = *src.add(len - 1);
+        }
+        vec.set_len(old_len + len);
     }
 }
 
@@ -89,7 +128,7 @@ impl ResultStringBuilder {
         if self.track_pieces {
             self.offsets.push(self.buf.len());
         }
-        self.buf.push_str(text);
+        push_str_small(&mut self.buf, text);
     }
     /// Emit a single character without heap-allocating a String.
     pub fn emit_char(&mut self, c: char) {
@@ -221,87 +260,125 @@ impl fmt::Display for ResultStringBuilder {
     }
 }
 
-pub type PrevContextItem<'a> = (Option<Cow<'a, str>>, Option<Cow<'a, List>>);
+pub type PrevContextItem<'a> = (Option<&'a str>, Option<&'a List>);
 
+/// Stand-in for list items synthesized at runtime; context consumers only inspect the variant.
+pub static ANYA_LIST_ITEM: List = List::Anya {
+    krama_ref: Vec::new(),
+};
+
+pub const PREV_CONTEXT_MAX_LEN: usize = 3;
+
+/// Variant tag of a [`List`] item.
+///
+/// `List` is niche-packed into its `Vec` fields, so reading the variant through a
+/// `&List` costs a pointer chase plus niche decoding; context entries only ever need
+/// the variant, so they store this byte instead.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ListKind {
+    Anya,
+    Vyanjana,
+    Matra,
+    Svara,
+}
+
+impl ListKind {
+    #[inline]
+    pub fn of(list: &List) -> Self {
+        match list {
+            List::Anya { .. } => ListKind::Anya,
+            List::Vyanjana { .. } => ListKind::Vyanjana,
+            List::Matra { .. } => ListKind::Matra,
+            List::Svara { .. } => ListKind::Svara,
+        }
+    }
+    #[inline]
+    pub fn is_matra(self) -> bool {
+        self == ListKind::Matra
+    }
+    #[inline]
+    pub fn is_vyanjana(self) -> bool {
+        self == ListKind::Vyanjana
+    }
+}
+
+type PrevContextEntry<'a> = (Option<&'a str>, Option<ListKind>);
+
+/// Fixed-size sliding window over the last `PREV_CONTEXT_MAX_LEN` context items,
+/// kept inline to avoid a heap allocation per transliteration call.
 pub struct PrevContextBuilder<'a> {
-    arr: VecDeque<PrevContextItem<'a>>,
-    max_len: usize,
+    arr: [PrevContextEntry<'a>; PREV_CONTEXT_MAX_LEN],
+    len: usize,
 }
 
 impl<'a> PrevContextBuilder<'a> {
-    pub fn new(max_len: usize) -> PrevContextBuilder<'a> {
+    pub fn new() -> PrevContextBuilder<'a> {
         PrevContextBuilder {
-            arr: VecDeque::with_capacity(max_len),
-            max_len,
+            arr: [(None, None); PREV_CONTEXT_MAX_LEN],
+            len: 0,
         }
     }
 
+    #[inline]
     pub fn clear(&mut self) {
-        self.arr.clear();
+        self.len = 0;
     }
 
     pub fn length(&self) -> usize {
-        self.arr.len()
+        self.len
     }
 
-    /// resolves negative index for the `arr`
-    fn resolve_arr_index(&self, i: isize) -> Option<usize> {
-        if self.arr.is_empty() {
-            return None;
-        }
-        let len = self.arr.len() as isize;
-        let mut idx = i;
-        if idx < 0 {
-            idx += len;
-        }
+    /// Entry at a given index (supports -ve indices).
+    #[inline]
+    fn at(&self, i: isize) -> Option<&PrevContextEntry<'a>> {
+        let len = self.len as isize;
+        let idx = if i < 0 { i + len } else { i };
         if idx < 0 || idx >= len {
             None
         } else {
-            Some(idx as usize)
+            self.arr.get(idx as usize)
         }
     }
 
-    pub fn at(&self, i: isize) -> Option<&PrevContextItem<'a>> {
-        match self.resolve_arr_index(i) {
-            None => None,
-            Some(idx) => self.arr.get(idx),
-        }
-    }
-
-    pub fn last(&self) -> Option<&PrevContextItem<'a>> {
-        self.arr.back()
+    #[allow(dead_code)]
+    pub fn last_text(&self) -> Option<&'a str> {
+        self.text_at(-1)
     }
     #[allow(dead_code)]
-    pub fn last_text(&self) -> Option<&str> {
-        self.last().and_then(|(text_opt, _)| text_opt.as_deref())
-    }
-    pub fn last_type(&self) -> Option<&List> {
-        self.last().and_then(|(_, list_opt)| list_opt.as_deref())
+    pub fn last_type(&self) -> Option<ListKind> {
+        self.type_at(-1)
     }
 
-    pub fn type_at(&self, i: isize) -> Option<&List> {
-        self.at(i).and_then(|(_, list_opt)| list_opt.as_deref())
+    #[inline]
+    pub fn type_at(&self, i: isize) -> Option<ListKind> {
+        self.at(i).and_then(|(_, kind)| *kind)
     }
 
     /// Text at a given index (supports -ve indices).
-    pub fn text_at(&self, i: isize) -> Option<&str> {
-        self.at(i).and_then(|(text_opt, _)| text_opt.as_deref())
+    #[inline]
+    pub fn text_at(&self, i: isize) -> Option<&'a str> {
+        self.at(i).and_then(|(text_opt, _)| *text_opt)
     }
 
     /// Check if the last context item has the given type.
     #[allow(dead_code)]
-    pub fn is_last_type(&self, t: &List) -> bool {
+    pub fn is_last_type(&self, t: ListKind) -> bool {
         self.last_type() == Some(t)
     }
 
-    /// Push a new context item, enforcing `max_len` and skipping empty/None text.
-    pub fn push(&mut self, item: PrevContextItem<'a>) {
-        if item.0.as_ref().is_none_or(|s| s.is_empty()) {
+    /// Push a new context item, enforcing the max length and skipping empty/None text.
+    #[inline]
+    pub fn push(&mut self, (text, list): PrevContextItem<'a>) {
+        if text.is_none_or(|s| s.is_empty()) {
             return;
         }
-        self.arr.push_back(item);
-        if self.arr.len() > self.max_len {
-            self.arr.pop_front();
+        let entry = (text, list.map(ListKind::of));
+        if self.len == PREV_CONTEXT_MAX_LEN {
+            self.arr.copy_within(1.., 0);
+            self.arr[PREV_CONTEXT_MAX_LEN - 1] = entry;
+        } else {
+            self.arr[self.len] = entry;
+            self.len += 1;
         }
     }
 }
@@ -321,13 +398,25 @@ pub struct InputTextCursor<'a> {
 
 impl<'a> InputTextCursor<'a> {
     pub fn new(text: &'a str) -> InputTextCursor<'a> {
-        let mut chars = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
+        let mut chars: Vec<(char, usize)> = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
 
+        let dst = chars.spare_capacity_mut().as_mut_ptr();
+        let mut len = 0;
         for (byte_idx, ch) in text.char_indices() {
-            chars.push((ch, byte_idx));
+            // SAFETY: a str has at most `text.len()` chars, so `len < text.len() + 1 <= capacity`.
+            unsafe {
+                dst.add(len)
+                    .write(core::mem::MaybeUninit::new((ch, byte_idx)))
+            };
+            len += 1;
         }
-        chars.push(('\0', text.len()));
-        // ^ needed for the last character to be accessible via the `peek_at` method
+        // SAFETY: `len <= text.len() < capacity`; all `len + 1` slots are now initialized.
+        unsafe {
+            dst.add(len)
+                .write(core::mem::MaybeUninit::new(('\0', text.len())));
+            chars.set_len(len + 1);
+        }
+        // ^ the trailing sentinel is needed for the last character to be accessible via the `peek_at` method
         // stores the char offsets
 
         InputTextCursor {
@@ -368,7 +457,10 @@ impl<'a> InputTextCursor<'a> {
             .chars
             .get(index_units + 1)
             .map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start..end)
+        // SAFETY: every offset in `chars` comes from `char_indices` (or is `text.len()`),
+        // so both ends are char boundaries of `text`, and `start <= end` as offsets
+        // are strictly increasing.
+        Some(unsafe { self.text.get_unchecked(start..end) })
     }
 
     /// units here is for char (and not bytes)
@@ -384,7 +476,9 @@ impl<'a> InputTextCursor<'a> {
         }
         let start_byte = self.chars.get(start).map(|(_, byte_idx)| *byte_idx)?;
         let end_byte = self.chars.get(end).map(|(_, byte_idx)| *byte_idx)?;
-        self.text.get(start_byte..end_byte)
+        // SAFETY: offsets in `chars` are char boundaries of `text` (see `peek_at_str`),
+        // and `start <= end` was checked above so `start_byte <= end_byte`.
+        Some(unsafe { self.text.get_unchecked(start_byte..end_byte) })
     }
 }
 
@@ -547,7 +641,28 @@ pub fn apply_typing_input_aliases<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::InputTextCursor;
+    use super::{InputTextCursor, push_str_small};
+    use alloc::string::String;
+
+    #[test]
+    fn push_str_small_matches_push_str_for_all_lengths() {
+        let source = "aक𑀓bखc²de॑fgहijklmnop";
+        for start in 0..source.len() {
+            for end in start..=source.len() {
+                let Some(piece) = source.get(start..end) else {
+                    continue;
+                };
+                for prefix in ["", "x", "नम"] {
+                    let mut expected = String::from(prefix);
+                    expected.push_str(piece);
+                    let mut actual = String::from(prefix);
+                    actual.shrink_to_fit();
+                    push_str_small(&mut actual, piece);
+                    assert_eq!(actual, expected);
+                }
+            }
+        }
+    }
 
     #[test]
     fn input_cursor_preserves_utf8_character_boundaries() {
@@ -570,5 +685,15 @@ mod tests {
         assert_eq!(cursor.peek_at_str(1), None);
         assert_eq!(cursor.slice(1, 0), None);
         assert_eq!(cursor.slice(0, 2), None);
+    }
+
+    #[test]
+    fn input_cursor_handles_empty_text() {
+        let cursor = InputTextCursor::new("");
+
+        assert_eq!(cursor.char_count(), 0);
+        assert_eq!(cursor.peek(), Some('\0'));
+        assert_eq!(cursor.peek_at_str(0), None);
+        assert_eq!(cursor.slice(0, 0), Some(""));
     }
 }

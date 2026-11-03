@@ -3,6 +3,7 @@ use alloc::vec::Vec;
 // indexmap is built with `default-features = false` for no_std; without `std` there is no
 // default hasher, so `indexmap::IndexMap<K, V>` needs a third type param. foldhash matches
 // hashbrown's default hasher in this crate.
+use super::char_table::CharIndexTable;
 use foldhash::fast::RandomState as IndexMapHasher;
 use hashbrown::HashMap;
 use indexmap::IndexMap as IndexMapImpl;
@@ -29,6 +30,10 @@ pub struct TextToKramaMap {
     pub fallback_list_ref: Option<i16>,
     /// only in `typing_text_to_krama_map`
     pub custom_back_ref: Option<i16>,
+    /// Single-char entries of `next`, for allocation-free and memcmp-free membership checks.
+    #[serde(skip)]
+    #[allow(dead_code)]
+    pub next_chars: alloc::boxed::Box<[char]>,
 }
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
@@ -117,19 +122,19 @@ pub struct CommonScriptAttr {
     pub krama_text_lookup: HashMap<String, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
-    pub krama_text_char_lookup: HashMap<char, usize>,
+    pub krama_text_char_lookup: CharIndexTable,
     #[serde(skip)]
     #[allow(dead_code)]
     pub text_to_krama_lookup: HashMap<String, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
-    pub text_to_krama_char_lookup: HashMap<char, usize>,
+    pub text_to_krama_char_lookup: CharIndexTable,
     #[serde(skip)]
     #[allow(dead_code)]
     pub typing_text_to_krama_lookup: HashMap<String, usize>,
     #[serde(skip)]
     #[allow(dead_code)]
-    pub typing_text_to_krama_char_lookup: HashMap<char, usize>,
+    pub typing_text_to_krama_char_lookup: CharIndexTable,
     #[serde(skip)]
     #[allow(dead_code)]
     pub custom_script_chars_lookup: HashMap<String, usize>,
@@ -147,11 +152,11 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
             custom_script_chars_arr: value.custom_script_chars_arr,
             list: value.list.into_iter().map(Into::into).collect(),
             krama_text_lookup: HashMap::new(),
-            krama_text_char_lookup: HashMap::new(),
+            krama_text_char_lookup: CharIndexTable::default(),
             text_to_krama_lookup: HashMap::new(),
-            text_to_krama_char_lookup: HashMap::new(),
+            text_to_krama_char_lookup: CharIndexTable::default(),
             typing_text_to_krama_lookup: HashMap::new(),
-            typing_text_to_krama_char_lookup: HashMap::new(),
+            typing_text_to_krama_char_lookup: CharIndexTable::default(),
             custom_script_chars_lookup: HashMap::new(),
         }
     }

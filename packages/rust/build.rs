@@ -6,6 +6,12 @@ serde is stil needed for bincode serialization.
 The resulting binary is smaller and faster to load.
 */
 
+#[allow(dead_code)]
+mod char_table {
+    extern crate alloc;
+    include!("src/script_data/char_table.rs");
+}
+
 mod schema {
     extern crate alloc;
     // Re-use the exact same schema types as the library.
