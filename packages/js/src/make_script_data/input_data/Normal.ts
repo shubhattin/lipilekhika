@@ -60,7 +60,7 @@ const Normal: InputOtherScriptType = {
     ऽ: "''",
     '्': '',
     '़': '',
-    '॰': '',
+    '॰': '°',
     क: 'k',
     क़: 'kz',
     ख: 'kh',

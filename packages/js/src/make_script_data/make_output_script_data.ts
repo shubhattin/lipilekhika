@@ -550,6 +550,31 @@ function get_out_script_data(
     }
   }
 
+  // Scan for krama keys which did not get mapped to any text and warn
+  // nuqta is optional and skipped when not present in the target script
+  // a-mAtrA and a1-mAtrA are not expected to be mapped in brahmic scripts
+  // halant and saMkShepachihna are not expected to be mapped in Normal and Romanized
+  {
+    const ignored_krama_labels: string[] = [
+      'nuqta',
+      ...(res.script_type === 'brahmic'
+        ? ['a-mAtrA', 'a1-mAtrA']
+        : ['Normal', 'Romanized'].includes(input_script_data.script_name)
+          ? ['halant', 'saMkShepachihna']
+          : [])
+    ];
+    const unmapped_krama_keys = res.krama_text_arr
+      .map((item, i) => (item[0] === '' ? KramaLabelsArray[i] : null))
+      .filter((v) => v !== null && !ignored_krama_labels.includes(v));
+    if (unmapped_krama_keys.length > 0) {
+      console.warn(
+        chalk.yellow(
+          `⚠️  ${unmapped_krama_keys.length} unmapped krama keys in "${input_script_data.script_name}": [${unmapped_krama_keys.join(', ')}]`
+        )
+      );
+    }
+  }
+
   // In Dev mode add the original krama key at the third index for easy comparision and verification
   // and also add unicode escaped strings for better debugging (hopefully)
   if (IS_DEV_MODE) {
