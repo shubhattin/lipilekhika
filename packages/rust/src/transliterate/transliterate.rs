@@ -1125,7 +1125,12 @@ pub fn transliterate_text_core(
         let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
         if let Some(text_to_krama_item) = text_to_krama_item {
             let (matched_text, map) = text_to_krama_item;
-            let matched_char_count = matched_text.chars().count();
+            // a match always starts at `ch`, so equal byte length means it is exactly `ch`
+            let matched_char_count = if matched_text.len() == ch.len_utf8() {
+                1
+            } else {
+                matched_text.chars().count()
+            };
             // only relevant while skipping a Tamil-Extended superscript; evaluated lazily
             let index_delete_length = if ignore_ta_ext_sup_num_text_index != -1
                 && matched_char_count > 1
