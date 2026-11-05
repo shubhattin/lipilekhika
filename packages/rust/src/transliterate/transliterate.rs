@@ -655,6 +655,60 @@ fn is_single_ascii_digit(s: &str) -> bool {
     s.len() == 1 && s.chars().next().is_some_and(|c| c.is_ascii_digit())
 }
 
+/// Where [`transliterate_text_core_with`] gets its working buffers from and returns them to.
+///
+/// Generic (rather than always passing a scratch struct) so that the plain one-shot path
+/// monomorphizes to exactly the allocate-fresh code, with no reuse bookkeeping.
+pub trait CoreBuffers {
+    /// Buffer for the input char table (contents are discarded).
+    fn take_chars(&mut self) -> Vec<(char, usize)>;
+    /// Buffer for the output (contents are discarded).
+    fn take_out(&mut self) -> String;
+    /// Hands the char-table buffer back after the call.
+    fn put_chars(&mut self, chars: Vec<(char, usize)>);
+}
+
+/// Allocates fresh buffers on every call (the one-shot transliteration path).
+pub struct FreshBuffers;
+
+impl CoreBuffers for FreshBuffers {
+    #[inline(always)]
+    fn take_chars(&mut self) -> Vec<(char, usize)> {
+        Vec::new()
+    }
+    #[inline(always)]
+    fn take_out(&mut self) -> String {
+        String::new()
+    }
+    #[inline(always)]
+    fn put_chars(&mut self, _chars: Vec<(char, usize)>) {}
+}
+
+/// Reusable buffers, so repeated calls (typing mode re-transliterates the context on
+/// every key) avoid per-call allocations. Give an output allocation back via `out`.
+#[derive(Debug, Default)]
+pub struct TransliterateScratch {
+    /// char table of the input (see `InputTextCursor`)
+    chars: Vec<(char, usize)>,
+    /// Spare allocation used for the next call's output.
+    pub out: String,
+}
+
+impl CoreBuffers for &mut TransliterateScratch {
+    #[inline(always)]
+    fn take_chars(&mut self) -> Vec<(char, usize)> {
+        core::mem::take(&mut self.chars)
+    }
+    #[inline(always)]
+    fn take_out(&mut self) -> String {
+        core::mem::take(&mut self.out)
+    }
+    #[inline(always)]
+    fn put_chars(&mut self, chars: Vec<(char, usize)>) {
+        self.chars = chars;
+    }
+}
+
 /// Synchronous core transliterator
 #[allow(clippy::too_many_arguments)]
 pub fn transliterate_text_core(
@@ -666,6 +720,32 @@ pub fn transliterate_text_core(
     trans_options_in: &CustomOptions,
     custom_rules: &[impl Borrow<Rule>],
     options: Option<TransliterationFnOptions>,
+) -> TransliterationOutput {
+    transliterate_text_core_with(
+        text,
+        from_script,
+        to_script,
+        from_script_data,
+        to_script_data,
+        trans_options_in,
+        custom_rules,
+        options,
+        FreshBuffers,
+    )
+}
+
+/// [`transliterate_text_core`] taking its working buffers from `buffers`.
+#[allow(clippy::too_many_arguments)]
+pub fn transliterate_text_core_with(
+    text: &str,
+    from_script: &ScriptListEnum,
+    to_script: &ScriptListEnum,
+    from_script_data: &ScriptData,
+    to_script_data: &ScriptData,
+    trans_options_in: &CustomOptions,
+    custom_rules: &[impl Borrow<Rule>],
+    options: Option<TransliterationFnOptions>,
+    mut buffers: impl CoreBuffers,
 ) -> TransliterationOutput {
     let opts = options.unwrap_or_default();
 
@@ -704,8 +784,9 @@ pub fn transliterate_text_core(
     } else {
         text.len()
     };
-    let mut result = ResultStringBuilder::new(result_capacity, track_result_pieces);
-    let mut cursor = InputTextCursor::new(text.as_ref());
+    let mut result =
+        ResultStringBuilder::new_in(buffers.take_out(), result_capacity, track_result_pieces);
+    let mut cursor = InputTextCursor::new_in(text.as_ref(), buffers.take_chars());
     let mut prev_context = PrevContextBuilder::new();
 
     let prev_context_in_use = (matches!(from_script_data, ScriptData::Brahmic { .. })
@@ -1451,6 +1532,8 @@ pub fn transliterate_text_core(
     }
 
     let context_length = ctx.prev_context.length();
+    // (taken via `ctx`: `cursor` stays borrowed for its whole lifetime)
+    buffers.put_chars(ctx.cursor.take_buffer());
 
     let output = result.into_string();
     let output = if custom_rules.is_empty() {

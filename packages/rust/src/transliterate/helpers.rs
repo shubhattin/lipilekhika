@@ -94,9 +94,22 @@ pub struct ResultStringBuilder {
 }
 
 impl ResultStringBuilder {
+    #[allow(dead_code)]
     pub fn new(capacity: usize, track_pieces: bool) -> Self {
+        Self::new_in(String::new(), capacity, track_pieces)
+    }
+
+    /// Like [`Self::new`], but reuses `buf`'s allocation (its contents are discarded).
+    pub fn new_in(mut buf: String, capacity: usize, track_pieces: bool) -> Self {
+        if buf.capacity() == 0 {
+            // nothing to reuse: allocate exactly, skipping `reserve`'s growth logic
+            buf = String::with_capacity(capacity);
+        } else {
+            buf.clear();
+            buf.reserve(capacity);
+        }
         ResultStringBuilder {
-            buf: String::with_capacity(capacity),
+            buf,
             // Mostly we will be delaing with 3 byte per character so this allocation seems optimum
             offsets: if track_pieces {
                 Vec::with_capacity(capacity / 3)
@@ -397,8 +410,21 @@ pub struct InputTextCursor<'a> {
 // ^ No need for InputCursor here in the rust implementation
 
 impl<'a> InputTextCursor<'a> {
+    #[allow(dead_code)]
     pub fn new(text: &'a str) -> InputTextCursor<'a> {
-        let mut chars: Vec<(char, usize)> = Vec::with_capacity(text.len() + 1); // text.len() is an upper bound for char count
+        Self::new_in(text, Vec::new())
+    }
+
+    /// Like [`Self::new`], but reuses `chars`' allocation (its contents are discarded).
+    /// Get the buffer back with [`Self::into_buffer`].
+    pub fn new_in(text: &'a str, mut chars: Vec<(char, usize)>) -> InputTextCursor<'a> {
+        // text.len() is an upper bound for char count; after this, capacity >= text.len() + 1
+        if chars.capacity() == 0 {
+            chars = Vec::with_capacity(text.len() + 1);
+        } else {
+            chars.clear();
+            chars.reserve(text.len() + 1);
+        }
 
         let dst = chars.spare_capacity_mut().as_mut_ptr();
         let mut len = 0;
@@ -424,6 +450,11 @@ impl<'a> InputTextCursor<'a> {
             chars,
             pos: 0,
         }
+    }
+
+    /// Takes the char-table buffer for reuse, leaving the cursor empty.
+    pub fn take_buffer(&mut self) -> Vec<(char, usize)> {
+        core::mem::take(&mut self.chars)
     }
 
     pub fn pos(&self) -> usize {

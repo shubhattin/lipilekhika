@@ -16,7 +16,8 @@ use std::time::Instant;
 
 use crate::script_data::{List, ScriptData};
 use crate::transliterate::transliterate::{
-    TransliterationFnOptions, resolve_transliteration_rules, transliterate_text_core,
+    TransliterateScratch, TransliterationFnOptions, resolve_transliteration_rules,
+    transliterate_text_core_with,
 };
 
 /// Default time in milliseconds after which the context will be cleared automatically.
@@ -90,6 +91,10 @@ pub struct TypingContext {
     to_script_data: &'static ScriptData,
     trans_options: CustomOptions,
     custom_rules: Vec<&'static crate::script_data::Rule>,
+    /// Buffers reused across keys; after each key `scratch.out` holds a spare output
+    /// allocation (the previous output, swapped out of `curr_output`), so steady-state
+    /// typing allocates only the returned diff text.
+    scratch: TransliterateScratch,
 }
 
 impl TypingContext {
@@ -117,6 +122,7 @@ impl TypingContext {
             to_script_data,
             trans_options: resolved.trans_options,
             custom_rules: resolved.custom_rules,
+            scratch: TransliterateScratch::default(),
         }
     }
 
@@ -173,9 +179,9 @@ impl TypingContext {
         }
 
         self.curr_input.push(ch);
-        let prev_output = self.curr_output.as_str();
+        let translit_options = self.build_translit_options();
 
-        let result = transliterate_text_core(
+        let result = transliterate_text_core_with(
             &self.curr_input,
             &ScriptListEnum::Normal,
             &self.typing_script,
@@ -183,18 +189,22 @@ impl TypingContext {
             self.to_script_data,
             &self.trans_options,
             &self.custom_rules,
-            Some(self.build_translit_options()),
+            Some(translit_options),
+            &mut self.scratch,
         );
 
         let context_length = result.context_length;
         let output = result.output;
 
         // Calculate the diff between previous and current output, by common prefix length.
-        let (to_delete_chars_count, diff_add_text) = compute_diff(prev_output, &output);
+        let (to_delete_chars_count, diff_add_text) = compute_diff(&self.curr_output, &output);
 
         if context_length > 0 {
-            self.curr_output = output;
+            // keep the new output; the old allocation becomes next key's output buffer
+            self.scratch.out = core::mem::replace(&mut self.curr_output, output);
         } else {
+            // reuse the new output's allocation for the next key
+            self.scratch.out = output;
             self.clear_context();
         }
 
