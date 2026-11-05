@@ -31,7 +31,8 @@ From `packages/js`:
 ```sh
 bun run make-script-data   # generate script data (also required by Rust, Go)
 bun run check              # typecheck
-bun run bench              # run benchmarks (see Benchmarks below)
+bun run bench              # cold single-pass benchmark (see Benchmarks below)
+bun run bench:suite        # statistical benchmark suite (mitata), bench:suite:bun for Bun
 bun run test:run           # run tests once
 bun run test:runtime       # JS, WASM and N-API under vite-node and bun (needs bindings)
 bun run test:runtime:dist  # same against the built package, under node and bun (after `bun run build`)
@@ -59,7 +60,7 @@ From `packages/rust`:
 ```sh
 cargo check
 cargo test              # or cargo test --release
-cargo bench
+cargo bench             # statistical benchmark suite (criterion), see Benchmarks below
 ```
 
 ## Python package (`packages/python`)
@@ -73,6 +74,7 @@ uv sync                                    # create .venv and install deps
 uvx maturin develop --release              # build Rust Python bindings
 uv run pytest                              # tests
 uvx ty check                               # typecheck
+uv run pytest benchmarks/bench_lipilekhika.py  # statistical benchmark suite (see Benchmarks below)
 ```
 
 ## Go package (`packages/go/lipilekhika`)
@@ -83,26 +85,58 @@ From `packages/go/lipilekhika`:
 
 ```sh
 go test ./... -v                           # tests
-go run ./bench/benchmark.go                # benchmarks (see Benchmarks below)
+go run ./bench/benchmark.go                # cold single-pass benchmark (see Benchmarks below)
+go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 ```
 
 ## Benchmarks
 
-All benchmarks run over the cases in [`test_data/`](test_data/) (`bun run gen:test-data`) using the generated script data. The generated data is gitignored, so **after switching branches rerun `bun run make-script-data`** in `packages/js`, otherwise you measure the previous branch's data.
+Every package has two kinds of benchmark over the same [`test_data/`](test_data/) cases (`bun run gen:test-data`), using the generated script data. **Run both**: the statistical suite to judge a change, the cold pass to see first-run latency and a quick cross-language table.
+
+The generated data is gitignored, so **after switching branches rerun `bun run make-script-data`** in `packages/js`, otherwise you measure the previous branch's data.
+
+### Statistical suites (use these to compare two versions)
+
+Warm-up, many samples and statistics (spread / percentiles, memory or allocations). They share the workloads of the rust criterion bench: one full pass over the transliteration cases, typing emulation of the `Normal` cases, and the typing cases.
+
+| Package | Command (from the package directory) | Tool |
+| --- | --- | --- |
+| Rust | `cargo bench` | [criterion](https://github.com/bheisler/criterion.rs), reports the change vs the previous run |
+| JS, Node | `bun run bench:suite` | [mitata](https://github.com/evanwashere/mitata) (vite-node), JS vs WASM vs N-API |
+| JS, Bun | `bun run bench:suite:bun` | same suite under Bun |
+| Go | `go test -run '^$' -bench . -benchmem -count 10` | `testing.B`, compare runs with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat) |
+| Python | `uv run pytest benchmarks/bench_lipilekhika.py` | [pytest-benchmark](https://pytest-benchmark.readthedocs.io) |
+
+Comparing two versions (eg. `main` and your branch):
+
+- **Go**: save each run, then compare (reports the change and whether it is significant):
+  ```sh
+  go test -run '^$' -bench . -benchmem -count 10 > old.txt   # on main
+  go test -run '^$' -bench . -benchmem -count 10 > new.txt   # on your branch
+  go run golang.org/x/perf/cmd/benchstat@latest old.txt new.txt
+  ```
+- **Python**: `--benchmark-autosave` on the first version, `--benchmark-compare` on the second.
+- **JS**: `--json <file>` saves the results (`bun run bench:suite -- --json main.json`); `--filter <regex>` runs some groups only.
+- **Rust**: `cargo bench` compares with the previous run automatically.
+
+### Cold single-pass benchmarks
+
+One timed pass without warm-up (JIT warm-up is included for JS), printing the same iterated / bulk table in every language. Expect noticeable run-to-run variation: run a few times, alternating between the versions you compare.
 
 | Package | Command (from the package directory) | Notes |
 | --- | --- | --- |
-| JS, Node | `bun run bench` | runs `src/scripts/benchmark.ts` with vite-node |
+| Rust | `cargo run --example bench --release` | [`examples/bench.rs`](packages/rust/examples/bench.rs) |
+| JS, Node | `bun run bench` | [`src/scripts/benchmark.ts`](packages/js/src/scripts/benchmark.ts) with vite-node, also WASM and N-API rows |
 | JS, Bun | `bun src/scripts/benchmark.ts` | same script under Bun |
-| Rust | `cargo bench` | criterion: warm-up, many samples, reports the change vs the previous run |
-| Rust (quick table) | `cargo run --example bench --release` | same iterated/bulk table as JS and Python |
-| Python | `uv run python scripts/benchmark.py` | measures the installed build, run `uvx maturin develop --release` after Rust changes |
-| Go | `go run ./bench/benchmark.go` | `-iterations N` repeats it; times are **totals over all iterations** |
-| Go (release build) | `./bench/run_release.sh -iterations 5` | stripped build of the same benchmark, same flags |
+| Go | `go run ./bench/benchmark.go` | [`bench/benchmark.go`](packages/go/lipilekhika/bench/benchmark.go), `-iterations N` repeats it (times are **totals over all iterations**); `./bench/run_release.sh` runs a stripped build with the same flags |
+| Python | `uv run python scripts/benchmark.py` | [`scripts/benchmark.py`](packages/python/scripts/benchmark.py) |
 
 - **Iterated** transliterates each case on its own (with its options); **bulk** joins the cases of each script pair into one input (without options).
-- The JS benchmark also has WASM and N-API rows; they run the Rust build (`./get_bindings.sh`).
-- Except `cargo bench`, these are a single timed pass without warm-up, so expect noticeable run-to-run variation. To compare two versions, run the same command a few times on each, alternating between them, and compare the ranges.
+
+### Notes
+
+- JS WASM / N-API numbers and Python run the rust build: rebuild it after rust changes (`./get_bindings.sh` in `packages/js`, `uvx maturin develop --release` in `packages/python`).
+- Absolute times depend on the machine; compare versions on the same machine and report the relative change.
 
 ## Questions & issues
 
