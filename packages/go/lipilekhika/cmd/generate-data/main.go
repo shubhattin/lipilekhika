@@ -106,14 +106,36 @@ func readCustomOptions(path string) (map[string]scriptdata.CustomOption, error) 
 	return out, nil
 }
 
-func writeGob(path string, data any) error {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(data); err != nil {
+// writeGob writes `data` to `path` unless the existing file already holds the same data.
+//
+// gob assigns type ids from a process-wide counter, so the bytes of a file depend on the
+// types encoded before it in the same run (e.g. a field change in the script data shifts
+// the ids inside script_list.gob too). To keep these committed binaries free of such
+// no-op diffs, the existing file is decoded and re-encoded next to the new data in this
+// process: both then share the same type ids, so equal bytes mean equal content.
+func writeGob[T any](path string, data T) error {
+	newBytes, err := encodeGob(data)
+	if err != nil {
 		return fmt.Errorf("encode %s: %w", path, err)
 	}
-	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
+	if existing, err := os.ReadFile(path); err == nil {
+		var old T
+		if gob.NewDecoder(bytes.NewReader(existing)).Decode(&old) == nil {
+			if oldBytes, err := encodeGob(old); err == nil && bytes.Equal(oldBytes, newBytes) {
+				return nil // unchanged content, keep the file as is
+			}
+		}
+	}
+	if err := os.WriteFile(path, newBytes, 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	return nil
+}
+
+func encodeGob(data any) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(data); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
