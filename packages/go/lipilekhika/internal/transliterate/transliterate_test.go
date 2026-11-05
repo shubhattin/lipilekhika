@@ -1,9 +1,13 @@
 package transliterate
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -125,6 +129,13 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 					t.Errorf("index %d %s→%s: %v", c.Index, c.From, c.To, err)
 					continue
 				}
+				// the old lipi lekhika does not handle vedic svara tails in tamil extended properly
+				// (same skip as the JS and Rust test suites)
+				if strings.HasPrefix(filepath.Base(fp), "auto") && c.To == "Tamil-Extended" &&
+					strings.ContainsAny(result, "॒॑᳚᳛") {
+					testsSkipped++
+					continue
+				}
 				caseFailed := false
 				if strictExpected && c.Output != "" && result != c.Output {
 					caseFailed = true
@@ -178,5 +189,50 @@ func TestTransliterateBasicPublicBehavior(t *testing.T) {
 	}
 	if same != "नमः" {
 		t.Fatalf("same-script transliterate changed text: got %q", same)
+	}
+}
+
+// customOptionKeys must follow the key order of custom_options.json (rule order matters).
+func TestCustomOptionKeysOrder(t *testing.T) {
+	root, err := packageRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(filepath.Join(root, "data", "custom_options.json"))
+	if err != nil {
+		t.Skipf("custom_options.json not found: %v", err)
+	}
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	if _, err := dec.Token(); err != nil { // opening '{'
+		t.Fatal(err)
+	}
+	var keys []string
+	for dec.More() {
+		tok, err := dec.Token()
+		if err != nil {
+			t.Fatal(err)
+		}
+		keys = append(keys, tok.(string))
+		var skip json.RawMessage
+		if err := dec.Decode(&skip); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if !slices.Equal(keys, customOptionKeys) {
+		t.Fatalf("customOptionKeys out of sync with custom_options.json:\n got  %v\n want %v", customOptionKeys, keys)
+	}
+}
+
+// Rule order follows custom_options.json (like rust): pancham rule runs before the virAma rule.
+func TestCustomRuleOrder(t *testing.T) {
+	out, err := Transliterate("BIG।", "Devanagari", "Normal", map[string]bool{
+		"all_to_normal:replace_pancham_varga_varna_with_n": true,
+		"all_to_normal:remove_virAma_and_double_virAma":    true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "BIG" {
+		t.Fatalf("got %q, want %q", out, "BIG")
 	}
 }

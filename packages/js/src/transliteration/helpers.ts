@@ -5,25 +5,33 @@ import type {
 import type { ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
-export type prev_context_array_type = [
-  string | undefined,
-  OutputBrahmicScriptData['list'][number] | null | undefined
-][];
+type ListItem = OutputBrahmicScriptData['list'][number];
+type ListType = ListItem['type'];
 
 type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
-// type GetMapValue<M> = M extends Map<any, infer V> ? V : never;
-type _text_to_krama_map_val_type =
-  | OutputScriptData['text_to_krama_map'][number][1]
-  | OutputScriptData['typing_text_to_krama_map'][number][1];
 
-export const getTextToKramaMapData = (
+/** @returns index of `text` in the `text_to_krama_map` (or `typing_text_to_krama_map`), `-1` if not found */
+export const textToKramaMapIndex = (
   script_data: ScriptData,
   text: string,
   use_typing_text_to_krama_map: boolean = false
-): _text_to_krama_map_val_type | undefined => {
+): number => {
+  return (
+    (use_typing_text_to_krama_map
+      ? script_data.map_typing_text_to_krama_map.get(text)
+      : script_data.map_text_to_krama_map.get(text)) ?? -1
+  );
+};
+
+/** Same as `textToKramaMapIndex` for a single code point, without creating a string */
+export const textToKramaMapCharIndex = (
+  script_data: ScriptData,
+  cp: number,
+  use_typing_text_to_krama_map: boolean = false
+): number => {
   return use_typing_text_to_krama_map
-    ? script_data.map_typing_text_to_krama_map.get(text)
-    : script_data.map_text_to_krama_map.get(text);
+    ? script_data.char_typing_text_to_krama_map.get(cp)
+    : script_data.char_text_to_krama_map.get(cp);
 };
 
 export const getCustomScriptCharsData = (
@@ -44,6 +52,11 @@ export const getTypingTextToKramaText = (
 export const kramaIndexOfText = (script_data: ScriptData, text: string): number => {
   return script_data.map_krama_text_arr.get(text) ?? -1;
   // no need to use lower bound binary search, we can direcly use a hash map lookup
+};
+
+/** Same as `kramaIndexOfText` for a single code point, without creating a string */
+export const kramaIndexOfChar = (script_data: ScriptData, cp: number): number => {
+  return script_data.char_krama_text_arr.get(cp);
 };
 
 export const kramaTextOrNull = (script: ScriptData, idx: number): string | null => {
@@ -144,73 +157,82 @@ export const string_builder = () => {
   };
 };
 
-export const prev_context_builder = (maxLen: number) => {
-  // Fixed-size ring buffer — O(1) push/evict, no GC pressure from shift().
-  type ContextItem = prev_context_array_type[number];
-  type ContextType = OutputBrahmicScriptData['list'][number]['type'];
+/** Stand-in for list items synthesized at runtime; context consumers only inspect the `type`. */
+export const ANYA_LIST_ITEM: ListItem = { type: 'anya', krama_ref: [] };
 
-  const buf: ContextItem[] = Array.from({ length: maxLen });
-  let head = 0; // index of the oldest element
-  let count = 0;
+/**
+ * Mostly used is -1 for prev context.
+ * But even in the theoretical case it is -3 for now
+ */
+export const PREV_CONTEXT_MAX_LEN = 3;
+
+/**
+ * Fixed-size sliding window over the last `PREV_CONTEXT_MAX_LEN` context items.
+ *
+ * Only the text and the list `type` of an item are ever inspected, so those are stored
+ * in two parallel slot arrays (no per-item tuple allocation).
+ */
+export const prev_context_builder = () => {
+  const texts: (string | undefined)[] = Array.from({ length: PREV_CONTEXT_MAX_LEN });
+  const types: (ListType | undefined)[] = Array.from({ length: PREV_CONTEXT_MAX_LEN });
+  let len = 0;
 
   function clear() {
-    head = 0;
-    count = 0;
+    len = 0;
   }
 
   function length() {
-    return count;
+    return len;
   }
 
-  function at(i: number): ContextItem | undefined {
-    if (count === 0) return undefined;
-    if (i < 0) i = count + i;
-    if (i < 0 || i >= count) return undefined;
-    return buf[(head + i) % maxLen];
+  /** resolves the (supports -ve) index into a slot index, `-1` if out of range */
+  function slot(i: number): number {
+    if (i < 0) i += len;
+    return i < 0 || i >= len ? -1 : i;
   }
 
-  function last(): ContextItem | undefined {
-    return at(-1);
-  }
-
-  function lastText(): string | undefined {
-    return last()?.[0];
-  }
-
-  function lastType(): ContextType | undefined {
-    return last()?.[1]?.type;
-  }
-
-  function typeAt(i: number): ContextType | undefined {
-    return at(i)?.[1]?.type;
+  function typeAt(i: number): ListType | undefined {
+    const s = slot(i);
+    return s === -1 ? undefined : types[s];
   }
 
   function textAt(i: number): string | undefined {
-    return at(i)?.[0];
+    const s = slot(i);
+    return s === -1 ? undefined : texts[s];
   }
 
-  function isLastType(t: ContextType) {
+  function lastText(): string | undefined {
+    return textAt(-1);
+  }
+
+  function lastType(): ListType | undefined {
+    return typeAt(-1);
+  }
+
+  function isLastType(t: ListType) {
     return lastType() === t;
   }
 
-  function push(item: ContextItem) {
-    const text = item[0];
+  /** Push a new context item, enforcing the max length and skipping empty/undefined text. */
+  function push(text: string | undefined, type: ListType | undefined) {
     if (text === undefined || text.length === 0) return;
-    if (count < maxLen) {
-      buf[(head + count) % maxLen] = item;
-      count++;
+    if (len === PREV_CONTEXT_MAX_LEN) {
+      for (let i = 1; i < PREV_CONTEXT_MAX_LEN; i++) {
+        texts[i - 1] = texts[i];
+        types[i - 1] = types[i];
+      }
+      texts[PREV_CONTEXT_MAX_LEN - 1] = text;
+      types[PREV_CONTEXT_MAX_LEN - 1] = type;
     } else {
-      // Ring full: overwrite oldest slot and advance head.
-      buf[head] = item;
-      head = (head + 1) % maxLen;
+      texts[len] = text;
+      types[len] = type;
+      len++;
     }
   }
 
   return {
     clear,
     length,
-    at,
-    last,
     lastText,
     lastType,
     typeAt,
@@ -238,6 +260,21 @@ export const make_input_cursor = (text: string) => {
     return _scratch;
   }
 
+  /** Code point at the UTF-16 `index` without creating a string, `-1` if out of range */
+  function cpAt(index: number): number {
+    return text.codePointAt(index) ?? -1;
+  }
+
+  /** UTF-16 index of the character before the one starting at `index`
+   * (steps over a whole surrogate pair for non-BMP characters) */
+  function prevCharIndex(index: number): number {
+    const low = text.charCodeAt(index - 1);
+    const high = text.charCodeAt(index - 2);
+    return low >= 0xdc00 && low <= 0xdfff && high >= 0xd800 && high <= 0xdbff
+      ? index - 2
+      : index - 1;
+  }
+
   function peek(): CursorCp | null {
     return peekAt(pos);
   }
@@ -258,6 +295,8 @@ export const make_input_cursor = (text: string) => {
     get pos() {
       return pos;
     },
+    cpAt,
+    prevCharIndex,
     peek,
     peekAt,
     peekAtOffsetUnits,
@@ -268,15 +307,25 @@ export const make_input_cursor = (text: string) => {
 
 type PeekAtLike = (index: number) => { ch: string } | null;
 
+/**
+ * Matches `prev` (krama indexes) backwards, ending at `anchorIndex`.
+ *
+ * @param prevIndex index of the item before `index`. Defaults to `index - 1` (result pieces);
+ * for the input text pass `cursor.prevCharIndex`, as non-BMP characters take two UTF-16 units
+ * (stepping back by one unit would land in the middle of a surrogate pair and never match)
+ */
 export const matchPrevKramaSequence = (
   peekAt: PeekAtLike,
   anchorIndex: number,
   prev: number[],
-  script_data: ScriptData
+  script_data: ScriptData,
+  prevIndex: (index: number) => number = (index) => index - 1
 ): { matched: boolean; matchedLen: number } => {
+  let index = anchorIndex;
   for (let i = 0; i < prev.length; i++) {
     const expected_krama_index = prev[prev.length - 1 - i];
-    const info = peekAt(anchorIndex - i);
+    if (i > 0) index = prevIndex(index);
+    const info = peekAt(index);
     if (info === null) return { matched: false, matchedLen: 0 };
     const got_krama_index = kramaIndexOfText(script_data, info.ch);
     if (got_krama_index === -1 || got_krama_index !== expected_krama_index) {
@@ -296,10 +345,18 @@ export const isTaExtSuperscriptTail = (ch: string | undefined): boolean => {
   return ch === '²' || ch === '³' || ch === '⁴';
 };
 
+/** Code point version of `isTaExtSuperscriptTail` */
+export const isTaExtSuperscriptTailCp = (cp: number): boolean => {
+  return cp === 0xb2 || cp === 0xb3 || cp === 0x2074; // ² ³ ⁴
+};
+
 export const VEDIC_SVARAS = ['॒', '॑', '᳚', '᳛'] as const;
 export const isVedicSvaraTail = (ch: string | undefined): boolean => {
   return ch === '॒' || ch === '॑' || ch === '᳚' || ch === '᳛';
 };
+
+/** UTF-16 code units taken by the code point */
+export const cpWidth = (cp: number): number => (cp > 0xffff ? 2 : 1);
 
 export const isScriptTamilExt = (script_name: script_list_type): boolean => {
   return script_name === 'Tamil-Extended';

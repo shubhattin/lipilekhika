@@ -405,6 +405,31 @@ function get_out_script_data(
     // sort the array
     res.custom_script_chars_arr = sortByText(res.custom_script_chars_arr);
 
+    /** index of the `anya` list item used by `treat_as_anya` (added on first use) */
+    let anya_list_ref: number | null = null;
+    /** Points the typing entry of `text` and of each of its intermediate states (prefixes)
+     * at an `anya` list item, if it would otherwise resolve to a `mAtrA`
+     * (runtimes take the type from `fallback_list_ref`, else from the first krama entry).
+     * eg. `.LR` (ॢ) and its intermediate `.L` (`['', ळ]`, starts with the empty a-mAtrA) */
+    const mark_typing_entries_as_anya = (text: string) => {
+      if (res.script_type !== 'brahmic') return;
+      for (let end = 1; end <= text.length; end++) {
+        const prefix = text.substring(0, end);
+        const entry: OutputScriptData['typing_text_to_krama_map'][number] | undefined =
+          res.typing_text_to_krama_map.find((v) => v[0] === prefix);
+        if (!entry) continue; // middle of a surrogate pair
+        const value: OutputScriptData['typing_text_to_krama_map'][number][1] = entry[1];
+        if (value.fallback_list_ref != null || value.custom_back_ref != null) continue;
+        const list_ref = res.krama_text_arr[value.krama?.[0] ?? -1]?.[1];
+        if (list_ref == null || res.list[list_ref]?.type !== 'mAtrA') continue;
+        if (anya_list_ref === null) {
+          res.list.push({ krama_ref: [], type: 'anya' });
+          anya_list_ref = res.list.length - 1;
+        }
+        value.fallback_list_ref = anya_list_ref;
+      }
+    };
+
     // Step 2: Add all alternative types and reference for custom_script_chars_arr
     res.typing_text_to_krama_map = deepCopy(NormalOutputData.text_to_krama_map);
     for (const item of input_script_data.typing_list) {
@@ -417,6 +442,7 @@ function get_out_script_data(
             undefined,
             'typing_text_to_krama_map'
           );
+          if (item.treat_as_anya) mark_typing_entries_as_anya(duplicate_text);
         }
       } else if (item.type === 'custom_script_char') {
         const custom_script_char_index = res.custom_script_chars_arr.findIndex(
@@ -664,7 +690,13 @@ async function copy_script_data_json() {
 
   for (const { target, minify, single_script_data_file, cmd, id } of LIST) {
     if (fs.existsSync(path.resolve(target))) {
-      fs.rmSync(path.resolve(target), { recursive: true, force: true });
+      for (const entry of fs.readdirSync(path.resolve(target))) {
+        // Keep the committed Go gob files: `generate-data` compares against them and only
+        // rewrites a file when its content changes (gob bytes can differ for equal data,
+        // so regenerating from scratch would add needless binary diffs)
+        if (id === 'go' && entry === 'gob') continue;
+        fs.rmSync(path.resolve(target, entry), { recursive: true, force: true });
+      }
     }
     fs.mkdirSync(target, { recursive: true });
     if (!single_script_data_file) {

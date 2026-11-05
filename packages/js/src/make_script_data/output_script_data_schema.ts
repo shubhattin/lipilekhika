@@ -47,7 +47,9 @@ type CommonScriptData = {
       krama?: number[] | null;
       /** Reference to a custom script character of that script */
       custom_back_ref?: number | null;
-      /** This will not be actually there, but there for type compatibility */
+      /** Only set for the `treat_as_anya` typing keys (eg. `.A`, `.LR` and their intermediate
+       * states like `.L`): points to an `anya` list item, so the typing context does not treat
+       * them as a `mAtrA` of the previous vyanjana */
       fallback_list_ref?: number | null;
     }
   ][];

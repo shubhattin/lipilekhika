@@ -7,3 +7,5 @@ lipilekhika/types.py
 
 .pytest_cache/
 .ruff_cache/
+# pytest-benchmark saved runs
+.benchmarks/
