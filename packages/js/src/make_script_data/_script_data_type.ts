@@ -10,7 +10,6 @@ const max_int_min_0 = max_int.min(0);
 const commonScriptDataSchema = z.strictObject({
   /**  [krama_key: string, list_arr_ref: number | null] */
   krama_text_arr: z.tuple([z.string(), max_int_min_0.nullable()]).array(),
-  krama_text_arr_index: max_int_min_0.array(),
   text_to_krama_map: z
     .tuple([
       z.string(), // text

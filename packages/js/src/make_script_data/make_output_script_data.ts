@@ -6,18 +6,13 @@ import type { InputScriptInfoType } from './input_script_data_schema';
 import type { OutputScriptData } from './output_script_data_schema';
 import {
   KramaKeysArray,
-  KramaKeysIndexB,
   KramaLabelsArray,
-  KramaLabelsIndexB,
+  kramaKeyIndex,
+  kramaLabelIndex,
   resolveKramaKeysExtendedType,
   type KramaKeysExtendedType,
   type KramaKeysType
 } from './krama_array_keys';
-import {
-  binarySearchLowerWithIndex,
-  createSearchIndex,
-  sortArray
-} from '../utils/binary_search/binary_search';
 import chalk from 'chalk';
 import { deepCopy, toUnicodeEscapes } from '../tools/kry';
 import { execSync } from 'child_process';
@@ -71,6 +66,11 @@ async function make_script_data() {
   }
 }
 
+/** Stable sort (new array) by the text at index `0`, using UTF-16 code unit order */
+function sortByText<T extends readonly [string, ...unknown[]]>(arr: readonly T[]): T[] {
+  return [...arr].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+}
+
 function get_out_script_data(
   input_script_data: InputScriptInfoType,
   NormalOutputData?: OutputScriptData
@@ -87,7 +87,6 @@ function get_out_script_data(
       text_to_krama_map: [],
       list: [],
       krama_text_arr: [],
-      krama_text_arr_index: [],
       typing_text_to_krama_map: [],
       custom_script_chars_arr: []
     };
@@ -100,7 +99,6 @@ function get_out_script_data(
       text_to_krama_map: [],
       list: [],
       krama_text_arr: [],
-      krama_text_arr_index: [],
       typing_text_to_krama_map: [],
       custom_script_chars_arr: []
     };
@@ -189,11 +187,14 @@ function get_out_script_data(
         else {
           // calculate index for individual characters
           const krama_key_index_list = text_char.split('').map((char) => {
-            return binarySearchLowerWithIndex(
-              KramaKeysArray,
-              KramaKeysIndexB,
-              resolveKramaKeysExtendedType(char as KramaKeysExtendedType)
-            );
+            // A char that is neither a krama key nor a label (eg `.` or `a` in `.a`) resolves
+            // to `undefined`. The earlier binary search treated `undefined` as equal to every
+            // key and so landed on the smallest one, `''` (a-mAtrA, empty output). Kept as is
+            // so that the generated typing data does not change.
+            const resolved = resolveKramaKeysExtendedType(char as KramaKeysExtendedType) as
+              | KramaKeysType
+              | undefined;
+            return kramaKeyIndex(resolved ?? '');
           });
           new_addition[1].krama = krama_key_index_list;
         }
@@ -214,9 +215,7 @@ function get_out_script_data(
   // Part 1: Prefill the krama_text_map using the manual_krama_text_map
   for (const krama_key in input_script_data.manual_krama_text_map ?? {}) {
     const value = input_script_data.manual_krama_text_map![krama_key as KramaKeysType];
-    const krama_key_index = binarySearchLowerWithIndex(
-      KramaKeysArray,
-      KramaKeysIndexB,
+    const krama_key_index = kramaKeyIndex(
       resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
     );
     if (value === undefined || value === null || krama_key_index === -1) continue;
@@ -262,11 +261,7 @@ function get_out_script_data(
     ) {
       const krama_key_list = item.text_krama;
       const krama_key_list_index_list = krama_key_list.map((krama_key) =>
-        binarySearchLowerWithIndex(
-          KramaKeysArray,
-          KramaKeysIndexB,
-          resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType)
-        )
+        kramaKeyIndex(resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType))
       );
       // @ts-expect-error Dev-only `text` field is not in the published schema type
       res.list.push({
@@ -283,14 +278,7 @@ function get_out_script_data(
       if (item.type === 'svara') {
         // handling svara references
         const mAtrA_krama_ref_index_list = item.mAtrA_text_krama.map((mAtrA_text_krama) =>
-          binarySearchLowerWithIndex(
-            KramaKeysArray,
-            KramaKeysIndexB,
-            resolveKramaKeysExtendedType(mAtrA_text_krama as KramaKeysExtendedType),
-            {
-              accessor: (arr, i) => arr[i]
-            }
-          )
+          kramaKeyIndex(resolveKramaKeysExtendedType(mAtrA_text_krama as KramaKeysExtendedType))
         );
         res.list.push({
           ...(IS_DEV_MODE ? { text: item.mAtrA } : {}),
@@ -315,9 +303,7 @@ function get_out_script_data(
     // refers to the first key_krama or mAtrA_key_krama as all of those will be the same
     if (item.duplicates) {
       for (const duplicate_text of item.duplicates) {
-        const krama_key_index = binarySearchLowerWithIndex(
-          KramaKeysArray,
-          KramaKeysIndexB,
+        const krama_key_index = kramaKeyIndex(
           resolveKramaKeysExtendedType(item.text_krama[0] as KramaKeysExtendedType)
         );
         if (krama_key_index !== -1) {
@@ -327,9 +313,7 @@ function get_out_script_data(
     }
     if (item.type === 'svara' && item.mAtrA_duplicates) {
       for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
-        const krama_key_index = binarySearchLowerWithIndex(
-          KramaKeysArray,
-          KramaKeysIndexB,
+        const krama_key_index = kramaKeyIndex(
           resolveKramaKeysExtendedType(item.mAtrA_text_krama[0] as KramaKeysExtendedType)
         );
         if (krama_key_index !== -1) {
@@ -342,11 +326,7 @@ function get_out_script_data(
     // add fallback portion
     if (item.fallback && item.text_krama.length === 0) {
       const fallback_key_kram_index_list = item.fallback.map((fallback_key) =>
-        binarySearchLowerWithIndex(
-          KramaKeysArray,
-          KramaKeysIndexB,
-          resolveKramaKeysExtendedType(fallback_key as KramaKeysExtendedType)
-        )
+        kramaKeyIndex(resolveKramaKeysExtendedType(fallback_key as KramaKeysExtendedType))
       );
       add_to_text_to_krama_map(item.text, fallback_key_kram_index_list, key_to_reference_back_list);
     }
@@ -423,19 +403,13 @@ function get_out_script_data(
       res.custom_script_chars_arr.push([item.specific_text, current_list_ref_index, null]);
     }
     // sort the array
-    res.custom_script_chars_arr = sortArray(res.custom_script_chars_arr, {
-      accessor: (arr, i) => arr[i][0]
-    });
+    res.custom_script_chars_arr = sortByText(res.custom_script_chars_arr);
 
     // Step 2: Add all alternative types and reference for custom_script_chars_arr
     res.typing_text_to_krama_map = deepCopy(NormalOutputData.text_to_krama_map);
     for (const item of input_script_data.typing_list) {
       if (item.type === 'duplicates') {
-        const ref_krama_key_index = binarySearchLowerWithIndex(
-          KramaLabelsArray,
-          KramaLabelsIndexB,
-          item.ref_krama_key
-        );
+        const ref_krama_key_index = kramaLabelIndex(item.ref_krama_key);
         for (const duplicate_text of item.duplicates) {
           add_to_text_to_krama_map(
             duplicate_text,
@@ -460,9 +434,7 @@ function get_out_script_data(
       }
     }
     // sort the array
-    res.typing_text_to_krama_map = sortArray(res.typing_text_to_krama_map, {
-      accessor: (arr, i) => arr[i][0]
-    });
+    res.typing_text_to_krama_map = sortByText(res.typing_text_to_krama_map);
 
     // Step 3: Reference back the custom normal key mapping to the typing_text_to_krama_map
     for (let i = 0; i < res.custom_script_chars_arr.length; i++) {
@@ -488,7 +460,7 @@ function get_out_script_data(
   for (const text_krama_item of res.text_to_krama_map) {
     const text = text_krama_item[0];
     const text_krama_ref = text_krama_item[1].krama;
-    const text_index = binarySearchLowerWithIndex(KramaKeysArray, KramaKeysIndexB, text);
+    const text_index = kramaKeyIndex(text);
     if (
       (text === 'c' &&
         ['Normal', 'Romanized'].includes(input_script_data.script_name) &&
@@ -593,12 +565,7 @@ function get_out_script_data(
     }
   }
 
-  res.krama_text_arr_index = createSearchIndex(res.krama_text_arr, {
-    accessor: (arr, i) => arr[i][0]
-  });
-  res.text_to_krama_map = sortArray(res.text_to_krama_map, {
-    accessor: (arr, i) => arr[i][0]
-  });
+  res.text_to_krama_map = sortByText(res.text_to_krama_map);
 
   // Scan for -1 values in text_to_krama_map krama field
   for (let i = 0; i < res.text_to_krama_map.length; i++) {
@@ -635,26 +602,12 @@ async function make_custom_option_json() {
           type: rule.type,
           check_in: rule.check_in ?? value.check_in,
           use_replace: rule.use_replace ?? value.use_replace,
-          prev: rule.prev.map((prev) =>
-            binarySearchLowerWithIndex(
-              KramaKeysArray,
-              KramaKeysIndexB,
-              resolveKramaKeysExtendedType(prev)
-            )
-          ),
+          prev: rule.prev.map((prev) => kramaKeyIndex(resolveKramaKeysExtendedType(prev))),
           following: rule.following.map((following) =>
-            binarySearchLowerWithIndex(
-              KramaKeysArray,
-              KramaKeysIndexB,
-              resolveKramaKeysExtendedType(following)
-            )
+            kramaKeyIndex(resolveKramaKeysExtendedType(following))
           ),
           replace_with: rule.replace_with.map((replace_with) =>
-            binarySearchLowerWithIndex(
-              KramaKeysArray,
-              KramaKeysIndexB,
-              resolveKramaKeysExtendedType(replace_with)
-            )
+            kramaKeyIndex(resolveKramaKeysExtendedType(replace_with))
           )
         });
       } else if (rule.type === 'direct_replace') {
@@ -664,11 +617,7 @@ async function make_custom_option_json() {
           use_replace: rule.use_replace ?? value.use_replace,
           to_replace: rule.to_replace.map((to_replace) =>
             to_replace.map((to_replace_item) =>
-              binarySearchLowerWithIndex(
-                KramaKeysArray,
-                KramaKeysIndexB,
-                resolveKramaKeysExtendedType(to_replace_item)
-              )
+              kramaKeyIndex(resolveKramaKeysExtendedType(to_replace_item))
             )
           ),
           replace_text: rule.replace_text ? rule.replace_text : undefined,
@@ -676,13 +625,7 @@ async function make_custom_option_json() {
             ? []
             : rule.replace_with.map(
                 (replace_with) =>
-                  replace_with
-                    ? binarySearchLowerWithIndex(
-                        KramaKeysArray,
-                        KramaKeysIndexB,
-                        resolveKramaKeysExtendedType(replace_with)
-                      )
-                    : -1 // blank space
+                  replace_with ? kramaKeyIndex(resolveKramaKeysExtendedType(replace_with)) : -1 // blank space
               )
         });
       }

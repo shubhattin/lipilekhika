@@ -147,14 +147,13 @@ type ScriptData struct {
 	ScriptType ScriptType `json:"script_type"`
 
 	KramaTextArr         []KramaTextItem        `json:"krama_text_arr"`
-	KramaTextArrIndex    []int                  `json:"krama_text_arr_index"`
 	CustomScriptCharsArr []CustomScriptCharItem `json:"custom_script_chars_arr"`
 	List                 []ListItem             `json:"list"`
 
 	TextMap              map[string]TextToKramaMap `json:"-"`
 	TypingTextMap        map[string]TextToKramaMap `json:"-"`
 	TypingTextMapEntries []TextMapEntry            `json:"-"` // ordered for index lookup
-	
+
 	KramaTextLookup         map[string]int `json:"-"`
 	CustomScriptCharsLookup map[string]int `json:"-"`
 
@@ -185,7 +184,6 @@ type scriptDataGob struct {
 	ScriptType ScriptType
 
 	KramaTextArr         []kramaTextItemGob
-	KramaTextArrIndex    []int
 	CustomScriptCharsArr []customScriptCharItemGob
 	List                 []ListItem
 	TextMapEntries       []textMapEntryGob
@@ -343,7 +341,6 @@ func (s ScriptData) GobEncode() ([]byte, error) {
 		ScriptID:             s.ScriptID,
 		ScriptType:           s.ScriptType,
 		KramaTextArr:         kramaTextArrToGob(s.KramaTextArr),
-		KramaTextArrIndex:    s.KramaTextArrIndex,
 		CustomScriptCharsArr: customScriptCharsToGob(s.CustomScriptCharsArr),
 		List:                 s.List,
 		TextMapEntries:       textEntriesToGob(textEntries),
@@ -371,7 +368,6 @@ func (s *ScriptData) GobDecode(data []byte) error {
 		ScriptID:             wire.ScriptID,
 		ScriptType:           wire.ScriptType,
 		KramaTextArr:         kramaTextArrFromGob(wire.KramaTextArr),
-		KramaTextArrIndex:    wire.KramaTextArrIndex,
 		CustomScriptCharsArr: customScriptCharsFromGob(wire.CustomScriptCharsArr),
 		List:                 wire.List,
 		TextMap:              textEntriesToMap(textEntriesFromGob(wire.TextMapEntries)),
@@ -393,7 +389,6 @@ func (s *ScriptData) UnmarshalJSON(data []byte) error {
 		ScriptType ScriptType `json:"script_type"`
 
 		KramaTextArr         []KramaTextItem        `json:"krama_text_arr"`
-		KramaTextArrIndex    []int                  `json:"krama_text_arr_index"`
 		TextToKramaMap       []TextMapEntry         `json:"text_to_krama_map"`
 		TypingTextToKramaMap []TextMapEntry         `json:"typing_text_to_krama_map"`
 		CustomScriptCharsArr []CustomScriptCharItem `json:"custom_script_chars_arr"`
@@ -427,7 +422,6 @@ func (s *ScriptData) UnmarshalJSON(data []byte) error {
 		ScriptID:             wire.ScriptID,
 		ScriptType:           wire.ScriptType,
 		KramaTextArr:         wire.KramaTextArr,
-		KramaTextArrIndex:    wire.KramaTextArrIndex,
 		CustomScriptCharsArr: wire.CustomScriptCharsArr,
 		List:                 wire.List,
 		TextMap:              textMap,

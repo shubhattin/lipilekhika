@@ -3,14 +3,9 @@
 import { format_string_text } from '../src/tools/kry';
 import * as fs from 'node:fs';
 import { type InputBrahmicScriptType } from '../src/make_script_data/input_script_data_schema';
-import {
-  KramaLabelsArray,
-  KramaKeysArray,
-  KramaKeysIndexB
-} from '../src/make_script_data/krama_array_keys';
+import { KramaLabelsArray, kramaKeyIndex } from '../src/make_script_data/krama_array_keys';
 import { SCRIPT_LIST, script_list_obj } from '../src/utils/lang_list';
 import { script_list_type } from '../src/utils/lang_list';
-import { binarySearchWithIndex, sortArray } from '../src/utils/binary_search/binary_search';
 import { execSync } from 'child_process';
 
 const DEVANAGARI_KRAMA = [
@@ -231,11 +226,10 @@ function get_script_data(lang: script_list_type, data: Record<string, unknown>) 
   }
 
   // sort `list` and `manual_krama_text_map`
-  out.list = sortArray(out.list, {
-    accessor: (arr, i) => arr[i].text
-  });
+  const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  out.list = [...out.list].sort((a, b) => cmp(a.text, b.text));
   out.manual_krama_text_map = Object.fromEntries(
-    sortArray(Object.entries(out.manual_krama_text_map!), { accessor: (arr, i) => arr[i][1] })
+    Object.entries(out.manual_krama_text_map!).sort((a, b) => cmp(a[1], b[1]))
   );
   return out;
 }
@@ -243,7 +237,7 @@ function get_script_data(lang: script_list_type, data: Record<string, unknown>) 
 function get_krama_key_from_antar_key(old_lang_key_index: number) {
   if (old_lang_key_index === -1) return null;
   const devanagari_old_key = DEVANAGARI_KRAMA[old_lang_key_index];
-  const new_index = binarySearchWithIndex(KramaKeysArray, KramaKeysIndexB, devanagari_old_key);
+  const new_index = kramaKeyIndex(String(devanagari_old_key));
   if (new_index !== -1) {
     return KramaLabelsArray[new_index];
   }
