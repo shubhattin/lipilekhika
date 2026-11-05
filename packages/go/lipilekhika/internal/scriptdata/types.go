@@ -28,6 +28,10 @@ type TextToKramaMap struct {
 	Krama           []int16  `json:"krama,omitempty"`
 	FallbackListRef *int16   `json:"fallback_list_ref,omitempty"`
 	CustomBackRef   *int16   `json:"custom_back_ref,omitempty"`
+
+	// NextChars holds the single-rune entries of `Next`, for allocation-free membership checks.
+	// Runtime only (set in the ordered entry arrays by `initLookups`, not serialized).
+	NextChars []rune `json:"-"`
 }
 
 type KramaTextItem struct {
@@ -116,6 +120,48 @@ type ListItem struct {
 	Type          string  `json:"type"`
 	KramaRef      []int16 `json:"krama_ref"`
 	MatraKramaRef []int16 `json:"mAtrA_krama_ref,omitempty"`
+
+	// kind is `Type` as an enum (runtime only, set by `initLookups`)
+	kind ListKind
+}
+
+// ListKind is the variant tag (`type`) of a ListItem.
+// Comparing it is cheaper than comparing the `Type` string.
+type ListKind uint8
+
+const (
+	// ListKindNone is the kind of a missing (nil) list item
+	ListKindNone ListKind = iota
+	ListKindAnya
+	ListKindVyanjana
+	ListKindMatra
+	ListKindSvara
+)
+
+func listKindOf(t string) ListKind {
+	switch t {
+	case "anya":
+		return ListKindAnya
+	case "vyanjana":
+		return ListKindVyanjana
+	case "mAtrA":
+		return ListKindMatra
+	case "svara":
+		return ListKindSvara
+	}
+	return ListKindNone
+}
+
+// AnyaListItem is a stand-in for list items synthesized at runtime;
+// context consumers only inspect the kind. Must not be mutated.
+var AnyaListItem = ListItem{Type: "anya", KramaRef: []int16{}, kind: ListKindAnya}
+
+// Kind returns the kind of the list item, `ListKindNone` for a nil item.
+func (l *ListItem) Kind() ListKind {
+	if l == nil {
+		return ListKindNone
+	}
+	return l.kind
 }
 
 func (l *ListItem) UnmarshalJSON(data []byte) error {
@@ -157,6 +203,23 @@ type ScriptData struct {
 	KramaTextLookup         map[string]int `json:"-"`
 	CustomScriptCharsLookup map[string]int `json:"-"`
 
+	// Runtime lookups built by `initLookups` (mirrors the rust `CommonScriptAttr` lookups)
+
+	// TextToKramaMapArr is `TextMap` as an (ordered) array, indexed by the lookups below
+	TextToKramaMapArr []TextMapEntry `json:"-"`
+	// TypingTextToKramaMapArr is `typing_text_to_krama_map` in its source order (custom back refs index into it)
+	TypingTextToKramaMapArr []TextMapEntry `json:"-"`
+	// text -> index in `TextToKramaMapArr`
+	TextToKramaLookup map[string]int `json:"-"`
+	// text -> index in `TypingTextToKramaMapArr`
+	TypingTextToKramaLookup map[string]int `json:"-"`
+	// single-rune keys of `KramaTextArr` -> index (first index wins)
+	KramaTextCharLookup CharIndexTable `json:"-"`
+	// single-rune keys of `TextToKramaMapArr` -> index
+	TextToKramaCharLookup CharIndexTable `json:"-"`
+	// single-rune keys of `TypingTextToKramaMapArr` -> index
+	TypingTextToKramaCharLookup CharIndexTable `json:"-"`
+
 	SchwaProperty  bool    `json:"schwa_property,omitempty"`
 	Halant         string  `json:"halant,omitempty"`
 	Nuqta          *string `json:"nuqta,omitempty"`
@@ -176,6 +239,78 @@ func (s *ScriptData) initLookups() {
 			s.CustomScriptCharsLookup[item.Text] = i
 		}
 	}
+
+	for i := range s.List {
+		s.List[i].kind = listKindOf(s.List[i].Type)
+	}
+
+	s.TextToKramaMapArr = withNextChars(textMapToSortedEntries(s.TextMap))
+	s.TypingTextToKramaMapArr = withNextChars(typingEntriesForGob(*s))
+	s.TextToKramaLookup = entriesIndexLookup(s.TextToKramaMapArr)
+	s.TypingTextToKramaLookup = entriesIndexLookup(s.TypingTextToKramaMapArr)
+
+	s.KramaTextCharLookup = newCharIndexTableFromKeys(len(s.KramaTextArr), func(i int) string {
+		return s.KramaTextArr[i].Text
+	})
+	s.TextToKramaCharLookup = newCharIndexTableFromKeys(len(s.TextToKramaMapArr), func(i int) string {
+		return s.TextToKramaMapArr[i].Text
+	})
+	s.TypingTextToKramaCharLookup = newCharIndexTableFromKeys(len(s.TypingTextToKramaMapArr), func(i int) string {
+		return s.TypingTextToKramaMapArr[i].Text
+	})
+}
+
+// withNextChars fills `NextChars` of each entry (entries are copies, the source maps are untouched)
+func withNextChars(entries []TextMapEntry) []TextMapEntry {
+	for i := range entries {
+		next := entries[i].Value.Next
+		if len(next) == 0 {
+			continue
+		}
+		chars := make([]rune, 0, len(next))
+		for _, n := range next {
+			if r, ok := singleRune(n); ok {
+				chars = append(chars, r)
+			}
+		}
+		entries[i].Value.NextChars = chars
+	}
+	return entries
+}
+
+// entriesIndexLookup maps each text to its (first) index in `entries`
+func entriesIndexLookup(entries []TextMapEntry) map[string]int {
+	out := make(map[string]int, len(entries))
+	for i, entry := range entries {
+		if _, exists := out[entry.Text]; !exists {
+			out[entry.Text] = i
+		}
+	}
+	return out
+}
+
+// TextToKramaMapIndex returns the index of `text` in `TextToKramaMapArr`
+// (or `TypingTextToKramaMapArr` if `useTypingMap`), -1 if not found.
+func (s *ScriptData) TextToKramaMapIndex(text string, useTypingMap bool) int {
+	var idx int
+	var ok bool
+	if useTypingMap {
+		idx, ok = s.TypingTextToKramaLookup[text]
+	} else {
+		idx, ok = s.TextToKramaLookup[text]
+	}
+	if !ok {
+		return -1
+	}
+	return idx
+}
+
+// TextToKramaMapCharIndex is TextToKramaMapIndex for a single rune (no string needed).
+func (s *ScriptData) TextToKramaMapCharIndex(r rune, useTypingMap bool) int {
+	if useTypingMap {
+		return s.TypingTextToKramaCharLookup.Get(r)
+	}
+	return s.TextToKramaCharLookup.Get(r)
 }
 
 type scriptDataGob struct {
@@ -542,6 +677,9 @@ type ScriptListData struct {
 	Langs               []string
 	LangScriptMap       map[string]string
 	ScriptAlternatesMap map[string]string
+
+	// set of `Scripts` (for the already normalized fast path)
+	scriptSet map[string]struct{}
 }
 
 type ScriptDataEntry struct {

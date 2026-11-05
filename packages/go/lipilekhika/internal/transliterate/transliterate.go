@@ -1,6 +1,7 @@
 package transliterate
 
 import (
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -8,10 +9,14 @@ import (
 )
 
 const (
-	maxContextLength            = 3
-	charsToSkip                 = " \n\r\t,~!@?%"
 	defaultUseNativeNum         = true
 	defaultIncludeInherentVowel = false
+)
+
+const (
+	optUseTypingChars        = "normal_to_all:use_typing_chars"
+	optPreserveSpecificChars = "all_to_normal:preserve_specific_chars"
+	optSinhalaConjunctHalant = "all_to_sinhala:use_conjunct_enabling_halant"
 )
 
 // Options holds transliteration options.
@@ -88,15 +93,22 @@ func resolveTransliterationRules(
 	customOptionsMap map[string]scriptdata.CustomOption,
 	inputOptions map[string]bool,
 ) ResolvedRules {
-	tOpts := getActiveCustomOptions(fromData, toData, customOptionsMap, inputOptions)
-	if tOpts == nil {
-		tOpts = make(map[string]bool)
+	// The overwhelmingly common API call has no custom options. Avoid scanning
+	// custom-option data when every option is necessarily disabled.
+	if inputOptions == nil {
+		return ResolvedRules{TransOptions: map[string]bool{}}
 	}
-	var customRules []scriptdata.Rule
+	tOpts := getActiveCustomOptions(fromData, toData, customOptionsMap, inputOptions)
+	// deterministic rule order (map iteration order is random)
+	keys := make([]string, 0, len(tOpts))
 	for k, enabled := range tOpts {
-		if !enabled {
-			continue
+		if enabled {
+			keys = append(keys, k)
 		}
+	}
+	sort.Strings(keys)
+	var customRules []scriptdata.Rule
+	for _, k := range keys {
 		if opt, ok := customOptionsMap[k]; ok {
 			customRules = append(customRules, opt.Rules...)
 		}
@@ -136,6 +148,11 @@ func ruleUsesReplace(rule *scriptdata.Rule, allowed scriptdata.CheckIn) bool {
 	return rule.CheckIn != nil && *rule.CheckIn == allowed
 }
 
+func ruleChecksOutput(rule *scriptdata.Rule) bool {
+	return rule.CheckIn != nil && *rule.CheckIn == scriptdata.CheckInOutput
+}
+
+// applyCustomReplaceRules only applies rules marked with `use_replace=true` (fast replaceAll pass).
 func applyCustomReplaceRules(
 	text string,
 	s *scriptdata.ScriptData,
@@ -164,9 +181,7 @@ func applyCustomReplaceRules(
 				if followStr == "" {
 					continue
 				}
-				search := prevStr + followStr
-				replace := replText + followStr
-				text = strings.ReplaceAll(text, search, replace)
+				text = strings.ReplaceAll(text, prevStr+followStr, replText+followStr)
 			}
 		case "direct_replace":
 			replText := replTextForDirectReplace(r, s)
@@ -193,15 +208,268 @@ func replTextForDirectReplace(r *scriptdata.Rule, s *scriptdata.ScriptData) stri
 	return getRuleReplaceText(r, s)
 }
 
-func i16ToIntSlice(v []int16) ([]int, bool) {
-	out := make([]int, 0, len(v))
+// TransliterateScratch holds buffers reused across calls, so repeated calls (typing mode
+// re-transliterates the context on every key) avoid per-call allocations.
+// The zero value is ready to use. Not safe for concurrent use.
+type TransliterateScratch struct {
+	// char table of the input (see `inputCursor`)
+	chars []cursorChar
+	// output buffer
+	out []byte
+}
+
+type transliterateCtx struct {
+	fromName, toName     string
+	fromData, toData     *scriptdata.ScriptData
+	customRules          []scriptdata.Rule
+	cursor               *inputCursor
+	result               *resultStringBuilder
+	prevCtx              *prevContextBuilder
+	brahmicHalant        string
+	brahmicNuqta         string
+	hasNuqta             bool
+	typingMode           bool
+	includeInherentVowel bool
+	isFromTamilExt       bool
+	isToTamilExt         bool
+	sinhalaConjunct      bool
+}
+
+func (ctx *transliterateCtx) resultLastCharIsTaExtSuperscript() bool {
+	return isTaExtSuperscriptTail(ctx.result.lastChar())
+}
+
+// prevContextCleanup returns `true` when the current write already handled concatenation/reordering.
+//
+// `lastExtraCall` is the final call after the input is consumed (it carries no item).
+func (ctx *transliterateCtx) prevContextCleanup(
+	itemText string,
+	itemList *scriptdata.ListItem,
+	next []string,
+	lastExtraCall bool,
+) bool {
+	resultConcat := false
+	itemKind := itemList.Kind()
+	prev := ctx.prevCtx
+
+	// custom cleanup logic/cases
+	// (cheapest, most selective test first; all operands are side-effect free)
+	if (lastExtraCall || itemKind == scriptdata.ListKindAnya) &&
+		((ctx.hasNuqta &&
+			prev.typeAt(-3) == scriptdata.ListKindVyanjana &&
+			prev.textAt(-2) == ctx.brahmicNuqta &&
+			prev.typeAt(-1) == scriptdata.ListKindMatra) ||
+			(prev.typeAt(-2) == scriptdata.ListKindVyanjana &&
+				prev.typeAt(-1) == scriptdata.ListKindMatra)) {
+		prev.clear()
+	}
+
+	if ctx.fromData.ScriptType == scriptdata.ScriptTypeBrahmic &&
+		ctx.toData.ScriptType == scriptdata.ScriptTypeOther {
+		// custom logic when converting from brahmic to other.
+		// Short-circuit chain ordered cheapest/most selective first (all checks are pure).
+		// Since `itemText != halant` is required, the former `toAnyaOrNull`
+		// (`(!matra && text != halant) || anya || nil`) reduces to `!matra`.
+		if itemKind != scriptdata.ListKindMatra &&
+			// vyanjana + nuqta
+			(prev.typeAt(-1) == scriptdata.ListKindVyanjana ||
+				(ctx.hasNuqta &&
+					prev.typeAt(-2) == scriptdata.ListKindVyanjana &&
+					prev.textAt(-1) == ctx.brahmicNuqta)) &&
+			itemText != ctx.brahmicHalant &&
+			(!ctx.hasNuqta || itemText != ctx.brahmicNuqta) &&
+			(!ctx.isFromTamilExt || firstRuneDiffers(itemText, ctx.brahmicHalant)) {
+			ctx.result.emit(ctx.toData.SchwaCharacter)
+		}
+	} else if ctx.fromData.ScriptType == scriptdata.ScriptTypeOther &&
+		ctx.toData.ScriptType == scriptdata.ScriptTypeBrahmic {
+		// custom logic when converting from other to brahmic
+		if prev.typeAt(-1) == scriptdata.ListKindVyanjana &&
+			(itemKind == scriptdata.ListKindMatra || itemKind == scriptdata.ListKindSvara) {
+			linkedMatra := itemText
+			if itemKind == scriptdata.ListKindSvara {
+				kr := -1
+				if len(itemList.MatraKramaRef) > 0 {
+					kr = int(itemList.MatraKramaRef[0])
+				}
+				linkedMatra = kramaTextOrEmpty(ctx.toData, kr)
+			}
+			ctx.result.emitPiecesWithReorder([]string{linkedMatra}, ctx.toData.Halant,
+				ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript())
+			resultConcat = true
+		} else if !ctx.includeInherentVowel &&
+			prev.typeAt(-1) == scriptdata.ListKindVyanjana &&
+			itemKind != scriptdata.ListKindMatra &&
+			itemText != ctx.brahmicHalant {
+			ctx.emitHalant()
+		} else if ctx.includeInherentVowel &&
+			!lastExtraCall &&
+			itemKind == scriptdata.ListKindVyanjana &&
+			(prev.typeAt(-1) == scriptdata.ListKindVyanjana ||
+				(ctx.hasNuqta &&
+					prev.typeAt(-2) == scriptdata.ListKindVyanjana &&
+					prev.textAt(-1) == ctx.brahmicNuqta)) {
+			ctx.emitHalant()
+		}
+	}
+
+	// custom typing mode context clear logic
+	// only clear context if there are no next characters or if its last extra call
+	toClear := false
+	if ctx.typingMode && len(next) == 0 && !lastExtraCall &&
+		// the case below is to enable typing of _, ' (Vedic svara chihnas too)
+		!(ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript()) {
+		toClear = true
+		// do not clear the context only if case where the current added element is a vyanjana
+		if itemKind == scriptdata.ListKindVyanjana {
+			toClear = false
+		}
+		if toClear {
+			prev.clear()
+		}
+	}
+
+	// addition and shifting
+	// in typing it should not be the last extra call
+	if (!ctx.typingMode || (!lastExtraCall && !toClear)) && !lastExtraCall {
+		prev.push(itemText, itemKind)
+	}
+	return resultConcat
+}
+
+// emitHalant emits the (skipped) halant in other -> brahmic conversion
+func (ctx *transliterateCtx) emitHalant() {
+	shouldReorder := ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript()
+	ctx.result.emitPiecesWithReorder([]string{ctx.brahmicHalant}, ctx.toData.Halant, shouldReorder)
+	if ctx.toName == "Sinhala" && ctx.sinhalaConjunct {
+		if lp, ok := ctx.result.lastPiece(); ok {
+			ctx.result.rewriteAt(-1, lp+"‍")
+		}
+	}
+}
+
+func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int) {
+	currentIdx := textIndex + delta
+	for i := range ctx.customRules {
+		rule := &ctx.customRules[i]
+		if rule.UseReplace != nil && *rule.UseReplace {
+			continue
+		}
+		switch rule.Type {
+		case "replace_prev_krama_keys":
+			// Bail out if any prev index is negative
+			if hasNegative(rule.Prev) {
+				continue
+			}
+			if !ruleChecksOutput(rule) {
+				if currentIdx < 0 || textIndex < 0 {
+					continue
+				}
+				matched, mLen := matchPrevKramaSequence(ctx.cursor.peekAtStr, currentIdx, rule.Prev, ctx.fromData)
+				if !matched {
+					continue
+				}
+				nextR, ok := ctx.cursor.peekAt(textIndex)
+				if !ok {
+					continue
+				}
+				nextIdx := kramaIndexOfChar(ctx.fromData, nextR)
+				if nextIdx < 0 || !containsI16(rule.Following, int16(nextIdx)) {
+					continue
+				}
+				ctx.result.rewriteTailPieces(mLen, replaceWithPieces(rule.ReplaceWith, ctx.toData))
+			} else {
+				// output
+				lp, ok := ctx.result.lastPiece()
+				if !ok {
+					continue
+				}
+				followIdx := kramaIndexOfText(ctx.toData, lp)
+				if followIdx < 0 || !containsI16(rule.Following, int16(followIdx)) {
+					continue
+				}
+				matched, mLen := matchPrevKramaSequence(ctx.result.peekAt, -2, rule.Prev, ctx.toData)
+				if matched {
+					pieces := replaceWithPieces(rule.ReplaceWith, ctx.toData)
+					pieces = append(pieces, lp) // instead [...pieces, last_piece]
+					ctx.result.rewriteTailPieces(mLen+1, pieces)
+				}
+			}
+		case "direct_replace":
+			lookup := ctx.fromData
+			if ruleChecksOutput(rule) {
+				lookup = ctx.toData
+			}
+			for _, grp := range rule.ToReplace {
+				if hasNegative(grp) {
+					continue
+				}
+				matched, mLen := matchPrevKramaSequence(ctx.result.peekAt, -1, grp, lookup)
+				if !matched {
+					continue
+				}
+				if rule.ReplaceText != nil {
+					ctx.result.rewriteTailPieces(mLen, []string{*rule.ReplaceText})
+				} else {
+					ctx.result.rewriteTailPieces(mLen, replaceWithPieces(rule.ReplaceWith, lookup))
+				}
+				break
+			}
+		}
+	}
+}
+
+func hasNegative(v []int16) bool {
 	for _, n := range v {
 		if n < 0 {
-			return nil, false
+			return true
 		}
-		out = append(out, int(n))
 	}
-	return out, true
+	return false
+}
+
+func containsI16(v []int16, x int16) bool {
+	for _, n := range v {
+		if n == x {
+			return true
+		}
+	}
+	return false
+}
+
+func containsRune(v []rune, x rune) bool {
+	for _, n := range v {
+		if n == x {
+			return true
+		}
+	}
+	return false
+}
+
+// runeIsStr reports whether `s` is exactly the single rune `r`.
+func runeIsStr(r rune, s string) bool {
+	sr, size := utf8.DecodeRuneInString(s)
+	return size > 0 && size == len(s) && sr == r
+}
+
+// firstRuneDiffers reports whether the first runes of `a` and `b` differ (an empty string has none).
+func firstRuneDiffers(a, b string) bool {
+	if a == "" || b == "" {
+		return a != b
+	}
+	ra, _ := utf8.DecodeRuneInString(a)
+	rb, _ := utf8.DecodeRuneInString(b)
+	return ra != rb
+}
+
+// emitKramaPieces emits the target-script text of each krama index directly
+// (negative/missing entries produce nothing), without first collecting the pieces.
+func emitKramaPieces(result *resultStringBuilder, toData *scriptdata.ScriptData, krama []int16) {
+	for _, k := range krama {
+		if k >= 0 {
+			result.emit(kramaTextOrEmpty(toData, int(k)))
+		}
+	}
 }
 
 // TransliterateTextCore is the synchronous core transliterator.
@@ -213,6 +481,20 @@ func TransliterateTextCore(
 	customRules []scriptdata.Rule,
 	opts *Options,
 ) (TransliterateOutput, error) {
+	return TransliterateTextCoreWith(text, fromName, toName, fromData, toData, transOptions, customRules, opts, nil)
+}
+
+// TransliterateTextCoreWith is TransliterateTextCore taking its working buffers from
+// `scratch` (nil allocates fresh buffers).
+func TransliterateTextCoreWith(
+	text string,
+	fromName, toName string,
+	fromData, toData *scriptdata.ScriptData,
+	transOptions map[string]bool,
+	customRules []scriptdata.Rule,
+	opts *Options,
+	scratch *TransliterateScratch,
+) (TransliterateOutput, error) {
 	if opts == nil {
 		opts = &Options{
 			UseNativeNumerals:    defaultUseNativeNum,
@@ -222,679 +504,491 @@ func TransliterateTextCore(
 	if opts.TypingMode && fromName != "Normal" {
 		return TransliterateOutput{}, &TransliterateError{Msg: "typing mode requires Normal as from script"}
 	}
-	// Only copy transOptions when we need to mutate it (typing mode adds a key).
-	// For the common non-typing path, alias the map directly — Go nil-map reads
-	// return the zero value (false) so this is safe even when transOptions is nil.
-	var tOpts map[string]bool
-	if opts.TypingMode {
-		tOpts = make(map[string]bool, len(transOptions)+1)
-		for k, v := range transOptions {
-			tOpts[k] = v
-		}
-		tOpts["normal_to_all:use_typing_chars"] = true
-	} else {
-		tOpts = transOptions
-	}
+	// option flags resolved once (nil-map reads return false)
+	transOptUseTypingChars := transOpt(transOptions, optUseTypingChars)
+	optPreserveSpecificChars := transOpt(transOptions, optPreserveSpecificChars) && toName == "Normal"
+
 	if opts.TypingMode && fromName == "Normal" {
 		text = applyTypingInputAliases(text, toName)
 	}
-	text = applyCustomReplaceRules(text, fromData, customRules, scriptdata.CheckInInput)
-
-	result := newResultStringBuilder()
-	cursor := newInputCursor(text)
-	prevCtx := newPrevContextBuilder(maxContextLength)
-
-	prevContextInUse := (fromData.ScriptType == scriptdata.ScriptTypeBrahmic && toData.ScriptType == scriptdata.ScriptTypeOther) ||
-		(fromData.ScriptType == scriptdata.ScriptTypeOther && toData.ScriptType == scriptdata.ScriptTypeBrahmic) ||
-		(opts.TypingMode && fromName == "Normal" && toData.ScriptType == scriptdata.ScriptTypeOther)
-
-	var brahmicNuqta *string
-	var brahmicHalant *string
-	if fromData.ScriptType == scriptdata.ScriptTypeBrahmic && toData.ScriptType == scriptdata.ScriptTypeOther {
-		brahmicNuqta = fromData.Nuqta
-		h := fromData.Halant
-		brahmicHalant = &h
-	} else if fromData.ScriptType == scriptdata.ScriptTypeOther && toData.ScriptType == scriptdata.ScriptTypeBrahmic {
-		brahmicNuqta = toData.Nuqta
-		h := toData.Halant
-		brahmicHalant = &h
+	if len(customRules) > 0 {
+		text = applyCustomReplaceRules(text, fromData, customRules, scriptdata.CheckInInput)
 	}
 
-	useTypingMap := tOpts["normal_to_all:use_typing_chars"] || opts.TypingMode
-	if useTypingMap && fromName == "Normal" {
-		useTypingMap = true
-	}
-	var fromTextMap map[string]scriptdata.TextToKramaMap
-	if useTypingMap && fromName == "Normal" {
-		fromTextMap = toData.TypingTextMap
-	} else {
-		fromTextMap = fromData.TextMap
+	var charsBuf []cursorChar
+	var outBuf []byte
+	if scratch != nil {
+		charsBuf, outBuf = scratch.chars, scratch.out
 	}
 
-	ignoreTaExtSupRuneIndex := -1
-	runeCount := cursor.runeCount()
+	trackResultPieces := len(customRules) > 0 ||
+		(toName == "Sinhala" && transOpt(transOptions, optSinhalaConjunctHalant))
+	// ^ as currently we are using rewriteAt only for sinhala target
+	resultCapacity := len(text)
+	if fromData.ScriptType == scriptdata.ScriptTypeOther && toData.ScriptType == scriptdata.ScriptTypeBrahmic {
+		resultCapacity = len(text) * 3 // brahmic script usually use 3x more bytes
+	}
+	result := newResultStringBuilder(outBuf, resultCapacity, trackResultPieces)
+	cursor := newInputCursor(text, charsBuf)
+	var prevCtx prevContextBuilder
 
-	// Hoist ctx so prevContextCleanup doesn't allocate a struct per call.
-	ctx := &transliterateCtx{
+	fromBrahmic := fromData.ScriptType == scriptdata.ScriptTypeBrahmic
+	toBrahmic := toData.ScriptType == scriptdata.ScriptTypeBrahmic
+	fromOther := fromData.ScriptType == scriptdata.ScriptTypeOther
+	toOther := toData.ScriptType == scriptdata.ScriptTypeOther
+
+	prevContextInUse := (fromBrahmic && toOther) || (fromOther && toBrahmic) ||
+		(opts.TypingMode && fromName == "Normal" && toOther)
+
+	ctx := transliterateCtx{
+		fromName: fromName, toName: toName,
 		fromData: fromData, toData: toData,
-		result: result, prevCtx: prevCtx,
-		brahmicHalant: brahmicHalant, brahmicNuqta: brahmicNuqta,
-		typingMode: opts.TypingMode, includeInherentVowel: opts.IncludeInherentVowel,
-		transOptions: tOpts,
+		customRules:          customRules,
+		cursor:               &cursor,
+		result:               &result,
+		prevCtx:              &prevCtx,
+		typingMode:           opts.TypingMode,
+		includeInherentVowel: opts.IncludeInherentVowel,
+		isFromTamilExt:       isScriptTamilExt(fromName),
+		isToTamilExt:         isScriptTamilExt(toName),
+		sinhalaConjunct:      transOpt(transOptions, optSinhalaConjunctHalant),
+	}
+	if fromBrahmic && toOther {
+		ctx.brahmicHalant = fromData.Halant
+		if fromData.Nuqta != nil {
+			ctx.brahmicNuqta, ctx.hasNuqta = *fromData.Nuqta, true
+		}
+	} else if fromOther && toBrahmic {
+		ctx.brahmicHalant = toData.Halant
+		if toData.Nuqta != nil {
+			ctx.brahmicNuqta, ctx.hasNuqta = *toData.Nuqta, true
+		}
 	}
 
-	for cursor.pos < runeCount {
+	// choose matching map
+	useTypingMap := (transOptUseTypingChars || opts.TypingMode) && fromName == "Normal"
+	lookupData := fromData
+	if useTypingMap {
+		lookupData = toData
+	}
+	textToKramaMap := fromData.TextToKramaMapArr
+	if useTypingMap {
+		textToKramaMap = toData.TypingTextToKramaMapArr
+	}
+
+	// Used when converting from Tamil-Extended (superscript numbers)
+	ignoreTaExtSupIndex := -1
+
+	charsLen := cursor.charCount()
+	for cursor.pos < charsLen {
 		textIndex := cursor.pos
-		r, chWidth, ok := cursor.peek()
+		ch, ok := cursor.peek()
 		if !ok {
 			break
 		}
-		ch := string(r)
 
-		if ignoreTaExtSupRuneIndex >= 0 && textIndex >= ignoreTaExtSupRuneIndex {
-			ignoreTaExtSupRuneIndex = -1
-			cursor.advanceRunes(1)
+		if ignoreTaExtSupIndex != -1 && textIndex >= ignoreTaExtSupIndex {
+			ignoreTaExtSupIndex = -1
+			cursor.advance(1)
 			continue
 		}
 
-		if strings.ContainsRune(charsToSkip, r) {
-			cursor.advanceRunes(1)
+		// skip certain chars (preserve as-is)
+		if isSkipChar(ch) {
+			cursor.advance(1)
 			if prevContextInUse {
-				prevContextCleanup(ctx, "", nil, nil, false)
+				ctx.prevContextCleanup(" ", nil, nil, false)
 				prevCtx.clear()
 			}
-			result.emit(ch)
+			result.emitRune(ch)
 			continue
 		}
 
-		if isSingleASCIIDigit(ch) && !opts.UseNativeNumerals {
-			result.emit(ch)
-			cursor.advanceRunes(1)
-			prevContextCleanup(ctx, ch, nil, nil, false)
+		// latin digits passthrough if native numerals disabled
+		if ch >= '0' && ch <= '9' && !opts.UseNativeNumerals {
+			result.emitRune(ch)
+			cursor.advance(1)
+			digit, _ := cursor.peekAtStr(textIndex)
+			ctx.prevContextCleanup(digit, nil, nil, false)
 			continue
 		}
 
-		if tOpts["all_to_normal:preserve_specific_chars"] && toName == "Normal" {
-			customArr := fromData.CustomScriptCharsArr
-			if idx, ok := fromData.CustomScriptCharsLookup[ch]; ok {
-				item := customArr[idx]
-				prevText := item.Text
-				var listRef *scriptdata.ListItem
+		// Preserve mode: custom script chars when converting to Normal
+		if optPreserveSpecificChars {
+			chStr, _ := cursor.peekAtStr(textIndex)
+			if idx, ok := fromData.CustomScriptCharsLookup[chStr]; ok {
+				item := &fromData.CustomScriptCharsArr[idx]
+				var listItem *scriptdata.ListItem
 				if item.FirstRef != nil {
-					li := int(*item.FirstRef)
-					if li >= 0 && li < len(fromData.List) {
-						listRef = &fromData.List[li]
-					}
+					listItem = listItemAt(fromData, int(*item.FirstRef))
 				}
-				prevContextCleanup(ctx, prevText, listRef, nil, false)
-				normText := ""
+				ctx.prevContextCleanup(item.Text, listItem, nil, false)
+				normalText := ""
 				if item.SecondRef != nil {
 					si := int(*item.SecondRef)
-					entries := fromData.TypingTextMapEntries
-					if si >= 0 && si < len(entries) {
-						normText = entries[si].Text
+					if si >= 0 && si < len(fromData.TypingTextToKramaMapArr) {
+						normalText = fromData.TypingTextToKramaMapArr[si].Text
 					}
 				}
-				result.emit(normText)
-				cursor.advanceRunes(utf8.RuneCountInString(prevText))
+				result.emit(normalText)
+				cursor.advance(utf8.RuneCountInString(item.Text))
 				continue
 			}
 		}
 
-		var matchedText string
-		var mapVal *scriptdata.TextToKramaMap
-		searchBaseUnits := 1
-		if chWidth > 1 {
-			searchBaseUnits = 1
-		}
-		scanUnits := 0
-		var lastValidVowelMatchVal *scriptdata.TextToKramaMap
-		var lastValidVowelMatchText string
-		checkVowelRetraction := prevContextInUse &&
-			fromData.ScriptType == scriptdata.ScriptTypeOther &&
-			toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-			(prevCtx.typeAt(-1) != nil && listItemIsVyanjana(prevCtx.typeAt(-1)) ||
-				brahmicNuqta != nil && prevCtx.typeAt(-2) != nil && listItemIsVyanjana(prevCtx.typeAt(-2)) &&
-					prevCtx.textAt(-1) == *brahmicNuqta)
+		// Step 1: match text_to_krama_map / typing_text_to_krama_map
+		itemIndex := -1
+		{
+			scanUnits := 0
+			lastValidVowelMatchIndex := -1
+			checkVowelRetraction := prevContextInUse && fromOther && toBrahmic &&
+				(prevCtx.typeAt(-1) == scriptdata.ListKindVyanjana ||
+					(ctx.hasNuqta &&
+						prevCtx.typeAt(-2) == scriptdata.ListKindVyanjana &&
+						prevCtx.textAt(-1) == ctx.brahmicNuqta))
 
-		for {
-			nextR, _, nextROk := cursor.peekAtRune(textIndex + searchBaseUnits + scanUnits)
-			if ignoreTaExtSupRuneIndex >= 0 && nextROk && isTaExtSuperscriptTailRune(nextR) {
-				scanUnits++
-				continue
-			}
-			endIdx := textIndex + searchBaseUnits + scanUnits
-			if endIdx > 0 {
-				_, w, _ := cursor.peekAtRune(endIdx - 1)
-				if w == 2 {
-					endIdx++
+			for {
+				if ignoreTaExtSupIndex != -1 && isTaExtSuperscriptTail(cursor.peekAt(textIndex+scanUnits+1)) {
+					scanUnits++ // each char is 1 unit
 				}
-			}
-			charToSearch := ""
-			if ignoreTaExtSupRuneIndex >= 0 {
-				charToSearch = cursor.sliceRunes(textIndex, ignoreTaExtSupRuneIndex)
-				if endIdx > ignoreTaExtSupRuneIndex {
-					charToSearch += cursor.sliceRunes(ignoreTaExtSupRuneIndex+1, endIdx)
+
+				endIndex := textIndex + scanUnits + 1
+				singleCharLookup := scanUnits == 0 && ignoreTaExtSupIndex == -1
+				// The single-char fast path never reads `charToSearch` unless the match
+				// has a `next` list, so build the slice lazily.
+				charToSearch := ""
+				var potentialMatchIndex int
+				if singleCharLookup {
+					// more scan units only needed in case ta-ext so safe to do
+					potentialMatchIndex = lookupData.TextToKramaMapCharIndex(ch, useTypingMap)
+				} else {
+					if ignoreTaExtSupIndex != -1 {
+						charToSearch = cursor.slice(textIndex, ignoreTaExtSupIndex)
+						if endIndex > ignoreTaExtSupIndex {
+							charToSearch += cursor.slice(ignoreTaExtSupIndex+1, endIndex)
+						}
+					} else {
+						charToSearch = cursor.slice(textIndex, endIndex)
+					}
+					potentialMatchIndex = lookupData.TextToKramaMapIndex(charToSearch, useTypingMap)
 				}
-			} else {
-				charToSearch = cursor.sliceRunes(textIndex, endIdx)
-			}
-			potentialMatchVal, ok := fromTextMap[charToSearch]
-			if !ok {
-				mapVal = nil
+				if potentialMatchIndex < 0 {
+					itemIndex = -1
+					break
+				}
+				potentialMatch := &textToKramaMap[potentialMatchIndex].Value
+
+				// vowel retraction support (kAUM etc.)
+				if checkVowelRetraction && len(potentialMatch.Krama) > 0 {
+					kramaID := potentialMatch.Krama[0]
+					if kramaID >= 0 {
+						kind := kramaListItem(toData, int(kramaID)).Kind()
+						isSingleVowel := len(potentialMatch.Krama) == 1 &&
+							(kind == scriptdata.ListKindSvara || kind == scriptdata.ListKindMatra)
+						if isSingleVowel {
+							lastValidVowelMatchIndex = potentialMatchIndex
+						} else if lastValidVowelMatchIndex >= 0 {
+							itemIndex = lastValidVowelMatchIndex
+							break
+						}
+					}
+				}
+
+				// extend match if `next` allows it
+				nextChars := potentialMatch.NextChars
+				if len(nextChars) > 0 {
+					nthCh, nthOk := cursor.peekAt(endIndex)
+
+					// Tamil-Extended special handling (superscript numbers after matra/halant)
+					if ctx.isFromTamilExt && fromBrahmic {
+						if singleCharLookup {
+							charToSearch = cursor.slice(textIndex, endIndex)
+						}
+						var n1Ch, n2Ch rune
+						var n1Ok, n2Ok bool
+						if nthOk {
+							n1Ch, n1Ok = cursor.peekAt(endIndex + 1)
+						}
+						// this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+						if nthOk && n1Ok {
+							n2Ch, n2Ok = cursor.peekAt(endIndex + 2)
+						}
+						nthKramaIndex := -1
+						if nthOk {
+							nthKramaIndex = kramaIndexOfChar(fromData, nthCh)
+						}
+
+						// Case: matra/halant + superscript tail (superscript is in next list)
+						if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n1Ch, n1Ok) &&
+							containsRune(nextChars, n1Ch) {
+							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false)
+							if charIndex >= 0 && nthKramaIndex >= 0 {
+								itemIndex = charIndex
+								nthKind := kramaListItem(fromData, nthKramaIndex).Kind()
+								if runeIsStr(nthCh, fromData.Halant) || nthKind == scriptdata.ListKindMatra {
+									ignoreTaExtSupIndex = endIndex + 1
+									break
+								}
+							}
+						} else if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n2Ch, n2Ok) &&
+							containsRune(nextChars, n2Ch) {
+							// Case: matra + matra + superscript tail (special for gO = g + E + A)
+							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n2Ch), false)
+							n1KramaIndex := -1
+							if n1Ok {
+								n1KramaIndex = kramaIndexOfChar(fromData, n1Ch)
+							}
+							if charIndex >= 0 && nthKramaIndex >= 0 && n1KramaIndex >= 0 {
+								itemIndex = charIndex
+								if kramaListItem(fromData, nthKramaIndex).Kind() == scriptdata.ListKindMatra &&
+									kramaListItem(fromData, n1KramaIndex).Kind() == scriptdata.ListKindMatra {
+									ignoreTaExtSupIndex = endIndex + 2
+									break
+								}
+							}
+						}
+
+						// Handle case: mAtrA + Vedic mark + superscript (n2 is superscript, n1 is Vedic)
+						if ignoreTaExtSupIndex == -1 && nthOk &&
+							isVedicSvaraTail(n1Ch, n1Ok) &&
+							isTaExtSuperscriptTail(n2Ch, n2Ok) &&
+							containsRune(nextChars, n2Ch) &&
+							nthKramaIndex >= 0 &&
+							// If nth_next is a mAtrA and n1 is Vedic mark, include superscript
+							kramaListItem(fromData, nthKramaIndex).Kind() == scriptdata.ListKindMatra {
+							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n2Ch), false)
+							if charIndex >= 0 {
+								itemIndex = charIndex
+								ignoreTaExtSupIndex = endIndex + 2
+								break
+							}
+						}
+					}
+
+					// Generic: if the next character is in the next list, extend scan and continue
+					if nthOk && containsRune(nextChars, nthCh) {
+						scanUnits++ // each char is 1 unit
+						continue
+					}
+				}
+
+				itemIndex = potentialMatchIndex
 				break
 			}
-			potentialMatch := &potentialMatchVal
-
-			if checkVowelRetraction && len(potentialMatch.Krama) >= 1 {
-				kid := potentialMatch.Krama[0]
-				if kid >= 0 && int(kid) < len(toData.KramaTextArr) {
-					kt := toData.KramaTextArr[kid]
-					var listType *scriptdata.ListItem
-					if kt.ListArrRef != nil {
-						li := int(*kt.ListArrRef)
-						if li >= 0 && li < len(toData.List) {
-							listType = &toData.List[li]
-						}
-					}
-					isSingleVowel := len(potentialMatch.Krama) == 1 &&
-						(listItemIsSvara(listType) || listItemIsMatra(listType))
-					if isSingleVowel {
-						lastValidVowelMatchVal = potentialMatch
-						lastValidVowelMatchText = charToSearch
-					} else if lastValidVowelMatchVal != nil {
-						matchedText = lastValidVowelMatchText
-						mapVal = lastValidVowelMatchVal
-						break
-					}
-				}
-			}
-
-			if len(potentialMatch.Next) > 0 {
-				nthR, _, nthOk := cursor.peekAtRune(endIdx)
-				if nthOk && containsStr(potentialMatch.Next, string(nthR)) {
-					scanUnits++
-					continue
-				}
-			}
-			matchedText = charToSearch
-			mapVal = potentialMatch
-			break
 		}
 
-		if mapVal != nil {
-			indexDeleteLen := 0
-			if ignoreTaExtSupRuneIndex >= 0 && utf8.RuneCountInString(matchedText) > 1 {
-				if len(mapVal.Krama) > 0 {
-					ki := mapVal.Krama[0]
-					if ki >= 0 && int(ki) < len(fromData.KramaTextArr) {
-						kt := fromData.KramaTextArr[ki]
-						var li *scriptdata.ListItem
-						if kt.ListArrRef != nil {
-							lidx := int(*kt.ListArrRef)
-							if lidx >= 0 && lidx < len(fromData.List) {
-								li = &fromData.List[lidx]
-							}
-						}
-						if listItemIsVyanjana(li) && isTaExtSuperscriptTail(matchedText) {
-							indexDeleteLen = 1
-						}
-					}
+		// (the Tamil-Extended matches index into `fromData.TextToKramaMapArr`, which is
+		// `textToKramaMap` as the typing map is only used with `Normal` as the input)
+		matchedText := ""
+		if itemIndex >= 0 {
+			entry := &textToKramaMap[itemIndex]
+			matchedText = entry.Text
+			m := &entry.Value
+			// a match always starts at `ch`, so equal byte length means it is exactly `ch`
+			matchedCharCount := 1
+			if len(matchedText) != utf8.RuneLen(ch) {
+				matchedCharCount = utf8.RuneCountInString(matchedText)
+			}
+			// only relevant while skipping a Tamil-Extended superscript; evaluated lazily
+			indexDeleteLength := 0
+			if ignoreTaExtSupIndex != -1 && matchedCharCount > 1 && len(m.Krama) > 0 &&
+				kramaListItem(fromData, int(m.Krama[0])).Kind() == scriptdata.ListKindVyanjana {
+				last, _ := utf8.DecodeLastRuneInString(matchedText)
+				if isTaExtSuperscriptTail(last, true) {
+					indexDeleteLength = 1
 				}
 			}
-			matchedLenUnits := utf8.RuneCountInString(matchedText) - indexDeleteLen
-			cursor.advanceRunes(matchedLenUnits)
+			matchedLenUnits := matchedCharCount - indexDeleteLength
+			cursor.advance(matchedLenUnits)
 
-			if tOpts["normal_to_all:use_typing_chars"] && mapVal.CustomBackRef != nil && *mapVal.CustomBackRef >= 0 {
-				cb := int(*mapVal.CustomBackRef)
-				if cb < len(toData.CustomScriptCharsArr) {
-					customItem := toData.CustomScriptCharsArr[cb]
-					result.emit(customItem.Text)
-					var listItem *scriptdata.ListItem
-					if customItem.FirstRef != nil {
-						fi := int(*customItem.FirstRef)
-						if fi >= 0 && fi < len(toData.List) {
-							listItem = &toData.List[fi]
-						}
-					}
-					prevContextCleanup(ctx, matchedText, listItem, mapVal.Next, false)
-					continue
+			if (opts.TypingMode || transOptUseTypingChars) && m.CustomBackRef != nil &&
+				*m.CustomBackRef >= 0 && int(*m.CustomBackRef) < len(toData.CustomScriptCharsArr) {
+				customItem := &toData.CustomScriptCharsArr[*m.CustomBackRef]
+				result.emit(customItem.Text)
+				var listItem *scriptdata.ListItem
+				if customItem.FirstRef != nil {
+					listItem = listItemAt(toData, int(*customItem.FirstRef))
 				}
+				ctx.prevContextCleanup(matchedText, listItem, m.Next, false)
+				continue
 			}
 
-			hasValidKrama := false
-			hasNegativeKrama := false
-			for _, k := range mapVal.Krama {
-				if k >= 0 {
-					hasValidKrama = true
-				}
-				if k == -1 {
-					hasNegativeKrama = true
-				}
-			}
-			if hasValidKrama {
-				pieces := make([]string, 0, len(mapVal.Krama))
-				for _, k := range mapVal.Krama {
-					if k >= 0 {
-						pieces = append(pieces, kramaTextOrEmpty(toData, int(k)))
-					}
-				}
-				resultText := strings.Join(pieces, "")
+			krama := m.Krama
+			// If krama exists and has at least one non -1, emit directly
+			if hasKramaOtherThanNeg1(krama) {
+				// prev-context bookkeeping
 				resultConcat := false
 				if prevContextInUse {
-					if fromData.ScriptType == scriptdata.ScriptTypeBrahmic && toData.ScriptType == scriptdata.ScriptTypeOther {
+					if fromBrahmic && toOther {
+						// pick a brahmic list item (from-script) if available
 						var item *scriptdata.ListItem
-						if !tOpts["normal_to_all:use_typing_chars"] && mapVal.FallbackListRef != nil {
-							fi := int(*mapVal.FallbackListRef)
-							if fi >= 0 && fi < len(fromData.List) {
-								item = &fromData.List[fi]
+						if m.FallbackListRef != nil && !(transOptUseTypingChars || opts.TypingMode) {
+							item = listItemAt(fromData, int(*m.FallbackListRef))
+						}
+						if item == nil && len(krama) > 0 {
+							if ctx.isFromTamilExt && anyKramaKind(fromData, krama, scriptdata.ListKindMatra) &&
+								anyKramaKind(fromData, krama, scriptdata.ListKindVyanjana) {
+								item = &scriptdata.AnyaListItem
+							} else if ctx.isFromTamilExt && len(krama) > 1 &&
+								anyKramaKind(fromData, krama, scriptdata.ListKindNone) {
+								item = kramaListItem(fromData, int(krama[len(krama)-1]))
+							} else {
+								item = kramaListItem(fromData, int(krama[0]))
 							}
 						}
-						if item == nil && len(mapVal.Krama) > 0 {
-							k0 := mapVal.Krama[0]
-							if k0 >= 0 && int(k0) < len(fromData.KramaTextArr) {
-								kt := fromData.KramaTextArr[k0]
-								if kt.ListArrRef != nil {
-									li := int(*kt.ListArrRef)
-									if li >= 0 && li < len(fromData.List) {
-										item = &fromData.List[li]
-									}
-								}
-							}
-						}
-						resultConcat = prevContextCleanup(ctx, matchedText, item, nil, false)
-					} else if toData.ScriptType == scriptdata.ScriptTypeBrahmic && fromData.ScriptType == scriptdata.ScriptTypeOther {
+						resultConcat = ctx.prevContextCleanup(matchedText, item, nil, false)
+					} else if toBrahmic && fromOther {
 						var item *scriptdata.ListItem
-						if mapVal.FallbackListRef != nil {
-							fi := int(*mapVal.FallbackListRef)
-							if fi >= 0 && fi < len(toData.List) {
-								item = &toData.List[fi]
-							}
-						}
-						if item == nil && len(mapVal.Krama) > 0 {
-							k0 := mapVal.Krama[0]
-							if k0 >= 0 && int(k0) < len(toData.KramaTextArr) {
-								kt := toData.KramaTextArr[k0]
-								if kt.ListArrRef != nil {
-									li := int(*kt.ListArrRef)
-									if li >= 0 && li < len(toData.List) {
-										item = &toData.List[li]
-									}
-								}
-							}
+						if m.FallbackListRef != nil {
+							item = listItemAt(toData, int(*m.FallbackListRef))
+						} else if len(krama) > 0 {
+							item = kramaListItem(toData, int(krama[0]))
 						}
 						var next []string
 						if opts.TypingMode && fromName == "Normal" {
-							next = mapVal.Next
+							next = m.Next
 						}
-						resultConcat = prevContextCleanup(ctx, matchedText, item, next, false)
-					} else if opts.TypingMode && fromName == "Normal" && toData.ScriptType == scriptdata.ScriptTypeOther {
-						resultConcat = prevContextCleanup(ctx, matchedText, nil, mapVal.Next, false)
+						resultConcat = ctx.prevContextCleanup(matchedText, item, next, false)
+					} else if opts.TypingMode && fromName == "Normal" && toOther {
+						resultConcat = ctx.prevContextCleanup(matchedText, nil, m.Next, false)
 					}
 				}
+
 				if !resultConcat {
-					toHalant := toData.Halant
-					if toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-						isScriptTamilExt(toName) && resultLastCharIsTaExtSuperscript(result) {
-						lastKrama := int16(-1)
-						if len(mapVal.Krama) > 0 {
-							lastKrama = mapVal.Krama[len(mapVal.Krama)-1]
+					// Tamil-Extended output reorder (matra/halant after superscript)
+					if toBrahmic && ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript() {
+						// only this reorder path needs the pieces as a slice
+						pieces := make([]string, 0, len(krama))
+						for _, k := range krama {
+							if k >= 0 {
+								pieces = append(pieces, kramaTextOrEmpty(toData, int(k)))
+							}
 						}
-						if resultText == toHalant || (lastKrama >= 0 && int(lastKrama) < len(toData.List) &&
-							listItemIsMatra(&toData.List[lastKrama])) {
-							emitPiecesWithReorder(result, pieces, toHalant, true)
-						} else if len(pieces) > 0 && isVedicSvaraTail(pieces[len(pieces)-1]) {
+						toHalant := toData.Halant
+						if (len(pieces) == 1 && pieces[0] == toHalant) ||
+							listItemAt(toData, int(krama[len(krama)-1])).Kind() == scriptdata.ListKindMatra {
+							result.emitPiecesWithReorder(pieces, toHalant, true)
+						} else if len(pieces) > 0 && lastRuneIsVedicSvara(pieces[len(pieces)-1]) {
 							last, _ := result.popLastChar()
 							result.emitPieces(pieces)
-							result.emit(last)
+							result.emitRune(last)
 						} else {
 							result.emitPieces(pieces)
 						}
 					} else {
-						result.emitPieces(pieces)
+						emitKramaPieces(&result, toData, krama)
 					}
 				}
-				applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -matchedLenUnits, ctx)
+
+				if len(customRules) > 0 {
+					ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits)
+				}
 				continue
-			} else if hasNegativeKrama {
+			} else if containsI16(krama, -1) {
+				// typing-mode special case when krama contains -1 entries: emit raw match
 				result.emit(matchedText)
 				if opts.TypingMode {
-					prevContextCleanup(ctx, matchedText, nil, mapVal.Next, false)
+					ctx.prevContextCleanup(matchedText, nil, m.Next, false)
 				}
 				continue
 			}
 		} else {
-			cursor.advanceRunes(1)
-			textIndex = cursor.pos
+			cursor.advance(1)
 		}
 
-		charToSearch := ch
-		if mapVal != nil {
+		// Step 2: Search in krama_text_arr
+		var charToSearch string
+		var index int
+		if itemIndex < 0 {
+			// pos - 1 as the fallback consumed (advanced 1) the previous character
+			charToSearch, _ = cursor.peekAtStr(cursor.pos - 1)
+			index = kramaIndexOfChar(fromData, ch) // no string lookup needed
+		} else {
 			charToSearch = matchedText
+			index = kramaIndexOfText(fromData, charToSearch)
 		}
-		index := kramaIndexOfText(fromData, charToSearch)
 		if index < 0 {
 			if prevContextInUse {
-				prevContextCleanup(ctx, charToSearch, nil, nil, false)
+				ctx.prevContextCleanup(charToSearch, nil, nil, false)
 				prevCtx.clear()
 			}
 			result.emit(charToSearch)
 			continue
 		}
+
 		resultConcat := false
 		if prevContextInUse {
-			if fromData.ScriptType == scriptdata.ScriptTypeBrahmic {
-				var li *scriptdata.ListItem
-				if index < len(fromData.KramaTextArr) {
-					kt := fromData.KramaTextArr[index]
-					if kt.ListArrRef != nil {
-						lidx := int(*kt.ListArrRef)
-						if lidx >= 0 && lidx < len(fromData.List) {
-							li = &fromData.List[lidx]
-						}
-					}
-				}
-				resultConcat = prevContextCleanup(ctx, charToSearch, li, nil, false)
-			} else if toData.ScriptType == scriptdata.ScriptTypeBrahmic {
-				var li *scriptdata.ListItem
-				if index < len(toData.KramaTextArr) {
-					kt := toData.KramaTextArr[index]
-					if kt.ListArrRef != nil {
-						lidx := int(*kt.ListArrRef)
-						if lidx >= 0 && lidx < len(toData.List) {
-							li = &toData.List[lidx]
-						}
-					}
-				}
-				resultConcat = prevContextCleanup(ctx, charToSearch, li, nil, false)
+			if fromBrahmic {
+				resultConcat = ctx.prevContextCleanup(charToSearch, kramaListItem(fromData, index), nil, false)
+			} else if toBrahmic {
+				resultConcat = ctx.prevContextCleanup(charToSearch, kramaListItem(toData, index), nil, false)
 			}
 		}
+
 		if !resultConcat {
-			toAdd := kramaTextOrEmpty(toData, index)
-			if toData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-				isScriptTamilExt(toName) && resultLastCharIsTaExtSuperscript(result) {
-				var li *scriptdata.ListItem
-				if index < len(toData.KramaTextArr) {
-					kt := toData.KramaTextArr[index]
-					if kt.ListArrRef != nil {
-						lidx := int(*kt.ListArrRef)
-						if lidx >= 0 && lidx < len(toData.List) {
-							li = &toData.List[lidx]
-						}
-					}
-				}
-				if toAdd == toData.Halant || listItemIsMatra(li) {
-					emitPiecesWithReorder(result, []string{toAdd}, toData.Halant, true)
-				} else if isVedicSvaraTail(toAdd) {
+			piece := kramaTextOrEmpty(toData, index)
+			if toBrahmic && ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript() {
+				if piece == toData.Halant || kramaListItem(toData, index).Kind() == scriptdata.ListKindMatra {
+					result.emitPiecesWithReorder([]string{piece}, toData.Halant, true)
+				} else if lastRuneIsVedicSvara(piece) {
 					last, _ := result.popLastChar()
-					result.emit(toAdd)
-					result.emit(last)
+					result.emit(piece)
+					result.emitRune(last)
 				} else {
-					result.emit(toAdd)
+					result.emit(piece)
 				}
 			} else {
-				result.emit(toAdd)
+				result.emit(piece)
 			}
 		}
-		applyCustomTransRules(fromData, toData, result, cursor, customRules, textIndex, -1, ctx)
+
+		if len(customRules) > 0 {
+			ctx.applyCustomTransRules(cursor.pos, -1)
+		}
 	}
 
 	if prevContextInUse {
-		prevContextCleanup(ctx, "", nil, nil, true)
+		ctx.prevContextCleanup("", nil, nil, true)
 	}
-	output := result.toString()
-	output = applyCustomReplaceRules(output, toData, customRules, scriptdata.CheckInOutput)
-	return TransliterateOutput{Output: output, ContextLength: prevCtx.length()}, nil
+
+	contextLength := prevCtx.length()
+	output := string(result.buf)
+	if scratch != nil {
+		// hand the buffers back for reuse (`output` is a copy, so reusing `out` is safe)
+		scratch.chars, scratch.out = cursor.chars, result.buf
+	}
+	if len(customRules) > 0 {
+		output = applyCustomReplaceRules(output, toData, customRules, scriptdata.CheckInOutput)
+	}
+	return TransliterateOutput{Output: output, ContextLength: contextLength}, nil
 }
 
-type transliterateCtx struct {
-	fromData             *scriptdata.ScriptData
-	toData               *scriptdata.ScriptData
-	result               *resultStringBuilder
-	prevCtx              *prevContextBuilder
-	brahmicHalant        *string
-	brahmicNuqta         *string
-	typingMode           bool
-	includeInherentVowel bool
-	transOptions         map[string]bool
-}
-
-func prevContextCleanup(
-	ctx *transliterateCtx,
-	itemText string,
-	itemType *scriptdata.ListItem,
-	next []string,
-	lastExtraCall bool,
-) bool {
-	brahmicHalant := ""
-	if ctx.brahmicHalant != nil {
-		brahmicHalant = *ctx.brahmicHalant
-	}
-	brahmicNuqta := ""
-	if ctx.brahmicNuqta != nil {
-		brahmicNuqta = *ctx.brahmicNuqta
-	}
-	resultConcat := false
-	if ctx.brahmicNuqta != nil &&
-		listItemIsVyanjana(ctx.prevCtx.typeAt(-3)) &&
-		ctx.prevCtx.textAt(-2) == brahmicNuqta &&
-		listItemIsMatra(ctx.prevCtx.typeAt(-1)) ||
-		listItemIsVyanjana(ctx.prevCtx.typeAt(-2)) &&
-			listItemIsMatra(ctx.prevCtx.typeAt(-1)) {
-		if itemType == nil || listItemIsAnya(itemType) {
-			ctx.prevCtx.clear()
-		}
-	}
-	if ctx.fromData.ScriptType == scriptdata.ScriptTypeBrahmic &&
-		ctx.toData.ScriptType == scriptdata.ScriptTypeOther {
-		taExtOk := true
-		if isScriptTamilExt(ctx.fromData.ScriptName) && itemText != "" {
-			taExtOk = !strings.HasPrefix(itemText, brahmicHalant)
-		}
-		vyanjanaCase := (ctx.brahmicNuqta == nil || itemText != brahmicNuqta) &&
-			(listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) ||
-				ctx.brahmicHalant != nil && listItemIsVyanjana(ctx.prevCtx.typeAt(-2)) &&
-					ctx.prevCtx.textAt(-1) == brahmicNuqta)
-		toAnyaOrNull := (!listItemIsMatra(itemType) && itemText != brahmicHalant) ||
-			listItemIsAnya(itemType) || itemType == nil
-		if itemText != brahmicHalant && taExtOk && vyanjanaCase && toAnyaOrNull {
-			ctx.result.emit(ctx.toData.SchwaCharacter)
-		}
-	} else if ctx.fromData.ScriptType == scriptdata.ScriptTypeOther &&
-		ctx.toData.ScriptType == scriptdata.ScriptTypeBrahmic {
-		if listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) &&
-			(listItemIsMatra(itemType) || listItemIsSvara(itemType)) {
-			linkedMatra := itemText
-			if itemType != nil && itemType.Type == "svara" {
-				if len(itemType.MatraKramaRef) > 0 {
-					kr := itemType.MatraKramaRef[0]
-					linkedMatra = kramaTextOrEmpty(ctx.toData, int(kr))
-				} else {
-					linkedMatra = ""
-				}
-			}
-			emitPiecesWithReorder(ctx.result, []string{linkedMatra}, ctx.toData.Halant,
-				isScriptTamilExt(ctx.toData.ScriptName) && resultLastCharIsTaExtSuperscript(ctx.result))
-			resultConcat = true
-		} else if !ctx.includeInherentVowel &&
-			listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) &&
-			!(itemText == brahmicHalant || listItemIsMatra(itemType)) {
-			shouldReorder := isScriptTamilExt(ctx.toData.ScriptName) &&
-				resultLastCharIsTaExtSuperscript(ctx.result)
-			emitPiecesWithReorder(ctx.result, []string{brahmicHalant}, ctx.toData.Halant, shouldReorder)
-			if ctx.toData.ScriptName == "Sinhala" &&
-				transOpt(ctx.transOptions, "all_to_sinhala:use_conjunct_enabling_halant") {
-				lp := ctx.result.lastPiece()
-				ctx.result.rewriteAt(-1, lp+"\u200d")
-			}
-		} else if ctx.includeInherentVowel && itemType != nil && listItemIsVyanjana(itemType) &&
-			(listItemIsVyanjana(ctx.prevCtx.typeAt(-1)) ||
-				ctx.brahmicNuqta != nil && listItemIsVyanjana(ctx.prevCtx.typeAt(-2)) &&
-					ctx.prevCtx.textAt(-1) == brahmicNuqta) {
-			shouldReorder := isScriptTamilExt(ctx.toData.ScriptName) &&
-				resultLastCharIsTaExtSuperscript(ctx.result)
-			emitPiecesWithReorder(ctx.result, []string{brahmicHalant}, ctx.toData.Halant, shouldReorder)
-			if ctx.toData.ScriptName == "Sinhala" &&
-				transOpt(ctx.transOptions, "all_to_sinhala:use_conjunct_enabling_halant") {
-				lp := ctx.result.lastPiece()
-				ctx.result.rewriteAt(-1, lp+"\u200d")
-			}
-		}
-	}
-	toClear := false
-	if ctx.typingMode && len(next) == 0 && !lastExtraCall &&
-		!(isScriptTamilExt(ctx.toData.ScriptName) && resultLastCharIsTaExtSuperscript(ctx.result)) {
-		toClear = true
-		if itemType != nil && listItemIsVyanjana(itemType) {
-			toClear = false
-		}
-		if toClear {
-			ctx.prevCtx.clear()
-		}
-	}
-	if !ctx.typingMode || (!lastExtraCall && !toClear) {
-		if itemText != "" || itemType != nil {
-			ctx.prevCtx.push(itemText, itemType)
-		}
-	}
-	return resultConcat
-}
-
-func applyCustomTransRules(
-	fromData, toData *scriptdata.ScriptData,
-	result *resultStringBuilder,
-	cursor *inputCursor,
-	rules []scriptdata.Rule,
-	textIndex, delta int,
-	ctx *transliterateCtx,
-) {
-	currentIdx := textIndex + delta
-	for _, rule := range rules {
-		if rule.UseReplace != nil && *rule.UseReplace {
-			continue
-		}
-		switch rule.Type {
-		case "replace_prev_krama_keys":
-			prevUsize, ok := i16ToIntSlice(rule.Prev)
-			if !ok {
-				continue
-			}
-			if rule.CheckIn != nil && *rule.CheckIn == scriptdata.CheckInOutput {
-				lp := result.lastPiece()
-				if lp == "" {
-					continue
-				}
-				followIdx := kramaIndexOfText(toData, lp)
-				if followIdx < 0 {
-					continue
-				}
-				followI16 := int16(followIdx)
-				found := false
-				for _, f := range rule.Following {
-					if f == followI16 {
-						found = true
-						break
-					}
-				}
-				if !found {
-					continue
-				}
-				peekAt := func(i int) (string, bool) {
-					return result.peekAt(i)
-				}
-				matched, mLen := matchPrevKramaSequence(peekAt, -2, prevUsize, toData)
-				if matched {
-					pieces := replaceWithPieces(rule.ReplaceWith, toData)
-					pieces = append(pieces, lp)
-					result.rewriteTailPieces(mLen+1, pieces)
-				}
-			} else {
-				if currentIdx < 0 {
-					continue
-				}
-				cursorPeek := func(i int) (string, bool) {
-					r, _, ok := cursor.peekAtRune(i)
-					if !ok {
-						return "", false
-					}
-					return string(r), ok
-				}
-				matched, mLen := matchPrevKramaSequence(cursorPeek, currentIdx, prevUsize, fromData)
-				if !matched {
-					continue
-				}
-				nextR, _, ok := cursor.peekAtRune(textIndex)
-				if !ok {
-					continue
-				}
-				nextIdx := kramaIndexOfText(fromData, string(nextR))
-				if nextIdx < 0 {
-					continue
-				}
-				nextI16 := int16(nextIdx)
-				found := false
-				for _, f := range rule.Following {
-					if f == nextI16 {
-						found = true
-						break
-					}
-				}
-				if !found {
-					continue
-				}
-				pieces := replaceWithPieces(rule.ReplaceWith, toData)
-				result.rewriteTailPieces(mLen, pieces)
-			}
-		case "direct_replace":
-			lookup := fromData
-			if rule.CheckIn != nil && *rule.CheckIn == scriptdata.CheckInOutput {
-				lookup = toData
-			}
-			for _, grp := range rule.ToReplace {
-				sgUsize, ok := i16ToIntSlice(grp)
-				if !ok {
-					continue
-				}
-				peekAt := func(i int) (string, bool) {
-					return result.peekAt(i)
-				}
-				matched, mLen := matchPrevKramaSequence(peekAt, -1, sgUsize, lookup)
-				if !matched {
-					continue
-				}
-				if rule.ReplaceText != nil {
-					result.rewriteTailPieces(mLen, []string{*rule.ReplaceText})
-				} else {
-					pieces := replaceWithPieces(rule.ReplaceWith, lookup)
-					result.rewriteTailPieces(mLen, pieces)
-				}
-				break
-			}
-		}
-	}
-}
-
-func containsStr(s []string, v string) bool {
-	for _, x := range s {
-		if x == v {
+func hasKramaOtherThanNeg1(krama []int16) bool {
+	for _, k := range krama {
+		if k != -1 {
 			return true
 		}
 	}
 	return false
 }
 
-func isSingleASCIIDigit(s string) bool {
-	// Use utf8.DecodeRuneInString to avoid allocating a []rune slice.
-	r, size := utf8.DecodeRuneInString(s)
-	if r == utf8.RuneError || size != len(s) {
-		return false
+// anyKramaKind reports whether any krama entry's list item has the given kind
+// (`ListKindNone` matches entries without a list item).
+func anyKramaKind(s *scriptdata.ScriptData, krama []int16, kind scriptdata.ListKind) bool {
+	for _, k := range krama {
+		if kramaListItem(s, int(k)).Kind() == kind {
+			return true
+		}
 	}
-	return r >= '0' && r <= '9'
+	return false
 }
 
-func resultLastCharIsTaExtSuperscript(result *resultStringBuilder) bool {
-	r, ok := result.LastChar()
-	return ok && isTaExtSuperscriptTailRune(r)
+func lastRuneIsVedicSvara(s string) bool {
+	if s == "" {
+		return false
+	}
+	r, _ := utf8.DecodeLastRuneInString(s)
+	return isVedicSvaraTail(r, true)
 }
 
 // TransliterateError represents a transliteration error.
@@ -936,10 +1030,10 @@ func Transliterate(
 	if err != nil {
 		return "", err
 	}
-	resolved := resolveTransliterationRules(&fromData, &toData, customOpts, transOptions)
+	resolved := resolveTransliterationRules(fromData, toData, customOpts, transOptions)
 	out, err := TransliterateTextCore(
 		text, fromNorm, toNorm,
-		&fromData, &toData,
+		fromData, toData,
 		resolved.TransOptions, resolved.CustomRules,
 		nil,
 	)

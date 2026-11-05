@@ -2,6 +2,7 @@ package typing
 
 import (
 	"time"
+	"unicode/utf8"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/transliterate"
@@ -90,6 +91,9 @@ type TypingContext struct {
 	toScriptData   *scriptdata.ScriptData
 	transOptions   map[string]bool
 	customRules    []scriptdata.Rule
+
+	// Buffers reused across keys (typing re-transliterates the context on every key).
+	scratch transliterate.TransliterateScratch
 }
 
 // NewTypingContext creates a new typing context for the given script/language.
@@ -116,15 +120,15 @@ func NewTypingContext(typingLang string, options *TypingContextOptions) (*Typing
 	if err != nil {
 		return nil, err
 	}
-	resolved := transliterate.ResolveTransliterationRules(&fromData, &toData, customOpts, nil)
+	resolved := transliterate.ResolveTransliterationRules(fromData, toData, customOpts, nil)
 
 	return &TypingContext{
 		normalizedTypingLang: normalized,
 		useNativeNumerals:    *opts.UseNativeNumerals,
 		includeInherentVowel: *opts.IncludeInherentVowel,
 		autoContextClearTime: time.Duration(*opts.AutoContextClearTimeMs) * time.Millisecond,
-		fromScriptData:       &fromData,
-		toScriptData:         &toData,
+		fromScriptData:       fromData,
+		toScriptData:         toData,
 		transOptions:         resolved.TransOptions,
 		customRules:          resolved.CustomRules,
 	}, nil
@@ -166,7 +170,7 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 	c.currInput += string(ch)
 	prevOutput := c.currOutput
 
-	result, err := transliterate.TransliterateTextCore(
+	result, err := transliterate.TransliterateTextCoreWith(
 		c.currInput,
 		"Normal",
 		c.normalizedTypingLang,
@@ -175,6 +179,7 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 		c.transOptions,
 		c.customRules,
 		c.buildTranslitOptions(),
+		&c.scratch,
 	)
 	if err != nil {
 		return TypingDiff{}, err
@@ -191,7 +196,7 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 
 	toDeleteCharsCount, diffAddText := computeDiff(prevOutput, output)
 
-	c.lastTime = time.Now()
+	c.lastTime = now
 
 	return TypingDiff{
 		ToDeleteCharsCount: toDeleteCharsCount,
@@ -227,17 +232,16 @@ func (c *TypingContext) GetNormalizedScript() string {
 
 // computeDiff returns (toDeleteCharsCount, diffAddText) between previous and current output.
 func computeDiff(prevOutput, output string) (int, string) {
-	prevRunes := []rune(prevOutput)
-	outRunes := []rune(output)
-
+	// common prefix length in bytes, compared rune by rune (no allocation)
 	common := 0
-	for common < len(prevRunes) && common < len(outRunes) {
-		if prevRunes[common] != outRunes[common] {
+	for common < len(prevOutput) && common < len(output) {
+		a, sizeA := utf8.DecodeRuneInString(prevOutput[common:])
+		b, sizeB := utf8.DecodeRuneInString(output[common:])
+		if a != b || sizeA != sizeB {
 			break
 		}
-		common++
+		common += sizeA
 	}
-	toDelete := len(prevRunes) - common
-	diffAdd := string(outRunes[common:])
-	return toDelete, diffAdd
+	toDelete := utf8.RuneCountInString(prevOutput[common:])
+	return toDelete, output[common:]
 }

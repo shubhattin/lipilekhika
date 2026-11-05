@@ -19,7 +19,7 @@ const (
 
 var (
 	scriptDataOnce sync.Once
-	scriptDataMap  map[string]ScriptData
+	scriptDataMap  map[string]*ScriptData
 	scriptDataErr  error
 
 	scriptListOnce sync.Once
@@ -31,7 +31,7 @@ var (
 	customOptionsErr  error
 )
 
-func loadScriptDataMap() (map[string]ScriptData, error) {
+func loadScriptDataMap() (map[string]*ScriptData, error) {
 	scriptDataOnce.Do(func() {
 		raw, err := embedded.FS.ReadFile(scriptDataBlobPath)
 		if err != nil {
@@ -43,7 +43,11 @@ func loadScriptDataMap() (map[string]ScriptData, error) {
 			scriptDataErr = fmt.Errorf("decode %s: %w", scriptDataBlobPath, err)
 			return
 		}
-		scriptDataMap = blob.ToMap()
+		// lookups are already initialized by `ScriptData.GobDecode`
+		scriptDataMap = make(map[string]*ScriptData, len(blob.Entries))
+		for i := range blob.Entries {
+			scriptDataMap[blob.Entries[i].Name] = &blob.Entries[i].Data
+		}
 	})
 	return scriptDataMap, scriptDataErr
 }
@@ -68,6 +72,10 @@ func loadScriptListJSON() error {
 			LangScriptMap:       jsonData.LangScriptMap,
 			ScriptAlternatesMap: jsonData.ScriptAlternatesMap,
 		}
+		scriptListData.scriptSet = make(map[string]struct{}, len(scriptListData.Scripts))
+		for _, script := range scriptListData.Scripts {
+			scriptListData.scriptSet[script] = struct{}{}
+		}
 	})
 	return scriptListErr
 }
@@ -89,24 +97,25 @@ func loadCustomOptionsMap() (map[string]CustomOption, error) {
 	return customOptionsMap, customOptionsErr
 }
 
-func GetScriptData(name string) (ScriptData, error) {
+// GetScriptData returns the (shared, read-only) script data for a script/lang name.
+func GetScriptData(name string) (*ScriptData, error) {
 	normalized, err := GetNormalizedScriptName(name)
 	if err != nil {
-		return ScriptData{}, err
+		return nil, err
 	}
 
 	all, err := loadScriptDataMap()
 	if err != nil {
-		return ScriptData{}, err
+		return nil, err
 	}
 	data, ok := all[normalized]
 	if !ok {
-		return ScriptData{}, fmt.Errorf("script %q not found after normalization", normalized)
+		return nil, fmt.Errorf("script %q not found after normalization", normalized)
 	}
 	return data, nil
 }
 
-func MustGetScriptData(name string) ScriptData {
+func MustGetScriptData(name string) *ScriptData {
 	out, err := GetScriptData(name)
 	if err != nil {
 		panic(err)

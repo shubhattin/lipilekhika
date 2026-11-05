@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -123,6 +124,13 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 				if err != nil {
 					testsFailed++
 					t.Errorf("index %d %s→%s: %v", c.Index, c.From, c.To, err)
+					continue
+				}
+				// the old lipi lekhika does not handle vedic svara tails in tamil extended properly
+				// (same skip as the JS and Rust test suites)
+				if strings.HasPrefix(filepath.Base(fp), "auto") && c.To == "Tamil-Extended" &&
+					strings.ContainsAny(result, "॒॑᳚᳛") {
+					testsSkipped++
 					continue
 				}
 				caseFailed := false

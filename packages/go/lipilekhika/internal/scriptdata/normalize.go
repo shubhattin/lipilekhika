@@ -11,6 +11,11 @@ func GetNormalizedScriptName(input string) (string, error) {
 		return "", err
 	}
 
+	// fast path: already a normalized script name (the common case for internal calls)
+	if _, ok := data.scriptSet[input]; ok {
+		return input, nil
+	}
+
 	candidate := capitalizeFirstAndAfterDash(input)
 	for _, script := range data.Scripts {
 		if script == candidate {
