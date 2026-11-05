@@ -3,6 +3,7 @@
 ## python-lib@1.0.8 (Unreleased)
 
 - Performance Improvements (via rust-lib@@1.1.2)
+- Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)
 
 ## python-lib@1.0.7
 
