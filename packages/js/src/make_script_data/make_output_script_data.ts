@@ -690,7 +690,13 @@ async function copy_script_data_json() {
 
   for (const { target, minify, single_script_data_file, cmd, id } of LIST) {
     if (fs.existsSync(path.resolve(target))) {
-      fs.rmSync(path.resolve(target), { recursive: true, force: true });
+      for (const entry of fs.readdirSync(path.resolve(target))) {
+        // Keep the committed Go gob files: `generate-data` compares against them and only
+        // rewrites a file when its content changes (gob bytes can differ for equal data,
+        // so regenerating from scratch would add needless binary diffs)
+        if (id === 'go' && entry === 'gob') continue;
+        fs.rmSync(path.resolve(target, entry), { recursive: true, force: true });
+      }
     }
     fs.mkdirSync(target, { recursive: true });
     if (!single_script_data_file) {
