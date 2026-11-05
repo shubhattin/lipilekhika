@@ -99,3 +99,39 @@
   reversible: false
   options:
     "normal_to_all:use_typing_chars": true
+# replace_pancham_varga_varna_with_anusvAra with non-BMP source scripts (Brahmi, Sharada, Granth, Siddham).
+# Each character of these scripts takes two UTF-16 units in JS; the input rule check
+# (`matchPrevKramaSequence`) used to step back one unit and land inside a surrogate pair,
+# so the rule never matched and the output kept the pancham varNa + halant (e.g. गङ्गा).
+- index: 12
+  from: Brahmi
+  to: Devanagari
+  input: 𑀕𑀗𑁆𑀕𑀸
+  output: गंगा
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+- index: 13
+  from: Sharada
+  to: Telugu
+  input: 𑆫𑆚𑇀𑆘𑆴𑆠𑆫𑆕𑇀𑆓
+  output: రంజితరంగ
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+- index: 14
+  from: Granth
+  to: Devanagari
+  input: 𑌪𑌞𑍍𑌚𑌮 𑌸𑌮𑍍𑌭𑌵
+  output: पंचम संभव
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+- index: 15
+  from: Siddham
+  to: Kannada
+  input: 𑖫𑖒𑖿𑖏 𑖎𑖜𑖿𑖙
+  output: ಶಂಖ ಕಂಠ
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false

@@ -229,7 +229,9 @@ function apply_custom_trans_rules(ctx: TransliterateCtx, text_index: number, del
           cursor.peekAt,
           current_text_index,
           rule.prev,
-          from_script_data
+          from_script_data,
+          // step back by characters, not UTF-16 units (non-BMP scripts like Brahmi)
+          cursor.prevCharIndex
         );
         const next_char_info = cursor.peekAt(text_index);
         if (prev_match.matched && next_char_info !== null) {

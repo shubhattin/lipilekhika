@@ -265,6 +265,16 @@ export const make_input_cursor = (text: string) => {
     return text.codePointAt(index) ?? -1;
   }
 
+  /** UTF-16 index of the character before the one starting at `index`
+   * (steps over a whole surrogate pair for non-BMP characters) */
+  function prevCharIndex(index: number): number {
+    const low = text.charCodeAt(index - 1);
+    const high = text.charCodeAt(index - 2);
+    return low >= 0xdc00 && low <= 0xdfff && high >= 0xd800 && high <= 0xdbff
+      ? index - 2
+      : index - 1;
+  }
+
   function peek(): CursorCp | null {
     return peekAt(pos);
   }
@@ -286,6 +296,7 @@ export const make_input_cursor = (text: string) => {
       return pos;
     },
     cpAt,
+    prevCharIndex,
     peek,
     peekAt,
     peekAtOffsetUnits,
@@ -296,15 +307,25 @@ export const make_input_cursor = (text: string) => {
 
 type PeekAtLike = (index: number) => { ch: string } | null;
 
+/**
+ * Matches `prev` (krama indexes) backwards, ending at `anchorIndex`.
+ *
+ * @param prevIndex index of the item before `index`. Defaults to `index - 1` (result pieces);
+ * for the input text pass `cursor.prevCharIndex`, as non-BMP characters take two UTF-16 units
+ * (stepping back by one unit would land in the middle of a surrogate pair and never match)
+ */
 export const matchPrevKramaSequence = (
   peekAt: PeekAtLike,
   anchorIndex: number,
   prev: number[],
-  script_data: ScriptData
+  script_data: ScriptData,
+  prevIndex: (index: number) => number = (index) => index - 1
 ): { matched: boolean; matchedLen: number } => {
+  let index = anchorIndex;
   for (let i = 0; i < prev.length; i++) {
     const expected_krama_index = prev[prev.length - 1 - i];
-    const info = peekAt(anchorIndex - i);
+    if (i > 0) index = prevIndex(index);
+    const info = peekAt(index);
     if (info === null) return { matched: false, matchedLen: 0 };
     const got_krama_index = kramaIndexOfText(script_data, info.ch);
     if (got_krama_index === -1 || got_krama_index !== expected_krama_index) {
