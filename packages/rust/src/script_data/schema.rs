@@ -95,7 +95,6 @@ pub struct CommonScriptAttrJson {
     #[allow(dead_code)]
     pub script_id: u8,
     pub krama_text_arr: Vec<(String, Option<i16>)>,
-    pub krama_text_arr_index: Vec<usize>,
     pub text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
@@ -110,7 +109,6 @@ pub struct CommonScriptAttr {
     #[allow(dead_code)]
     pub script_id: u8,
     pub krama_text_arr: Vec<(String, Option<i16>)>,
-    pub krama_text_arr_index: Vec<usize>,
     pub text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub typing_text_to_krama_map: Vec<(String, TextToKramaMap)>,
     pub custom_script_chars_arr: Vec<(String, Option<i16>, Option<i16>)>,
@@ -146,7 +144,6 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
             script_name: value.script_name,
             script_id: value.script_id,
             krama_text_arr: value.krama_text_arr,
-            krama_text_arr_index: value.krama_text_arr_index,
             text_to_krama_map: value.text_to_krama_map,
             typing_text_to_krama_map: value.typing_text_to_krama_map,
             custom_script_chars_arr: value.custom_script_chars_arr,

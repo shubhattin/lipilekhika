@@ -5,14 +5,12 @@ type CommonScriptData = {
    * `string` is the actual key, number(nullable) is the index of the key in the compiled `list`
    */
   krama_text_arr: [krama_key: string, list_arr_ref: number | null][];
-  /** To be used for binary search on the `krama_key_map`
-   * Although now we are not using this, but lets not remove it yet.
-   * As it can be useful in getting the order of krama texts, like a for a Typing Helper
-   */
-  krama_text_arr_index: number[];
+  // `krama_text_arr_index` (a sorted index into `krama_text_arr`) used to be emitted here.
+  // It was needed back when lookups were done with a lower bound binary search; all runtimes
+  // now build a hash map from `krama_text_arr` instead (first index wins), so it was removed.
   /** `string` used for search. Usable for Duplication Remova, Fallback Behaviour
    * and for `other` scripts type. Like Normal
-   * This will be a sorted array, so binary search can be directly used in it */
+   * Sorted by text (runtimes load it into a hash map) */
   text_to_krama_map: [
     text: string,
     {

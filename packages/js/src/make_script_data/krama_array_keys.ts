@@ -1,14 +1,9 @@
-import {
-  binarySearchLowerWithIndex,
-  createSearchIndex
-} from '../utils/binary_search/binary_search';
-
 /**
  * These Krama keys are written in an order where the keys which comes first shall take precedence if in the krama_text_map two have the same key
  * then the one that comes first shall be chosen
  * For eg. kau (from Bengali)
- * the "au" can land both on au and auU because of tne nature of the binary search algorithm
- * so to componsate that we chose the first one in case of multiple possible mappings
+ * the "au" can land both on au and auU, so to compensate that we chose the first one
+ * in case of multiple possible mappings (see `kramaKeyIndex`, first index wins)
  *
  * So Be careful with similar mAtrAs, different forms of the same vyanajana (like with nuqta and other forms)
  */
@@ -145,8 +140,23 @@ export type KramaKeysType = (typeof KramaKeysArray)[number];
 export type KramaKeysLabelType = (typeof KramaKeysMap)[KramaKeysType];
 export const KramaLabelsArray = Object.values(KramaKeysMap) as KramaKeysLabelType[];
 
-export const KramaKeysIndexB = createSearchIndex(KramaKeysArray);
-export const KramaLabelsIndexB = createSearchIndex(KramaLabelsArray);
+/** `value -> first index` lookup, so duplicates resolve to the earliest entry */
+const firstIndexMap = (arr: readonly string[]) => {
+  const map = new Map<string, number>();
+  arr.forEach((v, i) => {
+    if (!map.has(v)) map.set(v, i);
+  });
+  return map;
+};
+const KramaKeysIndexMap = firstIndexMap(KramaKeysArray);
+const KramaLabelsIndexMap = firstIndexMap(KramaLabelsArray);
+
+/** Index of a krama key in `KramaKeysArray`, or `-1` if absent */
+export const kramaKeyIndex = (krama_key: string): number => KramaKeysIndexMap.get(krama_key) ?? -1;
+
+/** Index of a krama label in `KramaLabelsArray`, or `-1` if absent */
+export const kramaLabelIndex = (krama_label: string): number =>
+  KramaLabelsIndexMap.get(krama_label) ?? -1;
 
 /** This type will be used as a convinient method to dscribe the krama key which we want to map to
  * This shall be ultimately converted to KramaKeysType
@@ -156,8 +166,6 @@ export type KramaKeysExtendedType = KramaKeysType | KramaKeysLabelType;
 export const resolveKramaKeysExtendedType = (
   krama_key_ext: KramaKeysExtendedType
 ): KramaKeysType => {
-  if (binarySearchLowerWithIndex(KramaKeysArray, KramaKeysIndexB, krama_key_ext) !== -1)
-    return krama_key_ext as KramaKeysType;
-  const index = binarySearchLowerWithIndex(KramaLabelsArray, KramaLabelsIndexB, krama_key_ext);
-  return KramaKeysArray[index];
+  if (kramaKeyIndex(krama_key_ext) !== -1) return krama_key_ext as KramaKeysType;
+  return KramaKeysArray[kramaLabelIndex(krama_key_ext)];
 };
