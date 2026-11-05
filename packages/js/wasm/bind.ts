@@ -54,7 +54,18 @@ async function initWasm(): Promise<void> {
     const isBun = typeof Bun !== 'undefined';
     if (isBun || import.meta.env.PROD) {
       // this approach is also used in prod as it converts the wasm to base64 in bundling step
-      await init();
+      //
+      // Bun does not keep the event loop alive while `WebAssembly.instantiateStreaming` (used by
+      // `init()`) is pending: with nothing else pending (eg. a script calling `transliterate_wasm`
+      // from a function that is not top-level awaited) the process exited silently with code 0
+      // before the module was ready. Hold the loop open with a timer until it resolves.
+      // (checked by `scripts/runtime_check.mjs`)
+      const keep_alive = isBun ? setInterval(() => {}, 1 << 30) : null;
+      try {
+        await init();
+      } finally {
+        if (keep_alive !== null) clearInterval(keep_alive);
+      }
     } else {
       // fallback to run with `vite-node` "locally"
       const [fs, path, url] = await Promise.all([

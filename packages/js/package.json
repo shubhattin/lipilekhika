@@ -54,6 +54,8 @@
     "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
     "publish:cli": "bun run build && npm publish",
     "bench": "vite-node src/scripts/benchmark.ts",
+    "test:runtime": "vite-node scripts/runtime_check.mjs && bun scripts/runtime_check.mjs",
+    "test:runtime:dist": "node scripts/runtime_check.mjs --dist && bun scripts/runtime_check.mjs --dist",
     "complexity": "vite-node src/scripts/complexity.ts"
   },
   "devDependencies": {

@@ -61,6 +61,18 @@ jobs:
           bun install
           bun run build
           bun run check
+
+      # Loads the JS, WASM and N-API variants under Node and Bun (source and built dist).
+      # Guards against a runtime exiting early while the WASM module loads (seen with Bun).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Runtime Check (source, vite-node + bun)
+        working-directory: packages/js
+        run: bun run test:runtime
+      - name: Runtime Check (dist, node + bun)
+        working-directory: packages/js
+        run: bun run test:runtime:dist
   tests:
     # Does not depend on wasm (rust)
     runs-on: ubuntu-latest
