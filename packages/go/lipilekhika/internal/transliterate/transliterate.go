@@ -1,6 +1,7 @@
 package transliterate
 
 import (
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -99,21 +100,46 @@ func resolveTransliterationRules(
 		return ResolvedRules{TransOptions: map[string]bool{}}
 	}
 	tOpts := getActiveCustomOptions(fromData, toData, customOptionsMap, inputOptions)
-	// deterministic rule order (map iteration order is random)
-	keys := make([]string, 0, len(tOpts))
-	for k, enabled := range tOpts {
-		if enabled {
-			keys = append(keys, k)
-		}
-	}
-	sort.Strings(keys)
+	// Rules are applied in the canonical option order (rule order can change the output
+	// when several options are enabled), map iteration order would be random.
 	var customRules []scriptdata.Rule
-	for _, k := range keys {
+	for _, k := range orderedCustomOptionKeys(tOpts) {
 		if opt, ok := customOptionsMap[k]; ok {
 			customRules = append(customRules, opt.Rules...)
 		}
 	}
 	return ResolvedRules{TransOptions: tOpts, CustomRules: customRules}
+}
+
+// customOptionKeys are the custom option keys in `custom_options.json` order
+// (same as rust `CustomOptions::KEYS`; kept in sync by `TestCustomOptionKeysOrder`).
+var customOptionKeys = []string{
+	"all_to_normal:replace_pancham_varga_varna_with_n",
+	"brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra",
+	"all_to_sinhala:use_conjunct_enabling_halant",
+	"all_to_normal:remove_virAma_and_double_virAma",
+	"all_to_normal:replace_avagraha_with_a",
+	"normal_to_all:use_typing_chars",
+	"all_to_normal:preserve_specific_chars",
+}
+
+// orderedCustomOptionKeys returns the enabled keys of `opts` in canonical order
+// (unknown keys, if any, last in sorted order).
+func orderedCustomOptionKeys(opts map[string]bool) []string {
+	keys := make([]string, 0, len(opts))
+	for _, k := range customOptionKeys {
+		if opts[k] {
+			keys = append(keys, k)
+		}
+	}
+	var unknown []string
+	for k, enabled := range opts {
+		if enabled && !slices.Contains(customOptionKeys, k) {
+			unknown = append(unknown, k)
+		}
+	}
+	sort.Strings(unknown)
+	return append(keys, unknown...)
 }
 
 // ResolveTransliterationRules is an exported wrapper around resolveTransliterationRules.
