@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 from lipilekhika import transliterate, preload_script_data
-from test_stats import increment_assertion_count  # ty:ignore[unresolved-import]
+from test_stats import increment_assertion_count  # ty:ignore[import-not-found]
 from lipilekhika.types import ScriptLangType, TransliterationOptionsType
 
 # Test data folder

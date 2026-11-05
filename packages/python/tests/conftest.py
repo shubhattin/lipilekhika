@@ -7,7 +7,7 @@ from pathlib import Path
 # Add tests directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from test_stats import (  # ty:ignore[unresolved-import]
+from test_stats import (  # ty:ignore[import-not-found]
     get_assertion_count,
     get_file_assertion_counts,
     reset_assertion_count,

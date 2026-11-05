@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ._lipilekhika import (  # ty:ignore[unresolved-import]
+from ._lipilekhika import (  # ty:ignore[import-not-found]
     transliterate as _transliterate,
     preload_script_data as _preload_script_data,
     get_schwa_status_for_script as _get_schwa_status_for_script,

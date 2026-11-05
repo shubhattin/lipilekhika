@@ -6,7 +6,7 @@ import yaml
 import pytest
 from pathlib import Path
 from pydantic import BaseModel, ConfigDict
-from test_stats import increment_assertion_count  # ty:ignore[unresolved-import]
+from test_stats import increment_assertion_count  # ty:ignore[import-not-found]
 
 # Vedic svaras for special handling
 VEDIC_SVARAS = ["॒", "॑", "᳚", "᳛"]

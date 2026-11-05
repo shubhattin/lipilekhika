@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from ._lipilekhika import (  # ty:ignore[unresolved-import]
+from ._lipilekhika import (  # ty:ignore[import-not-found]
     create_typing_context as _create_typing_context,
     default_auto_context_clear_time_ms as _default_auto_context_clear_time_ms,
     default_use_native_numerals as _default_use_native_numerals,
