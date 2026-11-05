@@ -19,6 +19,17 @@ fn char_eq_str(c: char, s: &str) -> bool {
     encoded == s
 }
 
+/// Emit the target-script text of each krama index directly (negative/missing entries
+/// produce nothing), without first collecting the pieces into a buffer.
+#[inline]
+fn emit_krama_pieces(result: &mut ResultStringBuilder, to_script_data: &ScriptData, krama: &[i16]) {
+    for &k in krama {
+        if k >= 0 {
+            result.emit(to_script_data.krama_text_or_empty(k));
+        }
+    }
+}
+
 struct TransliterateCtx<'a, R> {
     from_script: &'a ScriptListEnum,
     to_script: &'a ScriptListEnum,
@@ -57,19 +68,20 @@ where
         let item_type = item.and_then(|(_, t)| t); // [1]
 
         // custom cleanup logic/cases
-        if ((brahmic_nuqta.is_some()
-            && self
-                .prev_context
-                .type_at(-3)
-                .is_some_and(|k| k.is_vyanjana())
-            && self.prev_context.text_at(-2) == brahmic_nuqta
-            && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra()))
-            || (self
-                .prev_context
-                .type_at(-2)
-                .is_some_and(|k| k.is_vyanjana())
-                && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra())))
-            && (item.is_none() || item_type.is_some_and(|k| k.is_anya()))
+        // (cheapest, most selective test first; all operands are side-effect free)
+        if (item.is_none() || item_type.is_some_and(|k| k.is_anya()))
+            && ((brahmic_nuqta.is_some()
+                && self
+                    .prev_context
+                    .type_at(-3)
+                    .is_some_and(|k| k.is_vyanjana())
+                && self.prev_context.text_at(-2) == brahmic_nuqta
+                && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra()))
+                || (self
+                    .prev_context
+                    .type_at(-2)
+                    .is_some_and(|k| k.is_vyanjana())
+                    && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra())))
         {
             self.prev_context.clear();
         }
@@ -77,14 +89,15 @@ where
         if matches!(self.from_script_data, ScriptData::Brahmic { .. })
             && matches!(self.to_script_data, ScriptData::Other { .. })
         {
-            let ta_ext_case = if is_script_tamil_ext(self.from_script) {
-                item_text.and_then(|k| k.chars().next())
-                    != self.brahmic_halant.and_then(|k| k.chars().next())
-            } else {
-                true
-            };
-            // vyanjana + nuqta
-            let vyanjana_case = (self.brahmic_nuqta.is_none() || item_text != self.brahmic_nuqta)
+            // custom logic when converting from brahmic to other.
+            // Short-circuit chain ordered cheapest/most selective first (all checks are pure).
+            // Since `item_text != halant` is required, the former `to_anya_or_null`
+            // (`(!matra && text != halant) || anya || none`) reduces to `!matra`.
+            if let ScriptData::Other {
+                schwa_character, ..
+            } = self.to_script_data
+                && !item_type.is_some_and(|k| k.is_matra())
+                // vyanjana + nuqta
                 && (self
                     .prev_context
                     .type_at(-1)
@@ -94,19 +107,12 @@ where
                             .prev_context
                             .type_at(-2)
                             .is_some_and(|k| k.is_vyanjana())
-                        && self.prev_context.text_at(-1) == brahmic_nuqta));
-            let to_anya_or_null = (!item_type.is_some_and(|k| k.is_matra())
-                && item_text != brahmic_halant)
-                || item_type.is_some_and(|k| k.is_anya())
-                || item_type.is_none();
-            // custom logic when converting from brahmic to other
-            if item_text != self.brahmic_halant
-                && ta_ext_case
-                && vyanjana_case
-                && to_anya_or_null
-                && let ScriptData::Other {
-                    schwa_character, ..
-                } = self.to_script_data
+                        && self.prev_context.text_at(-1) == brahmic_nuqta))
+                && item_text != self.brahmic_halant
+                && (self.brahmic_nuqta.is_none() || item_text != self.brahmic_nuqta)
+                && (!is_script_tamil_ext(self.from_script)
+                    || item_text.and_then(|k| k.chars().next())
+                        != self.brahmic_halant.and_then(|k| k.chars().next()))
             {
                 self.result.emit(schwa_character);
             }
@@ -147,7 +153,8 @@ where
                     .prev_context
                     .type_at(-1)
                     .is_some_and(|k| k.is_vyanjana()))
-                && !(item_text == brahmic_halant || item_type.is_some_and(|k| k.is_matra()))
+                && !item_type.is_some_and(|k| k.is_matra())
+                && item_text != brahmic_halant
             {
                 if let (
                     Some(brahmic_halant),
@@ -849,7 +856,12 @@ pub fn transliterate_text_core(
                 }
 
                 let end_index = text_index + scan_units + 1;
-                let char_to_search: Cow<'_, str> = if ignore_ta_ext_sup_num_text_index != -1 {
+                let single_char_lookup = scan_units == 0 && ignore_ta_ext_sup_num_text_index == -1;
+                // The single-char fast path never reads `char_to_search` unless the match
+                // has a `next` list, so build the slice lazily.
+                let char_to_search: Cow<'_, str> = if single_char_lookup {
+                    Cow::Borrowed("")
+                } else if ignore_ta_ext_sup_num_text_index != -1 {
                     let a = ctx
                         .cursor
                         .slice(text_index, ignore_ta_ext_sup_num_text_index as usize)
@@ -871,15 +883,14 @@ pub fn transliterate_text_core(
                     Cow::Borrowed(ctx.cursor.slice(text_index, end_index).unwrap_or_default())
                 };
 
-                let potential_match_index =
-                    if scan_units == 0 && ignore_ta_ext_sup_num_text_index == -1 {
-                        // more scan units only needed in case ta-ext so safe to do
-                        text_to_krama_lookup_script_data
-                            .text_to_krama_map_char_index(ch, use_typing_map)
-                    } else {
-                        text_to_krama_lookup_script_data
-                            .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
-                    };
+                let potential_match_index = if single_char_lookup {
+                    // more scan units only needed in case ta-ext so safe to do
+                    text_to_krama_lookup_script_data
+                        .text_to_krama_map_char_index(ch, use_typing_map)
+                } else {
+                    text_to_krama_lookup_script_data
+                        .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
+                };
 
                 let Some(potential_match_index) = potential_match_index else {
                     text_to_krama_item_index = None;
@@ -920,6 +931,13 @@ pub fn transliterate_text_core(
                     // Tamil-Extended special handling (superscript numbers after matra/halant)
                     if is_from_tamil_ext_ && matches!(from_script_data, ScriptData::Brahmic { .. })
                     {
+                        let char_to_search: Cow<'_, str> = if single_char_lookup {
+                            Cow::Borrowed(
+                                ctx.cursor.slice(text_index, end_index).unwrap_or_default(),
+                            )
+                        } else {
+                            char_to_search
+                        };
                         let n_1_th_next = if nth_next.is_some() {
                             ctx.cursor.peek_at(end_index + 1)
                         } else {
@@ -1107,18 +1125,18 @@ pub fn transliterate_text_core(
         let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
         if let Some(text_to_krama_item) = text_to_krama_item {
             let (matched_text, map) = text_to_krama_item;
-            let is_type_vyanjana = map
-                .krama
-                .as_ref()
-                .and_then(|k| k.first())
-                .and_then(|ki| ctx.from_script_data.krama_text_arr.get(*ki as usize))
-                .and_then(|(_, li)| li.as_ref())
-                .and_then(|li| from_script_data.list.get(*li as usize))
-                .is_some_and(|l| l.is_vyanjana());
             let matched_char_count = matched_text.chars().count();
+            // only relevant while skipping a Tamil-Extended superscript; evaluated lazily
             let index_delete_length = if ignore_ta_ext_sup_num_text_index != -1
                 && matched_char_count > 1
-                && is_type_vyanjana
+                && map
+                    .krama
+                    .as_ref()
+                    .and_then(|k| k.first())
+                    .and_then(|ki| ctx.from_script_data.krama_text_arr.get(*ki as usize))
+                    .and_then(|(_, li)| li.as_ref())
+                    .and_then(|li| from_script_data.list.get(*li as usize))
+                    .is_some_and(|l| l.is_vyanjana())
                 && is_ta_ext_superscript_tail(matched_text.chars().last())
             {
                 1
@@ -1150,21 +1168,6 @@ pub fn transliterate_text_core(
             // If krama exists and has at least one non -1, emit directly
             if let Some(krama) = &map.krama {
                 if krama.iter().any(|&k| k != -1) {
-                    // Use a stack-allocated buffer to avoid a heap allocation on every matched character.
-                    // krama sequences are at most ~4 entries in practice; 8 is a safe upper bound.
-                    let mut pieces_buf = [""; 8];
-                    let mut pieces_len = 0usize;
-                    for &k in krama.iter() {
-                        if k < 0 {
-                            continue;
-                        }
-                        if pieces_len < pieces_buf.len() {
-                            pieces_buf[pieces_len] = ctx.to_script_data.krama_text_or_empty(k);
-                            pieces_len += 1;
-                        }
-                    }
-                    let pieces = &pieces_buf[..pieces_len];
-
                     // prev-context bookkeeping
                     let mut result_concat_status = false;
                     if ctx.prev_context_in_use {
@@ -1276,6 +1279,22 @@ pub fn transliterate_text_core(
                             if is_to_tamil_ext_
                                 && is_ta_ext_superscript_tail(ctx.result.last_char())
                             {
+                                // Stack buffer (no heap allocation); only this reorder path
+                                // needs the pieces as a slice. krama sequences are at most
+                                // ~4 entries in practice; 8 is a safe upper bound.
+                                let mut pieces_buf = [""; 8];
+                                let mut pieces_len = 0usize;
+                                for &k in krama.iter() {
+                                    if k < 0 {
+                                        continue;
+                                    }
+                                    if pieces_len < pieces_buf.len() {
+                                        pieces_buf[pieces_len] =
+                                            to_script_data.krama_text_or_empty(k);
+                                        pieces_len += 1;
+                                    }
+                                }
+                                let pieces = &pieces_buf[..pieces_len];
                                 if pieces.len() == 1 && pieces[0] == to_halant
                                     || map.krama.as_ref().is_some_and(|krama| {
                                         krama.last().is_some_and(|last_i| {
@@ -1299,10 +1318,10 @@ pub fn transliterate_text_core(
                                     ctx.result.emit_pieces(pieces);
                                 }
                             } else {
-                                ctx.result.emit_pieces(pieces);
+                                emit_krama_pieces(ctx.result, to_script_data, krama);
                             }
                         } else {
-                            ctx.result.emit_pieces(pieces);
+                            emit_krama_pieces(ctx.result, to_script_data, krama);
                         }
                     }
 
