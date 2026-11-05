@@ -85,3 +85,55 @@
   text: kAlO na jAnAti
   output: kAlO na jAnAti
   script: Normal
+# Standalone mAtrA keys (`.A`, `.LR`, ... and intermediates like `.L`) are anya in the typing context:
+# they do not attach to the previous vyanjana. Previously `.L` resolved to a (empty) mAtrA, so the raw
+# input text was emitted (k.L -> क.L, k.LR -> क.LR), and rust/go cleared the context at the end of the
+# input (k.LR -> क.Lऋ).
+- index: 16
+  text: k
+  output: क्
+  script: Devanagari
+  options:
+    includeInherentVowel: false
+- index: 17
+  text: k.
+  output: क्।
+  script: Devanagari
+  options:
+    includeInherentVowel: false
+- index: 18
+  text: k.L
+  output: क्ळ
+  script: Devanagari
+  options:
+    includeInherentVowel: false
+- index: 19
+  text: k.LR
+  output: क्ॢ
+  script: Devanagari
+  options:
+    includeInherentVowel: false
+- index: 20
+  text: k
+  output: क
+  script: Devanagari
+  options:
+    includeInherentVowel: true
+- index: 21
+  text: k.
+  output: क।
+  script: Devanagari
+  options:
+    includeInherentVowel: true
+- index: 22
+  text: k.L
+  output: कळ
+  script: Devanagari
+  options:
+    includeInherentVowel: true
+- index: 23
+  text: k.LR
+  output: कॢ
+  script: Devanagari
+  options:
+    includeInherentVowel: true

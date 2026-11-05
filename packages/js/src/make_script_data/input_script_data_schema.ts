@@ -43,6 +43,14 @@ export type InputTypingListDataType =
       /** This is Normal key for which duplicates have to be defined */
       ref_krama_key: KramaKeysLabelType;
       duplicates: string[];
+      /** Treat the duplicate keys (and their intermediate typing states) as `anya` in the
+       * typing context, where they would otherwise resolve to a `mAtrA`.
+       *
+       * Used for the standalone mAtrA keys like `.A` -> `ा`: they are not attached to the
+       * previous vyanjana (`k.A` -> `क्ा`, or `का` with inherent vowel), like any other anya.
+       * Implemented as a `fallback_list_ref` to an `anya` list item (brahmic scripts only).
+       */
+      treat_as_anya?: boolean;
     }
   | {
       type: 'custom_script_char';
