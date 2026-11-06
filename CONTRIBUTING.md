@@ -68,10 +68,10 @@ cargo bench             # statistical benchmark suite (criterion), see Benchmark
 The crate embeds generated files that are **committed to git**:
 
 - `src/generated/lipi_data.bin` — bincode blob with the data of all scripts and the custom option rules
-- `src/scripts.rs` — the script/language/alias lists, expanded into `Script` / `ScriptListEnum` by the `script_list!` macro
-- `src/custom_options.rs` — the custom option keys, expanded into `CustomOptions` by the `custom_options!` macro
+- `src/scripts.rs` — the `Script` / `ScriptListEnum` enums and the script/language/alias lists
+- `src/custom_options.rs` — the `CustomOptions` struct and its builder
 
-The macros live in the [`macros/`](packages/rust/macros) crate (`lipilekhika-macros`, published to crates.io before `lipilekhika`). The files are written by [`datagen/`](packages/rust/datagen) (`lipilekhika-datagen`, not published), which reads the JSON that `bun run make-script-data` copies into `packages/rust/data/` (gitignored).
+They are written by [`datagen/`](packages/rust/datagen) (`lipilekhika-datagen`, not published), which reads the JSON that `bun run make-script-data` copies into `packages/rust/data/` (gitignored). The Rust files are generated with `quote!` and formatted with `rustfmt` (needs the `rustfmt` component).
 
 After changing script data, run `bun run make-script-data` in `packages/js` (it runs `cargo run -p lipilekhika-datagen`) and commit the updated files. Encoding is deterministic and a file is only rewritten when its content changes, so unchanged data never shows up in `git status`. CI fails if the committed files are out of date (`cargo run -p lipilekhika-datagen -- --check`).
 

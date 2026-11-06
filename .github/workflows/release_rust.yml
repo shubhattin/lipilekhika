@@ -92,23 +92,7 @@ jobs:
       - uses: rust-lang/crates-io-auth-action@v1
         id: auth
 
-      # `lipilekhika-macros` is versioned independently: publish it only when its
-      # version is not on crates.io yet (it must be published before `lipilekhika`).
-      - name: Publish lipilekhika-macros to crates.io
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        shell: bash
-        run: |
-          cd packages/rust/macros
-          MACROS_VERSION=$(awk -F'"' '/^[[:space:]]*version[[:space:]]*=/ {print $2; exit}' Cargo.toml)
-          if curl -sf -A "lipilekhika-release (https://github.com/shubhattin/lipilekhika)" \
-            "https://crates.io/api/v1/crates/lipilekhika-macros/${MACROS_VERSION}" > /dev/null; then
-            echo "lipilekhika-macros ${MACROS_VERSION} is already published, skipping"
-          else
-            cargo publish -p lipilekhika-macros
-          fi
-
-      - name: Publish lipilekhika to crates.io
+      - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |

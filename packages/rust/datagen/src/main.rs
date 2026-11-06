@@ -2,8 +2,11 @@
 //! `bun run make-script-data` (packages/js) copies into `packages/rust/data/`:
 //!
 //! - `src/generated/lipi_data.bin`: bincode blob with all script data + custom option rules
-//! - `src/scripts.rs`: `script_list!` invocation with the script/language lists
-//! - `src/custom_options.rs`: `custom_options!` invocation with the option keys
+//! - `src/scripts.rs`: `Script` / `ScriptListEnum` enums and the script/language lists
+//! - `src/custom_options.rs`: the `CustomOptions` struct
+//!
+//! The Rust files are generated with `quote!`, pretty-printed with `prettyplease` and then
+//! formatted with `rustfmt` (so `cargo fmt` leaves them alone).
 //!
 //! Files are only rewritten when their content changes. The encoding is deterministic, so
 //! unchanged data never shows up as a (binary) diff in git.
@@ -14,10 +17,13 @@
 //! The schema types are shared with the library via `include!` (no dependency on the
 //! `lipilekhika` crate itself, so this still builds when the generated files are stale).
 
-use std::fmt::Write as _;
 use std::fs;
+use std::io::Write as _;
 use std::path::{Path, PathBuf};
-use std::process::ExitCode;
+use std::process::{Command, ExitCode, Stdio};
+
+mod custom_options_rs;
+mod scripts_rs;
 
 // at the crate root so `alloc` is in the extern prelude of the included modules too
 extern crate alloc;
@@ -142,7 +148,11 @@ fn generate(root: &Path) -> Result<Vec<(PathBuf, Vec<u8>)>, String> {
         }
     }
 
-    let custom_options_rs = render_custom_options_rs(&custom_options_json);
+    let scripts_rs = format_rust(root, scripts_rs::render_scripts_rs(&script_list)?)?;
+    let custom_options_rs = format_rust(
+        root,
+        custom_options_rs::render_custom_options_rs(&custom_options_json)?,
+    )?;
     let custom_options: CustomOptionMap = custom_options_json
         .into_iter()
         .map(|(k, v)| (k, v.into()))
@@ -157,10 +167,7 @@ fn generate(root: &Path) -> Result<Vec<(PathBuf, Vec<u8>)>, String> {
 
     Ok(vec![
         (root.join("src/generated/lipi_data.bin"), blob_bytes),
-        (
-            root.join("src/scripts.rs"),
-            render_scripts_rs(&script_list).into_bytes(),
-        ),
+        (root.join("src/scripts.rs"), scripts_rs.into_bytes()),
         (
             root.join("src/custom_options.rs"),
             custom_options_rs.into_bytes(),
@@ -168,47 +175,38 @@ fn generate(root: &Path) -> Result<Vec<(PathBuf, Vec<u8>)>, String> {
     ])
 }
 
-fn render_scripts_rs(script_list: &ScriptListDataJson) -> String {
-    let mut out = String::from(HEADER);
-    out.push_str("\nlipilekhika_macros::script_list! {\n");
+/// Pretty-prints generated tokens and formats them with `rustfmt`, so the committed files
+/// are exactly what `cargo fmt` produces. Formatting happens before the "changed?" check,
+/// so it never causes a spurious rewrite.
+fn format_rust(root: &Path, tokens: proc_macro2::TokenStream) -> Result<String, String> {
+    let file: syn::File =
+        syn::parse2(tokens).map_err(|e| format!("generated invalid Rust syntax: {e}"))?;
+    let source = format!("{HEADER}\n{}", prettyplease::unparse(&file));
 
-    fn section<'a, V: std::fmt::Debug + 'a>(
-        out: &mut String,
-        name: &str,
-        separator: &str,
-        entries: impl IntoIterator<Item = (&'a String, &'a V)>,
-    ) {
-        writeln!(out, "    {name}: {{").unwrap();
-        for (key, value) in entries {
-            writeln!(out, "        {key:?} {separator} {value:?},").unwrap();
-        }
-        out.push_str("    },\n");
+    let mut child = Command::new("rustfmt")
+        .args(["--edition", "2024", "--emit", "stdout"])
+        .current_dir(root)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| {
+            format!("failed to run rustfmt ({e}); install it with `rustup component add rustfmt`")
+        })?;
+    child
+        .stdin
+        .take()
+        .expect("piped stdin")
+        .write_all(source.as_bytes())
+        .map_err(|e| format!("failed to write to rustfmt: {e}"))?;
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("rustfmt failed: {e}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "rustfmt failed:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
     }
-
-    section(&mut out, "scripts", "=", &script_list.scripts);
-    section(&mut out, "langs", "=", &script_list.langs);
-    section(
-        &mut out,
-        "lang_script_map",
-        "=>",
-        &script_list.lang_script_map,
-    );
-    section(
-        &mut out,
-        "script_alternates_map",
-        "=>",
-        &script_list.script_alternates_map,
-    );
-    out.push_str("}\n");
-    out
-}
-
-fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String {
-    let mut out = String::from(HEADER);
-    out.push_str("\nlipilekhika_macros::custom_options! {\n");
-    for key in custom_options.keys() {
-        writeln!(out, "    {key:?},").unwrap();
-    }
-    out.push_str("}\n");
-    out
+    String::from_utf8(output.stdout).map_err(|e| format!("rustfmt output is not UTF-8: {e}"))
 }

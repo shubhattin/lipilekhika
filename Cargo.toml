@@ -2,7 +2,6 @@
 members = [
     "desktop-client",
     "packages/rust",
-    "packages/rust/macros",
     "packages/rust/datagen",
     "desktop-client/lipiparivartaka/src-tauri",
     "packages/js/wasm",

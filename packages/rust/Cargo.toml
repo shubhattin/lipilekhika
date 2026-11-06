@@ -15,8 +15,6 @@ include = ["src/**/*", "Cargo.toml", "LICENCE*", "README*"]
 
 
 [dependencies]
-# Expands the generated `src/scripts.rs` / `src/custom_options.rs` (compile time only).
-lipilekhika-macros = { version = "=0.1.0", path = "macros" }
 serde = { version = "1.0", default-features = false, features = [
     "derive",
     "alloc",

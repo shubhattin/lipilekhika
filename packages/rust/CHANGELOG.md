@@ -4,7 +4,7 @@
 
 - The generated script data is now committed (`src/generated/lipi_data.bin`, `src/scripts.rs`, `src/custom_options.rs`): no build script anymore, the crate can be installed directly from GitHub (`tag = "rust-lib@v<version>"`) and is published without `--no-verify --allow-dirty` (#141)
 - All script data and custom option rules are embedded as a single bincode blob, the script list is compiled in as constants
-- New `lipilekhika-macros` dependency (proc-macros expanding the generated script list and custom options); the `[build-dependencies]` (`serde_json`, `syn`, `quote`, `prettyplease`) are gone
+- No more `[build-dependencies]` (`serde_json`, `syn`, `quote`, `prettyplease`): code generation moved to the unpublished `lipilekhika-datagen` crate
 - Performance Improvements in #140
 - Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)
 

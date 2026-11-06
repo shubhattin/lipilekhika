@@ -36,12 +36,12 @@ jobs:
         run: |
           cd packages/rust
           cargo build --release
-      # Packages and verify-builds both crates the way `cargo publish` does
+      # Packages and verify-builds the crate the way `cargo publish` does
       # (no `--no-verify` / `--allow-dirty` needed)
       - name: Package
         run: |
           cd packages/rust
-          cargo package -p lipilekhika-macros -p lipilekhika
+          cargo package -p lipilekhika
 
   # The committed `src/generated/lipi_data.bin`, `src/scripts.rs` and `src/custom_options.rs`
   # must match what `bun run make-script-data` generates from the current JS data.
@@ -52,6 +52,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt # lipilekhika-datagen formats the generated code
 
       - name: Cache cargo registry + build
         uses: actions/cache@v4

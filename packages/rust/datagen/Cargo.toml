@@ -14,6 +14,7 @@ publish = false
 #   - packages/rust/src/generated/lipi_data.bin
 #   - packages/rust/src/scripts.rs
 #   - packages/rust/src/custom_options.rs
+# The Rust files are formatted with `rustfmt`, which must be installed.
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -29,4 +30,8 @@ hashbrown = { version = "0.15", default-features = false, features = [
 ] }
 foldhash = { version = "0.1", default-features = false }
 indexmap = { version = "2", default-features = false, features = ["serde"] }
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+prettyplease = "0.2"
 

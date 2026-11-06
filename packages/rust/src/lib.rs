@@ -27,9 +27,7 @@ mod script_data;
 mod transliterate;
 mod utils;
 
-#[rustfmt::skip]
 pub mod custom_options;
-#[rustfmt::skip]
 pub mod scripts;
 pub mod typing;
 
