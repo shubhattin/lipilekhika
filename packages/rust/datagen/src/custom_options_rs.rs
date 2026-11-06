@@ -1,20 +1,23 @@
-use quote::{format_ident, quote};
-use syn::Index;
+//! Generates `src/custom_options.rs` (the `CustomOptions` struct) from `custom_options.json`.
+
+use proc_macro2::TokenStream;
+use quote::quote;
+use syn::Ident;
 
 use crate::schema::CustomOptionMapJson;
 
-/// Generate the contents of `src/custom_options.rs` from parsed `custom_options.json`.
-pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String {
-    let fields: Vec<_> = custom_options
-        .keys()
-        .map(|key| {
-            let ident = format_ident!("{}", key.replace(':', "_"));
-            (ident, key.as_str())
-        })
-        .collect();
+pub fn render_custom_options_rs(
+    custom_options: &CustomOptionMapJson,
+) -> Result<TokenStream, String> {
+    let mut fields: Vec<(Ident, &str)> = Vec::with_capacity(custom_options.len());
+    for key in custom_options.keys() {
+        let field_name = key.replace(':', "_");
+        let ident = syn::parse_str::<Ident>(&field_name)
+            .map_err(|_| format!("{key:?} is not a valid field name once `:` becomes `_`"))?;
+        fields.push((ident, key.as_str()));
+    }
 
-    let entry_count = fields.len();
-    let entry_count_lit = Index::from(entry_count);
+    let entry_count = proc_macro2::Literal::usize_unsuffixed(fields.len());
 
     let struct_fields = fields.iter().map(|(field_ident, raw_key)| {
         let doc = format!("`{raw_key}`");
@@ -26,14 +29,11 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
     let option_keys = fields.iter().map(|(_, raw_key)| quote! { #raw_key, });
 
-    let entry_tuples: Vec<_> = fields
-        .iter()
-        .map(|(field_ident, raw_key)| {
-            quote! {
-                (#raw_key, self.#field_ident),
-            }
-        })
-        .collect();
+    let entry_tuples = fields.iter().map(|(field_ident, raw_key)| {
+        quote! {
+            (#raw_key, self.#field_ident),
+        }
+    });
 
     let try_set_arms = fields.iter().map(|(field_ident, raw_key)| {
         quote! {
@@ -56,9 +56,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
         }
     });
 
-    let tokens = quote! {
-        // generated file, do not edit
-        #[rustfmt::skip]
+    Ok(quote! {
         use alloc::string::{String, ToString};
         use derive_builder::Builder;
 
@@ -81,7 +79,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
         impl CustomOptions {
             /// Number of supported custom options.
-            pub const ENTRY_COUNT: usize = #entry_count_lit;
+            pub const ENTRY_COUNT: usize = #entry_count;
 
             /// Canonical keys in `custom_options.json` insertion order.
             pub const KEYS: &'static [&'static str] = &[#(#option_keys)*];
@@ -96,7 +94,6 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Sets an option by its canonical `category:option` key.
             #[inline]
-            #[rustfmt::skip]
             pub fn try_set(&mut self, key: &str, value: bool) -> Result<(), UnknownCustomOptionKey> {
                 match key {
                     #(#try_set_arms)*
@@ -115,7 +112,6 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
 
             /// Fixed-size array of canonical key/value pairs (`&opts.as_entries()` for a slice).
             #[inline]
-            #[rustfmt::skip]
             pub fn as_entries(&self) -> [(&'static str, bool); Self::ENTRY_COUNT] {
                 [#(#entry_tuples)*]
             }
@@ -132,6 +128,7 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
                     .map(|(key, enabled)| (key.to_string(), enabled))
                     .collect()
             }
+
             /// Builds [`CustomOptions`] from any map-like `(key, enabled)` source.
             ///
             /// Accepts [`hashbrown::HashMap`](hashbrown::HashMap), [`std::collections::HashMap`](std::collections::HashMap),
@@ -181,8 +178,5 @@ pub fn render_custom_options_rs(custom_options: &CustomOptionMapJson) -> String 
                     .expect("CustomOptionsBuilder: infallible with `#[builder(default)]`")
             }
         }
-    };
-
-    let syntax_tree: syn::File = syn::parse2(tokens).expect("Generated invalid Rust syntax");
-    prettyplease::unparse(&syntax_tree)
+    })
 }

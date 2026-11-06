@@ -1,9 +1,10 @@
 use alloc::boxed::Box;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use once_cell::race::OnceBox;
 
-use super::generated;
 use super::schema::{List, ScriptListData};
+use crate::scripts::{LANG_SCRIPT_MAP, LANGS, SCRIPT_ALTERNATES_MAP, SCRIPTS};
 
 impl List {
     pub fn get_krama_ref(&self) -> &Vec<i16> {
@@ -37,11 +38,18 @@ static SCRIPT_LIST_DATA_CACHE: OnceBox<ScriptListData> = OnceBox::new();
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
     SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
-        let bytes = generated::SCRIPT_LIST_BYTES;
-        let (data, _): (ScriptListData, usize) =
-            bincode::serde::decode_from_slice(bytes, bincode::config::standard())
-                .expect("bincode decode failed for script_list");
-        Box::new(data)
+        // Built from the generated `SCRIPTS` / `LANGS` / ... constants in `src/scripts.rs`.
+        let pairs = |list: &[(&str, &str)]| {
+            list.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect()
+        };
+        Box::new(ScriptListData {
+            scripts: SCRIPTS.iter().map(|(name, _)| name.to_string()).collect(),
+            langs: LANGS.iter().map(|(name, _)| name.to_string()).collect(),
+            lang_script_map: pairs(LANG_SCRIPT_MAP),
+            script_alternates_map: pairs(SCRIPT_ALTERNATES_MAP),
+        })
     })
 }
 #[cfg(test)]

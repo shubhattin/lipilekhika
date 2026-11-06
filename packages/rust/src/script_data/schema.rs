@@ -355,6 +355,19 @@ pub struct CustomOptions {
 pub type CustomOptionMapJson = IndexMap<String, CustomOptionsJson>;
 pub type CustomOptionMap = IndexMap<String, CustomOptions>;
 
+/// Contents of the committed `src/generated/lipi_data.bin`, written by `lipilekhika-datagen`
+/// with `bincode::config::standard()`.
+///
+/// Every serialized field is a `Vec` or an `IndexMap` (insertion ordered) and all `HashMap`s
+/// are `#[serde(skip)]`, so the same input JSON always encodes to the same bytes.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct LipiDataBlob {
+    /// One entry per script, in `script_list.json` order (= `ScriptListEnum` discriminant).
+    pub script_data: Vec<ScriptData>,
+    /// Custom option rules in `custom_options.json` order.
+    pub custom_options: CustomOptionMap,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ScriptListDataJson {

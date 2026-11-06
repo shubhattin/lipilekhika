@@ -23,17 +23,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # JS Step
+      # Test data for `cargo test` (script data artifacts are committed)
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
           bun install
           bun run gen:test-data
-      - name: Make Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
 
       # Rust setup
       - name: Install Rust
@@ -102,10 +97,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           cd packages/rust
-          # Cargo still omits gitignored paths from the crate even with [package] include;
-          # comment out generated-file entries so generated files are packaged, then allow publish with a dirty tree.
-          sed -i '/^src\/data\// s/^/#/' .gitignore || true
-          cargo publish --no-verify --allow-dirty
+          cargo publish -p lipilekhika
 
   build-binaries:
     runs-on: ${{ matrix.os }}
@@ -128,18 +120,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      # JS Step
-      - uses: oven-sh/setup-bun@v2
-      - name: Generate Test Data
-        run: |
-          bun install
-          bun run gen:test-data
-      - name: Make Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
 
       # Rust setup (with targets)
       - name: Install Rust

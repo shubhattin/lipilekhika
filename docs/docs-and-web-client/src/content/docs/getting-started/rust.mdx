@@ -22,6 +22,27 @@ The recommended way to install is using `cargo add`:
 cargo add lipilekhika
 ```
 
+### Installing from GitHub
+
+You can also depend on the crate directly from the [GitHub repository](https://github.com/shubhattin/lipilekhika). As it is a monorepo with packages for several languages, the release tags of the Rust crate use the format **`rust-lib@v<version>`** (e.g. `rust-lib@v1.2.0`):
+
+```toml
+[dependencies]
+lipilekhika = { git = "https://github.com/shubhattin/lipilekhika", tag = "rust-lib@vX.Y.Z" }
+```
+
+or with `cargo add`:
+
+```bash
+cargo add lipilekhika --git https://github.com/shubhattin/lipilekhika --tag rust-lib@vX.Y.Z
+```
+
+Use `branch = "main"` instead of `tag` to track the latest unreleased changes.
+
+<Aside type="caution">
+Installing from GitHub works only for releases after `rust-lib@v1.1.2`. Older tags did not commit the generated script data, so they do not build from the repository.
+</Aside>
+
 ## Basic Usage
 
 ### Transliteration

@@ -87,16 +87,6 @@ jobs:
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
-      # Setup Bun for script/test data generation
-      - uses: oven-sh/setup-bun@v2
-        name: Setup Bun
-
-      - name: Generate Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
-
       # Setup Java (required for Android build)
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -139,12 +129,6 @@ jobs:
       # Install flutter_rust_bridge_codegen
       - name: Install flutter_rust_bridge_codegen
         run: cargo install flutter_rust_bridge_codegen
-
-      # Enable script data in Rust package
-      - name: Enable script data
-        run: |
-          cd packages/rust
-          sed -i '/^src\/data\// s/^/#/' .gitignore
 
       # Generate Dart FFI bindings
       - name: Generate Dart bindings

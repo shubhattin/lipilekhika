@@ -1,0 +1,3 @@
+# Intentionally empty: pins rustfmt to its defaults for this crate, so a contributor's
+# global rustfmt config cannot change the files formatted by `lipilekhika-datagen`
+# (src/scripts.rs, src/custom_options.rs) or by `cargo fmt`.

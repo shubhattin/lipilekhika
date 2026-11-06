@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Setup Bun for script/test data generation
+      # Setup Bun for test data generation
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
 
@@ -25,12 +25,6 @@ jobs:
         run: |
           bun install
           bun run gen:test-data
-
-      - name: Generate Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
 
       # Setup Rust
       - name: Install Rust
@@ -46,11 +40,6 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-
-      # Enable script data in Rust package (uncomment in .gitignore)
-      - run: |
-          cd packages/rust
-          sed -i '/^src\/data\// s/^/#/' .gitignore
 
       # Setup Flutter
       - name: Setup Flutter

@@ -1,6 +1,6 @@
 mod char_table;
 mod custom_options;
-mod generated;
+mod data_blob;
 mod schema;
 #[allow(clippy::module_inception)]
 mod script_data;

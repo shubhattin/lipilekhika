@@ -203,12 +203,11 @@ jobs:
             ${{ runner.os }}-${{ matrix.target }}-cargo-
             ${{ runner.os }}-cargo-
 
-      - name: Generate Script Data (required for Rust build.rs)
+      - name: Install JS dependencies
         shell: bash
         run: |
           cd packages/js
           bun install
-          bun run make-script-data
 
       - name: Build native binding for target
         shell: bash

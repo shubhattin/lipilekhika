@@ -11,15 +11,8 @@ categories = ["text-processing", "localization"]
 version = "1.1.2"
 edition = "2024"
 rust-version = "1.85.0"
-include = [
-    "src/**/*",
-    "build.rs",
-    "scripts_rs_builder.rs",
-    "custom_options_rs_builder.rs",
-    "Cargo.toml",
-    "LICENSE*",
-    "README*",
-]
+# `include` bypasses .gitignore, so list only what the crate needs
+include = ["src/**/*.rs", "src/generated/*.bin", "Cargo.toml", "LICENCE*", "README*"]
 
 
 [dependencies]
@@ -55,24 +48,6 @@ clap = { version = "4.5.54", features = ["derive"] }
 criterion = { version = "0.5.1", default-features = true }
 owo-colors = "4.2.0"
 serde_yaml_ng = "0.10.0"
-
-[build-dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.148"
-bincode = { version = "2", default-features = false, features = [
-    "serde",
-    "alloc",
-] }
-hashbrown = { version = "0.15", default-features = false, features = [
-    "alloc",
-    "serde",
-    "default-hasher",
-] }
-foldhash = { version = "0.1", default-features = false }
-indexmap = { version = "2", default-features = false, features = ["serde"] }
-quote = "1.0"
-syn = { version = "2.0", features = ["full"] }
-prettyplease = "0.2"
 
 [lib]
 crate-type = ["rlib"]

@@ -4018,12 +4018,24 @@ dependencies = [
  "indexmap 2.12.1",
  "once_cell",
  "owo-colors",
+ "serde",
+ "serde_yaml_ng",
+ "strum",
+]
+
+[[package]]
+name = "lipilekhika-datagen"
+version = "0.0.0"
+dependencies = [
+ "bincode",
+ "foldhash 0.1.5",
+ "hashbrown 0.15.5",
+ "indexmap 2.12.1",
  "prettyplease",
+ "proc-macro2",
  "quote",
  "serde",
  "serde_json",
- "serde_yaml_ng",
- "strum",
  "syn 2.0.114",
 ]
 

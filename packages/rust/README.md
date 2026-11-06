@@ -31,6 +31,15 @@ The fastest Lipi Lekhika implementation—about **9× faster** than pure JavaScr
 cargo add lipilekhika
 ```
 
+Or directly from GitHub. This is a monorepo with packages for several languages, so the Rust crate's release tags use the format `rust-lib@v<version>`:
+
+```toml
+[dependencies]
+lipilekhika = { git = "https://github.com/shubhattin/lipilekhika", tag = "rust-lib@vX.Y.Z" }
+```
+
+> Installing from GitHub works for releases after `rust-lib@v1.1.2` (older tags did not commit the generated script data).
+
 ## 🚀 Quick Start
 
 ### Basic Transliteration
@@ -251,15 +260,15 @@ See the full list of custom transliteration options:
 
 ## 🛠 Building from Source
 
-> **Do not build from a plain `git clone`.** Script data and `src/scripts.rs` are generated and not checked in — a fresh checkout will not compile.
-
-Use the published crate instead:
+The generated script data (`src/generated/lipi_data.bin`, `src/scripts.rs`, `src/custom_options.rs`) is committed to the repository, so a plain checkout builds with just Cargo — no build script or code generation step:
 
 ```bash
-cargo add lipilekhika
+git clone https://github.com/shubhattin/lipilekhika
+cd lipilekhika/packages/rust
+cargo build
 ```
 
-If you need to build locally (e.g. for contributing), follow the steps in [`.github/workflows/release_rust.yml`](https://github.com/shubhattin/lipilekhika/blob/main/.github/workflows/release_rust.yml)
+Regenerating the data is only needed when changing it, see [CONTRIBUTING.md](https://github.com/shubhattin/lipilekhika/blob/main/CONTRIBUTING.md#rust-package-packagesrust).
 
 ## 📝 License
 

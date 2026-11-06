@@ -26,10 +26,12 @@ These are test cases generated from text data and older version of lipi lekhika,
 
 ## JS package (`packages/js`)
 
+`make-script-data` also regenerates the committed Rust data, so it additionally needs [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) with the `rustfmt` component (included by default with rustup). Without them the rest of the data is still generated, but it warns that the committed Rust data was not updated.
+
 From `packages/js`:
 
 ```sh
-bun run make-script-data   # generate script data (also required by Rust, Go)
+bun run make-script-data   # generate script data (also regenerates the committed Rust/Go data)
 bun run check              # typecheck
 bun run bench              # cold single-pass benchmark (see Benchmarks below)
 bun run bench:suite        # statistical benchmark suite (mitata), bench:suite:bun for Bun
@@ -53,7 +55,7 @@ Tests need native bindings — run once (or after binding changes in rust packag
 
 ## Rust package (`packages/rust`)
 
-Requires [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) >= 1.85. Run `bun run make-script-data` in `packages/js` and `bun run gen:test-data` from the repo root first.
+Requires [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) >= 1.85. The script data is committed, so building needs only Cargo. Run `bun run gen:test-data` from the repo root before running the tests.
 
 From `packages/rust`:
 
@@ -62,6 +64,18 @@ cargo check
 cargo test              # or cargo test --release
 cargo bench             # statistical benchmark suite (criterion), see Benchmarks below
 ```
+
+#### Script data
+
+The crate embeds generated files that are **committed to git**:
+
+- `src/generated/lipi_data.bin` — bincode blob with the data of all scripts and the custom option rules
+- `src/scripts.rs` — the `Script` / `ScriptListEnum` enums and the script/language/alias lists
+- `src/custom_options.rs` — the `CustomOptions` struct and its builder
+
+They are written by [`datagen/`](packages/rust/datagen) (`lipilekhika-datagen`, not published), which reads the JSON that `bun run make-script-data` copies into `packages/rust/data/` (gitignored). The Rust files are generated with `quote!` and formatted with `rustfmt` (needs the `rustfmt` component).
+
+After changing script data, run `bun run make-script-data` in `packages/js` (it runs `cargo run -p lipilekhika-datagen`) and commit the updated files. Encoding is deterministic and a file is only rewritten when its content changes, so unchanged data never shows up in `git status`. CI fails if the committed files are out of date (`cargo run -p lipilekhika-datagen -- --check`).
 
 ## Python package (`packages/python`)
 
@@ -93,7 +107,7 @@ go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 
 Every package has two kinds of benchmark over the same [`test_data/`](test_data/) cases (`bun run gen:test-data`), using the generated script data. **Run both**: the statistical suite to judge a change, the cold pass to see first-run latency and a quick cross-language table.
 
-The generated data is gitignored, so **after switching branches rerun `bun run make-script-data`** in `packages/js`, otherwise you measure the previous branch's data.
+The JS script data is gitignored (Rust and Go embed committed copies), so **after switching branches rerun `bun run make-script-data`** in `packages/js`, otherwise you measure the previous branch's data.
 
 ### Statistical suites (use these to compare two versions)
 
