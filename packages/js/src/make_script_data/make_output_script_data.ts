@@ -676,8 +676,12 @@ async function copy_script_data_json() {
   }[] = [
     {
       id: 'rust',
-      target: '../rust/src/data',
-      minify: true
+      // JSON input of `lipilekhika-datagen` (gitignored). It writes the committed
+      // `src/generated/lipi_data.bin`, `src/scripts.rs` and `src/custom_options.rs`,
+      // rewriting a file only when its content changes.
+      target: '../rust/data',
+      minify: true,
+      cmd: 'cd ../rust && cargo run -q -p lipilekhika-datagen'
     },
     {
       id: 'go',
@@ -726,18 +730,20 @@ async function copy_script_data_json() {
       fs.writeFileSync(target + '/script_list.json', JSON.stringify(script_list_data, null, 2));
     }
     // The Go target folder can be fully regenerated; ensure embed scaffold exists.
-    if (cmd && id === 'go') {
+    if (id === 'go') {
       fs.mkdirSync(target + '/gob', { recursive: true });
       fs.writeFileSync(
         target + '/embed.go',
         'package data\n\nimport "embed"\n\n// FS contains generated binary artifacts committed to git.\n//\n//go:embed gob/*\nvar FS embed.FS\n'
       );
       fs.writeFileSync(target + '/gob/placeholder.txt', 'generated gob files live here');
-
+    }
+    // Generate the committed binary artifacts from the JSON copied above.
+    if (cmd) {
       try {
-        execSync(cmd);
+        execSync(cmd, { stdio: 'inherit' });
       } catch (e) {
-        console.error(chalk.red('✖  Error generating Go script data'), e);
+        console.error(chalk.red(`✖  Error generating ${id} script data`), e);
       }
     }
   }

@@ -39,9 +39,6 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - run: |
-          cd packages/rust
-          sed -i '/^src\/data\// s/^/#/' .gitignore
   
       - name: Build and Check
         run: |

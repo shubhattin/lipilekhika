@@ -1,0 +1,32 @@
+[package]
+name = "lipilekhika-datagen"
+description = "Generates the committed script data artifacts of the lipilekhika crate"
+license = "MIT"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85.0"
+publish = false
+
+# Run via `bun run make-script-data` in `packages/js` (which first copies the JSON into
+# `packages/rust/data/`), or directly: `cargo run -p lipilekhika-datagen [-- --check]`.
+#
+# Writes (only when content changed):
+#   - packages/rust/src/generated/lipi_data.bin
+#   - packages/rust/src/scripts.rs
+#   - packages/rust/src/custom_options.rs
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.148"
+bincode = { version = "2", default-features = false, features = [
+    "serde",
+    "alloc",
+] }
+hashbrown = { version = "0.15", default-features = false, features = [
+    "alloc",
+    "serde",
+    "default-hasher",
+] }
+foldhash = { version = "0.1", default-features = false }
+indexmap = { version = "2", default-features = false, features = ["serde"] }
+
