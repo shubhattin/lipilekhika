@@ -38,7 +38,7 @@ static SCRIPT_LIST_DATA_CACHE: OnceBox<ScriptListData> = OnceBox::new();
 /// Returns the script list data
 pub fn get_script_list_data() -> &'static ScriptListData {
     SCRIPT_LIST_DATA_CACHE.get_or_init(|| {
-        // Built from the `script_list!` constants in `src/scripts.rs`.
+        // Built from the generated `SCRIPTS` / `LANGS` / ... constants in `src/scripts.rs`.
         let pairs = |list: &[(&str, &str)]| {
             list.iter()
                 .map(|(k, v)| (k.to_string(), v.to_string()))

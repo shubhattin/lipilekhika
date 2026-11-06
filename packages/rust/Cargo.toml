@@ -11,7 +11,8 @@ categories = ["text-processing", "localization"]
 version = "1.1.2"
 edition = "2024"
 rust-version = "1.85.0"
-include = ["src/**/*", "Cargo.toml", "LICENCE*", "README*"]
+# `include` bypasses .gitignore, so list only what the crate needs
+include = ["src/**/*.rs", "src/generated/*.bin", "Cargo.toml", "LICENCE*", "README*"]
 
 
 [dependencies]
