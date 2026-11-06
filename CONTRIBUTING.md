@@ -26,6 +26,8 @@ These are test cases generated from text data and older version of lipi lekhika,
 
 ## JS package (`packages/js`)
 
+`make-script-data` also regenerates the committed Rust data, so it additionally needs [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) with the `rustfmt` component (included by default with rustup). Without them the rest of the data is still generated, but it warns that the committed Rust data was not updated.
+
 From `packages/js`:
 
 ```sh

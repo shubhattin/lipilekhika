@@ -744,6 +744,18 @@ async function copy_script_data_json() {
         execSync(cmd, { stdio: 'inherit' });
       } catch (e) {
         console.error(chalk.red(`✖  Error generating ${id} script data`), e);
+        if (id === 'rust') {
+          // not fatal (the other targets are still generated), but the committed Rust
+          // artifacts are now stale, so make that clearly visible
+          console.warn(
+            chalk.yellow(
+              '⚠  The committed Rust data (packages/rust/src/generated/lipi_data.bin, src/scripts.rs, ' +
+                'src/custom_options.rs) was NOT updated with the new script data.\n' +
+                '   Install Rust/Cargo with the rustfmt component, then rerun `bun run make-script-data` ' +
+                '(or `cargo run -p lipilekhika-datagen` in packages/rust).'
+            )
+          );
+        }
       }
     }
   }

@@ -2,6 +2,8 @@
 # The artifacts generated from it (src/generated/lipi_data.bin, src/scripts.rs,
 # src/custom_options.rs) are committed.
 /data/
+# legacy location of the JSON input (before the generated data was committed)
+/src/data/
 pkg
 
 test_log/
