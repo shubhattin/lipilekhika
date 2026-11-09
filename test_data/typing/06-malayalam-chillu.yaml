@@ -1,0 +1,12 @@
+# Malayalam chillu letters (.k .N .n .r .l .L -> ൿ ൺ ൻ ർ ൽ ൾ) are dead consonants:
+# no virama and no inherent vowel after them (#160)
+- index: 0
+  text: .n ka.n k.n k.k
+  output: ൻ കൻ ക്ൻ ക്ൿ
+  script: Malayalam
+  preserve_check: true
+- index: 1
+  text: ka.r ka.lka va.N ma.L
+  output: കർ കൽക വൺ മൾ
+  script: Malayalam
+  preserve_check: true
