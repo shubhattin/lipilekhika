@@ -126,12 +126,13 @@ describe('Typing a long text without a context break', () => {
   it('takes linear time', async () => {
     const ctx = createTypingContext('Devanagari');
     await ctx.ready;
-    typeRun(ctx, 1_000); // warm up
+    typeRun(ctx, 500); // warm up
     // compared with a 5x shorter run, so that it does not depend on the machine speed
     // (or coverage): linear ~5x, it was ~25x
-    const short = typeRun(ctx, 2_000);
-    const long = typeRun(ctx, 10_000);
-    expect(long.result).toBe('क'.repeat(10_000));
+    const short = typeRun(ctx, 1_000);
+    const long = typeRun(ctx, 5_000);
+    expect(long.result).toBe('क'.repeat(5_000));
     expect(long.ms / short.ms).toBeLessThan(12);
-  });
+    // CI with coverage is many times slower than a local run
+  }, 60_000);
 });
