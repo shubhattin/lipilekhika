@@ -51,9 +51,9 @@ const Sinhala: InputBrahmicScriptType = {
       text: HALANT,
       text_krama: ['halant'],
       type: 'anya',
-      duplicates: [HALANT + '\u200d']
-      // ^ a different variant of halant present in Sinhala which
-      // allows conjuct glyphs (saMyukAkShara)
+      duplicates: [HALANT + '\u200d', '\u200d' + HALANT]
+      // ^ variants of halant with a ZWJ: al-lakuna + ZWJ makes a conjunct glyph
+      // (saMyukAkShara, ක්‍ෂ) and ZWJ + al-lakuna makes touching letters (ක‍්ව)
     },
 
     {

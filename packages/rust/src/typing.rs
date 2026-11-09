@@ -441,7 +441,12 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
     }
 
     // Merge duplicates
-    common_krama_map = merge_duplicate_text_mappings(common_krama_map);
+    // A key whose character this script lacks falls back to an empty text (`.a1` to the
+    // a1 mAtrA, which is the empty a mAtrA in Devanagari), nothing to show for it
+    common_krama_map = merge_duplicate_text_mappings(common_krama_map)
+        .into_iter()
+        .filter(|(text, _, _)| !text.is_empty())
+        .collect();
     script_specific_krama_map = merge_duplicate_text_mappings(script_specific_krama_map);
 
     ScriptTypingDataMap {

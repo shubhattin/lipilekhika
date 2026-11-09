@@ -569,7 +569,11 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
     }
   }
 
-  res.common_krama_map = mergeDuplicateTextMappings(res.common_krama_map);
+  // A key whose character this script lacks falls back to an empty text (`.a1` to the
+  // a1 mAtrA, which is the empty a mAtrA in Devanagari), nothing to show for it
+  res.common_krama_map = mergeDuplicateTextMappings(res.common_krama_map).filter(
+    ([text]) => text !== ''
+  );
   res.script_specific_krama_map = mergeDuplicateTextMappings(res.script_specific_krama_map);
 
   return res;

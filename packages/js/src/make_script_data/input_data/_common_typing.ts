@@ -162,6 +162,11 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = (
   [
     {
       type: 'duplicates',
+      ref_krama_key: 'a1-mAtrA',
+      duplicates: ['.a1']
+    },
+    {
+      type: 'duplicates',
       ref_krama_key: 'A-mAtrA',
       duplicates: ['.A']
     },
