@@ -71,6 +71,38 @@ function sortByText<T extends readonly [string, ...unknown[]]>(arr: readonly T[]
   return [...arr].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 }
 
+const VYANJANA_KRAMA_RANGE = [kramaKeyIndex('क'), kramaKeyIndex('ष')] as const;
+const isVyanjanaKramaIndex = (krama_index: number) =>
+  krama_index >= VYANJANA_KRAMA_RANGE[0] && krama_index <= VYANJANA_KRAMA_RANGE[1];
+
+/**
+ * Split `text` greedily (longest prefix first) into texts of `krama_text_arr`.
+ * For a text listed more than once the first krama index wins, as in `kramaKeyIndex`.
+ * Returns `null` if some part cannot be matched or a piece is rejected by `accept_piece`.
+ */
+function decompose_into_krama_texts(
+  text: string,
+  krama_text_arr: OutputScriptData['krama_text_arr'],
+  accept_piece: (piece: string) => boolean
+): number[] | null {
+  const krama: number[] = [];
+  let start = 0;
+  while (start < text.length) {
+    let found = -1;
+    let end = text.length;
+    for (; end > start; end--) {
+      const piece = text.substring(start, end);
+      if (!accept_piece(piece)) continue;
+      found = krama_text_arr.findIndex((item) => item[0] === piece);
+      if (found !== -1) break;
+    }
+    if (found === -1) return null;
+    krama.push(found);
+    start = end;
+  }
+  return krama.length > 0 ? krama : null;
+}
+
 function get_out_script_data(
   input_script_data: InputScriptInfoType,
   NormalOutputData?: OutputScriptData
@@ -177,6 +209,19 @@ function get_out_script_data(
         const krama_key_index = NormalOutputData?.krama_text_arr.findIndex(
           (item) => item[0] === text_char
         );
+        // An intermediate prefix that is not itself a Normal text but is made only of
+        // letters which are (eg `aiI` of `aiI^` = `ai` + `I`). Without this it falls to the
+        // per character resolution below and comes out as `a-mAtrA` x 3 (`aaa` in Romanized).
+        // Only letter pieces are accepted so that entries like `.L`, `.a` or `''` (whose
+        // intermediate output brahmic typing relies on) keep resolving as before.
+        const letter_pieces_krama =
+          krama_key_index === undefined || krama_key_index === -1
+            ? decompose_into_krama_texts(
+                text_char,
+                NormalOutputData?.krama_text_arr ?? [],
+                (piece) => /^[a-zA-Z]+$/.test(piece)
+              )
+            : null;
         if (
           krama_key_index !== undefined &&
           krama_key_index !== null &&
@@ -184,6 +229,7 @@ function get_out_script_data(
           krama_key_index !== -1
         )
           new_addition[1].krama = [krama_key_index];
+        else if (letter_pieces_krama !== null) new_addition[1].krama = letter_pieces_krama;
         else {
           // calculate index for individual characters
           const krama_key_index_list = text_char.split('').map((char) => {
@@ -496,6 +542,32 @@ function get_out_script_data(
         (text_krama_ref === null || text_krama_ref === undefined || text_krama_ref.length === 0))
     ) {
       text_krama_item[1].krama = [text_index];
+    }
+  }
+  // A prefix-only entry (eg Romanized `sh` of `shh`) that is not a character of the
+  // script itself has no krama. The matcher stops at the longest prefix and does not
+  // backtrack, so `sha` was emitted raw as `shअ`. Map it to its pieces instead, with a
+  // halant between two consonants as the context logic never sees the inner boundary
+  // (Romanized `sh` -> `s` + `h` -> स्ह)
+  if (res.script_type === 'other') {
+    const HALANT_KRAMA_INDEX = kramaKeyIndex('्');
+    for (const text_krama_item of res.text_to_krama_map) {
+      const text = text_krama_item[0];
+      const text_krama_ref = text_krama_item[1].krama;
+      if (
+        (text_krama_ref !== null && text_krama_ref !== undefined && text_krama_ref.length > 0) ||
+        res.krama_text_arr.findIndex((item) => item[0] === text) !== -1
+      )
+        continue;
+      const pieces = decompose_into_krama_texts(text, res.krama_text_arr, () => true);
+      if (pieces === null || pieces.length < 2) continue;
+      const krama: number[] = [];
+      for (let i = 0; i < pieces.length; i++) {
+        if (i > 0 && isVyanjanaKramaIndex(pieces[i - 1]) && isVyanjanaKramaIndex(pieces[i]))
+          krama.push(HALANT_KRAMA_INDEX);
+        krama.push(pieces[i]);
+      }
+      text_krama_item[1].krama = krama;
     }
   }
   // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
