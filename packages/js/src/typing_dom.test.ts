@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   clearTypingContextOnKeyDown,
   createTypingContext,
@@ -55,14 +55,26 @@ class FakeTextArea {
 }
 class FakeInput extends FakeTextArea {}
 
+// Stubbed by hand, not with `vi.stubGlobal`, as the tests also run under `bun test`
+const FAKE_GLOBALS = {
+  InputEvent: FakeInputEvent,
+  KeyboardEvent: FakeKeyboardEvent,
+  HTMLTextAreaElement: FakeTextArea,
+  HTMLInputElement: FakeInput
+};
+const globals = globalThis as Record<string, unknown>;
+const original_globals = new Map<string, PropertyDescriptor | undefined>();
 beforeAll(() => {
-  vi.stubGlobal('InputEvent', FakeInputEvent);
-  vi.stubGlobal('KeyboardEvent', FakeKeyboardEvent);
-  vi.stubGlobal('HTMLTextAreaElement', FakeTextArea);
-  vi.stubGlobal('HTMLInputElement', FakeInput);
+  for (const [name, value] of Object.entries(FAKE_GLOBALS)) {
+    original_globals.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
+    globals[name] = value;
+  }
 });
 afterAll(() => {
-  vi.unstubAllGlobals();
+  for (const [name, descriptor] of original_globals) {
+    if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+    else delete globals[name];
+  }
 });
 
 type Ctx = ReturnType<typeof createTypingContext>;
