@@ -358,8 +358,16 @@ function get_out_script_data(
       );
       const halant_index = kramaLabelIndex('halant');
       if (krama_key_index !== -1 && halant_index !== -1) {
+        const halant_text = res.script_type === 'brahmic' ? res.halant : '';
         for (const halant_duplicate_text of item.halant_duplicates) {
           add_to_text_to_krama_map(halant_duplicate_text, [krama_key_index, halant_index]);
+          // a halant written after it is part of it, not a second one (ൻ്റ is the usual way to
+          // write ന്റ)
+          if (halant_text)
+            add_to_text_to_krama_map(halant_duplicate_text + halant_text, [
+              krama_key_index,
+              halant_index
+            ]);
         }
       }
     }
