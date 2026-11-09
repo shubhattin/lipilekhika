@@ -1384,9 +1384,12 @@ pub fn transliterate_text_core_with(
                                 if pieces.len() == 1 && pieces[0] == to_halant
                                     || map.krama.as_ref().is_some_and(|krama| {
                                         krama.last().is_some_and(|last_i| {
+                                            // krama index -> krama_text_arr -> list index
                                             to_script_data
-                                                .list
+                                                .krama_text_arr
                                                 .get(*last_i as usize)
+                                                .and_then(|(_, list_ref)| *list_ref)
+                                                .and_then(|li| to_script_data.list.get(li as usize))
                                                 .is_some_and(|k| k.is_matra())
                                         })
                                     })

@@ -75,3 +75,22 @@
   input: kL kLR CA chA
   output: क्ळ् कॢ चा चा
   reversible: false
+# Tamil-Extended: superscript stays on the consonant before an independent vowel (#149)
+- index: 8
+  from: Normal
+  to: Tamil-Extended
+  input: ghaA ghaa ghaai jhaA ghae khae
+  output: க⁴ஆ க⁴அ க⁴ஐ ஜ²ஆ க⁴எ க²எ
+  reversible: false
+- index: 9
+  from: Romanized
+  to: Tamil-Extended
+  input: khaā ghaai
+  output: க²ஆ க⁴ஐ
+  reversible: false
+- index: 10
+  from: Bengali
+  to: Tamil-Extended
+  input: খও ঘআ
+  output: க²ஓ க⁴ஆ
+  reversible: false

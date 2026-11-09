@@ -912,7 +912,8 @@ export const transliterate_text_core = (
             );
             if (
               to_script_data.script_type === 'brahmic' &&
-              (to_script_data.list[krama.at(-1) ?? -1]?.type === 'mAtrA' ||
+              (to_script_data.list[to_script_data.krama_text_arr[krama.at(-1) ?? -1]?.[1] ?? -1]
+                ?.type === 'mAtrA' ||
                 result_pieces_to_add.join('') === to_script_data.halant)
             ) {
               emitPiecesWithReorder(result, result_pieces_to_add, to_script_data.halant!, true);
