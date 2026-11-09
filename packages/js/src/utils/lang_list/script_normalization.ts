@@ -106,7 +106,9 @@ export const getNormalizedScriptName = (name: script_input_name_type): script_li
     return capitalizedName as script_list_type;
   if (LANG_LIST.includes(capitalizedName as lang_list_type))
     return LANG_SCRIPT_MAP[capitalizedName as lang_list_type];
-  if (name.toLocaleLowerCase() in ALTERNATE_TO_SCRIPT_MAP)
-    return ALTERNATE_TO_SCRIPT_MAP[name.toLocaleLowerCase() as alternate_script_type];
+  const lowerName = name.toLocaleLowerCase();
+  // own keys only: `in` also matches inherited ones like `constructor` or `__proto__`
+  if (Object.hasOwn(ALTERNATE_TO_SCRIPT_MAP, lowerName))
+    return ALTERNATE_TO_SCRIPT_MAP[lowerName as alternate_script_type];
   return null;
 };

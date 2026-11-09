@@ -40,7 +40,8 @@ async function emulateTyping(createTypingContext, text, script) {
   let result = '';
   for (const key of text) {
     const { diff_add_text, to_delete_chars_count } = ctx.takeKeyInput(key);
-    if (to_delete_chars_count > 0) result = [...result].slice(0, -to_delete_chars_count).join('');
+    // to_delete_chars_count is in UTF-16 code units (JS and N-API alike)
+    if (to_delete_chars_count > 0) result = result.slice(0, -to_delete_chars_count);
     result += diff_add_text;
   }
   return result;

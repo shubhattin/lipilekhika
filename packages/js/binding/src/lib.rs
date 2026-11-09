@@ -17,6 +17,7 @@ pub struct TypingContextOptionsInput {
 
 #[napi(object)]
 pub struct TypingDiffOutput {
+    /// In UTF-16 code units (like JS `string.length`), not code points as in the Rust crate
     #[napi(js_name = "to_delete_chars_count")]
     pub to_delete_chars_count: u32,
     #[napi(js_name = "diff_add_text")]
@@ -28,6 +29,23 @@ pub struct TypingDiffOutput {
 #[napi]
 pub struct NativeTypingContext {
     inner: lipilekhika::typing::TypingContext,
+    /// The diffs applied since the context last returned `context_length` 0 or was cleared (a
+    /// time based clear inside the context keeps the older text in front). The context's own
+    /// output is always a suffix of it, so its last `to_delete_chars_count` chars are the ones
+    /// being deleted, which gives their length in UTF-16 code units.
+    output: String,
+}
+
+/// Removes the last `count` chars of `text`, returning their length in UTF-16 code units.
+fn truncate_last_chars_utf16(text: &mut String, count: usize) -> usize {
+    let mut utf16_len = 0;
+    for _ in 0..count {
+        match text.pop() {
+            Some(ch) => utf16_len += ch.len_utf16(),
+            None => break,
+        }
+    }
+    utf16_len
 }
 
 #[napi]
@@ -76,19 +94,32 @@ impl NativeTypingContext {
 
         let inner = lipilekhika::typing::TypingContext::new(typing_script, typing_options);
 
-        Ok(Self { inner })
+        Ok(Self {
+            inner,
+            output: String::new(),
+        })
     }
 
     #[napi(js_name = "clear_context")]
     pub fn clear_context(&mut self) {
         self.inner.clear_context();
+        self.output.clear();
     }
 
     #[napi(js_name = "take_key_input")]
     pub fn take_key_input(&mut self, key: String) -> Result<TypingDiffOutput> {
         let diff = self.inner.take_key_input(&key);
+        // the Rust count is in code points, JS slices strings in UTF-16 code units
+        let to_delete_utf16_count =
+            truncate_last_chars_utf16(&mut self.output, diff.to_delete_chars_count);
+        if diff.context_length > 0 {
+            self.output.push_str(&diff.diff_add_text);
+        } else {
+            // the context was cleared
+            self.output.clear();
+        }
         Ok(TypingDiffOutput {
-            to_delete_chars_count: u32::try_from(diff.to_delete_chars_count)
+            to_delete_chars_count: u32::try_from(to_delete_utf16_count)
                 .map_err(|_| Error::from_reason("to_delete_chars_count exceeds u32 range"))?,
             diff_add_text: diff.diff_add_text,
             context_length: u32::try_from(diff.context_length)

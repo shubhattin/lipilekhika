@@ -22,6 +22,9 @@
 - Typing: `.a1` types the a1 mAtrA: Purna-Devanagari `k.a1` -> `क्ऺ`, Sharada `k.a1` -> `𑆑𑇀𑇋` (was `क्१`, `𑆑𑇀𑇑`). Scripts without an a1 mAtrA type it as `.a` ([#163](https://github.com/shubhattin/lipilekhika/issues/163))
 - Fix: Sinhala touching letters (ZWJ + al-lakuna, `ක‍්ව`) are read as a halant: `ක‍්ව` -> `kva` / `क्व` (was `ka‍va` / `क‍्व`, with an inherent vowel and the ZWJ copied) ([#164](https://github.com/shubhattin/lipilekhika/issues/164))
 - Typing data map (`getScriptTypingDataMap` / `get_script_typing_data_map`): keys whose character a script lacks (empty text) are no longer listed, eg. `.a1` in Devanagari and `.h` in Romanized ([#163](https://github.com/shubhattin/lipilekhika/issues/163))
+- Fix: typing a key outside the BMP (eg. an emoji) keeps the whole character, not only its high surrogate: `k😀` -> `क्😀` (was `क्\ud83d`) ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
+- Fix: `to_delete_chars_count` of the N-API typing context (`lipilekhika/node`) is in UTF-16 code units like the JS one (was code points), typing into Brahmi, Granth, Modi, Sharada, Siddham no longer corrupts the text: `ki` -> `𑀓𑀺` (was `𑀓\ud804𑀺`). The JS typing diff no longer splits a surrogate pair in `diff_add_text` ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
+- Fix: Object prototype keys (`constructor`, `__proto__`, `toString`, ...) are not accepted as script names: `getNormalizedScriptName('constructor')` -> `null`, `transliterate` throws `Invalid script name` ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
 
 ## js-lib@1.0.13
 
