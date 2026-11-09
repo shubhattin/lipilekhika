@@ -8,6 +8,7 @@
 - Fix: input side custom rules (eg. `brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra`) never applied for non-BMP source scripts (Brahmi, Sharada, Granth, Siddham, Modi)
 - Fix: Tamil-Extended superscripts followed by a non-BMP character (eg. an emoji) gave wrong output or dropped a character
 - Fix: `transliterate_wasm` / `preloadWasm` never returned under Bun when nothing else kept the process alive (the script exited silently)
+- Fix: Tamil-Extended superscripts moved after a following independent vowel: `ghaA` -> `க⁴ஆ` (was `கஆ⁴`) ([#150](https://github.com/shubhattin/lipilekhika/pull/150))
 
 ## js-lib@1.0.13
 
