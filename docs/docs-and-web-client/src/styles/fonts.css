@@ -31,10 +31,25 @@
   font-style: normal;
 }
 
+/*
+ * Noto Sans subset for romanized text (Latin, Latin Extended, IPA, all Combining
+ * Diacritical Marks and Latin Extended Additional). The @fontsource subsets leave
+ * out marks like U+0310, U+0324 and U+0325 (r̥, r̤, m̐), so they came from a fallback
+ * font and were placed wrongly. Base letter and mark now come from one font, so
+ * mark positioning works. Built with pyftsubset from Noto Sans Regular 2.015 (OFL).
+ */
+@font-face {
+  font-family: 'Noto Sans Romanized';
+  src: url('./fonts/NotoSansRomanized.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ===== Base / Romanized ===== */
 .font-normal,
 .font-romanized {
-  font-family: 'Noto Sans', system-ui, sans-serif;
+  font-family: 'Noto Sans Romanized', 'Noto Sans', system-ui, sans-serif;
 }
 
 /* ===== Indic Scripts ===== */
