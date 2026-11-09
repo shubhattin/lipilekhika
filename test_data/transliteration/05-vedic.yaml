@@ -72,3 +72,29 @@
   from: Purna-Devanagari
   to: Tamil-Extended
   reversible: true
+# Tamil-Extended: more than one Vedic svara, or a halant + svara, between a letter and its
+# superscript (#158)
+- index: 12
+  input: घ॒॑ ख्॒ ऋ॒॑
+  output: க॒॑⁴ க்॒² ரு॒॑²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
+- index: 13
+  input: ख॒॑ घ॑᳚ झ॒॑᳛ ख्॑ घ्॒ झ्॒॑ ॠ॑᳚ ऌ॒॑ ॡ॒॑᳛ खि॒॑ घो॑᳚ घौ॒॑᳛ कृ॒॑ खॄ॑᳚ कॢ॒॑ कँ॒॑ घाँ॑᳚ ख॒॑क
+  output: க॒॑² க॑᳚⁴ ஜ॒॑᳛² க்॑² க்॒⁴ ஜ்॒॑² ரூ॑᳚² ல்ரி॒॑² ல்ரீ॒॑᳛² கி॒॑² கோ॑᳚⁴ கௌ॒॑᳛⁴ க்ரு॒॑² க்²ரூ॑᳚² க்ல்ரி॒॑² கஂ॒॑² கா⁴ஂ॑᳚² க॒॑²க
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
+- index: 14
+  input: க॒॑⁴
+  output: gha↓↑
+  from: Tamil-Extended
+  to: Normal
+# a Vedic svara on लृ / लॄ (#159)
+- index: 15
+  input: लृ॒ लॄ॑ लृ॒॑ क्लृ᳚
+  output: ல்ரு॒² ல்ரூ॑² ல்ரு॒॑² க்ல்ரு᳚²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
