@@ -142,3 +142,9 @@
   text: khae ghaA ghaai jhaA
   output: க²எ க⁴ஆ கா⁴இ ஜ²ஆ
   script: Tamil-Extended
+# In typing mode `aa` is picked up as `A` (the A mAtrA) before the next vowel is typed,
+# so `khaai` is kA²i: the superscript stays after the mAtrA, before the independent vowel (#149)
+- index: 25
+  text: khaai ghaau jhaai dhaai bhaau khaaI ghaaU khaae ghaao khaaAi
+  output: கா²இ கா⁴உ ஜா²இ தா⁴இ பா⁴உ கா²ஈ கா⁴ஊ கா²எ கா⁴ஒ கா²ஆஇ
+  script: Tamil-Extended
