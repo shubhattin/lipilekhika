@@ -149,6 +149,20 @@ describe('node binding typing matches the TS typing diffs (#155)', () => {
   }
 });
 
+describe('node binding typing: an empty key does not change the context (#155)', () => {
+  it('Brahmi k, (empty), i', async () => {
+    const ctx = createTypingContext('Brahmi');
+    await ctx.ready;
+    let result = '';
+    for (const key of ['k', '', 'i']) {
+      const { to_delete_chars_count, diff_add_text } = ctx.takeKeyInput(key);
+      if (to_delete_chars_count > 0) result = result.slice(0, -to_delete_chars_count);
+      result += diff_add_text;
+    }
+    expect(result).toBe('𑀓𑀺');
+  });
+});
+
 describe('wasm binding smoke check', () => {
   it('exports transliterate_wasm and returns output', async () => {
     expect(typeof transliterate_wasm).toBe('function');

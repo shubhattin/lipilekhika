@@ -29,7 +29,7 @@ pub struct TypingDiffOutput {
 #[napi]
 pub struct NativeTypingContext {
     inner: lipilekhika::typing::TypingContext,
-    /// The diffs applied since the context last returned `context_length` 0 or was cleared (a
+    /// The diffs applied since the context last returned `context_length` 0 for a key or was cleared (a
     /// time based clear inside the context keeps the older text in front). The context's own
     /// output is always a suffix of it, so its last `to_delete_chars_count` chars are the ones
     /// being deleted, which gives their length in UTF-16 code units.
@@ -112,7 +112,9 @@ impl NativeTypingContext {
         // the Rust count is in code points, JS slices strings in UTF-16 code units
         let to_delete_utf16_count =
             truncate_last_chars_utf16(&mut self.output, diff.to_delete_chars_count);
-        if diff.context_length > 0 {
+        if key.is_empty() {
+            // the context returns an empty diff for an empty key, without clearing itself
+        } else if diff.context_length > 0 {
             self.output.push_str(&diff.diff_add_text);
         } else {
             // the context was cleared
