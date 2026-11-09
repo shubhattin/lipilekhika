@@ -185,4 +185,24 @@
   to: Normal
   input: ல்ரு² ல்ரூ²
   output: lR lRR
+# Malayalam chillu letters are dead consonants (consonant + virama) (#160)
+- index: 16
+  from: Malayalam
+  to: Normal
+  input: കൻ കൺ കർ കൽ കൾ കൿ കൻക ൻ
+  output: kan kaN kar kal kaL kak kanka n
+  reversible: false
+- index: 16.1
+  from: Malayalam
+  to: Devanagari
+  input: കൻ കൺ കർ കൽ കൾ കൿ കൻക
+  output: कन् कण् कर् कल् कळ् कक् कन्क
+  reversible: false
+- index: 16.2
+  from: Malayalam
+  to: Normal
+  input: കൻ കൻക ൿ
+  output: ka.n ka.nka .k
+  options:
+    "all_to_normal:preserve_specific_chars": true
   reversible: false

@@ -16,8 +16,9 @@
   script: Tamil
   preserve_check: true
 - index: 4
-  text: .10 .100 .1000 .ka .Na .na .ra .la .La .ke
-  output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ ൿെ
+  # the chillu letters are dead consonants, a vowel after one is a separate vowel (#160)
+  text: .10 .100 .1000 .k .N .n .r .l .L .ke
+  output: ൰ ൱ ൲ ൿ ൺ ൻ ർ ൽ ൾ ൿഎ
   script: Malayalam
   preserve_check: true
   # Numerals
