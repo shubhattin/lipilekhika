@@ -92,3 +92,14 @@
   to: Romanized
   input: ක්‍ෂ ද්‍වයම්‍
   output: kṣa dvayam
+# Brahmi Bhattiprolu AA (𑀹, A1 mAtrA) is a mAtrA: no inherent vowel before it (#154)
+- index: 13
+  from: Brahmi
+  to: Normal
+  input: 𑀓𑀹 𑀓𑀹𑀁 𑀓𑀸
+  output: kA kAM kA
+- index: 13.1
+  from: Brahmi
+  to: Romanized
+  input: 𑀓𑀹 𑀓𑀸
+  output: kā kā

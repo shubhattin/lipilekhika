@@ -135,3 +135,10 @@
   to: Telugu
   input: ඥාති ඟ
   output: జ్ఞాతి ఙ్గ
+# alternate keys fall back to the plain key where a script has no own form:
+# Gujarati has no ॾ (D1), it is ડ, not the ડ઼ of ड़ (Dz)
+- index: 13
+  from: Purna-Devanagari
+  to: Gujarati
+  input: ॾ ड़ ड ॻ ॼ ॿ
+  output: ડ ડ઼ ડ ગ જ બ
