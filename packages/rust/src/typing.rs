@@ -861,6 +861,62 @@ mod tests {
     }
 
     #[test]
+    fn empty_key_does_not_change_the_context() {
+        let mut ctx = TypingContext::new(Script::Devanagari, None);
+        assert_eq!(ctx.take_key_input("k").context_length, 1);
+        ctx.update_include_inherent_vowel(true);
+        // the option change applies to the next key, the empty key does not re-render
+        assert_eq!(
+            ctx.take_key_input(""),
+            TypingDiff {
+                to_delete_chars_count: 0,
+                diff_add_text: String::new(),
+                context_length: 1,
+            }
+        );
+        let diff = ctx.take_key_input("a");
+        assert_eq!(
+            (diff.to_delete_chars_count, diff.diff_add_text.as_str()),
+            (1, "")
+        );
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn auto_context_clear_time_zero_clears_after_any_pause() {
+        let mut ctx = TypingContext::new(
+            Script::Devanagari,
+            Some(TypingContextOptions {
+                auto_context_clear_time_ms: 0,
+                ..Default::default()
+            }),
+        );
+        ctx.take_key_input("k");
+        std::thread::sleep(core::time::Duration::from_millis(2));
+        let diff = ctx.take_key_input("a");
+        assert_eq!(
+            (diff.to_delete_chars_count, diff.diff_add_text.as_str()),
+            (0, "अ")
+        );
+    }
+
+    /// Typing a long text without a space keeps it all as context, the result has to be the
+    /// same as typing it in shorter words
+    #[test]
+    fn long_text_without_context_break() {
+        let mut ctx = TypingContext::new(Script::Devanagari, None);
+        let mut result = String::new();
+        for ch in "ka".repeat(10_000).chars() {
+            let diff = ctx.take_key_input_char(ch);
+            for _ in 0..diff.to_delete_chars_count {
+                result.pop();
+            }
+            result.push_str(&diff.diff_add_text);
+        }
+        assert_eq!(result, "क".repeat(10_000));
+    }
+
+    #[test]
     fn test_get_script_typing_data_map_valid_script() {
         let data = get_script_typing_data_map(Script::Devanagari);
 
