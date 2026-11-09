@@ -18,3 +18,41 @@
   output: gE↓ kE↓
   from: Tamil-Extended
   to: Normal
+# Vedic svara + superscript with no visible mAtrA (#152)
+# The writer puts the svara before the superscript (ख॒ -> க॒²), the reader has to read it back
+# even without a mAtrA in between: for a bare consonant and for ரு/ரூ/ல்ரி/ல்ரீ (ऋ/ॠ/ऌ/ॡ)
+- index: 4
+  input: க॒² ரு॒²
+  output: ख॒ ऋ॒
+  from: Tamil-Extended
+  to: Purna-Devanagari
+- index: 5
+  input: க॒² ரு॒²
+  output: kha↓ R↓
+  from: Tamil-Extended
+  to: Normal
+# Round trip of every consonant/vowel that takes a superscript, with each of the 4 svaras
+- index: 6
+  input: ख॒ ग॒ घ॒ छ॒ ज॒ झ॒ ठ॒ ड॒ ढ॒ थ॒ द॒ ध॒ फ॒ ब॒ भ॒ ऋ॒ ॠ॒ ऌ॒ ॡ॒
+  output: க॒² க॒³ க॒⁴ ச॒² ஜ॒ ஜ॒² ட॒² ட॒³ ட॒⁴ த॒² த॒³ த॒⁴ ப॒² ப॒³ ப॒⁴ ரு॒² ரூ॒² ல்ரி॒² ல்ரீ॒²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
+- index: 7
+  input: ख॑ ग॑ घ॑ छ॑ ज॑ झ॑ ठ॑ ड॑ ढ॑ थ॑ द॑ ध॑ फ॑ ब॑ भ॑ ऋ॑ ॠ॑ ऌ॑ ॡ॑
+  output: க॑² க॑³ க॑⁴ ச॑² ஜ॑ ஜ॑² ட॑² ட॑³ ட॑⁴ த॑² த॑³ த॑⁴ ப॑² ப॑³ ப॑⁴ ரு॑² ரூ॑² ல்ரி॑² ல்ரீ॑²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
+- index: 8
+  input: ख᳚ ग᳚ घ᳚ छ᳚ ज᳚ झ᳚ ठ᳚ ड᳚ ढ᳚ थ᳚ द᳚ ध᳚ फ᳚ ब᳚ भ᳚ ऋ᳚ ॠ᳚ ऌ᳚ ॡ᳚
+  output: க᳚² க᳚³ க᳚⁴ ச᳚² ஜ᳚ ஜ᳚² ட᳚² ட᳚³ ட᳚⁴ த᳚² த᳚³ த᳚⁴ ப᳚² ப᳚³ ப᳚⁴ ரு᳚² ரூ᳚² ல்ரி᳚² ல்ரீ᳚²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true
+- index: 9
+  input: ख᳛ ग᳛ घ᳛ छ᳛ ज᳛ झ᳛ ठ᳛ ड᳛ ढ᳛ थ᳛ द᳛ ध᳛ फ᳛ ब᳛ भ᳛ ऋ᳛ ॠ᳛ ऌ᳛ ॡ᳛
+  output: க᳛² க᳛³ க᳛⁴ ச᳛² ஜ᳛ ஜ᳛² ட᳛² ட᳛³ ட᳛⁴ த᳛² த᳛³ த᳛⁴ ப᳛² ப᳛³ ப᳛⁴ ரு᳛² ரூ᳛² ல்ரி᳛² ல்ரீ᳛²
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  reversible: true

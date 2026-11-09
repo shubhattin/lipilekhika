@@ -114,16 +114,38 @@ func writeTestLog(filename, content string) {
 	_ = os.WriteFile(filepath.Join(dir, filename), []byte(content+"\n"), 0o644)
 }
 
+// loadTypingTests loads every typing case under test_data/typing (all `.yaml` files, recursively,
+// except the `context` folder which has its own schema), same as the JS/Rust/Python tests.
 func loadTypingTests(t *testing.T) []typingTestCase {
 	t.Helper()
-	path := filepath.Join("..", "..", "..", "..", "test_data", "typing", "01-typing-mode.yaml")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("read typing test data: %v", err)
-	}
+	root := filepath.Join("..", "..", "..", "..", "test_data", "typing")
 	var tests []typingTestCase
-	if err := yaml.Unmarshal(data, &tests); err != nil {
-		t.Fatalf("parse typing test data: %v", err)
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if path != root && d.Name() == "context" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) != ".yaml" {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("read %s: %w", path, err)
+		}
+		var cases []typingTestCase
+		if err := yaml.Unmarshal(data, &cases); err != nil {
+			return fmt.Errorf("parse %s: %w", path, err)
+		}
+		tests = append(tests, cases...)
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("load typing test data: %v", err)
 	}
 	return tests
 }

@@ -49,3 +49,18 @@
   input: लघु॰ रा॰
   output: laghu° rā°
   reversible: true
+# Prefix-only `c` (of `ch`) is emitted as it is, after the halant of the previous consonant,
+# and the vowel after it is independent: kca -> क्cअ, not कc (#151)
+- index: 9
+  from: Normal
+  to: Devanagari
+  input: kca kc
+  output: क्cअ क्c
+# Romanized `sh` is only a prefix (of `shh` -> ṣ), it is `s` + `h` (स्ह), not passed through raw
+# as `shअ`. So Devanagari स्ह -> Romanized (sha) -> Devanagari gives स्ह back (#153)
+- index: 10
+  from: Romanized
+  to: Devanagari
+  input: sha shi sh ksha
+  output: स्ह स्हि स्ह् क्स्ह
+  reversible: true
