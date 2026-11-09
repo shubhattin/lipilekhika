@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getNormalizedScriptName } from './script_normalization';
+import { transliterate } from '../../index';
 
 describe('getNormalizedScriptName', () => {
   describe('Script acronyms', () => {
@@ -167,6 +168,16 @@ describe('getNormalizedScriptName', () => {
     });
   });
 
+  describe('Object prototype keys (#155)', () => {
+    it.each(['constructor', 'Constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf'])(
+      'returns null for %s',
+      (name) => {
+        // @ts-ignore
+        expect(getNormalizedScriptName(name)).toBeNull();
+      }
+    );
+  });
+
   describe('Edge cases', () => {
     it('should handle acronyms with dashes correctly', () => {
       // @ts-ignore
@@ -182,5 +193,17 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('Telugu')).toBe('Telugu');
       expect(getNormalizedScriptName('tel')).toBe('Telugu');
     });
+  });
+});
+
+describe('transliterate rejects Object prototype keys as script names (#155)', () => {
+  it.each([
+    ['constructor', 'Constructor'],
+    ['Normal', 'constructor'],
+    ['__proto__', 'Devanagari'],
+    ['Devanagari', 'toString']
+  ])('%s -> %s', async (from, to) => {
+    // @ts-ignore
+    await expect(transliterate('ka', from, to)).rejects.toThrow('Invalid script name');
   });
 });

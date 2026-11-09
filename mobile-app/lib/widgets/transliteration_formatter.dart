@@ -79,9 +79,15 @@ class TransliterationFormatter extends TextInputFormatter {
     // In Flutter terms:
     // - replaceEnd = cursorAfterInsert (where cursor is after system inserted the char)
     // - We need to remove: the inserted char (1) + toDeleteCharsCount previous output chars
+    //
+    // toDeleteCharsCount is in code points (Rust chars), while Dart string offsets are in
+    // UTF-16 code units, so a char outside the BMP (eg. Brahmi 𑀓) takes 2 offsets.
     final replaceEnd = cursorAfterInsert;
-    final replaceStart =
-        (replaceEnd - toDeleteCharsCount - 1).clamp(0, replaceEnd);
+    final replaceStart = _offsetBeforeCodePoints(
+      newValue.text,
+      replaceEnd - 1,
+      toDeleteCharsCount,
+    );
 
     // Build the new text by replacing the range [replaceStart, replaceEnd) with diffAddText
     final beforeReplacement = newValue.text.substring(0, replaceStart);
@@ -98,3 +104,21 @@ class TransliterationFormatter extends TextInputFormatter {
     );
   }
 }
+
+/// Returns the UTF-16 offset that is [count] code points before [end] in [text],
+/// stepping over a surrogate pair as one code point (stops at 0).
+int _offsetBeforeCodePoints(String text, int end, int count) {
+  var offset = end;
+  for (var i = 0; i < count && offset > 0; i++) {
+    offset--;
+    if (offset > 0 &&
+        _isLowSurrogate(text.codeUnitAt(offset)) &&
+        _isHighSurrogate(text.codeUnitAt(offset - 1))) {
+      offset--;
+    }
+  }
+  return offset;
+}
+
+bool _isHighSurrogate(int unit) => unit >= 0xD800 && unit <= 0xDBFF;
+bool _isLowSurrogate(int unit) => unit >= 0xDC00 && unit <= 0xDFFF;

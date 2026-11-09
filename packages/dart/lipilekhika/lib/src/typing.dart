@@ -53,7 +53,8 @@ bool get defaultIncludeInherentVowel =>
 ///
 /// // Process each key press
 /// final diff = ctx.takeKeyInput(key: 'k');
-/// // diff.toDeleteCharsCount tells how many chars to delete
+/// // diff.toDeleteCharsCount tells how many chars to delete, in code points (runes), not
+/// // UTF-16 code units: a char outside the BMP (eg. Brahmi 𑀓) is 2 code units of a Dart String
 /// // diff.diffAddText tells what text to add
 /// ```
 rust_typing.TypingContext createTypingContext({

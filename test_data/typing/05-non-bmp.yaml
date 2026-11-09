@@ -1,0 +1,35 @@
+# Characters outside the BMP (surrogate pairs in UTF-16) (#155)
+# A non-BMP key is taken as one key (TS used to keep only its high surrogate)
+- index: 0
+  text: k😀
+  output: क्😀
+  script: Devanagari
+- index: 1
+  text: ka😀a
+  output: क😀अ
+  script: Devanagari
+# Scripts outside the BMP: `to_delete_chars_count` must match the unit the output is sliced in
+- index: 2
+  text: ki
+  output: 𑀓𑀺
+  script: Brahmi
+- index: 3
+  text: ki😀 kRShNa
+  output: 𑀓𑀺😀 𑀓𑀾𑀱𑁆𑀡
+  script: Brahmi
+- index: 4
+  text: namaste kRShNa
+  output: 𑖡𑖦𑖭𑖿𑖝𑖸 𑖎𑖴𑖬𑖿𑖜
+  script: Siddham
+- index: 5
+  text: namaste
+  output: 𑌨𑌮𑌸𑍍𑌤𑍇
+  script: Granth
+- index: 6
+  text: kRShNa
+  output: 𑘎𑘵𑘬𑘿𑘜
+  script: Modi
+- index: 7
+  text: namaste
+  output: 𑆤𑆩𑆱𑇀𑆠𑆼
+  script: Sharada

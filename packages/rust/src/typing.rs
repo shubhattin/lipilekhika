@@ -60,6 +60,9 @@ impl Default for TypingContextOptions {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TypingDiff {
     /// Number of characters that should be deleted from the current "app" input state.
+    ///
+    /// Counted in `char`s (code points). A UTF-16 based consumer (JS, Dart, ...) has to convert
+    /// it, as a char outside the BMP (eg. Brahmi `𑀓`) is 2 UTF-16 code units.
     pub to_delete_chars_count: usize,
     /// Text that should be inserted into the current "app" input state.
     pub diff_add_text: String,

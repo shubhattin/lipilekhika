@@ -36,8 +36,16 @@ export type TypingContextOptions = {
   includeInherentVowel?: boolean;
 };
 
+const isHighSurrogate = (code: number) => code >= 0xd800 && code <= 0xdbff;
+
 export type TypingDiff = {
-  /** These number of characters need to be deleted from the current "app" input state */
+  /**
+   * These number of characters need to be deleted from the current "app" input state.
+   *
+   * Counted in UTF-16 code units (like `string.length`), so it can be used directly with
+   * `string.slice` and input selection offsets. A character outside the BMP (eg. Brahmi `𑀓`)
+   * counts as 2.
+   */
   to_delete_chars_count: number;
   /** These characters need to be added to the current "app" input state */
   diff_add_text: string;
@@ -111,7 +119,9 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     if (last_time_ms && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
       clearContext();
     }
-    const char_key = key?.[0] ?? '';
+    // one code point, so that a key outside the BMP (a surrogate pair) is not split
+    const first_code_point = key?.codePointAt(0);
+    const char_key = first_code_point === undefined ? '' : String.fromCodePoint(first_code_point);
     curr_input += char_key;
     const prev_output = curr_output;
     const { context_length, output } = transliterate_text_core(
@@ -140,6 +150,8 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       if (output[common_index] !== prev_output[common_index]) break;
       common_index++;
     }
+    // do not split a surrogate pair: if only its high surrogate is common, it is replaced as well
+    if (common_index > 0 && isHighSurrogate(output.charCodeAt(common_index - 1))) common_index--;
     const diff_add_text = output.substring(common_index);
     const to_delete_chars_count = prev_output.length - common_index;
 

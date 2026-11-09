@@ -301,7 +301,7 @@ export const get_active_custom_options = (
   if (!input_options) return {};
   const active_custom_options: CustomOptionType = {};
   for (const [key, enabled] of Object.entries(input_options ?? {})) {
-    if (!(key in custom_options_json)) continue;
+    if (!Object.hasOwn(custom_options_json, key)) continue;
     const option_info = custom_options_json[
       key as CustomOptionList
     ] as TransOptionsType[keyof TransOptionsType];
