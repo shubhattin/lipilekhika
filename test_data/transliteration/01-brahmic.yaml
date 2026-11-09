@@ -206,3 +206,16 @@
   options:
     "all_to_normal:preserve_specific_chars": true
   reversible: false
+# a virama after a chillu is part of it (ൻ്റ is the usual way to write ന്റ), not a second one
+- index: 16.3
+  from: Malayalam
+  to: Devanagari
+  input: എൻ്റെ ൻ്റ കൻ് കർ്ക
+  output: एन्ऱे न्ऱ कन् कर्क
+  reversible: false
+- index: 16.4
+  from: Malayalam
+  to: Normal
+  input: എൻ്റെ കൻ്
+  output: enrze kan
+  reversible: false
