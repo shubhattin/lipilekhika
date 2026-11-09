@@ -103,3 +103,14 @@
   to: Romanized
   input: 𑀓𑀹 𑀓𑀸
   output: kā kā
+# Sinhala touching letters: ZWJ + al-lakuna (ක‍්ව) is a halant, no inherent vowel or ZWJ (#164)
+- index: 14
+  from: Sinhala
+  to: Normal
+  input: ක‍්ව ක‍්ෂ ක්‍ව
+  output: kva kSha kva
+- index: 14.1
+  from: Sinhala
+  to: Romanized
+  input: ක‍්ෂ
+  output: kṣa

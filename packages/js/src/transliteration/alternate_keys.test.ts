@@ -3,6 +3,8 @@ import { transliterate } from '../index';
 import { getScriptData } from '../utils/get_script_data';
 import { SCRIPT_LIST } from '../utils/lang_list';
 import { kramaLabelIndex } from '../make_script_data/krama_array_keys';
+import { emulateTyping } from './test_commons';
+import { getScriptTypingDataMap } from '../typing';
 
 /**
  * Alternate krama keys (A1, u1, g1, ...) have a distinct form only in some scripts
@@ -55,4 +57,59 @@ describe('Alternate krama keys', () => {
       }
     });
   }
+});
+
+/**
+ * Standalone mAtrA typing keys of the alternate mAtrAs (`.a1`, `.A1`, ...): typed in the
+ * script's own form where it has one, else the same as the plain key (`.a1` as `.a`)
+ *
+ * `[alternate key, plain key, alternate typing key, plain typing key]`
+ */
+const ALTERNATE_MATRA_TYPING_KEYS: [string, string, string, string][] = [
+  ['a1-mAtrA', 'a-mAtrA', '.a1', '.a'],
+  ['A1-mAtrA', 'A-mAtrA', '.A1', '.A'],
+  ['u1-mAtrA', 'u-mAtrA', '.u1', '.u'],
+  ['U1-mAtrA', 'U-mAtrA', '.U1', '.U']
+];
+
+describe('Alternate mAtrA typing keys', () => {
+  for (const script of SCRIPT_LIST) {
+    if (script === 'Normal') continue;
+    describe(script, () => {
+      for (const [
+        alt_key,
+        plain_key,
+        alt_typing_key,
+        plain_typing_key
+      ] of ALTERNATE_MATRA_TYPING_KEYS) {
+        it(`${alt_typing_key} / ${plain_typing_key}`, async () => {
+          const data = await getScriptData(script);
+          const alt_form = data.krama_text_arr[kramaLabelIndex(alt_key)][0];
+          const plain_form = data.krama_text_arr[kramaLabelIndex(plain_key)][0];
+          const alt_out = await emulateTyping(alt_typing_key, script);
+          if (alt_form !== plain_form) {
+            expect(alt_out, `${alt_typing_key} types ${alt_form} in ${script}`).toBe(alt_form);
+          } else {
+            expect(alt_out, `${alt_typing_key} is typed as ${plain_typing_key} in ${script}`).toBe(
+              await emulateTyping(plain_typing_key, script)
+            );
+          }
+        });
+      }
+    });
+  }
+});
+
+describe('Typing data map', () => {
+  // `.a1` falls back to the empty a mAtrA in scripts without an a1 mAtrA (Devanagari)
+  it('has no empty texts in the common krama map', async () => {
+    for (const script of SCRIPT_LIST) {
+      if (script === 'Normal') continue;
+      const { common_krama_map } = await getScriptTypingDataMap(script);
+      expect(
+        common_krama_map.filter(([text]) => text === ''),
+        script
+      ).toEqual([]);
+    }
+  });
 });
