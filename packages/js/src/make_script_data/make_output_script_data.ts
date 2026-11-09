@@ -352,6 +352,17 @@ function get_out_script_data(
         }
       }
     }
+    if (item.halant_duplicates) {
+      const krama_key_index = kramaKeyIndex(
+        resolveKramaKeysExtendedType(item.text_krama[0] as KramaKeysExtendedType)
+      );
+      const halant_index = kramaLabelIndex('halant');
+      if (krama_key_index !== -1 && halant_index !== -1) {
+        for (const halant_duplicate_text of item.halant_duplicates) {
+          add_to_text_to_krama_map(halant_duplicate_text, [krama_key_index, halant_index]);
+        }
+      }
+    }
     if (item.type === 'svara' && item.mAtrA_duplicates) {
       for (const mAtrA_duplicate_text of item.mAtrA_duplicates) {
         const krama_key_index = kramaKeyIndex(
@@ -465,7 +476,11 @@ function get_out_script_data(
         const text_to_krama_item = res.text_to_krama_map.find((v) => v[0] === item.specific_text);
         if (text_to_krama_item) {
           const krama_key_item = res.krama_text_arr[text_to_krama_item[1].krama?.[0] ?? -1];
+          // a dead consonant (vyanjana + halant, eg. Malayalam chillu ൻ) is not a vyanjana in
+          // the typing context: it takes no halant and no vowel sign after it
+          const is_dead_consonant = text_to_krama_item[1].fallback_list_ref != null;
           if (
+            !is_dead_consonant &&
             krama_key_item &&
             krama_key_item[1] &&
             res.list[krama_key_item[1]]?.type === 'vyanjana'

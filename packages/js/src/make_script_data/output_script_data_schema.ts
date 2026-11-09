@@ -64,8 +64,9 @@ type CommonScriptData = {
    */
   custom_script_chars_arr: [
     text: string,
-    /** This will be used to deterime the type of the custom script character
-     * eg:- Malayalam chillu ka is a vyanjana  */
+    /** This will be used to deterime the type of the custom script character, `null` if
+     * it is not a vyanjana. A dead consonant (vyanjana + halant, eg:- Malayalam chillu ൻ)
+     * is not one, as it takes no halant and no vowel sign after it */
     list_ref: number | null,
     /** This will be used to get the Normal text key of the custom script character.
      *

@@ -18,6 +18,10 @@ export type CommonListTypeAttributes = {
    * In the processing/compiling step it should be verified as a key of this list, display and throw the error
    */
   duplicates?: string[];
+  /** Texts that are this key followed by a halant, a dead consonant (only for a `vyanjana`).
+   * Eg. Malayalam chillu letters :- ൻ is ന് (न्)
+   */
+  halant_duplicates?: string[];
   /** In case if no entry is found for the key in krama even after de-duplication resolution
    * then fallback array will be used. Like for malayalam .100 it can be .1+.0+.0
    * If the fallback array is not provided, then the key_krama should be empty and will also be ignored

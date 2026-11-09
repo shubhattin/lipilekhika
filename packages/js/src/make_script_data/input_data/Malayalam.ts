@@ -217,7 +217,7 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ക',
       text_krama: ['k', 'kz'],
-      duplicates: ['ൿ'],
+      halant_duplicates: ['ൿ'],
       type: 'vyanjana'
     },
     {
@@ -288,7 +288,7 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ണ',
       text_krama: ['N'],
-      duplicates: ['ൺ'],
+      halant_duplicates: ['ൺ'],
       type: 'vyanjana'
     },
     {
@@ -314,7 +314,7 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ന',
       text_krama: ['n'],
-      duplicates: ['ൻ'],
+      halant_duplicates: ['ൻ'],
       type: 'vyanjana'
     },
     {
@@ -355,7 +355,7 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ര',
       text_krama: ['r'],
-      duplicates: ['ർ'],
+      halant_duplicates: ['ർ'],
       type: 'vyanjana'
     },
     {
@@ -366,13 +366,13 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ല',
       text_krama: ['l'],
-      duplicates: ['ൽ'],
+      halant_duplicates: ['ൽ'],
       type: 'vyanjana'
     },
     {
       text: 'ള',
       text_krama: ['L'],
-      duplicates: ['ൾ'],
+      halant_duplicates: ['ൾ'],
       type: 'vyanjana'
     },
     {
