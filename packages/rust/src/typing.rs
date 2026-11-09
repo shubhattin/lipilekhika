@@ -16,12 +16,21 @@ use std::time::Instant;
 
 use crate::script_data::{List, ScriptData};
 use crate::transliterate::transliterate::{
-    TransliterateScratch, TransliterationFnOptions, resolve_transliteration_rules,
-    transliterate_text_core_with,
+    TransliterateScratch, TransliterationFnOptions, TransliterationOutput,
+    resolve_transliteration_rules, transliterate_text_core_with,
 };
 
 /// Default time in milliseconds after which the context will be cleared automatically.
 pub const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS: u64 = 4500;
+
+/// Typing keeps the input of the current context and transliterates all of it on every key. The
+/// context is cleared at a space or punctuation, but a long run of letters would keep growing.
+/// Once the context input is `CONTEXT_TRIM_LENGTH` long (bytes), its start is committed, keeping
+/// about the last `CONTEXT_KEEP_LENGTH` (see [`TypingContext::commit_context_start`]).
+const CONTEXT_TRIM_LENGTH: usize = 64;
+const CONTEXT_KEEP_LENGTH: usize = 32;
+/// Number of split points tried for one commit
+const CONTEXT_TRIM_TRIES: usize = 4;
 /// Default value for using native numerals while typing.
 pub const DEFAULT_USE_NATIVE_NUMERALS: bool = true;
 /// Default value for including inherent vowels while typing.
@@ -32,7 +41,7 @@ pub const DEFAULT_INCLUDE_INHERENT_VOWEL: bool = false;
 #[derive(Debug, Clone)]
 pub struct TypingContextOptions {
     /// The time in milliseconds after which the context will be cleared automatically.
-    /// Defaults to [`DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS`].
+    /// `0` clears it after any pause. Defaults to [`DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS`].
     pub auto_context_clear_time_ms: u64,
     /// Use native numerals in transliteration/typing.
     /// Defaults to `DEFAULT_USE_NATIVE_NUMERALS`
@@ -84,6 +93,10 @@ pub struct TypingContext {
 
     curr_input: String,
     curr_output: String,
+    /// context length returned for the last key (0 after a clear)
+    curr_context_length: usize,
+    /// `curr_input` length at which [`Self::commit_context_start`] is tried next
+    next_trim_length: usize,
 
     #[cfg(feature = "std")]
     auto_context_clear_time: Duration,
@@ -117,6 +130,8 @@ impl TypingContext {
             include_inherent_vowel: opts.include_inherent_vowel,
             curr_input: String::new(),
             curr_output: String::new(),
+            curr_context_length: 0,
+            next_trim_length: CONTEXT_TRIM_LENGTH,
             #[cfg(feature = "std")]
             auto_context_clear_time: Duration::from_millis(opts.auto_context_clear_time_ms),
             #[cfg(feature = "std")]
@@ -137,6 +152,62 @@ impl TypingContext {
         }
         self.curr_input.clear();
         self.curr_output.clear();
+        self.curr_context_length = 0;
+        self.next_trim_length = CONTEXT_TRIM_LENGTH;
+    }
+
+    /// Transliterates `input` (the context input or a part of it) in typing mode.
+    fn transliterate_input(&mut self, input: &str) -> TransliterationOutput {
+        let translit_options = self.build_translit_options();
+        transliterate_text_core_with(
+            input,
+            &ScriptListEnum::Normal,
+            &self.typing_script,
+            self.from_script_data,
+            self.to_script_data,
+            &self.trans_options,
+            &self.custom_rules,
+            Some(translit_options),
+            &mut self.scratch,
+        )
+    }
+
+    /// Commits the start of a long context, so that a long run of letters does not make each
+    /// key slower (quadratic time). The input is split into a head and about the last
+    /// `CONTEXT_KEEP_LENGTH` of it, the split is only used when it does not change anything:
+    /// the head and the tail transliterated on their own give the current output, and the tail
+    /// keeps the whole context. The head's output is then final, the context continues with
+    /// the tail.
+    fn commit_context_start(&mut self) {
+        let input = core::mem::take(&mut self.curr_input);
+        let mut split = input.len().saturating_sub(CONTEXT_KEEP_LENGTH);
+        let mut tries = 0;
+        while tries < CONTEXT_TRIM_TRIES && split > 0 {
+            if !input.is_char_boundary(split) {
+                split -= 1;
+                continue;
+            }
+            tries += 1;
+            let tail = self.transliterate_input(&input[split..]);
+            if !tail.output.is_empty()
+                && tail.context_length == self.curr_context_length
+                && self.curr_output.ends_with(tail.output.as_str())
+            {
+                let head = self.transliterate_input(&input[..split]);
+                if head.output.len() + tail.output.len() == self.curr_output.len()
+                    && self.curr_output.starts_with(head.output.as_str())
+                {
+                    self.curr_input = String::from(&input[split..]);
+                    self.curr_output = tail.output;
+                    self.next_trim_length = CONTEXT_TRIM_LENGTH;
+                    return;
+                }
+            }
+            split -= 1;
+        }
+        // no split point found, try again after some more keys
+        self.next_trim_length = input.len() + CONTEXT_KEEP_LENGTH;
+        self.curr_input = input;
     }
 
     /// Internal helper to build transliteration options for typing mode.
@@ -151,12 +222,12 @@ impl TypingContext {
     /// Accepts character-by-character input and returns the diff relative to the previous output.
     pub fn take_key_input<T: AsRef<str>>(&mut self, key: T) -> TypingDiff {
         let key = key.as_ref();
-        // If key is empty, nothing to do.
+        // an empty key changes nothing (not even the idle timer)
         let Some(ch) = key.chars().next() else {
             return TypingDiff {
                 to_delete_chars_count: 0,
                 diff_add_text: String::new(),
-                context_length: 0,
+                context_length: self.curr_context_length,
             };
         };
 
@@ -182,19 +253,9 @@ impl TypingContext {
         }
 
         self.curr_input.push(ch);
-        let translit_options = self.build_translit_options();
-
-        let result = transliterate_text_core_with(
-            &self.curr_input,
-            &ScriptListEnum::Normal,
-            &self.typing_script,
-            self.from_script_data,
-            self.to_script_data,
-            &self.trans_options,
-            &self.custom_rules,
-            Some(translit_options),
-            &mut self.scratch,
-        );
+        let input = core::mem::take(&mut self.curr_input);
+        let result = self.transliterate_input(&input);
+        self.curr_input = input;
 
         let context_length = result.context_length;
         let output = result.output;
@@ -205,6 +266,10 @@ impl TypingContext {
         if context_length > 0 {
             // keep the new output; the old allocation becomes next key's output buffer
             self.scratch.out = core::mem::replace(&mut self.curr_output, output);
+            self.curr_context_length = context_length;
+            if self.curr_input.len() >= self.next_trim_length {
+                self.commit_context_start();
+            }
         } else {
             // reuse the new output's allocation for the next key
             self.scratch.out = output;

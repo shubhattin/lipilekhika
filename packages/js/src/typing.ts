@@ -17,9 +17,12 @@ export const DEFAULT_USE_NATIVE_NUMERALS = true;
 export const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
 
 export type TypingContextOptions = {
-  /** The time in milliseconds after which the context will be cleared automatically
+  /** The time in milliseconds after which the context will be cleared automatically.
+   * `0` clears it after any pause.
    * @default 4500ms
    */
+  autoContextClearTimeMs?: number;
+  /** @deprecated Misspelled name of `autoContextClearTimeMs`, which is used when both are set */
   autoContextTClearTimeMs?: number;
   /** Use native numerals in transliteration/typing
    * @default true
@@ -37,6 +40,24 @@ export type TypingContextOptions = {
 };
 
 const isHighSurrogate = (code: number) => code >= 0xd800 && code <= 0xdbff;
+const isLowSurrogate = (code: number) => code >= 0xdc00 && code <= 0xdfff;
+
+/** Reads the auto clear time, accepting the deprecated misspelled option name too */
+export const resolveAutoContextClearTimeMs = (options?: TypingContextOptions) =>
+  options?.autoContextClearTimeMs ??
+  options?.autoContextTClearTimeMs ??
+  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
+
+/**
+ * Typing keeps the input of the current context and transliterates all of it on every key. The
+ * context is cleared at a space or punctuation, but a long run of letters would keep growing.
+ * Once the context input is `CONTEXT_TRIM_LENGTH` long (UTF-16 code units), its start is
+ * committed, keeping the last `CONTEXT_KEEP_LENGTH` (see `commitContextStart`).
+ */
+const CONTEXT_TRIM_LENGTH = 64;
+const CONTEXT_KEEP_LENGTH = 32;
+/** Number of split points tried for one commit */
+const CONTEXT_TRIM_TRIES = 4;
 
 export type TypingDiff = {
   /**
@@ -63,7 +84,6 @@ export type TypingDiff = {
  * @returns A closed over context object with the following methods:
  */
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
-  const { autoContextTClearTimeMs } = options ?? {};
   let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
   let include_inherent_vowel = options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
@@ -74,7 +94,11 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   let curr_input = '';
   let curr_output = '';
 
-  const auto_context_clear_time_ms = autoContextTClearTimeMs ?? DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
+  let curr_context_length = 0;
+  /** `curr_input` length at which `commitContextStart` is tried next */
+  let next_trim_length = CONTEXT_TRIM_LENGTH;
+
+  const auto_context_clear_time_ms = resolveAutoContextClearTimeMs(options);
   let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -100,6 +124,56 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     last_time_ms = null;
     curr_input = '';
     curr_output = '';
+    curr_context_length = 0;
+    next_trim_length = CONTEXT_TRIM_LENGTH;
+  }
+
+  const transliterateInput = (input: string) =>
+    transliterate_text_core(
+      input,
+      'Normal',
+      normalized_typing_lang!,
+      from_script_data!,
+      to_script_data!,
+      trans_options,
+      custom_rules,
+      {
+        typing_mode: true,
+        useNativeNumerals: use_native_numerals,
+        includeInherentVowel: include_inherent_vowel
+      }
+    );
+
+  /**
+   * Commits the start of a long context, so that a long run of letters does not make each key
+   * slower (quadratic time). The input is split into a head and the last `CONTEXT_KEEP_LENGTH`
+   * of it, the split is only used when it does not change anything: the head and the tail
+   * transliterated on their own give the current output, and the tail keeps the whole context.
+   * The head's output is then final, the context continues with the tail.
+   */
+  function commitContextStart() {
+    let split = curr_input.length - CONTEXT_KEEP_LENGTH;
+    for (let tries = 0; tries < CONTEXT_TRIM_TRIES && split > 0; tries++, split--) {
+      // do not split a surrogate pair
+      if (isLowSurrogate(curr_input.charCodeAt(split))) continue;
+      const tail_input = curr_input.substring(split);
+      const tail = transliterateInput(tail_input);
+      if (
+        tail.output === '' ||
+        tail.context_length !== curr_context_length ||
+        !curr_output.endsWith(tail.output)
+      )
+        continue;
+      const head = transliterateInput(curr_input.substring(0, split));
+      if (head.output.length + tail.output.length !== curr_output.length) continue;
+      if (!curr_output.startsWith(head.output)) continue;
+      curr_input = tail_input;
+      curr_output = tail.output;
+      next_trim_length = CONTEXT_TRIM_LENGTH;
+      return;
+    }
+    // no split point found, try again after some more keys
+    next_trim_length = curr_input.length + CONTEXT_KEEP_LENGTH;
   }
   // having `takeKeyInput` as async function resulted in some latency issues
   // so we have reorganized the code be synchronous
@@ -111,38 +185,21 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
    */
   function takeKeyInput(key: string): TypingDiff {
     if (!from_script_data || !to_script_data) {
-      throw new Error(
-        'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'
-      );
-    }
-    const curr_time_ms = Date.now();
-    if (last_time_ms && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
-      clearContext();
+      throw new Error('Typing context not ready. Await `ctx.ready` before calling takeKeyInput.');
     }
     // one code point, so that a key outside the BMP (a surrogate pair) is not split
     const first_code_point = key?.codePointAt(0);
-    const char_key = first_code_point === undefined ? '' : String.fromCodePoint(first_code_point);
-    curr_input += char_key;
-    const prev_output = curr_output;
-    const { context_length, output } = transliterate_text_core(
-      curr_input,
-      'Normal',
-      normalized_typing_lang!,
-      from_script_data,
-      to_script_data,
-      trans_options,
-      custom_rules,
-      {
-        typing_mode: true,
-        useNativeNumerals: use_native_numerals,
-        includeInherentVowel: include_inherent_vowel
-      }
-    );
-    if (context_length > 0) {
-      curr_output = output;
-    } else if (context_length === 0) {
+    if (first_code_point === undefined) {
+      // an empty key changes nothing (not even the idle timer)
+      return { to_delete_chars_count: 0, diff_add_text: '', context_length: curr_context_length };
+    }
+    const curr_time_ms = Date.now();
+    if (last_time_ms !== null && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
       clearContext();
     }
+    curr_input += String.fromCodePoint(first_code_point);
+    const prev_output = curr_output;
+    const { context_length, output } = transliterateInput(curr_input);
 
     // calculate the diff
     let common_index = 0;
@@ -154,6 +211,14 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     if (common_index > 0 && isHighSurrogate(output.charCodeAt(common_index - 1))) common_index--;
     const diff_add_text = output.substring(common_index);
     const to_delete_chars_count = prev_output.length - common_index;
+
+    if (context_length > 0) {
+      curr_output = output;
+      curr_context_length = context_length;
+      if (curr_input.length >= next_trim_length) commitContextStart();
+    } else {
+      clearContext();
+    }
 
     last_time_ms = Date.now();
     return {

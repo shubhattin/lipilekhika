@@ -113,7 +113,7 @@ impl NativeTypingContext {
         let to_delete_utf16_count =
             truncate_last_chars_utf16(&mut self.output, diff.to_delete_chars_count);
         if key.is_empty() {
-            // the context returns an empty diff for an empty key, without clearing itself
+            // an empty key changes nothing in the context
         } else if diff.context_length > 0 {
             self.output.push_str(&diff.diff_add_text);
         } else {

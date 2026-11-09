@@ -102,7 +102,7 @@ struct TypingOptionsYaml {
     #[serde(rename = "includeInherentVowel")]
     include_inherent_vowel: Option<bool>,
 
-    #[serde(rename = "autoContextTClearTimeMs")]
+    #[serde(rename = "autoContextClearTimeMs", alias = "autoContextTClearTimeMs")]
     auto_context_clear_time_ms: Option<u64>,
 }
 

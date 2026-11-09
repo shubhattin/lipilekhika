@@ -1,6 +1,7 @@
 package typing
 
 import (
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -21,7 +22,7 @@ const DefaultIncludeInherentVowel = false
 // TypingContextOptions configures a typing context.
 type TypingContextOptions struct {
 	// The time in milliseconds after which the context will be cleared automatically.
-	// Defaults to DefaultAutoContextClearTimeMs.
+	// 0 clears it after any pause. Defaults to DefaultAutoContextClearTimeMs (when nil).
 	AutoContextClearTimeMs *int
 	// Use native numerals in transliteration/typing. Defaults to DefaultUseNativeNumerals.
 	UseNativeNumerals *bool
@@ -43,7 +44,7 @@ func withDefaults(opts *TypingContextOptions) TypingContextOptions {
 	if opts == nil {
 		return out
 	}
-	if opts.AutoContextClearTimeMs != nil && *opts.AutoContextClearTimeMs > 0 {
+	if opts.AutoContextClearTimeMs != nil {
 		out.AutoContextClearTimeMs = intPtr(*opts.AutoContextClearTimeMs)
 	}
 	if opts.UseNativeNumerals != nil {
@@ -83,6 +84,10 @@ type TypingContext struct {
 
 	currInput  string
 	currOutput string
+	// context length returned for the last key (0 after a clear)
+	currContextLength int
+	// currInput length (bytes) at which commitContextStart is tried next
+	nextTrimLength int
 
 	autoContextClearTime time.Duration
 	lastTime             time.Time
@@ -127,6 +132,7 @@ func NewTypingContext(typingLang string, options *TypingContextOptions) (*Typing
 		useNativeNumerals:    *opts.UseNativeNumerals,
 		includeInherentVowel: *opts.IncludeInherentVowel,
 		autoContextClearTime: time.Duration(*opts.AutoContextClearTimeMs) * time.Millisecond,
+		nextTrimLength:       contextTrimLength,
 		fromScriptData:       fromData,
 		toScriptData:         toData,
 		transOptions:         resolved.TransOptions,
@@ -139,6 +145,66 @@ func (c *TypingContext) ClearContext() {
 	c.lastTime = time.Time{}
 	c.currInput = ""
 	c.currOutput = ""
+	c.currContextLength = 0
+	c.nextTrimLength = contextTrimLength
+}
+
+// Typing keeps the input of the current context and transliterates all of it on every key. The
+// context is cleared at a space or punctuation, but a long run of letters would keep growing.
+// Once the context input is contextTrimLength long (bytes), its start is committed, keeping
+// about the last contextKeepLength (see commitContextStart).
+const (
+	contextTrimLength = 64
+	contextKeepLength = 32
+	// number of split points tried for one commit
+	contextTrimTries = 4
+)
+
+func (c *TypingContext) transliterateInput(input string) (transliterate.TransliterateOutput, error) {
+	return transliterate.TransliterateTextCoreWith(
+		input,
+		"Normal",
+		c.normalizedTypingLang,
+		c.fromScriptData,
+		c.toScriptData,
+		c.transOptions,
+		c.customRules,
+		c.buildTranslitOptions(),
+		&c.scratch,
+	)
+}
+
+// commitContextStart commits the start of a long context, so that a long run of letters does
+// not make each key slower (quadratic time). The input is split into a head and about the last
+// contextKeepLength of it, the split is only used when it does not change anything: the head
+// and the tail transliterated on their own give the current output, and the tail keeps the
+// whole context. The head's output is then final, the context continues with the tail.
+func (c *TypingContext) commitContextStart() {
+	split := len(c.currInput) - contextKeepLength
+	for tries := 0; tries < contextTrimTries && split > 0; split-- {
+		// split at a rune start
+		if !utf8.RuneStart(c.currInput[split]) {
+			continue
+		}
+		tries++
+		tailInput := c.currInput[split:]
+		tail, err := c.transliterateInput(tailInput)
+		if err != nil || tail.Output == "" || tail.ContextLength != c.currContextLength ||
+			!strings.HasSuffix(c.currOutput, tail.Output) {
+			continue
+		}
+		head, err := c.transliterateInput(c.currInput[:split])
+		if err != nil || len(head.Output)+len(tail.Output) != len(c.currOutput) ||
+			!strings.HasPrefix(c.currOutput, head.Output) {
+			continue
+		}
+		c.currInput = tailInput
+		c.currOutput = tail.Output
+		c.nextTrimLength = contextTrimLength
+		return
+	}
+	// no split point found, try again after some more keys
+	c.nextTrimLength = len(c.currInput) + contextKeepLength
 }
 
 func (c *TypingContext) buildTranslitOptions() *transliterate.Options {
@@ -152,10 +218,11 @@ func (c *TypingContext) buildTranslitOptions() *transliterate.Options {
 // TakeKeyInput accepts character-by-character input and returns the diff relative to the previous output.
 func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 	if key == "" {
+		// an empty key changes nothing (not even the idle timer)
 		return TypingDiff{
 			ToDeleteCharsCount: 0,
 			DiffAddText:        "",
-			ContextLength:      0,
+			ContextLength:      c.currContextLength,
 		}, nil
 	}
 	var ch rune
@@ -170,17 +237,7 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 	c.currInput += string(ch)
 	prevOutput := c.currOutput
 
-	result, err := transliterate.TransliterateTextCoreWith(
-		c.currInput,
-		"Normal",
-		c.normalizedTypingLang,
-		c.fromScriptData,
-		c.toScriptData,
-		c.transOptions,
-		c.customRules,
-		c.buildTranslitOptions(),
-		&c.scratch,
-	)
+	result, err := c.transliterateInput(c.currInput)
 	if err != nil {
 		return TypingDiff{}, err
 	}
@@ -188,13 +245,17 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 	contextLength := result.ContextLength
 	output := result.Output
 
+	toDeleteCharsCount, diffAddText := computeDiff(prevOutput, output)
+
 	if contextLength > 0 {
 		c.currOutput = output
-	} else if contextLength == 0 {
+		c.currContextLength = contextLength
+		if len(c.currInput) >= c.nextTrimLength {
+			c.commitContextStart()
+		}
+	} else {
 		c.ClearContext()
 	}
-
-	toDeleteCharsCount, diffAddText := computeDiff(prevOutput, output)
 
 	c.lastTime = now
 
