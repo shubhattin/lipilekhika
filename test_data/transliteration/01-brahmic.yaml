@@ -432,3 +432,25 @@
   input: लॢ लॣ कॢ
   output: ல்ல்ரி² ல்ல்ரீ² க்ல்ரி²
   reversible: true
+# ம் after a vowel sign or vowel written as its parts (கௌம் with ௌ as ெ + ௗ, ஔம் with ஔ as
+# ஒ + ௗ) is still the anusvAra
+- index: 20.3
+  from: Tamil
+  to: Devanagari
+  input: "கௌம் ஔம்"
+  output: कौं औं
+  reversible: false
+# the anusvAra goes with a vyanjana, svara or mAtrA only (Vedic svaras in between), after a
+# digit, a sign or a danda ம் is म्
+- index: 20.4
+  from: Tamil
+  to: Devanagari
+  input: ௧ம்ய ஃம்ய ஸ।ம்ய ௐம்ய ஜ॑ம் ஸம்ய
+  output: १म्य ःम्य स।म्य ॐम्य ज॑ं संय
+  reversible: false
+- index: 20.5
+  from: Devanagari
+  to: Tamil
+  input: अंम्
+  output: அம்ம்
+  reversible: true
