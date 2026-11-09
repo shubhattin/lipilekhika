@@ -901,7 +901,14 @@ func TransliterateTextCoreWith(
 								item = kramaListItem(fromData, int(krama[0]))
 							}
 						}
-						resultConcat = ctx.prevContextCleanup(matchedText, item, nil, false)
+						// A halant variant matched as a whole (Sinhala al-lakuna + ZWJ `්‍`) is
+						// passed as the halant itself, so that the cleanup does not add an inherent
+						// vowel before it (ක්‍ෂ -> kSha, not kaSha)
+						itemText := matchedText
+						if len(krama) == 1 && kramaTextOrEmpty(fromData, int(krama[0])) == ctx.brahmicHalant {
+							itemText = ctx.brahmicHalant
+						}
+						resultConcat = ctx.prevContextCleanup(itemText, item, nil, false)
 					} else if toBrahmic && fromOther {
 						var item *scriptdata.ListItem
 						if m.FallbackListRef != nil {

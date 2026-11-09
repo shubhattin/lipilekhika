@@ -43,8 +43,7 @@ const Brahmi: InputBrahmicScriptType = {
     'udAtta-2': '↑↑',
     'udAtta-3': '↑↑↑',
     virama: '।',
-    double_virama: '॥',
-    'A1-mAtrA': '𑀹'
+    double_virama: '॥'
   },
   list: [
     // Svara
@@ -60,6 +59,15 @@ const Brahmi: InputBrahmicScriptType = {
       mAtrA: '𑀸',
       text_krama: ['A-svara', 'A1-svara'],
       mAtrA_text_krama: ['A-mAtrA'],
+      type: 'svara'
+    },
+    {
+      // Bhattiprolu AA: only a mAtrA form (no independent letter, A1-svara is 𑀆 above).
+      // A list item so that the A1 mAtrA is typed as a mAtrA (k.A1 -> 𑀓𑁆𑀹)
+      text: '𑀅𑀹',
+      mAtrA: '𑀹',
+      text_krama: [],
+      mAtrA_text_krama: ['A1-mAtrA'],
       type: 'svara'
     },
     {

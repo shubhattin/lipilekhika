@@ -213,6 +213,13 @@ const Sinhala: InputBrahmicScriptType = {
       type: 'vyanjana'
     },
     {
+      // prenasalized ṅga (ङ्ग)
+      text: 'ඟ',
+      text_krama: [],
+      fallback: ['G', 'halant', 'g'],
+      type: 'vyanjana'
+    },
+    {
       text: 'ච',
       text_krama: ['C'],
       type: 'vyanjana'
@@ -240,7 +247,8 @@ const Sinhala: InputBrahmicScriptType = {
     {
       text: 'ඥ',
       text_krama: [],
-      fallback: ['J', 'halant', 'j'],
+      // jña (ज्ञ), as in ඥාති (jñāti)
+      fallback: ['j', 'halant', 'J'],
       type: 'vyanjana'
     },
     {

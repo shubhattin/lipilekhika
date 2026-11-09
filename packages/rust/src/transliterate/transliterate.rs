@@ -1339,11 +1339,21 @@ pub fn transliterate_text_core_with(
                                 }
                             }
 
-                            result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(matched_text.as_str()), item)),
-                                None,
-                                None,
-                            );
+                            // A halant variant matched as a whole (Sinhala al-lakuna + ZWJ `්‍`)
+                            // is passed as the halant itself, so that the cleanup does not add an
+                            // inherent vowel before it (ක්‍ෂ -> kSha, not kaSha)
+                            let item_text = match ctx.brahmic_halant {
+                                Some(halant)
+                                    if krama.len() == 1
+                                        && from_script_data.krama_text_or_empty(krama[0])
+                                            == halant =>
+                                {
+                                    halant
+                                }
+                                _ => matched_text.as_str(),
+                            };
+                            result_concat_status =
+                                ctx.prev_context_cleanup(Some((Some(item_text), item)), None, None);
                         } else if matches!(to_script_data, ScriptData::Brahmic { .. })
                             && matches!(from_script_data, ScriptData::Other { .. })
                         {

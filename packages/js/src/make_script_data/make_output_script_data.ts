@@ -419,6 +419,39 @@ function get_out_script_data(
     }
   }
 
+  /** index of the `anya` list item that entries point at with `fallback_list_ref`
+   * (added on first use) */
+  let anya_list_ref: number | null = null;
+  const get_anya_list_ref = () => {
+    if (anya_list_ref === null) {
+      res.list.push({ krama_ref: [], type: 'anya' });
+      anya_list_ref = res.list.length - 1;
+    }
+    return anya_list_ref;
+  };
+
+  // An intermediate entry (a prefix of a longer text, not a krama text itself) that is a
+  // vyanjana + halant, like Gurumukhi `ੜ੍` of `ੜ੍ਹ`. Runtimes take the type of a match from its
+  // first krama entry (the vyanjana), so going to an `other` script an inherent vowel was added
+  // after it (`ੜ੍` -> `Dza`, `ੜ੍ਕ` -> `r̤aka`). As `anya` the halant ends the vyanjana.
+  if (res.script_type === 'brahmic') {
+    const halant_index = kramaLabelIndex('halant');
+    for (const [text, value] of res.text_to_krama_map) {
+      const krama = value.krama;
+      if (
+        krama === undefined ||
+        krama === null ||
+        krama.length < 2 ||
+        krama.at(-1) !== halant_index ||
+        value.fallback_list_ref != null ||
+        res.krama_text_arr.some((item) => item[0] === text)
+      )
+        continue;
+      if (res.list[res.krama_text_arr[krama[0]]?.[1] ?? -1]?.type !== 'vyanjana') continue;
+      value.fallback_list_ref = get_anya_list_ref();
+    }
+  }
+
   if (input_script_data.script_name !== 'Normal' && NormalOutputData) {
     // typing data genertion
 
@@ -446,8 +479,6 @@ function get_out_script_data(
     // sort the array
     res.custom_script_chars_arr = sortByText(res.custom_script_chars_arr);
 
-    /** index of the `anya` list item used by `treat_as_anya` (added on first use) */
-    let anya_list_ref: number | null = null;
     /** Points the typing entry of `text` and of each of its intermediate states (prefixes)
      * at an `anya` list item, if it would otherwise resolve to a `mAtrA`
      * (runtimes take the type from `fallback_list_ref`, else from the first krama entry).
@@ -463,11 +494,7 @@ function get_out_script_data(
         if (value.fallback_list_ref != null || value.custom_back_ref != null) continue;
         const list_ref = res.krama_text_arr[value.krama?.[0] ?? -1]?.[1];
         if (list_ref == null || res.list[list_ref]?.type !== 'mAtrA') continue;
-        if (anya_list_ref === null) {
-          res.list.push({ krama_ref: [], type: 'anya' });
-          anya_list_ref = res.list.length - 1;
-        }
-        value.fallback_list_ref = anya_list_ref;
+        value.fallback_list_ref = get_anya_list_ref();
       }
     };
 

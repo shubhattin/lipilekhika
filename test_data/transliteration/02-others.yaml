@@ -64,3 +64,42 @@
   input: sha shi sh ksha
   output: स्ह स्हि स्ह् क्स्ह
   reversible: true
+# Gurumukhi ੜ੍ (the prefix of ੜ੍ਹ) is a vyanjana + halant, no inherent vowel is added (#154)
+- index: 11
+  from: Gurumukhi
+  to: Normal
+  input: ੜ੍ ਕੜ੍ਕ ੜ੍ਹ ੜ
+  output: Dz kaDzka Dhza Dza
+- index: 11.1
+  from: Gurumukhi
+  to: Romanized
+  input: ੜ੍ਕ
+  output: r̤ka
+# Sinhala → Normal / Romanized
+- index: 12
+  from: Sinhala
+  to: Normal
+  input: ඥාති ඟ
+  output: jJAti Gga
+# A conjunct written with al-lakuna + ZWJ (ක්‍ෂ) keeps its halant (#161)
+- index: 12.1
+  from: Sinhala
+  to: Normal
+  input: ක්‍ෂ ද්‍ව ද්‍වයම්‍ ක්ෂ
+  output: kSha dva dvayam kSha
+- index: 12.2
+  from: Sinhala
+  to: Romanized
+  input: ක්‍ෂ ද්‍වයම්‍
+  output: kṣa dvayam
+# Brahmi Bhattiprolu AA (𑀹, A1 mAtrA) is a mAtrA: no inherent vowel before it (#154)
+- index: 13
+  from: Brahmi
+  to: Normal
+  input: 𑀓𑀹 𑀓𑀹𑀁 𑀓𑀸
+  output: kA kAM kA
+- index: 13.1
+  from: Brahmi
+  to: Romanized
+  input: 𑀓𑀹 𑀓𑀸
+  output: kā kā

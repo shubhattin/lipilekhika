@@ -251,12 +251,12 @@ const Gujarati: InputBrahmicScriptType = {
     },
     {
       text: 'ડ',
-      text_krama: ['D'],
+      text_krama: ['D', 'D1'],
       type: 'vyanjana'
     },
     {
       text: 'ડ઼',
-      text_krama: ['Dz', 'D1'],
+      text_krama: ['Dz'],
       type: 'vyanjana'
     },
     {
