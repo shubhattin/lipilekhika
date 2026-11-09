@@ -306,3 +306,30 @@
   input: ಕೝ
   output: कन्
   reversible: false
+# Text written by earlier versions with the wrong characters is still read:
+# Sinhala candrabindu as the Gujarati ઁ, Granth 𑙃 and Modi ॰ abbreviation signs
+- index: 18.3
+  from: Sinhala
+  to: Devanagari
+  input: කઁ
+  output: कँ
+  reversible: false
+- index: 18.4
+  from: Granth
+  to: Devanagari
+  input: 𑌲𑌘𑍁𑙃
+  output: लघु॰
+  reversible: false
+- index: 18.5
+  from: Modi
+  to: Devanagari
+  input: 𑘩𑘑𑘳॰
+  output: लघु॰
+  reversible: false
+# Purna-Devanagari also reads candra a ॲ
+- index: 18.6
+  from: Purna-Devanagari
+  to: Gujarati
+  input: ॲप
+  output: ઍપ
+  reversible: false
