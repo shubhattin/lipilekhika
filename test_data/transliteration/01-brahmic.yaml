@@ -333,3 +333,20 @@
   input: ॲप
   output: ઍપ
   reversible: false
+# Brahmi writes its own dandas 𑁇 𑁈 (like Sharada, Siddham, Modi), the Devanagari ones are still read
+- index: 18.7
+  from: Devanagari
+  to: Brahmi
+  input: राम। राम॥
+  output: 𑀭𑀸𑀫𑁇 𑀭𑀸𑀫𑁈
+- index: 18.8
+  from: Brahmi
+  to: Devanagari
+  input: 𑀭𑀸𑀫। 𑀭𑀸𑀫॥
+  output: राम। राम॥
+  reversible: false
+- index: 18.9
+  from: Normal
+  to: Brahmi
+  input: rAma . rAma ..
+  output: 𑀭𑀸𑀫 𑁇 𑀭𑀸𑀫 𑁈
