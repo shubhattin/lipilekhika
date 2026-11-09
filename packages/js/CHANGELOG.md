@@ -25,6 +25,8 @@
 - Fix: typing a key outside the BMP (eg. an emoji) keeps the whole character, not only its high surrogate: `k😀` -> `क्😀` (was `क्\ud83d`) ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
 - Fix: `to_delete_chars_count` of the N-API typing context (`lipilekhika/node`) is in UTF-16 code units like the JS one (was code points), typing into Brahmi, Granth, Modi, Sharada, Siddham no longer corrupts the text: `ki` -> `𑀓𑀺` (was `𑀓\ud804𑀺`). The JS typing diff no longer splits a surrogate pair in `diff_add_text` ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
 - Fix: Object prototype keys (`constructor`, `__proto__`, `toString`, ...) are not accepted as script names: `getNormalizedScriptName('constructor')` -> `null`, `transliterate` throws `Invalid script name` ([#155](https://github.com/shubhattin/lipilekhika/issues/155))
+- Fix: Tamil-Extended read back with more than one Vedic svara, or a halant + svara, before the superscript: `க॒॑⁴` -> `घ॒॑` (was `क॒॑⁴`), `க்॒²` -> `ख्॒` (was `क्॒²`), `ரு॒॑²` -> `ऋ॒॑` ([#158](https://github.com/shubhattin/lipilekhika/issues/158))
+- Fix: Tamil-Extended `ல்ரு²` / `ல்ரூ²` read back as `लृ` / `लॄ` (was `ल्रु²` / `ल्रू²`), also after a consonant (`க்ல்ரு²` -> `क्लृ`) and with a Vedic svara ([#159](https://github.com/shubhattin/lipilekhika/issues/159))
 
 ## js-lib@1.0.13
 
