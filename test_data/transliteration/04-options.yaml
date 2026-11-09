@@ -135,3 +135,31 @@
   options:
     "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
   reversible: false
+# Sinhala touching letters (ZWJ + al-lakuna) are read as a halant with preserve_specific_chars
+# too, it does not take the ZWJ as the `.q` custom character (ka.qva). A ZWJ that is not before
+# an al-lakuna is still preserved.
+- index: 16
+  from: Sinhala
+  to: Normal
+  input: ක‍්ව ක්‍ෂ ක‍ව
+  output: kva kSha ka.qva
+  options:
+    "all_to_normal:preserve_specific_chars": true
+  reversible: false
+# Romanized sh (स्ह, one match) gets the conjunct enabling ZWJ too, like स्ह from Devanagari
+- index: 16.1
+  from: Romanized
+  to: Sinhala
+  input: sha shva sva
+  output: ස්‍හ ස්‍හ්‍ව ස්‍ව
+  options:
+    "all_to_sinhala:use_conjunct_enabling_halant": true
+  reversible: false
+- index: 16.2
+  from: Devanagari
+  to: Sinhala
+  input: स्ह स्ह्व स्व
+  output: ස්‍හ ස්‍හ්‍ව ස්‍ව
+  options:
+    "all_to_sinhala:use_conjunct_enabling_halant": true
+  reversible: false
