@@ -355,6 +355,11 @@ export const isVedicSvaraTail = (ch: string | undefined): boolean => {
   return ch === '॒' || ch === '॑' || ch === '᳚' || ch === '᳛';
 };
 
+/** Code point version of `isVedicSvaraTail` */
+export const isVedicSvaraTailCp = (cp: number): boolean => {
+  return cp === 0x952 || cp === 0x951 || cp === 0x1cda || cp === 0x1cdb; // ॒ ॑ ᳚ ᳛
+};
+
 /** UTF-16 code units taken by the code point */
 export const cpWidth = (cp: number): number => (cp > 0xffff ? 2 : 1);
 
