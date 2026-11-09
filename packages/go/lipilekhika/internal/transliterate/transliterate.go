@@ -892,7 +892,7 @@ func TransliterateTextCoreWith(
 						}
 						toHalant := toData.Halant
 						if (len(pieces) == 1 && pieces[0] == toHalant) ||
-							listItemAt(toData, int(krama[len(krama)-1])).Kind() == scriptdata.ListKindMatra {
+							kramaListItem(toData, int(krama[len(krama)-1])).Kind() == scriptdata.ListKindMatra {
 							result.emitPiecesWithReorder(pieces, toHalant, true)
 						} else if len(pieces) > 0 && lastRuneIsVedicSvara(pieces[len(pieces)-1]) {
 							last, _ := result.popLastChar()
