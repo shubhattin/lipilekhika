@@ -176,7 +176,6 @@ const Granth: InputBrahmicScriptType = {
       mAtrA: '𑍋',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
-      mAtrA_duplicates: ['𑍋'],
       type: 'svara'
     },
     {
@@ -184,7 +183,6 @@ const Granth: InputBrahmicScriptType = {
       mAtrA: '𑍌',
       text_krama: ['au-svara', 'auU-svara'],
       mAtrA_text_krama: ['au-mAtrA', 'auU-mAtrA'],
-      mAtrA_duplicates: ['𑍌'],
       type: 'svara'
     },
 

@@ -151,7 +151,6 @@ const Bengali: InputBrahmicScriptType = {
       mAtrA: 'ো',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
-      mAtrA_duplicates: ['ো'],
       type: 'svara'
     },
     {
@@ -159,7 +158,6 @@ const Bengali: InputBrahmicScriptType = {
       mAtrA: 'ৌ',
       text_krama: ['au-svara', 'auU-svara'],
       mAtrA_text_krama: ['au-mAtrA', 'auU-mAtrA'],
-      mAtrA_duplicates: ['ৌ'],
       type: 'svara'
     },
 
@@ -252,7 +250,6 @@ const Bengali: InputBrahmicScriptType = {
     {
       text: 'ড়',
       text_krama: ['Dz'],
-      duplicates: ['ড়'],
       type: 'vyanjana'
     },
     {
@@ -263,7 +260,6 @@ const Bengali: InputBrahmicScriptType = {
     {
       text: 'ঢ়',
       text_krama: ['Dhz'],
-      duplicates: ['ঢ়'],
       type: 'vyanjana'
     },
     {
@@ -341,7 +337,6 @@ const Bengali: InputBrahmicScriptType = {
     {
       text: 'য়',
       text_krama: ['yz'],
-      duplicates: ['য়'],
       type: 'vyanjana'
     },
     {

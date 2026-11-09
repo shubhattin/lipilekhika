@@ -216,7 +216,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'क़',
       text_krama: ['kz'],
-      duplicates: ['क़'],
       type: 'vyanjana'
     },
     {
@@ -227,7 +226,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ख़',
       text_krama: ['khz'],
-      duplicates: ['ख़'],
       type: 'vyanjana'
     },
     {
@@ -238,7 +236,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ग़',
       text_krama: ['gz'],
-      duplicates: ['ग़'],
       type: 'vyanjana'
     },
     {
@@ -274,7 +271,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ज़',
       text_krama: ['jz'],
-      duplicates: ['ज़'],
       type: 'vyanjana'
     },
     {
@@ -310,7 +306,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ड़',
       text_krama: ['Dz'],
-      duplicates: ['ड़'],
       type: 'vyanjana'
     },
     {
@@ -326,7 +321,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ढ़',
       text_krama: ['Dhz'],
-      duplicates: ['ढ़'],
       type: 'vyanjana'
     },
     {
@@ -362,7 +356,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऩ',
       text_krama: ['nz'],
-      duplicates: ['ऩ'],
       type: 'vyanjana'
     },
     {
@@ -378,7 +371,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'फ़',
       text_krama: ['phz'],
-      duplicates: ['फ़'],
       type: 'vyanjana'
     },
     {
@@ -409,7 +401,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'य़',
       text_krama: ['yz'],
-      duplicates: ['य़'],
       type: 'vyanjana'
     },
     {
@@ -420,7 +411,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऱ',
       text_krama: ['rz'],
-      duplicates: ['ऱ'],
       type: 'vyanjana'
     },
     {
@@ -436,7 +426,6 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऴ',
       text_krama: ['Lz'],
-      duplicates: ['ऴ'],
       type: 'vyanjana'
     },
     {

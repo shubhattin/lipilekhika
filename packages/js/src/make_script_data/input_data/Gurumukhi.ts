@@ -179,7 +179,6 @@ const Gurumukhi: InputBrahmicScriptType = {
     {
       text: 'ਖ਼',
       text_krama: ['khz'],
-      duplicates: ['ਖ਼'],
       type: 'vyanjana'
     },
     {
@@ -190,7 +189,6 @@ const Gurumukhi: InputBrahmicScriptType = {
     {
       text: 'ਗ਼',
       text_krama: ['gz'],
-      duplicates: ['ਗ਼'],
       type: 'vyanjana'
     },
     {
@@ -221,7 +219,6 @@ const Gurumukhi: InputBrahmicScriptType = {
     {
       text: 'ਜ਼',
       text_krama: ['jz'],
-      duplicates: ['ਜ਼'],
       type: 'vyanjana'
     },
     {
@@ -314,7 +311,6 @@ const Gurumukhi: InputBrahmicScriptType = {
     {
       text: 'ਫ਼',
       text_krama: ['phz'],
-      duplicates: ['ਫ਼'],
       type: 'vyanjana'
     },
     {

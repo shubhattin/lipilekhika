@@ -186,13 +186,11 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'क़',
       text_krama: ['kz'],
-      duplicates: ['क़'],
       type: 'vyanjana'
     },
     {
       text: 'ख़',
       text_krama: ['khz'],
-      duplicates: ['ख़'],
       type: 'vyanjana'
     },
     {
@@ -209,7 +207,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ग़',
       text_krama: ['gz'],
-      duplicates: ['ग़'],
       type: 'vyanjana'
     },
     {
@@ -241,7 +238,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ज़',
       text_krama: ['jz'],
-      duplicates: ['ज़'],
       type: 'vyanjana'
     },
     {
@@ -273,7 +269,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ड़',
       text_krama: ['Dz'],
-      duplicates: ['ड़'],
       type: 'vyanjana'
     },
     {
@@ -284,7 +279,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ढ़',
       text_krama: ['Dhz'],
-      duplicates: ['ढ़'],
       type: 'vyanjana'
     },
     {
@@ -320,7 +314,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऩ',
       text_krama: ['nz'],
-      duplicates: ['ऩ'],
       type: 'vyanjana'
     },
     {
@@ -336,7 +329,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'फ़',
       text_krama: ['phz'],
-      duplicates: ['फ़'],
       type: 'vyanjana'
     },
     {
@@ -363,7 +355,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'य़',
       text_krama: ['yz'],
-      duplicates: ['य़'],
       type: 'vyanjana'
     },
     {
@@ -374,7 +365,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऱ',
       text_krama: ['rz'],
-      duplicates: ['ऱ'],
       type: 'vyanjana'
     },
     {
@@ -390,7 +380,6 @@ const Devanagari: InputBrahmicScriptType = {
     {
       text: 'ऴ',
       text_krama: ['Lz'],
-      duplicates: ['ऴ'],
       type: 'vyanjana'
     },
     {
