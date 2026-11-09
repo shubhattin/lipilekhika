@@ -512,6 +512,57 @@ func emitKramaPieces(result *resultStringBuilder, toData *scriptdata.ScriptData,
 	}
 }
 
+// isMisplacedDeadConsonantSign reports whether the match `text` (`krama`) is a sign written as a
+// dead consonant (the Tamil anusvAra ம், a consonant + halant) where that sign cannot be: after a
+// halant or at the start of a word, there is no `prev` (`prevOk` is false), or it is a skip
+// character or a character not of the script. There it is the consonant + halant
+// (ஸாத்ம்ய -> सात्म्य, ம்ய -> म्य, not सात्ंय, ंय).
+func isMisplacedDeadConsonantSign(s *scriptdata.ScriptData, text string, krama []int16, prev rune, prevOk bool) bool {
+	halant := s.Halant
+	if len(krama) != 1 || halant == "" || !strings.HasSuffix(text, halant) {
+		return false
+	}
+	head := text[:len(text)-len(halant)]
+	consonant, size := utf8.DecodeRuneInString(head)
+	if size == 0 || size != len(head) {
+		return false
+	}
+	if kramaListItem(s, int(krama[0])).Kind() == scriptdata.ListKindVyanjana ||
+		kramaListItem(s, kramaIndexOfChar(s, consonant)).Kind() != scriptdata.ListKindVyanjana {
+		return false
+	}
+	if !prevOk {
+		return true
+	}
+	return isSkipChar(prev) || runeIsStr(prev, halant) ||
+		(kramaIndexOfChar(s, prev) < 0 && s.TextToKramaMapCharIndex(prev, false) < 0)
+}
+
+// longerTextIsRead reports whether a text longer than the character at `index` is read from it,
+// walking text_to_krama_map like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is a halant, while the
+// ZWJ by itself is a custom script character.
+func longerTextIsRead(s *scriptdata.ScriptData, cursor *inputCursor, index int) bool {
+	ch, ok := cursor.peekAt(index)
+	if !ok {
+		return false
+	}
+	mapIndex := s.TextToKramaMapCharIndex(ch, false)
+	end := index + 1
+	read := false
+	for mapIndex >= 0 {
+		c, ok := cursor.peekAt(end)
+		if !ok || !containsRune(s.TextToKramaMapArr[mapIndex].Value.NextChars, c) {
+			break
+		}
+		end++
+		mapIndex = s.TextToKramaMapIndex(cursor.slice(index, end), false)
+		if mapIndex >= 0 && hasKramaOtherThanNeg1(s.TextToKramaMapArr[mapIndex].Value.Krama) {
+			read = true
+		}
+	}
+	return read
+}
+
 // TransliterateTextCore is the synchronous core transliterator.
 func TransliterateTextCore(
 	text string,
@@ -547,6 +598,8 @@ func TransliterateTextCoreWith(
 	// option flags resolved once (nil-map reads return false)
 	transOptUseTypingChars := transOpt(transOptions, optUseTypingChars)
 	optPreserveSpecificChars := transOpt(transOptions, optPreserveSpecificChars) && toName == "Normal"
+	// a halant followed by a vyanjana in the output is written al-lakuna + ZWJ (Sinhala)
+	sinhalaConjunctHalantOpt := transOpt(transOptions, optSinhalaConjunctHalant) && toName == "Sinhala"
 
 	if opts.TypingMode && fromName == "Normal" {
 		text = applyTypingInputAliases(text, toName)
@@ -655,9 +708,10 @@ func TransliterateTextCoreWith(
 		}
 
 		// Preserve mode: custom script chars when converting to Normal
+		// (unless it starts a longer text, the Sinhala ZWJ + al-lakuna `‍්` is a halant)
 		if optPreserveSpecificChars {
 			chStr, _ := cursor.peekAtStr(textIndex)
-			if idx, ok := fromData.CustomScriptCharsLookup[chStr]; ok {
+			if idx, ok := fromData.CustomScriptCharsLookup[chStr]; ok && !longerTextIsRead(fromData, &cursor, textIndex) {
 				item := &fromData.CustomScriptCharsArr[idx]
 				var listItem *scriptdata.ListItem
 				if item.FirstRef != nil {
@@ -822,6 +876,48 @@ func TransliterateTextCoreWith(
 								}
 							}
 						}
+						// The match ends with a halant that cannot be continued (ல் is the start of
+						// ல்ரி² ऌ), but the halant starts a mAtrA ending in a superscript (்ல்ரி²
+						// ்ல்ரீ², ॢ ॣ): stop the match before the halant, so ல்ல்ரி² is read as
+						// ல + ்ல்ரி² (लॢ) like க்ல்ரி² (कॢ), not ल् + ऌ
+						halant := fromData.Halant
+						if c, ok := cursor.peekAt(endIndex - 1); nthOk && !containsRune(nextChars, nthCh) &&
+							len(charToSearch) > len(halant) && strings.HasSuffix(charToSearch, halant) &&
+							endIndex >= 1 && ok && isHalant(c) {
+							// the longest text from the halant up to the superscript (after Vedic svaras)
+							tail := halant
+							tailEnd := endIndex
+							for {
+								c, ok := cursor.peekAt(tailEnd)
+								if !ok || isTaExtSuperscriptTail(c, ok) {
+									break
+								}
+								if fromData.TextToKramaMapIndex(tail+string(c), false) < 0 {
+									break
+								}
+								tail += string(c)
+								tailEnd++
+							}
+							for {
+								c, ok := cursor.peekAt(tailEnd)
+								if !isVedicSvaraTail(c, ok) {
+									break
+								}
+								tailEnd++
+							}
+							if tailSup, ok := cursor.peekAt(tailEnd); tail != halant && ok && isTaExtSuperscriptTail(tailSup, ok) {
+								tailIsMatra := false
+								if tailIndex := fromData.TextToKramaMapIndex(tail+string(tailSup), false); tailIndex >= 0 {
+									tailKrama := fromData.TextToKramaMapArr[tailIndex].Value.Krama
+									tailIsMatra = len(tailKrama) == 1 &&
+										kramaListItem(fromData, int(tailKrama[0])).Kind() == scriptdata.ListKindMatra
+								}
+								if headIndex := fromData.TextToKramaMapIndex(charToSearch[:len(charToSearch)-len(halant)], false); tailIsMatra && headIndex >= 0 {
+									itemIndex = headIndex
+									break
+								}
+							}
+						}
 					}
 
 					// Generic: if the next character is in the next list, extend scan and continue
@@ -833,6 +929,15 @@ func TransliterateTextCoreWith(
 
 				itemIndex = potentialMatchIndex
 				break
+			}
+		}
+		// A sign written as a dead consonant (Tamil anusvAra ம்) after a halant or at the start of a
+		// word: only the consonant is read here (Step 2), the halant next
+		if itemIndex >= 0 && !useTypingMap && fromBrahmic {
+			entry := &textToKramaMap[itemIndex]
+			prev, prevOk := cursor.peekAt(textIndex - 1)
+			if isMisplacedDeadConsonantSign(fromData, entry.Text, entry.Value.Krama, prev, prevOk) {
+				itemIndex = -1
 			}
 		}
 
@@ -958,6 +1063,19 @@ func TransliterateTextCoreWith(
 							result.emitRune(last)
 						} else {
 							result.emitPieces(pieces)
+						}
+					} else if sinhalaConjunctHalantOpt && len(krama) > 1 {
+						// a halant inside one match (Romanized sh -> स्ह) is followed by a vyanjana too
+						for i, k := range krama {
+							if k < 0 {
+								continue
+							}
+							piece := kramaTextOrEmpty(toData, int(k))
+							if i+1 < len(krama) && piece == toData.Halant {
+								result.emit(piece + "‍")
+							} else {
+								result.emit(piece)
+							}
 						}
 					} else {
 						emitKramaPieces(&result, toData, krama)
