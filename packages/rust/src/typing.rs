@@ -10,8 +10,6 @@ use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "std")]
-use core::time::Duration;
-#[cfg(feature = "std")]
 use std::time::Instant;
 
 use crate::script_data::{List, ScriptData};
@@ -25,8 +23,10 @@ pub const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS: u64 = 4500;
 
 /// Typing keeps the input of the current context and transliterates all of it on every key. The
 /// context is cleared at a space or punctuation, but a long run of letters would keep growing.
-/// Once the context input is `CONTEXT_TRIM_LENGTH` long (bytes), its start is committed, keeping
-/// about the last `CONTEXT_KEEP_LENGTH` (see [`TypingContext::commit_context_start`]).
+/// Once the context input is `CONTEXT_TRIM_LENGTH` keys (chars) long, its start is committed,
+/// keeping about the last `CONTEXT_KEEP_LENGTH` (see [`TypingContext::commit_context_start`]).
+/// Counted in chars, like the TS (code points) and Go (runes) versions, so all of them commit at
+/// the same keys.
 const CONTEXT_TRIM_LENGTH: usize = 64;
 const CONTEXT_KEEP_LENGTH: usize = 32;
 /// Number of split points tried for one commit
@@ -97,9 +97,11 @@ pub struct TypingContext {
     curr_context_length: usize,
     /// `curr_input` length at which [`Self::commit_context_start`] is tried next
     next_trim_length: usize,
+    /// `curr_input` length in chars (keys)
+    curr_input_length: usize,
 
     #[cfg(feature = "std")]
-    auto_context_clear_time: Duration,
+    auto_context_clear_time_ms: u64,
     #[cfg(feature = "std")]
     last_time: Option<Instant>,
 
@@ -132,8 +134,9 @@ impl TypingContext {
             curr_output: String::new(),
             curr_context_length: 0,
             next_trim_length: CONTEXT_TRIM_LENGTH,
+            curr_input_length: 0,
             #[cfg(feature = "std")]
-            auto_context_clear_time: Duration::from_millis(opts.auto_context_clear_time_ms),
+            auto_context_clear_time_ms: opts.auto_context_clear_time_ms,
             #[cfg(feature = "std")]
             last_time: None,
             from_script_data,
@@ -154,6 +157,7 @@ impl TypingContext {
         self.curr_output.clear();
         self.curr_context_length = 0;
         self.next_trim_length = CONTEXT_TRIM_LENGTH;
+        self.curr_input_length = 0;
     }
 
     /// Transliterates `input` (the context input or a part of it) in typing mode.
@@ -180,14 +184,17 @@ impl TypingContext {
     /// the tail.
     fn commit_context_start(&mut self) {
         let input = core::mem::take(&mut self.curr_input);
-        let mut split = input.len().saturating_sub(CONTEXT_KEEP_LENGTH);
-        let mut tries = 0;
-        while tries < CONTEXT_TRIM_TRIES && split > 0 {
-            if !input.is_char_boundary(split) {
-                split -= 1;
-                continue;
+        // start of the last `CONTEXT_KEEP_LENGTH` chars, each try moves one char back
+        let splits = input
+            .char_indices()
+            .rev()
+            .skip(CONTEXT_KEEP_LENGTH - 1)
+            .take(CONTEXT_TRIM_TRIES)
+            .map(|(i, _)| i);
+        for (tries, split) in splits.enumerate() {
+            if split == 0 {
+                break;
             }
-            tries += 1;
             let tail = self.transliterate_input(&input[split..]);
             if !tail.output.is_empty()
                 && tail.context_length == self.curr_context_length
@@ -198,15 +205,15 @@ impl TypingContext {
                     && self.curr_output.starts_with(head.output.as_str())
                 {
                     self.curr_input = String::from(&input[split..]);
+                    self.curr_input_length = CONTEXT_KEEP_LENGTH + tries;
                     self.curr_output = tail.output;
                     self.next_trim_length = CONTEXT_TRIM_LENGTH;
                     return;
                 }
             }
-            split -= 1;
         }
         // no split point found, try again after some more keys
-        self.next_trim_length = input.len() + CONTEXT_KEEP_LENGTH;
+        self.next_trim_length = self.curr_input_length + CONTEXT_KEEP_LENGTH;
         self.curr_input = input;
     }
 
@@ -247,12 +254,14 @@ impl TypingContext {
         let now = Instant::now();
         #[cfg(feature = "std")]
         if let Some(last) = self.last_time
-            && now.duration_since(last) > self.auto_context_clear_time
+            // whole milliseconds, like JS `Date.now()`, so that `0` behaves the same
+            && now.duration_since(last).as_millis() > u128::from(self.auto_context_clear_time_ms)
         {
             self.clear_context();
         }
 
         self.curr_input.push(ch);
+        self.curr_input_length += 1;
         let input = core::mem::take(&mut self.curr_input);
         let result = self.transliterate_input(&input);
         self.curr_input = input;
@@ -267,7 +276,7 @@ impl TypingContext {
             // keep the new output; the old allocation becomes next key's output buffer
             self.scratch.out = core::mem::replace(&mut self.curr_output, output);
             self.curr_context_length = context_length;
-            if self.curr_input.len() >= self.next_trim_length {
+            if self.curr_input_length >= self.next_trim_length {
                 self.commit_context_start();
             }
         } else {
@@ -971,6 +980,7 @@ mod tests {
     fn long_text_without_context_break() {
         let mut ctx = TypingContext::new(Script::Devanagari, None);
         let mut result = String::new();
+        let start = std::time::Instant::now();
         for ch in "ka".repeat(10_000).chars() {
             let diff = ctx.take_key_input_char(ch);
             for _ in 0..diff.to_delete_chars_count {
@@ -979,6 +989,12 @@ mod tests {
             result.push_str(&diff.diff_add_text);
         }
         assert_eq!(result, "क".repeat(10_000));
+        // took ~4 s (release) when each key re-transliterated the whole run, now ~0.05 s
+        let elapsed = start.elapsed();
+        assert!(
+            elapsed.as_secs_f64() < 2.0,
+            "typing 20000 keys took {elapsed:?}"
+        );
     }
 
     #[test]

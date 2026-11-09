@@ -7,8 +7,9 @@ use std::str::FromStr;
 
 #[napi(object)]
 pub struct TypingContextOptionsInput {
+    /// A JS number, see [`clear_time_ms_from_js`]
     #[napi(js_name = "auto_context_clear_time_ms")]
-    pub auto_context_clear_time_ms: Option<u32>,
+    pub auto_context_clear_time_ms: Option<f64>,
     #[napi(js_name = "use_native_numerals")]
     pub use_native_numerals: Option<bool>,
     #[napi(js_name = "include_inherent_vowel")]
@@ -34,6 +35,18 @@ pub struct NativeTypingContext {
     /// output is always a suffix of it, so its last `to_delete_chars_count` chars are the ones
     /// being deleted, which gives their length in UTF-16 code units.
     output: String,
+}
+
+/// Converts a JS auto clear time to the context's `u64` like the TS context compares it
+/// (`elapsed > time`): `NaN` and `Infinity` never clear, negative values clear after any pause
+/// (as `0`), fractions round down (the elapsed time is in whole milliseconds).
+fn clear_time_ms_from_js(ms: f64) -> u64 {
+    if ms.is_nan() {
+        u64::MAX
+    } else {
+        // `as` saturates: negative -> 0, too large / `Infinity` -> `u64::MAX`
+        ms as u64
+    }
 }
 
 /// Removes the last `count` chars of `text`, returning their length in UTF-16 code units.
@@ -78,7 +91,7 @@ impl NativeTypingContext {
         let typing_options = options.map(|opts| lipilekhika::typing::TypingContextOptions {
             auto_context_clear_time_ms: opts
                 .auto_context_clear_time_ms
-                .map(u64::from)
+                .map(clear_time_ms_from_js)
                 .unwrap_or(lipilekhika::typing::DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS),
             use_native_numerals: opts
                 .use_native_numerals

@@ -51,13 +51,20 @@ export const resolveAutoContextClearTimeMs = (options?: TypingContextOptions) =>
 /**
  * Typing keeps the input of the current context and transliterates all of it on every key. The
  * context is cleared at a space or punctuation, but a long run of letters would keep growing.
- * Once the context input is `CONTEXT_TRIM_LENGTH` long (UTF-16 code units), its start is
- * committed, keeping the last `CONTEXT_KEEP_LENGTH` (see `commitContextStart`).
+ * Once the context input is `CONTEXT_TRIM_LENGTH` keys (code points) long, its start is
+ * committed, keeping about the last `CONTEXT_KEEP_LENGTH` (see `commitContextStart`).
+ * Counted in code points, like the Rust and Go versions, so all of them commit at the same keys.
  */
 const CONTEXT_TRIM_LENGTH = 64;
 const CONTEXT_KEEP_LENGTH = 32;
 /** Number of split points tried for one commit */
 const CONTEXT_TRIM_TRIES = 4;
+
+/** UTF-16 index of the code point before index `i` of `text` */
+const prevCodePointIndex = (text: string, i: number) =>
+  i > 1 && isLowSurrogate(text.charCodeAt(i - 1)) && isHighSurrogate(text.charCodeAt(i - 2))
+    ? i - 2
+    : i - 1;
 
 export type TypingDiff = {
   /**
@@ -94,8 +101,10 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   let curr_input = '';
   let curr_output = '';
 
+  /** `curr_input` length in code points (keys) */
+  let curr_input_length = 0;
   let curr_context_length = 0;
-  /** `curr_input` length at which `commitContextStart` is tried next */
+  /** `curr_input_length` at which `commitContextStart` is tried next */
   let next_trim_length = CONTEXT_TRIM_LENGTH;
 
   const auto_context_clear_time_ms = resolveAutoContextClearTimeMs(options);
@@ -124,6 +133,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     last_time_ms = null;
     curr_input = '';
     curr_output = '';
+    curr_input_length = 0;
     curr_context_length = 0;
     next_trim_length = CONTEXT_TRIM_LENGTH;
   }
@@ -152,10 +162,14 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
    * The head's output is then final, the context continues with the tail.
    */
   function commitContextStart() {
-    let split = curr_input.length - CONTEXT_KEEP_LENGTH;
-    for (let tries = 0; tries < CONTEXT_TRIM_TRIES && split > 0; tries++, split--) {
-      // do not split a surrogate pair
-      if (isLowSurrogate(curr_input.charCodeAt(split))) continue;
+    // start of the last `CONTEXT_KEEP_LENGTH` code points, each try moves one code point back
+    let split = curr_input.length;
+    for (let i = 0; i < CONTEXT_KEEP_LENGTH; i++) split = prevCodePointIndex(curr_input, split);
+    for (
+      let tries = 0;
+      tries < CONTEXT_TRIM_TRIES && split > 0;
+      tries++, split = prevCodePointIndex(curr_input, split)
+    ) {
       const tail_input = curr_input.substring(split);
       const tail = transliterateInput(tail_input);
       if (
@@ -168,12 +182,13 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       if (head.output.length + tail.output.length !== curr_output.length) continue;
       if (!curr_output.startsWith(head.output)) continue;
       curr_input = tail_input;
+      curr_input_length = CONTEXT_KEEP_LENGTH + tries;
       curr_output = tail.output;
       next_trim_length = CONTEXT_TRIM_LENGTH;
       return;
     }
     // no split point found, try again after some more keys
-    next_trim_length = curr_input.length + CONTEXT_KEEP_LENGTH;
+    next_trim_length = curr_input_length + CONTEXT_KEEP_LENGTH;
   }
   // having `takeKeyInput` as async function resulted in some latency issues
   // so we have reorganized the code be synchronous
@@ -198,6 +213,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       clearContext();
     }
     curr_input += String.fromCodePoint(first_code_point);
+    curr_input_length++;
     const prev_output = curr_output;
     const { context_length, output } = transliterateInput(curr_input);
 
@@ -215,12 +231,12 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     if (context_length > 0) {
       curr_output = output;
       curr_context_length = context_length;
-      if (curr_input.length >= next_trim_length) commitContextStart();
+      if (curr_input_length >= next_trim_length) commitContextStart();
     } else {
       clearContext();
     }
 
-    last_time_ms = Date.now();
+    last_time_ms = curr_time_ms;
     return {
       /** These number of characters need to be deleted from the current "app" input state */
       to_delete_chars_count,

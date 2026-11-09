@@ -51,21 +51,22 @@ describe('Typing with characters outside the BMP (#155)', () => {
 
 describe('Typing context auto clear and empty key', () => {
   afterEach(() => {
-    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   type Step = string | { pause_ms: number } | { include_inherent_vowel: boolean };
   /** Types the steps with a fake clock, a pause moves the clock forward */
   const typeSteps = async (steps: Step[], options?: Parameters<typeof createTypingContext>[1]) => {
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(1_000_000);
+    // a fake clock (`vi.setSystemTime` is not available in the bun test runner)
+    let now_ms = 1_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now_ms);
     const ctx = createTypingContext('Devanagari', options);
     await ctx.ready;
     let result = '';
     const diffs: TypingDiff[] = [];
     for (const step of steps) {
       if (typeof step !== 'string') {
-        if ('pause_ms' in step) vi.setSystemTime(Date.now() + step.pause_ms);
+        if ('pause_ms' in step) now_ms += step.pause_ms;
         else ctx.updateIncludeInherentVowel(step.include_inherent_vowel);
         continue;
       }

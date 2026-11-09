@@ -124,7 +124,7 @@ jobs:
         run: |
           cd packages/js
           bun run build
-          bun test --only-failures
+          bun run test:run
 
   build-native:
     needs: test
