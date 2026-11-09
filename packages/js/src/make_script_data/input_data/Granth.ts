@@ -49,6 +49,13 @@ const Granth: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: '॰',
+      text_krama: ['saMkShepachihna'],
+      type: 'anya',
+      duplicates: ['𑙃']
+      // ^ the Modi abbreviation sign, written by older versions
+    },
+    {
       text: '𑍐',
       text_krama: ['AUM'],
       duplicates: ['ॐ'],

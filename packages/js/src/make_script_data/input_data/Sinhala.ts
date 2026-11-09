@@ -48,6 +48,13 @@ const Sinhala: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: 'ඁ',
+      text_krama: ['anunAnAsika'],
+      type: 'anya',
+      duplicates: ['ઁ']
+      // ^ the Gujarati candrabindu, written by older versions
+    },
+    {
       text: HALANT,
       text_krama: ['halant'],
       type: 'anya',
