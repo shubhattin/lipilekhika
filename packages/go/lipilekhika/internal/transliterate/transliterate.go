@@ -648,7 +648,7 @@ func TransliterateTextCoreWith(
 		if ch >= '0' && ch <= '9' && !opts.UseNativeNumerals {
 			cursor.advance(1)
 			digit, _ := cursor.peekAtStr(textIndex)
-			// cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0) (#151)
+			// cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
 			ctx.prevContextCleanup(digit, nil, nil, false)
 			result.emitRune(ch)
 			continue
@@ -763,14 +763,19 @@ func TransliterateTextCoreWith(
 						}
 
 						// Case: Vedic svara + superscript with no visible mAtrA, as the writer puts the
-						// svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒) (#152)
+						// svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
 						// Read the match with the superscript, the svara itself is read next.
-						if ignoreTaExtSupIndex == -1 && isVedicSvaraTail(nthCh, nthOk) &&
+						// (no superscript is being skipped, or the skipped one is inside this match)
+						if (ignoreTaExtSupIndex == -1 || ignoreTaExtSupIndex < endIndex) &&
+							isVedicSvaraTail(nthCh, nthOk) &&
 							isTaExtSuperscriptTail(n1Ch, n1Ok) && containsRune(nextChars, n1Ch) {
 							if charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false); charIndex >= 0 {
 								itemIndex = charIndex
+								// If a superscript was already skipped inside this match (the ² of க்² in
+								// க்²ரு॑²), it makes up for the one after the svara in the match length,
+								// so the whole match is advanced over.
+								taExtSuperscriptDetached = ignoreTaExtSupIndex == -1
 								ignoreTaExtSupIndex = endIndex + 1
-								taExtSuperscriptDetached = true
 								break
 							}
 						} else if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n1Ch, n1Ok) &&
@@ -866,7 +871,7 @@ func TransliterateTextCoreWith(
 					listItem = listItemAt(toData, int(*customItem.FirstRef))
 				}
 				// cleanup first, so a pending halant goes before the custom character
-				// (kqq -> क्q, k.qSha -> क्‍ष) (#151)
+				// (kqq -> क्q, k.qSha -> क्‍ष)
 				// custom characters are never svara/mAtrA, so cleanup never emits them itself
 				ctx.prevContextCleanup(matchedText, listItem, m.Next, false)
 				result.emit(customItem.Text)
@@ -911,7 +916,7 @@ func TransliterateTextCoreWith(
 						}
 						// The halant typed by its own key (`.h`) is passed as the halant itself, so
 						// that the cleanup does not add a second one after a vyanjana
-						// (k.h -> क्, not क््) (#151)
+						// (k.h -> क्, not क््)
 						itemText := matchedText
 						if len(krama) == 1 && kramaTextOrEmpty(toData, int(krama[0])) == ctx.brahmicHalant {
 							itemText = ctx.brahmicHalant
@@ -960,7 +965,7 @@ func TransliterateTextCoreWith(
 			} else if containsI16(krama, -1) {
 				// krama contains -1 entries: emit raw match
 				// (prefix-only entries like `c` of `ch` or `S` of `Sh`)
-				// cleanup first, so a pending halant goes before the text (kc -> क्c) (#151)
+				// cleanup first, so a pending halant goes before the text (kc -> क्c)
 				if opts.TypingMode {
 					ctx.prevContextCleanup(matchedText, nil, m.Next, false)
 				} else if prevContextInUse {
@@ -1002,10 +1007,10 @@ func TransliterateTextCoreWith(
 			} else if toBrahmic {
 				resultConcat = ctx.prevContextCleanup(charToSearch, kramaListItem(toData, index), nil, false)
 			} else if opts.TypingMode && fromName == "Normal" {
-				// Typing into an `other` script, a typing entry without krama (like `sh` of `shh`
-				// and `sh^`, `ch` of `chh` in Romanized) is resolved here. Keep the context with
-				// its `next` (as in Step 1), or else it is cleared and `shh` at the start of a
-				// word comes out as `śh` (#153)
+				// Typing into an `other` script: a key with no krama in the typing map (Romanized
+				// `sh` / `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next`
+				// as in Step 1, so the context is kept while more keys can follow (else `shh` at
+				// the start of a word comes out as `śh`), and cleared like in Step 1 when none can.
 				var next []string
 				if itemIndex >= 0 {
 					next = textToKramaMap[itemIndex].Value.Next

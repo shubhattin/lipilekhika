@@ -560,7 +560,7 @@ export const transliterate_text_core = (
       // '0' - '9'
       const char = cursor.slice(char_index, char_index + char_width);
       cursor.advance(char_width);
-      // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0) (#151)
+      // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
       prev_context_cleanup(ctx, char, null);
       result.emit(char);
       continue;
@@ -695,7 +695,9 @@ export const transliterate_text_core = (
             const n_2_th_next_character =
               n_2_th_next_cp !== -1 ? String.fromCodePoint(n_2_th_next_cp) : undefined;
             if (
-              ignore_ta_ext_sup_num_text_index === -1 &&
+              // no superscript is being skipped, or the skipped one is inside this match
+              (ignore_ta_ext_sup_num_text_index === -1 ||
+                ignore_ta_ext_sup_num_text_index < end_index) &&
               nth_next_character !== undefined &&
               isVedicSvaraTail(nth_next_character) &&
               n_1_th_next_character !== undefined &&
@@ -703,7 +705,7 @@ export const transliterate_text_core = (
               next.indexOf(n_1_th_next_character) !== -1
             ) {
               // Vedic svara + superscript with no visible mAtrA, as the writer puts the svara
-              // before the superscript: க॒² (ख॒), ரு॒² (ऋ॒) (#152)
+              // before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
               // Read the match with the superscript, the svara itself is read next.
               const char_index_ = textToKramaMapIndex(
                 from_script_data,
@@ -711,8 +713,11 @@ export const transliterate_text_core = (
               );
               if (char_index_ !== -1) {
                 text_to_krama_item_index = char_index_;
+                // If a superscript was already skipped inside this match (the ² of க்² in
+                // க்²ரு॑²), it makes up for the one after the svara in the match length,
+                // so the whole match is advanced over.
+                ta_ext_superscript_detached = ignore_ta_ext_sup_num_text_index === -1;
                 ignore_ta_ext_sup_num_text_index = end_index + nth_next_width;
-                ta_ext_superscript_detached = true;
                 break;
               }
             } else if (
@@ -852,7 +857,7 @@ export const transliterate_text_core = (
           to_script_data.custom_script_chars_arr[map.custom_back_ref] ?? null;
         if (custom_options_json !== null) {
           // cleanup first, so a pending halant goes before the custom character
-          // (kqq -> क्q, k.qSha -> क्‍ष) (#151)
+          // (kqq -> क्q, k.qSha -> क्‍ष)
           // custom characters are never svara/mAtrA, so cleanup never emits them itself
           prev_context_cleanup(
             ctx,
@@ -928,7 +933,7 @@ export const transliterate_text_core = (
                   : null;
             }
             // The halant typed by its own key (`.h`) is passed as the halant itself, so that
-            // the cleanup does not add a second one after a vyanjana (k.h -> क्, not क््) (#151)
+            // the cleanup does not add a second one after a vyanjana (k.h -> क्, not क््)
             const item_text =
               krama.length === 1 && kramaTextOrEmpty(to_script_data, krama[0]) === BRAHMIC_HALANT
                 ? BRAHMIC_HALANT
@@ -985,7 +990,7 @@ export const transliterate_text_core = (
       } else if (krama !== null && krama !== undefined && krama.indexOf(-1) !== -1) {
         // handle cases where any one of the krama poiting is -1
         // (prefix-only entries like `c` of `ch` or `S` of `Sh`, emitted as they are)
-        // cleanup first, so a pending halant goes before the text (kc -> क्c) (#151)
+        // cleanup first, so a pending halant goes before the text (kc -> क्c)
         if (typing_mode) {
           // custom context setup call where -1
           // Like for Sh('), ''(')\
@@ -1040,10 +1045,10 @@ export const transliterate_text_core = (
           to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]
         );
       } else if (typing_mode && from_script_name === 'Normal') {
-        // Typing into an `other` script, a typing entry without krama (like `sh` of `shh` and
-        // `sh^`, `ch` of `chh` in Romanized) is resolved here. Keep the context with its
-        // `next` (as in Step 1), or else it is cleared and `shh` at the start of a word
-        // comes out as `śh` (#153)
+        // Typing into an `other` script: a key with no krama in the typing map (Romanized `sh` /
+        // `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next` as in Step 1,
+        // so the context is kept while more keys can follow (else `shh` at the start of a word
+        // comes out as `śh`), and cleared like in Step 1 when none can.
         prev_context_cleanup(ctx, char_to_search, null, text_to_krama_item?.[1].next);
       }
     }

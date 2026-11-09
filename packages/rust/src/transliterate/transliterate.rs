@@ -22,6 +22,16 @@ fn char_eq_str(c: char, s: &str) -> bool {
 /// Emit the target-script text of each krama index directly (negative/missing entries
 /// produce nothing), without first collecting the pieces into a buffer.
 #[inline]
+/// `text` followed by `tail` (eg the Tamil-Extended superscript looked up with a match)
+fn with_tail(text: &str, tail: Option<char>) -> String {
+    let mut s = String::with_capacity(text.len() + 4);
+    s.push_str(text);
+    if let Some(c) = tail {
+        s.push(c);
+    }
+    s
+}
+
 fn emit_krama_pieces(result: &mut ResultStringBuilder, to_script_data: &ScriptData, krama: &[i16]) {
     for &k in krama {
         if k >= 0 {
@@ -895,7 +905,7 @@ pub fn transliterate_text_core_with(
             ctx.cursor.advance(1);
             const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
             let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
-            // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0) (#151)
+            // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
             let _ = ctx.prev_context_cleanup(Some((Some(digit_str), None)), None, None);
             ctx.result.emit_char(ch);
             continue;
@@ -1054,46 +1064,38 @@ pub fn transliterate_text_core_with(
                         let n_2_th_next_character: Option<char> = n_2_th_next;
 
                         // Case: Vedic svara + superscript with no visible mAtrA, as the writer
-                        // puts the svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒) (#152)
+                        // puts the svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
                         // Read the match with the superscript, the svara itself is read next.
-                        if ignore_ta_ext_sup_num_text_index == -1
+                        if (ignore_ta_ext_sup_num_text_index == -1
+                            // or the skipped superscript is inside this match
+                            || ignore_ta_ext_sup_num_text_index < end_index as isize)
                             && is_vedic_svara_tail(nth_next_character)
                             && is_ta_ext_superscript_tail(n_1_th_next_character)
                             && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
-                            && let Some(char_index) = {
-                                let mut sup_buf = [0u8; 4];
-                                let sup = n_1_th_next_character
-                                    .map(|c| c.encode_utf8(&mut sup_buf) as &str)
-                                    .unwrap_or_default();
-                                let mut search_str =
-                                    String::with_capacity(char_to_search.len() + sup.len());
-                                search_str.push_str(&char_to_search);
-                                search_str.push_str(sup);
-                                from_script_data.text_to_krama_map_index(&search_str, false)
-                            }
                         {
-                            text_to_krama_item_index = Some(char_index);
-                            ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
-                            ta_ext_superscript_detached = true;
-                            break;
+                            if let Some(char_index) = from_script_data.text_to_krama_map_index(
+                                &with_tail(&char_to_search, n_1_th_next_character),
+                                false,
+                            ) {
+                                text_to_krama_item_index = Some(char_index);
+                                // If a superscript was already skipped inside this match (the ² of
+                                // க்² in க்²ரு॑²), it makes up for the one after the svara in the
+                                // match length, so the whole match is advanced over.
+                                ta_ext_superscript_detached =
+                                    ignore_ta_ext_sup_num_text_index == -1;
+                                ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
+                                break;
+                            }
                         }
                         // Case: matra/halant + superscript tail (superscript is in next list)
                         else if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_1_th_next_character)
                             && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
-                            let mut sup_buf = [0u8; 4];
-                            let sup = n_1_th_next_character
-                                .map(|c| c.encode_utf8(&mut sup_buf) as &str)
-                                .unwrap_or_default();
-                            let search_str = {
-                                let mut s = String::with_capacity(char_to_search.len() + sup.len());
-                                s.push_str(&char_to_search);
-                                s.push_str(sup);
-                                s
-                            };
-                            let char_index =
-                                from_script_data.text_to_krama_map_index(&search_str, false);
+                            let char_index = from_script_data.text_to_krama_map_index(
+                                &with_tail(&char_to_search, n_1_th_next_character),
+                                false,
+                            );
                             let mut nth_buf = [0u8; 4];
                             let nth_char_text_index = nth_next_character.and_then(|c| {
                                 from_script_data.krama_index_of_text(c.encode_utf8(&mut nth_buf))
@@ -1126,18 +1128,10 @@ pub fn transliterate_text_core_with(
                             && is_ta_ext_superscript_tail(n_2_th_next_character)
                             && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
-                            let mut sup_buf = [0u8; 4];
-                            let sup = n_2_th_next_character
-                                .map(|c| c.encode_utf8(&mut sup_buf) as &str)
-                                .unwrap_or_default();
-                            let search_str = {
-                                let mut s = String::with_capacity(char_to_search.len() + sup.len());
-                                s.push_str(&char_to_search);
-                                s.push_str(sup);
-                                s
-                            };
-                            let char_index =
-                                from_script_data.text_to_krama_map_index(&search_str, false);
+                            let char_index = from_script_data.text_to_krama_map_index(
+                                &with_tail(&char_to_search, n_2_th_next_character),
+                                false,
+                            );
                             let mut nth_buf = [0u8; 4];
                             let nth_char_text_index = nth_next_character.and_then(|c| {
                                 from_script_data.krama_index_of_text(c.encode_utf8(&mut nth_buf))
@@ -1203,19 +1197,10 @@ pub fn transliterate_text_core_with(
 
                                 // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
                                 if nth_char_type.is_some_and(|k| k.is_matra()) {
-                                    let mut sup_buf2 = [0u8; 4];
-                                    let sup = n_2_th_next_character
-                                        .map(|c| c.encode_utf8(&mut sup_buf2) as &str)
-                                        .unwrap_or_default();
-                                    let search_str2 = {
-                                        let mut s =
-                                            String::with_capacity(char_to_search.len() + sup.len());
-                                        s.push_str(&char_to_search);
-                                        s.push_str(sup);
-                                        s
-                                    };
-                                    let char_index = from_script_data
-                                        .text_to_krama_map_index(&search_str2, false);
+                                    let char_index = from_script_data.text_to_krama_map_index(
+                                        &with_tail(&char_to_search, n_2_th_next_character),
+                                        false,
+                                    );
                                     if let Some(char_index) = char_index {
                                         text_to_krama_item_index = Some(char_index);
                                         ignore_ta_ext_sup_num_text_index = (end_index
@@ -1257,7 +1242,7 @@ pub fn transliterate_text_core_with(
             };
             // only relevant while skipping a Tamil-Extended superscript; evaluated lazily
             let index_delete_length = if ta_ext_superscript_detached
-                || ignore_ta_ext_sup_num_text_index != -1
+                || (ignore_ta_ext_sup_num_text_index != -1
                     && matched_char_count > 1
                     && map
                         .krama
@@ -1267,7 +1252,7 @@ pub fn transliterate_text_core_with(
                         .and_then(|(_, li)| li.as_ref())
                         .and_then(|li| from_script_data.list.get(*li as usize))
                         .is_some_and(|l| l.is_vyanjana())
-                    && is_ta_ext_superscript_tail(matched_text.chars().last())
+                    && is_ta_ext_superscript_tail(matched_text.chars().last()))
             {
                 1
             } else {
@@ -1287,7 +1272,7 @@ pub fn transliterate_text_core_with(
                     .1
                     .and_then(|li| to_script_data.list.get(li as usize));
                 // cleanup first, so a pending halant goes before the custom character
-                // (kqq -> क्q, k.qSha -> क्‍ष) (#151)
+                // (kqq -> क्q, k.qSha -> क्‍ष)
                 // custom characters are never svara/mAtrA, so cleanup never emits them itself
                 ctx.prev_context_cleanup(
                     Some((Some(matched_text.as_str()), list_item)),
@@ -1389,7 +1374,7 @@ pub fn transliterate_text_core_with(
                             };
                             // The halant typed by its own key (`.h`) is passed as the halant
                             // itself, so that the cleanup does not add a second one after a
-                            // vyanjana (k.h -> क्, not क््) (#151)
+                            // vyanjana (k.h -> क्, not क््)
                             let item_text = match ctx.brahmic_halant {
                                 Some(halant)
                                     if krama.len() == 1
@@ -1493,7 +1478,7 @@ pub fn transliterate_text_core_with(
                 } else
                 // krama contains -1 entries: emit raw match
                 // (prefix-only entries like `c` of `ch` or `S` of `Sh`)
-                // cleanup first, so a pending halant goes before the text (kc -> क्c) (#151)
+                // cleanup first, so a pending halant goes before the text (kc -> क्c)
                 if krama.contains(&-1) {
                     if opts.typing_mode {
                         ctx.prev_context_cleanup(
@@ -1561,10 +1546,10 @@ pub fn transliterate_text_core_with(
                 result_concat_status =
                     ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
             } else if opts.typing_mode && *from_script == ScriptListEnum::Normal {
-                // Typing into an `other` script, a typing entry without krama (like `sh` of
-                // `shh` and `sh^`, `ch` of `chh` in Romanized) is resolved here. Keep the
-                // context with its `next` (as in Step 1), or else it is cleared and `shh` at
-                // the start of a word comes out as `śh` (#153)
+                // Typing into an `other` script: a key with no krama in the typing map (Romanized
+                // `sh` / `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next`
+                // as in Step 1, so the context is kept while more keys can follow (else `shh` at
+                // the start of a word comes out as `śh`), and cleared like in Step 1 when none can.
                 ctx.prev_context_cleanup(
                     Some((Some(char_to_search), None)),
                     text_to_krama_item.and_then(|(_, m)| m.next.as_deref()),
