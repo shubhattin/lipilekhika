@@ -743,84 +743,83 @@ func TransliterateTextCoreWith(
 				if len(nextChars) > 0 {
 					nthCh, nthOk := cursor.peekAt(endIndex)
 
-					// Tamil-Extended special handling (superscript numbers after matra/halant)
+					// Tamil-Extended special handling (superscript numbers after matra/halant/svara)
 					if ctx.isFromTamilExt && fromBrahmic {
 						if singleCharLookup {
 							charToSearch = cursor.slice(textIndex, endIndex)
 						}
-						var n1Ch, n2Ch rune
-						var n1Ok, n2Ok bool
-						if nthOk {
-							n1Ch, n1Ok = cursor.peekAt(endIndex + 1)
+						isHalant := func(c rune) bool { return runeIsStr(c, fromData.Halant) }
+						isMatra := func(c rune) bool {
+							i := kramaIndexOfChar(fromData, c)
+							return i >= 0 && kramaListItem(fromData, i).Kind() == scriptdata.ListKindMatra
 						}
-						// this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
-						if nthOk && n1Ok {
-							n2Ch, n2Ok = cursor.peekAt(endIndex + 2)
+						// The superscript of the match can be after a halant or a mAtrA and Vedic svaras,
+						// as the writer puts them before it:  [halant | mAtrA | mAtrA mAtrA]? svara* superscript
+						// eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒), ரு॒॑² (ऋ॒॑)
+						// In the match the superscript takes the place of these, which are read next.
+						supIndex := endIndex
+						hasSign := nthOk && (isHalant(nthCh) || isMatra(nthCh))
+						if hasSign {
+							supIndex++
+							// mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+							if c, ok := cursor.peekAt(supIndex); ok && isMatra(nthCh) && isMatra(c) {
+								supIndex++
+							}
 						}
-						nthKramaIndex := -1
-						if nthOk {
-							nthKramaIndex = kramaIndexOfChar(fromData, nthCh)
-						}
-
-						// Case: Vedic svara + superscript with no visible mAtrA, as the writer puts the
-						// svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
-						// Read the match with the superscript, the svara itself is read next.
-						// (no superscript is being skipped, or the skipped one is inside this match)
-						if (ignoreTaExtSupIndex == -1 || ignoreTaExtSupIndex < endIndex) &&
-							isVedicSvaraTail(nthCh, nthOk) &&
-							isTaExtSuperscriptTail(n1Ch, n1Ok) && containsRune(nextChars, n1Ch) {
-							if charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false); charIndex >= 0 {
-								itemIndex = charIndex
-								// If a superscript was already skipped inside this match (the ² of க்² in
-								// க்²ரு॑²), it makes up for the one after the svara in the match length,
-								// so the whole match is advanced over.
-								taExtSuperscriptDetached = ignoreTaExtSupIndex == -1
-								ignoreTaExtSupIndex = endIndex + 1
+						svarasStart := supIndex
+						for {
+							c, ok := cursor.peekAt(supIndex)
+							if !isVedicSvaraTail(c, ok) {
 								break
 							}
-						} else if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n1Ch, n1Ok) &&
-							containsRune(nextChars, n1Ch) {
-							// Case: matra/halant + superscript tail (superscript is in next list)
-							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false)
-							if charIndex >= 0 && nthKramaIndex >= 0 {
+							supIndex++
+						}
+						supCh, supOk := cursor.peekAt(supIndex)
+						if (hasSign || supIndex > svarasStart) &&
+							isTaExtSuperscriptTail(supCh, supOk) && containsRune(nextChars, supCh) &&
+							// no superscript is being skipped, or (with only svaras in between) the
+							// skipped one is inside this match: the ² of க்² in க்²ரு॑² (खृ॑)
+							(ignoreTaExtSupIndex == -1 || (!hasSign && ignoreTaExtSupIndex < endIndex)) {
+							if charIndex := fromData.TextToKramaMapIndex(charToSearch+string(supCh), false); charIndex >= 0 {
 								itemIndex = charIndex
-								nthKind := kramaListItem(fromData, nthKramaIndex).Kind()
-								if runeIsStr(nthCh, fromData.Halant) || nthKind == scriptdata.ListKindMatra {
-									ignoreTaExtSupIndex = endIndex + 1
-									break
+								// With only svaras in between, a superscript already skipped inside this
+								// match (the ² of க்² in க்²ரு॑²) makes up for the one after the svaras in
+								// the match length, so the whole match is advanced over.
+								if !hasSign {
+									taExtSuperscriptDetached = ignoreTaExtSupIndex == -1
 								}
-							}
-						} else if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n2Ch, n2Ok) &&
-							containsRune(nextChars, n2Ch) {
-							// Case: matra + matra + superscript tail (special for gO = g + E + A)
-							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n2Ch), false)
-							n1KramaIndex := -1
-							if n1Ok {
-								n1KramaIndex = kramaIndexOfChar(fromData, n1Ch)
-							}
-							if charIndex >= 0 && nthKramaIndex >= 0 && n1KramaIndex >= 0 {
-								itemIndex = charIndex
-								if kramaListItem(fromData, nthKramaIndex).Kind() == scriptdata.ListKindMatra &&
-									kramaListItem(fromData, n1KramaIndex).Kind() == scriptdata.ListKindMatra {
-									ignoreTaExtSupIndex = endIndex + 2
-									break
-								}
+								ignoreTaExtSupIndex = supIndex
+								break
 							}
 						}
-
-						// Handle case: mAtrA + Vedic mark + superscript (n2 is superscript, n1 is Vedic)
-						if ignoreTaExtSupIndex == -1 && nthOk &&
-							isVedicSvaraTail(n1Ch, n1Ok) &&
-							isTaExtSuperscriptTail(n2Ch, n2Ok) &&
-							containsRune(nextChars, n2Ch) &&
-							nthKramaIndex >= 0 &&
-							// If nth_next is a mAtrA and n1 is Vedic mark, include superscript
-							kramaListItem(fromData, nthKramaIndex).Kind() == scriptdata.ListKindMatra {
-							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n2Ch), false)
-							if charIndex >= 0 {
-								itemIndex = charIndex
-								ignoreTaExtSupIndex = endIndex + 2
-								break
+						// The match ends with halant + a letter that cannot be continued (ல்ர is the
+						// start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a
+						// superscript (்ரு² ்ரூ²): stop the match before the halant, so ல்ரு² is read
+						// as ல + ்ரு² (लृ), not ल्रु²
+						if nthOk && !containsRune(nextChars, nthCh) && endIndex >= 2 {
+							last, lastSize := utf8.DecodeLastRuneInString(charToSearch)
+							beforeLast, beforeLastSize := utf8.DecodeLastRuneInString(charToSearch[:len(charToSearch)-lastSize])
+							headLen := len(charToSearch) - lastSize - beforeLastSize
+							c0, ok0 := cursor.peekAt(endIndex - 2)
+							c1, ok1 := cursor.peekAt(endIndex - 1)
+							if headLen > 0 && isHalant(beforeLast) && ok0 && ok1 && c0 == beforeLast && c1 == last {
+								tailSupIndex := endIndex + 1
+								for {
+									c, ok := cursor.peekAt(tailSupIndex)
+									if !isVedicSvaraTail(c, ok) {
+										break
+									}
+									tailSupIndex++
+								}
+								if tailSup, ok := cursor.peekAt(tailSupIndex); ok && isTaExtSuperscriptTail(tailSup, ok) {
+									tail := string([]rune{beforeLast, last, nthCh, tailSup})
+									if fromData.TextToKramaMapIndex(tail, false) >= 0 {
+										if headIndex := fromData.TextToKramaMapIndex(charToSearch[:headLen], false); headIndex >= 0 {
+											itemIndex = headIndex
+											break
+										}
+									}
+								}
 							}
 						}
 					}
