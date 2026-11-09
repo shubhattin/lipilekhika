@@ -143,6 +143,7 @@ const sanskrit_other_brahmic_scripts = async () => {
     for (const _input of COMBINED_INPUTS) {
       let input = _input;
       if (
+        other_script === "Brahmi" ||
         other_script === "Modi" ||
         other_script === "Sharada" ||
         other_script === "Siddham"

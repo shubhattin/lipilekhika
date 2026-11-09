@@ -302,6 +302,8 @@ const Kannada: InputBrahmicScriptType = {
     {
       text: 'ನ',
       text_krama: ['n'],
+      halant_duplicates: ['ೝ'],
+      // ^ nakaara pollu
       type: 'vyanjana'
     },
     {

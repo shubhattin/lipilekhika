@@ -219,3 +219,134 @@
   input: എൻ്റെ കൻ്
   output: enrze kan
   reversible: false
+# Native characters that were wrong or not read
+# Sinhala candrabindu is U+0D81 (was the Gujarati U+0A81)
+- index: 17
+  from: Devanagari
+  to: Sinhala
+  input: कँ हँस
+  output: කඁ හඁස
+# Abbreviation sign: Granth has none of its own (uses ॰), Modi has 𑙃 (they were swapped)
+- index: 17.1
+  from: Devanagari
+  to: Granth
+  input: लघु॰
+  output: 𑌲𑌘𑍁॰
+- index: 17.2
+  from: Modi
+  to: Devanagari
+  input: 𑘩𑘑𑘳𑙃
+  output: लघु॰
+# Bengali/Assamese khanda ta ৎ is a dead ta (ত্)
+- index: 17.3
+  from: Bengali
+  to: Devanagari
+  input: উৎসব ভবিষ্যৎ
+  output: उत्सब भबिष्यत्
+  reversible: false
+- index: 17.4
+  from: Assamese
+  to: Devanagari
+  input: উৎসৱ
+  output: उत्सव
+  reversible: false
+# Bengali ZWJ + hasanta is ra + ya-phala (র‍্য), not a reph, the ZWJ is only for display
+- index: 17.5
+  from: Bengali
+  to: Devanagari
+  input: র‍্যাব র‍্যাম্প
+  output: र्याब र्याम्प
+  reversible: false
+# Malayalam dot reph ൎ is ര്, old style chillu is consonant + virama + ZWJ,
+# ൔ ൕ ൖ are the chillu forms of മ യ ഴ
+- index: 17.6
+  from: Malayalam
+  to: Devanagari
+  input: ധൎമ്മം അവന്‍ അവള്‍ കൔ കൕ കൖ
+  output: धर्म्मं अवन् अवळ् कम् कय् कऴ्
+  reversible: false
+# Sinhala ඦ is the prenasalized ñja (ञ्ज)
+- index: 17.7
+  from: Sinhala
+  to: Devanagari
+  input: කඦ ඦ
+  output: कञ्ज ञ्ज
+  reversible: false
+# Gurmukhi precomposed ਲ਼ (U+0A33)
+- index: 17.8
+  from: Gurumukhi
+  to: Devanagari
+  input: ਕਾਲ਼ਾ
+  output: काळा
+  reversible: false
+# Brahmi's own dandas 𑁇 𑁈
+- index: 17.9
+  from: Brahmi
+  to: Devanagari
+  input: 𑀭𑀸𑀫𑁇 𑀭𑀸𑀫𑁈
+  output: राम। राम॥
+  reversible: false
+# Devanagari candra a ॲ (Marathi) is the same vowel as ऍ
+- index: 18
+  from: Devanagari
+  to: Gujarati
+  input: ॲप
+  output: ઍપ
+  reversible: false
+# Telugu and Kannada nakaara pollu is a dead na (న్, ನ್)
+- index: 18.1
+  from: Telugu
+  to: Devanagari
+  input: కౝ
+  output: कन्
+  reversible: false
+- index: 18.2
+  from: Kannada
+  to: Devanagari
+  input: ಕೝ
+  output: कन्
+  reversible: false
+# Text written by earlier versions with the wrong characters is still read:
+# Sinhala candrabindu as the Gujarati ઁ, Granth 𑙃 and Modi ॰ abbreviation signs
+- index: 18.3
+  from: Sinhala
+  to: Devanagari
+  input: කઁ
+  output: कँ
+  reversible: false
+- index: 18.4
+  from: Granth
+  to: Devanagari
+  input: 𑌲𑌘𑍁𑙃
+  output: लघु॰
+  reversible: false
+- index: 18.5
+  from: Modi
+  to: Devanagari
+  input: 𑘩𑘑𑘳॰
+  output: लघु॰
+  reversible: false
+# Purna-Devanagari also reads candra a ॲ
+- index: 18.6
+  from: Purna-Devanagari
+  to: Gujarati
+  input: ॲप
+  output: ઍપ
+  reversible: false
+# Brahmi writes its own dandas 𑁇 𑁈 (like Sharada, Siddham, Modi), the Devanagari ones are still read
+- index: 18.7
+  from: Devanagari
+  to: Brahmi
+  input: राम। राम॥
+  output: 𑀭𑀸𑀫𑁇 𑀭𑀸𑀫𑁈
+- index: 18.8
+  from: Brahmi
+  to: Devanagari
+  input: 𑀭𑀸𑀫। 𑀭𑀸𑀫॥
+  output: राम। राम॥
+  reversible: false
+- index: 18.9
+  from: Normal
+  to: Brahmi
+  input: rAma . rAma ..
+  output: 𑀭𑀸𑀫 𑁇 𑀭𑀸𑀫 𑁈

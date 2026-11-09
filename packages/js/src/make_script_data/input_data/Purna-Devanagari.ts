@@ -150,6 +150,8 @@ const Purna_Devanagari: InputBrahmicScriptType = {
     },
     {
       text: 'ऍ',
+      duplicates: ['ॲ'],
+      // ^ ॲ candra a (Marathi), the same vowel
       mAtrA: 'ॅ',
       text_krama: ['aiI-svara'],
       mAtrA_text_krama: ['aiI-mAtrA'],

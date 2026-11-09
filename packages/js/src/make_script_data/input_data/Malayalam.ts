@@ -92,6 +92,13 @@ const Malayalam: InputBrahmicScriptType = {
   ],
   list: [
     {
+      text: '്',
+      text_krama: ['halant'],
+      type: 'anya',
+      duplicates: ['്‍']
+      // ^ virama + ZWJ: the old (pre Unicode 5.1) encoding of the chillu letters (ന്‍ = ൻ)
+    },
+    {
       text: 'ഓം',
       text_krama: ['AUM'],
       duplicates: ['ॐ'],
@@ -345,17 +352,20 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'മ',
       text_krama: ['m'],
+      halant_duplicates: ['ൔ'],
       type: 'vyanjana'
     },
     {
       text: 'യ',
       text_krama: ['y', 'yz'],
+      halant_duplicates: ['ൕ'],
       type: 'vyanjana'
     },
     {
       text: 'ര',
       text_krama: ['r'],
-      halant_duplicates: ['ർ'],
+      halant_duplicates: ['ർ', 'ൎ'],
+      // ^ ൎ dot reph
       type: 'vyanjana'
     },
     {
@@ -378,6 +388,7 @@ const Malayalam: InputBrahmicScriptType = {
     {
       text: 'ഴ',
       text_krama: ['Lz'],
+      halant_duplicates: ['ൖ'],
       type: 'vyanjana'
     },
     {

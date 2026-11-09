@@ -36,7 +36,7 @@ const Granth: InputBrahmicScriptType = {
     anusvAra: '𑌀',
     anunAnAsika: '𑌁',
     visarga: '𑌃',
-    saMkShepachihna: '𑙃',
+    saMkShepachihna: '॰',
     avagraha: '𑌽',
     halant: '𑍍',
     nuqta: '𑌼',
@@ -48,6 +48,13 @@ const Granth: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: '॰',
+      text_krama: ['saMkShepachihna'],
+      type: 'anya',
+      duplicates: ['𑙃']
+      // ^ the Modi abbreviation sign, written by older versions
+    },
     {
       text: '𑍐',
       text_krama: ['AUM'],

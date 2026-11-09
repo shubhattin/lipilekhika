@@ -114,3 +114,17 @@
   to: Romanized
   input: ක‍්ෂ
   output: kṣa
+# Native characters that were not read: Bengali khanda ta ৎ, Bengali ZWJ + hasanta (র‍্য),
+# Malayalam old style chillu (virama + ZWJ) and dot reph ൎ
+- index: 16
+  from: Bengali
+  to: Normal
+  input: উৎসব র‍্যাব
+  output: utsaba ryAba
+  reversible: false
+- index: 16.1
+  from: Malayalam
+  to: Normal
+  input: അവന്‍ ധൎമ്മം
+  output: avan dharmmaM
+  reversible: false

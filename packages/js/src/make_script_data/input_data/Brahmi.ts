@@ -42,10 +42,23 @@ const Brahmi: InputBrahmicScriptType = {
     'udAtta-1': '↑',
     'udAtta-2': '↑↑',
     'udAtta-3': '↑↑↑',
-    virama: '।',
-    double_virama: '॥'
+    virama: '𑁇',
+    double_virama: '𑁈'
   },
   list: [
+    {
+      text: '𑁇',
+      text_krama: ['virama'],
+      type: 'anya',
+      duplicates: ['।']
+    },
+    {
+      text: '𑁈',
+      text_krama: ['double_virama'],
+      type: 'anya',
+      duplicates: ['॥']
+      // ^ the Devanagari dandas are also read
+    },
     // Svara
     {
       text: '𑀅',
