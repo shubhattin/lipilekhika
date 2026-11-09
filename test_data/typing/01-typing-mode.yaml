@@ -137,3 +137,8 @@
   script: Devanagari
   options:
     includeInherentVowel: true
+# Tamil-Extended: superscript stays on the consonant before an independent vowel (#149)
+- index: 24
+  text: khae ghaA ghaai jhaA
+  output: க²எ க⁴ஆ கா⁴இ ஜ²ஆ
+  script: Tamil-Extended
