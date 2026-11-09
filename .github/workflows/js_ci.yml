@@ -119,7 +119,8 @@ jobs:
           ./gen_node_bind.sh
       - name: Test and Coverage
         working-directory: packages/js
-        run: bun test --coverage --concurrent --only-failures
+        # vitest, the bun test runner lacks vi.setSystemTime (fake clock in the typing tests)
+        run: bun run coverage
       - name: Lint
         working-directory: packages/js
         run: bun lint

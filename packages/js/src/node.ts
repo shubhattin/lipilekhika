@@ -3,6 +3,7 @@ import { loadNativeBinding, type NativeModule } from './native_binding';
 import type { CustomOptionType } from './transliteration/transliterate';
 import type { TransliterateInput, TransliterateOutput } from './types';
 import {
+  resolveAutoContextClearTimeMs,
   DEFAULT_INCLUDE_INHERENT_VOWEL,
   DEFAULT_USE_NATIVE_NUMERALS,
   type TypingContextOptions,
@@ -48,7 +49,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   const ready: Promise<void> = (async () => {
     const nativeMod = await loadNativeModule();
     native_ctx = new nativeMod.NativeTypingContext(normalized_typing_lang, {
-      auto_context_clear_time_ms: options?.autoContextTClearTimeMs,
+      auto_context_clear_time_ms: resolveAutoContextClearTimeMs(options),
       use_native_numerals,
       include_inherent_vowel
     });
@@ -60,9 +61,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
 
   const getNativeContext = () => {
     if (!native_ctx) {
-      throw new Error(
-        'Typing context not ready. Await `ctx.ready` before calling takeKeyInputSync.'
-      );
+      throw new Error('Typing context not ready. Await `ctx.ready` before calling takeKeyInput.');
     }
     return native_ctx;
   };

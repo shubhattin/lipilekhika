@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTypingContext, type TypingDiff } from './typing';
 
 /** A high surrogate not followed by a low one, or a low surrogate not preceded by a high one */
@@ -47,4 +47,92 @@ describe('Typing with characters outside the BMP (#155)', () => {
     expect(diffs[1]).toMatchObject({ to_delete_chars_count: 2, diff_add_text: '𑀺' });
     expect(result).toBe('𑀓𑀺');
   });
+});
+
+describe('Typing context auto clear and empty key', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  type Step = string | { pause_ms: number } | { include_inherent_vowel: boolean };
+  /** Types the steps with a fake clock, a pause moves the clock forward */
+  const typeSteps = async (steps: Step[], options?: Parameters<typeof createTypingContext>[1]) => {
+    // a fake clock (`vi.setSystemTime` is not available in the bun test runner)
+    let now_ms = 1_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => now_ms);
+    const ctx = createTypingContext('Devanagari', options);
+    await ctx.ready;
+    let result = '';
+    const diffs: TypingDiff[] = [];
+    for (const step of steps) {
+      if (typeof step !== 'string') {
+        if ('pause_ms' in step) now_ms += step.pause_ms;
+        else ctx.updateIncludeInherentVowel(step.include_inherent_vowel);
+        continue;
+      }
+      const diff = ctx.takeKeyInput(step);
+      diffs.push(diff);
+      if (diff.to_delete_chars_count > 0) result = result.slice(0, -diff.to_delete_chars_count);
+      result += diff.diff_add_text;
+    }
+    return { result, diffs };
+  };
+
+  it('clears the context after a pause longer than autoContextClearTimeMs', async () => {
+    const options = { autoContextClearTimeMs: 1000 };
+    expect((await typeSteps(['k', { pause_ms: 1500 }, 'a'], options)).result).toBe('क्अ');
+    expect((await typeSteps(['k', { pause_ms: 500 }, 'a'], options)).result).toBe('क');
+  });
+
+  it('still accepts the deprecated autoContextTClearTimeMs', async () => {
+    const options = { autoContextTClearTimeMs: 1000 };
+    expect((await typeSteps(['k', { pause_ms: 1500 }, 'a'], options)).result).toBe('क्अ');
+  });
+
+  it('autoContextClearTimeMs 0 clears the context after any pause', async () => {
+    const options = { autoContextClearTimeMs: 0 };
+    expect((await typeSteps(['k', { pause_ms: 1 }, 'a'], options)).result).toBe('क्अ');
+  });
+
+  it('an empty key does not change the context', async () => {
+    // the option change applies to the next key, the empty key does not re-render
+    const { diffs, result } = await typeSteps(['k', { include_inherent_vowel: true }, '']);
+    expect(diffs[1]).toEqual({ to_delete_chars_count: 0, diff_add_text: '', context_length: 1 });
+    expect(result).toBe('क्');
+  });
+
+  it('an empty key does not restart the idle timer', async () => {
+    const options = { autoContextClearTimeMs: 1000 };
+    const steps = ['k', { pause_ms: 800 }, '', { pause_ms: 800 }, 'a'];
+    expect((await typeSteps(steps, options)).result).toBe('क्अ');
+  });
+});
+
+describe('Typing a long text without a context break', () => {
+  // the context is only cleared at a space or punctuation, so a long run of letters kept
+  // the whole run as context and each key re-transliterated all of it (quadratic time)
+  const typeRun = (ctx: ReturnType<typeof createTypingContext>, syllables: number) => {
+    ctx.clearContext();
+    let result = '';
+    const start = performance.now();
+    for (const key of 'ka'.repeat(syllables)) {
+      const diff = ctx.takeKeyInput(key);
+      if (diff.to_delete_chars_count > 0) result = result.slice(0, -diff.to_delete_chars_count);
+      result += diff.diff_add_text;
+    }
+    return { result, ms: performance.now() - start };
+  };
+
+  it('takes linear time', async () => {
+    const ctx = createTypingContext('Devanagari');
+    await ctx.ready;
+    typeRun(ctx, 500); // warm up
+    // compared with a 5x shorter run, so that it does not depend on the machine speed
+    // (or coverage): linear ~5x, it was ~25x
+    const short = typeRun(ctx, 1_000);
+    const long = typeRun(ctx, 5_000);
+    expect(long.result).toBe('क'.repeat(5_000));
+    expect(long.ms / short.ms).toBeLessThan(12);
+    // CI with coverage is many times slower than a local run
+  }, 60_000);
 });

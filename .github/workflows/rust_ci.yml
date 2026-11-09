@@ -103,3 +103,5 @@ jobs:
         run: |
           cd packages/rust
           cargo test --release
+          # the idle auto clear of the typing context only exists with `std`
+          cargo test --release --features std typing::

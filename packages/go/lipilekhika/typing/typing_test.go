@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/typing"
@@ -310,4 +311,86 @@ func TestAutoEmulateTyping(t *testing.T) {
 		"Emulate Typing (auto transliteration): total_emulations=%d, auto_vedic_skipped=%d, passed=%d, failed=%d",
 		total, skipped, passed, failed,
 	))
+}
+
+// typeKeys types the keys, a "pause:<ms>" key sleeps instead
+func typeKeys(t *testing.T, ctx *typing.TypingContext, keys []string) (string, []typing.TypingDiff) {
+	t.Helper()
+	result := []rune{}
+	diffs := []typing.TypingDiff{}
+	for _, key := range keys {
+		if ms, ok := strings.CutPrefix(key, "pause:"); ok {
+			var d int
+			fmt.Sscanf(ms, "%d", &d)
+			time.Sleep(time.Duration(d) * time.Millisecond)
+			continue
+		}
+		diff, err := ctx.TakeKeyInput(key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		diffs = append(diffs, diff)
+		result = result[:len(result)-diff.ToDeleteCharsCount]
+		result = append(result, []rune(diff.DiffAddText)...)
+	}
+	return string(result), diffs
+}
+
+func TestAutoContextClearTime(t *testing.T) {
+	cases := []struct {
+		name    string
+		clearMs int
+		keys    []string
+		want    string
+	}{
+		{"pause longer than the clear time", 30, []string{"k", "pause:100", "a"}, "क्अ"},
+		{"pause shorter than the clear time", 1000, []string{"k", "pause:5", "a"}, "क"},
+		// like TS and Rust, 0 clears the context after any pause (it was replaced by the default)
+		{"zero clears after any pause", 0, []string{"k", "pause:5", "a"}, "क्अ"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx, err := typing.NewTypingContext("Devanagari", &typing.TypingContextOptions{AutoContextClearTimeMs: ptrInt(c.clearMs)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got, _ := typeKeys(t, ctx, c.keys); got != c.want {
+				t.Errorf("got %q, want %q", got, c.want)
+			}
+		})
+	}
+}
+
+func TestEmptyKeyDoesNotChangeContext(t *testing.T) {
+	ctx, err := typing.NewTypingContext("Devanagari", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	typeKeys(t, ctx, []string{"k"})
+	ctx.UpdateIncludeInherentVowel(true)
+	// the option change applies to the next key, the empty key does not re-render
+	got, diffs := typeKeys(t, ctx, []string{""})
+	want := typing.TypingDiff{ToDeleteCharsCount: 0, DiffAddText: "", ContextLength: 1}
+	if diffs[0] != want {
+		t.Errorf("empty key diff = %+v, want %+v", diffs[0], want)
+	}
+	if got != "" {
+		t.Errorf("empty key added %q", got)
+	}
+}
+
+func TestLongTextWithoutContextBreak(t *testing.T) {
+	ctx, err := typing.NewTypingContext("Devanagari", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys := strings.Split(strings.Repeat("ka", 10_000), "")
+	start := time.Now()
+	got, _ := typeKeys(t, ctx, keys)
+	if want := strings.Repeat("क", 10_000); got != want {
+		t.Errorf("long text typed wrong")
+	}
+	if elapsed := time.Since(start); elapsed > 2*time.Second {
+		t.Errorf("typing 20000 keys took %v, it should be linear", elapsed)
+	}
 }

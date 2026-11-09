@@ -163,6 +163,51 @@ describe('node binding typing: an empty key does not change the context (#155)',
   });
 });
 
+describe('node binding typing: auto clear and empty key', () => {
+  it('clears the context after a pause longer than autoContextClearTimeMs', async () => {
+    const ctx = createTypingContext('Devanagari', { autoContextClearTimeMs: 50 });
+    await ctx.ready;
+    let result = '';
+    for (const key of ['k', 'a']) {
+      const { to_delete_chars_count, diff_add_text } = ctx.takeKeyInput(key);
+      if (to_delete_chars_count > 0) result = result.slice(0, -to_delete_chars_count);
+      result += diff_add_text;
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    expect(result).toBe('क्अ');
+  });
+
+  it('reads out of range auto clear times like the TS context', async () => {
+    // TS: `elapsed > time`, so NaN / Infinity never clear and a negative time clears at any pause
+    for (const [time, expected] of [
+      [Infinity, 'क'],
+      [NaN, 'क'],
+      [2 ** 32, 'क'],
+      [-1, 'क्अ']
+    ] as const) {
+      const ctx = createTypingContext('Devanagari', { autoContextClearTimeMs: time });
+      await ctx.ready;
+      let result = '';
+      for (const key of ['k', 'a']) {
+        const { to_delete_chars_count, diff_add_text } = ctx.takeKeyInput(key);
+        if (to_delete_chars_count > 0) result = result.slice(0, -to_delete_chars_count);
+        result += diff_add_text;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      expect(result, `autoContextClearTimeMs ${time}`).toBe(expected);
+    }
+  });
+
+  it('an empty key returns the current context length like the TS context', async () => {
+    const ctx = createTypingContext('Devanagari');
+    const ctx_ts = createTypingContextTs('Devanagari');
+    await Promise.all([ctx.ready, ctx_ts.ready]);
+    for (const key of ['k', '', 'a', '']) {
+      expect(ctx.takeKeyInput(key), `key ${JSON.stringify(key)}`).toEqual(ctx_ts.takeKeyInput(key));
+    }
+  });
+});
+
 describe('wasm binding smoke check', () => {
   it('exports transliterate_wasm and returns output', async () => {
     expect(typeof transliterate_wasm).toBe('function');
