@@ -148,3 +148,27 @@
   text: khaai ghaau jhaai dhaai bhaau khaaI ghaaU khaae ghaao khaaAi
   output: கா²இ கா⁴உ ஜா²இ தா⁴இ பா⁴உ கா²ஈ கா⁴ஊ கா²எ கா⁴ஒ கா²ஆஇ
   script: Tamil-Extended
+# .A1 (A1 mAtrA) after a vyanjana, Brahmi has a distinct form (Bhattiprolu AA 𑀹) (#154)
+- index: 26
+  text: k.A1 .A1 k.A
+  output: 𑀓𑁆𑀹 𑀹 𑀓𑁆𑀸
+  script: Brahmi
+- index: 27
+  text: k.A1 .A1 k.A
+  output: 𑀓𑀹 𑀹 𑀓𑀸
+  script: Brahmi
+  options:
+    includeInherentVowel: true
+# scripts without a distinct A1 form (or with one) are unchanged
+- index: 28
+  text: k.A1 k.u1 k.U1
+  output: क्ा क्ु क्ू
+  script: Devanagari
+- index: 29
+  text: k.A1 k.u1 k.U1
+  output: क्ऻ क्ॖ क्ॗ
+  script: Purna-Devanagari
+- index: 30
+  text: k.A1 k.u1 k.U1
+  output: 𑆑𑇀𑇋𑆳 𑆑𑇀𑇋𑆶 𑆑𑇀𑇋𑆷
+  script: Sharada

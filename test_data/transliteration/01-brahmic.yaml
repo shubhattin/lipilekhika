@@ -94,3 +94,44 @@
   input: খও ঘআ
   output: க²ஓ க⁴ஆ
   reversible: false
+# Sharada A1/u1/U1 mAtrAs (𑇋𑆳 𑇋𑆶 𑇋𑆷) are read back as A1/u1/U1, not as plain A/u/U (#154)
+- index: 11
+  from: Purna-Devanagari
+  to: Sharada
+  input: कऻ कॖ कॗ ॴ ॶ ॷ
+  output: 𑆑𑇋𑆳 𑆑𑇋𑆶 𑆑𑇋𑆷 𑆃𑇋𑆳 𑆃𑇋𑆶 𑆃𑇋𑆷
+  reversible: true
+- index: 11.1
+  from: Brahmi
+  to: Sharada
+  input: 𑀓𑀹
+  output: 𑆑𑇋𑆳
+  reversible: true
+# scripts without a distinct A1/u1/U1 form still read them as A/u/U
+- index: 11.2
+  from: Sharada
+  to: Devanagari
+  input: 𑆑𑇋𑆳 𑆑𑇋𑆶 𑆑𑇋𑆷 𑆃𑇋𑆳 𑆑𑆳 𑆑𑆶 𑆑𑆷
+  output: का कु कू आ का कु कू
+- index: 11.3
+  from: Sharada
+  to: Telugu
+  input: 𑆑𑇋𑆳 𑆑𑇋𑆶 𑆑𑇋𑆷 𑆃𑇋𑆳 𑆑𑆳 𑆑𑆶 𑆑𑆷
+  output: కా కు కూ ఆ కా కు కూ
+- index: 11.4
+  from: Devanagari
+  to: Sharada
+  input: का कु कू आ
+  output: 𑆑𑆳 𑆑𑆶 𑆑𑆷 𑆄
+  reversible: true
+# Sinhala ඥ is jña (ज्ञ, as in ඥාති = jñāti) and ඟ is the prenasalized ṅga (ङ्ग) (#154)
+- index: 12
+  from: Sinhala
+  to: Devanagari
+  input: ඥාති ඥ ඟ ගඟ
+  output: ज्ञाति ज्ञ ङ्ग गङ्ग
+- index: 12.1
+  from: Sinhala
+  to: Telugu
+  input: ඥාති ඟ
+  output: జ్ఞాతి ఙ్గ

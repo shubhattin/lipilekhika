@@ -95,7 +95,6 @@ const Sharada: InputBrahmicScriptType = {
       mAtrA: '𑆳',
       text_krama: ['A-svara'],
       mAtrA_text_krama: ['A-mAtrA'],
-      mAtrA_duplicates: ['𑇋𑆳'],
       type: 'svara'
     },
     {
@@ -117,7 +116,6 @@ const Sharada: InputBrahmicScriptType = {
       mAtrA: '𑆶',
       text_krama: ['u-svara'],
       mAtrA_text_krama: ['u-mAtrA'],
-      mAtrA_duplicates: ['𑇋𑆶'],
       type: 'svara'
     },
     {
@@ -125,7 +123,6 @@ const Sharada: InputBrahmicScriptType = {
       mAtrA: '𑆷',
       text_krama: ['U-svara'],
       mAtrA_text_krama: ['U-mAtrA'],
-      mAtrA_duplicates: ['𑇋𑆷'],
       type: 'svara'
     },
     {

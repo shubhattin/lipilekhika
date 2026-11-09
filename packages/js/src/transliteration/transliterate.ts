@@ -917,7 +917,14 @@ export const transliterate_text_core = (
             } else {
               item = null;
             }
-            result_concat_status = prev_context_cleanup(ctx, matched_text, item);
+            // A halant variant matched as a whole (Sinhala al-lakuna + ZWJ `්‍`) is passed as
+            // the halant itself, so that the cleanup does not add an inherent vowel before it
+            // (ක්‍ෂ -> kSha, not kaSha)
+            const item_text =
+              krama.length === 1 && kramaTextOrEmpty(from_script_data, krama[0]) === BRAHMIC_HALANT
+                ? BRAHMIC_HALANT
+                : matched_text;
+            result_concat_status = prev_context_cleanup(ctx, item_text, item);
           } else if (
             to_script_data.script_type === 'brahmic' &&
             from_script_data.script_type === 'other'
