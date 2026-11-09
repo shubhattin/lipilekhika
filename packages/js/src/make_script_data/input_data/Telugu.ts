@@ -264,6 +264,8 @@ const Telugu: InputBrahmicScriptType = {
     {
       text: 'న',
       text_krama: ['n', 'nz'],
+      halant_duplicates: ['ౝ'],
+      // ^ nakaara pollu
       type: 'vyanjana'
     },
     {

@@ -48,6 +48,13 @@ const Bengali: InputBrahmicScriptType = {
   },
   list: [
     {
+      text: '্',
+      text_krama: ['halant'],
+      type: 'anya',
+      duplicates: ['‍্']
+      // ^ ZWJ + hasanta: ra + ya-phala (র‍্য) without a reph, the ZWJ is only for display
+    },
+    {
       text: 'ওঁ',
       text_krama: ['AUM'],
       duplicates: ['ॐ'],
@@ -267,6 +274,8 @@ const Bengali: InputBrahmicScriptType = {
     {
       text: 'ত',
       text_krama: ['t'],
+      halant_duplicates: ['ৎ'],
+      // ^ khanda ta ৎ
       type: 'vyanjana'
     },
     {

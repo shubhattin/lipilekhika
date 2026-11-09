@@ -360,6 +360,7 @@ const Gurumukhi: InputBrahmicScriptType = {
     {
       text: 'ਲ਼',
       text_krama: ['L', 'Lz'],
+      duplicates: ['ਲ਼'],
       type: 'vyanjana'
     },
     {

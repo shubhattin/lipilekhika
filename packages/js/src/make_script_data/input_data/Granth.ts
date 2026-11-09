@@ -36,7 +36,7 @@ const Granth: InputBrahmicScriptType = {
     anusvAra: '𑌀',
     anunAnAsika: '𑌁',
     visarga: '𑌃',
-    saMkShepachihna: '𑙃',
+    saMkShepachihna: '॰',
     avagraha: '𑌽',
     halant: '𑍍',
     nuqta: '𑌼',

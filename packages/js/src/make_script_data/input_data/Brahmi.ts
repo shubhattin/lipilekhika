@@ -46,6 +46,19 @@ const Brahmi: InputBrahmicScriptType = {
     double_virama: '॥'
   },
   list: [
+    {
+      text: '।',
+      text_krama: ['virama'],
+      type: 'anya',
+      duplicates: ['𑁇']
+    },
+    {
+      text: '॥',
+      text_krama: ['double_virama'],
+      type: 'anya',
+      duplicates: ['𑁈']
+      // ^ Brahmi's own dandas are also read
+    },
     // Svara
     {
       text: '𑀅',

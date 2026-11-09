@@ -35,7 +35,7 @@ const Modi: InputBrahmicScriptType = {
     anusvAra: '𑘽',
     anunAnAsika: '𑙀',
     visarga: '𑘾',
-    saMkShepachihna: '॰',
+    saMkShepachihna: '𑙃',
     avagraha: 'ऽ',
     halant: '𑘿',
     anudAttA: '↓',

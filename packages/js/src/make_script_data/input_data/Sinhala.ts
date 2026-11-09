@@ -33,7 +33,7 @@ const Sinhala: InputBrahmicScriptType = {
     '9': '෯',
     AUM: 'ॐ',
     anusvAra: 'ං',
-    anunAnAsika: 'ઁ',
+    anunAnAsika: 'ඁ',
     visarga: 'ඃ',
     saMkShepachihna: '॰',
     avagraha: 'ऽ',
@@ -249,6 +249,13 @@ const Sinhala: InputBrahmicScriptType = {
       text_krama: [],
       // jña (ज्ञ), as in ඥාති (jñāti)
       fallback: ['j', 'halant', 'J'],
+      type: 'vyanjana'
+    },
+    {
+      // prenasalized ñja (ञ्ज)
+      text: 'ඦ',
+      text_krama: [],
+      fallback: ['J', 'halant', 'j'],
       type: 'vyanjana'
     },
     {
