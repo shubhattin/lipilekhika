@@ -235,7 +235,7 @@
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >From</span
               >
-              <ScriptSeleector bind:script={typing_script} have_normal_script={false} />
+              <ScriptSeleector bind:script={typing_script} />
             </div>
             <div class="hidden items-center justify-center lg:flex">
               <Button
@@ -270,15 +270,17 @@
                   <Icon src={BsCopy} className="size-4" />
                   <span class="sr-only">Copy source text</span>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="size-8"
-                  onclick={() => (typing_modal_open = true)}
-                >
-                  <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-                  <span class="sr-only">Typing Help</span>
-                </Button>
+                {#if typing_script !== 'Normal'}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="size-8"
+                    onclick={() => (typing_modal_open = true)}
+                  >
+                    <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+                    <span class="sr-only">Typing Help</span>
+                  </Button>
+                {/if}
               </div>
               <div class="flex items-center gap-2">
                 <span class="hidden text-xs text-muted-foreground sm:inline-block"
@@ -427,7 +429,7 @@
     {@render pwa_snippet?.()}
   </div>
 
-  {#if typing_modal_open}
+  {#if typing_modal_open && typing_script !== 'Normal'}
     {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
       <TypingHelper bind:open={typing_modal_open} script={typing_script} />
     {/await}

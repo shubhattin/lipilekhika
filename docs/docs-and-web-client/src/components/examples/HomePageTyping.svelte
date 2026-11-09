@@ -60,10 +60,12 @@
       <Icon src={BsCopy} className="size-4" />
       <span class="sr-only">Copy text</span>
     </Button>
-    <Button variant="ghost" size="icon" class="size-8" onclick={() => (typing_modal_open = true)}>
-      <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-      <span class="sr-only">Typing Help</span>
-    </Button>
+    {#if $typing_script_atom !== 'Normal'}
+      <Button variant="ghost" size="icon" class="size-8" onclick={() => (typing_modal_open = true)}>
+        <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+        <span class="sr-only">Typing Help</span>
+      </Button>
+    {/if}
   </div>
 
   <Textarea
@@ -86,7 +88,7 @@
   >
 </div>
 
-{#if typing_modal_open}
+{#if typing_modal_open && $typing_script_atom !== 'Normal'}
   {#await import('../TypingHelper.svelte') then { default: TypingHelper }}
     <TypingHelper bind:open={typing_modal_open} script={$typing_script_atom} />
   {/await}
