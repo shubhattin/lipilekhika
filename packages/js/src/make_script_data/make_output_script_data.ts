@@ -438,6 +438,50 @@ function get_out_script_data(
     }
   }
 
+  // Canonically equivalent forms (Unicode NFD / NFC) of a text are read like it. A keyboard or
+  // font may store a two-part vowel sign as its parts (Malayalam ൊ as െ + ാ, Tamil ஔ as ஒ + ௗ),
+  // NFC keeps some letters decomposed (Gurumukhi ਸ਼ as ਸ + ਼, it is excluded from composition)
+  // and NFD splits every Romanized letter with a diacritic (ā as a + U+0304). Only read: the
+  // output keeps the script's own form, and a text that already has a mapping keeps it.
+  {
+    /** text -> its krama entry, the texts that are read */
+    const readable = new Map<string, { krama: number[]; fallback_list_ref?: number | null }>();
+    for (let i = 0; i < res.krama_text_arr.length; i++) {
+      const text = res.krama_text_arr[i][0];
+      // the first index wins, like in the runtimes
+      if (text && !readable.has(text)) readable.set(text, { krama: [i] });
+    }
+    for (const [text, value] of res.text_to_krama_map) {
+      if (!value.krama?.length || value.krama.includes(-1)) continue;
+      readable.set(text, { krama: value.krama, fallback_list_ref: value.fallback_list_ref });
+    }
+    const variants = new Map<string, { krama: number[]; fallback_list_ref?: number | null }>();
+    for (const [text, value] of readable) {
+      for (const form of ['NFD', 'NFC'] as const) {
+        const variant = text.normalize(form);
+        if (variant !== text && !readable.has(variant) && !variants.has(variant))
+          variants.set(variant, value);
+      }
+    }
+    for (const [variant, value] of variants) {
+      // The matcher does not back out of a longer prefix, a prefix (of two or more code points)
+      // that is not read by itself would be emitted as it is. So a variant is only added when
+      // each of its prefixes is read: the NFD of Romanized āūṁ (ॐ) would need a◌̄u and a◌̄u◌̄m,
+      // it is read letter by letter as आऊं.
+      const code_points = [...variant];
+      let prefixes_read = true;
+      for (let j = 2; j < code_points.length; j++) {
+        const prefix = code_points.slice(0, j).join('');
+        if (!readable.has(prefix) && !variants.has(prefix)) {
+          prefixes_read = false;
+          break;
+        }
+      }
+      if (prefixes_read)
+        add_to_text_to_krama_map(variant, [...value.krama], value.fallback_list_ref);
+    }
+  }
+
   /** index of the `anya` list item that entries point at with `fallback_list_ref`
    * (added on first use) */
   let anya_list_ref: number | null = null;

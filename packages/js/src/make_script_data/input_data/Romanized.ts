@@ -252,12 +252,14 @@ const Romanized: InputOtherScriptType = {
     {
       text: 'l̥̄',
       text_krama: ['LRR-svara', 'LRR-mAtrA'],
-      duplicates: ['L̥̄']
+      // IAST
+      duplicates: ['L̥̄', 'ḹ', 'Ḹ']
     },
     {
       text: 'ṁ',
       text_krama: ['anusvAra'],
-      duplicates: ['Ṁ']
+      // IAST
+      duplicates: ['Ṁ', 'ṃ', 'Ṃ']
     },
     {
       text: 'm̐',
