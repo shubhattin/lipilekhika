@@ -58,6 +58,20 @@ where
         next: Option<&[String]>,
         last_extra_call: Option<bool>,
     ) -> bool {
+        self.prev_context_cleanup_ext(item, next, last_extra_call, false)
+    }
+
+    /// [`Self::prev_context_cleanup`] with `emits_ta_ext_superscript_tail`: the text of the
+    /// current item (emitted after this call) ends with a Tamil-Extended superscript, eg
+    /// `RR` -> `ரூ²`. Like when the superscript is already the last character, the typing
+    /// context is kept so that a Vedic svara typed next goes before it.
+    fn prev_context_cleanup_ext(
+        &mut self,
+        item: Option<PrevContextItem<'a>>,
+        next: Option<&[String]>,
+        last_extra_call: Option<bool>,
+        emits_ta_ext_superscript_tail: bool,
+    ) -> bool {
         let last_extra_call = last_extra_call.unwrap_or_default();
         let mut result_str_concat_status = false;
 
@@ -234,7 +248,8 @@ where
             && !last_extra_call
             // the case below is to enable typing of _, ' (Vedic svara chihnas too)
             && !(is_script_tamil_ext(self.to_script)
-                && is_ta_ext_superscript_tail(self.result.last_char()))
+                && (emits_ta_ext_superscript_tail
+                    || is_ta_ext_superscript_tail(self.result.last_char())))
         {
             to_clear_context = true;
             // do not clear the context only if case where the current added element is a vyanjana
@@ -877,11 +892,12 @@ pub fn transliterate_text_core_with(
 
         // latin digits passthrough if native numerals disabled
         if ch.is_ascii_digit() && !opts.use_native_numerals {
-            ctx.result.emit_char(ch);
             ctx.cursor.advance(1);
             const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
             let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
+            // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0) (#151)
             let _ = ctx.prev_context_cleanup(Some((Some(digit_str), None)), None, None);
+            ctx.result.emit_char(ch);
             continue;
         }
 
@@ -908,6 +924,9 @@ pub fn transliterate_text_core_with(
 
         // Step 1: match text_to_krama_map / typing_text_to_krama_map
         let mut text_to_krama_item_index: Option<usize>;
+        // the matched text ends with a Tamil-Extended superscript that is not next to the rest
+        // of it in the input (a Vedic svara is in between), so it is not to be advanced over
+        let mut ta_ext_superscript_detached = false;
         {
             let mut scan_units: usize = 0;
             let mut last_valid_vowel_match_index: Option<usize> = None;
@@ -1034,8 +1053,32 @@ pub fn transliterate_text_core_with(
                         };
                         let n_2_th_next_character: Option<char> = n_2_th_next;
 
-                        // Case: matra/halant + superscript tail (superscript is in next list)
+                        // Case: Vedic svara + superscript with no visible mAtrA, as the writer
+                        // puts the svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒) (#152)
+                        // Read the match with the superscript, the svara itself is read next.
                         if ignore_ta_ext_sup_num_text_index == -1
+                            && is_vedic_svara_tail(nth_next_character)
+                            && is_ta_ext_superscript_tail(n_1_th_next_character)
+                            && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
+                            && let Some(char_index) = {
+                                let mut sup_buf = [0u8; 4];
+                                let sup = n_1_th_next_character
+                                    .map(|c| c.encode_utf8(&mut sup_buf) as &str)
+                                    .unwrap_or_default();
+                                let mut search_str =
+                                    String::with_capacity(char_to_search.len() + sup.len());
+                                search_str.push_str(&char_to_search);
+                                search_str.push_str(sup);
+                                from_script_data.text_to_krama_map_index(&search_str, false)
+                            }
+                        {
+                            text_to_krama_item_index = Some(char_index);
+                            ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
+                            ta_ext_superscript_detached = true;
+                            break;
+                        }
+                        // Case: matra/halant + superscript tail (superscript is in next list)
+                        else if ignore_ta_ext_sup_num_text_index == -1
                             && is_ta_ext_superscript_tail(n_1_th_next_character)
                             && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
                         {
@@ -1213,17 +1256,18 @@ pub fn transliterate_text_core_with(
                 matched_text.chars().count()
             };
             // only relevant while skipping a Tamil-Extended superscript; evaluated lazily
-            let index_delete_length = if ignore_ta_ext_sup_num_text_index != -1
-                && matched_char_count > 1
-                && map
-                    .krama
-                    .as_ref()
-                    .and_then(|k| k.first())
-                    .and_then(|ki| ctx.from_script_data.krama_text_arr.get(*ki as usize))
-                    .and_then(|(_, li)| li.as_ref())
-                    .and_then(|li| from_script_data.list.get(*li as usize))
-                    .is_some_and(|l| l.is_vyanjana())
-                && is_ta_ext_superscript_tail(matched_text.chars().last())
+            let index_delete_length = if ta_ext_superscript_detached
+                || ignore_ta_ext_sup_num_text_index != -1
+                    && matched_char_count > 1
+                    && map
+                        .krama
+                        .as_ref()
+                        .and_then(|k| k.first())
+                        .and_then(|ki| ctx.from_script_data.krama_text_arr.get(*ki as usize))
+                        .and_then(|(_, li)| li.as_ref())
+                        .and_then(|li| from_script_data.list.get(*li as usize))
+                        .is_some_and(|l| l.is_vyanjana())
+                    && is_ta_ext_superscript_tail(matched_text.chars().last())
             {
                 1
             } else {
@@ -1239,15 +1283,18 @@ pub fn transliterate_text_core_with(
                     .custom_script_chars_arr
                     .get(custom_back_ref as usize)
             {
-                ctx.result.emit(custom_item.0.as_str());
                 let list_item = custom_item
                     .1
                     .and_then(|li| to_script_data.list.get(li as usize));
+                // cleanup first, so a pending halant goes before the custom character
+                // (kqq -> क्q, k.qSha -> क्‍ष) (#151)
+                // custom characters are never svara/mAtrA, so cleanup never emits them itself
                 ctx.prev_context_cleanup(
                     Some((Some(matched_text.as_str()), list_item)),
                     map.next.as_deref(),
                     None,
                 );
+                ctx.result.emit(custom_item.0.as_str());
                 continue;
             }
 
@@ -1333,16 +1380,38 @@ pub fn transliterate_text_core_with(
                                 };
                             }
 
-                            let next_list =
-                                if opts.typing_mode && *from_script == ScriptListEnum::Normal {
-                                    map.next.as_deref()
-                                } else {
-                                    None
-                                };
-                            result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(matched_text.as_str()), item)),
+                            let typing_from_normal =
+                                opts.typing_mode && *from_script == ScriptListEnum::Normal;
+                            let next_list = if typing_from_normal {
+                                map.next.as_deref()
+                            } else {
+                                None
+                            };
+                            // The halant typed by its own key (`.h`) is passed as the halant
+                            // itself, so that the cleanup does not add a second one after a
+                            // vyanjana (k.h -> क्, not क््) (#151)
+                            let item_text = match ctx.brahmic_halant {
+                                Some(halant)
+                                    if krama.len() == 1
+                                        && to_script_data.krama_text_or_empty(krama[0])
+                                            == halant =>
+                                {
+                                    halant
+                                }
+                                _ => matched_text.as_str(),
+                            };
+                            let emits_ta_ext_superscript_tail = typing_from_normal
+                                && is_to_tamil_ext_
+                                && krama.last().is_some_and(|&k| {
+                                    is_ta_ext_superscript_tail(
+                                        to_script_data.krama_text_or_empty(k).chars().last(),
+                                    )
+                                });
+                            result_concat_status = ctx.prev_context_cleanup_ext(
+                                Some((Some(item_text), item)),
                                 next_list,
                                 None,
+                                emits_ta_ext_superscript_tail,
                             );
                         } else if opts.typing_mode
                             && *from_script == ScriptListEnum::Normal
@@ -1422,16 +1491,26 @@ pub fn transliterate_text_core_with(
                     }
                     continue;
                 } else
-                // typing-mode special case when krama contains -1 entries: emit raw match
+                // krama contains -1 entries: emit raw match
+                // (prefix-only entries like `c` of `ch` or `S` of `Sh`)
+                // cleanup first, so a pending halant goes before the text (kc -> क्c) (#151)
                 if krama.contains(&-1) {
-                    ctx.result.emit(matched_text.as_str());
                     if opts.typing_mode {
                         ctx.prev_context_cleanup(
                             Some((Some(matched_text.as_str()), None)),
                             map.next.as_deref(),
                             None,
                         );
+                    } else if ctx.prev_context_in_use {
+                        // like an unknown character (see Step 2), `kca` -> क्cअ
+                        ctx.prev_context_cleanup(
+                            Some((Some(matched_text.as_str()), None)),
+                            None,
+                            None,
+                        );
+                        ctx.prev_context.clear();
                     }
+                    ctx.result.emit(matched_text.as_str());
                     continue;
                 }
             }
@@ -1481,6 +1560,16 @@ pub fn transliterate_text_core_with(
                 let item = list_idx.and_then(|li| to_script_data.list.get(li as usize));
                 result_concat_status =
                     ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
+            } else if opts.typing_mode && *from_script == ScriptListEnum::Normal {
+                // Typing into an `other` script, a typing entry without krama (like `sh` of
+                // `shh` and `sh^`, `ch` of `chh` in Romanized) is resolved here. Keep the
+                // context with its `next` (as in Step 1), or else it is cleared and `shh` at
+                // the start of a word comes out as `śh` (#153)
+                ctx.prev_context_cleanup(
+                    Some((Some(char_to_search), None)),
+                    text_to_krama_item.and_then(|(_, m)| m.next.as_deref()),
+                    None,
+                );
             }
         }
 
