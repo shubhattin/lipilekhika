@@ -933,7 +933,7 @@ pub fn transliterate_text_core_with(
         }
 
         // Step 1: match text_to_krama_map / typing_text_to_krama_map
-        let mut text_to_krama_item_index: Option<usize>;
+        let text_to_krama_item_index: Option<usize>;
         // the matched text ends with a Tamil-Extended superscript that is not next to the rest
         // of it in the input (a Vedic svara is in between), so it is not to be advanced over
         let mut ta_ext_superscript_detached = false;
@@ -1038,8 +1038,9 @@ pub fn transliterate_text_core_with(
                     let nth_next = ctx.cursor.peek_at(end_index);
                     let nth_next_character: Option<char> = nth_next;
 
-                    // Tamil-Extended special handling (superscript numbers after matra/halant)
-                    if is_from_tamil_ext_ && matches!(from_script_data, ScriptData::Brahmic { .. })
+                    // Tamil-Extended special handling (superscript numbers after matra/halant/svara)
+                    if is_from_tamil_ext_
+                        && let ScriptData::Brahmic { halant, .. } = from_script_data
                     {
                         let char_to_search: Cow<'_, str> = if single_char_lookup {
                             Cow::Borrowed(
@@ -1048,169 +1049,101 @@ pub fn transliterate_text_core_with(
                         } else {
                             char_to_search
                         };
-                        let n_1_th_next = if nth_next.is_some() {
-                            ctx.cursor.peek_at(end_index + 1)
-                        } else {
-                            None
+                        let is_halant = |c: char| char_eq_str(c, halant);
+                        let is_matra = |c: char| {
+                            from_script_data
+                                .krama_index_of_char(c)
+                                .and_then(|i| from_script_data.krama_text_arr.get(i))
+                                .and_then(|(_, li)| *li)
+                                .and_then(|li| from_script_data.list.get(li as usize))
+                                .is_some_and(|k| k.is_matra())
                         };
-                        let n_1_th_next_character: Option<char> = n_1_th_next;
-
-                        // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
-                        let n_2_th_next = if nth_next.is_some() && n_1_th_next.is_some() {
-                            ctx.cursor.peek_at(end_index + 1 + 1)
-                        } else {
-                            None
-                        };
-                        let n_2_th_next_character: Option<char> = n_2_th_next;
-
-                        // Case: Vedic svara + superscript with no visible mAtrA, as the writer
-                        // puts the svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
-                        // Read the match with the superscript, the svara itself is read next.
-                        if (ignore_ta_ext_sup_num_text_index == -1
-                            // or the skipped superscript is inside this match
-                            || ignore_ta_ext_sup_num_text_index < end_index as isize)
-                            && is_vedic_svara_tail(nth_next_character)
-                            && is_ta_ext_superscript_tail(n_1_th_next_character)
-                            && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
-                        {
-                            if let Some(char_index) = from_script_data.text_to_krama_map_index(
-                                &with_tail(&char_to_search, n_1_th_next_character),
+                        // The superscript of the match can be after a halant or a mAtrA and Vedic
+                        // svaras, as the writer puts them before it:
+                        //   [halant | mAtrA | mAtrA mAtrA]? svara* superscript
+                        // eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒),
+                        // ரு॒॑² (ऋ॒॑). In the match the superscript takes the place of these, which
+                        // are read next.
+                        let mut sup_index = end_index;
+                        let sign = nth_next_character.filter(|&c| is_halant(c) || is_matra(c));
+                        if let Some(sign) = sign {
+                            sup_index += 1;
+                            // mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+                            if is_matra(sign) && ctx.cursor.peek_at(sup_index).is_some_and(is_matra)
+                            {
+                                sup_index += 1;
+                            }
+                        }
+                        let svaras_start = sup_index;
+                        while is_vedic_svara_tail(ctx.cursor.peek_at(sup_index)) {
+                            sup_index += 1;
+                        }
+                        let sup_character = ctx.cursor.peek_at(sup_index);
+                        if (sign.is_some() || sup_index > svaras_start)
+                            && is_ta_ext_superscript_tail(sup_character)
+                            && sup_character.is_some_and(|c| next_chars.contains(&c))
+                            // no superscript is being skipped, or (with only svaras in between)
+                            // the skipped one is inside this match: the ² of க்² in க்²ரு॑² (खृ॑)
+                            && (ignore_ta_ext_sup_num_text_index == -1
+                                || (sign.is_none()
+                                    && ignore_ta_ext_sup_num_text_index < end_index as isize))
+                            && let Some(char_index) = from_script_data.text_to_krama_map_index(
+                                &with_tail(&char_to_search, sup_character),
                                 false,
-                            ) {
-                                text_to_krama_item_index = Some(char_index);
-                                // If a superscript was already skipped inside this match (the ² of
-                                // க்² in க்²ரு॑²), it makes up for the one after the svara in the
-                                // match length, so the whole match is advanced over.
+                            )
+                        {
+                            text_to_krama_item_index = Some(char_index);
+                            // With only svaras in between, a superscript already skipped inside
+                            // this match (the ² of க்² in க்²ரு॑²) makes up for the one after the
+                            // svaras in the match length, so the whole match is advanced over.
+                            if sign.is_none() {
                                 ta_ext_superscript_detached =
                                     ignore_ta_ext_sup_num_text_index == -1;
-                                ignore_ta_ext_sup_num_text_index = (end_index + 1) as isize;
-                                break;
                             }
+                            ignore_ta_ext_sup_num_text_index = sup_index as isize;
+                            break;
                         }
-                        // Case: matra/halant + superscript tail (superscript is in next list)
-                        else if ignore_ta_ext_sup_num_text_index == -1
-                            && is_ta_ext_superscript_tail(n_1_th_next_character)
-                            && n_1_th_next_character.is_some_and(|c| next_chars.contains(&c))
+                        // The match ends with halant + a letter that cannot be continued (ல்ர is
+                        // the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a
+                        // superscript (்ரு² ்ரூ²): stop the match before the halant, so ல்ரு² is
+                        // read as ல + ்ரு² (लृ), not ल्रु²
+                        if let Some(nth_ch) = nth_next_character
+                            && !next_chars.contains(&nth_ch)
+                            && end_index >= 2
                         {
-                            let char_index = from_script_data.text_to_krama_map_index(
-                                &with_tail(&char_to_search, n_1_th_next_character),
-                                false,
-                            );
-                            let mut nth_buf = [0u8; 4];
-                            let nth_char_text_index = nth_next_character.and_then(|c| {
-                                from_script_data.krama_index_of_text(c.encode_utf8(&mut nth_buf))
-                            });
-
-                            if let (Some(char_index), Some(nth_char_text_index)) =
-                                (char_index, nth_char_text_index)
+                            let mut tail_chars = char_to_search.chars().rev();
+                            let last = tail_chars.next();
+                            let before_last = tail_chars.next();
+                            let head_len = char_to_search.len()
+                                - last.map_or(0, char::len_utf8)
+                                - before_last.map_or(0, char::len_utf8);
+                            if let (Some(last), Some(before_last)) = (last, before_last)
+                                && head_len > 0
+                                && is_halant(before_last)
+                                && ctx.cursor.peek_at(end_index - 2) == Some(before_last)
+                                && ctx.cursor.peek_at(end_index - 1) == Some(last)
                             {
-                                text_to_krama_item_index = Some(char_index);
-
-                                let nth_char_type = from_script_data
-                                    .krama_text_arr
-                                    .get(nth_char_text_index)
-                                    .and_then(|(_, li)| *li)
-                                    .and_then(|li| from_script_data.list.get(li as usize));
-
-                                if let ScriptData::Brahmic { halant, .. } = from_script_data
-                                    && (nth_next_character.is_some_and(|c| char_eq_str(c, halant))
-                                        || nth_char_type.is_some_and(|k| k.is_matra()))
-                                {
-                                    ignore_ta_ext_sup_num_text_index = (end_index
-                                        + if nth_next_character.is_some() { 1 } else { 0 })
-                                        as isize;
-                                    break;
+                                let mut tail_sup_index = end_index + 1;
+                                while is_vedic_svara_tail(ctx.cursor.peek_at(tail_sup_index)) {
+                                    tail_sup_index += 1;
                                 }
-                            }
-                        }
-                        // Case: matra + matra + superscript tail (superscript is in next list; special for gO = g + E + A)
-                        else if ignore_ta_ext_sup_num_text_index == -1
-                            && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
-                        {
-                            let char_index = from_script_data.text_to_krama_map_index(
-                                &with_tail(&char_to_search, n_2_th_next_character),
-                                false,
-                            );
-                            let mut nth_buf = [0u8; 4];
-                            let nth_char_text_index = nth_next_character.and_then(|c| {
-                                from_script_data.krama_index_of_text(c.encode_utf8(&mut nth_buf))
-                            });
-                            let mut n1_buf = [0u8; 4];
-                            let n_1_th_char_text_index = n_1_th_next_character.and_then(|c| {
-                                from_script_data.krama_index_of_text(c.encode_utf8(&mut n1_buf))
-                            });
-
-                            if let (
-                                Some(char_index),
-                                Some(nth_char_text_index),
-                                Some(n_1_th_char_text_index),
-                            ) = (char_index, nth_char_text_index, n_1_th_char_text_index)
-                            {
-                                text_to_krama_item_index = Some(char_index);
-
-                                let nth_char_type = from_script_data
-                                    .krama_text_arr
-                                    .get(nth_char_text_index)
-                                    .and_then(|(_, li)| *li)
-                                    .and_then(|li| from_script_data.list.get(li as usize));
-                                let n_1_th_char_type = from_script_data
-                                    .krama_text_arr
-                                    .get(n_1_th_char_text_index)
-                                    .and_then(|(_, li)| *li)
-                                    .and_then(|li| from_script_data.list.get(li as usize));
-
-                                if nth_char_type.is_some_and(|k| k.is_matra())
-                                    && n_1_th_char_type.is_some_and(|k| k.is_matra())
-                                {
-                                    ignore_ta_ext_sup_num_text_index = (end_index
-                                        + if nth_next_character.is_some() { 1 } else { 0 }
-                                        + if n_1_th_next_character.is_some() {
-                                            1
-                                        } else {
-                                            0
-                                        })
-                                        as isize;
-                                    break;
-                                }
-                            }
-                        }
-
-                        // Handle case: mAtrA + Vedic mark + superscript (n_2_th is superscript, n_1_th is Vedic)
-                        if ignore_ta_ext_sup_num_text_index == -1
-                            && nth_next_character.is_some()
-                            && is_vedic_svara_tail(n_1_th_next_character)
-                            && is_ta_ext_superscript_tail(n_2_th_next_character)
-                            && n_2_th_next_character.is_some_and(|c| next_chars.contains(&c))
-                        {
-                            let mut nth_buf = [0u8; 4];
-                            let nth_char_text_index = nth_next_character.and_then(|c| {
-                                from_script_data.krama_index_of_text(c.encode_utf8(&mut nth_buf))
-                            });
-
-                            if let Some(nth_char_text_index) = nth_char_text_index {
-                                let nth_char_type = from_script_data
-                                    .krama_text_arr
-                                    .get(nth_char_text_index)
-                                    .and_then(|(_, li)| *li)
-                                    .and_then(|li| from_script_data.list.get(li as usize));
-
-                                // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
-                                if nth_char_type.is_some_and(|k| k.is_matra()) {
-                                    let char_index = from_script_data.text_to_krama_map_index(
-                                        &with_tail(&char_to_search, n_2_th_next_character),
-                                        false,
-                                    );
-                                    if let Some(char_index) = char_index {
-                                        text_to_krama_item_index = Some(char_index);
-                                        ignore_ta_ext_sup_num_text_index = (end_index
-                                            + if nth_next_character.is_some() { 1 } else { 0 }
-                                            + if n_1_th_next_character.is_some() {
-                                                1
-                                            } else {
-                                                0
-                                            })
-                                            as isize;
+                                let tail_sup = ctx.cursor.peek_at(tail_sup_index);
+                                if is_ta_ext_superscript_tail(tail_sup) {
+                                    let mut tail = String::with_capacity(16);
+                                    tail.push(before_last);
+                                    tail.push(last);
+                                    tail.push(nth_ch);
+                                    tail.extend(tail_sup);
+                                    if from_script_data
+                                        .text_to_krama_map_index(&tail, false)
+                                        .is_some()
+                                        && let Some(head_index) = from_script_data
+                                            .text_to_krama_map_index(
+                                                &char_to_search[..head_len],
+                                                false,
+                                            )
+                                    {
+                                        text_to_krama_item_index = Some(head_index);
                                         break;
                                     }
                                 }

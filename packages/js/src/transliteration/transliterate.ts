@@ -17,6 +17,7 @@ import {
   isTaExtSuperscriptTailCp,
   isScriptTamilExt,
   isVedicSvaraTail,
+  isVedicSvaraTailCp,
   cpWidth,
   textToKramaMapIndex,
   textToKramaMapCharIndex,
@@ -679,140 +680,80 @@ export const transliterate_text_core = (
             // Tamil-Extended only: work with strings here (rare path)
             const next = potential_match[1].next!;
             if (single_char_lookup) char_to_search = cursor.slice(text_index, end_index);
-            const nth_next_width = nth_next_cp !== -1 ? cpWidth(nth_next_cp) : 0;
-            const nth_next_character =
-              nth_next_cp !== -1 ? String.fromCodePoint(nth_next_cp) : undefined;
-            const n_1_th_next_cp =
-              nth_next_cp !== -1 ? cursor.cpAt(end_index + nth_next_width) : -1;
-            const n_1_th_next_width = n_1_th_next_cp !== -1 ? cpWidth(n_1_th_next_cp) : 0;
-            const n_1_th_next_character =
-              n_1_th_next_cp !== -1 ? String.fromCodePoint(n_1_th_next_cp) : undefined;
-            // this handles mAtrA duplicates like O = E + A in gEA (or gO as visible when)
-            const n_2_th_next_cp =
-              nth_next_cp !== -1 && n_1_th_next_cp !== -1
-                ? cursor.cpAt(end_index + nth_next_width + n_1_th_next_width)
-                : -1;
-            const n_2_th_next_character =
-              n_2_th_next_cp !== -1 ? String.fromCodePoint(n_2_th_next_cp) : undefined;
+            const halant = from_script_data.halant;
+            const isMatraCp = (cp: number) =>
+              from_script_data.list[
+                from_script_data.krama_text_arr[kramaIndexOfChar(from_script_data, cp)]?.[1] ?? -1
+              ]?.type === 'mAtrA';
+            // The superscript of the match can be after a halant or a mAtrA and Vedic svaras, as
+            // the writer puts them before it:  [halant | mAtrA | mAtrA mAtrA]? svara* superscript
+            // eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒), ரு॒॑² (ऋ॒॑)
+            // In the match the superscript takes the place of these, which are read next.
+            let sup_index = end_index;
+            const sign_cp = cursor.cpAt(sup_index);
+            const has_sign =
+              sign_cp !== -1 &&
+              (String.fromCodePoint(sign_cp) === halant || isMatraCp(sign_cp));
+            if (has_sign) {
+              sup_index += cpWidth(sign_cp);
+              const second_cp = cursor.cpAt(sup_index);
+              // mAtrA duplicates like O = E + A in gEA (or gO as visible when)
+              if (isMatraCp(sign_cp) && second_cp !== -1 && isMatraCp(second_cp))
+                sup_index += cpWidth(second_cp);
+            }
+            const svaras_start = sup_index;
+            while (isVedicSvaraTailCp(cursor.cpAt(sup_index))) sup_index += 1; // single UTF-16 units
+            const sup_cp = cursor.cpAt(sup_index);
             if (
-              // no superscript is being skipped, or the skipped one is inside this match
+              (has_sign || sup_index > svaras_start) &&
+              isTaExtSuperscriptTailCp(sup_cp) &&
+              // no superscript is being skipped, or (with only svaras in between) the skipped one
+              // is inside this match: the ² of க்² in க்²ரு॑² (खृ॑)
               (ignore_ta_ext_sup_num_text_index === -1 ||
-                ignore_ta_ext_sup_num_text_index < end_index) &&
-              nth_next_character !== undefined &&
-              isVedicSvaraTail(nth_next_character) &&
-              n_1_th_next_character !== undefined &&
-              isTaExtSuperscriptTail(n_1_th_next_character) &&
-              next.indexOf(n_1_th_next_character) !== -1
+                (!has_sign && ignore_ta_ext_sup_num_text_index < end_index))
             ) {
-              // Vedic svara + superscript with no visible mAtrA, as the writer puts the svara
-              // before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
-              // Read the match with the superscript, the svara itself is read next.
-              const char_index_ = textToKramaMapIndex(
-                from_script_data,
-                char_to_search + n_1_th_next_character
-              );
+              const sup_character = String.fromCharCode(sup_cp);
+              const char_index_ =
+                next.indexOf(sup_character) !== -1
+                  ? textToKramaMapIndex(from_script_data, char_to_search + sup_character)
+                  : -1;
               if (char_index_ !== -1) {
                 text_to_krama_item_index = char_index_;
-                // If a superscript was already skipped inside this match (the ² of க்² in
-                // க்²ரு॑²), it makes up for the one after the svara in the match length,
-                // so the whole match is advanced over.
-                ta_ext_superscript_detached = ignore_ta_ext_sup_num_text_index === -1;
-                ignore_ta_ext_sup_num_text_index = end_index + nth_next_width;
+                // With only svaras in between, a superscript already skipped inside this match
+                // (the ² of க்² in க்²ரு॑²) makes up for the one after the svaras in the match
+                // length, so the whole match is advanced over.
+                if (!has_sign) ta_ext_superscript_detached = ignore_ta_ext_sup_num_text_index === -1;
+                ignore_ta_ext_sup_num_text_index = sup_index;
                 break;
               }
-            } else if (
-              ignore_ta_ext_sup_num_text_index === -1 &&
-              n_1_th_next_character !== undefined &&
-              isTaExtSuperscriptTail(n_1_th_next_character) &&
-              next.indexOf(n_1_th_next_character) !== -1
-            ) {
-              // the next character is also a superscript number and also is in the next list
-              // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index_ = textToKramaMapIndex(
-                from_script_data,
-                char_to_search + n_1_th_next_character
-              );
-              const nth_char_text_index = kramaIndexOfText(
-                from_script_data,
-                nth_next_character ?? ''
-              );
-              if (char_index_ !== -1 && nth_char_text_index !== -1) {
-                text_to_krama_item_index = char_index_;
-                const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
-                const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
-                if (nth_next_character === from_script_data.halant || nth_char_type === 'mAtrA') {
-                  ignore_ta_ext_sup_num_text_index = end_index + nth_next_width;
-                  break;
-                }
-              }
-            } else if (
-              ignore_ta_ext_sup_num_text_index === -1 &&
-              n_2_th_next_character !== undefined &&
-              isTaExtSuperscriptTail(n_2_th_next_character) &&
-              next.indexOf(n_2_th_next_character) !== -1
-            ) {
-              // the next character is also a superscript number and also is in the next list
-              // so we find a match (guranteed as in 'next') and map to it and break
-              const char_index_ = textToKramaMapIndex(
-                from_script_data,
-                char_to_search + n_2_th_next_character
-              );
-              const nth_char_text_index = kramaIndexOfText(
-                from_script_data,
-                nth_next_character ?? ''
-              );
-              const n_1_th_char_text_index = kramaIndexOfText(
-                from_script_data,
-                n_1_th_next_character ?? ''
-              );
-              // special case for some mAtrAs like gO = g + E + A
-              if (
-                char_index_ !== -1 &&
-                nth_char_text_index !== -1 &&
-                n_1_th_char_text_index !== -1
-              ) {
-                const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
-                const n_1_th_char_text_item =
-                  from_script_data.krama_text_arr[n_1_th_char_text_index];
-                text_to_krama_item_index = char_index_;
-                const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
-                const n_1_th_char_type =
-                  from_script_data.list[n_1_th_char_text_item[1] ?? -1]?.type;
-                if (nth_char_type === 'mAtrA' && n_1_th_char_type === 'mAtrA') {
-                  ignore_ta_ext_sup_num_text_index = end_index + nth_next_width + n_1_th_next_width;
-                  break;
-                }
-              }
             }
-            // Handle case: mAtrA + Vedic mark + superscript (n_2_th is superscript, n_1_th is Vedic)
+            // The match ends with halant + a letter that cannot be continued (ல்ர is the start of
+            // ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a superscript (்ரு² ்ரூ²):
+            // stop the match before the halant, so ல்ரு² is read as ல + ்ரு² (लृ), not ल्रु²
             if (
-              ignore_ta_ext_sup_num_text_index === -1 &&
-              nth_next_character !== undefined &&
-              n_1_th_next_character !== undefined &&
-              isVedicSvaraTail(n_1_th_next_character) &&
-              n_2_th_next_character !== undefined &&
-              isTaExtSuperscriptTail(n_2_th_next_character) &&
-              next.indexOf(n_2_th_next_character) !== -1
+              nth_next_cp !== -1 &&
+              !next_cps.includes(nth_next_cp) &&
+              char_to_search.length > 2 &&
+              char_to_search.at(-2) === halant &&
+              cursor.slice(end_index - 2, end_index) === char_to_search.slice(-2)
             ) {
-              const nth_char_text_index = kramaIndexOfText(
-                from_script_data,
-                nth_next_character ?? ''
-              );
-              if (nth_char_text_index !== -1) {
-                const nth_char_text_item = from_script_data.krama_text_arr[nth_char_text_index];
-                const nth_char_type = from_script_data.list[nth_char_text_item[1] ?? -1]?.type;
-                // If nth_next is a mAtrA and n_1_th is Vedic mark, include superscript
-                if (nth_char_type === 'mAtrA') {
-                  const char_index_ = textToKramaMapIndex(
-                    from_script_data,
-                    char_to_search + n_2_th_next_character
-                  );
-                  if (char_index_ !== -1) {
-                    text_to_krama_item_index = char_index_;
-                    ignore_ta_ext_sup_num_text_index =
-                      end_index + nth_next_width + n_1_th_next_width;
-                    break;
-                  }
+              let tail_sup_index = end_index + cpWidth(nth_next_cp);
+              while (isVedicSvaraTailCp(cursor.cpAt(tail_sup_index))) tail_sup_index += 1;
+              const tail_sup_cp = cursor.cpAt(tail_sup_index);
+              if (isTaExtSuperscriptTailCp(tail_sup_cp)) {
+                const tail_index = textToKramaMapIndex(
+                  from_script_data,
+                  char_to_search.slice(-2) +
+                    String.fromCodePoint(nth_next_cp) +
+                    String.fromCharCode(tail_sup_cp)
+                );
+                const head_index = textToKramaMapIndex(
+                  from_script_data,
+                  char_to_search.slice(0, -2)
+                );
+                if (tail_index !== -1 && head_index !== -1) {
+                  text_to_krama_item_index = head_index;
+                  break;
                 }
               }
             }

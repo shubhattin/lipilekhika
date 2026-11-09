@@ -159,3 +159,30 @@
   to: Devanagari
   input: ක‍ව ක‍
   output: क‍व क‍
+# Tamil-Extended: लृ / लॄ (ல்ரு² / ல்ரூ²) start like ऌ / ॡ (ல்ரி² / ல்ரீ²) (#159)
+- index: 15
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  input: लृ लॄ क्लृ ख्लॄ ल्लृ लृक
+  output: ல்ரு² ல்ரூ² க்ல்ரு² க்²ல்ரூ² ல்ல்ரு² ல்ரு²க
+  reversible: true
+# not followed by a superscript, ல்ர + ு is ल्रु
+- index: 15.1
+  from: Tamil-Extended
+  to: Purna-Devanagari
+  input: ல்ரு ல்ரூ க்ல்ரு
+  output: ल्रु ल्रू क्ल्रु
+  reversible: false
+# ल्ऋ is also written ல்ரு², read back as लृ
+- index: 15.2
+  from: Purna-Devanagari
+  to: Tamil-Extended
+  input: ल्ऋ
+  output: ல்ரு²
+  reversible: false
+- index: 15.3
+  from: Tamil-Extended
+  to: Normal
+  input: ல்ரு² ல்ரூ²
+  output: lR lRR
+  reversible: false
