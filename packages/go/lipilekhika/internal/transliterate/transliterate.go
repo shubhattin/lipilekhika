@@ -274,6 +274,20 @@ func (ctx *transliterateCtx) prevContextCleanup(
 	next []string,
 	lastExtraCall bool,
 ) bool {
+	return ctx.prevContextCleanupExt(itemText, itemList, next, lastExtraCall, false)
+}
+
+// prevContextCleanupExt is prevContextCleanup with `emitsTaExtSuperscriptTail`: the text of the
+// current item (emitted after this call) ends with a Tamil-Extended superscript, eg `RR` -> `ரூ²`.
+// Like when the superscript is already the last character, the typing context is kept so that a
+// Vedic svara typed next goes before it.
+func (ctx *transliterateCtx) prevContextCleanupExt(
+	itemText string,
+	itemList *scriptdata.ListItem,
+	next []string,
+	lastExtraCall bool,
+	emitsTaExtSuperscriptTail bool,
+) bool {
 	resultConcat := false
 	itemKind := itemList.Kind()
 	prev := ctx.prevCtx
@@ -344,7 +358,7 @@ func (ctx *transliterateCtx) prevContextCleanup(
 	toClear := false
 	if ctx.typingMode && len(next) == 0 && !lastExtraCall &&
 		// the case below is to enable typing of _, ' (Vedic svara chihnas too)
-		!(ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript()) {
+		!(ctx.isToTamilExt && (emitsTaExtSuperscriptTail || ctx.resultLastCharIsTaExtSuperscript())) {
 		toClear = true
 		// do not clear the context only if case where the current added element is a vyanjana
 		if itemKind == scriptdata.ListKindVyanjana {
@@ -632,10 +646,11 @@ func TransliterateTextCoreWith(
 
 		// latin digits passthrough if native numerals disabled
 		if ch >= '0' && ch <= '9' && !opts.UseNativeNumerals {
-			result.emitRune(ch)
 			cursor.advance(1)
 			digit, _ := cursor.peekAtStr(textIndex)
+			// cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
 			ctx.prevContextCleanup(digit, nil, nil, false)
+			result.emitRune(ch)
 			continue
 		}
 
@@ -664,6 +679,9 @@ func TransliterateTextCoreWith(
 
 		// Step 1: match text_to_krama_map / typing_text_to_krama_map
 		itemIndex := -1
+		// the matched text ends with a Tamil-Extended superscript that is not next to the rest of
+		// it in the input (a Vedic svara is in between), so it is not to be advanced over
+		taExtSuperscriptDetached := false
 		{
 			scanUnits := 0
 			lastValidVowelMatchIndex := -1
@@ -744,9 +762,25 @@ func TransliterateTextCoreWith(
 							nthKramaIndex = kramaIndexOfChar(fromData, nthCh)
 						}
 
-						// Case: matra/halant + superscript tail (superscript is in next list)
-						if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n1Ch, n1Ok) &&
+						// Case: Vedic svara + superscript with no visible mAtrA, as the writer puts the
+						// svara before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
+						// Read the match with the superscript, the svara itself is read next.
+						// (no superscript is being skipped, or the skipped one is inside this match)
+						if (ignoreTaExtSupIndex == -1 || ignoreTaExtSupIndex < endIndex) &&
+							isVedicSvaraTail(nthCh, nthOk) &&
+							isTaExtSuperscriptTail(n1Ch, n1Ok) && containsRune(nextChars, n1Ch) {
+							if charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false); charIndex >= 0 {
+								itemIndex = charIndex
+								// If a superscript was already skipped inside this match (the ² of க்² in
+								// க்²ரு॑²), it makes up for the one after the svara in the match length,
+								// so the whole match is advanced over.
+								taExtSuperscriptDetached = ignoreTaExtSupIndex == -1
+								ignoreTaExtSupIndex = endIndex + 1
+								break
+							}
+						} else if ignoreTaExtSupIndex == -1 && isTaExtSuperscriptTail(n1Ch, n1Ok) &&
 							containsRune(nextChars, n1Ch) {
+							// Case: matra/halant + superscript tail (superscript is in next list)
 							charIndex := fromData.TextToKramaMapIndex(charToSearch+string(n1Ch), false)
 							if charIndex >= 0 && nthKramaIndex >= 0 {
 								itemIndex = charIndex
@@ -817,7 +851,9 @@ func TransliterateTextCoreWith(
 			}
 			// only relevant while skipping a Tamil-Extended superscript; evaluated lazily
 			indexDeleteLength := 0
-			if ignoreTaExtSupIndex != -1 && matchedCharCount > 1 && len(m.Krama) > 0 &&
+			if taExtSuperscriptDetached {
+				indexDeleteLength = 1
+			} else if ignoreTaExtSupIndex != -1 && matchedCharCount > 1 && len(m.Krama) > 0 &&
 				kramaListItem(fromData, int(m.Krama[0])).Kind() == scriptdata.ListKindVyanjana {
 				last, _ := utf8.DecodeLastRuneInString(matchedText)
 				if isTaExtSuperscriptTail(last, true) {
@@ -830,12 +866,15 @@ func TransliterateTextCoreWith(
 			if (opts.TypingMode || transOptUseTypingChars) && m.CustomBackRef != nil &&
 				*m.CustomBackRef >= 0 && int(*m.CustomBackRef) < len(toData.CustomScriptCharsArr) {
 				customItem := &toData.CustomScriptCharsArr[*m.CustomBackRef]
-				result.emit(customItem.Text)
 				var listItem *scriptdata.ListItem
 				if customItem.FirstRef != nil {
 					listItem = listItemAt(toData, int(*customItem.FirstRef))
 				}
+				// cleanup first, so a pending halant goes before the custom character
+				// (kqq -> क्q, k.qSha -> क्‍ष)
+				// custom characters are never svara/mAtrA, so cleanup never emits them itself
 				ctx.prevContextCleanup(matchedText, listItem, m.Next, false)
+				result.emit(customItem.Text)
 				continue
 			}
 
@@ -870,11 +909,24 @@ func TransliterateTextCoreWith(
 						} else if len(krama) > 0 {
 							item = kramaListItem(toData, int(krama[0]))
 						}
+						typingFromNormal := opts.TypingMode && fromName == "Normal"
 						var next []string
-						if opts.TypingMode && fromName == "Normal" {
+						if typingFromNormal {
 							next = m.Next
 						}
-						resultConcat = ctx.prevContextCleanup(matchedText, item, next, false)
+						// The halant typed by its own key (`.h`) is passed as the halant itself, so
+						// that the cleanup does not add a second one after a vyanjana
+						// (k.h -> क्, not क््)
+						itemText := matchedText
+						if len(krama) == 1 && kramaTextOrEmpty(toData, int(krama[0])) == ctx.brahmicHalant {
+							itemText = ctx.brahmicHalant
+						}
+						emitsTaExtSuperscriptTail := false
+						if typingFromNormal && ctx.isToTamilExt {
+							last, size := utf8.DecodeLastRuneInString(kramaTextOrEmpty(toData, int(krama[len(krama)-1])))
+							emitsTaExtSuperscriptTail = isTaExtSuperscriptTail(last, size > 0)
+						}
+						resultConcat = ctx.prevContextCleanupExt(itemText, item, next, false, emitsTaExtSuperscriptTail)
 					} else if opts.TypingMode && fromName == "Normal" && toOther {
 						resultConcat = ctx.prevContextCleanup(matchedText, nil, m.Next, false)
 					}
@@ -911,11 +963,17 @@ func TransliterateTextCoreWith(
 				}
 				continue
 			} else if containsI16(krama, -1) {
-				// typing-mode special case when krama contains -1 entries: emit raw match
-				result.emit(matchedText)
+				// krama contains -1 entries: emit raw match
+				// (prefix-only entries like `c` of `ch` or `S` of `Sh`)
+				// cleanup first, so a pending halant goes before the text (kc -> क्c)
 				if opts.TypingMode {
 					ctx.prevContextCleanup(matchedText, nil, m.Next, false)
+				} else if prevContextInUse {
+					// like an unknown character (see Step 2), `kca` -> क्cअ
+					ctx.prevContextCleanup(matchedText, nil, nil, false)
+					prevCtx.clear()
 				}
+				result.emit(matchedText)
 				continue
 			}
 		} else {
@@ -948,6 +1006,16 @@ func TransliterateTextCoreWith(
 				resultConcat = ctx.prevContextCleanup(charToSearch, kramaListItem(fromData, index), nil, false)
 			} else if toBrahmic {
 				resultConcat = ctx.prevContextCleanup(charToSearch, kramaListItem(toData, index), nil, false)
+			} else if opts.TypingMode && fromName == "Normal" {
+				// Typing into an `other` script: a key with no krama in the typing map (Romanized
+				// `sh` / `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next`
+				// as in Step 1, so the context is kept while more keys can follow (else `shh` at
+				// the start of a word comes out as `śh`), and cleared like in Step 1 when none can.
+				var next []string
+				if itemIndex >= 0 {
+					next = textToKramaMap[itemIndex].Value.Next
+				}
+				ctx.prevContextCleanup(charToSearch, nil, next, false)
 			}
 		}
 

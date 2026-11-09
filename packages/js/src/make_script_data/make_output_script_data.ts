@@ -71,6 +71,37 @@ function sortByText<T extends readonly [string, ...unknown[]]>(arr: readonly T[]
   return [...arr].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 }
 
+/**
+ * Krama of an intermediate typing prefix (not a Normal text itself) for an `other` script.
+ * Runs of letters are split greedily (longest first) into Normal texts, `aiI` -> `ai` + `I`
+ * (for a text listed more than once the first krama index wins, as in `kramaKeyIndex`).
+ * Other characters, like the `.` of the standalone mAtrA keys (`.ai`, `.L`), are only part
+ * of the key and are left out. Returns `null` if a run of letters cannot be split.
+ */
+function other_script_typing_prefix_krama(
+  text: string,
+  normal_krama_text_arr: OutputScriptData['krama_text_arr']
+): number[] | null {
+  const krama: number[] = [];
+  for (const [letters] of text.matchAll(/[a-zA-Z]+/g)) {
+    let start = 0;
+    while (start < letters.length) {
+      let end = letters.length;
+      let found = -1;
+      while (end > start) {
+        const piece = letters.substring(start, end);
+        found = normal_krama_text_arr.findIndex((item) => item[0] === piece);
+        if (found !== -1) break;
+        end--;
+      }
+      if (found === -1) return null;
+      krama.push(found);
+      start = end;
+    }
+  }
+  return krama.length > 0 ? krama : null;
+}
+
 function get_out_script_data(
   input_script_data: InputScriptInfoType,
   NormalOutputData?: OutputScriptData
@@ -177,6 +208,15 @@ function get_out_script_data(
         const krama_key_index = NormalOutputData?.krama_text_arr.findIndex(
           (item) => item[0] === text_char
         );
+        // In `other` scripts the a-mAtrA, which the per character fallback below resolves
+        // unknown characters to, has a visible text (`a` in Romanized): `aiI` was typed as
+        // `aaa`, `.L` as `aḷ`. (In brahmic scripts it is empty and the typing relies on it.)
+        const other_script_krama =
+          res.script_type === 'other' &&
+          NormalOutputData !== undefined &&
+          (krama_key_index === undefined || krama_key_index === -1)
+            ? other_script_typing_prefix_krama(text_char, NormalOutputData.krama_text_arr)
+            : null;
         if (
           krama_key_index !== undefined &&
           krama_key_index !== null &&
@@ -184,6 +224,7 @@ function get_out_script_data(
           krama_key_index !== -1
         )
           new_addition[1].krama = [krama_key_index];
+        else if (other_script_krama !== null) new_addition[1].krama = other_script_krama;
         else {
           // calculate index for individual characters
           const krama_key_index_list = text_char.split('').map((char) => {
@@ -497,6 +538,14 @@ function get_out_script_data(
     ) {
       text_krama_item[1].krama = [text_index];
     }
+  }
+  // Romanized `sh` is only a prefix (of `shh` -> ṣ), not a character. The matcher does not
+  // backtrack to `s` + `h`, so without a krama `sha` was emitted raw as `shअ`. The halant is
+  // part of the krama as the context logic does not add one inside a single match.
+  if (input_script_data.script_name === 'Romanized') {
+    const sh_item = res.text_to_krama_map.find((item) => item[0] === 'sh');
+    if (sh_item && !sh_item[1].krama?.length)
+      sh_item[1].krama = [kramaKeyIndex('स'), kramaKeyIndex('्'), kramaKeyIndex('ह')];
   }
   // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
   // then we can safely remove it as it directly looked up in the krama array

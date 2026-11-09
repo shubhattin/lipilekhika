@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
@@ -21,6 +22,8 @@ type typingTestCase struct {
 	PreserveCheck bool                   `yaml:"preserve_check"`
 	Options       map[string]interface{} `yaml:"options"`
 	Todo          bool                   `yaml:"todo"`
+	// File is the name of the yaml file the case is from (without the extension)
+	File string `yaml:"-"`
 }
 
 type transTestCase struct {
@@ -114,16 +117,42 @@ func writeTestLog(filename, content string) {
 	_ = os.WriteFile(filepath.Join(dir, filename), []byte(content+"\n"), 0o644)
 }
 
+// loadTypingTests loads every typing case under test_data/typing (all `.yaml` files, recursively,
+// except the `context` folder which has its own schema), same as the JS/Rust/Python tests.
 func loadTypingTests(t *testing.T) []typingTestCase {
 	t.Helper()
-	path := filepath.Join("..", "..", "..", "..", "test_data", "typing", "01-typing-mode.yaml")
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("read typing test data: %v", err)
-	}
+	root := filepath.Join("..", "..", "..", "..", "test_data", "typing")
 	var tests []typingTestCase
-	if err := yaml.Unmarshal(data, &tests); err != nil {
-		t.Fatalf("parse typing test data: %v", err)
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if path != root && d.Name() == "context" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) != ".yaml" {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("read %s: %w", path, err)
+		}
+		var cases []typingTestCase
+		if err := yaml.Unmarshal(data, &cases); err != nil {
+			return fmt.Errorf("parse %s: %w", path, err)
+		}
+		file := strings.TrimSuffix(filepath.Base(path), ".yaml")
+		for i := range cases {
+			cases[i].File = file
+		}
+		tests = append(tests, cases...)
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("load typing test data: %v", err)
 	}
 	return tests
 }
@@ -188,7 +217,8 @@ func TestTypingMode(t *testing.T) {
 	preserveChecks := 0
 	for _, tc := range tests {
 		tc := tc
-		name := fmt.Sprintf("%d-%s", tc.Index, tc.Script)
+		// indexes restart in each file, so the file name keeps the subtest names unique
+		name := fmt.Sprintf("%s/%d-%s", tc.File, tc.Index, tc.Script)
 		if tc.Todo {
 			todoSkipped++
 			t.Run(name, func(t *testing.T) { t.Skip("todo") })
@@ -202,7 +232,7 @@ func TestTypingMode(t *testing.T) {
 				t.Fatalf("emulate typing: %v", err)
 			}
 			if got != tc.Output {
-				t.Fatalf("typing mismatch: got %q want %q", got, tc.Output)
+				t.Fatalf("typing mismatch for input %q: got %q want %q", tc.Text, got, tc.Output)
 			}
 			if tc.PreserveCheck {
 				preserveChecks++

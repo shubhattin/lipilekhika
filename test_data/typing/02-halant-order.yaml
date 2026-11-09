@@ -1,0 +1,55 @@
+# Halant of a consonant must come before the next character (#151)
+#
+# The halant of a consonant depends on the key that follows it (k -> क्, ka -> क,
+# kk -> क्क्), so it is added when that next key is processed. Some paths emitted the next
+# character first and added the halant after it (kqq -> कq् instead of क्q).
+# An unknown character was already correct (kWa -> क्Wअ), these cases follow it.
+
+# Custom script characters: `qq` (q), `QQ` (Q), `.q` (ZWJ)
+# k.qSha -> क् + ZWJ + ष: the half form of क
+- index: 0
+  text: kqq kQQ k.qSha
+  output: "क्q क्Q क्‍ष"
+  script: Devanagari
+# In Sinhala the conjunct form is al-lakuna + ZWJ (ක්‍ෂ), it came out as ZWJ + al-lakuna
+- index: 1
+  text: k.qSha
+  output: "ක්‍ෂ"
+  script: Sinhala
+# Tamil numeral custom characters `.10`, `.100`, `.1000` after a consonant
+- index: 2
+  text: k.10 k.100 k.1000
+  output: க்௰ க்௱ க்௲
+  script: Tamil
+
+# Prefix-only keys which are not characters by themselves (`S` of `Sh`, `c` of `ch`)
+# are emitted as they are, after the halant of the previous consonant
+- index: 3
+  text: kSa kca kc
+  output: क्Sअ क्cअ क्c
+  script: Devanagari
+
+# ASCII digits with native numerals off
+- index: 4
+  text: k0 k0a
+  output: क्0 क्0अ
+  script: Devanagari
+  options:
+    useNativeNumerals: false
+- index: 5
+  text: ram5
+  output: రమ్5
+  script: Telugu
+  options:
+    useNativeNumerals: false
+# with native numerals on this was already correct
+- index: 6
+  text: k0 k0a
+  output: क्० क्०अ
+  script: Devanagari
+
+# `.h` (halant key) after a consonant adds only one halant, not two (क््)
+- index: 7
+  text: k.h kh.h k.hSha k.hk
+  output: क् ख् क्ष क्क्
+  script: Devanagari

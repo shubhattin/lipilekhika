@@ -1,0 +1,31 @@
+# Typing into Romanized (#153)
+
+# `sh` is only a prefix here (of `shh` -> ṣ and `sh^` -> Ś) and has no krama of its own in the
+# typing data, same for `ch` (of `chh` -> Ch). At the start of a word the typing context was
+# cleared after it, so the next `h` / `^` started afresh: shh -> śh, sh^ -> ś^
+- index: 0
+  text: shhaShTha chhAyA sh^iva
+  output: ṣaṣṭha Chāyā Śiva
+  script: Romanized
+# after another letter it already worked
+- index: 1
+  text: ash^ ashh achh
+  output: aŚ aṣ aCh
+  script: Romanized
+
+# `aiI` and `auU` are prefixes of `aiI^` (Ê) and `auU^` (Ô). As intermediate typing entries they
+# were resolved character by character to the a-mAtrA, typed as `aaa`. They are `ai` + `I`, `au` + `U`
+- index: 2
+  text: kaiI auU
+  output: kaiī auū
+  script: Romanized
+- index: 3
+  text: kaiI^ auU^
+  output: kÊ Ô
+  script: Romanized
+# Same for the standalone mAtrA keys (`.ai` of `.aiI`, `.L` of `.LR`): while typed, the `.` showed
+# up as an `a` (`.ai` -> `aaa`, `.L` -> `aḷ`). Like in brahmic scripts the `.` has no output
+- index: 4
+  text: .a .ai .au .L k.L
+  output: a ai au ḷ kḷ
+  script: Romanized

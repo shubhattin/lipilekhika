@@ -74,6 +74,9 @@ const emit_krama_pieces = (
 /**
  * @param item_text text of the current item (stored in the context)
  * @param item_list list item (type info) of the current item
+ * @param emits_ta_ext_superscript_tail the text of the current item (emitted after this call)
+ * ends with a Tamil-Extended superscript, eg `RR` -> `ரூ²`. Like when the superscript is already
+ * the last character, the typing context is kept so that a Vedic svara typed next goes before it.
  * @return flag to indicate if the result concat has to be done as it already is concatenated here.
  */
 function prev_context_cleanup(
@@ -81,7 +84,8 @@ function prev_context_cleanup(
   item_text: string | undefined,
   item_list: ListItem | null | undefined,
   next?: string[] | null,
-  last_extra_call: boolean = false
+  last_extra_call: boolean = false,
+  emits_ta_ext_superscript_tail: boolean = false
 ) {
   const {
     to_script_name,
@@ -198,7 +202,10 @@ function prev_context_cleanup(
     (next === undefined || next === null || next.length === 0) &&
     !last_extra_call &&
     // the case below is to enable typing of _, ' (Vedic svara chihnas too)
-    !(is_to_tamil_ext && isTaExtSuperscriptTail(result.lastChar()))
+    !(
+      is_to_tamil_ext &&
+      (emits_ta_ext_superscript_tail || isTaExtSuperscriptTail(result.lastChar()))
+    )
   ) {
     to_clear_context = true;
     // do not clear the context only if case where the current added element is a vyanjana
@@ -552,9 +559,10 @@ export const transliterate_text_core = (
     if (cp >= 0x30 && cp <= 0x39 && !use_native_numerals) {
       // '0' - '9'
       const char = cursor.slice(char_index, char_index + char_width);
-      result.emit(char);
       cursor.advance(char_width);
+      // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
       prev_context_cleanup(ctx, char, null);
+      result.emit(char);
       continue;
     }
 
@@ -574,6 +582,9 @@ export const transliterate_text_core = (
     // Step 1: Search for the character in the text_to_krama_map
     /** index in `text_to_krama_map`, `-1` if no match */
     let text_to_krama_item_index = -1;
+    /** the matched text ends with a Tamil-Extended superscript that is not next to the rest of
+     * it in the input (a Vedic svara is in between), so the superscript is not to be advanced over */
+    let ta_ext_superscript_detached = false;
     {
       // Iterative matching with retraction support for vyanjana+vowel context
       // Instead of lookahead, we save the last valid vowel (svara/mAtrA) match and retract if needed
@@ -684,6 +695,32 @@ export const transliterate_text_core = (
             const n_2_th_next_character =
               n_2_th_next_cp !== -1 ? String.fromCodePoint(n_2_th_next_cp) : undefined;
             if (
+              // no superscript is being skipped, or the skipped one is inside this match
+              (ignore_ta_ext_sup_num_text_index === -1 ||
+                ignore_ta_ext_sup_num_text_index < end_index) &&
+              nth_next_character !== undefined &&
+              isVedicSvaraTail(nth_next_character) &&
+              n_1_th_next_character !== undefined &&
+              isTaExtSuperscriptTail(n_1_th_next_character) &&
+              next.indexOf(n_1_th_next_character) !== -1
+            ) {
+              // Vedic svara + superscript with no visible mAtrA, as the writer puts the svara
+              // before the superscript: க॒² (ख॒), ரு॒² (ऋ॒), க்²ரு॑² (खृ॑)
+              // Read the match with the superscript, the svara itself is read next.
+              const char_index_ = textToKramaMapIndex(
+                from_script_data,
+                char_to_search + n_1_th_next_character
+              );
+              if (char_index_ !== -1) {
+                text_to_krama_item_index = char_index_;
+                // If a superscript was already skipped inside this match (the ² of க்² in
+                // க்²ரு॑²), it makes up for the one after the svara in the match length,
+                // so the whole match is advanced over.
+                ta_ext_superscript_detached = ignore_ta_ext_sup_num_text_index === -1;
+                ignore_ta_ext_sup_num_text_index = end_index + nth_next_width;
+                break;
+              }
+            } else if (
               ignore_ta_ext_sup_num_text_index === -1 &&
               n_1_th_next_character !== undefined &&
               isTaExtSuperscriptTail(n_1_th_next_character) &&
@@ -799,11 +836,12 @@ export const transliterate_text_core = (
       // condtional subtarct 1 when a superscript number is present in the current match
       // (only relevant while skipping a Tamil-Extended superscript)
       const index_delete_length =
-        ignore_ta_ext_sup_num_text_index !== -1 &&
-        matched_text.length > 1 &&
-        from_script_data.list[from_script_data.krama_text_arr[map.krama?.[0] ?? -1]?.[1] ?? -1]
-          ?.type === 'vyanjana' &&
-        isTaExtSuperscriptTail(matched_text.at(-1) ?? undefined)
+        ta_ext_superscript_detached ||
+        (ignore_ta_ext_sup_num_text_index !== -1 &&
+          matched_text.length > 1 &&
+          from_script_data.list[from_script_data.krama_text_arr[map.krama?.[0] ?? -1]?.[1] ?? -1]
+            ?.type === 'vyanjana' &&
+          isTaExtSuperscriptTail(matched_text.at(-1) ?? undefined))
           ? 1
           : 0;
       const matched_len_units = matched_text.length - index_delete_length;
@@ -818,13 +856,16 @@ export const transliterate_text_core = (
         const custom_script_char_item =
           to_script_data.custom_script_chars_arr[map.custom_back_ref] ?? null;
         if (custom_options_json !== null) {
-          result.emit(custom_script_char_item[0]);
+          // cleanup first, so a pending halant goes before the custom character
+          // (kqq -> क्q, k.qSha -> क्‍ष)
+          // custom characters are never svara/mAtrA, so cleanup never emits them itself
           prev_context_cleanup(
             ctx,
             matched_text,
             to_script_data.list[custom_script_char_item[1] ?? -1] ?? null,
             map.next
           );
+          result.emit(custom_script_char_item[0]);
         }
         continue;
       }
@@ -891,10 +932,26 @@ export const transliterate_text_core = (
                     null)
                   : null;
             }
+            // The halant typed by its own key (`.h`) is passed as the halant itself, so that
+            // the cleanup does not add a second one after a vyanjana (k.h -> क्, not क््)
+            const item_text =
+              krama.length === 1 && kramaTextOrEmpty(to_script_data, krama[0]) === BRAHMIC_HALANT
+                ? BRAHMIC_HALANT
+                : matched_text;
             if (typing_mode && from_script_name === 'Normal') {
               // Note :- this is the only over place where next chars can be found
-              result_concat_status = prev_context_cleanup(ctx, matched_text, item, map.next);
-            } else result_concat_status = prev_context_cleanup(ctx, matched_text, item);
+              result_concat_status = prev_context_cleanup(
+                ctx,
+                item_text,
+                item,
+                map.next,
+                false,
+                is_to_tamil_ext &&
+                  isTaExtSuperscriptTail(
+                    kramaTextOrEmpty(to_script_data, krama[krama.length - 1]).at(-1)
+                  )
+              );
+            } else result_concat_status = prev_context_cleanup(ctx, item_text, item);
           } else if (
             typing_mode &&
             from_script_name === 'Normal' &&
@@ -932,12 +989,18 @@ export const transliterate_text_core = (
         continue;
       } else if (krama !== null && krama !== undefined && krama.indexOf(-1) !== -1) {
         // handle cases where any one of the krama poiting is -1
-        result.emit(matched_text);
+        // (prefix-only entries like `c` of `ch` or `S` of `Sh`, emitted as they are)
+        // cleanup first, so a pending halant goes before the text (kc -> क्c)
         if (typing_mode) {
           // custom context setup call where -1
           // Like for Sh('), ''(')\
           prev_context_cleanup(ctx, matched_text, null, map.next);
+        } else if (PREV_CONTEXT_IN_USE) {
+          // like an unknown character (see Step 2), `kca` -> क्cअ
+          prev_context_cleanup(ctx, matched_text, null);
+          prev_context.clear();
         }
+        result.emit(matched_text);
         continue;
       }
     } else {
@@ -981,6 +1044,12 @@ export const transliterate_text_core = (
           char_to_search,
           to_script_data.list[to_script_data.krama_text_arr[index][1] ?? -1]
         );
+      } else if (typing_mode && from_script_name === 'Normal') {
+        // Typing into an `other` script: a key with no krama in the typing map (Romanized `sh` /
+        // `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next` as in Step 1,
+        // so the context is kept while more keys can follow (else `shh` at the start of a word
+        // comes out as `śh`), and cleared like in Step 1 when none can.
+        prev_context_cleanup(ctx, char_to_search, null, text_to_krama_item?.[1].next);
       }
     }
     if (!result_concat_status) {
