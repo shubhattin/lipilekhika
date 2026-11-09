@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { transliterate_node, createTypingContext } from '../src/node';
 import { transliterate, transliterate_wasm } from '../src/index';
 import { transliterate as transliterate_wasm_bind } from '../wasm/bind';
+import { createTypingContext as createTypingContextTs } from '../src/typing';
+import { typing_test_data_schema } from '../src/transliteration/test_commons';
+import YAML from 'yaml';
+import * as fs from 'node:fs';
+import path from 'node:path';
 
 const PACHAM_VARGA_AS_ANUSVARA = {
   'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
@@ -108,6 +113,40 @@ describe('node binding smoke checks', () => {
       expect(result).toBe(out);
     }
   });
+});
+
+describe('node binding typing matches the TS typing diffs (#155)', () => {
+  const TYPING_DIR = path.join(__dirname, '../../../test_data/typing');
+  const files = fs
+    .readdirSync(TYPING_DIR)
+    .filter((f) => f.endsWith('.yaml'))
+    .map((f) => path.join(TYPING_DIR, f));
+  for (const file of files) {
+    const cases = typing_test_data_schema.array().parse(YAML.parse(fs.readFileSync(file, 'utf-8')));
+    describe(path.basename(file, '.yaml'), () => {
+      for (const test of cases) {
+        if (test.todo) continue;
+        it(`${test.index} - ${test.script}`, async () => {
+          const script = test.script as Parameters<typeof createTypingContext>[0];
+          const options = test.options ?? undefined;
+          const ctx = createTypingContext(script, options);
+          const ctx_ts = createTypingContextTs(script, options);
+          await Promise.all([ctx.ready, ctx_ts.ready]);
+          let result = '';
+          for (const ch of test.text) {
+            const diff = ctx.takeKeyInput(ch);
+            // `to_delete_chars_count` is in UTF-16 code units, as JS strings are sliced
+            expect(diff, `key ${JSON.stringify(ch)}`).toEqual(ctx_ts.takeKeyInput(ch));
+            if (diff.to_delete_chars_count > 0) {
+              result = result.slice(0, -diff.to_delete_chars_count);
+            }
+            result += diff.diff_add_text;
+          }
+          expect(result).toBe(test.output);
+        });
+      }
+    });
+  }
 });
 
 describe('wasm binding smoke check', () => {
