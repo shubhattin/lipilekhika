@@ -110,20 +110,28 @@ describe('Typing context auto clear and empty key', () => {
 
 describe('Typing a long text without a context break', () => {
   // the context is only cleared at a space or punctuation, so a long run of letters kept
-  // the whole run as context and each key re-transliterated all of it
-  it('takes linear time', async () => {
-    const ctx = createTypingContext('Devanagari');
-    await ctx.ready;
-    const keys = 'ka'.repeat(10_000);
+  // the whole run as context and each key re-transliterated all of it (quadratic time)
+  const typeRun = (ctx: ReturnType<typeof createTypingContext>, syllables: number) => {
+    ctx.clearContext();
     let result = '';
     const start = performance.now();
-    for (const key of keys) {
+    for (const key of 'ka'.repeat(syllables)) {
       const diff = ctx.takeKeyInput(key);
       if (diff.to_delete_chars_count > 0) result = result.slice(0, -diff.to_delete_chars_count);
       result += diff.diff_add_text;
     }
-    const elapsed_ms = performance.now() - start;
-    expect(result).toBe('क'.repeat(10_000));
-    expect(elapsed_ms).toBeLessThan(2000);
+    return { result, ms: performance.now() - start };
+  };
+
+  it('takes linear time', async () => {
+    const ctx = createTypingContext('Devanagari');
+    await ctx.ready;
+    typeRun(ctx, 1_000); // warm up
+    // compared with a 5x shorter run, so that it does not depend on the machine speed
+    // (or coverage): linear ~5x, it was ~25x
+    const short = typeRun(ctx, 2_000);
+    const long = typeRun(ctx, 10_000);
+    expect(long.result).toBe('क'.repeat(10_000));
+    expect(long.ms / short.ms).toBeLessThan(12);
   });
 });
