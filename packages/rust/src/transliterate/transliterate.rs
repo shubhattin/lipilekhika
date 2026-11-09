@@ -1249,10 +1249,7 @@ pub fn transliterate_text_core_with(
                             let mut tail = String::with_capacity(24);
                             tail.push_str(halant);
                             let mut tail_end = end_index;
-                            loop {
-                                let Some(c) = ctx.cursor.peek_at(tail_end) else {
-                                    break;
-                                };
+                            while let Some(c) = ctx.cursor.peek_at(tail_end) {
                                 if is_ta_ext_superscript_tail(Some(c)) {
                                     break;
                                 }
