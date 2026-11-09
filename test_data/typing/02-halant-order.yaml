@@ -1,18 +1,17 @@
 # Halant of a consonant must come before the next character (#151)
 #
-# After a consonant the halant is held back, as the next key decides whether it is needed
-# (k -> क, ka -> क, kk -> क्क). It is emitted when the next character is processed.
-# Some paths emitted the next character first and only then the pending halant, so it
-# landed after that character (kqq -> कq् instead of क्q).
-# An unknown character was already correct (kqa -> क्qअ), these cases follow it.
+# The halant of a consonant depends on the key that follows it (k -> क्, ka -> क,
+# kk -> क्क्), so it is added when that next key is processed. Some paths emitted the next
+# character first and added the halant after it (kqq -> कq् instead of क्q).
+# An unknown character was already correct (kWa -> क्Wअ), these cases follow it.
 
-# Custom script characters: `qq` (q), `.q` (ZWJ)
+# Custom script characters: `qq` (q), `QQ` (Q), `.q` (ZWJ)
 # k.qSha -> क् + ZWJ + ष: the half form of क
 - index: 0
-  text: kqq k.qSha
-  output: "क्q क्‍ष"
+  text: kqq kQQ k.qSha
+  output: "क्q क्Q क्‍ष"
   script: Devanagari
-# In Sinhala a conjunct needs al-lakuna + ZWJ (ක්‍ෂ), not ZWJ + al-lakuna
+# In Sinhala the conjunct form is al-lakuna + ZWJ (ක්‍ෂ), it came out as ZWJ + al-lakuna
 - index: 1
   text: k.qSha
   output: "ක්‍ෂ"
@@ -51,6 +50,6 @@
 
 # `.h` (halant key) after a consonant adds only one halant, not two (क््)
 - index: 7
-  text: k.h kh.h k.hSha
-  output: क् ख् क्ष
+  text: k.h kh.h k.hSha k.hk
+  output: क् ख् क्ष क्क्
   script: Devanagari

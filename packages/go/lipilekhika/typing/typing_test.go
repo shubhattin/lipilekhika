@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika"
@@ -21,6 +22,8 @@ type typingTestCase struct {
 	PreserveCheck bool                   `yaml:"preserve_check"`
 	Options       map[string]interface{} `yaml:"options"`
 	Todo          bool                   `yaml:"todo"`
+	// File is the name of the yaml file the case is from (without the extension)
+	File string `yaml:"-"`
 }
 
 type transTestCase struct {
@@ -141,6 +144,10 @@ func loadTypingTests(t *testing.T) []typingTestCase {
 		if err := yaml.Unmarshal(data, &cases); err != nil {
 			return fmt.Errorf("parse %s: %w", path, err)
 		}
+		file := strings.TrimSuffix(filepath.Base(path), ".yaml")
+		for i := range cases {
+			cases[i].File = file
+		}
 		tests = append(tests, cases...)
 		return nil
 	})
@@ -210,7 +217,8 @@ func TestTypingMode(t *testing.T) {
 	preserveChecks := 0
 	for _, tc := range tests {
 		tc := tc
-		name := fmt.Sprintf("%d-%s", tc.Index, tc.Script)
+		// indexes restart in each file, so the file name keeps the subtest names unique
+		name := fmt.Sprintf("%s/%d-%s", tc.File, tc.Index, tc.Script)
 		if tc.Todo {
 			todoSkipped++
 			t.Run(name, func(t *testing.T) { t.Skip("todo") })
@@ -224,7 +232,7 @@ func TestTypingMode(t *testing.T) {
 				t.Fatalf("emulate typing: %v", err)
 			}
 			if got != tc.Output {
-				t.Fatalf("typing mismatch: got %q want %q", got, tc.Output)
+				t.Fatalf("typing mismatch for input %q: got %q want %q", tc.Text, got, tc.Output)
 			}
 			if tc.PreserveCheck {
 				preserveChecks++

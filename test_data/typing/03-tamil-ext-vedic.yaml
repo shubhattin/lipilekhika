@@ -1,7 +1,7 @@
 # Tamil-Extended: Vedic svara typed after a vowel ending in a superscript (#152)
 #
 # In Tamil-Extended the Vedic svara (॒ ॑ ᳚ ᳛) goes before the superscript number (² ³ ⁴),
-# same as transliterating दे॒वाँ॑ or the one-shot (non incremental) output.
+# same as transliterating दे॒वाँ॑ (or Normal dE↓vAMM↑).
 # `RR` (ॠ = ரூ²), `LRR` (ॡ = ல்ரீ²) and `MM` (ँ = ஂ²) have no further key, so the typing
 # context was cleared after them and the svara typed next went after the superscript.
 
@@ -17,4 +17,9 @@
 - index: 2
   text: R' kRR' LR_
   output: ரு॑² க்ரூ॑² ல்ரி॒²
+  script: Tamil-Extended
+# multi-key svaras ('' -> ᳚, ''' -> ᳛) replace the one typed before them, still before the superscript
+- index: 3
+  text: RR'' LRR''' vAMM''
+  output: ரூ᳚² ல்ரீ᳛² வாஂ᳚²
   script: Tamil-Extended
