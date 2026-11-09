@@ -142,3 +142,20 @@
   to: Gujarati
   input: ॾ ड़ ड ॻ ॼ ॿ
   output: ડ ડ઼ ડ ગ જ બ
+# Sinhala touching letters: ZWJ + al-lakuna (ක‍්ව) is a halant, the ZWJ is not copied (#164)
+- index: 14
+  from: Sinhala
+  to: Devanagari
+  input: ක‍්ව ක‍්ෂ ක්‍ව
+  output: क्व क्ष क्व
+- index: 14.1
+  from: Sinhala
+  to: Telugu
+  input: ක‍්ව
+  output: క్వ
+# a ZWJ elsewhere (not before an al-lakuna) passes through as before
+- index: 14.2
+  from: Sinhala
+  to: Devanagari
+  input: ක‍ව ක‍
+  output: क‍व क‍

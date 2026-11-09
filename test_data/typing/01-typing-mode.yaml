@@ -172,3 +172,23 @@
   text: k.A1 k.u1 k.U1
   output: 𑆑𑇀𑇋𑆳 𑆑𑇀𑇋𑆶 𑆑𑇀𑇋𑆷
   script: Sharada
+# .a1 (a1 mAtrA), Purna-Devanagari ऺ and Sharada 𑇋 (#163)
+- index: 31
+  text: k.a1 .a1
+  output: क्ऺ ऺ
+  script: Purna-Devanagari
+- index: 32
+  text: k.a1
+  output: कऺ
+  script: Purna-Devanagari
+  options:
+    includeInherentVowel: true
+- index: 33
+  text: k.a1 .a1
+  output: 𑆑𑇀𑇋 𑇋
+  script: Sharada
+# no distinct a1 mAtrA in Devanagari: the same as .a
+- index: 34
+  text: k.a1 .a1 k.a
+  output: क्  क्
+  script: Devanagari
