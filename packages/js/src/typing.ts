@@ -259,6 +259,33 @@ function beforeInputEventFromTypingEvent(event: unknown): BeforeInputEventLike |
   return null;
 }
 
+/**
+ * Where the last transliterated key left the element. The typing context holds the text just
+ * before the caret, so it is only valid while the caret and the text are still where it left them.
+ * A mouse click, a touch, undo, an autocorrect or the app changing the value do not always come
+ * with an event we can clear on, so before every key this is compared with the element instead.
+ */
+type TypingAnchor = {
+  element: object;
+  value: string;
+  caret: number;
+};
+const typing_anchors = new WeakMap<object, TypingAnchor>();
+
+function setTypingAnchor(typingContext: object, element: HTMLInputElement | HTMLTextAreaElement) {
+  typing_anchors.set(typingContext, {
+    element,
+    value: element.value,
+    caret: element.selectionStart ?? element.value.length
+  });
+}
+
+/** Clears the context and forgets where it was left */
+function resetTypingContext(typingContext: ReturnType<typeof createTypingContext>) {
+  typing_anchors.delete(typingContext);
+  typingContext.clearContext();
+}
+
 function keyboardEventFromTypingEvent(event: unknown): KeyboardEvent | null {
   if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return event;
   if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
@@ -287,6 +314,8 @@ export async function handleTypingInputEvent(
 ) {
   const enabled = enabled_ ?? true;
   if (!enabled) {
+    // the text typed now is not part of the context
+    resetTypingContext(typingContext);
     onValueChange?.(inputElementFromTypingEvent(event)?.value ?? '');
     return;
   }
@@ -305,14 +334,14 @@ export async function handleTypingInputEvent(
   // For deletes/paste/etc, let the browser handle it and clear context.
   if (nativeEvent.inputType !== 'insertText') {
     onValueChange?.(inputElement.value);
-    typingContext.clearContext();
+    resetTypingContext(typingContext);
     return;
   }
 
   const inputData: unknown = nativeEvent.data;
   if (typeof inputData !== 'string' || inputData.length !== 1) {
     onValueChange?.(inputElement.value);
-    typingContext.clearContext();
+    resetTypingContext(typingContext);
     return;
   }
 
@@ -322,8 +351,22 @@ export async function handleTypingInputEvent(
   const selectionEnd = inputElement.selectionEnd ?? selectionStart;
   if (selectionStart !== selectionEnd) {
     onValueChange?.(inputElement.value);
-    typingContext.clearContext();
+    resetTypingContext(typingContext);
     return;
+  }
+
+  // The browser has already inserted `inputData` at the caret: the context is only still valid
+  // if that is the only change since the last key.
+  const value = inputElement.value;
+  const anchor = typing_anchors.get(typingContext);
+  const anchorCaret = selectionStart - inputData.length;
+  if (
+    !anchor ||
+    anchor.element !== inputElement ||
+    anchor.caret !== anchorCaret ||
+    anchor.value !== value.slice(0, anchorCaret) + value.slice(selectionStart)
+  ) {
+    resetTypingContext(typingContext);
   }
 
   if (isReactSyntheticEvent && onValueChange) {
@@ -333,6 +376,13 @@ export async function handleTypingInputEvent(
 
   await typingContext.ready;
 
+  // More text arrived while waiting for the script data: the offsets read above are stale, so
+  // leave the typed text as it is rather than replacing the wrong part of it.
+  if (inputElement.value !== value) {
+    resetTypingContext(typingContext);
+    return;
+  }
+
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 
   // In the `input` event, the browser has already inserted `inputData` at the caret.
@@ -340,6 +390,7 @@ export async function handleTypingInputEvent(
   const replaceEnd = selectionStart;
   const replaceStart = Math.max(0, replaceEnd - to_delete_chars_count - inputData.length);
   inputElement.setRangeText(diff_add_text, replaceStart, replaceEnd, 'end');
+  setTypingAnchor(typingContext, inputElement);
 
   onValueChange?.(inputElement.value);
 }
@@ -369,6 +420,8 @@ export async function handleTypingBeforeInputEvent(
    * */
   const enabled = enabled_ ?? true;
   if (!enabled) {
+    // the text typed now is not part of the context
+    resetTypingContext(typingContext);
     return;
   }
 
@@ -380,33 +433,35 @@ export async function handleTypingBeforeInputEvent(
   // Don’t interfere with IME/composition; this breaks mobile/IME typing.
   if (beforeInputEvent.isComposing) return;
 
-  // Only handle actual text insertions. Let the browser do everything else.
-  // React's synthetic `onBeforeInput` reports `type === "beforeinput"` on the
-  // wrapper even when the underlying native event is a polyfilled `textInput`.
-  // (Deletes/paste/etc should be handled via `input` handler + context clearing.)
-  if (
-    beforeInputEvent.inputType !== 'insertText' &&
-    beforeInputEvent.type !== 'beforeinput' &&
-    beforeInputEvent.type !== 'textInput'
-  )
+  // Only handle typed text. Let the browser do everything else (deletes, undo, paste, drop,
+  // autocorrect...) and start a new context, as the text before the caret changes.
+  // A native `beforeinput` always has an `inputType`. React's synthetic `onBeforeInput`
+  // (polyfilled with `textInput`) has none, it only reports the `type`.
+  const isTypedText = beforeInputEvent.inputType
+    ? beforeInputEvent.inputType === 'insertText'
+    : beforeInputEvent.type === 'beforeinput' || beforeInputEvent.type === 'textInput';
+  if (!isTypedText) {
+    resetTypingContext(typingContext);
     return;
+  }
   const inputData: unknown = beforeInputEvent.data;
-  if (typeof inputData !== 'string' || inputData.length === 0) return;
+  if (typeof inputData !== 'string' || inputData.length === 0) {
+    resetTypingContext(typingContext);
+    return;
+  }
 
   // Only intercept real single-character typing.
   // In some environments (notably React), paste can surface as a `textInput` event
   // with multi-character `data`. Preventing default in that case breaks Ctrl+V.
   if (inputData.length !== 1) {
-    typingContext.clearContext();
+    resetTypingContext(typingContext);
     return;
   }
 
   // If there is a selection, we don’t have a clean incremental diff story yet.
   // Let the browser replace the selection and reset the typing context.
-  const selectionStart = inputElement.selectionStart ?? 0;
-  const selectionEnd = inputElement.selectionEnd ?? selectionStart;
-  if (selectionStart !== selectionEnd) {
-    typingContext.clearContext();
+  if ((inputElement.selectionStart ?? 0) !== (inputElement.selectionEnd ?? 0)) {
+    resetTypingContext(typingContext);
     return;
   }
 
@@ -415,12 +470,28 @@ export async function handleTypingBeforeInputEvent(
 
   await typingContext.ready;
 
+  // Read the caret only now: keys typed before the script data was loaded all wait above and
+  // continue in order, each after the previous one has been applied.
+  const selectionStart = inputElement.selectionStart ?? 0;
+  const selectionEnd = inputElement.selectionEnd ?? selectionStart;
+  const anchor = typing_anchors.get(typingContext);
+  if (
+    !anchor ||
+    anchor.element !== inputElement ||
+    anchor.caret !== selectionStart ||
+    anchor.value !== inputElement.value
+  ) {
+    resetTypingContext(typingContext);
+  }
+
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 
   // Replace the "context" immediately before the caret with the transliterated diff.
-  const replaceEnd = selectionStart;
-  const replaceStart = Math.max(0, replaceEnd - to_delete_chars_count);
-  inputElement.setRangeText(diff_add_text, replaceStart, replaceEnd, 'end');
+  // (`selectionEnd` only differs if a selection was made while waiting: it is replaced, like
+  // the browser would have done.)
+  const replaceStart = Math.max(0, selectionStart - to_delete_chars_count);
+  inputElement.setRangeText(diff_add_text, replaceStart, selectionEnd, 'end');
+  setTypingAnchor(typingContext, inputElement);
 
   onValueChange?.(inputElement.value);
 }
@@ -462,9 +533,8 @@ export function clearTypingContextOnKeyDown(
 
     if (key === 'Unidentified' || key === 'Process' || key === 'Dead') return false;
 
-    // Respect shortcut chords / OS-level commands; these should not affect context.
-    if (e.ctrlKey || e.metaKey || e.altKey) return false;
-
+    // Also with Ctrl/Alt/Meta: these still move the caret (word or line jumps) or delete text.
+    // Other shortcut chords (copy, select all...) are not in the list and keep the context.
     if (CONTEXT_CLEAR_KEYS.has(key)) {
       ctx.clearContext();
       return true;
