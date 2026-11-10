@@ -13,6 +13,7 @@ const WASM_ENTRIES = {
   wasm: path.resolve(__dirname, 'src/wasm.ts'),
   'wasm.workerd': path.resolve(__dirname, 'src/wasm.workerd.ts'),
   'wasm.edge-light': path.resolve(__dirname, 'src/wasm.edge-light.ts'),
+  'wasm.browser': path.resolve(__dirname, 'src/wasm.browser.ts'),
   wasm_slim: path.resolve(__dirname, 'src/wasm_slim.ts')
 };
 const WASM_SOURCE_PATH = path.resolve(__dirname, 'wasm/pkg/lipilekhika_wasm_bg.wasm');
@@ -137,6 +138,10 @@ function wasmModuleImportsPlugin(): Plugin {
   const DEFAULT_URL = "module_or_path = new URL('lipilekhika_wasm_bg.wasm', import.meta.url);";
   const BIND_PATH = path.resolve(__dirname, 'wasm/bind.ts');
   const BIND_URL = "new URL('./pkg/lipilekhika_wasm_bg.wasm', import.meta.url)";
+  const BROWSER_BIND_PATH = path.resolve(__dirname, 'wasm/bind_browser.ts');
+  // hidden from Vite's own `new URL(..., import.meta.url)` handling (which would inline it) until
+  // the chunk is written
+  const BROWSER_URL_PLACEHOLDER = '__LIPILEKHIKA_WASM_FILE_URL__';
   return {
     name: 'lipilekhika-wasm-module-imports',
     enforce: 'pre',
@@ -162,6 +167,12 @@ function wasmModuleImportsPlugin(): Plugin {
           `new URL(${JSON.stringify(`data:application/wasm;base64,${base64}`)})`
         );
       }
+      if (id === BROWSER_BIND_PATH) {
+        if (!code.includes(BIND_URL)) {
+          this.error(`\`${BIND_URL}\` not found in ${id}`);
+        }
+        return code.replace(BIND_URL, BROWSER_URL_PLACEHOLDER);
+      }
       if (id !== GLUE_PATH) return null;
       if (!code.includes(DEFAULT_URL)) {
         this.error(`wasm-bindgen glue changed: \`${DEFAULT_URL}\` not found in ${id}`);
@@ -169,6 +180,13 @@ function wasmModuleImportsPlugin(): Plugin {
       return code.replace(
         DEFAULT_URL,
         "throw new Error('lipilekhika: the WASM module must be passed to init()');"
+      );
+    },
+    renderChunk(code) {
+      if (!code.includes(BROWSER_URL_PLACEHOLDER)) return null;
+      return code.replaceAll(
+        BROWSER_URL_PLACEHOLDER,
+        `new URL('../${path.basename(WASM_DIST_PATH)}', import.meta.url)`
       );
     },
     closeBundle() {

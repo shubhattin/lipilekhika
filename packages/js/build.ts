@@ -76,7 +76,7 @@ async function main() {
 
   // The `workerd` / `edge-light` builds of `lipilekhika/wasm` import the `.wasm` file as a module,
   // which only ESM tooling for those runtimes does: no CommonJS build is exported for them.
-  for (const name of ['wasm.workerd.cjs', 'wasm.edge-light.cjs']) {
+  for (const name of ['wasm.workerd.cjs', 'wasm.edge-light.cjs', 'wasm.browser.cjs']) {
     await rm(path.join(packageRoot, 'dist', 'cjs', name), { force: true });
   }
 

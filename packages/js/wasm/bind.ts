@@ -16,12 +16,7 @@ const backend = createWasmBackend(async () => {
   // @ts-expect-error Bun is a runtime global when executed under Bun
   const isBun = typeof Bun !== 'undefined';
   if (isBun || import.meta.env.PROD) {
-    // Bun does not keep the event loop alive while `WebAssembly.instantiateStreaming` (used by
-    // `init()`) is pending: with nothing else pending (eg. a script calling `transliterate_wasm`
-    // from a function that is not top-level awaited) the process exited silently with code 0
-    // before the module was ready. Hold the loop open with a timer until it resolves.
-    // (checked by `scripts/runtime_check.mjs`)
-    const keep_alive = isBun ? setInterval(() => {}, 1 << 30) : null;
+    // (Bun keeps running while this is pending: see `createWasmBackend`)
     try {
       await init({ module_or_path: wasmUrl() });
     } catch (cause) {
@@ -30,8 +25,6 @@ const backend = createWasmBackend(async () => {
           "WebAssembly from bytes (eg. Vercel Edge) need `transliterate_wasm` from 'lipilekhika/wasm'.",
         { cause }
       );
-    } finally {
-      if (keep_alive !== null) clearInterval(keep_alive);
     }
   } else {
     // fallback to run with `vite-node` "locally"

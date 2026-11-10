@@ -110,7 +110,7 @@ The same `transliterate_wasm` is available from three entry points. They differ 
 | Import | How the WASM is loaded | Use it for |
 | --- | --- | --- |
 | `lipilekhika` | Embedded (base64) in a lazily loaded chunk | **Recommended.** Node.js, Bun, Deno, browsers, every bundler and CDN, with no setup |
-| `lipilekhika/wasm` | Picked by the runtime: the `.wasm` file is imported as a module on Cloudflare Workers (`workerd`) and Vercel Edge (`edge-light`), embedded everywhere else | Cloudflare Workers (preferred), Vercel Edge (required), and code shared between such a server and the browser |
+| `lipilekhika/wasm` | Picked by the runtime: the `.wasm` file is imported as a module on Cloudflare Workers (`workerd`) and Vercel Edge (`edge-light`), fetched as a separate file in browsers (with the embedded module as fallback), embedded in Node.js, Bun and Deno | Cloudflare Workers (preferred), Vercel Edge (required), code shared between such a server and the browser, and browsers when you want the separate `.wasm` file |
 | `lipilekhika/wasm/slim` | Nothing embedded: you pass the `.wasm` file (`lipilekhika/lipilekhika.wasm`) to `initWasm()` | A strict Content Security Policy, serving the `.wasm` yourself (CDN, cache), or a runtime not covered above |
 
 <Aside type="tip">
@@ -141,9 +141,30 @@ The package's export conditions pick the right build, so no configuration is nee
 
 - **Cloudflare Workers** (`workerd` condition) — `wrangler`, the Cloudflare Vite plugin and frameworks using it (Astro, SvelteKit, React Router, Nuxt, TanStack Start on Cloudflare, ...) import the `.wasm` file as a `WebAssembly.Module`, in `dev` and in the deployed Worker.
 - **Vercel Edge / Next.js edge runtime** (`edge-light` condition) — the `.wasm` file is imported with the `?module` suffix.
-- **Everywhere else** (Node.js, Bun, Deno, browsers) — the embedded module, the same as `lipilekhika`.
+- **Browsers** (`browser` condition) — the `.wasm` file is fetched (see [In the Browser](#in-the-browser)).
+- **Everywhere else** (Node.js, Bun, Deno) — the embedded module, the same as `lipilekhika`.
 
 So in a full stack app (eg. Astro on Cloudflare) the same `import { transliterate_wasm } from 'lipilekhika/wasm'` works in server code running on the Worker and in client code running in the browser.
+
+### In the Browser
+
+In browsers `lipilekhika/wasm` fetches the `.wasm` file from `new URL('../lipilekhika.wasm', import.meta.url)`: it is downloaded and cached as its own file (80 KB gzipped, against 114 KB for the base64 copy in JavaScript) and compiled while it streams. Bundlers that handle this pattern emit the file as an asset; without a bundler (a CDN `import`) it is fetched as is.
+
+If the file can not be loaded, `lipilekhika/wasm` falls back to the embedded module (a separate chunk, only downloaded in that case) and logs a warning:
+
+| Setup | Extra config |
+| --- | --- |
+| Vite 8 (Astro 7, SvelteKit, ...) — dev and build | None |
+| Vite 7 and older — build | None |
+| Vite 7 and older — dev | The dependency pre-bundling moves the module away from the file: add `optimizeDeps: { exclude: ['lipilekhika'] }` to load the file (without it the embedded module is used) |
+| esbuild (`--bundle`) | esbuild leaves the URL as is: copy `node_modules/lipilekhika/dist/lipilekhika.wasm` to the folder above your bundle, or use `lipilekhika/wasm/slim` (without it the embedded module is used) |
+
+```js
+// vite.config.js (Vite 7 and older)
+export default {
+  optimizeDeps: { exclude: ['lipilekhika'] }
+};
+```
 
 <Aside type="note">
   `lipilekhika/wasm` can be used in every environment, but its `.wasm` import only works with the tooling of those runtimes, so it is offered as a separate entry point and `lipilekhika` stays usable with any bundler.

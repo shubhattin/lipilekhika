@@ -41,6 +41,7 @@
       "types": "./dist/wasm.d.ts",
       "workerd": "./dist/esm/wasm.workerd.mjs",
       "edge-light": "./dist/esm/wasm.edge-light.mjs",
+      "browser": "./dist/esm/wasm.browser.mjs",
       "import": "./dist/esm/wasm.mjs",
       "require": "./dist/cjs/wasm.cjs"
     },

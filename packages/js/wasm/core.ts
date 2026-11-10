@@ -97,12 +97,22 @@ export function createWasmBackend(init: () => Promise<void> | void): WasmBackend
   let initPromise: Promise<void> | null = null;
   const initOnce = () => {
     if (!initPromise) {
+      // Bun does not keep the event loop alive while `WebAssembly.instantiateStreaming` (used by
+      // the glue's `init()`) is pending: with nothing else pending (eg. a script calling
+      // `transliterate_wasm` from a function that is not top-level awaited) the process exited
+      // silently with code 0 before the module was ready. Hold the loop open with a timer until
+      // it is ready. (checked by `scripts/runtime_check.mjs`)
+      // @ts-expect-error Bun is a runtime global when executed under Bun
+      const keep_alive = typeof Bun !== 'undefined' ? setInterval(() => {}, 1 << 30) : null;
       initPromise = Promise.resolve()
         .then(init)
         .catch((error: unknown) => {
           // let a later call try again (eg. a failed fetch of the `.wasm` file)
           initPromise = null;
           throw error;
+        })
+        .finally(() => {
+          if (keep_alive !== null) clearInterval(keep_alive);
         });
     }
     return initPromise;

@@ -13,6 +13,7 @@
 // silently with code 0 before the WASM module was ready). The exit code starts as a failure and
 // is only cleared after every check passed, so such a silent early exit fails this script.
 
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -86,25 +87,29 @@ async function main() {
   );
 
   // `lipilekhika/wasm` (dist: through the package's own `exports`, as a consumer resolves it)
-  // and `lipilekhika/wasm/slim` given the `.wasm` file as bytes and as a compiled module
   const wasm_mod = await import(USE_DIST ? 'lipilekhika/wasm' : target('', '../src/wasm.ts'));
-  const wasm_bytes = readFileSync(
-    new URL(
-      USE_DIST ? '../dist/lipilekhika.wasm' : '../wasm/pkg/lipilekhika_wasm_bg.wasm',
-      import.meta.url
-    )
-  );
-  const slim_url = target('../dist/esm/wasm_slim.mjs', '../src/wasm_slim.ts');
-  const slim_mod = await import(slim_url);
-  // a second copy of the slim module (own state) for the `WebAssembly.Module` source
-  const slim_mod_2 = await import(`${USE_DIST ? slim_url : `file://${slim_url}`}?second`);
-  await slim_mod.initWasm(wasm_bytes);
-  await slim_mod_2.initWasm(new WebAssembly.Module(wasm_bytes));
   const [text, from, to] = CASES[0];
-  const expected = await main_mod.transliterate(text, from, to);
-  check(`wasm (lipilekhika/wasm)`, await wasm_mod.transliterate_wasm(text, from, to), expected);
-  check(`wasm slim (bytes)`, await slim_mod.transliterate_wasm(text, from, to), expected);
-  check(`wasm slim (Module)`, await slim_mod_2.transliterate_wasm(text, from, to), expected);
+  check(
+    `wasm (lipilekhika/wasm)`,
+    await wasm_mod.transliterate_wasm(text, from, to),
+    await main_mod.transliterate(text, from, to)
+  );
+
+  // Every WASM entry shares one wasm-bindgen instance: once one has loaded it, the others reuse
+  // it and load nothing. So each other way of loading is checked in a fresh process.
+  if (USE_DIST) {
+    for (const mode of Object.keys(ISOLATED_CHECKS)) {
+      const res = spawnSync(
+        process.execPath,
+        [fileURLToPath(import.meta.url), '--dist', `--isolated=${mode}`],
+        { encoding: 'utf8' }
+      );
+      process.stdout.write(res.stdout);
+      if (res.status !== 0) {
+        throw new Error(`isolated check ${mode} failed:\n${res.stderr}`);
+      }
+    }
+  }
 
   // typing: JS context vs N-API context
   const typing_mod = await import(target('../dist/esm/typing.mjs', '../src/typing.ts'));
@@ -119,8 +124,45 @@ async function main() {
   console.log('Runtime check passed');
 }
 
+const WASM_BYTES = () => readFileSync(new URL('../dist/lipilekhika.wasm', import.meta.url));
+/** run alone in a process each (dist), see `main` */
+const ISOLATED_CHECKS = {
+  'slim (WebAssembly.Module)': async (slim) => {
+    await slim.initWasm(new WebAssembly.Module(WASM_BYTES()));
+  },
+  'slim (bytes)': async (slim) => {
+    await slim.initWasm(WASM_BYTES());
+  },
+  // the `browser` build fetches `../lipilekhika.wasm`: Bun can fetch a file URL, Node can not and
+  // falls back to the embedded module
+  browser: null
+};
+
+async function isolated(mode) {
+  const [text, from, to] = CASES[0];
+  const { transliterate } = await import(target('../dist/esm/index.mjs', ''));
+  const expected = await transliterate(text, from, to);
+  let actual;
+  let loaded = 'file';
+  if (mode === 'browser') {
+    const warn = console.warn;
+    console.warn = () => (loaded = 'embedded fallback');
+    const mod = await import(target('../dist/esm/wasm.browser.mjs', ''));
+    actual = await mod.transliterate_wasm(text, from, to);
+    console.warn = warn;
+  } else {
+    const slim = await import(target('../dist/esm/wasm_slim.mjs', ''));
+    await ISOLATED_CHECKS[mode](slim);
+    actual = await slim.transliterate_wasm(text, from, to);
+  }
+  check(`wasm ${mode}${mode === 'browser' ? ` (${loaded})` : ''}`, actual, expected);
+  process.exitCode = 0;
+}
+
+const ISOLATED_MODE = process.argv.find((a) => a.startsWith('--isolated='))?.split('=')[1];
+
 // not awaited on purpose (see the note at the top)
-main().catch((error) => {
+(ISOLATED_MODE ? isolated(ISOLATED_MODE) : main()).catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
