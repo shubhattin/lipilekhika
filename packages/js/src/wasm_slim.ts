@@ -22,7 +22,8 @@ const api = createWasmApi(() => backend);
  * import wasmModule from 'lipilekhika/lipilekhika.wasm';
  * await initWasm(wasmModule);
  * // any runtime, from a CDN
- * await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika/dist/lipilekhika.wasm'));
+ * // (the same version as the installed package)
+ * await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika@1.0.14/dist/lipilekhika.wasm'));
  * ```
  * @param wasm - A `WebAssembly.Module`, the bytes, a `Response`, or a URL to fetch (or a promise of one)
  */

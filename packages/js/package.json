@@ -41,7 +41,10 @@
       "types": "./dist/wasm.d.ts",
       "workerd": "./dist/esm/wasm.workerd.mjs",
       "edge-light": "./dist/esm/wasm.edge-light.mjs",
-      "browser": "./dist/esm/wasm.browser.mjs",
+      "browser": {
+        "import": "./dist/esm/wasm.browser.mjs",
+        "require": "./dist/cjs/wasm.cjs"
+      },
       "import": "./dist/esm/wasm.mjs",
       "require": "./dist/cjs/wasm.cjs"
     },
@@ -51,6 +54,7 @@
       "require": "./dist/cjs/wasm_slim.cjs"
     },
     "./lipilekhika.wasm": "./dist/lipilekhika.wasm",
+    "./lipilekhika.wasm?module": "./dist/lipilekhika.wasm?module",
     "./package.json": "./package.json"
   },
   "files": [

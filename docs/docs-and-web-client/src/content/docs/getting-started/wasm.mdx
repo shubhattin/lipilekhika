@@ -18,7 +18,7 @@ The WASM module offers several advantages over the pure JavaScript implementatio
 
 - **⚡ Superior Performance** — Rust's compiled WASM code executes significantly faster than JavaScript
 - **📦 Compact Size** — Only 114 KB gzipped (base64), or 80 KB as a `.wasm` file, including all script data embedded
-- **🌍 Universal Compatibility** — Works with no setup in Node.js, Bun, Deno, browsers (any bundler) and Cloudflare Workers, and on Vercel Edge through [`lipilekhika/wasm`](#cloudflare-workers-and-edge-runtimes)
+- **🌍 Universal Compatibility** — Works with no setup in Node.js, Bun, Deno and browsers (any bundler), and on Cloudflare Workers and Vercel Edge through [`lipilekhika/wasm`](#cloudflare-workers-and-edge-runtimes)
 - **🔒 Type Safety** — Built with Rust's type system for reliability
 - **🎯 Same API** — Drop-in replacement for the standard `transliterate` function
 
@@ -110,7 +110,7 @@ The same `transliterate_wasm` is available from three entry points. They differ 
 | Import | How the WASM is loaded | Use it for |
 | --- | --- | --- |
 | `lipilekhika` | Embedded (base64) in a lazily loaded chunk | **Recommended.** Node.js, Bun, Deno, browsers, every bundler and CDN, with no setup |
-| `lipilekhika/wasm` | Picked by the runtime: the `.wasm` file is imported as a module on Cloudflare Workers (`workerd`) and Vercel Edge (`edge-light`), fetched as a separate file in browsers (with the embedded module as fallback), embedded in Node.js, Bun and Deno | Cloudflare Workers (preferred), Vercel Edge (required), code shared between such a server and the browser, and browsers when you want the separate `.wasm` file |
+| `lipilekhika/wasm` | Picked by the runtime: the `.wasm` file is imported as a module on Cloudflare Workers (`workerd`) and Vercel Edge (`edge-light`), fetched as a separate file in browsers (with the embedded module as fallback), embedded in Node.js, Bun and Deno | Cloudflare Workers and Vercel Edge (required there), code shared between such a server and the browser, and browsers when you want the separate `.wasm` file |
 | `lipilekhika/wasm/slim` | Nothing embedded: you pass the `.wasm` file (`lipilekhika/lipilekhika.wasm`) to `initWasm()` | A strict Content Security Policy, serving the `.wasm` yourself (CDN, cache), or a runtime not covered above |
 
 <Aside type="tip">
@@ -119,12 +119,9 @@ The same `transliterate_wasm` is available from three entry points. They differ 
 
 ## Cloudflare Workers and Edge Runtimes
 
-On these runtimes WebAssembly is meant to be loaded by importing the `.wasm` file as a module, which `lipilekhika/wasm` does:
+Cloudflare Workers and the Vercel Edge runtime do not allow compiling WebAssembly from bytes at runtime: a `.wasm` file has to be imported as a module. The embedded module of `lipilekhika` can not load there, its `transliterate_wasm` throws an error pointing to `lipilekhika/wasm`.
 
-- **Vercel Edge** does not allow compiling WebAssembly from bytes, so the embedded module of `lipilekhika` can not load there (its `transliterate_wasm` throws an error pointing to `lipilekhika/wasm`). Use `lipilekhika/wasm`.
-- **Cloudflare Workers** run the embedded module of `lipilekhika` too, but with `lipilekhika/wasm` the Worker ships the `.wasm` file (80 KB gzipped) as a WebAssembly module, instead of a base64 copy inside its JavaScript that is decoded and compiled on first use. Prefer `lipilekhika/wasm`.
-
-`lipilekhika/wasm` has the same API (`transliterate_wasm`, `preloadWasm`):
+Import from `lipilekhika/wasm` instead. It has the same API (`transliterate_wasm`, `preloadWasm`), and the Worker ships the `.wasm` file (80 KB gzipped) as a WebAssembly module:
 
 ```typescript
 import { transliterate_wasm } from 'lipilekhika/wasm';
@@ -193,11 +190,20 @@ export default {
     await initWasm(wasmModule);
     ```
   </TabItem>
+  <TabItem label="Vercel Edge">
+    ```typescript
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+    import wasmModule from 'lipilekhika/lipilekhika.wasm?module'; // a WebAssembly.Module
+
+    await initWasm(wasmModule);
+    ```
+  </TabItem>
   <TabItem label="CDN">
     ```typescript
     import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
 
-    await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika/dist/lipilekhika.wasm'));
+    // use the same version as the installed package: the `.wasm` file and the JS must match
+    await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika@1.0.14/dist/lipilekhika.wasm'));
     ```
   </TabItem>
   <TabItem label="Node.js">
@@ -212,8 +218,14 @@ export default {
   </TabItem>
 </Tabs>
 
+`lipilekhika/wasm/slim` does not make the module smaller: it is the same `.wasm` file that `lipilekhika/wasm` loads on its own in browsers, on Workers and on Vercel Edge. Use it when you want to decide where the file comes from.
+
+<Aside type="note">
+  All entries (`lipilekhika`, `lipilekhika/wasm`, `lipilekhika/wasm/slim`) share one WASM instance: the first one used loads the module, the others then use it. If the module is already loaded, `initWasm()` resolves without loading anything.
+</Aside>
+
 <Aside type="caution">
-  The embedded module of `lipilekhika` is loaded from a `data:` URL. With a Content Security Policy that does not allow it (`connect-src`), use `lipilekhika/wasm/slim` and serve the `.wasm` file from your own origin.
+  **Content Security Policy:** compiling WebAssembly in a browser needs `'wasm-unsafe-eval'` in `script-src`, whichever entry you use. `lipilekhika/wasm` and `lipilekhika/wasm/slim` also fetch the `.wasm` file, which `connect-src` must allow (your own origin, or the CDN).
 </Aside>
 
 ## API Reference
@@ -335,6 +347,16 @@ export const runtime = 'edge';
 export async function GET() {
   return new Response(await transliterate_wasm('namaste', 'Normal', 'Devanagari'));
 }
+```
+
+### Jest (jsdom)
+
+The jsdom test environment does not expose `TextEncoder` / `TextDecoder`, which the WASM bindings use. Add them in a setup file:
+
+```javascript
+// jest.setup.js (`setupFiles` in the Jest config)
+const { TextEncoder, TextDecoder } = require('node:util');
+Object.assign(globalThis, { TextEncoder, TextDecoder });
 ```
 
 ## When to Use WASM vs JavaScript

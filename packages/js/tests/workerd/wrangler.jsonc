@@ -1,6 +1,0 @@
-// Worker for `scripts/workerd_check.mjs` (run by `bun run test:workerd`)
-{
-  "name": "lipilekhika-workerd-check",
-  "main": "src/index.js",
-  "compatibility_date": "2026-11-01"
-}

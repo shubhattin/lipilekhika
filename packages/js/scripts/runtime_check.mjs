@@ -15,6 +15,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 process.exitCode = 1;
@@ -95,6 +96,20 @@ async function main() {
     await main_mod.transliterate(text, from, to)
   );
 
+  // CommonJS (`require`): its own module graph, so it loads the module again
+  if (USE_DIST) {
+    const require = createRequire(import.meta.url);
+    const cjs_root = require('../dist/cjs/index.cjs');
+    const cjs_wasm = require('lipilekhika/wasm');
+    const expected = await main_mod.transliterate(text, from, to);
+    check('wasm cjs (lipilekhika)', await cjs_root.transliterate_wasm(text, from, to), expected);
+    check(
+      'wasm cjs (lipilekhika/wasm)',
+      await cjs_wasm.transliterate_wasm(text, from, to),
+      expected
+    );
+  }
+
   // Every WASM entry shares one wasm-bindgen instance: once one has loaded it, the others reuse
   // it and load nothing. So each other way of loading is checked in a fresh process.
   if (USE_DIST) {
@@ -135,7 +150,10 @@ const ISOLATED_CHECKS = {
   },
   // the `browser` build fetches `../lipilekhika.wasm`: Bun can fetch a file URL, Node can not and
   // falls back to the embedded module
-  browser: null
+  browser: null,
+  // `lipilekhika` and `slim` called at the same time: the module is instantiated once (the second
+  // entry waits for the first one's load)
+  'shared load': null
 };
 
 async function isolated(mode) {
@@ -144,6 +162,25 @@ async function isolated(mode) {
   const expected = await transliterate(text, from, to);
   let actual;
   let loaded = 'file';
+  if (mode === 'shared load') {
+    let instantiated = 0;
+    const instantiate = WebAssembly.instantiate;
+    WebAssembly.instantiate = (...args) => {
+      instantiated++;
+      return instantiate.apply(WebAssembly, args);
+    };
+    const root = await import(target('../dist/esm/index.mjs', ''));
+    const slim = await import(target('../dist/esm/wasm_slim.mjs', ''));
+    const [a, b] = await Promise.all([
+      root.transliterate_wasm(text, from, to),
+      slim.initWasm(WASM_BYTES()).then(() => slim.transliterate_wasm(text, from, to))
+    ]);
+    check('wasm shared load (lipilekhika + slim)', a, expected);
+    check('wasm shared load (slim)', b, expected);
+    check('wasm shared load: instantiated', instantiated, 1);
+    process.exitCode = 0;
+    return;
+  }
   if (mode === 'browser') {
     const warn = console.warn;
     console.warn = () => (loaded = 'embedded fallback');

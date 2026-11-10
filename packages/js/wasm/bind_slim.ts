@@ -1,6 +1,6 @@
 // `lipilekhika/wasm/slim`: nothing is embedded or imported, the caller gives the `.wasm` file
 // (`lipilekhika/lipilekhika.wasm` in the package) to `initWasm`.
-import init, { initSync } from './pkg/lipilekhika_wasm.js';
+import init from './pkg/lipilekhika_wasm.js';
 import { createWasmBackend } from './core';
 import type { WasmSource } from '../src/wasm_api';
 
@@ -13,13 +13,9 @@ const backend = createWasmBackend(async () => {
     );
   }
   try {
-    const resolved = await source;
-    if (resolved instanceof WebAssembly.Module) {
-      // no compile step: works where compiling from bytes is not allowed (Workers, Vercel Edge)
-      initSync({ module: resolved });
-      return;
-    }
-    await init({ module_or_path: resolved });
+    // a `WebAssembly.Module` is only instantiated (no compiling: works where compiling from bytes
+    // is not allowed, Workers and Vercel Edge), bytes / `Response` / URL are compiled
+    await init({ module_or_path: await source });
   } catch (error) {
     // a failed source (eg. a 404 fetch) can be replaced by calling `initWasm` again
     source = null;

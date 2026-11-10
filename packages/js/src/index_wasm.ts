@@ -12,8 +12,8 @@ const api = createWasmApi(() => import('../wasm/bind'));
  * Transliterates `text` from `from` to `to`.
  *
  * The WASM module is embedded (base64), so it works with every bundler and in Node.js, Bun, Deno,
- * browsers and Cloudflare Workers with no setup. On Vercel Edge (no compiling WebAssembly from
- * bytes) import it from `lipilekhika/wasm`, which is also the better fit on Cloudflare Workers.
+ * and browsers with no setup. On Cloudflare Workers and Vercel Edge (no compiling WebAssembly
+ * from bytes) import it from `lipilekhika/wasm`.
  * @param text - `string | string[]` — text to transliterate (same options for all items in an array)
  * @param from - The script/language to transliterate from
  * @param to - The script/language to transliterate to

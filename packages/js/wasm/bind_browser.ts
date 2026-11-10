@@ -20,9 +20,10 @@ const backend = createWasmBackend(async () => {
         'other bundlers serve `lipilekhika/lipilekhika.wasm` or use `lipilekhika/wasm/slim`.',
       error
     );
-    // initializes the shared wasm-bindgen glue, which `core.ts` calls into
-    const embedded = await import('./bind');
-    await embedded.preloadWasm();
+    // loads the module into the shared wasm-bindgen glue, which `core.ts` calls into (directly,
+    // not through `bind.ts`'s own `preloadWasm`, which would wait for this load to finish)
+    const { loadEmbeddedWasm } = await import('./bind');
+    await loadEmbeddedWasm();
   }
 });
 

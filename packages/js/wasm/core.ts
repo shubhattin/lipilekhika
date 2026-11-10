@@ -91,10 +91,38 @@ function transliterateMany(
 }
 
 /**
- * Makes a binding from a function that initializes the glue (it is called once, on first use).
+ * Every entry (`lipilekhika`, `lipilekhika/wasm`, `lipilekhika/wasm/slim`) calls into the same
+ * wasm-bindgen glue, which holds one instance: the first entry to load it loads it for all. This
+ * is that load (in progress or done), so another entry waits for it instead of loading the module
+ * a second time. If it failed, the next entry loads the module its own way.
+ */
+let sharedLoad: Promise<void> | null = null;
+
+/**
+ * Makes a binding from a function that initializes the glue (it is called once, on first use,
+ * unless another entry has already loaded the module).
  */
 export function createWasmBackend(init: () => Promise<void> | void): WasmBackend {
   let initPromise: Promise<void> | null = null;
+  const load = async () => {
+    const pending = sharedLoad;
+    if (pending) {
+      try {
+        await pending;
+        return;
+      } catch {
+        // that entry could not load the module: load it this entry's way
+      }
+    }
+    const own = Promise.resolve().then(init);
+    sharedLoad = own;
+    try {
+      await own;
+    } catch (error) {
+      if (sharedLoad === own) sharedLoad = null;
+      throw error;
+    }
+  };
   const initOnce = () => {
     if (!initPromise) {
       // Bun does not keep the event loop alive while `WebAssembly.instantiateStreaming` (used by
@@ -104,8 +132,7 @@ export function createWasmBackend(init: () => Promise<void> | void): WasmBackend
       // it is ready. (checked by `scripts/runtime_check.mjs`)
       // @ts-expect-error Bun is a runtime global when executed under Bun
       const keep_alive = typeof Bun !== 'undefined' ? setInterval(() => {}, 1 << 30) : null;
-      initPromise = Promise.resolve()
-        .then(init)
+      initPromise = load()
         .catch((error: unknown) => {
           // let a later call try again (eg. a failed fetch of the `.wasm` file)
           initPromise = null;
