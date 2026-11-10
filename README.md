@@ -54,13 +54,13 @@ Transliteration benchmarks on the shared [`test_data`](./test_data) corpus: time
 
 `Benchmark machine: Intel Core i5-12450H (12 threads, up to 4.40 GHz)`
 
-The Rust implementation is **~9× faster** than pure JavaScript on Node.js (22 ms vs 219 ms) and **~5×** faster than on Bun (122 ms). With multiple threads it is **~43×** faster than JavaScript on Node.js.
+The Rust implementation is **~9× faster** than pure JavaScript on Node.js (23 ms vs 219 ms) and **~5×** faster than on Bun (122 ms). With multiple threads it is **~41×** faster than JavaScript on Node.js.
 
 **Native implementations**
 
 | Implementation | Single thread (ms) |      Multi thread (ms) |
 | -------------- | -----------------: | ---------------------: |
-| **Rust**       |             **22** |                **5.1** |
+| **Rust**       |             **23** |                **5.4** |
 | **Go**         |                 49 | 15.5 _(10 goroutines)_ |
 
 **Other languages** _(via the Rust core)_
@@ -87,7 +87,7 @@ Averages from the statistical benchmark suites (warm-up, many samples): Rust [cr
 > Even the initial Rust rewrite (almost line by line) was _439 ms_ (JS : 740 ms). But after some simple optmization like
 > using `HashMap` (over binary search for lookups) and `Vec<char>` (to iterate in string) it was at _155 ms_ (JS : 460 ms). But now after optimizations
 > (like avoid heap allocations and better data structures). Moving to `no_std` also improved performance (-12ms) for some reason.
-> That got it to _51 ms_, and later hot path work (dense char lookup tables, allocation free context, buffer reuse while typing) to **22 ms**.
+> That got it to _51 ms_, and later hot path work (dense char lookup tables, allocation free context, buffer reuse while typing) to **23 ms**.
 
 ## 🤝 Contributing
 
