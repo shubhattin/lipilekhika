@@ -166,7 +166,9 @@ async function isolated(mode) {
     let instantiated = 0;
     const instantiate = WebAssembly.instantiate;
     WebAssembly.instantiate = (...args) => {
-      instantiated++;
+      // only lipilekhika's module (its wasm-bindgen imports): Node 22's own `fetch` (undici)
+      // instantiates its HTTP parser module when the global `Response` is first used
+      if (args[1]?.['./lipilekhika_wasm_bg.js']) instantiated++;
       return instantiate.apply(WebAssembly, args);
     };
     const root = await import(target('../dist/esm/index.mjs', ''));
