@@ -125,17 +125,19 @@ const OTHER_BRAHMI_SCRIPTS = [
 ] satisfies script_list_type[];
 
 /**
- * The old Lipi Lekhika reads Tamil ம் always as the anusvAra, also after a halant or at the start
- * of a word where an anusvAra cannot be (ஸாத்ம்ய -> सात्ंय, ம்ரியதே -> ंरियते). There it is म्. Its
- * output from Tamil is fixed: a halant + anusvAra or an anusvAra starting a word (Devanagari), an
- * `M` after a consonant or starting a word (Normal).
+ * The old Lipi Lekhika reads Tamil ம் always as the anusvAra, also where an anusvAra cannot be
+ * (ஸாத்ம்ய -> सात्ंय, ம்ரியதே -> ंरियते). It goes with a vyanjana, a svara or a mAtrA (Vedic svaras
+ * in between), elsewhere ம் is म्. Its output from Tamil is fixed like that: an anusvAra not after a
+ * letter, vowel or vowel sign (Devanagari), an `M` not after a vowel (Normal, `MM` is the
+ * candrabindu).
  */
 const fix_old_tamil_anusvara = (text: string, to: "Devanagari" | "Normal") =>
   to === "Devanagari"
-    ? text.replaceAll("्ं", "्म्").replaceAll(/(^|[\s\-.,;!?'"()])ं/gm, "$1म्")
-    : text
-        .replaceAll(/(?<=[bcdghjklmnprstvyzDLNST])M/g, "m")
-        .replaceAll(/(^|[\s\-.,;!?'"()])M/gm, "$1m");
+    ? text.replaceAll(
+        /(?<![\u0904-\u0939\u093C\u093E-\u094C\u0951\u0952\u0958-\u0963\u1CDA\u1CDB])\u0902/g,
+        "म्"
+      )
+    : text.replaceAll(/(?<![aAiIuUeEoOR↑↓M])M(?!M)/g, "m");
 
 /**
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
