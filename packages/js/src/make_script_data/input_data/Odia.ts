@@ -247,7 +247,6 @@ const Odia: InputBrahmicScriptType = {
     {
       text: 'ଡ଼',
       text_krama: ['Dz'],
-      duplicates: ['ଡ଼'],
       type: 'vyanjana'
     },
     {
@@ -258,7 +257,6 @@ const Odia: InputBrahmicScriptType = {
     {
       text: 'ଢ଼',
       text_krama: ['Dhz'],
-      duplicates: ['ଢ଼'],
       type: 'vyanjana'
     },
     {

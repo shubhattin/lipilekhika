@@ -350,3 +350,107 @@
   to: Brahmi
   input: rAma . rAma ..
   output: 𑀭𑀸𑀫 𑁇 𑀭𑀸𑀫 𑁈
+# Canonically equivalent (Unicode NFD) forms are read like the precomposed characters: two-part
+# vowel signs typed or stored as their parts, Tamil ஔ as ஒ + ௗ, the Siddham O / AU signs as E / AI
+# + AA. Inputs are escaped so that they stay decomposed.
+# കൊണ്ടു കോട്ട കൌശലം
+- index: 19
+  from: Malayalam
+  to: Devanagari
+  input: "കൊണ്ടു കോട്ട കൌശലം"
+  output: कोण्टु कोट्ट कौशलं
+  reversible: false
+# କୈଳାସ କୋଣ କୌଶଳ
+- index: 19.1
+  from: Odia
+  to: Devanagari
+  input: "କୈଳାସ କୋଣ କୌଶଳ"
+  output: कैळास कोण कौशळ
+  reversible: false
+# కైలాస
+- index: 19.2
+  from: Telugu
+  to: Devanagari
+  input: "కైలాస"
+  output: कैलास
+  reversible: false
+# කේතු
+- index: 19.3
+  from: Sinhala
+  to: Devanagari
+  input: "කේතු"
+  output: केतु
+  reversible: false
+# ஔவை கௌரி
+- index: 19.4
+  from: Tamil
+  to: Devanagari
+  input: "ஔவை கௌரி"
+  output: औवै कौरि
+  reversible: false
+- index: 19.5
+  from: Tamil-Extended
+  to: Devanagari
+  input: "ஔவை"
+  output: औवै
+  reversible: false
+# 𑖎𑖺𑖫 𑖎𑖻𑖫𑖰𑖎 (the decomposed sign was read as the independent vowel: कओश)
+- index: 19.6
+  from: Siddham
+  to: Devanagari
+  input: "\U0001158E\U000115B8\U000115AF\U000115AB \U0001158E\U000115B9\U000115AF\U000115AB\U000115B0\U0001158E"
+  output: कोश कौशिक
+  reversible: false
+# Gurumukhi ਸ਼ is excluded from composition, so normalized (NFC) text has ਸ + ਼, the precomposed
+# U+0A36 is read too
+- index: 19.7
+  from: Gurumukhi
+  to: Devanagari
+  input: "ਸ਼ਾਮ ਸ਼ਾਮ"
+  output: शाम शाम
+  reversible: false
+# Tamil writes the anusvAra as ம், it is read as म् where an anusvAra cannot be: after a halant
+# or at the start of a word (ஸாத்ம்ய was read as सात्ंय)
+- index: 20
+  from: Devanagari
+  to: Tamil
+  input: सात्म्य म्य
+  output: ஸாத்ம்ய ம்ய
+  reversible: true
+# after a vowel it is still the anusvAra
+- index: 20.1
+  from: Tamil
+  to: Devanagari
+  input: ஸம்ஸ்க்ருதம் அம்ப ஸாம்ப
+  output: संस्क्रुतं अंप सांप
+  reversible: false
+# Tamil-Extended लॢ लॣ are read back like the vowel sign after any other consonant (क्ल्रि² -> कॢ),
+# not as ल् + ऌ
+- index: 20.2
+  from: Devanagari
+  to: Tamil-Extended
+  input: लॢ लॣ कॢ
+  output: ல்ல்ரி² ல்ல்ரீ² க்ல்ரி²
+  reversible: true
+# ம் after a vowel sign or vowel written as its parts (கௌம் with ௌ as ெ + ௗ, ஔம் with ஔ as
+# ஒ + ௗ) is still the anusvAra
+- index: 20.3
+  from: Tamil
+  to: Devanagari
+  input: "கௌம் ஔம்"
+  output: कौं औं
+  reversible: false
+# the anusvAra goes with a vyanjana, svara or mAtrA only (Vedic svaras in between), after a
+# digit, a sign or a danda ம் is म्
+- index: 20.4
+  from: Tamil
+  to: Devanagari
+  input: ௧ம்ய ஃம்ய ஸ।ம்ய ௐம்ய ஜ॑ம் ஸம்ய
+  output: १म्य ःम्य स।म्य ॐम्य ज॑ं संय
+  reversible: false
+- index: 20.5
+  from: Devanagari
+  to: Tamil
+  input: अंम्
+  output: அம்ம்
+  reversible: true

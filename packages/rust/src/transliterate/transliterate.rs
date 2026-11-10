@@ -40,6 +40,78 @@ fn emit_krama_pieces(result: &mut ResultStringBuilder, to_script_data: &ScriptDa
     }
 }
 
+/// Whether the text before `index` is a syllable that a sign written as a dead consonant (the
+/// Tamil anusvAra ம், see `dead_consonant_sign_index`) can go with: a vyanjana (with its inherent
+/// vowel), a svara or a mAtrA, looking past Vedic svaras. Else (the start of a word, after a
+/// halant, a digit or a sign) it is the consonant + halant (ஸாத்ம்ய -> सात्म्य, not सात्ंय).
+fn sign_has_base(script_data: &ScriptData, cursor: &InputTextCursor, index: usize) -> bool {
+    let mut end = index;
+    while end > 0 && is_vedic_svara_tail(cursor.peek_at(end - 1)) {
+        end -= 1;
+    }
+    let Some(prev) = end.checked_sub(1).and_then(|i| cursor.peek_at(i)) else {
+        return false;
+    };
+    let krama_index = script_data.krama_index_of_char(prev).or_else(|| {
+        // a vowel sign or vowel written as its parts (ௌ as ெ + ௗ): the text of the last two
+        let map_index =
+            script_data.text_to_krama_map_index(cursor.slice(end.checked_sub(2)?, end)?, false)?;
+        usize::try_from(
+            *script_data.text_to_krama_map[map_index]
+                .1
+                .krama
+                .as_ref()?
+                .last()?,
+        )
+        .ok()
+    });
+    krama_index
+        .and_then(|i| script_data.krama_text_arr.get(i))
+        .and_then(|(_, li)| *li)
+        .and_then(|li| script_data.list.get(li as usize))
+        .is_some_and(|k| k.is_vyanjana() || k.is_svara() || k.is_matra())
+}
+
+/// Whether the character at `index` is not read by itself but starts a longer text that is,
+/// walking `text_to_krama_map` like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is a halant, while
+/// the ZWJ by itself is a custom script character.
+fn only_read_in_longer_text(
+    script_data: &ScriptData,
+    cursor: &InputTextCursor,
+    index: usize,
+) -> bool {
+    let Some(ch) = cursor.peek_at(index) else {
+        return false;
+    };
+    let has_krama = |i: usize| {
+        script_data.text_to_krama_map[i]
+            .1
+            .krama
+            .as_ref()
+            .is_some_and(|krama| krama.iter().any(|&k| k != -1))
+    };
+    let mut map_index = script_data.text_to_krama_map_char_index(ch, false);
+    if script_data.krama_index_of_char(ch).is_some() || map_index.is_some_and(has_krama) {
+        return false;
+    }
+    let mut end = index + 1;
+    let mut read = false;
+    while let Some(i) = map_index {
+        match cursor.peek_at(end) {
+            Some(c) if script_data.text_to_krama_map[i].1.next_chars.contains(&c) => {}
+            _ => break,
+        }
+        end += 1;
+        map_index = cursor
+            .slice(index, end)
+            .and_then(|text| script_data.text_to_krama_map_index(text, false));
+        if map_index.is_some_and(has_krama) {
+            read = true;
+        }
+    }
+    read
+}
+
 struct TransliterateCtx<'a, R> {
     from_script: &'a ScriptListEnum,
     to_script: &'a ScriptListEnum,
@@ -282,7 +354,13 @@ where
         result_str_concat_status
     }
 
-    fn apply_custom_trans_rules(&mut self, text_index: isize, delta: isize) {
+    /// `direct_replace_only`: only the `direct_replace` rules (applied inside a match)
+    fn apply_custom_trans_rules(
+        &mut self,
+        text_index: isize,
+        delta: isize,
+        direct_replace_only: bool,
+    ) {
         let current_text_index = text_index + delta;
 
         for rule_ref in self.custom_rules.iter() {
@@ -294,6 +372,9 @@ where
                         continue;
                     }
                 }
+            }
+            if direct_replace_only && !matches!(rule, Rule::DirectReplace { .. }) {
+                continue;
             }
 
             match rule {
@@ -854,6 +935,10 @@ pub fn transliterate_text_core_with(
     let is_to_tamil_ext_ = is_script_tamil_ext(to_script);
     let opt_preserve_specific_chars_ =
         trans_options.all_to_normal_preserve_specific_chars && *to_script == ScriptListEnum::Normal;
+    // `direct_replace` rules are applied after every piece of a match
+    let has_direct_replace_rules = custom_rules.iter().any(|rule| {
+        matches!(rule.borrow(), Rule::DirectReplace { use_replace, .. } if use_replace != &Some(true))
+    });
 
     let mut ctx = TransliterateCtx {
         from_script,
@@ -912,11 +997,14 @@ pub fn transliterate_text_core_with(
         }
 
         // Preserve mode: custom script chars when converting to Normal
+        // (unless it starts a longer text, the Sinhala ZWJ + al-lakuna `‍්` is a halant)
         if opt_preserve_specific_chars_ {
             let mut ch_buf = [0u8; 4];
             let ch_str = ch.encode_utf8(&mut ch_buf);
             let idx = from_script_data.custom_script_char_index_of_text(ch_str);
-            if let Some(custom_idx) = idx {
+            if let Some(custom_idx) = idx
+                && !only_read_in_longer_text(from_script_data, ctx.cursor, text_index)
+            {
                 let (custom_text, list_ref_opt, back_ref_opt) =
                     &from_script_data.custom_script_chars_arr[custom_idx];
                 let list_item = list_ref_opt.and_then(|i| from_script_data.list.get(i as usize));
@@ -1103,49 +1191,72 @@ pub fn transliterate_text_core_with(
                             ignore_ta_ext_sup_num_text_index = sup_index as isize;
                             break;
                         }
-                        // The match ends with halant + a letter that cannot be continued (ல்ர is
-                        // the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a
-                        // superscript (்ரு² ்ரூ²): stop the match before the halant, so ல்ரு² is
-                        // read as ல + ்ரு² (लृ), not ल्रु²
-                        if let Some(nth_ch) = nth_next_character
+                        // The match ends with a halant, or a halant + a letter, that cannot be
+                        // continued (ல் and ல்ர are the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant
+                        // starts a mAtrA ending in a superscript (்ரு² ்ரூ² ்ல்ரி² ்ல்ரீ²): stop the
+                        // match before the halant, so ல்ரு² is read as ல + ்ரு² (लृ) and ல்ல்ரி²
+                        // as ல + ்ல்ரி² (लॢ, like க்ல்ரி² कॢ)
+                        let mut rev = char_to_search.char_indices().rev();
+                        let halant_tail = match (rev.next(), rev.next()) {
+                            (Some((i, c)), _) if is_halant(c) => Some((i, 1)),
+                            (Some(_), Some((i, c))) if is_halant(c) => Some((i, 2)),
+                            _ => None,
+                        };
+                        if let Some((tail_start, back)) = halant_tail
+                            && tail_start > 0
+                            && let Some(nth_ch) = nth_next_character
                             && !next_chars.contains(&nth_ch)
-                            && end_index >= 2
+                            && end_index >= back
+                            && ctx.cursor.slice(end_index - back, end_index)
+                                == Some(&char_to_search[tail_start..])
                         {
-                            let mut tail_chars = char_to_search.chars().rev();
-                            let last = tail_chars.next();
-                            let before_last = tail_chars.next();
-                            let head_len = char_to_search.len()
-                                - last.map_or(0, char::len_utf8)
-                                - before_last.map_or(0, char::len_utf8);
-                            if let (Some(last), Some(before_last)) = (last, before_last)
-                                && head_len > 0
-                                && is_halant(before_last)
-                                && ctx.cursor.peek_at(end_index - 2) == Some(before_last)
-                                && ctx.cursor.peek_at(end_index - 1) == Some(last)
-                            {
-                                let mut tail_sup_index = end_index + 1;
-                                while is_vedic_svara_tail(ctx.cursor.peek_at(tail_sup_index)) {
-                                    tail_sup_index += 1;
+                            // the longest text from the halant up to the superscript (after
+                            // Vedic svaras)
+                            let mut tail = String::with_capacity(24);
+                            tail.push_str(&char_to_search[tail_start..]);
+                            let mut tail_end = end_index;
+                            while let Some(c) = ctx.cursor.peek_at(tail_end) {
+                                if is_ta_ext_superscript_tail(Some(c)) {
+                                    break;
                                 }
-                                let tail_sup = ctx.cursor.peek_at(tail_sup_index);
-                                if is_ta_ext_superscript_tail(tail_sup) {
-                                    let mut tail = String::with_capacity(16);
-                                    tail.push(before_last);
-                                    tail.push(last);
-                                    tail.push(nth_ch);
-                                    tail.extend(tail_sup);
-                                    if from_script_data
-                                        .text_to_krama_map_index(&tail, false)
-                                        .is_some()
-                                        && let Some(head_index) = from_script_data
-                                            .text_to_krama_map_index(
-                                                &char_to_search[..head_len],
-                                                false,
-                                            )
-                                    {
-                                        text_to_krama_item_index = Some(head_index);
-                                        break;
-                                    }
+                                tail.push(c);
+                                if from_script_data
+                                    .text_to_krama_map_index(&tail, false)
+                                    .is_none()
+                                {
+                                    tail.pop();
+                                    break;
+                                }
+                                tail_end += 1;
+                            }
+                            while is_vedic_svara_tail(ctx.cursor.peek_at(tail_end)) {
+                                tail_end += 1;
+                            }
+                            let tail_sup = ctx.cursor.peek_at(tail_end);
+                            if is_ta_ext_superscript_tail(tail_sup) {
+                                tail.extend(tail_sup);
+                                let tail_is_matra = from_script_data
+                                    .text_to_krama_map_index(&tail, false)
+                                    .and_then(|i| {
+                                        from_script_data.text_to_krama_map[i].1.krama.as_deref()
+                                    })
+                                    .and_then(|krama| match krama {
+                                        &[k] => usize::try_from(k).ok(),
+                                        _ => None,
+                                    })
+                                    .and_then(|k| from_script_data.krama_text_arr.get(k))
+                                    .and_then(|(_, li)| *li)
+                                    .and_then(|li| from_script_data.list.get(li as usize))
+                                    .is_some_and(|k| k.is_matra());
+                                if tail_is_matra
+                                    && let Some(head_index) = from_script_data
+                                        .text_to_krama_map_index(
+                                            &char_to_search[..tail_start],
+                                            false,
+                                        )
+                                {
+                                    text_to_krama_item_index = Some(head_index);
+                                    break;
                                 }
                             }
                         }
@@ -1164,6 +1275,13 @@ pub fn transliterate_text_core_with(
                 break;
             }
         }
+        // A sign written as a dead consonant (Tamil anusvAra ம்) with no syllable to go with (the
+        // start of a word, after a halant): only the consonant is read here (Step 2), the halant next
+        let text_to_krama_item_index = text_to_krama_item_index.filter(|&i| {
+            Some(i) != from_script_data.dead_consonant_sign_index
+                || use_typing_map
+                || sign_has_base(from_script_data, ctx.cursor, text_index)
+        });
         let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
         if let Some(text_to_krama_item) = text_to_krama_item {
             let (matched_text, map) = text_to_krama_item;
@@ -1358,53 +1476,62 @@ pub fn transliterate_text_core_with(
                         if let ScriptData::Brahmic {
                             halant: to_halant, ..
                         } = to_script_data
+                            && is_to_tamil_ext_
+                            && is_ta_ext_superscript_tail(ctx.result.last_char())
                         {
-                            if is_to_tamil_ext_
-                                && is_ta_ext_superscript_tail(ctx.result.last_char())
-                            {
-                                // Stack buffer (no heap allocation); only this reorder path
-                                // needs the pieces as a slice. krama sequences are at most
-                                // ~4 entries in practice; 8 is a safe upper bound.
-                                let mut pieces_buf = [""; 8];
-                                let mut pieces_len = 0usize;
-                                for &k in krama.iter() {
-                                    if k < 0 {
-                                        continue;
-                                    }
-                                    if pieces_len < pieces_buf.len() {
-                                        pieces_buf[pieces_len] =
-                                            to_script_data.krama_text_or_empty(k);
-                                        pieces_len += 1;
-                                    }
+                            // Stack buffer (no heap allocation); only this reorder path
+                            // needs the pieces as a slice. krama sequences are at most
+                            // ~4 entries in practice; 8 is a safe upper bound.
+                            let mut pieces_buf = [""; 8];
+                            let mut pieces_len = 0usize;
+                            for &k in krama.iter() {
+                                if k < 0 {
+                                    continue;
                                 }
-                                let pieces = &pieces_buf[..pieces_len];
-                                if pieces.len() == 1 && pieces[0] == to_halant
-                                    || map.krama.as_ref().is_some_and(|krama| {
-                                        krama.last().is_some_and(|last_i| {
-                                            // krama index -> krama_text_arr -> list index
-                                            to_script_data
-                                                .krama_text_arr
-                                                .get(*last_i as usize)
-                                                .and_then(|(_, list_ref)| *list_ref)
-                                                .and_then(|li| to_script_data.list.get(li as usize))
-                                                .is_some_and(|k| k.is_matra())
-                                        })
+                                if pieces_len < pieces_buf.len() {
+                                    pieces_buf[pieces_len] = to_script_data.krama_text_or_empty(k);
+                                    pieces_len += 1;
+                                }
+                            }
+                            let pieces = &pieces_buf[..pieces_len];
+                            if pieces.len() == 1 && pieces[0] == to_halant
+                                || map.krama.as_ref().is_some_and(|krama| {
+                                    krama.last().is_some_and(|last_i| {
+                                        // krama index -> krama_text_arr -> list index
+                                        to_script_data
+                                            .krama_text_arr
+                                            .get(*last_i as usize)
+                                            .and_then(|(_, list_ref)| *list_ref)
+                                            .and_then(|li| to_script_data.list.get(li as usize))
+                                            .is_some_and(|k| k.is_matra())
                                     })
-                                {
-                                    ctx.result.emit_pieces_with_reorder(pieces, to_halant, true);
-                                } else if pieces
-                                    .last()
-                                    .and_then(|k| k.chars().last())
-                                    .is_some_and(|s| is_vedic_svara_tail(Some(s)))
-                                {
-                                    let last = ctx.result.pop_last_char().unwrap_or_default();
-                                    ctx.result.emit_pieces(pieces);
-                                    ctx.result.emit_char(last);
-                                } else {
-                                    ctx.result.emit_pieces(pieces);
-                                }
+                                })
+                            {
+                                ctx.result.emit_pieces_with_reorder(pieces, to_halant, true);
+                            } else if pieces
+                                .last()
+                                .and_then(|k| k.chars().last())
+                                .is_some_and(|s| is_vedic_svara_tail(Some(s)))
+                            {
+                                let last = ctx.result.pop_last_char().unwrap_or_default();
+                                ctx.result.emit_pieces(pieces);
+                                ctx.result.emit_char(last);
                             } else {
-                                emit_krama_pieces(ctx.result, to_script_data, krama);
+                                ctx.result.emit_pieces(pieces);
+                            }
+                        } else if has_direct_replace_rules && krama.len() > 1 {
+                            // the direct_replace rules see every piece of a match, not only the
+                            // last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ,
+                            // Sinhala ඟ (ङ्ग) -> nga
+                            for (i, &k) in krama.iter().enumerate() {
+                                if k < 0 {
+                                    continue;
+                                }
+                                let piece = to_script_data.krama_text_or_empty(k);
+                                ctx.result.emit(piece);
+                                if !piece.is_empty() && i + 1 < krama.len() {
+                                    ctx.apply_custom_trans_rules(text_index as isize, 0, true);
+                                }
                             }
                         } else {
                             emit_krama_pieces(ctx.result, to_script_data, krama);
@@ -1415,6 +1542,7 @@ pub fn transliterate_text_core_with(
                         ctx.apply_custom_trans_rules(
                             ctx.cursor.pos() as isize,
                             -(matched_len_units as isize),
+                            false,
                         );
                     }
                     continue;
@@ -1543,7 +1671,7 @@ pub fn transliterate_text_core_with(
         }
 
         if !ctx.custom_rules.is_empty() {
-            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1);
+            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1, false);
         }
     }
 

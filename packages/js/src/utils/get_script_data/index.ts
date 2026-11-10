@@ -40,6 +40,25 @@ export type ScriptData = OutputScriptData & {
     string,
     [_custom_script_chars_arr_type[1], _custom_script_chars_arr_type[2]]
   >;
+  /** Index in `text_to_krama_map` of a sign written as a consonant + halant (the Tamil anusvAra
+   * ம்), `-1` if the script has none. Where the sign cannot be it is that consonant + halant. */
+  dead_consonant_sign_index: number;
+};
+
+const dead_consonant_sign_index = (script_data: OutputScriptData): number => {
+  if (script_data.script_type !== 'brahmic') return -1;
+  const halant = script_data.halant;
+  const type_of = (krama_index: number) =>
+    script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1]?.type;
+  return script_data.text_to_krama_map.findIndex(([text, { krama }]) => {
+    if (!krama || krama.length !== 1 || type_of(krama[0]) === 'vyanjana') return false;
+    if (!text.endsWith(halant)) return false;
+    const consonant = text.slice(0, -halant.length);
+    return (
+      single_code_point(consonant) !== -1 &&
+      type_of(script_data.krama_text_arr.findIndex(([t]) => t === consonant)) === 'vyanjana'
+    );
+  });
 };
 
 /** first index wins (to not repeat the same key and match lower bound binary search behaviour) */
@@ -83,7 +102,8 @@ const get_runtime_script_data = async (
     next_cps_typing_text_to_krama_map: make_next_cps(script_data.typing_text_to_krama_map),
     map_custom_script_chars_arr: new Map(
       script_data.custom_script_chars_arr.map((v) => [v[0], [v[1], v[2]]])
-    )
+    ),
+    dead_consonant_sign_index: dead_consonant_sign_index(script_data)
   };
 };
 

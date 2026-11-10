@@ -128,3 +128,25 @@
   input: അവന്‍ ധൎമ്മം
   output: avan dharmmaM
   reversible: false
+# Decomposed (NFD) Romanized letters are read like the precomposed ones
+# rāmaḥ kṛṣṇaḥ śivaṁ ṭīkā ḍamaru ṝ
+- index: 17
+  from: Romanized
+  to: Devanagari
+  input: "rāmaḥ kṛṣṇaḥ śivaṁ ṭīkā ḍamaru ṝ"
+  output: रामः कृष्णः शिवं टीका डमरु ॠ
+  reversible: false
+# Āditya Śiva Ṛṣi
+- index: 17.1
+  from: Romanized
+  to: Devanagari
+  input: "Āditya Śiva Ṛṣi"
+  output: आदित्य शिव ऋषि
+  reversible: false
+# IAST ṃ (anusvAra) and ḹ (ॡ) are read too, next to ISO 15919 ṁ and l̥̄
+- index: 17.2
+  from: Romanized
+  to: Devanagari
+  input: saṃskṛtam kḹpta ḸṂ
+  output: संस्कृतम् कॣप्त ॡं
+  reversible: false

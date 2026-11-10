@@ -137,7 +137,6 @@ const Tamil: InputBrahmicScriptType = {
       mAtrA: 'ொ',
       text_krama: ['o-svara'],
       mAtrA_text_krama: ['o-mAtrA'],
-      mAtrA_duplicates: ['ொ'],
       type: 'svara'
     },
     {
@@ -145,7 +144,6 @@ const Tamil: InputBrahmicScriptType = {
       mAtrA: 'ோ',
       text_krama: ['O-svara'],
       mAtrA_text_krama: ['O-mAtrA'],
-      mAtrA_duplicates: ['ோ'],
       type: 'svara'
     },
     {
@@ -153,7 +151,6 @@ const Tamil: InputBrahmicScriptType = {
       mAtrA: 'ௌ',
       text_krama: ['au-svara', 'auU-svara'],
       mAtrA_text_krama: ['au-mAtrA', 'auU-mAtrA'],
-      mAtrA_duplicates: ['ௌ'],
       type: 'svara'
     },
     {

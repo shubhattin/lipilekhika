@@ -14,7 +14,12 @@ export type CommonListTypeAttributes = {
    * Each key should have at least one key krama. Scan for this too in the compilation step.
    */
   text_krama: KramaKeysExtendedType[];
-  /** This contains duplicates of the key, for eg:- some nuqta symbols and mAtrAs.
+  /** Other texts that are read as this key (read only, the output uses `text`). Eg:- Romanized
+   * capitals (`Ā` of `ā`), alternate spellings (ISO `r̥` of `ṛ`), characters of older versions.
+   *
+   * The canonically equivalent forms (Unicode NFD / NFC) of `text` are added automatically, eg.
+   * `क़` as `क` + `़`, they need not be listed here. Only a form that normalization does not give
+   * from `text` is listed: Gurumukhi `ਲ਼` (U+0A33) of `ਲ` + `਼`, as U+0A33 is not composed back.
    * In the processing/compiling step it should be verified as a key of this list, display and throw the error
    */
   duplicates?: string[];
@@ -116,6 +121,9 @@ export type InputBrahmicScriptType = {
           type: 'svara';
           mAtrA: string;
           mAtrA_text_krama: KramaKeysExtendedType[];
+          /** Other texts that are read as the mAtrA (read only), like `duplicates`. Its
+           * canonically equivalent forms (eg. Malayalam `ൊ` as `െ` + `ാ`) are added
+           * automatically, they need not be listed. */
           mAtrA_duplicates?: string[];
           mAtrA_fallback?: KramaKeysExtendedType[];
         }

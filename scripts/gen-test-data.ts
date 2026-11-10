@@ -125,6 +125,21 @@ const OTHER_BRAHMI_SCRIPTS = [
 ] satisfies script_list_type[];
 
 /**
+ * The old Lipi Lekhika reads Tamil ம் always as the anusvAra, also where an anusvAra cannot be
+ * (ஸாத்ம்ய -> सात्ंय, ம்ரியதே -> ंरियते). It goes with a vyanjana, a svara or a mAtrA (Vedic svaras
+ * in between), elsewhere ம் is म्. Its output from Tamil is fixed like that: an anusvAra not after a
+ * letter, vowel or vowel sign (Devanagari), an `M` not after a vowel (Normal, `MM` is the
+ * candrabindu).
+ */
+const fix_old_tamil_anusvara = (text: string, to: "Devanagari" | "Normal") =>
+  to === "Devanagari"
+    ? text.replaceAll(
+        /(?<![\u0904-\u0939\u093C\u093E-\u094C\u0951\u0952\u0958-\u0963\u1CDA\u1CDB])\u0902/g,
+        "म्"
+      )
+    : text.replaceAll(/(?<![aAiIuUeEoOR↑↓M])M(?!M)/g, "m");
+
+/**
  * Generates test Test Data for transliteration to and from Devangari to other Brahmic scripts
  */
 const sanskrit_other_brahmic_scripts = async () => {
@@ -200,11 +215,13 @@ const sanskrit_other_brahmic_scripts = async () => {
       });
 
       if (!reversible) {
-        const input1 = await old_lipi_parivartak(
+        let input1 = await old_lipi_parivartak(
           output,
           other_script,
           FROM_SCRIPT
         );
+        if (other_script === "Tamil")
+          input1 = fix_old_tamil_anusvara(input1, FROM_SCRIPT);
         if (
           input1 !== input &&
           !(other_script === "Gurumukhi" && output.includes("ਰੀ"))
@@ -239,16 +256,21 @@ const sanskrit_other_brahmic_scripts = async () => {
           (other_script !== "Gurumukhi" ||
             ["rI"].some((alias) => input_norm1.includes(alias)))
         ) {
+          const output_norm = REPLACEMENTS.reduce(
+            (acc, [pattern, replacement]) =>
+              acc.replaceAll(pattern, replacement),
+            input_norm1
+          );
           sans_to_brahmic_data.push({
             index: index++,
             from: other_script,
             to: "Normal",
             input: dot_free_output,
-            output: REPLACEMENTS.reduce(
-              (acc, [pattern, replacement]) =>
-                acc.replaceAll(pattern, replacement),
-              input_norm1
-            ),
+            // after the replacements, as the `s` of `#s` (↑) would be taken for a consonant
+            output:
+              other_script === "Tamil"
+                ? fix_old_tamil_anusvara(output_norm, "Normal")
+                : output_norm,
             reversible: true,
           });
         }

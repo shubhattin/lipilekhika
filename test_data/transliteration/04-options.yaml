@@ -135,3 +135,58 @@
   options:
     "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
   reversible: false
+# Sinhala touching letters (ZWJ + al-lakuna) are read as a halant with preserve_specific_chars
+# too, it does not take the ZWJ as the `.q` custom character (ka.qva). A ZWJ that is not before
+# an al-lakuna is still preserved.
+- index: 16
+  from: Sinhala
+  to: Normal
+  input: ක‍්ව ක්‍ෂ ක‍ව
+  output: kva kSha ka.qva
+  options:
+    "all_to_normal:preserve_specific_chars": true
+  reversible: false
+# Romanized sh (स्ह, one match) gets the conjunct enabling ZWJ too, like स्ह from Devanagari
+- index: 16.1
+  from: Romanized
+  to: Sinhala
+  input: sha shva sva
+  output: ස්‍හ ස්‍හ්‍ව ස්‍ව
+  options:
+    "all_to_sinhala:use_conjunct_enabling_halant": true
+  reversible: false
+- index: 16.2
+  from: Devanagari
+  to: Sinhala
+  input: स्ह स्ह्व स्व
+  output: ස්‍හ ස්‍හ්‍ව ස්‍ව
+  options:
+    "all_to_sinhala:use_conjunct_enabling_halant": true
+  reversible: false
+# with preserve_specific_chars a character read by itself is still taken as the custom
+# character even when it starts a longer text (Ṭ of Ṭh, the chillu ൺ of ൺ്)
+- index: 16.3
+  from: Romanized
+  to: Normal
+  input: Ṭhakkura Ḍhakkā
+  output: T^hakkura D^hakkA
+  options:
+    "all_to_normal:preserve_specific_chars": true
+  reversible: false
+- index: 16.4
+  from: Malayalam
+  to: Normal
+  input: കൺ്
+  output: ka.N
+  options:
+    "all_to_normal:preserve_specific_chars": true
+  reversible: false
+# the output rules apply after every piece of a match, Sinhala ඟ ඦ (ङ्ग ञ्ज in one match)
+- index: 16.5
+  from: Sinhala
+  to: Normal
+  input: ඟ ඦ ඞ්ග
+  output: nga nja nga
+  options:
+    "all_to_normal:replace_pancham_varga_varna_with_n": true
+  reversible: false

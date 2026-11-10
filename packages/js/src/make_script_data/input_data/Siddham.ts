@@ -151,7 +151,6 @@ const Siddham: InputBrahmicScriptType = {
       mAtrA: '𑖺',
       text_krama: ['O-svara', 'o-svara'],
       mAtrA_text_krama: ['O-mAtrA', 'o-mAtrA'],
-      duplicates: ['𑖺'],
       type: 'svara'
     },
     {
@@ -159,7 +158,6 @@ const Siddham: InputBrahmicScriptType = {
       mAtrA: '𑖻',
       text_krama: ['au-svara', 'auU-svara'],
       mAtrA_text_krama: ['au-mAtrA', 'auU-mAtrA'],
-      duplicates: ['𑖻'],
       type: 'svara'
     },
 

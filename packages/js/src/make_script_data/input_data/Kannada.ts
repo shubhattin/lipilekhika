@@ -81,7 +81,6 @@ const Kannada: InputBrahmicScriptType = {
       mAtrA: 'ೀ',
       text_krama: ['I-svara'],
       mAtrA_text_krama: ['I-mAtrA'],
-      mAtrA_duplicates: ['ೀ'],
       type: 'svara'
     },
     {
@@ -138,7 +137,7 @@ const Kannada: InputBrahmicScriptType = {
       mAtrA: 'ೇ',
       text_krama: ['E-svara'],
       mAtrA_text_krama: ['E-mAtrA'],
-      mAtrA_duplicates: ['ೇ', 'ೇ'],
+      mAtrA_duplicates: ['ೇ'],
       type: 'svara'
     },
     {
@@ -146,7 +145,6 @@ const Kannada: InputBrahmicScriptType = {
       mAtrA: 'ೈ',
       text_krama: ['ai-svara', 'aiI-svara'],
       mAtrA_text_krama: ['ai-mAtrA', 'aiI-mAtrA'],
-      mAtrA_duplicates: ['ೈ'],
       type: 'svara'
     },
     {
@@ -154,7 +152,6 @@ const Kannada: InputBrahmicScriptType = {
       mAtrA: 'ೊ',
       text_krama: ['o-svara'],
       mAtrA_text_krama: ['o-mAtrA'],
-      mAtrA_duplicates: ['ೊ'],
       type: 'svara'
     },
     {
@@ -162,7 +159,6 @@ const Kannada: InputBrahmicScriptType = {
       mAtrA: 'ೋ',
       text_krama: ['O-svara'],
       mAtrA_text_krama: ['O-mAtrA'],
-      mAtrA_duplicates: ['ೋ'],
       type: 'svara'
     },
     {
