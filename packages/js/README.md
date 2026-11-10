@@ -124,7 +124,7 @@ Read more about [WASM Module](https://lipilekhika.in/getting-started/wasm/)
 
 **Returns:** `Promise<TransliterateOutput<T>>` — `string` when `text` is a string, `string[]` when `text` is an array
 
-**Note:** Uses the fast Rust-based WASM implementation for improved performance. Works in all JavaScript environments (Node.js, browsers, Deno, Bun).
+**Note:** Uses the fast Rust-based WASM implementation for improved performance. Works with no setup in Node.js, Bun, Deno, browsers (any bundler) and Cloudflare Workers. On Vercel Edge, and preferably on Cloudflare Workers, import it from `lipilekhika/wasm` (same API). `lipilekhika/wasm/slim` (`initWasm`) takes the `.wasm` file (`lipilekhika/lipilekhika.wasm`) from you, eg. for a strict CSP.
 
 </details>
 

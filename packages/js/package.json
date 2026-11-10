@@ -36,7 +36,21 @@
       "types": "./dist/typing.d.ts",
       "import": "./dist/esm/typing.mjs",
       "require": "./dist/cjs/typing.cjs"
-    }
+    },
+    "./wasm": {
+      "types": "./dist/wasm.d.ts",
+      "workerd": "./dist/esm/wasm.workerd.mjs",
+      "edge-light": "./dist/esm/wasm.edge-light.mjs",
+      "import": "./dist/esm/wasm.mjs",
+      "require": "./dist/cjs/wasm.cjs"
+    },
+    "./wasm/slim": {
+      "types": "./dist/wasm_slim.d.ts",
+      "import": "./dist/esm/wasm_slim.mjs",
+      "require": "./dist/cjs/wasm_slim.cjs"
+    },
+    "./lipilekhika.wasm": "./dist/lipilekhika.wasm",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist"
@@ -58,6 +72,7 @@
     "bench:suite:bun": "bun src/scripts/bench_suite.ts",
     "test:runtime": "vite-node scripts/runtime_check.mjs && bun scripts/runtime_check.mjs",
     "test:runtime:dist": "node scripts/runtime_check.mjs --dist && bun scripts/runtime_check.mjs --dist",
+    "test:workerd": "node scripts/workerd_check.mjs",
     "complexity": "vite-node src/scripts/complexity.ts"
   },
   "devDependencies": {

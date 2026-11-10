@@ -73,6 +73,11 @@ jobs:
       - name: Runtime Check (dist, node + bun)
         working-directory: packages/js
         run: bun run test:runtime:dist
+      # `lipilekhika/wasm` in the Cloudflare Workers runtime (workerd via `wrangler dev`), installed
+      # from the packed tarball like a user's Worker (export conditions + the shipped `.wasm` file)
+      - name: Workers Runtime Check (dist, workerd)
+        working-directory: packages/js
+        run: bun run test:workerd
   tests:
     # Does not depend on wasm (rust)
     runs-on: ubuntu-latest

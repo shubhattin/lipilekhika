@@ -17,8 +17,8 @@ Lipi Lekhika includes a blazing-fast 🦀 **Rust-based WebAssembly (WASM) module
 The WASM module offers several advantages over the pure JavaScript implementation:
 
 - **⚡ Superior Performance** — Rust's compiled WASM code executes significantly faster than JavaScript
-- **📦 Compact Size** — Only 114 KB gzipped (base64), including all script data embedded
-- **🌍 Universal Compatibility** — Works seamlessly in Node.js, browsers, Deno, Bun, and more
+- **📦 Compact Size** — Only 114 KB gzipped (base64), or 80 KB as a `.wasm` file, including all script data embedded
+- **🌍 Universal Compatibility** — Works with no setup in Node.js, Bun, Deno, browsers (any bundler) and Cloudflare Workers, and on Vercel Edge through [`lipilekhika/wasm`](#cloudflare-workers-and-edge-runtimes)
 - **🔒 Type Safety** — Built with Rust's type system for reliability
 - **🎯 Same API** — Drop-in replacement for the standard `transliterate` function
 
@@ -103,6 +103,98 @@ console.log(result); // नमस्ते
   **Best Practice**: Call `preloadWasm()` during your application's initialization phase (e.g., in a loader, startup hook, or top-level await) to ensure the WASM module is ready before users interact with transliteration features.
 </Aside>
 
+## Choosing an Entry Point
+
+The same `transliterate_wasm` is available from three entry points. They differ only in how the WASM module is loaded.
+
+| Import | How the WASM is loaded | Use it for |
+| --- | --- | --- |
+| `lipilekhika` | Embedded (base64) in a lazily loaded chunk | **Recommended.** Node.js, Bun, Deno, browsers, every bundler and CDN, with no setup |
+| `lipilekhika/wasm` | Picked by the runtime: the `.wasm` file is imported as a module on Cloudflare Workers (`workerd`) and Vercel Edge (`edge-light`), embedded everywhere else | Cloudflare Workers (preferred), Vercel Edge (required), and code shared between such a server and the browser |
+| `lipilekhika/wasm/slim` | Nothing embedded: you pass the `.wasm` file (`lipilekhika/lipilekhika.wasm`) to `initWasm()` | A strict Content Security Policy, serving the `.wasm` yourself (CDN, cache), or a runtime not covered above |
+
+<Aside type="tip">
+  **Use `transliterate_wasm` from `lipilekhika` unless your server code runs on Cloudflare Workers or Vercel Edge.** It needs no bundler configuration and no asset handling, and the WASM chunk is only loaded when `transliterate_wasm` or `preloadWasm` is first called, so it does not add to your initial bundle.
+</Aside>
+
+## Cloudflare Workers and Edge Runtimes
+
+On these runtimes WebAssembly is meant to be loaded by importing the `.wasm` file as a module, which `lipilekhika/wasm` does:
+
+- **Vercel Edge** does not allow compiling WebAssembly from bytes, so the embedded module of `lipilekhika` can not load there (its `transliterate_wasm` throws an error pointing to `lipilekhika/wasm`). Use `lipilekhika/wasm`.
+- **Cloudflare Workers** run the embedded module of `lipilekhika` too, but with `lipilekhika/wasm` the Worker ships the `.wasm` file (80 KB gzipped) as a WebAssembly module, instead of a base64 copy inside its JavaScript that is decoded and compiled on first use. Prefer `lipilekhika/wasm`.
+
+`lipilekhika/wasm` has the same API (`transliterate_wasm`, `preloadWasm`):
+
+```typescript
+import { transliterate_wasm } from 'lipilekhika/wasm';
+
+export default {
+  async fetch() {
+    const text = await transliterate_wasm('namaskAra', 'Normal', 'Devanagari');
+    return new Response(text); // नमस्कार
+  }
+};
+```
+
+The package's export conditions pick the right build, so no configuration is needed:
+
+- **Cloudflare Workers** (`workerd` condition) — `wrangler`, the Cloudflare Vite plugin and frameworks using it (Astro, SvelteKit, React Router, Nuxt, TanStack Start on Cloudflare, ...) import the `.wasm` file as a `WebAssembly.Module`, in `dev` and in the deployed Worker.
+- **Vercel Edge / Next.js edge runtime** (`edge-light` condition) — the `.wasm` file is imported with the `?module` suffix.
+- **Everywhere else** (Node.js, Bun, Deno, browsers) — the embedded module, the same as `lipilekhika`.
+
+So in a full stack app (eg. Astro on Cloudflare) the same `import { transliterate_wasm } from 'lipilekhika/wasm'` works in server code running on the Worker and in client code running in the browser.
+
+<Aside type="note">
+  `lipilekhika/wasm` can be used in every environment, but its `.wasm` import only works with the tooling of those runtimes, so it is offered as a separate entry point and `lipilekhika` stays usable with any bundler.
+</Aside>
+
+## Manual Initialization (`lipilekhika/wasm/slim`)
+
+`lipilekhika/wasm/slim` embeds nothing: call `initWasm()` once with the `.wasm` file, which the package exports as `lipilekhika/lipilekhika.wasm`. It accepts a `WebAssembly.Module`, the bytes, a `Response` (or a promise of one), or a URL to fetch.
+
+<Tabs>
+  <TabItem label="Vite (browser)">
+    ```typescript
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+    // the `.wasm` file is emitted as an asset and fetched (and compiled) while streaming
+    import wasmUrl from 'lipilekhika/lipilekhika.wasm?url';
+
+    await initWasm(wasmUrl);
+    const result = await transliterate_wasm('namaste', 'Normal', 'Devanagari');
+    ```
+  </TabItem>
+  <TabItem label="Cloudflare Workers">
+    ```typescript
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+    import wasmModule from 'lipilekhika/lipilekhika.wasm'; // a WebAssembly.Module
+
+    await initWasm(wasmModule);
+    ```
+  </TabItem>
+  <TabItem label="CDN">
+    ```typescript
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+
+    await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika/dist/lipilekhika.wasm'));
+    ```
+  </TabItem>
+  <TabItem label="Node.js">
+    ```typescript
+    import { readFile } from 'node:fs/promises';
+    import { createRequire } from 'node:module';
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+
+    const require = createRequire(import.meta.url);
+    await initWasm(await readFile(require.resolve('lipilekhika/lipilekhika.wasm')));
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="caution">
+  The embedded module of `lipilekhika` is loaded from a `data:` URL. With a Content Security Policy that does not allow it (`connect-src`), use `lipilekhika/wasm/slim` and serve the `.wasm` file from your own origin.
+</Aside>
+
 ## API Reference
 
 ### `transliterate_wasm(text, from, to, options?)`
@@ -137,6 +229,15 @@ await preloadWasm();
 // Now WASM calls are instant
 const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
 ```
+
+### `initWasm(wasm)` (`lipilekhika/wasm/slim`)
+
+Initializes the WASM module of `lipilekhika/wasm/slim`. Call it before `transliterate_wasm` (from `lipilekhika/wasm/slim`); calling it again returns the same initialization. If it fails (eg. the fetch of the file), it can be called again.
+
+**Parameters:**
+- `wasm: WasmSource` — A `WebAssembly.Module`, the bytes (`BufferSource`), a `Response`, a URL (`string | URL`) to fetch, or a promise of one of these
+
+**Returns:** `Promise<void>`
 
 ## Performance Comparison
 
@@ -194,6 +295,27 @@ const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
 console.log(result);
 ```
 
+### Cloudflare Workers
+
+```typescript
+import { transliterate_wasm } from 'lipilekhika/wasm';
+```
+
+See [Cloudflare Workers and Edge Runtimes](#cloudflare-workers-and-edge-runtimes).
+
+### Next.js (Edge Runtime)
+
+```typescript
+// app/api/transliterate/route.ts
+import { transliterate_wasm } from 'lipilekhika/wasm';
+
+export const runtime = 'edge';
+
+export async function GET() {
+  return new Response(await transliterate_wasm('namaste', 'Normal', 'Devanagari'));
+}
+```
+
 ## When to Use WASM vs JavaScript
 
 **Use WASM (`transliterate_wasm`) when:**
@@ -210,7 +332,7 @@ console.log(result);
 
 ## Bundle Size
 
-The WASM module adds only **114 KB (gzipped base64)** to your bundle, which includes:
+The WASM module adds only **114 KB (gzipped base64)** to your bundle, or **80 KB (gzipped)** as the `.wasm` file used by `lipilekhika/wasm` on Workers / Edge and by `lipilekhika/wasm/slim`. It includes:
 - The compiled Rust WASM binary
 - All script data embedded (no external data files needed)
 - Complete transliteration logic
@@ -225,6 +347,8 @@ This is remarkably compact considering it includes all the data and logic for 15
 2. All script data is embedded directly into the WASM binary at compile time
 3. The module is lazy-loaded on first use (or via `preloadWasm()`)
 4. Subsequent calls reuse the loaded module for optimal performance
+
+The `.wasm` binary is embedded as base64 in `lipilekhika`, so no bundler or server has to handle a `.wasm` file. It is also shipped as a file (`lipilekhika/lipilekhika.wasm`), which `lipilekhika/wasm` imports as a module on Cloudflare Workers / Vercel Edge and which `lipilekhika/wasm/slim` takes from you.
 
 ### Browser Compatibility
 
