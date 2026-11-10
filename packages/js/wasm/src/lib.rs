@@ -19,8 +19,12 @@ fn parse_trans_options(
             .get(0)
             .as_string()
             .ok_or_else(|| JsError::new("trans_options keys must be strings"))?;
-        let value = entry
-            .get(1)
+        let value = entry.get(1);
+        // an `undefined` value is taken as not set (like a missing key)
+        if value.is_undefined() {
+            continue;
+        }
+        let value = value
             .as_bool()
             .ok_or_else(|| JsError::new("trans_options value must be a boolean"))?;
         options

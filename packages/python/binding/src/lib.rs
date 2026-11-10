@@ -53,9 +53,10 @@ fn preload_script_data(script_name: &str) -> PyResult<()> {
 
 #[pyfunction]
 #[pyo3(signature = (script_name))]
-fn get_schwa_status_for_script(script_name: &str) -> PyResult<bool> {
+fn get_schwa_status_for_script(script_name: &str) -> PyResult<Option<bool>> {
     let script = py_parse_script(script_name, "script_name")?;
-    Ok(lipilekhika::get_schwa_status_for_script(script).unwrap_or(false))
+    // None for Normal and Romanized, which have no schwa
+    Ok(lipilekhika::get_schwa_status_for_script(script))
 }
 
 #[pyfunction]

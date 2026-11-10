@@ -78,7 +78,7 @@ func main() {
 
 ## 🎯 Supported Scripts
 
-Devanagari, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Odia, Gurmukhi, Sinhala, Tamil-Extended, Myanmar, Tibetan, Limbu, and more.
+Devanagari, Purna-Devanagari, Bengali, Assamese, Gujarati, Gurumukhi, Odia, Telugu, Kannada, Malayalam, Tamil, Tamil-Extended, Sinhala, Brahmi, Granth, Modi, Sharada, Siddham, Normal and Romanized.
 
 📖 Full list: [lipilekhika.in/reference/supported_scripts](https://lipilekhika.in/reference/supported_scripts)
 

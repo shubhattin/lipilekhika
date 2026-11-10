@@ -1,6 +1,7 @@
 package transliterate
 
 import (
+	"fmt"
 	"slices"
 	"sort"
 	"strings"
@@ -721,6 +722,14 @@ func TransliterateTextCoreWith(
 			continue
 		}
 
+		// `.` between digits is a decimal point, not a danda (or the native digit key `.5`)
+		if ch == '.' && fromData.ScriptType == scriptdata.ScriptTypeOther && isDecimalPoint(&cursor, textIndex) {
+			cursor.advance(1)
+			ctx.prevContextCleanup(".", nil, nil, false)
+			result.emitRune('.')
+			continue
+		}
+
 		// latin digits passthrough if native numerals disabled
 		if ch >= '0' && ch <= '9' && !opts.UseNativeNumerals {
 			cursor.advance(1)
@@ -1162,6 +1171,10 @@ func TransliterateTextCoreWith(
 	}
 
 	contextLength := prevCtx.length()
+	// a digit is kept, a `.` and a digit typed after it make a decimal point (see isDecimalPoint)
+	if last, ok := cursor.peekAt(charsLen - 1); ok && opts.TypingMode && isASCIIDigit(last) && contextLength < 1 {
+		contextLength = 1
+	}
 	output := string(result.buf)
 	if scratch != nil {
 		// hand the buffers back for reuse (`output` is a copy, so reusing `out` is safe)
@@ -1225,6 +1238,16 @@ func Transliterate(
 	if err != nil {
 		return "", err
 	}
+	customOpts, err := scriptdata.GetCustomOptionsMap()
+	if err != nil {
+		return "", err
+	}
+	// unknown keys are rejected, like in the Rust based bindings (WASM, N-API, Python, Dart)
+	for key := range transOptions {
+		if _, ok := customOpts[key]; !ok {
+			return "", fmt.Errorf("unknown trans_options key: %s", key)
+		}
+	}
 	if fromNorm == toNorm {
 		return text, nil
 	}
@@ -1233,10 +1256,6 @@ func Transliterate(
 		return "", err
 	}
 	toData, err := scriptdata.GetScriptData(toNorm)
-	if err != nil {
-		return "", err
-	}
-	customOpts, err := scriptdata.GetCustomOptionsMap()
 	if err != nil {
 		return "", err
 	}

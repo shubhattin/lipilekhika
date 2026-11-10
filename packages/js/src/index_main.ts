@@ -7,13 +7,9 @@ import {
 import { getScriptData } from './utils/get_script_data';
 import { getNormalizedScriptName } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
+import { validate_trans_options } from './utils/validate_trans_options';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
-import type {
-  ScriptLangType,
-  ScriptListType,
-  TransliterateInput,
-  TransliterateOutput
-} from './types';
+import type { ScriptLangType, TransliterateInput, TransliterateOutput } from './types';
 
 export * from './types';
 
@@ -58,8 +54,9 @@ export async function transliterate<T extends TransliterateInput>(
   text: T,
   from: ScriptLangType,
   to: ScriptLangType,
-  trans_options?: CustomOptionType
+  trans_options_?: CustomOptionType
 ): Promise<TransliterateOutput<T>> {
+  const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
     throw new Error(`Invalid script name: ${from}`);
@@ -107,6 +104,8 @@ export async function getAllOptions(
   if (!normalized_to) {
     throw new Error(`Invalid script name: ${to_script_name}`);
   }
+  // the text is returned as it is, no option has an effect (Hindi -> Sanskrit)
+  if (normalized_from === normalized_to) return [];
   const from_script_data = await getScriptData(normalized_from);
   const to_script_data = await getScriptData(normalized_to);
   return Object.keys(
@@ -124,9 +123,13 @@ export async function getAllOptions(
  * the end of vyanjana (consonant) characters.
  */
 export async function getSchwaStatusForScript(
-  script_name: ScriptListType
+  script_name: ScriptLangType
 ): Promise<boolean | null> {
-  const script_data = await getScriptData(script_name);
+  const normalized_name = getNormalizedScriptName(script_name);
+  if (!normalized_name) {
+    throw new Error(`Invalid script name: ${script_name}`);
+  }
+  const script_data = await getScriptData(normalized_name);
   if (script_data.script_type === 'brahmic') {
     return script_data.schwa_property;
   } else {

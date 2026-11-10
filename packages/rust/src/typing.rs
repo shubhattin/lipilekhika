@@ -493,9 +493,40 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
         })
         .collect();
 
+    // A key without a krama in the typing map is read from the Normal krama (Step 2 of the
+    // transliteration), the first index of its text wins
+    let normal_script_data = ScriptData::get_script_data(&ScriptListEnum::Normal);
+    let mut normal_krama_index: Vec<(&str, usize)> = Vec::new();
+    {
+        let mut seen: HashSet<&str> = HashSet::new();
+        for (i, (text, _)) in normal_script_data.krama_text_arr.iter().enumerate() {
+            if !text.is_empty() && seen.insert(text.as_str()) {
+                normal_krama_index.push((text.as_str(), i));
+            }
+        }
+    }
+    let krama_index_of_normal_text = |text: &str| -> Option<usize> {
+        normal_krama_index
+            .iter()
+            .find(|(t, _)| *t == text)
+            .map(|(_, i)| *i)
+    };
+    let mut typing_map_texts: HashSet<&str> = HashSet::new();
+
     // Populate mappings from typing_text_to_krama_map
     for (normal_text_map, item) in &script_data.typing_text_to_krama_map {
+        typing_map_texts.insert(normal_text_map.as_str());
         if normal_text_map.is_empty() {
+            continue;
+        }
+
+        if item.custom_back_ref.is_none() && item.krama.as_ref().is_none_or(|k| k.is_empty()) {
+            // a prefix of longer keys which is a character too (`sh` -> श, the start of `shh`)
+            if let Some(krama_index) = krama_index_of_normal_text(normal_text_map)
+                && let Some(entry) = common_krama_map.get_mut(krama_index)
+            {
+                entry.2.push(normal_text_map.clone());
+            }
             continue;
         }
 
@@ -517,6 +548,16 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
         }
     }
 
+    // the keys which are not in the typing map at all (`m` -> म), read by their code point
+    for (text, krama_index) in &normal_krama_index {
+        if typing_map_texts.contains(text) || text.chars().count() != 1 {
+            continue;
+        }
+        if let Some(entry) = common_krama_map.get_mut(*krama_index) {
+            entry.2.push(text.to_string());
+        }
+    }
+
     // Merge duplicates
     // A key whose character this script lacks falls back to an empty text (`.a1` to the
     // a1 mAtrA, which is the empty a mAtrA in Devanagari), nothing to show for it
@@ -524,7 +565,11 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
         .into_iter()
         .filter(|(text, _, _)| !text.is_empty())
         .collect();
-    script_specific_krama_map = merge_duplicate_text_mappings(script_specific_krama_map);
+    // the context clearing `q` has no text
+    script_specific_krama_map = merge_duplicate_text_mappings(script_specific_krama_map)
+        .into_iter()
+        .filter(|(text, _, _)| !text.is_empty())
+        .collect();
 
     ScriptTypingDataMap {
         common_krama_map,
@@ -1032,7 +1077,7 @@ mod tests {
             zero.contains(&"0".to_string()) && zero.contains(&".0".to_string()),
             "{zero:?}"
         );
-        assert_eq!(keys_of("य़"), ["yz"]);
+        assert_eq!(keys_of("य़"), ["yz"]);
         assert_eq!(keys_of("ऍ"), ["aiI"]);
         assert_eq!(keys_of("ै"), [".ai"]);
     }

@@ -630,6 +630,10 @@ pub fn is_script_tamil_ext(var: &ScriptListEnum) -> bool {
 const VEDIC_SVARAS_TYPING_SYMBOLS: [&str; 4] = ["_", "'''", "''", "'"];
 const VEDIC_SVARAS_NORMAL_SYMBOLS: [&str; 4] = ["↓", "↑↑↑", "↑↑", "↑"];
 
+/// Typing alias rules: Vedic svara input in Tamil-Extended.
+///
+/// `x` -> `kSh` (क्ष) is a key in the typing data of each script, so that its `k` does not join
+/// the key before it. Normal has no typing data, there it is replaced in the input.
 pub fn apply_typing_input_aliases<'a>(
     text: &'a str,
     to_script_name: &ScriptListEnum,
@@ -638,7 +642,7 @@ pub fn apply_typing_input_aliases<'a>(
         return Cow::Borrowed(text);
     }
 
-    let needs_x = text.contains('x');
+    let needs_x = matches!(to_script_name, ScriptListEnum::Normal) && text.contains('x');
     let is_ta_ext = is_script_tamil_ext(to_script_name);
 
     // For Tamil-Extended check whether any vedic typing symbol is present.

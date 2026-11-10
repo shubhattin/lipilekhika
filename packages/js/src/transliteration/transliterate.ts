@@ -480,6 +480,17 @@ type TransliterateCtx = {
   is_to_tamil_ext: boolean;
 };
 
+const isAsciiDigit = (code_unit: number) => code_unit >= 0x30 && code_unit <= 0x39;
+
+/**
+ * The `.` at `index` is a decimal point: it is after a digit and before a digit (`3.14`), and the
+ * digit before it is not itself a native digit key (`.1.2` is the keys `.1` `.2` -> १२ in typing)
+ */
+const isDecimalPoint = (text: string, index: number) =>
+  isAsciiDigit(text.charCodeAt(index - 1)) &&
+  isAsciiDigit(text.charCodeAt(index + 1)) &&
+  text.charCodeAt(index - 2) !== 0x2e;
+
 const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
 const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE = false;
 
@@ -518,7 +529,7 @@ export const transliterate_text_core = (
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
   // Avoid mutating the caller's options object; use a local flag instead.
-  const use_typing_chars = typing_mode || !!trans_options['normal_to_all:use_typing_chars'];
+  const use_typing_chars = typing_mode || trans_options['normal_to_all:use_typing_chars'] === true;
 
   if (typing_mode && from_script_name === 'Normal') {
     text = applyTypingInputAliases(text, to_script_name);
@@ -558,7 +569,7 @@ export const transliterate_text_core = (
   const is_from_tamil_ext = isScriptTamilExt(from_script_name);
   const is_to_tamil_ext = isScriptTamilExt(to_script_name);
   const opt_preserve_specific_chars =
-    !!trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal';
+    trans_options['all_to_normal:preserve_specific_chars'] === true && to_script_name === 'Normal';
   /** `direct_replace` rules are applied after every piece of a match */
   const has_direct_replace_rules = custom_rules.some(
     (rule) => rule.type === 'direct_replace' && rule.use_replace !== true
@@ -629,6 +640,18 @@ export const transliterate_text_core = (
         prev_context.clear();
       }
       result.emit(cursor.slice(char_index, char_index + char_width));
+      continue;
+    }
+
+    if (
+      cp === 0x2e &&
+      from_script_data.script_type === 'other' &&
+      isDecimalPoint(text, char_index)
+    ) {
+      // `.` between digits is a decimal point, not a danda (or the native digit key `.5`)
+      cursor.advance(1);
+      prev_context_cleanup(ctx, '.', null);
+      result.emit('.');
       continue;
     }
 
@@ -1150,7 +1173,11 @@ export const transliterate_text_core = (
     /** Can be used to manage context while using the typing feature.
      * If this is 0, the external context can be cleared
      */
-    context_length: prev_context.length()
+    context_length:
+      // a digit is kept, a `.` and a digit typed after it make a decimal point (see `isDecimalPoint`)
+      typing_mode && isAsciiDigit(text.charCodeAt(text.length - 1))
+        ? Math.max(prev_context.length(), 1)
+        : prev_context.length()
   };
 };
 

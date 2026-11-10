@@ -404,13 +404,14 @@ const VEDIC_SVARAS_NORMAL_SYMBOLS = ['↓', '↑↑↑', '↑↑', '↑'];
 /**
  * Applying custom typing alias rules
  *
- * Eg. x -> kSh,
  * Handling Vedic Svara input in tamil Extended
+ *
+ * `x` -> `kSh` (क्ष) is a key in the typing data of each script, so that its `k` does not join
+ * the key before it. Normal has no typing data, there it is replaced in the input.
  */
 export const applyTypingInputAliases = (text: string, to_script_name: script_list_type): string => {
   if (!text) return text;
-  // ITRANS-style shortcut: x -> kSh (क्ष)
-  if (text.indexOf('x') !== -1) text = text.replaceAll('x', 'kSh');
+  if (to_script_name === 'Normal' && text.indexOf('x') !== -1) text = text.replaceAll('x', 'kSh');
   if (to_script_name === 'Tamil-Extended')
     for (let i = 0; i < VEDIC_SVARAS_TYPING_SYMBOLS.length; i++) {
       const symbol = VEDIC_SVARAS_TYPING_SYMBOLS[i];

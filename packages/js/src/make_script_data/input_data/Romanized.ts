@@ -104,7 +104,7 @@ const Romanized: InputOtherScriptType = {
     भ: 'bh',
     म: 'm',
     य: 'y',
-    य़: 'y',
+    य़: 'yz',
     व: 'v',
     र: 'r',
     ऱ: 'ṟ',

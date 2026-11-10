@@ -97,7 +97,7 @@ from lipilekhika import get_all_options
 # Get all available custom options for a script pair
 options = get_all_options('Normal', 'Devanagari')
 print(options)
-# ['normal_to_brahmic:use_alternative_mAtrA_form', ...]
+# ['normal_to_all:use_typing_chars']
 ```
 
 ## Core API Reference
@@ -202,8 +202,9 @@ Returns the schwa deletion characteristic of the script. This is the property in
 ```python
 from lipilekhika import get_schwa_status_for_script
 
-has_schwa = get_schwa_status_for_script('Devanagari')
-print(has_schwa)  # True
+print(get_schwa_status_for_script('Bengali'))     # True
+print(get_schwa_status_for_script('Devanagari'))  # False
+print(get_schwa_status_for_script('Normal'))      # None
 ```
 
 ### Constants & Types
@@ -213,8 +214,8 @@ The package exports the following constants:
 ```python
 from lipilekhika import SCRIPT_LIST, LANG_LIST, ALL_SCRIPT_LANG_LIST
 
-print(SCRIPT_LIST)  # ['Devanagari', 'Bengali', 'Telugu', ...]
-print(LANG_LIST)    # ['Sanskrit', 'Hindi', 'Marathi', ...]
+print(SCRIPT_LIST)  # ['Devanagari', 'Telugu', 'Tamil', ...]
+print(LANG_LIST)    # ['English', 'Sanskrit', 'Hindi', ...]
 print(ALL_SCRIPT_LANG_LIST)  # Combined list
 ```
 

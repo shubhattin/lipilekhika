@@ -579,6 +579,13 @@ function get_out_script_data(
           );
           if (item.treat_as_anya) mark_typing_entries_as_anya(duplicate_text);
         }
+      } else if (item.type === 'krama_sequence') {
+        add_to_text_to_krama_map(
+          item.text,
+          item.krama_keys.map((key) => kramaLabelIndex(key)),
+          undefined,
+          'typing_text_to_krama_map'
+        );
       } else if (item.type === 'custom_script_char') {
         const custom_script_char_index = res.custom_script_chars_arr.findIndex(
           (v) => v[0] === item.specific_text

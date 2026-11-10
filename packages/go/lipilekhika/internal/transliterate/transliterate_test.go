@@ -201,7 +201,7 @@ func TestUnknownOptionKey(t *testing.T) {
 		}
 	}
 	out, err := Transliterate("f", "Normal", "Devanagari", map[string]bool{"normal_to_all:use_typing_chars": true})
-	if err != nil || out != "फ़्" {
+	if err != nil || out != "फ़्" {
 		t.Fatalf("valid option: got %q, %v", out, err)
 	}
 }

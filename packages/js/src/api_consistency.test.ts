@@ -65,7 +65,7 @@ describe('Typing data map', () => {
     expect(keysOf(common_krama_map, 'श')).toContain('sh');
     expect(keysOf(common_krama_map, 'व')).toEqual(expect.arrayContaining(['v', 'w']));
     expect(keysOf(common_krama_map, '०')).toEqual(expect.arrayContaining(['0', '.0']));
-    expect(keysOf(common_krama_map, 'य़')).toEqual(['yz']);
+    expect(keysOf(common_krama_map, 'य़')).toEqual(['yz']);
     expect(keysOf(common_krama_map, 'ऍ')).toEqual(['aiI']);
     expect(keysOf(common_krama_map, 'ै')).toEqual(['.ai']);
   });

@@ -73,10 +73,19 @@ pub fn transliterate(
     let to_script = Script::from_str(to.trim())
         .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
-    let trans_options = trans_options
-        .map(lipilekhika::CustomOptions::try_from_map)
-        .transpose()
-        .map_err(|_| Error::from_reason("trans_options contains an unknown option key"))?;
+    let trans_options = match trans_options {
+        None => None,
+        Some(map) => {
+            let mut options = lipilekhika::CustomOptions::default();
+            for (key, value) in map {
+                // same message as the WASM and JS backends
+                options
+                    .try_set(&key, value)
+                    .map_err(|_| Error::from_reason(format!("unknown trans_options key: {key}")))?;
+            }
+            Some(options)
+        }
+    };
 
     Ok(
         lipilekhika::transliterate(&text, from_script, to_script, trans_options.as_ref())

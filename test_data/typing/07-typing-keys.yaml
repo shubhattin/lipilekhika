@@ -1,13 +1,13 @@
-# य़ / য় (ya + nukta) is typed with `yz`, like the other nukta letters (kz, jz, Dz).
+# य़ / য় (ya + nukta) is typed with `yz`, like the other nukta letters (kz, jz, Dz).
 # Without a key of its own `yz` came out as y + z (য্জ়্)
 - index: 0
   text: samayza yza yzA
-  output: সময় য় য়া
+  output: সময় য় য়া
   script: Bengali
   preserve_check: true
 - index: 1
   text: samayza yza
-  output: समय़ य़
+  output: समय़ य़
   script: Devanagari
   preserve_check: true
 - index: 2

@@ -396,6 +396,21 @@ func isScriptTamilExt(scriptName string) bool {
 	return scriptName == "Tamil-Extended"
 }
 
+func isASCIIDigit(r rune) bool { return r >= '0' && r <= '9' }
+
+// isDecimalPoint reports whether the `.` at index is a decimal point: it is after a digit and
+// before a digit (3.14), and the digit before it is not itself a native digit key
+// (.1.2 is the keys .1 .2 -> १२ in typing)
+func isDecimalPoint(c *inputCursor, index int) bool {
+	prev, okPrev := c.peekAt(index - 1)
+	next, okNext := c.peekAt(index + 1)
+	if !okPrev || !okNext || !isASCIIDigit(prev) || !isASCIIDigit(next) {
+		return false
+	}
+	prev2, ok := c.peekAt(index - 2)
+	return !ok || prev2 != '.'
+}
+
 func isSkipChar(r rune) bool {
 	switch r {
 	case ' ', '\n', '\r', '\t', ',', '~', '!', '@', '?', '%':
@@ -407,15 +422,15 @@ func isSkipChar(r rune) bool {
 var vedicSvarasTypingSymbols = []string{"_", "'''", "''", "'"}
 var vedicSvarasNormalSymbols = []string{"↓", "↑↑↑", "↑↑", "↑"}
 
-// applyTypingInputAliases applies custom typing alias rules
+// applyTypingInputAliases applies custom typing alias rules: Vedic svara input in Tamil-Extended.
 //
-// Eg. x -> kSh,
-// Handling Vedic Svara input in tamil Extended
+// x -> kSh (क्ष) is a key in the typing data of each script, so that its k does not join the key
+// before it. Normal has no typing data, there it is replaced in the input.
 func applyTypingInputAliases(text, toScriptName string) string {
 	if text == "" {
 		return text
 	}
-	if strings.Contains(text, "x") {
+	if toScriptName == "Normal" && strings.Contains(text, "x") {
 		text = strings.ReplaceAll(text, "x", "kSh")
 	}
 	if isScriptTamilExt(toScriptName) {

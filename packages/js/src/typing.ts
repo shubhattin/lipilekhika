@@ -657,7 +657,10 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${script}`);
   }
-  const script_data = await getScriptData(normalized_typing_lang);
+  const [script_data, normal_script_data] = await Promise.all([
+    getScriptData(normalized_typing_lang),
+    getScriptData('Normal')
+  ]);
   type Item = [text: string, type: ListType, mappings: string[]];
   const mergeDuplicateTextMappings = (items: Item[]) => {
     // Merge items that end up with the same displayed text (and type), and keep mappings unique.
@@ -716,12 +719,21 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
     ])
   };
 
+  /** A key without a krama in the typing map is read from the Normal krama (Step 2 of the
+   * transliteration), the first index of its text wins */
+  const normal_krama_index = new Map<string, number>();
+  for (let i = 0; i < normal_script_data.krama_text_arr.length; i++) {
+    const text = normal_script_data.krama_text_arr[i][0];
+    if (text && !normal_krama_index.has(text)) normal_krama_index.set(text, i);
+  }
+  const typing_map_texts = new Set<string>();
   for (let i = 0; i < script_data.typing_text_to_krama_map.length; i++) {
     const item = script_data.typing_text_to_krama_map[i];
     const normal_text_map = item[0];
+    typing_map_texts.add(normal_text_map);
     if (normal_text_map === '') continue;
 
-    if (item[1] && item[1].custom_back_ref) {
+    if (item[1] && item[1].custom_back_ref !== undefined && item[1].custom_back_ref !== null) {
       res.script_specific_krama_map[item[1].custom_back_ref][2].push(normal_text_map);
     } else if (item[1] && item[1].krama && item[1].krama.length === 1) {
       // ignore the ones whose length is greater than 1 (as they usually are intermediate typing states)
@@ -729,7 +741,16 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
       if (krama_index !== -1) {
         res.common_krama_map[krama_index][2].push(normal_text_map);
       }
+    } else if (item[1] && !item[1].krama?.length) {
+      // a prefix of longer keys which is a character too (`sh` -> श, the start of `shh`)
+      const krama_index = normal_krama_index.get(normal_text_map);
+      if (krama_index !== undefined) res.common_krama_map[krama_index][2].push(normal_text_map);
     }
+  }
+  // the keys which are not in the typing map at all (`m` -> म), read by their code point
+  for (const [text, krama_index] of normal_krama_index) {
+    if (typing_map_texts.has(text) || [...text].length !== 1) continue;
+    res.common_krama_map[krama_index][2].push(text);
   }
 
   // A key whose character this script lacks falls back to an empty text (`.a1` to the
@@ -737,7 +758,10 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
   res.common_krama_map = mergeDuplicateTextMappings(res.common_krama_map).filter(
     ([text]) => text !== ''
   );
-  res.script_specific_krama_map = mergeDuplicateTextMappings(res.script_specific_krama_map);
+  // the context clearing `q` has no text
+  res.script_specific_krama_map = mergeDuplicateTextMappings(res.script_specific_krama_map).filter(
+    ([text]) => text !== ''
+  );
 
   return res;
 }

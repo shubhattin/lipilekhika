@@ -755,6 +755,20 @@ pub struct TransliterationOutput {
     pub context_length: usize,
 }
 
+/// The `.` at `index` is a decimal point: it is after a digit and before a digit (`3.14`), and the
+/// digit before it is not itself a native digit key (`.1.2` is the keys `.1` `.2` -> १२ in typing)
+#[inline]
+fn is_decimal_point(cursor: &InputTextCursor, index: usize) -> bool {
+    index >= 1
+        && cursor
+            .peek_at(index - 1)
+            .is_some_and(|c| c.is_ascii_digit())
+        && cursor
+            .peek_at(index + 1)
+            .is_some_and(|c| c.is_ascii_digit())
+        && (index < 2 || cursor.peek_at(index - 2) != Some('.'))
+}
+
 #[inline]
 #[allow(dead_code)]
 fn is_single_ascii_digit(s: &str) -> bool {
@@ -957,6 +971,7 @@ pub fn transliterate_text_core_with(
         include_inherent_vowels: opts.include_inherent_vowel,
     };
 
+    let from_is_other = matches!(from_script_data, ScriptData::Other { .. });
     let chars_len = ctx.cursor.char_count();
     while ctx.cursor.pos() < chars_len {
         let mut text_index = ctx.cursor.pos();
@@ -982,6 +997,14 @@ pub fn transliterate_text_core_with(
                 ctx.prev_context.clear();
             }
             ctx.result.emit_char(ch);
+            continue;
+        }
+
+        // `.` between digits is a decimal point, not a danda (or the native digit key `.5`)
+        if ch == '.' && from_is_other && is_decimal_point(ctx.cursor, text_index) {
+            ctx.cursor.advance(1);
+            let _ = ctx.prev_context_cleanup(Some((Some("."), None)), None, None);
+            ctx.result.emit_char('.');
             continue;
         }
 
@@ -1679,7 +1702,19 @@ pub fn transliterate_text_core_with(
         let _ = ctx.prev_context_cleanup(None, None, Some(true));
     }
 
-    let context_length = ctx.prev_context.length();
+    let context_length = if opts.typing_mode
+        && chars_len > 0
+        && ctx
+            .cursor
+            .peek_at(chars_len - 1)
+            .is_some_and(|c| c.is_ascii_digit())
+    {
+        // a digit is kept, a `.` and a digit typed after it make a decimal point
+        // (see `is_decimal_point`)
+        ctx.prev_context.length().max(1)
+    } else {
+        ctx.prev_context.length()
+    };
     // (taken via `ctx`: `cursor` stays borrowed for its whole lifetime)
     buffers.put_chars(ctx.cursor.take_buffer());
 
