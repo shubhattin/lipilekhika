@@ -416,7 +416,7 @@ impl<'a> InputTextCursor<'a> {
     }
 
     /// Like [`Self::new`], but reuses `chars`' allocation (its contents are discarded).
-    /// Get the buffer back with [`Self::into_buffer`].
+    /// Get the buffer back with [`Self::take_buffer`].
     pub fn new_in(text: &'a str, mut chars: Vec<(char, usize)>) -> InputTextCursor<'a> {
         // text.len() is an upper bound for char count; after this, capacity >= text.len() + 1
         if chars.capacity() == 0 {
@@ -426,22 +426,10 @@ impl<'a> InputTextCursor<'a> {
             chars.reserve(text.len() + 1);
         }
 
-        let dst = chars.spare_capacity_mut().as_mut_ptr();
-        let mut len = 0;
-        for (byte_idx, ch) in text.char_indices() {
-            // SAFETY: a str has at most `text.len()` chars, so `len < text.len() + 1 <= capacity`.
-            unsafe {
-                dst.add(len)
-                    .write(core::mem::MaybeUninit::new((ch, byte_idx)))
-            };
-            len += 1;
-        }
-        // SAFETY: `len <= text.len() < capacity`; all `len + 1` slots are now initialized.
-        unsafe {
-            dst.add(len)
-                .write(core::mem::MaybeUninit::new(('\0', text.len())));
-            chars.set_len(len + 1);
-        }
+        // A raw `spare_capacity_mut` fill was benchmarked against this and gave no
+        // measurable gain, so the table is built with safe code.
+        chars.extend(text.char_indices().map(|(byte_idx, ch)| (ch, byte_idx)));
+        chars.push(('\0', text.len()));
         // ^ the trailing sentinel is needed for the last character to be accessible via the `peek_at` method
         // stores the char offsets
 
