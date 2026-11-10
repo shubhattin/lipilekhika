@@ -518,7 +518,7 @@ export const transliterate_text_core = (
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
   // Avoid mutating the caller's options object; use a local flag instead.
-  const use_typing_chars = typing_mode || !!trans_options['normal_to_all:use_typing_chars'];
+  const use_typing_chars = typing_mode || trans_options['normal_to_all:use_typing_chars'] === true;
 
   if (typing_mode && from_script_name === 'Normal') {
     text = applyTypingInputAliases(text, to_script_name);
@@ -558,7 +558,7 @@ export const transliterate_text_core = (
   const is_from_tamil_ext = isScriptTamilExt(from_script_name);
   const is_to_tamil_ext = isScriptTamilExt(to_script_name);
   const opt_preserve_specific_chars =
-    !!trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal';
+    trans_options['all_to_normal:preserve_specific_chars'] === true && to_script_name === 'Normal';
   /** `direct_replace` rules are applied after every piece of a match */
   const has_direct_replace_rules = custom_rules.some(
     (rule) => rule.type === 'direct_replace' && rule.use_replace !== true

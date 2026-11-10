@@ -18,8 +18,14 @@ use crate::scripts::Script;
 /// Returns the list of all supported custom options for
 /// transliterations for the provided script pair.
 pub fn get_all_options(from_script: Script, to_script: Script) -> Vec<String> {
-    let from_script_data = ScriptData::get_script_data(&from_script.into());
-    let to_script_data = ScriptData::get_script_data(&to_script.into());
+    let from_script: crate::scripts::ScriptListEnum = from_script.into();
+    let to_script: crate::scripts::ScriptListEnum = to_script.into();
+    // the text is returned as it is, no option has an effect (Hindi -> Sanskrit)
+    if from_script == to_script {
+        return Vec::new();
+    }
+    let from_script_data = ScriptData::get_script_data(&from_script);
+    let to_script_data = ScriptData::get_script_data(&to_script);
     let custom_options_map = get_custom_options_map();
     let all_options_enabled = crate::CustomOptions::all_enabled();
 
@@ -56,5 +62,14 @@ mod tests {
         let from = Script::from_str("dev").unwrap().into();
         let to = Script::from_str("tel").unwrap().into();
         let _ = get_all_options(from, to);
+    }
+
+    #[test]
+    fn same_script_pair_has_no_options() {
+        // Hindi and Sanskrit are both Devanagari, the text is returned as it is
+        let hindi = Script::from_str("Hindi").unwrap();
+        let sanskrit = Script::from_str("Sanskrit").unwrap();
+        assert!(get_all_options(hindi, sanskrit).is_empty());
+        assert!(get_all_options(Script::Devanagari, Script::Devanagari).is_empty());
     }
 }

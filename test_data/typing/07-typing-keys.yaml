@@ -1,0 +1,57 @@
+# य़ / য় (ya + nukta) is typed with `yz`, like the other nukta letters (kz, jz, Dz).
+# Without a key of its own `yz` came out as y + z (য্জ়্)
+- index: 0
+  text: samayza yza yzA
+  output: সময় য় য়া
+  script: Bengali
+  preserve_check: true
+- index: 1
+  text: samayza yza
+  output: समय़ य़
+  script: Devanagari
+  preserve_check: true
+- index: 2
+  text: yzadi
+  output: ଯଦି
+  script: Odia
+  preserve_check: true
+
+# Independent candra vowels ऍ ऑ (and their mAtrAs) are typed with `aiI` / `auU`, in the scripts
+# which have them. Other scripts keep `aiI` as ai + I
+- index: 3
+  text: aiI auU kaiI kauU
+  output: ऍ ऑ कॅ कॉ
+  script: Devanagari
+- index: 4
+  text: aiI auU kaiI kauU
+  output: ऍ ऑ कॅ कॉ
+  script: Purna-Devanagari
+- index: 5
+  text: aiI auU kaiI kauU
+  output: ઍ ઑ કૅ કૉ
+  script: Gujarati
+- index: 6
+  text: aiI auU kaiI kauU
+  output: ඇ ඈ කැ කෑ
+  script: Sinhala
+- index: 7
+  text: aiI kaiI
+  output: ঐঈ কৈঈ
+  script: Bengali
+
+# Standalone ai / au mAtrA keys `.ai` `.au`, like `.A` `.i` ... (the input was dropped: k.ai -> क्)
+- index: 8
+  text: .ai .au k.ai k.au
+  output: ै ौ क्ै क्ौ
+  script: Devanagari
+
+# `x` (क्ष) is a key, it was replaced by kSh in the input before the keys were split, so its
+# k joined the key before it: #x -> ꣬ष् (#k is ꣬), Malayalam .x -> ൿഷ് (.k is the chillu ൿ)
+- index: 12
+  text: "# #x .x kx xa xi"
+  output: "# #क्ष् ।क्ष् क्क्ष् क्ष क्षि"
+  script: Devanagari
+- index: 13
+  text: .x xa
+  output: ।ക്ഷ് ക്ഷ
+  script: Malayalam

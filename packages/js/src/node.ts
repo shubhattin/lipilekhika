@@ -1,6 +1,7 @@
 import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import { loadNativeBinding, type NativeModule } from './native_binding';
 import type { CustomOptionType } from './transliteration/transliterate';
+import { validate_trans_options } from './utils/validate_trans_options';
 import type { TransliterateInput, TransliterateOutput } from './types';
 import {
   resolveAutoContextClearTimeMs,
@@ -112,8 +113,9 @@ export async function transliterate_node<T extends TransliterateInput>(
   text: T,
   from: ScriptLangType,
   to: ScriptLangType,
-  trans_options?: CustomOptionType
+  trans_options_?: CustomOptionType
 ): Promise<TransliterateOutput<T>> {
+  const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
     throw new Error(`Invalid script name: ${from}`);

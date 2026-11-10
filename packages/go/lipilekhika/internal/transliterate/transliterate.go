@@ -1,6 +1,7 @@
 package transliterate
 
 import (
+	"fmt"
 	"slices"
 	"sort"
 	"strings"
@@ -1225,6 +1226,16 @@ func Transliterate(
 	if err != nil {
 		return "", err
 	}
+	customOpts, err := scriptdata.GetCustomOptionsMap()
+	if err != nil {
+		return "", err
+	}
+	// unknown keys are rejected, like in the Rust based bindings (WASM, N-API, Python, Dart)
+	for key := range transOptions {
+		if _, ok := customOpts[key]; !ok {
+			return "", fmt.Errorf("unknown trans_options key: %s", key)
+		}
+	}
 	if fromNorm == toNorm {
 		return text, nil
 	}
@@ -1233,10 +1244,6 @@ func Transliterate(
 		return "", err
 	}
 	toData, err := scriptdata.GetScriptData(toNorm)
-	if err != nil {
-		return "", err
-	}
-	customOpts, err := scriptdata.GetCustomOptionsMap()
 	if err != nil {
 		return "", err
 	}

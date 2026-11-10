@@ -221,7 +221,7 @@ const ctx = createTypingContext('Telugu');
 **Parameters:**
 
 - `script: ScriptLangType` — Target script/language for typing
-- `options?: TypingOptions` — Custom typing options
+- `options?: TypingContextOptions` — Custom typing options
   - `autoContextClearTimeMs?: number` (default: `4500`)
   - `useNativeNumerals?: boolean` (default: `true`)
   - `includeInherentVowel?: boolean` (default: `false`)
@@ -237,14 +237,14 @@ const ctx = createTypingContext('Telugu');
 </details>
 
 <details>
-<summary><strong><code>handleTypingBeforeInputEvent(ctx, event, callback?, options?)</code></strong> — Handle beforeinput events</summary>
+<summary><strong><code>handleTypingBeforeInputEvent(ctx, event, callback?, enabled?)</code></strong> — Handle beforeinput events</summary>
 
 **Parameters:**
 
 - `ctx: TypingContext` — Typing context
 - `event: InputEvent` — The beforeinput event
 - `callback?: (newValue: string) => void` — Called with updated value
-- `options?` — Additional options
+- `enabled?: boolean` — `false` lets the input through as it is (default: `true`)
 
 </details>
 
@@ -267,7 +267,7 @@ import { getScriptKramaData, getScriptTypingDataMap } from 'lipilekhika/typing';
 
 // Get sequential character array (krama) for a script
 const kramaData = await getScriptKramaData('Devanagari');
-// Returns: [['अ', 'svara'], ['आ', 'svara'], ['क', 'vyanjana'], ...]
+// Returns: [['ॐ', 'anya'], ['अ', 'svara'], ['', 'mAtrA'], ...] (`[text, type]` in krama order)
 
 // Get detailed typing mappings for a script
 const typingMap = await getScriptTypingDataMap('Telugu');

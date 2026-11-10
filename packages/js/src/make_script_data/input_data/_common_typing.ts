@@ -97,6 +97,31 @@ export const COMMON_SCRIPT_TYPING_DATA = [
     type: 'custom_script_char',
     specific_text: 'Q',
     custom_normal_key: 'QQ'
+  },
+  {
+    // ITRANS-style shortcut: x -> kSh (क्ष). A key of its own, so that its k does not join the
+    // key before it (#x -> #क्ष्, not ꣬ष् as #k is ꣬)
+    type: 'krama_sequence',
+    text: 'x',
+    krama_keys: ['k', 'halant', 'Sh']
+  }
+] satisfies InputTypingListDataType[];
+
+/** Independent candra vowels ऍ ऑ (and their mAtrAs ॅ ॉ after a vyanjana): `aiI` `auU`.
+ *
+ * Only for the scripts which have them (Devanagari, Gujarati, Sinhala ...), elsewhere `aiI`
+ * stays `ai` + `I` (in Romanized `aiI` is the start of `aiI^` -> Ê)
+ */
+export const CANDRA_SVARA_TYPING_DATA = [
+  {
+    type: 'duplicates',
+    ref_krama_key: 'aiI-svara',
+    duplicates: ['aiI']
+  },
+  {
+    type: 'duplicates',
+    ref_krama_key: 'auU-svara',
+    duplicates: ['auU']
   }
 ] satisfies InputTypingListDataType[];
 
@@ -217,6 +242,11 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = (
     },
     {
       type: 'duplicates',
+      ref_krama_key: 'ai-mAtrA',
+      duplicates: ['.ai']
+    },
+    {
+      type: 'duplicates',
       ref_krama_key: 'aiI-mAtrA',
       duplicates: ['.aiI']
     },
@@ -229,6 +259,11 @@ export const COMMON_SVARA_MATRA_TYPING_DATA = (
       type: 'duplicates',
       ref_krama_key: 'o-mAtrA',
       duplicates: ['.o']
+    },
+    {
+      type: 'duplicates',
+      ref_krama_key: 'au-mAtrA',
+      duplicates: ['.au']
     },
     {
       type: 'duplicates',

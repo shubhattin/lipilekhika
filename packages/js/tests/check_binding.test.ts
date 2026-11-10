@@ -115,6 +115,34 @@ describe('node binding smoke checks', () => {
   });
 });
 
+describe('backends agree on edge inputs', () => {
+  it('transliterate_wasm takes an array whose items split a surrogate pair', async () => {
+    const text = '𑀓𑀸𑀫';
+    const pieces = [text.slice(0, 1), text.slice(1)];
+    // a lone surrogate becomes U+FFFD in WASM and N-API (the JS backend keeps it)
+    const expected = ['\ufffd', '\ufffdाम'];
+    expect(await transliterate_wasm(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);
+    expect(await transliterate_node(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);
+  });
+
+  it('every backend takes an undefined option value as not set', async () => {
+    const options = { 'normal_to_all:use_typing_chars': undefined } as never;
+    expect(await transliterate('f', 'Normal', 'Devanagari', options)).toBe('f');
+    expect(await transliterate_wasm('f', 'Normal', 'Devanagari', options)).toBe('f');
+    expect(await transliterate_node('f', 'Normal', 'Devanagari', options)).toBe('f');
+  });
+
+  it('every backend rejects an unknown option key', async () => {
+    const options = { foo: true } as never;
+    for (const fn of [transliterate, transliterate_wasm, transliterate_node])
+      for (const [from, to] of [
+        ['Normal', 'Devanagari'],
+        ['Hindi', 'Sanskrit']
+      ] as const)
+        await expect(fn('k', from, to, options)).rejects.toThrow('unknown trans_options key: foo');
+  });
+});
+
 describe('node binding typing matches the TS typing diffs (#155)', () => {
   const TYPING_DIR = path.join(__dirname, '../../../test_data/typing');
   const files = fs

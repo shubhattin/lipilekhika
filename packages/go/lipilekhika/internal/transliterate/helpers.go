@@ -407,15 +407,15 @@ func isSkipChar(r rune) bool {
 var vedicSvarasTypingSymbols = []string{"_", "'''", "''", "'"}
 var vedicSvarasNormalSymbols = []string{"↓", "↑↑↑", "↑↑", "↑"}
 
-// applyTypingInputAliases applies custom typing alias rules
+// applyTypingInputAliases applies custom typing alias rules: Vedic svara input in Tamil-Extended.
 //
-// Eg. x -> kSh,
-// Handling Vedic Svara input in tamil Extended
+// x -> kSh (क्ष) is a key in the typing data of each script, so that its k does not join the key
+// before it. Normal has no typing data, there it is replaced in the input.
 func applyTypingInputAliases(text, toScriptName string) string {
 	if text == "" {
 		return text
 	}
-	if strings.Contains(text, "x") {
+	if toScriptName == "Normal" && strings.Contains(text, "x") {
 		text = strings.ReplaceAll(text, "x", "kSh")
 	}
 	if isScriptTamilExt(toScriptName) {

@@ -150,3 +150,16 @@
   input: saṃskṛtam kḹpta ḸṂ
   output: संस्कृतम् कॣप्त ॡं
   reversible: false
+# य़ / য় (ya + nukta) is yz in Normal and Romanized, like kz jz Dz. As `y` it read back as य / য
+- index: 18
+  from: Bengali
+  to: Normal
+  input: সময় য়া
+  output: samayza yzA
+  reversible: true
+- index: 18.1
+  from: Devanagari
+  to: Romanized
+  input: समय़
+  output: samayza
+  reversible: true

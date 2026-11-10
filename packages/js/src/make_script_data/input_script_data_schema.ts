@@ -73,6 +73,15 @@ export type InputTypingListDataType =
        * as for this no equivalent krama key mapping exists
        */
       custom_normal_key: string;
+    }
+  | {
+      type: 'krama_sequence';
+      /** The typing key */
+      text: string;
+      /** The krama keys it types, as one match: `x` -> `k halant Sh` (क्ष).
+       * Its type in the typing context is the one of the first krama key (`k`, a vyanjana).
+       */
+      krama_keys: KramaKeysLabelType[];
     };
 
 export type InputBrahmicScriptType = {
