@@ -722,14 +722,6 @@ func TransliterateTextCoreWith(
 			continue
 		}
 
-		// `.` between digits is a decimal point, not a danda (or the native digit key `.5`)
-		if ch == '.' && fromData.ScriptType == scriptdata.ScriptTypeOther && isDecimalPoint(&cursor, textIndex) {
-			cursor.advance(1)
-			ctx.prevContextCleanup(".", nil, nil, false)
-			result.emitRune('.')
-			continue
-		}
-
 		// latin digits passthrough if native numerals disabled
 		if ch >= '0' && ch <= '9' && !opts.UseNativeNumerals {
 			cursor.advance(1)
@@ -1171,10 +1163,6 @@ func TransliterateTextCoreWith(
 	}
 
 	contextLength := prevCtx.length()
-	// a digit is kept, a `.` and a digit typed after it make a decimal point (see isDecimalPoint)
-	if last, ok := cursor.peekAt(charsLen - 1); ok && opts.TypingMode && isASCIIDigit(last) && contextLength < 1 {
-		contextLength = 1
-	}
 	output := string(result.buf)
 	if scratch != nil {
 		// hand the buffers back for reuse (`output` is a copy, so reusing `out` is safe)

@@ -163,23 +163,3 @@
   input: समय़
   output: samayza
   reversible: true
-# A `.` between digits is a decimal point, not a danda. After a number at the end of a sentence
-# it still is one, and the native digit notation .1.2 (१२ in typing) stays a danda + digit here
-- index: 19
-  from: Normal
-  to: Devanagari
-  input: 3.14 1.5. 5.
-  output: ३.१४ १.५। ५।
-  reversible: true
-- index: 19.1
-  from: Romanized
-  to: Bengali
-  input: "3.14"
-  output: ৩.১৪
-  reversible: true
-- index: 19.2
-  from: Normal
-  to: Devanagari
-  input: ..1.2..
-  output: ॥१।२॥
-  reversible: false
