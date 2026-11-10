@@ -396,6 +396,21 @@ func isScriptTamilExt(scriptName string) bool {
 	return scriptName == "Tamil-Extended"
 }
 
+func isASCIIDigit(r rune) bool { return r >= '0' && r <= '9' }
+
+// isDecimalPoint reports whether the `.` at index is a decimal point: it is after a digit and
+// before a digit (3.14), and the digit before it is not itself a native digit key
+// (.1.2 is the keys .1 .2 -> १२ in typing)
+func isDecimalPoint(c *inputCursor, index int) bool {
+	prev, okPrev := c.peekAt(index - 1)
+	next, okNext := c.peekAt(index + 1)
+	if !okPrev || !okNext || !isASCIIDigit(prev) || !isASCIIDigit(next) {
+		return false
+	}
+	prev2, ok := c.peekAt(index - 2)
+	return !ok || prev2 != '.'
+}
+
 func isSkipChar(r rune) bool {
 	switch r {
 	case ' ', '\n', '\r', '\t', ',', '~', '!', '@', '?', '%':

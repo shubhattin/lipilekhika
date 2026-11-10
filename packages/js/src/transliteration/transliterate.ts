@@ -480,6 +480,17 @@ type TransliterateCtx = {
   is_to_tamil_ext: boolean;
 };
 
+const isAsciiDigit = (code_unit: number) => code_unit >= 0x30 && code_unit <= 0x39;
+
+/**
+ * The `.` at `index` is a decimal point: it is after a digit and before a digit (`3.14`), and the
+ * digit before it is not itself a native digit key (`.1.2` is the keys `.1` `.2` -> १२ in typing)
+ */
+const isDecimalPoint = (text: string, index: number) =>
+  isAsciiDigit(text.charCodeAt(index - 1)) &&
+  isAsciiDigit(text.charCodeAt(index + 1)) &&
+  text.charCodeAt(index - 2) !== 0x2e;
+
 const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
 const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE = false;
 
@@ -629,6 +640,18 @@ export const transliterate_text_core = (
         prev_context.clear();
       }
       result.emit(cursor.slice(char_index, char_index + char_width));
+      continue;
+    }
+
+    if (
+      cp === 0x2e &&
+      from_script_data.script_type === 'other' &&
+      isDecimalPoint(text, char_index)
+    ) {
+      // `.` between digits is a decimal point, not a danda (or the native digit key `.5`)
+      cursor.advance(1);
+      prev_context_cleanup(ctx, '.', null);
+      result.emit('.');
       continue;
     }
 
@@ -1150,7 +1173,11 @@ export const transliterate_text_core = (
     /** Can be used to manage context while using the typing feature.
      * If this is 0, the external context can be cleared
      */
-    context_length: prev_context.length()
+    context_length:
+      // a digit is kept, a `.` and a digit typed after it make a decimal point (see `isDecimalPoint`)
+      typing_mode && isAsciiDigit(text.charCodeAt(text.length - 1))
+        ? Math.max(prev_context.length(), 1)
+        : prev_context.length()
   };
 };
 
