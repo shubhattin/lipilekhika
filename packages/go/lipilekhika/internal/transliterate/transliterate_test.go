@@ -192,6 +192,20 @@ func TestTransliterateBasicPublicBehavior(t *testing.T) {
 	}
 }
 
+// Unknown option keys are rejected, like in the Rust based bindings (WASM, N-API, Python, Dart)
+func TestUnknownOptionKey(t *testing.T) {
+	for _, pair := range [][2]string{{"Normal", "Devanagari"}, {"Hindi", "Sanskrit"}} {
+		_, err := Transliterate("k", pair[0], pair[1], map[string]bool{"foo": true})
+		if err == nil || err.Error() != "unknown trans_options key: foo" {
+			t.Fatalf("%v: expected unknown key error, got %v", pair, err)
+		}
+	}
+	out, err := Transliterate("f", "Normal", "Devanagari", map[string]bool{"normal_to_all:use_typing_chars": true})
+	if err != nil || out != "फ़्" {
+		t.Fatalf("valid option: got %q, %v", out, err)
+	}
+}
+
 // customOptionKeys must follow the key order of custom_options.json (rule order matters).
 func TestCustomOptionKeysOrder(t *testing.T) {
 	root, err := packageRoot()

@@ -67,6 +67,13 @@ class TestGetSchwaStatusForScript:
         status = get_schwa_status_for_script("dev")
         assert isinstance(status, bool)
 
+    def test_get_schwa_status_values(self):
+        """Brahmic scripts give a bool, Normal and Romanized (no schwa) give None."""
+        assert get_schwa_status_for_script("Devanagari") is False
+        assert get_schwa_status_for_script("Bengali") is True
+        assert get_schwa_status_for_script("Normal") is None
+        assert get_schwa_status_for_script("Romanized") is None
+
     def test_get_schwa_status_invalid_script(self):
         """Test getting schwa status for invalid script raises error."""
         with pytest.raises(ValueError):
@@ -92,6 +99,11 @@ class TestGetAllOptions:
         """Test getting all options with normalized script names."""
         options = get_all_options("Normal", "dev")
         assert isinstance(options, list)
+
+    def test_get_all_options_same_script(self):
+        """Hindi and Sanskrit are both Devanagari: nothing to transliterate, no options."""
+        assert get_all_options("Hindi", "Sanskrit") == []
+        assert get_all_options("Devanagari", "Devanagari") == []
 
     def test_get_all_options_invalid_scripts(self):
         """Test getting all options with invalid scripts raises error."""

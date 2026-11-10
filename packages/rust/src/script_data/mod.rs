@@ -57,4 +57,13 @@ mod tests {
         let to = Script::from_str("tel").unwrap().into();
         let _ = get_all_options(from, to);
     }
+
+    #[test]
+    fn same_script_pair_has_no_options() {
+        // Hindi and Sanskrit are both Devanagari, the text is returned as it is
+        let hindi = Script::from_str("Hindi").unwrap().into();
+        let sanskrit = Script::from_str("Sanskrit").unwrap().into();
+        assert!(get_all_options(hindi, sanskrit).is_empty());
+        assert!(get_all_options(Script::Devanagari, Script::Devanagari).is_empty());
+    }
 }

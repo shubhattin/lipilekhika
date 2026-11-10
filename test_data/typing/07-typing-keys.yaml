@@ -1,0 +1,76 @@
+# य़ / য় (ya + nukta) is typed with `yz`, like the other nukta letters (kz, jz, Dz).
+# Without a key of its own `yz` came out as y + z (য্জ়্)
+- index: 0
+  text: samayza yza yzA
+  output: সময় য় য়া
+  script: Bengali
+  preserve_check: true
+- index: 1
+  text: samayza yza
+  output: समय़ य़
+  script: Devanagari
+  preserve_check: true
+- index: 2
+  text: yzadi
+  output: ଯଦି
+  script: Odia
+  preserve_check: true
+
+# Independent candra vowels ऍ ऑ (and their mAtrAs) are typed with `aiI` / `auU`, in the scripts
+# which have them. Other scripts keep `aiI` as ai + I
+- index: 3
+  text: aiI auU kaiI kauU
+  output: ऍ ऑ कॅ कॉ
+  script: Devanagari
+- index: 4
+  text: aiI auU kaiI kauU
+  output: ऍ ऑ कॅ कॉ
+  script: Purna-Devanagari
+- index: 5
+  text: aiI auU kaiI kauU
+  output: ઍ ઑ કૅ કૉ
+  script: Gujarati
+- index: 6
+  text: aiI auU kaiI kauU
+  output: ඇ ඈ කැ කෑ
+  script: Sinhala
+- index: 7
+  text: aiI kaiI
+  output: ঐঈ কৈঈ
+  script: Bengali
+
+# Standalone ai / au mAtrA keys `.ai` `.au`, like `.A` `.i` ... (the input was dropped: k.ai -> क्)
+- index: 8
+  text: .ai .au k.ai k.au
+  output: ै ौ क्ै क्ौ
+  script: Devanagari
+
+# A `.` after a digit and before a digit is a decimal point. The `.` is the start of the native
+# digit keys (`.5` -> ५), so it was swallowed: 1.5 -> १५, and 3.14 -> 3१4 with Latin numerals.
+# The native digit keys still work, also one after another (.1.2 -> १२), and a `.` after a
+# number that ends a sentence is still a danda
+- index: 9
+  text: 1.5 3.14 5. .5 .1.2
+  output: १.५ ३.१४ ५। ५ १२
+  script: Devanagari
+- index: 10
+  text: 1.5 3.14 5. .5 .1.2
+  output: 1.5 3.14 5। ५ १२
+  script: Devanagari
+  options:
+    useNativeNumerals: false
+- index: 11
+  text: 2.10 .10
+  output: ௨.௧௦ ௰
+  script: Tamil
+
+# `x` (क्ष) is a key, it was replaced by kSh in the input before the keys were split, so its
+# k joined the key before it: #x -> ꣬ष् (#k is ꣬), Malayalam .x -> ൿഷ് (.k is the chillu ൿ)
+- index: 12
+  text: "# #x .x kx xa xi"
+  output: "# #क्ष् ।क्ष् क्क्ष् क्ष क्षि"
+  script: Devanagari
+- index: 13
+  text: .x xa
+  output: ।ക്ഷ് ക്ഷ
+  script: Malayalam

@@ -150,3 +150,36 @@
   input: saṃskṛtam kḹpta ḸṂ
   output: संस्कृतम् कॣप्त ॡं
   reversible: false
+# य़ / য় (ya + nukta) is yz in Normal and Romanized, like kz jz Dz. As `y` it read back as य / য
+- index: 18
+  from: Bengali
+  to: Normal
+  input: সময় য়া
+  output: samayza yzA
+  reversible: true
+- index: 18.1
+  from: Devanagari
+  to: Romanized
+  input: समय़
+  output: samayza
+  reversible: true
+# A `.` between digits is a decimal point, not a danda. After a number at the end of a sentence
+# it still is one, and the native digit notation .1.2 (१२ in typing) stays a danda + digit here
+- index: 19
+  from: Normal
+  to: Devanagari
+  input: 3.14 1.5. 5.
+  output: ३.१४ १.५। ५।
+  reversible: true
+- index: 19.1
+  from: Romanized
+  to: Bengali
+  input: "3.14"
+  output: ৩.১৪
+  reversible: true
+- index: 19.2
+  from: Normal
+  to: Devanagari
+  input: ..1.2..
+  output: ॥१।२॥
+  reversible: false

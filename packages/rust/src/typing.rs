@@ -1009,6 +1009,49 @@ mod tests {
     }
 
     #[test]
+    fn typing_data_map_shows_keys_read_from_the_normal_krama() {
+        let data = get_script_typing_data_map(Script::Devanagari);
+        let keys_of = |text: &str| -> Vec<String> {
+            data.common_krama_map
+                .iter()
+                .filter(|item| item.0 == text)
+                .flat_map(|item| item.2.clone())
+                .collect()
+        };
+        assert_eq!(keys_of("म"), ["m"]);
+        assert_eq!(keys_of("ङ"), ["G"]);
+        assert_eq!(keys_of("ः"), ["H"]);
+        assert!(keys_of("श").contains(&"sh".to_string()));
+        let v = keys_of("व");
+        assert!(
+            v.contains(&"v".to_string()) && v.contains(&"w".to_string()),
+            "{v:?}"
+        );
+        let zero = keys_of("०");
+        assert!(
+            zero.contains(&"0".to_string()) && zero.contains(&".0".to_string()),
+            "{zero:?}"
+        );
+        assert_eq!(keys_of("य़"), ["yz"]);
+        assert_eq!(keys_of("ऍ"), ["aiI"]);
+        assert_eq!(keys_of("ै"), [".ai"]);
+    }
+
+    #[test]
+    fn typing_data_map_has_no_item_without_text() {
+        for script in [Script::Devanagari, Script::Tamil, Script::Romanized] {
+            let data = get_script_typing_data_map(script);
+            for item in data
+                .common_krama_map
+                .iter()
+                .chain(&data.script_specific_krama_map)
+            {
+                assert!(!item.0.is_empty(), "{item:?}");
+            }
+        }
+    }
+
+    #[test]
     fn test_get_script_typing_data_map_normalized_names() {
         let _ = get_script_typing_data_map(Script::from_str("dev").unwrap());
     }
