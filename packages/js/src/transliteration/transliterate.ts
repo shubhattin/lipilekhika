@@ -73,49 +73,55 @@ const emit_krama_pieces = (
 };
 
 /**
- * Whether the match `text` (`krama`) is a sign written as a dead consonant (the Tamil anusvAra
- * ம், a consonant + halant) where that sign cannot be: after a halant or at the start of a word,
- * `prev_cp` is `-1`, a skip character or a character not of the script. There it is the
- * consonant + halant (ஸாத்ம்ய -> सात्म्य, ம்ய -> म्य, not सात्ंय, ंय).
+ * Whether the text before `index` is a syllable that a sign written as a dead consonant (the
+ * Tamil anusvAra ம், see `dead_consonant_sign_index`) can go with: a vyanjana (with its inherent
+ * vowel), a svara or a mAtrA, looking past Vedic svaras. Else (the start of a word, after a
+ * halant, a digit or a sign) it is the consonant + halant (ஸாத்ம்ய -> सात्म्य, not सात्ंय).
  */
-const is_misplaced_dead_consonant_sign = (
+const sign_has_base = (
   script_data: ScriptData,
-  text: string,
-  krama: number[] | null | undefined,
-  prev_cp: number
+  cursor: ReturnType<typeof make_input_cursor>,
+  index: number
 ): boolean => {
-  const halant = script_data.script_type === 'brahmic' ? script_data.halant : null;
-  if (krama === null || krama === undefined || krama.length !== 1 || !halant) return false;
-  const consonant_cp = text.codePointAt(0) ?? -1;
-  if (text.length !== cpWidth(consonant_cp) + halant.length || !text.endsWith(halant)) return false;
-  const type_of = (krama_index: number) =>
-    script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1]?.type;
-  if (
-    type_of(krama[0]) === 'vyanjana' ||
-    type_of(kramaIndexOfChar(script_data, consonant_cp)) !== 'vyanjana'
-  )
-    return false;
-  return (
-    prev_cp === -1 ||
-    isSkipChar(prev_cp) ||
-    String.fromCodePoint(prev_cp) === halant ||
-    (kramaIndexOfChar(script_data, prev_cp) === -1 &&
-      textToKramaMapCharIndex(script_data, prev_cp) === -1)
-  );
+  let end = index;
+  let prev = cursor.prevCharIndex(end);
+  while (prev >= 0 && isVedicSvaraTailCp(cursor.cpAt(prev))) {
+    end = prev;
+    prev = cursor.prevCharIndex(end);
+  }
+  if (prev < 0) return false;
+  let krama_index = kramaIndexOfChar(script_data, cursor.cpAt(prev));
+  if (krama_index === -1 && prev > 0) {
+    // a vowel sign or vowel written as its parts (ௌ as ெ + ௗ): the text of the last two
+    const map_index = textToKramaMapIndex(
+      script_data,
+      cursor.slice(cursor.prevCharIndex(prev), end)
+    );
+    krama_index = script_data.text_to_krama_map[map_index]?.[1].krama?.at(-1) ?? -1;
+  }
+  const type = script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1]?.type;
+  return type === 'vyanjana' || type === 'svara' || type === 'mAtrA';
 };
 
 /**
- * Whether a text longer than the character at `index` (`width` UTF-16 units) is read from it,
- * walking `text_to_krama_map` like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is a halant, while
- * the ZWJ by itself is a custom script character.
+ * Whether the character at `index` (`width` UTF-16 units) is not read by itself but starts a
+ * longer text that is, walking `text_to_krama_map` like Step 1. The Sinhala ZWJ + al-lakuna `‍්`
+ * is a halant, while the ZWJ by itself is a custom script character.
  */
-const longer_text_is_read = (
+const only_read_in_longer_text = (
   script_data: ScriptData,
   cursor: ReturnType<typeof make_input_cursor>,
   index: number,
   width: number
 ): boolean => {
-  let map_index = textToKramaMapCharIndex(script_data, cursor.cpAt(index));
+  const cp = cursor.cpAt(index);
+  let map_index = textToKramaMapCharIndex(script_data, cp);
+  const own_krama = map_index !== -1 ? script_data.text_to_krama_map[map_index][1].krama : null;
+  if (
+    kramaIndexOfChar(script_data, cp) !== -1 ||
+    (own_krama && has_krama_other_than(own_krama, -1))
+  )
+    return false;
   let end = index + width;
   let read = false;
   while (map_index !== -1) {
@@ -281,13 +287,20 @@ function prev_context_cleanup(
   return result_str_concat_status;
 }
 
-function apply_custom_trans_rules(ctx: TransliterateCtx, text_index: number, delta: number) {
+/** @param direct_replace_only only the `direct_replace` rules (applied inside a match) */
+function apply_custom_trans_rules(
+  ctx: TransliterateCtx,
+  text_index: number,
+  delta: number,
+  direct_replace_only = false
+) {
   const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
   const current_text_index = text_index + delta;
 
   for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
     if (custom_rules[rule_index].use_replace === true) continue;
     const rule = custom_rules[rule_index];
+    if (direct_replace_only && rule.type !== 'direct_replace') continue;
 
     if (rule.type === 'replace_prev_krama_keys') {
       if (rule.check_in === 'input') {
@@ -546,9 +559,10 @@ export const transliterate_text_core = (
   const is_to_tamil_ext = isScriptTamilExt(to_script_name);
   const opt_preserve_specific_chars =
     !!trans_options['all_to_normal:preserve_specific_chars'] && to_script_name === 'Normal';
-  /** a halant followed by a vyanjana in the output is written al-lakuna + ZWJ (Sinhala) */
-  const opt_sinhala_conjunct_halant =
-    to_script_name === 'Sinhala' && !!trans_options['all_to_sinhala:use_conjunct_enabling_halant'];
+  /** `direct_replace` rules are applied after every piece of a match */
+  const has_direct_replace_rules = custom_rules.some(
+    (rule) => rule.type === 'direct_replace' && rule.use_replace !== true
+  );
 
   const ctx: TransliterateCtx = {
     from_script_name,
@@ -635,7 +649,7 @@ export const transliterate_text_core = (
       const custom_script_val = getCustomScriptCharsData(from_script_data, char);
       if (
         custom_script_val !== undefined &&
-        !longer_text_is_read(from_script_data, cursor, char_index, char_width)
+        !only_read_in_longer_text(from_script_data, cursor, char_index, char_width)
       ) {
         prev_context_cleanup(ctx, char, from_script_data.list[custom_script_val[0] ?? -1] ?? null);
         const normal_text = getTypingTextToKramaText(from_script_data, custom_script_val[1]);
@@ -792,49 +806,22 @@ export const transliterate_text_core = (
                 break;
               }
             }
-            // The match ends with halant + a letter that cannot be continued (ல்ர is the start of
-            // ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a superscript (்ரு² ்ரூ²):
-            // stop the match before the halant, so ல்ரு² is read as ல + ்ரு² (लृ), not ल्रु²
+            // The match ends with a halant, or a halant + a letter, that cannot be continued (ல்
+            // and ல்ர are the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a
+            // superscript (்ரு² ்ரூ² ்ல்ரி² ்ல்ரீ²): stop the match before the halant, so ல்ரு² is
+            // read as ல + ்ரு² (लृ) and ல்ல்ரி² as ல + ்ல்ரி² (लॢ, like க்ல்ரி² कॢ)
+            const halant_back =
+              char_to_search.at(-1) === halant ? 1 : char_to_search.at(-2) === halant ? 2 : 0;
             if (
+              halant_back !== 0 &&
               nth_next_cp !== -1 &&
               !next_cps.includes(nth_next_cp) &&
-              char_to_search.length > 2 &&
-              char_to_search.at(-2) === halant &&
-              cursor.slice(end_index - 2, end_index) === char_to_search.slice(-2)
-            ) {
-              let tail_sup_index = end_index + cpWidth(nth_next_cp);
-              while (isVedicSvaraTailCp(cursor.cpAt(tail_sup_index))) tail_sup_index += 1;
-              const tail_sup_cp = cursor.cpAt(tail_sup_index);
-              if (isTaExtSuperscriptTailCp(tail_sup_cp)) {
-                const tail_index = textToKramaMapIndex(
-                  from_script_data,
-                  char_to_search.slice(-2) +
-                    String.fromCodePoint(nth_next_cp) +
-                    String.fromCharCode(tail_sup_cp)
-                );
-                const head_index = textToKramaMapIndex(
-                  from_script_data,
-                  char_to_search.slice(0, -2)
-                );
-                if (tail_index !== -1 && head_index !== -1) {
-                  text_to_krama_item_index = head_index;
-                  break;
-                }
-              }
-            }
-            // The match ends with a halant that cannot be continued (ல் is the start of ல்ரி² ऌ),
-            // but the halant starts a mAtrA ending in a superscript (்ல்ரி² ்ல்ரீ², ॢ ॣ): stop the
-            // match before the halant, so ல்ல்ரி² is read as ல + ்ல்ரி² (लॢ) like க்ல்ரி² (कॢ),
-            // not ल् + ऌ
-            if (
-              nth_next_cp !== -1 &&
-              !next_cps.includes(nth_next_cp) &&
-              char_to_search.length > 1 &&
-              char_to_search.at(-1) === halant &&
-              cursor.slice(end_index - 1, end_index) === halant
+              char_to_search.length > halant_back &&
+              cursor.slice(end_index - halant_back, end_index) ===
+                char_to_search.slice(-halant_back)
             ) {
               // the longest text from the halant up to the superscript (after Vedic svaras)
-              let tail = halant;
+              let tail = char_to_search.slice(-halant_back);
               let tail_end = end_index;
               while (true) {
                 const tail_cp = cursor.cpAt(tail_end);
@@ -846,28 +833,23 @@ export const transliterate_text_core = (
               }
               while (isVedicSvaraTailCp(cursor.cpAt(tail_end))) tail_end += 1;
               const tail_sup_cp = cursor.cpAt(tail_end);
-              if (tail !== halant && isTaExtSuperscriptTailCp(tail_sup_cp)) {
-                const tail_index = textToKramaMapIndex(
-                  from_script_data,
-                  tail + String.fromCharCode(tail_sup_cp)
-                );
-                const tail_krama =
-                  tail_index !== -1
-                    ? from_script_data.text_to_krama_map[tail_index][1].krama
-                    : null;
-                const head_index = textToKramaMapIndex(
-                  from_script_data,
-                  char_to_search.slice(0, -1)
-                );
-                if (
-                  head_index !== -1 &&
-                  tail_krama?.length === 1 &&
-                  from_script_data.list[from_script_data.krama_text_arr[tail_krama[0]]?.[1] ?? -1]
-                    ?.type === 'mAtrA'
-                ) {
-                  text_to_krama_item_index = head_index;
-                  break;
-                }
+              const tail_krama = isTaExtSuperscriptTailCp(tail_sup_cp)
+                ? from_script_data.text_to_krama_map[
+                    textToKramaMapIndex(from_script_data, tail + String.fromCharCode(tail_sup_cp))
+                  ]?.[1].krama
+                : null;
+              const head_index = textToKramaMapIndex(
+                from_script_data,
+                char_to_search.slice(0, -halant_back)
+              );
+              if (
+                head_index !== -1 &&
+                tail_krama?.length === 1 &&
+                from_script_data.list[from_script_data.krama_text_arr[tail_krama[0]]?.[1] ?? -1]
+                  ?.type === 'mAtrA'
+              ) {
+                text_to_krama_item_index = head_index;
+                break;
               }
             }
           }
@@ -881,18 +863,13 @@ export const transliterate_text_core = (
         break;
       }
     }
-    // A sign written as a dead consonant (Tamil anusvAra ம்) after a halant or at the start of a
-    // word: only the consonant is read here (Step 2), the halant next
+    // A sign written as a dead consonant (Tamil anusvAra ம்) with no syllable to go with (the start
+    // of a word, after a halant): only the consonant is read here (Step 2), the halant next
     if (
+      text_to_krama_item_index === from_script_data.dead_consonant_sign_index &&
       text_to_krama_item_index !== -1 &&
       !use_typing_text_to_krama_map &&
-      from_script_data.script_type === 'brahmic' &&
-      is_misplaced_dead_consonant_sign(
-        from_script_data,
-        text_to_krama_map[text_to_krama_item_index][0],
-        text_to_krama_map[text_to_krama_item_index][1].krama,
-        cursor.cpAt(cursor.prevCharIndex(char_index))
-      )
+      !sign_has_base(from_script_data, cursor, char_index)
     )
       text_to_krama_item_index = -1;
     // (the Tamil-Extended matches index into `from_script_data.text_to_krama_map`, which
@@ -1056,18 +1033,14 @@ export const transliterate_text_core = (
             } else {
               result.emitPieces(result_pieces_to_add);
             }
-          } else if (opt_sinhala_conjunct_halant && krama.length > 1) {
-            // a halant inside one match (Romanized sh -> स्ह) is followed by a vyanjana too
+          } else if (has_direct_replace_rules && krama.length > 1) {
+            // the direct_replace rules see every piece of a match, not only the last: Romanized
+            // sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga
             for (let i = 0; i < krama.length; i++) {
               if (krama[i] < 0) continue;
               const piece = kramaTextOrEmpty(to_script_data, krama[i]);
-              result.emit(
-                i < krama.length - 1 &&
-                  to_script_data.script_type === 'brahmic' &&
-                  piece === to_script_data.halant
-                  ? piece + '\u200d'
-                  : piece
-              );
+              result.emit(piece);
+              if (piece && i < krama.length - 1) apply_custom_trans_rules(ctx, text_index, 0, true);
             }
           } else {
             emit_krama_pieces(result, to_script_data, krama);
