@@ -2,6 +2,8 @@
 
 ## js-lib@1.0.14 (Unreleased)
 
+- `transliterate_wasm` on Cloudflare Workers and Vercel Edge: new `lipilekhika/wasm` entry (same API), which imports the `.wasm` file as a module on those runtimes (`workerd` / `edge-light` export conditions), fetches it as a separate file in browsers (falling back to the embedded module if it can not be loaded) and is the embedded module in Node.js, Bun and Deno. `lipilekhika/wasm/slim` (`initWasm`) takes the `.wasm` file from you, shipped as `lipilekhika/lipilekhika.wasm`. `transliterate_wasm` from `lipilekhika` is unchanged and stays the recommended one; where it can not load it now says to use `lipilekhika/wasm`
+- Fix: `transliterate_wasm` from `lipilekhika` failed with `Invalid URL` under CommonJS (`require('lipilekhika')`), where there is no `import.meta.url` to resolve its embedded module against. The embedded module is now decoded from base64 directly, no `fetch` of a `data:` URL (works in test environments without `fetch` and with a Content Security Policy that blocks `data:`)
 - Performance improvements for `transliterate_wasm` and `transliterate_node` (N-API) (Rust based)
 - Faster pure JS `transliterate` and typing (Rust optimizations ported): ~43% / ~60% faster transliteration on Node / Bun, ~17-26% faster typing
 - Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)

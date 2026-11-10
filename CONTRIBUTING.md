@@ -38,6 +38,7 @@ bun run bench:suite        # statistical benchmark suite (mitata), bench:suite:b
 bun run test:run           # run tests once
 bun run test:runtime       # JS, WASM and N-API under vite-node and bun (needs bindings)
 bun run test:runtime:dist  # same against the built package, under node and bun (after `bun run build`)
+bun run test:workerd       # `lipilekhika/wasm` in the Cloudflare Workers runtime (workerd, after `bun run build`)
 ```
 
 Tests need native bindings — run once (or after binding changes in rust package):

@@ -4,9 +4,21 @@ import path from 'node:path';
 import dts from 'unplugin-dts/vite';
 import MacroPlugin from 'unplugin-macros/vite';
 import fs from 'node:fs';
-import type { Plugin } from 'vite';
+import { normalizePath, type Plugin } from 'vite';
 
 const IS_UMD_BUILD_MODE = process.env.VITE_IS_UMD_BUILD_MODE === 'true';
+
+/** `lipilekhika/wasm` (per export condition) and `lipilekhika/wasm/slim` */
+const WASM_ENTRIES = {
+  wasm: path.resolve(__dirname, 'src/wasm.ts'),
+  'wasm.workerd': path.resolve(__dirname, 'src/wasm.workerd.ts'),
+  'wasm.edge-light': path.resolve(__dirname, 'src/wasm.edge-light.ts'),
+  'wasm.browser': path.resolve(__dirname, 'src/wasm.browser.ts'),
+  wasm_slim: path.resolve(__dirname, 'src/wasm_slim.ts')
+};
+const WASM_SOURCE_PATH = path.resolve(__dirname, 'wasm/pkg/lipilekhika_wasm_bg.wasm');
+/** The `.wasm` file shipped in the package (`lipilekhika/lipilekhika.wasm`) */
+const WASM_DIST_PATH = path.resolve(__dirname, 'dist/lipilekhika.wasm');
 
 export default defineConfig({
   resolve: {
@@ -19,9 +31,11 @@ export default defineConfig({
   },
   plugins: [
     // unplugin-dts uses `outDirs` (string | …); maps to former vite-plugin-dts `outDir`.
-    dts({ include: ['src'], outDirs: 'dist/types' }),
+    dts({ include: ['src', 'wasm/wasm_modules.d.ts'], outDirs: 'dist/types' }),
     MacroPlugin(),
-    ...(IS_UMD_BUILD_MODE ? [copyAndMinifyJsonPlugin()] : [copyNativeBinariesPlugin()])
+    ...(IS_UMD_BUILD_MODE
+      ? [copyAndMinifyJsonPlugin()]
+      : [copyNativeBinariesPlugin(), wasmModuleImportsPlugin()])
   ],
   build: {
     lib: {
@@ -32,7 +46,8 @@ export default defineConfig({
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
+            typing: path.resolve(__dirname, 'src/typing.ts'),
+            ...WASM_ENTRIES
           },
       name: 'lipilekhika', // used for UMD/iife global when loaded via <script>
       // formats: ["es", "cjs", "iife", "umd"],
@@ -49,7 +64,8 @@ export default defineConfig({
         : {
             index: path.resolve(__dirname, 'src/index.ts'),
             node: path.resolve(__dirname, 'src/node.ts'),
-            typing: path.resolve(__dirname, 'src/typing.ts')
+            typing: path.resolve(__dirname, 'src/typing.ts'),
+            ...WASM_ENTRIES
           },
       output: !IS_UMD_BUILD_MODE
         ? [
@@ -99,6 +115,96 @@ function copyNativeBinariesPlugin(): Plugin {
       for (const nativeBinaryFile of nativeBinaryFiles) {
         fs.copyFileSync(path.join(srcDir, nativeBinaryFile), path.join(destDir, nativeBinaryFile));
       }
+    }
+  };
+}
+
+/**
+ * - `import wasm from '<pkg>/lipilekhika_wasm_bg.wasm'` (and `?module`) in the `workerd` /
+ *   `edge-light` bindings stays an import in the output, of `dist/lipilekhika.wasm` (copied there),
+ *   for the consumer's tooling (wrangler, the Cloudflare Vite plugin, Next.js) to load as a
+ *   `WebAssembly.Module`.
+ * - `wasm/bind.ts` (the default binding) gets the module as `bytesFromBase64('<base64>')`, written
+ *   in place of its `new URL('./pkg/lipilekhika_wasm_bg.wasm', import.meta.url)`. Leaving that to
+ *   library mode's asset inlining gives `new URL('data:...', '' + import.meta.url)`, which throws
+ *   in the CommonJS build (no `import.meta.url` there, the base is "undefined") and needs `fetch`
+ *   of a `data:` URL.
+ * - The wasm-bindgen glue's `init()` falls back to `new URL('lipilekhika_wasm_bg.wasm',
+ *   import.meta.url)`, which library mode would inline as base64 into the glue chunk that every
+ *   WASM entry shares. The bindings always pass the module explicitly, so the fallback is removed:
+ *   only the chunk of `wasm/bind.ts` carries the base64 copy.
+ */
+function wasmModuleImportsPlugin(): Plugin {
+  // Vite ids use `/` on every OS: compare normalized paths (without a query)
+  const GLUE_PATH = normalizePath(path.resolve(__dirname, 'wasm/pkg/lipilekhika_wasm.js'));
+  const DEFAULT_URL = "module_or_path = new URL('lipilekhika_wasm_bg.wasm', import.meta.url);";
+  const BIND_PATH = normalizePath(path.resolve(__dirname, 'wasm/bind.ts'));
+  const BIND_URL = "new URL('./pkg/lipilekhika_wasm_bg.wasm', import.meta.url)";
+  const BROWSER_BIND_PATH = normalizePath(path.resolve(__dirname, 'wasm/bind_browser.ts'));
+  const rewritten = new Set<string>();
+  const idPath = (id: string) => normalizePath(path.resolve(id.split('?')[0]));
+  // hidden from Vite's own `new URL(..., import.meta.url)` handling (which would inline it) until
+  // the chunk is written
+  const BROWSER_URL_PLACEHOLDER = '__LIPILEKHIKA_WASM_FILE_URL__';
+  return {
+    name: 'lipilekhika-wasm-module-imports',
+    enforce: 'pre',
+    apply: 'build',
+    resolveId(source, importer) {
+      const [file, query] = source.split('?');
+      if (!importer || !file.endsWith('.wasm')) return null;
+      const resolved = path.resolve(path.dirname(importer.split('?')[0]), file);
+      if (normalizePath(resolved) !== normalizePath(WASM_SOURCE_PATH)) return null;
+      // kept as written: every entry is in `dist/esm` or `dist/cjs`, one level below the file
+      return {
+        id: `../${path.basename(WASM_DIST_PATH)}${query ? `?${query}` : ''}`,
+        external: true
+      };
+    },
+    transform(code, rawId) {
+      const id = idPath(rawId);
+      if (id === BIND_PATH) {
+        if (!code.includes(BIND_URL)) {
+          this.error(`\`${BIND_URL}\` not found in ${id}`);
+        }
+        const base64 = fs.readFileSync(WASM_SOURCE_PATH).toString('base64');
+        rewritten.add(id);
+        return code.replace(BIND_URL, `bytesFromBase64(${JSON.stringify(base64)})`);
+      }
+      if (id === BROWSER_BIND_PATH) {
+        if (!code.includes(BIND_URL)) {
+          this.error(`\`${BIND_URL}\` not found in ${id}`);
+        }
+        rewritten.add(id);
+        return code.replace(BIND_URL, BROWSER_URL_PLACEHOLDER);
+      }
+      if (id !== GLUE_PATH) return null;
+      if (!code.includes(DEFAULT_URL)) {
+        this.error(`wasm-bindgen glue changed: \`${DEFAULT_URL}\` not found in ${id}`);
+      }
+      rewritten.add(id);
+      return code.replace(
+        DEFAULT_URL,
+        "throw new Error('lipilekhika: the WASM module must be passed to init()');"
+      );
+    },
+    buildEnd(error) {
+      if (error) return;
+      // a rewrite that silently did not apply would ship a broken package (eg. ids not matching)
+      for (const expected of [BIND_PATH, BROWSER_BIND_PATH, GLUE_PATH]) {
+        if (!rewritten.has(expected)) this.error(`wasm build: ${expected} was not rewritten`);
+      }
+    },
+    renderChunk(code) {
+      if (!code.includes(BROWSER_URL_PLACEHOLDER)) return null;
+      return code.replaceAll(
+        BROWSER_URL_PLACEHOLDER,
+        `new URL('../${path.basename(WASM_DIST_PATH)}', import.meta.url)`
+      );
+    },
+    closeBundle() {
+      fs.mkdirSync(path.dirname(WASM_DIST_PATH), { recursive: true });
+      fs.copyFileSync(WASM_SOURCE_PATH, WASM_DIST_PATH);
     }
   };
 }

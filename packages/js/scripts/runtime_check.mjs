@@ -13,6 +13,9 @@
 // silently with code 0 before the WASM module was ready). The exit code starts as a failure and
 // is only cleared after every check passed, so such a silent early exit fails this script.
 
+import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 process.exitCode = 1;
@@ -84,6 +87,45 @@ async function main() {
     expected_many.join('|')
   );
 
+  // `lipilekhika/wasm` (dist: through the package's own `exports`, as a consumer resolves it)
+  const wasm_mod = await import(USE_DIST ? 'lipilekhika/wasm' : target('', '../src/wasm.ts'));
+  const [text, from, to] = CASES[0];
+  check(
+    `wasm (lipilekhika/wasm)`,
+    await wasm_mod.transliterate_wasm(text, from, to),
+    await main_mod.transliterate(text, from, to)
+  );
+
+  // CommonJS (`require`): its own module graph, so it loads the module again
+  if (USE_DIST) {
+    const require = createRequire(import.meta.url);
+    const cjs_root = require('../dist/cjs/index.cjs');
+    const cjs_wasm = require('lipilekhika/wasm');
+    const expected = await main_mod.transliterate(text, from, to);
+    check('wasm cjs (lipilekhika)', await cjs_root.transliterate_wasm(text, from, to), expected);
+    check(
+      'wasm cjs (lipilekhika/wasm)',
+      await cjs_wasm.transliterate_wasm(text, from, to),
+      expected
+    );
+  }
+
+  // Every WASM entry shares one wasm-bindgen instance: once one has loaded it, the others reuse
+  // it and load nothing. So each other way of loading is checked in a fresh process.
+  if (USE_DIST) {
+    for (const mode of Object.keys(ISOLATED_CHECKS)) {
+      const res = spawnSync(
+        process.execPath,
+        [fileURLToPath(import.meta.url), '--dist', `--isolated=${mode}`],
+        { encoding: 'utf8' }
+      );
+      process.stdout.write(res.stdout);
+      if (res.status !== 0) {
+        throw new Error(`isolated check ${mode} failed:\n${res.stderr}`);
+      }
+    }
+  }
+
   // typing: JS context vs N-API context
   const typing_mod = await import(target('../dist/esm/typing.mjs', '../src/typing.ts'));
   const typed_js = await emulateTyping(typing_mod.createTypingContext, TYPING_INPUT, 'Devanagari');
@@ -97,8 +139,69 @@ async function main() {
   console.log('Runtime check passed');
 }
 
+const WASM_BYTES = () => readFileSync(new URL('../dist/lipilekhika.wasm', import.meta.url));
+/** run alone in a process each (dist), see `main` */
+const ISOLATED_CHECKS = {
+  'slim (WebAssembly.Module)': async (slim) => {
+    await slim.initWasm(new WebAssembly.Module(WASM_BYTES()));
+  },
+  'slim (bytes)': async (slim) => {
+    await slim.initWasm(WASM_BYTES());
+  },
+  // the `browser` build fetches `../lipilekhika.wasm`: Bun can fetch a file URL, Node can not and
+  // falls back to the embedded module
+  browser: null,
+  // `lipilekhika` and `slim` called at the same time: the module is instantiated once (the second
+  // entry waits for the first one's load)
+  'shared load': null
+};
+
+async function isolated(mode) {
+  const [text, from, to] = CASES[0];
+  const { transliterate } = await import(target('../dist/esm/index.mjs', ''));
+  const expected = await transliterate(text, from, to);
+  let actual;
+  let loaded = 'file';
+  if (mode === 'shared load') {
+    let instantiated = 0;
+    const instantiate = WebAssembly.instantiate;
+    WebAssembly.instantiate = (...args) => {
+      // only lipilekhika's module (its wasm-bindgen imports): Node 22's own `fetch` (undici)
+      // instantiates its HTTP parser module when the global `Response` is first used
+      if (args[1]?.['./lipilekhika_wasm_bg.js']) instantiated++;
+      return instantiate.apply(WebAssembly, args);
+    };
+    const root = await import(target('../dist/esm/index.mjs', ''));
+    const slim = await import(target('../dist/esm/wasm_slim.mjs', ''));
+    const [a, b] = await Promise.all([
+      root.transliterate_wasm(text, from, to),
+      slim.initWasm(WASM_BYTES()).then(() => slim.transliterate_wasm(text, from, to))
+    ]);
+    check('wasm shared load (lipilekhika + slim)', a, expected);
+    check('wasm shared load (slim)', b, expected);
+    check('wasm shared load: instantiated', instantiated, 1);
+    process.exitCode = 0;
+    return;
+  }
+  if (mode === 'browser') {
+    const warn = console.warn;
+    console.warn = () => (loaded = 'embedded fallback');
+    const mod = await import(target('../dist/esm/wasm.browser.mjs', ''));
+    actual = await mod.transliterate_wasm(text, from, to);
+    console.warn = warn;
+  } else {
+    const slim = await import(target('../dist/esm/wasm_slim.mjs', ''));
+    await ISOLATED_CHECKS[mode](slim);
+    actual = await slim.transliterate_wasm(text, from, to);
+  }
+  check(`wasm ${mode}${mode === 'browser' ? ` (${loaded})` : ''}`, actual, expected);
+  process.exitCode = 0;
+}
+
+const ISOLATED_MODE = process.argv.find((a) => a.startsWith('--isolated='))?.split('=')[1];
+
 // not awaited on purpose (see the note at the top)
-main().catch((error) => {
+(ISOLATED_MODE ? isolated(ISOLATED_MODE) : main()).catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

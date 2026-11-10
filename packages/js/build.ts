@@ -54,6 +54,32 @@ async function main() {
     }
   );
 
+  runStep(
+    '.d.ts file unification (wasm)',
+    'bun',
+    ['api-extractor', 'run', '--local', '--config', 'scripts/api-extractor.wasm.json'],
+    {
+      cwd: packageRoot,
+      quiet: true
+    }
+  );
+
+  runStep(
+    '.d.ts file unification (wasm/slim)',
+    'bun',
+    ['api-extractor', 'run', '--local', '--config', 'scripts/api-extractor.wasm_slim.json'],
+    {
+      cwd: packageRoot,
+      quiet: true
+    }
+  );
+
+  // The `workerd` / `edge-light` builds of `lipilekhika/wasm` import the `.wasm` file as a module,
+  // which only ESM tooling for those runtimes does: no CommonJS build is exported for them.
+  for (const name of ['wasm.workerd.cjs', 'wasm.edge-light.cjs', 'wasm.browser.cjs']) {
+    await rm(path.join(packageRoot, 'dist', 'cjs', name), { force: true });
+  }
+
   await rm(path.join(packageRoot, 'dist', 'types'), { recursive: true, force: true });
   await rm(path.join(packageRoot, 'tsdoc-metadata.json'), { force: true });
 }

@@ -6,254 +6,221 @@ sidebar:
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
-import { Code } from '@astrojs/starlight/components';
 import { LinkCard } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
 
-Lipi Lekhika includes a blazing-fast 🦀 **Rust-based WebAssembly (WASM) module** that brings high-performance transliteration to all JavaScript environments. The WASM implementation provides significant performance improvements while maintaining the same easy-to-use API.
+`transliterate_wasm` runs the 🦀 Rust implementation compiled to WebAssembly. It has the same API as `transliterate` and is about 2.5–4× faster. It is part of the `lipilekhika` package, no extra install needed.
 
-## Features
-
-The WASM module offers several advantages over the pure JavaScript implementation:
-
-- **⚡ Superior Performance** — Rust's compiled WASM code executes significantly faster than JavaScript
-- **📦 Compact Size** — Only 114 KB gzipped (base64), including all script data embedded
-- **🌍 Universal Compatibility** — Works seamlessly in Node.js, browsers, Deno, Bun, and more
-- **🔒 Type Safety** — Built with Rust's type system for reliability
-- **🎯 Same API** — Drop-in replacement for the standard `transliterate` function
-
-## Installation
-
-The WASM module is included in the main `lipilekhika` package — no additional installation required!
-
-<Tabs>
-  <TabItem label="npm" icon="npm">
-    ```bash
-    npm install lipilekhika
-    ```
-  </TabItem>
-  <TabItem label="pnpm" icon="pnpm">
-    ```bash
-    pnpm add lipilekhika
-    ```
-  </TabItem>
-  <TabItem label="bun" icon="bun">
-    ```bash
-    bun add lipilekhika
-    ```
-  </TabItem>
-  <TabItem label="yarn" icon="seti:yarn">
-    ```bash
-    yarn add lipilekhika
-    ```
-  </TabItem>
-</Tabs>
-
-## Basic Usage
-
-### Simple Transliteration
-
-The `transliterate_wasm` function provides the same interface as `transliterate` (`text`: `string | string[]`):
+## Usage
 
 ```typescript
 import { transliterate_wasm } from 'lipilekhika';
 
-const result = await transliterate_wasm('na jAyatE mriyatE vA', 'Normal', 'Devanagari');
-console.log(result); // न जायते म्रियते वा
-```
+await transliterate_wasm('na jAyatE mriyatE vA', 'Normal', 'Devanagari'); // न जायते म्रियते वा
+await transliterate_wasm(['rAma', 'kRShNa'], 'Normal', 'Telugu'); // ['రామ', 'కృష్ణ']
 
-### With Custom Options
-
-You can pass custom transliteration options just like the standard function:
-
-```typescript
-import { transliterate_wasm } from 'lipilekhika';
-
-const result = await transliterate_wasm(
-  'गङ्गा',
-  'Devanagari',
-  'Gujarati',
-  { 'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true }
-);
-console.log(result); // ગંગા (instead of ગઙ્ગા)
+// custom options, as with `transliterate`
+await transliterate_wasm('गङ्गा', 'Devanagari', 'Gujarati', {
+  'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': true
+}); // ગંગા
 ```
 
 <LinkCard
   title="Custom Transliteration Options"
   href="/reference/custom_trans_options"
-  description="A detailed overview of all available custom transliteration options"
+  description="All available custom transliteration options"
 />
 
-## Preloading the WASM Module
-
-To avoid the initial loading delay when first calling `transliterate_wasm`, you can preload the WASM module:
+The module is loaded on the first call. To have it ready before then, call `preloadWasm()` at startup:
 
 ```typescript
-import { preloadWasm, transliterate_wasm } from 'lipilekhika';
+import { preloadWasm } from 'lipilekhika';
 
-// Preload during app initialization
 await preloadWasm();
-
-// Later calls will be instant (no loading delay)
-const result = await transliterate_wasm('namaste', 'Normal', 'Devanagari');
-console.log(result); // नमस्ते
 ```
 
+## Choosing an Entry Point
+
+`transliterate_wasm` is available from three imports, which differ only in how the WASM module is loaded:
+
+| Import | WASM module | Use for |
+| --- | --- | --- |
+| `lipilekhika` | Embedded (base64) in a chunk loaded on first use | **Recommended.** Node.js, Bun, Deno, browsers, any bundler or CDN, no setup |
+| `lipilekhika/wasm` | Loaded the best way for the runtime (see below) | Cloudflare Workers and Vercel Edge (required there), and the separate `.wasm` file in browsers |
+| `lipilekhika/wasm/slim` | Nothing embedded, you pass the `.wasm` file to `initWasm()` | A strict CSP, hosting the file yourself, or a setup the others do not cover |
+
 <Aside type="tip">
-  **Best Practice**: Call `preloadWasm()` during your application's initialization phase (e.g., in a loader, startup hook, or top-level await) to ensure the WASM module is ready before users interact with transliteration features.
+  Use `lipilekhika` unless your code runs on Cloudflare Workers or Vercel Edge. To switch, change only the import path: the functions and their types are the same.
 </Aside>
+
+## Cloudflare Workers and Vercel Edge
+
+These runtimes do not allow compiling WebAssembly from bytes, so the embedded module of `lipilekhika` can not load there (it throws an error pointing to `lipilekhika/wasm`). Use `lipilekhika/wasm`:
+
+```typescript
+import { transliterate_wasm } from 'lipilekhika/wasm';
+
+export default {
+  async fetch() {
+    return new Response(await transliterate_wasm('namaskAra', 'Normal', 'Devanagari')); // नमस्कार
+  }
+};
+```
+
+`lipilekhika/wasm` picks its build through export conditions, with no configuration:
+
+- **Cloudflare Workers** (`workerd`) — imports the `.wasm` file as a module. Works with `wrangler` and the Cloudflare Vite plugin (Astro, SvelteKit, React Router, Nuxt, ...), in dev and deployed.
+- **Vercel Edge / Next.js edge** (`edge-light`) — imports the `.wasm` file with `?module`.
+- **Browsers** (`browser`) — fetches the `.wasm` file, see below.
+- **Node.js, Bun, Deno** — the embedded module, as `lipilekhika`.
+
+So in a full stack app (eg. Astro on Cloudflare) the same import works on the server and in the browser.
+
+### In the Browser
+
+`lipilekhika/wasm` fetches the `.wasm` file from `new URL('../lipilekhika.wasm', import.meta.url)`: 80 KB gzipped instead of 114 KB of base64, cached on its own and compiled while it downloads. If the file can not be loaded, it falls back to the embedded module and logs a warning.
+
+| Setup | Extra config |
+| --- | --- |
+| Vite 8 (Astro 7, SvelteKit, ...), dev and build | None |
+| Vite 7 and older, build | None |
+| Vite 7 and older, dev | `optimizeDeps: { exclude: ['lipilekhika'] }` in `vite.config`, else the embedded module is used |
+| esbuild | Copy `node_modules/lipilekhika/dist/lipilekhika.wasm` to the folder above your bundle, else the embedded module is used |
+| CDN, no bundler | None |
+
+## Manual Loading (`lipilekhika/wasm/slim`)
+
+Call `initWasm()` once with the `.wasm` file, exported as `lipilekhika/lipilekhika.wasm`. It takes a `WebAssembly.Module`, the bytes, a `Response`, or a URL to fetch (or a promise of one).
+
+<Tabs>
+  <TabItem label="Vite">
+    ```typescript
+    import { initWasm, transliterate_wasm } from 'lipilekhika/wasm/slim';
+    import wasmUrl from 'lipilekhika/lipilekhika.wasm?url';
+
+    await initWasm(wasmUrl);
+    await transliterate_wasm('namaste', 'Normal', 'Devanagari');
+    ```
+  </TabItem>
+  <TabItem label="Cloudflare Workers">
+    ```typescript
+    import { initWasm } from 'lipilekhika/wasm/slim';
+    import wasmModule from 'lipilekhika/lipilekhika.wasm';
+
+    await initWasm(wasmModule);
+    ```
+  </TabItem>
+  <TabItem label="Vercel Edge">
+    ```typescript
+    import { initWasm } from 'lipilekhika/wasm/slim';
+    import wasmModule from 'lipilekhika/lipilekhika.wasm?module';
+
+    await initWasm(wasmModule);
+    ```
+  </TabItem>
+  <TabItem label="Node.js">
+    ```typescript
+    import { readFile } from 'node:fs/promises';
+    import { createRequire } from 'node:module';
+    import { initWasm } from 'lipilekhika/wasm/slim';
+
+    const require = createRequire(import.meta.url);
+    await initWasm(await readFile(require.resolve('lipilekhika/lipilekhika.wasm')));
+    ```
+  </TabItem>
+  <TabItem label="CDN">
+    ```typescript
+    import { initWasm } from 'lipilekhika/wasm/slim';
+
+    // the version must match the installed package
+    await initWasm(fetch('https://cdn.jsdelivr.net/npm/lipilekhika@1.0.14/dist/lipilekhika.wasm'));
+    ```
+  </TabItem>
+</Tabs>
+
+`slim` loads the same file as `lipilekhika/wasm`, so it is not smaller: use it to decide where the file comes from.
+
+<Aside type="note">
+  All three entries share one WASM instance: the first one used loads the module and the others reuse it. If it is already loaded, `initWasm()` loads nothing.
+</Aside>
+
+<Aside type="caution">
+  **Content Security Policy:** WebAssembly in a browser needs `'wasm-unsafe-eval'` in `script-src`. `lipilekhika/wasm` and `slim` also fetch the `.wasm` file, so `connect-src` must allow its origin.
+</Aside>
+
+## Other Environments
+
+```html
+<!-- Browser, from a CDN -->
+<script type="module">
+  import { transliterate_wasm } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
+  console.log(await transliterate_wasm('namaste', 'Normal', 'Devanagari')); // नमस्ते
+</script>
+```
+
+```typescript
+// Deno
+import { transliterate_wasm } from 'npm:lipilekhika';
+```
+
+```typescript
+// Next.js edge route (app/api/transliterate/route.ts)
+import { transliterate_wasm } from 'lipilekhika/wasm';
+
+export const runtime = 'edge';
+
+export async function GET() {
+  return new Response(await transliterate_wasm('namaste', 'Normal', 'Devanagari'));
+}
+```
+
+**Jest (jsdom):** jsdom lacks `TextEncoder` / `TextDecoder`, which the WASM bindings use. Add them in a setup file (`setupFiles`):
+
+```javascript
+const { TextEncoder, TextDecoder } = require('node:util');
+Object.assign(globalThis, { TextEncoder, TextDecoder });
+```
 
 ## API Reference
 
 ### `transliterate_wasm(text, from, to, options?)`
 
-WASM-based transliteration using the Rust implementation.
+- `text: string | string[]` — one string or many (same options for all)
+- `from`, `to: ScriptLangType` — script/language names
+- `options?: TransliterationOptions` — custom transliteration options
 
-**Parameters:**
-- `text: string | string[]` — One string or many (same options for all)
-- `from: ScriptLangType` — Source script/language name
-- `to: ScriptLangType` — Target script/language name
-- `options?: TransliterationOptions` — Optional custom transliteration options
-
-**Returns:** `Promise<string | string[]>` — shape matches `text`
-
-**Example:**
-```typescript
-const result = await transliterate_wasm('hello', 'Normal', 'Telugu');
-console.log(result); // హెల్లొ
-```
+**Returns:** `Promise<string | string[]>`, the same shape as `text`.
 
 ### `preloadWasm()`
 
-Preloads the WASM module to eliminate initial loading delay.
+Loads the WASM module ahead of the first call. **Returns:** `Promise<void>`.
 
-**Returns:** `Promise<void>`
+### `initWasm(wasm)` (`lipilekhika/wasm/slim` only)
 
-**Example:**
-```typescript
-// During app initialization
-await preloadWasm();
+Loads the module from `wasm`: a `WebAssembly.Module`, bytes (`BufferSource`), a `Response`, a URL (`string | URL`), or a promise of one. Call it before `transliterate_wasm`; later calls return the same load. If it fails, it can be called again. **Returns:** `Promise<void>`.
 
-// Now WASM calls are instant
-const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
-```
+## WASM or JavaScript?
 
-## Performance Comparison
+In the benchmarks WASM transliterates the test corpus in 59 ms on Node.js and 47 ms on Bun, against 219 ms and 122 ms for `transliterate`.
 
-The WASM implementation provides significant performance improvements, especially for:
-
-- **Large text blocks** — Faster processing of lengthy documents
-- **Batch operations** — Efficient when transliterating multiple texts
-- **Complex scripts** — Better performance with intricate character mappings
-- **Repeated calls** — Lower overhead after initial load
-- **Benchmarks** - 2x faster than the JavaScript implementation
-
-<Aside type="note">
-  For small, one-off transliterations, the performance difference may be negligible due to WASM initialization overhead. The WASM module shines with repeated use or larger text processing.
+<Aside type="tip" title="One load, every script ready">
+  The WASM module contains the data of all scripts, so it is loaded once (one cold start) and after that any script pair is instant, including when the user switches scripts. `transliterate` instead loads each script's data on its first use, a separate fetch per script in the browser (see `preloadScriptData`).
 </Aside>
 
-## Cross-Environment Support
+- **WASM** — large texts, many or repeated calls, switching between many scripts, servers.
+- **JavaScript** (`transliterate`) — a few small calls, where loading the module first is not worth it; environments without WebAssembly.
 
-The WASM module works seamlessly across all JavaScript environments:
+WebAssembly is supported by Chrome/Edge 57+, Firefox 52+, Safari 11+, Node.js, Deno and Bun. In very old browsers (IE11) use `transliterate`.
 
-### Node.js
-
-```javascript
-import { transliterate_wasm } from 'lipilekhika';
-
-const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
-console.log(result);
-```
-
-### Browser (ESM)
-
-```html
-<script type="module">
-  import { transliterate_wasm } from 'https://cdn.jsdelivr.net/npm/lipilekhika/dist/esm/index.mjs';
-  
-  const text = await transliterate_wasm('namaste', 'Normal', 'Devanagari');
-  console.log(text); // नमस्ते
-</script>
-```
-
-### Deno
-
-```typescript
-import { transliterate_wasm } from 'npm:lipilekhika';
-
-const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
-console.log(result);
-```
-
-### Bun
-
-```typescript
-import { transliterate_wasm } from 'lipilekhika';
-
-const result = await transliterate_wasm('text', 'Normal', 'Devanagari');
-console.log(result);
-```
-
-## When to Use WASM vs JavaScript
-
-**Use WASM (`transliterate_wasm`) when:**
-- Processing large volumes of text
-- Performance is critical
-- You're making repeated transliteration calls
-- Building production applications
-
-**Use JavaScript (`transliterate`) when:**
-- Making occasional, small transliterations
-- Bundle size is extremely constrained
-- You need maximum compatibility with older environments
-- Debugging or development (easier stack traces)
-
-## Bundle Size
-
-The WASM module adds only **114 KB (gzipped base64)** to your bundle, which includes:
-- The compiled Rust WASM binary
-- All script data embedded (no external data files needed)
-- Complete transliteration logic
-
-This is remarkably compact considering it includes all the data and logic for 15+ scripts!
-
-## Technical Details
-
-### How It Works
-
-1. The WASM module is compiled from the Rust implementation of Lipi Lekhika
-2. All script data is embedded directly into the WASM binary at compile time
-3. The module is lazy-loaded on first use (or via `preloadWasm()`)
-4. Subsequent calls reuse the loaded module for optimal performance
-
-### Browser Compatibility
-
-The WASM module requires WebAssembly support, which is available in:
-- Chrome/Edge 57+
-- Firefox 52+
-- Safari 11+
-- Node.js 8+
-- Deno (all versions)
-- Bun (all versions)
-
-<Aside type="caution">
-  Very old browsers (IE11, old mobile browsers) do not support WebAssembly. For maximum compatibility, fall back to the standard `transliterate` function or use feature detection.
-</Aside>
-
-## Additional Resources
+## More
 
 <LinkCard
   title="JavaScript Guide"
   href="/getting-started/javascript"
-  description="Complete guide for using Lipi Lekhika in JavaScript/TypeScript"
-/>
-<LinkCard
-  title="Rust Package"
-  href="/getting-started/rust"
-  description="Learn about the native Rust implementation"
+  description="Using Lipi Lekhika in JavaScript/TypeScript, including the native Node.js module"
 />
 <LinkCard
   title="Supported Scripts"
   href="/reference/supported_scripts"
-  description="List of all supported scripts/languages and their aliases"
+  description="All supported scripts/languages and their aliases"
 />
