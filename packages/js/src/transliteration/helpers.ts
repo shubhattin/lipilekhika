@@ -1,14 +1,14 @@
 import type {
-  OutputBrahmicScriptData,
-  OutputScriptData
+  ExpandedBrahmicScriptData,
+  ExpandedScriptData
 } from '../make_script_data/output_script_data_schema';
 import type { ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 
-type ListItem = OutputBrahmicScriptData['list'][number];
+type ListItem = ExpandedBrahmicScriptData['list'][number];
 type ListType = ListItem['type'];
 
-type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
+type _custom_script_chars_arr_type = ExpandedScriptData['custom_script_chars_arr'][number];
 
 /** @returns index of `text` in the `text_to_krama_map` (or `typing_text_to_krama_map`), `-1` if not found */
 export const textToKramaMapIndex = (

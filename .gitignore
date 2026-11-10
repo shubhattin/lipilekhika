@@ -16,6 +16,7 @@ target
 
 # Script Data Ignore (Built Output)
 packages/js/src/script_data
+packages/js/src/shared_script_data.json
 packages/js/src/custom_options.json
 
 test_data/transliteration/auto-*/auto-*.yaml

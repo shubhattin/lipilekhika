@@ -3,7 +3,12 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { argv } from 'node:process';
 import type { InputScriptInfoType } from './input_script_data_schema';
-import type { OutputScriptData } from './output_script_data_schema';
+import type {
+  ExpandedScriptData,
+  KramaType,
+  OutputScriptData,
+  SharedScriptData
+} from './output_script_data_schema';
 import {
   KramaKeysArray,
   KramaLabelsArray,
@@ -19,6 +24,8 @@ import { execSync } from 'child_process';
 import { BMP_CODE_LAST_INDEX, LEAD_SURROGATE_RANGE } from '../utils/non_bmp';
 import { type TransOptionsType, CustomOptionsInput } from './custom_options_input';
 import { ALTERNATE_TO_SCRIPT_MAP } from '../utils/lang_list/script_normalization';
+import { compare_text, expand_script_data } from '../utils/get_script_data/expand_script_data';
+import { single_code_point } from '../utils/get_script_data/char_table';
 import {
   lang_list_obj,
   script_list_obj,
@@ -30,7 +37,12 @@ import {
 
 const IS_DEV_MODE = argv.at(-1) === '--dev';
 const OUT_FOLDER = path.resolve('./src/script_data');
+const SHARED_OUT_FILE = path.resolve('./src/shared_script_data.json');
 const CUSTOM_OPTIONS_OUT_FOLDER = path.resolve('./src/custom_options.json');
+
+/** The data of each script in the shape the runtimes work on, as expanded from the stored data
+ * (filled by `make_script_data`). Rust and Go are generated from it. */
+const EXPANDED_SCRIPT_DATA = new Map<string, ExpandedScriptData>();
 
 async function make_script_data() {
   // reset output folder
@@ -50,20 +62,307 @@ async function make_script_data() {
   }
   // precalculating normal output data as will be needed for typing data of other scripts
   const NormalInputData = script_data_list.find((item) => item.script_name === 'Normal');
-  const NormalOutputData = get_out_script_data(NormalInputData!);
-  {
-    const jsonOutput = JSON.stringify(NormalOutputData, null, 2).replace(
-      /\\\\u([0-9a-fA-F]{4})/g,
-      '\\u$1'
-    );
-    fs.writeFileSync(path.resolve(OUT_FOLDER, `Normal.json`), jsonOutput);
-  }
+  const NormalCompiledData = get_out_script_data(NormalInputData!);
+  const compiled_list: ExpandedScriptData[] = [NormalCompiledData];
   for (const input_script_data of script_data_list) {
     if (input_script_data.script_name === 'Normal') continue;
-    const res = get_out_script_data(input_script_data, NormalOutputData!);
-    const jsonOutput = JSON.stringify(res, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
-    fs.writeFileSync(path.resolve(OUT_FOLDER, `${input_script_data.script_name}.json`), jsonOutput);
+    compiled_list.push(get_out_script_data(input_script_data, NormalCompiledData));
   }
+  // a fixed order, so that the shared data does not depend on the order of the directory listing
+  compiled_list.sort((a, b) => compare_text(a.script_name, b.script_name));
+
+  const to_json = (data: unknown) =>
+    JSON.stringify(data, null, 2).replace(/\\\\u([0-9a-fA-F]{4})/g, '\\u$1');
+
+  const shared_script_data = make_shared_script_data(compiled_list);
+  fs.writeFileSync(SHARED_OUT_FILE, to_json(shared_script_data));
+  for (const compiled of compiled_list) {
+    const stored = compact_script_data(compiled, shared_script_data);
+    // expanded from what is written (after a JSON round trip), like the runtimes do
+    const expanded = expand_script_data(
+      JSON.parse(JSON.stringify(stored)),
+      JSON.parse(JSON.stringify(shared_script_data))
+    );
+    assert_same_script_data(compiled, expanded);
+    EXPANDED_SCRIPT_DATA.set(compiled.script_name, expanded);
+    fs.writeFileSync(
+      path.resolve(OUT_FOLDER, `${compiled.script_name}.json`),
+      to_json(IS_DEV_MODE ? add_dev_info(stored, compiled) : stored)
+    );
+  }
+}
+
+type ExpandedValue = ExpandedScriptData['typing_text_to_krama_map'][number][1];
+type StoredValue = SharedScriptData['typing_text_to_krama_map'][number][1] &
+  OutputScriptData['text_to_krama_map'][number][1];
+
+/** Type of each krama index of the script */
+function get_krama_types(data: ExpandedScriptData): (KramaType | null)[] {
+  return data.krama_text_arr.map(([, list_ref]) =>
+    list_ref === null ? null : (data.list[list_ref]?.type ?? null)
+  );
+}
+
+/** The value which occurs the most (the first one seen, if more than one does) */
+function most_common<T>(values: T[]): { value: T; count: number } {
+  const counts = new Map<string, { value: T; count: number }>();
+  for (const value of values) {
+    const key = JSON.stringify(value);
+    const item = counts.get(key);
+    if (item) item.count++;
+    else counts.set(key, { value, count: 1 });
+  }
+  let best: { value: T; count: number } | undefined;
+  for (const item of counts.values()) if (!best || item.count > best.count) best = item;
+  return best!;
+}
+
+/** A map value as it is stored: the reference to a `list` item is stored as the type itself */
+function to_stored_value(data: ExpandedScriptData, value: ExpandedValue): StoredValue {
+  const stored: StoredValue = {};
+  if (value.next !== null && value.next !== undefined) stored.next = value.next;
+  if (value.krama !== null && value.krama !== undefined) stored.krama = value.krama;
+  if (value.custom_back_ref !== null && value.custom_back_ref !== undefined)
+    stored.custom_back_ref = value.custom_back_ref;
+  if (value.fallback_list_ref !== null && value.fallback_list_ref !== undefined) {
+    const list_item = data.list[value.fallback_list_ref];
+    if (!list_item)
+      throw new Error(`"${data.script_name}": list item ${value.fallback_list_ref} not found`);
+    stored.type = list_item.type;
+    if (list_item.type === 'svara') stored.mAtrA_krama = list_item.mAtrA_krama_ref[0] ?? -1;
+  }
+  return stored;
+}
+
+/**
+ * The data which is stored once for all the scripts: the type of each krama index (the same
+ * in every brahmic script) and the typing map entries which most scripts have in common.
+ */
+function make_shared_script_data(compiled_list: ExpandedScriptData[]): SharedScriptData {
+  const brahmic_krama_types = compiled_list
+    .filter((data) => data.script_type === 'brahmic')
+    .map(get_krama_types);
+  const krama_type_arr = KramaKeysArray.map(
+    (_, i) => most_common(brahmic_krama_types.map((types) => types[i])).value
+  );
+
+  // An entry is shared if more scripts have it (with that value) than have to remove it
+  const typing_script_list = compiled_list.filter(
+    (data) => data.typing_text_to_krama_map.length > 0
+  );
+  const values_of_text = new Map<string, StoredValue[]>();
+  for (const data of typing_script_list) {
+    for (const [text, value] of data.typing_text_to_krama_map) {
+      const values = values_of_text.get(text) ?? [];
+      values.push(to_stored_value(data, value));
+      values_of_text.set(text, values);
+    }
+  }
+  const typing_text_to_krama_map: SharedScriptData['typing_text_to_krama_map'] = [];
+  for (const [text, values] of values_of_text) {
+    const { value, count } = most_common(values);
+    const scripts_without_it = typing_script_list.length - values.length;
+    if (count >= 2 && count > scripts_without_it) typing_text_to_krama_map.push([text, value]);
+  }
+  return { krama_type_arr, typing_text_to_krama_map: sortByText(typing_text_to_krama_map) };
+}
+
+/**
+ * Index in `text_to_krama_map` of a sign written as a consonant + halant (the Tamil anusvAra
+ * ம்), `-1` if the script has none. Where the sign cannot be it is that consonant + halant.
+ */
+function get_dead_consonant_sign_index(script_data: ExpandedScriptData): number {
+  if (script_data.script_type !== 'brahmic') return -1;
+  const halant = script_data.halant;
+  const type_of = (krama_index: number) =>
+    script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1]?.type;
+  return script_data.text_to_krama_map.findIndex(([text, { krama }]) => {
+    if (!krama || krama.length !== 1 || type_of(krama[0]) === 'vyanjana') return false;
+    if (!text.endsWith(halant)) return false;
+    const consonant = text.slice(0, -halant.length);
+    return (
+      single_code_point(consonant) !== -1 &&
+      type_of(script_data.krama_text_arr.findIndex(([t]) => t === consonant)) === 'vyanjana'
+    );
+  });
+}
+
+/**
+ * The data of a script as it is stored (`src/script_data/<script>.json`): only what is not
+ * already in the shared data. `expand_script_data` gives back the compiled shape.
+ */
+function compact_script_data(data: ExpandedScriptData, shared: SharedScriptData): OutputScriptData {
+  const krama_types = get_krama_types(data);
+  const krama_text_arr = data.krama_text_arr.map(([text]) => text);
+  const text_to_krama_map: OutputScriptData['text_to_krama_map'] = data.text_to_krama_map.map(
+    ([text, value]) => [text, to_stored_value(data, value)]
+  );
+
+  // typing map: only the difference from the shared one
+  let typing_text_to_krama_map: OutputScriptData['typing_text_to_krama_map'];
+  if (data.typing_text_to_krama_map.length > 0) {
+    const shared_values = new Map(
+      shared.typing_text_to_krama_map.map(([text, value]) => [text, JSON.stringify(value)])
+    );
+    const texts = new Set<string>();
+    typing_text_to_krama_map = [];
+    for (const [text, value] of data.typing_text_to_krama_map) {
+      texts.add(text);
+      const stored_value = to_stored_value(data, value);
+      if (shared_values.get(text) !== JSON.stringify(stored_value))
+        typing_text_to_krama_map.push([text, stored_value]);
+    }
+    for (const text of shared_values.keys())
+      if (!texts.has(text)) typing_text_to_krama_map.push([text, null]);
+    typing_text_to_krama_map = sortByText(typing_text_to_krama_map);
+  }
+
+  const custom_script_chars_arr: OutputScriptData['custom_script_chars_arr'] =
+    data.custom_script_chars_arr.map(([text, list_ref, custom_ref]) => {
+      const type = list_ref === null ? null : (data.list[list_ref]?.type ?? null);
+      if (type === 'svara')
+        throw new Error(`"${data.script_name}": a custom script character cannot be a svara`);
+      return [
+        text,
+        type,
+        custom_ref === null ? null : (data.typing_text_to_krama_map[custom_ref]?.[0] ?? null)
+      ];
+    });
+
+  if (data.script_type !== 'brahmic') {
+    if (krama_types.some((type) => type !== null))
+      throw new Error(`"${data.script_name}": krama types are only stored for brahmic scripts`);
+    return {
+      script_type: 'other',
+      script_name: data.script_name,
+      script_id: data.script_id,
+      schwa_character: data.schwa_character,
+      krama_text_arr,
+      text_to_krama_map,
+      ...(typing_text_to_krama_map ? { typing_text_to_krama_map } : {}),
+      custom_script_chars_arr
+    };
+  }
+
+  const krama_type_overrides: [number, KramaType | null][] = [];
+  const svara_mAtrA_krama_overrides: [number, number][] = [];
+  for (let i = 0; i < krama_types.length; i++) {
+    if (krama_types[i] !== shared.krama_type_arr[i]) krama_type_overrides.push([i, krama_types[i]]);
+    const list_item = data.list[data.krama_text_arr[i][1] ?? -1];
+    if (list_item?.type !== 'svara') continue;
+    // The mAtrA of a svara is the next krama index. Only its text is read, so it is listed
+    // only if the text is not the same.
+    const mAtrA_krama = list_item.mAtrA_krama_ref[0] ?? -1;
+    if (mAtrA_krama !== i + 1 && krama_text_arr[mAtrA_krama] !== krama_text_arr[i + 1])
+      svara_mAtrA_krama_overrides.push([i, mAtrA_krama]);
+  }
+  const dead_consonant_sign_index = get_dead_consonant_sign_index(data);
+  return {
+    script_type: 'brahmic',
+    script_name: data.script_name,
+    script_id: data.script_id,
+    halant: data.halant,
+    ...(data.nuqta === undefined ? {} : { nuqta: data.nuqta }),
+    schwa_property: data.schwa_property,
+    krama_text_arr,
+    ...(krama_type_overrides.length > 0 ? { krama_type_overrides } : {}),
+    ...(svara_mAtrA_krama_overrides.length > 0 ? { svara_mAtrA_krama_overrides } : {}),
+    text_to_krama_map,
+    ...(dead_consonant_sign_index !== -1 ? { dead_consonant_sign_index } : {}),
+    ...(typing_text_to_krama_map ? { typing_text_to_krama_map } : {}),
+    custom_script_chars_arr
+  };
+}
+
+/**
+ * What the runtimes read from the data of a script. The `list` is only read for the type of an
+ * entry and for the text of the mAtrA of a svara, its items and their order do not matter.
+ */
+function get_read_view(data: ExpandedScriptData) {
+  const type_of = (list_ref: number | null | undefined) =>
+    list_ref === null || list_ref === undefined ? null : (data.list[list_ref]?.type ?? null);
+  const value_view = (value: ExpandedValue) => {
+    const list_item = data.list[value.fallback_list_ref ?? -1];
+    return [
+      value.next ?? null,
+      value.krama ?? null,
+      value.custom_back_ref ?? null,
+      list_item
+        ? list_item.type === 'svara'
+          ? [list_item.type, list_item.mAtrA_krama_ref[0] ?? -1]
+          : [list_item.type]
+        : null
+    ];
+  };
+  return {
+    script: [
+      data.script_type,
+      data.script_name,
+      data.script_id,
+      data.script_type === 'brahmic'
+        ? [data.halant, data.nuqta ?? null, data.schwa_property]
+        : [data.schwa_character]
+    ],
+    krama_text_arr: data.krama_text_arr.map(([text, list_ref]) => {
+      const list_item = data.list[list_ref ?? -1];
+      return [
+        text,
+        list_item?.type ?? null,
+        list_item?.type === 'svara'
+          ? (data.krama_text_arr[list_item.mAtrA_krama_ref[0] ?? -1]?.[0] ?? null)
+          : null
+      ];
+    }),
+    text_to_krama_map: data.text_to_krama_map.map(([text, value]) => [text, value_view(value)]),
+    typing_text_to_krama_map: data.typing_text_to_krama_map.map(([text, value]) => [
+      text,
+      value_view(value)
+    ]),
+    custom_script_chars_arr: data.custom_script_chars_arr.map(([text, list_ref, custom_ref]) => [
+      text,
+      type_of(list_ref),
+      custom_ref
+    ])
+  };
+}
+
+/** Throws if the data expanded from what is stored is not read like the compiled data */
+function assert_same_script_data(compiled: ExpandedScriptData, expanded: ExpandedScriptData) {
+  const compiled_view = get_read_view(compiled);
+  const expanded_view = get_read_view(expanded);
+  for (const key of Object.keys(compiled_view) as (keyof typeof compiled_view)[]) {
+    const compiled_items: unknown[] = compiled_view[key];
+    const expanded_items: unknown[] = expanded_view[key];
+    for (let i = 0; i < Math.max(compiled_items.length, expanded_items.length); i++) {
+      const compiled_item = JSON.stringify(compiled_items[i]);
+      const expanded_item = JSON.stringify(expanded_items[i]);
+      if (compiled_item !== expanded_item)
+        throw new Error(
+          `"${compiled.script_name}": the stored data does not give back ${key}[${i}]\n` +
+            `  compiled: ${compiled_item}\n  expanded: ${expanded_item}`
+        );
+    }
+  }
+}
+
+/** Dev mode: the krama key, the type and the unicode escapes next to the texts, for easy
+ * comparision and verification (these fields are not in the schema) */
+function add_dev_info(stored: OutputScriptData, compiled: ExpandedScriptData) {
+  const krama_types = get_krama_types(compiled);
+  return {
+    ...stored,
+    text_to_krama_map: stored.text_to_krama_map.map(([text, value]) => [
+      text,
+      { ...value, uni: toUnicodeEscapes(text) }
+    ]),
+    krama_text_arr_dev: stored.krama_text_arr.map((text, i) => [
+      i,
+      KramaKeysArray[i],
+      text,
+      toUnicodeEscapes(text),
+      krama_types[i]
+    ])
+  };
 }
 
 /** Stable sort (new array) by the text at index `0`, using UTF-16 code unit order */
@@ -80,7 +379,7 @@ function sortByText<T extends readonly [string, ...unknown[]]>(arr: readonly T[]
  */
 function other_script_typing_prefix_krama(
   text: string,
-  normal_krama_text_arr: OutputScriptData['krama_text_arr']
+  normal_krama_text_arr: ExpandedScriptData['krama_text_arr']
 ): number[] | null {
   const krama: number[] = [];
   for (const [letters] of text.matchAll(/[a-zA-Z]+/g)) {
@@ -104,9 +403,9 @@ function other_script_typing_prefix_krama(
 
 function get_out_script_data(
   input_script_data: InputScriptInfoType,
-  NormalOutputData?: OutputScriptData
+  NormalOutputData?: ExpandedScriptData
 ) {
-  let res: OutputScriptData;
+  let res: ExpandedScriptData;
   if (input_script_data.script_type === 'brahmic') {
     res = {
       script_type: 'brahmic',
@@ -202,7 +501,7 @@ function get_out_script_data(
         }
         continue;
       }
-      const new_addition: OutputScriptData['text_to_krama_map'][number] = [text_char, {}];
+      const new_addition: ExpandedScriptData['text_to_krama_map'][number] = [text_char, {}];
       if (next_char) new_addition[1].next = [next_char];
       if (add_in === 'typing_text_to_krama_map' && i !== text.length - 1) {
         const krama_key_index = NormalOutputData?.krama_text_arr.findIndex(
@@ -304,9 +603,8 @@ function get_out_script_data(
       const krama_key_list_index_list = krama_key_list.map((krama_key) =>
         kramaKeyIndex(resolveKramaKeysExtendedType(krama_key as KramaKeysExtendedType))
       );
-      // @ts-expect-error Dev-only `text` field is not in the published schema type
+      // @ts-expect-error the `mAtrA_krama_ref` of a svara is set just below
       res.list.push({
-        ...(IS_DEV_MODE ? { text: item.text } : {}),
         krama_ref: krama_key_list_index_list,
         type: item.type
       });
@@ -322,7 +620,6 @@ function get_out_script_data(
           kramaKeyIndex(resolveKramaKeysExtendedType(mAtrA_text_krama as KramaKeysExtendedType))
         );
         res.list.push({
-          ...(IS_DEV_MODE ? { text: item.mAtrA } : {}),
           krama_ref: mAtrA_krama_ref_index_list,
           type: 'mAtrA'
         });
@@ -554,10 +851,10 @@ function get_out_script_data(
       if (res.script_type !== 'brahmic') return;
       for (let end = 1; end <= text.length; end++) {
         const prefix = text.substring(0, end);
-        const entry: OutputScriptData['typing_text_to_krama_map'][number] | undefined =
+        const entry: ExpandedScriptData['typing_text_to_krama_map'][number] | undefined =
           res.typing_text_to_krama_map.find((v) => v[0] === prefix);
         if (!entry) continue; // middle of a surrogate pair
-        const value: OutputScriptData['typing_text_to_krama_map'][number][1] = entry[1];
+        const value: ExpandedScriptData['typing_text_to_krama_map'][number][1] = entry[1];
         if (value.fallback_list_ref != null || value.custom_back_ref != null) continue;
         const list_ref = res.krama_text_arr[value.krama?.[0] ?? -1]?.[1];
         if (list_ref == null || res.list[list_ref]?.type !== 'mAtrA') continue;
@@ -723,24 +1020,6 @@ function get_out_script_data(
     }
   }
 
-  // In Dev mode add the original krama key at the third index for easy comparision and verification
-  // and also add unicode escaped strings for better debugging (hopefully)
-  if (IS_DEV_MODE) {
-    for (let i = 0; i < res.text_to_krama_map.length; i++) {
-      // @ts-expect-error Dev-only `uni` field for debuggin
-      res.text_to_krama_map[i][1].uni = toUnicodeEscapes(res.text_to_krama_map[i][0]);
-    }
-    for (let i = 0; i < res.list.length; i++) {
-      // @ts-expect-error Dev-only `text_uni` field for debugging
-      res.list[i].text_uni = toUnicodeEscapes(res.list[i].text);
-    }
-    for (let i = 0; i < KramaKeysArray.length; i++) {
-      res.krama_text_arr[i].push(KramaKeysArray[i]);
-      res.krama_text_arr[i].push(toUnicodeEscapes(res.krama_text_arr[i][0]));
-      res.krama_text_arr[i].push(i);
-    }
-  }
-
   res.text_to_krama_map = sortByText(res.text_to_krama_map);
 
   // Scan for -1 values in text_to_krama_map krama field
@@ -853,14 +1132,18 @@ async function copy_script_data_json() {
       }
     }
     fs.mkdirSync(target, { recursive: true });
+    // Rust and Go read the expanded shape
     if (!single_script_data_file) {
-      fs.cpSync('src/script_data', target + '/script_data', { recursive: true });
-    } else {
-      const ALL_DATA: Record<string, OutputScriptData> = {};
+      fs.mkdirSync(target + '/script_data', { recursive: true });
       for (const script of SCRIPT_LIST) {
-        const data = await import(`../script_data/${script}.json`);
-        ALL_DATA[script] = data.default;
+        fs.writeFileSync(
+          `${target}/script_data/${script}.json`,
+          JSON.stringify(EXPANDED_SCRIPT_DATA.get(script), null, 2)
+        );
       }
+    } else {
+      const ALL_DATA: Record<string, ExpandedScriptData> = {};
+      for (const script of SCRIPT_LIST) ALL_DATA[script] = EXPANDED_SCRIPT_DATA.get(script)!;
       fs.writeFileSync(target + '/script_data.json', JSON.stringify(ALL_DATA, null, 2));
     }
     fs.copyFileSync('src/custom_options.json', target + '/custom_options.json');
@@ -954,6 +1237,7 @@ make_script_data()
         .readdirSync('src/script_data')
         .filter((f) => f.endsWith('.json'))
         .map((f) => path.join('src/script_data', f));
+      scriptDataFiles.push(path.relative('.', SHARED_OUT_FILE));
       if (scriptDataFiles.length > 0) {
         execSync(`bunx oxfmt ${scriptDataFiles.join(' ')}`);
       }

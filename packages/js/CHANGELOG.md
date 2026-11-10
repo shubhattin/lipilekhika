@@ -4,6 +4,7 @@
 
 - Performance improvements for `transliterate_wasm` and `transliterate_node` (N-API) (Rust based)
 - Faster pure JS `transliterate` and typing (Rust optimizations ported): ~43% / ~60% faster transliteration on Node / Bun, ~17-26% faster typing
+- Smaller script data: the data of a script is about 3x smaller (eg. the Devanagari chunk 14.2 kB -> 4.4 kB, 2.8 kB -> 1.3 kB gzipped). What the scripts have in common (krama types, shared typing keys) is stored once in the main bundle (+1.5 kB gzipped)
 - Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)
 - Fix: input side custom rules (eg. `brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra`) never applied for non-BMP source scripts (Brahmi, Sharada, Granth, Siddham, Modi)
 - Fix: Tamil-Extended superscripts followed by a non-BMP character (eg. an emoji) gave wrong output or dropped a character

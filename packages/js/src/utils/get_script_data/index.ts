@@ -1,13 +1,23 @@
 import type { script_list_type } from '../../utils/lang_list';
-import type { OutputScriptData } from '../../make_script_data/output_script_data_schema';
+import type {
+  ExpandedScriptData,
+  OutputScriptData,
+  SharedScriptData
+} from '../../make_script_data/output_script_data_schema';
 import { fetchScriptDataPayload } from '@lipilekhika/script-data-source';
 import { CharIndexTable, single_code_point } from './char_table';
+import { expand_script_data } from './expand_script_data';
+import shared_script_data_json from '../../shared_script_data.json';
+
+/** The data shared by the scripts, it is part of the bundle (the data of a script is loaded on demand) */
+const SHARED_SCRIPT_DATA = shared_script_data_json as unknown as SharedScriptData;
 
 const SCRIPT_DATA_PROMISE_CACHE: Partial<Record<script_list_type, Promise<ScriptData>>> = {};
 
-type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr'][number];
+type _custom_script_chars_arr_type = ExpandedScriptData['custom_script_chars_arr'][number];
 
-/** This is an addition to the `OutputScriptData` type to add a Map based lookup for some structures
+/** This is an addition to the `ExpandedScriptData` type (built from the stored `OutputScriptData`
+ * with `expand_script_data`) to add a Map based lookup for some structures
  *
  * The Map can be used for faster lookup than lower bound binary search.
  *
@@ -16,7 +26,7 @@ type _custom_script_chars_arr_type = OutputScriptData['custom_script_chars_arr']
  * Single code point keys additionally get a dense `CharIndexTable` (lookup by code point,
  * no string creation or hashing), see `char_table.ts`.
  */
-export type ScriptData = OutputScriptData & {
+export type ScriptData = ExpandedScriptData & {
   // Script Id based map key
   /** `key` - krama_text, `value` - index (in array) */
   map_krama_text_arr: Map<string, number>;
@@ -45,22 +55,6 @@ export type ScriptData = OutputScriptData & {
   dead_consonant_sign_index: number;
 };
 
-const dead_consonant_sign_index = (script_data: OutputScriptData): number => {
-  if (script_data.script_type !== 'brahmic') return -1;
-  const halant = script_data.halant;
-  const type_of = (krama_index: number) =>
-    script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1]?.type;
-  return script_data.text_to_krama_map.findIndex(([text, { krama }]) => {
-    if (!krama || krama.length !== 1 || type_of(krama[0]) === 'vyanjana') return false;
-    if (!text.endsWith(halant)) return false;
-    const consonant = text.slice(0, -halant.length);
-    return (
-      single_code_point(consonant) !== -1 &&
-      type_of(script_data.krama_text_arr.findIndex(([t]) => t === consonant)) === 'vyanjana'
-    );
-  });
-};
-
 /** first index wins (to not repeat the same key and match lower bound binary search behaviour) */
 const make_index_map = (keys: readonly string[]) => {
   const map = new Map<string, number>();
@@ -85,7 +79,8 @@ const make_next_cps = (map: readonly (readonly [string, { next?: string[] | null
 const get_runtime_script_data = async (
   script_data_: Promise<OutputScriptData>
 ): Promise<ScriptData> => {
-  const script_data = await script_data_;
+  const stored_script_data = await script_data_;
+  const script_data = expand_script_data(stored_script_data, SHARED_SCRIPT_DATA);
   const krama_keys = script_data.krama_text_arr.map((v) => v[0]);
   const text_to_krama_keys = script_data.text_to_krama_map.map((v) => v[0]);
   const typing_text_to_krama_keys = script_data.typing_text_to_krama_map.map((v) => v[0]);
@@ -103,7 +98,11 @@ const get_runtime_script_data = async (
     map_custom_script_chars_arr: new Map(
       script_data.custom_script_chars_arr.map((v) => [v[0], [v[1], v[2]]])
     ),
-    dead_consonant_sign_index: dead_consonant_sign_index(script_data)
+    // computed by the generator (`make_output_script_data.ts`)
+    dead_consonant_sign_index:
+      stored_script_data.script_type === 'brahmic'
+        ? (stored_script_data.dead_consonant_sign_index ?? -1)
+        : -1
   };
 };
 

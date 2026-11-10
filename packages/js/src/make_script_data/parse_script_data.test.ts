@@ -1,11 +1,12 @@
 import { describe, it } from 'vitest';
-import { scriptDataSchema } from './_script_data_type';
+import { scriptDataSchema, sharedScriptDataSchema } from './_script_data_type';
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { CustomOptionsSchema } from './_custom_options_type';
 
 const SCRIPT_DATA_PATH = path.join('./src/script_data');
 const CUSTOM_OPTIONS_PATH = path.join('./src/custom_options.json');
+const SHARED_SCRIPT_DATA_PATH = path.join('./src/shared_script_data.json');
 
 describe('Parse Script Data', () => {
   const files = fs.readdirSync(SCRIPT_DATA_PATH);
@@ -18,6 +19,13 @@ describe('Parse Script Data', () => {
       scriptDataSchema.parse(data);
     });
   }
+});
+
+describe('Parse Shared Script Data', () => {
+  it('Parse shared script data', () => {
+    const data = JSON.parse(fs.readFileSync(SHARED_SCRIPT_DATA_PATH, { encoding: 'utf-8' }));
+    sharedScriptDataSchema.parse(data);
+  });
 });
 
 describe('Parse Custom Options', () => {
