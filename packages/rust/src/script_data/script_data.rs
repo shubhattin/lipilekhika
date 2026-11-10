@@ -64,7 +64,34 @@ impl ScriptData {
             )
         }
 
+        let halant = match self {
+            ScriptData::Brahmic { halant, .. } => Some(halant.clone()),
+            _ => None,
+        };
         let attr = self.get_common_attr_mut();
+
+        // a sign written as a consonant + halant (the Tamil anusvAra ம்)
+        attr.dead_consonant_sign_index = halant.and_then(|halant| {
+            let list_item = |krama_index: Option<usize>| {
+                krama_index
+                    .and_then(|i| attr.krama_text_arr.get(i))
+                    .and_then(|(_, li)| *li)
+                    .and_then(|li| attr.list.get(li as usize))
+            };
+            attr.text_to_krama_map.iter().position(|(text, map)| {
+                let Some(&[sign]) = map.krama.as_deref() else {
+                    return false;
+                };
+                if list_item(usize::try_from(sign).ok()).is_some_and(|k| k.is_vyanjana()) {
+                    return false;
+                }
+                text.strip_suffix(halant.as_str()).is_some_and(|consonant| {
+                    single_char(consonant).is_some()
+                        && list_item(attr.krama_text_arr.iter().position(|(t, _)| t == consonant))
+                            .is_some_and(|k| k.is_vyanjana())
+                })
+            })
+        });
 
         for (_, map) in attr
             .text_to_krama_map

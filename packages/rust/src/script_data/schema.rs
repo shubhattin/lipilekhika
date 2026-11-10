@@ -136,6 +136,10 @@ pub struct CommonScriptAttr {
     #[serde(skip)]
     #[allow(dead_code)]
     pub custom_script_chars_lookup: HashMap<String, usize>,
+    /// Index in `text_to_krama_map` of a sign written as a consonant + halant (the Tamil
+    /// anusvAra ம்). Where the sign cannot be it is that consonant + halant.
+    #[serde(skip)]
+    pub dead_consonant_sign_index: Option<usize>,
 }
 
 impl From<CommonScriptAttrJson> for CommonScriptAttr {
@@ -155,6 +159,7 @@ impl From<CommonScriptAttrJson> for CommonScriptAttr {
             typing_text_to_krama_lookup: HashMap::new(),
             typing_text_to_krama_char_lookup: CharIndexTable::default(),
             custom_script_chars_lookup: HashMap::new(),
+            dead_consonant_sign_index: None,
         }
     }
 }
