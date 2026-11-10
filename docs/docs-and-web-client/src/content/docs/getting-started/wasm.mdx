@@ -201,9 +201,13 @@ Loads the module from `wasm`: a `WebAssembly.Module`, bytes (`BufferSource`), a 
 
 ## WASM or JavaScript?
 
-The WASM module includes all script data. In the benchmarks it transliterates the test corpus in 59 ms on Node.js and 47 ms on Bun, against 219 ms and 122 ms for `transliterate`.
+In the benchmarks WASM transliterates the test corpus in 59 ms on Node.js and 47 ms on Bun, against 219 ms and 122 ms for `transliterate`.
 
-- **WASM** — large texts, many or repeated calls, servers.
+<Aside type="tip" title="One load, every script ready">
+  The WASM module contains the data of all scripts, so it is loaded once (one cold start) and after that any script pair is instant, including when the user switches scripts. `transliterate` instead loads each script's data on its first use, a separate fetch per script in the browser (see `preloadScriptData`).
+</Aside>
+
+- **WASM** — large texts, many or repeated calls, switching between many scripts, servers.
 - **JavaScript** (`transliterate`) — a few small calls, where loading the module first is not worth it; environments without WebAssembly.
 
 WebAssembly is supported by Chrome/Edge 57+, Firefox 52+, Safari 11+, Node.js, Deno and Bun. In very old browsers (IE11) use `transliterate`.
