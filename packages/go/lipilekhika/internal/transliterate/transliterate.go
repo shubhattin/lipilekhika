@@ -388,11 +388,16 @@ func (ctx *transliterateCtx) emitHalant() {
 	}
 }
 
-func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int) {
+// applyCustomTransRules applies the custom rules, with `directReplaceOnly` only the
+// `direct_replace` rules (applied inside a match).
+func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int, directReplaceOnly bool) {
 	currentIdx := textIndex + delta
 	for i := range ctx.customRules {
 		rule := &ctx.customRules[i]
 		if rule.UseReplace != nil && *rule.UseReplace {
+			continue
+		}
+		if directReplaceOnly && rule.Type != "direct_replace" {
 			continue
 		}
 		switch rule.Type {
@@ -512,41 +517,54 @@ func emitKramaPieces(result *resultStringBuilder, toData *scriptdata.ScriptData,
 	}
 }
 
-// isMisplacedDeadConsonantSign reports whether the match `text` (`krama`) is a sign written as a
-// dead consonant (the Tamil anusvAra ம், a consonant + halant) where that sign cannot be: after a
-// halant or at the start of a word, there is no `prev` (`prevOk` is false), or it is a skip
-// character or a character not of the script. There it is the consonant + halant
-// (ஸாத்ம்ய -> सात्म्य, ம்ய -> म्य, not सात्ंय, ंय).
-func isMisplacedDeadConsonantSign(s *scriptdata.ScriptData, text string, krama []int16, prev rune, prevOk bool) bool {
-	halant := s.Halant
-	if len(krama) != 1 || halant == "" || !strings.HasSuffix(text, halant) {
+// signHasBase reports whether the text before `index` is a syllable that a sign written as a dead
+// consonant (the Tamil anusvAra ம், see `DeadConsonantSignIndex`) can go with: a vyanjana (with
+// its inherent vowel), a svara or a mAtrA, looking past Vedic svaras. Else (the start of a word,
+// after a halant, a digit or a sign) it is the consonant + halant (ஸாத்ம்ய -> सात्म्य, not सात्ंय).
+func signHasBase(s *scriptdata.ScriptData, cursor *inputCursor, index int) bool {
+	end := index
+	for end > 0 {
+		if c, ok := cursor.peekAt(end - 1); !isVedicSvaraTail(c, ok) {
+			break
+		}
+		end--
+	}
+	if end == 0 {
 		return false
 	}
-	head := text[:len(text)-len(halant)]
-	consonant, size := utf8.DecodeRuneInString(head)
-	if size == 0 || size != len(head) {
+	prev, ok := cursor.peekAt(end - 1)
+	if !ok {
 		return false
 	}
-	if kramaListItem(s, int(krama[0])).Kind() == scriptdata.ListKindVyanjana ||
-		kramaListItem(s, kramaIndexOfChar(s, consonant)).Kind() != scriptdata.ListKindVyanjana {
-		return false
+	kramaIndex := kramaIndexOfChar(s, prev)
+	if kramaIndex < 0 && end >= 2 {
+		// a vowel sign or vowel written as its parts (ௌ as ெ + ௗ): the text of the last two
+		if mapIndex := s.TextToKramaMapIndex(cursor.slice(end-2, end), false); mapIndex >= 0 {
+			if krama := s.TextToKramaMapArr[mapIndex].Value.Krama; len(krama) > 0 {
+				kramaIndex = int(krama[len(krama)-1])
+			}
+		}
 	}
-	if !prevOk {
+	switch kramaListItem(s, kramaIndex).Kind() {
+	case scriptdata.ListKindVyanjana, scriptdata.ListKindSvara, scriptdata.ListKindMatra:
 		return true
 	}
-	return isSkipChar(prev) || runeIsStr(prev, halant) ||
-		(kramaIndexOfChar(s, prev) < 0 && s.TextToKramaMapCharIndex(prev, false) < 0)
+	return false
 }
 
-// longerTextIsRead reports whether a text longer than the character at `index` is read from it,
-// walking text_to_krama_map like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is a halant, while the
-// ZWJ by itself is a custom script character.
-func longerTextIsRead(s *scriptdata.ScriptData, cursor *inputCursor, index int) bool {
+// onlyReadInLongerText reports whether the character at `index` is not read by itself but starts a
+// longer text that is, walking text_to_krama_map like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is
+// a halant, while the ZWJ by itself is a custom script character.
+func onlyReadInLongerText(s *scriptdata.ScriptData, cursor *inputCursor, index int) bool {
 	ch, ok := cursor.peekAt(index)
 	if !ok {
 		return false
 	}
 	mapIndex := s.TextToKramaMapCharIndex(ch, false)
+	if kramaIndexOfChar(s, ch) >= 0 ||
+		(mapIndex >= 0 && hasKramaOtherThanNeg1(s.TextToKramaMapArr[mapIndex].Value.Krama)) {
+		return false
+	}
 	end := index + 1
 	read := false
 	for mapIndex >= 0 {
@@ -598,8 +616,14 @@ func TransliterateTextCoreWith(
 	// option flags resolved once (nil-map reads return false)
 	transOptUseTypingChars := transOpt(transOptions, optUseTypingChars)
 	optPreserveSpecificChars := transOpt(transOptions, optPreserveSpecificChars) && toName == "Normal"
-	// a halant followed by a vyanjana in the output is written al-lakuna + ZWJ (Sinhala)
-	sinhalaConjunctHalantOpt := transOpt(transOptions, optSinhalaConjunctHalant) && toName == "Sinhala"
+	// `direct_replace` rules are applied after every piece of a match
+	hasDirectReplaceRules := false
+	for i := range customRules {
+		if customRules[i].Type == "direct_replace" && (customRules[i].UseReplace == nil || !*customRules[i].UseReplace) {
+			hasDirectReplaceRules = true
+			break
+		}
+	}
 
 	if opts.TypingMode && fromName == "Normal" {
 		text = applyTypingInputAliases(text, toName)
@@ -711,7 +735,7 @@ func TransliterateTextCoreWith(
 		// (unless it starts a longer text, the Sinhala ZWJ + al-lakuna `‍්` is a halant)
 		if optPreserveSpecificChars {
 			chStr, _ := cursor.peekAtStr(textIndex)
-			if idx, ok := fromData.CustomScriptCharsLookup[chStr]; ok && !longerTextIsRead(fromData, &cursor, textIndex) {
+			if idx, ok := fromData.CustomScriptCharsLookup[chStr]; ok && !onlyReadInLongerText(fromData, &cursor, textIndex) {
 				item := &fromData.CustomScriptCharsArr[idx]
 				var listItem *scriptdata.ListItem
 				if item.FirstRef != nil {
@@ -846,73 +870,44 @@ func TransliterateTextCoreWith(
 								break
 							}
 						}
-						// The match ends with halant + a letter that cannot be continued (ல்ர is the
-						// start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA ending in a
-						// superscript (்ரு² ்ரூ²): stop the match before the halant, so ல்ரு² is read
-						// as ல + ்ரு² (लृ), not ल्रु²
-						if nthOk && !containsRune(nextChars, nthCh) && endIndex >= 2 {
-							last, lastSize := utf8.DecodeLastRuneInString(charToSearch)
-							beforeLast, beforeLastSize := utf8.DecodeLastRuneInString(charToSearch[:len(charToSearch)-lastSize])
-							headLen := len(charToSearch) - lastSize - beforeLastSize
-							c0, ok0 := cursor.peekAt(endIndex - 2)
-							c1, ok1 := cursor.peekAt(endIndex - 1)
-							if headLen > 0 && isHalant(beforeLast) && ok0 && ok1 && c0 == beforeLast && c1 == last {
-								tailSupIndex := endIndex + 1
-								for {
-									c, ok := cursor.peekAt(tailSupIndex)
-									if !isVedicSvaraTail(c, ok) {
-										break
-									}
-									tailSupIndex++
-								}
-								if tailSup, ok := cursor.peekAt(tailSupIndex); ok && isTaExtSuperscriptTail(tailSup, ok) {
-									tail := string([]rune{beforeLast, last, nthCh, tailSup})
-									if fromData.TextToKramaMapIndex(tail, false) >= 0 {
-										if headIndex := fromData.TextToKramaMapIndex(charToSearch[:headLen], false); headIndex >= 0 {
-											itemIndex = headIndex
-											break
-										}
-									}
-								}
-							}
+						// The match ends with a halant, or a halant + a letter, that cannot be continued
+						// (ல் and ல்ர are the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant starts a mAtrA
+						// ending in a superscript (்ரு² ்ரூ² ்ல்ரி² ்ல்ரீ²): stop the match before the
+						// halant, so ல்ரு² is read as ல + ்ரு² (लृ) and ல்ல்ரி² as ல + ்ல்ரி² (लॢ, like
+						// க்ல்ரி² कॢ)
+						tailStart, back := -1, 0
+						if last, lastSize := utf8.DecodeLastRuneInString(charToSearch); lastSize > 0 && isHalant(last) {
+							tailStart, back = len(charToSearch)-lastSize, 1
+						} else if beforeLast, size := utf8.DecodeLastRuneInString(charToSearch[:len(charToSearch)-lastSize]); size > 0 && isHalant(beforeLast) {
+							tailStart, back = len(charToSearch)-lastSize-size, 2
 						}
-						// The match ends with a halant that cannot be continued (ல் is the start of
-						// ல்ரி² ऌ), but the halant starts a mAtrA ending in a superscript (்ல்ரி²
-						// ்ல்ரீ², ॢ ॣ): stop the match before the halant, so ல்ல்ரி² is read as
-						// ல + ்ல்ரி² (लॢ) like க்ல்ரி² (कॢ), not ल् + ऌ
-						halant := fromData.Halant
-						if c, ok := cursor.peekAt(endIndex - 1); nthOk && !containsRune(nextChars, nthCh) &&
-							len(charToSearch) > len(halant) && strings.HasSuffix(charToSearch, halant) &&
-							endIndex >= 1 && ok && isHalant(c) {
+						if tailStart > 0 && nthOk && !containsRune(nextChars, nthCh) && endIndex >= back &&
+							cursor.slice(endIndex-back, endIndex) == charToSearch[tailStart:] {
 							// the longest text from the halant up to the superscript (after Vedic svaras)
-							tail := halant
+							tail := charToSearch[tailStart:]
 							tailEnd := endIndex
 							for {
 								c, ok := cursor.peekAt(tailEnd)
-								if !ok || isTaExtSuperscriptTail(c, ok) {
-									break
-								}
-								if fromData.TextToKramaMapIndex(tail+string(c), false) < 0 {
+								if !ok || isTaExtSuperscriptTail(c, ok) || fromData.TextToKramaMapIndex(tail+string(c), false) < 0 {
 									break
 								}
 								tail += string(c)
 								tailEnd++
 							}
 							for {
-								c, ok := cursor.peekAt(tailEnd)
-								if !isVedicSvaraTail(c, ok) {
+								if c, ok := cursor.peekAt(tailEnd); !isVedicSvaraTail(c, ok) {
 									break
 								}
 								tailEnd++
 							}
-							if tailSup, ok := cursor.peekAt(tailEnd); tail != halant && ok && isTaExtSuperscriptTail(tailSup, ok) {
+							if tailSup, ok := cursor.peekAt(tailEnd); ok && isTaExtSuperscriptTail(tailSup, ok) {
 								tailIsMatra := false
 								if tailIndex := fromData.TextToKramaMapIndex(tail+string(tailSup), false); tailIndex >= 0 {
 									tailKrama := fromData.TextToKramaMapArr[tailIndex].Value.Krama
 									tailIsMatra = len(tailKrama) == 1 &&
 										kramaListItem(fromData, int(tailKrama[0])).Kind() == scriptdata.ListKindMatra
 								}
-								if headIndex := fromData.TextToKramaMapIndex(charToSearch[:len(charToSearch)-len(halant)], false); tailIsMatra && headIndex >= 0 {
+								if headIndex := fromData.TextToKramaMapIndex(charToSearch[:tailStart], false); tailIsMatra && headIndex >= 0 {
 									itemIndex = headIndex
 									break
 								}
@@ -931,14 +926,11 @@ func TransliterateTextCoreWith(
 				break
 			}
 		}
-		// A sign written as a dead consonant (Tamil anusvAra ம்) after a halant or at the start of a
-		// word: only the consonant is read here (Step 2), the halant next
-		if itemIndex >= 0 && !useTypingMap && fromBrahmic {
-			entry := &textToKramaMap[itemIndex]
-			prev, prevOk := cursor.peekAt(textIndex - 1)
-			if isMisplacedDeadConsonantSign(fromData, entry.Text, entry.Value.Krama, prev, prevOk) {
-				itemIndex = -1
-			}
+		// A sign written as a dead consonant (Tamil anusvAra ம்) with no syllable to go with (the start
+		// of a word, after a halant): only the consonant is read here (Step 2), the halant next
+		if itemIndex >= 0 && itemIndex == fromData.DeadConsonantSignIndex && !useTypingMap &&
+			!signHasBase(fromData, &cursor, textIndex) {
+			itemIndex = -1
 		}
 
 		// (the Tamil-Extended matches index into `fromData.TextToKramaMapArr`, which is
@@ -1064,17 +1056,17 @@ func TransliterateTextCoreWith(
 						} else {
 							result.emitPieces(pieces)
 						}
-					} else if sinhalaConjunctHalantOpt && len(krama) > 1 {
-						// a halant inside one match (Romanized sh -> स्ह) is followed by a vyanjana too
+					} else if hasDirectReplaceRules && len(krama) > 1 {
+						// the direct_replace rules see every piece of a match, not only the last: Romanized
+						// sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga
 						for i, k := range krama {
 							if k < 0 {
 								continue
 							}
 							piece := kramaTextOrEmpty(toData, int(k))
-							if i+1 < len(krama) && piece == toData.Halant {
-								result.emit(piece + "‍")
-							} else {
-								result.emit(piece)
+							result.emit(piece)
+							if piece != "" && i+1 < len(krama) {
+								ctx.applyCustomTransRules(cursor.pos, 0, true)
 							}
 						}
 					} else {
@@ -1083,7 +1075,7 @@ func TransliterateTextCoreWith(
 				}
 
 				if len(customRules) > 0 {
-					ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits)
+					ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits, false)
 				}
 				continue
 			} else if containsI16(krama, -1) {
@@ -1161,7 +1153,7 @@ func TransliterateTextCoreWith(
 		}
 
 		if len(customRules) > 0 {
-			ctx.applyCustomTransRules(cursor.pos, -1)
+			ctx.applyCustomTransRules(cursor.pos, -1, false)
 		}
 	}
 

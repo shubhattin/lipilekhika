@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 )
 
 type ScriptType string
@@ -219,6 +220,9 @@ type ScriptData struct {
 	TextToKramaCharLookup CharIndexTable `json:"-"`
 	// single-rune keys of `TypingTextToKramaMapArr` -> index
 	TypingTextToKramaCharLookup CharIndexTable `json:"-"`
+	// index in `TextToKramaMapArr` of a sign written as a consonant + halant (the Tamil anusvAra
+	// ம்), -1 if none. Where the sign cannot be it is that consonant + halant.
+	DeadConsonantSignIndex int `json:"-"`
 
 	SchwaProperty  bool    `json:"schwa_property,omitempty"`
 	Halant         string  `json:"halant,omitempty"`
@@ -258,6 +262,38 @@ func (s *ScriptData) initLookups() {
 	s.TypingTextToKramaCharLookup = newCharIndexTableFromKeys(len(s.TypingTextToKramaMapArr), func(i int) string {
 		return s.TypingTextToKramaMapArr[i].Text
 	})
+	s.DeadConsonantSignIndex = s.deadConsonantSignIndex()
+}
+
+// deadConsonantSignIndex finds the sign written as a consonant + halant (the Tamil anusvAra ம்),
+// see `DeadConsonantSignIndex`.
+func (s *ScriptData) deadConsonantSignIndex() int {
+	if s.ScriptType != ScriptTypeBrahmic || s.Halant == "" {
+		return -1
+	}
+	kindOf := func(kramaIdx int) ListKind {
+		if kramaIdx < 0 || kramaIdx >= len(s.KramaTextArr) || s.KramaTextArr[kramaIdx].ListArrRef == nil {
+			return ListKindNone
+		}
+		if ref := int(*s.KramaTextArr[kramaIdx].ListArrRef); ref >= 0 && ref < len(s.List) {
+			return s.List[ref].Kind()
+		}
+		return ListKindNone
+	}
+	for i, entry := range s.TextToKramaMapArr {
+		krama := entry.Value.Krama
+		if len(krama) != 1 || kindOf(int(krama[0])) == ListKindVyanjana || !strings.HasSuffix(entry.Text, s.Halant) {
+			continue
+		}
+		consonant := strings.TrimSuffix(entry.Text, s.Halant)
+		if _, ok := singleRune(consonant); !ok {
+			continue
+		}
+		if kindOf(s.KramaTextCharLookup.Get([]rune(consonant)[0])) == ListKindVyanjana {
+			return i
+		}
+	}
+	return -1
 }
 
 // withNextChars fills `NextChars` of each entry (entries are copies, the source maps are untouched)
