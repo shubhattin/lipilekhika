@@ -394,3 +394,23 @@ func TestLongTextWithoutContextBreak(t *testing.T) {
 		t.Errorf("typing 20000 keys took %v, it should be linear", elapsed)
 	}
 }
+
+// With the inherent vowel, the start of a run of consonants (क्क्क) on its own lost its last
+// halant (क्क), so the context was never committed and each key took longer
+func TestLongConsonantRunWithInherentVowel(t *testing.T) {
+	ctx, err := typing.NewTypingContext("Devanagari", &typing.TypingContextOptions{
+		IncludeInherentVowel: ptrBool(true),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	keys := strings.Split(strings.Repeat("k", 20_000), "")
+	start := time.Now()
+	got, _ := typeKeys(t, ctx, keys)
+	if want := strings.Repeat("क्", 19_999) + "क"; got != want {
+		t.Errorf("long consonant run typed wrong")
+	}
+	if elapsed := time.Since(start); elapsed > 2*time.Second {
+		t.Errorf("typing 20000 keys took %v, it should be linear", elapsed)
+	}
+}

@@ -31,6 +31,15 @@ export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 
 type CustomRulesType = TransOptionsType[keyof TransOptionsType]['rules'];
 
+/** ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्) */
+const ZWJ = '‍';
+/** ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant) */
+const ZWNJ = '‌';
+
+/** A Combining Diacritical Mark (U+0300 - U+036F), the marks of decomposed Latin letters (ā as
+ * a + U+0304, ḥ as h + U+0323) */
+const isLatinCombiningMark = (cp: number): boolean => cp >= 0x300 && cp <= 0x36f;
+
 /** These Characters can be skipped/ignore while transliterating the input text
  *
  * `' '`, `'\n'`, `'\r'`, `'\t'`, `','`, `'~'`, `'!'`, `'@'`, `'?'`, `'%'`
@@ -287,12 +296,19 @@ function prev_context_cleanup(
   return result_str_concat_status;
 }
 
-/** @param direct_replace_only only the `direct_replace` rules (applied inside a match) */
+/**
+ * Applies the custom rules after a match (`next_in_match` is `undefined`), or between two pieces
+ * of one match (only the rules that can apply there: `direct_replace` and the input side
+ * `replace_prev_krama_keys`), `next_in_match` then is the krama of the next piece.
+ * @param text_index + `delta`: the start of the match in the input
+ * @param match_krama the krama of the match read so far (all of it after the match)
+ */
 function apply_custom_trans_rules(
   ctx: TransliterateCtx,
   text_index: number,
   delta: number,
-  direct_replace_only = false
+  match_krama: readonly number[],
+  next_in_match?: number
 ) {
   const { custom_rules, cursor, result, from_script_data, to_script_data } = ctx;
   const current_text_index = text_index + delta;
@@ -300,29 +316,45 @@ function apply_custom_trans_rules(
   for (let rule_index = 0; rule_index < custom_rules.length; rule_index++) {
     if (custom_rules[rule_index].use_replace === true) continue;
     const rule = custom_rules[rule_index];
-    if (direct_replace_only && rule.type !== 'direct_replace') continue;
+    if (
+      next_in_match !== undefined &&
+      rule.type === 'replace_prev_krama_keys' &&
+      rule.check_in !== 'input'
+    )
+      continue;
 
     if (rule.type === 'replace_prev_krama_keys') {
       if (rule.check_in === 'input') {
-        const prev_match = matchPrevKramaSequence(
-          cursor.peekAt,
-          current_text_index,
-          rule.prev,
-          from_script_data,
-          // step back by characters, not UTF-16 units (non-BMP scripts like Brahmi)
-          cursor.prevCharIndex
-        );
-        const next_char_info = cursor.peekAt(text_index);
-        if (prev_match.matched && next_char_info !== null) {
-          const next_char = next_char_info.ch;
-          const next_char_krama_index = kramaIndexOfText(from_script_data, next_char);
-          if (
-            next_char_krama_index !== -1 &&
-            rule.following.indexOf(next_char_krama_index) !== -1
-          ) {
-            const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
-            result.rewriteTailPieces(prev_match.matchedLen, replace_with_pieces);
+        if (current_text_index < 0) continue;
+        // the letters read, not the input characters: the end of `prev` is compared with the
+        // krama of this match (a Tamil-Extended ்ரு² (ृ) starts with the halant character but is
+        // no halant, a Sinhala ඟ is ङ्ग), the rest with the characters before the match
+        let match_krama_index = match_krama.length;
+        let input_index = current_text_index;
+        let matched = true;
+        for (let i = rule.prev.length - 1; i >= 0 && matched; i--) {
+          const expected = rule.prev[i];
+          while (match_krama_index > 0 && match_krama[match_krama_index - 1] < 0)
+            match_krama_index--;
+          if (match_krama_index > 0) {
+            matched = match_krama[--match_krama_index] === expected;
+            continue;
           }
+          // step back by characters, not UTF-16 units (non-BMP scripts like Brahmi)
+          input_index = input_index > 0 ? cursor.prevCharIndex(input_index) : -1;
+          const info = input_index >= 0 ? cursor.peekAt(input_index) : null;
+          matched = info !== null && kramaIndexOfText(from_script_data, info.ch) === expected;
+        }
+        if (!matched) continue;
+        let next_krama = next_in_match;
+        if (next_krama === undefined) {
+          const next_char_info = cursor.peekAt(text_index);
+          if (next_char_info === null) continue;
+          next_krama = kramaIndexOfText(from_script_data, next_char_info.ch);
+        }
+        if (next_krama !== -1 && rule.following.indexOf(next_krama) !== -1) {
+          const replace_with_pieces = replaceWithPieces(rule.replace_with, to_script_data);
+          result.rewriteTailPieces(rule.prev.length, replace_with_pieces);
         }
       } else if (rule.check_in === 'output') {
         // in this approch we will have check backwards
@@ -346,6 +378,12 @@ function apply_custom_trans_rules(
       }
     } else if (rule.type === 'direct_replace') {
       const lookup_data = rule.check_in === 'output' ? to_script_data : from_script_data;
+      // a joiner is not added next to one already in the text (the Sinhala conjunct ZWJ before a
+      // ZWJ, or before a ZWNJ asking for no conjunct)
+      if (next_in_match === undefined && rule.replace_text?.endsWith(ZWJ)) {
+        const next_char = cursor.peekAt(text_index)?.ch;
+        if (next_char === ZWJ || next_char === ZWNJ) continue;
+      }
       for (const search_group of rule.to_replace) {
         const match = matchPrevKramaSequence(result.peekAt, -1, search_group, lookup_data);
         if (!match.matched) continue;
@@ -568,9 +606,11 @@ export const transliterate_text_core = (
   const is_to_tamil_ext = isScriptTamilExt(to_script_name);
   const opt_preserve_specific_chars =
     trans_options['all_to_normal:preserve_specific_chars'] === true && to_script_name === 'Normal';
-  /** `direct_replace` rules are applied after every piece of a match */
-  const has_direct_replace_rules = custom_rules.some(
-    (rule) => rule.type === 'direct_replace' && rule.use_replace !== true
+  /** `direct_replace` and input side `replace_prev_krama_keys` rules are applied after every
+   * piece of a match */
+  const has_in_match_rules = custom_rules.some(
+    (rule) =>
+      rule.use_replace !== true && (rule.type === 'direct_replace' || rule.check_in === 'input')
   );
 
   const ctx: TransliterateCtx = {
@@ -868,6 +908,42 @@ export const transliterate_text_core = (
             continue;
           }
         }
+        // Decomposed (NFD) text: a letter is its base + combining marks (ī is i + U+0304), and
+        // the base can continue the letter before it (a + i is ai, k + h is kh). When the match
+        // cannot take the mark after it but its last letter can, the match stops before that
+        // letter: kaī is k a ī (कई), not kai + U+0304
+        if (
+          scan_units > 0 &&
+          ignore_ta_ext_sup_num_text_index === -1 &&
+          from_script_data.script_type === 'other'
+        ) {
+          const mark_cp = cursor.cpAt(end_index);
+          if (
+            isLatinCombiningMark(mark_cp) &&
+            !text_to_krama_next_cps[potential_match_index]?.includes(mark_cp)
+          ) {
+            const last_index = cursor.prevCharIndex(end_index);
+            const head_index = textToKramaMapIndex(
+              text_to_krama_lookup_script_data,
+              cursor.slice(text_index, last_index),
+              use_typing_text_to_krama_map
+            );
+            const head_krama = head_index !== -1 ? text_to_krama_map[head_index][1].krama : null;
+            if (
+              head_krama &&
+              head_krama.length > 0 &&
+              !head_krama.includes(-1) &&
+              textToKramaMapIndex(
+                text_to_krama_lookup_script_data,
+                cursor.slice(last_index, end_index) + String.fromCharCode(mark_cp),
+                use_typing_text_to_krama_map
+              ) !== -1
+            ) {
+              text_to_krama_item_index = head_index;
+              break;
+            }
+          }
+        }
         text_to_krama_item_index = potential_match_index;
         break;
       }
@@ -1042,20 +1118,29 @@ export const transliterate_text_core = (
             } else {
               result.emitPieces(result_pieces_to_add);
             }
-          } else if (has_direct_replace_rules && krama.length > 1) {
-            // the direct_replace rules see every piece of a match, not only the last: Romanized
-            // sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga
+          } else if (has_in_match_rules && krama.length > 1) {
+            // the rules that can apply inside a match see every piece of it, not only the last:
+            // Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga, or
+            // -> ंग with the anusvAra option
             for (let i = 0; i < krama.length; i++) {
               if (krama[i] < 0) continue;
               const piece = kramaTextOrEmpty(to_script_data, krama[i]);
               result.emit(piece);
-              if (piece && i < krama.length - 1) apply_custom_trans_rules(ctx, text_index, 0, true);
+              if (piece && i < krama.length - 1)
+                apply_custom_trans_rules(
+                  ctx,
+                  text_index,
+                  -matched_len_units,
+                  krama.slice(0, i + 1),
+                  krama[i + 1]
+                );
             }
           } else {
             emit_krama_pieces(result, to_script_data, krama);
           }
         }
-        if (custom_rules.length > 0) apply_custom_trans_rules(ctx, text_index, -matched_len_units);
+        if (custom_rules.length > 0)
+          apply_custom_trans_rules(ctx, text_index, -matched_len_units, krama);
         continue;
       } else if (krama !== null && krama !== undefined && krama.indexOf(-1) !== -1) {
         // handle cases where any one of the krama poiting is -1
@@ -1091,6 +1176,15 @@ export const transliterate_text_core = (
           : ''
         : text_to_krama_item[0];
     if (index === -1) {
+      // A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or the
+      // eyelash ra र‍्), it is not written in Normal / Romanized and does not end the syllable:
+      // क्‍ष and क‍्ष are kSha (were k‍Sha and ka‍Sha)
+      if (
+        from_script_data.script_type === 'brahmic' &&
+        to_script_data.script_type === 'other' &&
+        (char_to_search === ZWJ || char_to_search === ZWNJ)
+      )
+        continue;
       // text not matched so ignore and return as it is
       if (PREV_CONTEXT_IN_USE) {
         prev_context_cleanup(ctx, char_to_search, null);
@@ -1145,7 +1239,7 @@ export const transliterate_text_core = (
         result.emit(to_add_text);
       }
     }
-    if (custom_rules.length > 0) apply_custom_trans_rules(ctx, text_index, -char_width);
+    if (custom_rules.length > 0) apply_custom_trans_rules(ctx, text_index, -char_width, [index]);
   }
   if (PREV_CONTEXT_IN_USE)
     // calling with last extra index flag

@@ -23,6 +23,14 @@ const (
 	optKeepASCIINumerals     = "normal_to_brahmic:keep_ascii_numerals"
 )
 
+const (
+	// ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्)
+	zwjRune = '\u200d'
+	// ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant)
+	zwnjRune = '\u200c'
+	zwj      = string(zwjRune)
+)
+
 // Options holds transliteration options.
 type Options struct {
 	TypingMode           bool
@@ -393,16 +401,24 @@ func (ctx *transliterateCtx) emitHalant() {
 	}
 }
 
-// applyCustomTransRules applies the custom rules, with `directReplaceOnly` only the
-// `direct_replace` rules (applied inside a match).
-func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int, directReplaceOnly bool) {
+// applyCustomTransRules applies the custom rules after a match (`nextInMatch` is nil), or between
+// two pieces of one match (only the rules that can apply there: `direct_replace` and the input
+// side `replace_prev_krama_keys`), `nextInMatch` then is the krama of the next piece.
+//
+//   - `textIndex` + `delta`: the start of the match in the input
+//   - `matchKrama`: the krama of the match read so far (all of it after the match)
+func (ctx *transliterateCtx) applyCustomTransRules(
+	textIndex, delta int,
+	matchKrama []int16,
+	nextInMatch *int16,
+) {
 	currentIdx := textIndex + delta
 	for i := range ctx.customRules {
 		rule := &ctx.customRules[i]
 		if rule.UseReplace != nil && *rule.UseReplace {
 			continue
 		}
-		if directReplaceOnly && rule.Type != "direct_replace" {
+		if nextInMatch != nil && rule.Type == "replace_prev_krama_keys" && ruleChecksOutput(rule) {
 			continue
 		}
 		switch rule.Type {
@@ -415,19 +431,47 @@ func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int, directR
 				if currentIdx < 0 || textIndex < 0 {
 					continue
 				}
-				matched, mLen := matchPrevKramaSequence(ctx.cursor.peekAtStr, currentIdx, rule.Prev, ctx.fromData)
+				// the letters read, not the input characters: the end of `prev` is compared with
+				// the krama of this match (a Tamil-Extended ்ரு² (ृ) starts with the halant
+				// character but is no halant, a Sinhala ඟ is ङ्ग), the rest with the characters
+				// before the match
+				matchedKramaIdx := len(matchKrama)
+				inputIdx := currentIdx
+				matched := true
+				for p := len(rule.Prev) - 1; p >= 0 && matched; p-- {
+					expected := int(rule.Prev[p])
+					for matchedKramaIdx > 0 && matchKrama[matchedKramaIdx-1] < 0 {
+						matchedKramaIdx--
+					}
+					if matchedKramaIdx > 0 {
+						matchedKramaIdx--
+						matched = int(matchKrama[matchedKramaIdx]) == expected
+						continue
+					}
+					inputIdx--
+					r, ok := ctx.cursor.peekAt(inputIdx)
+					matched = ok && kramaIndexOfChar(ctx.fromData, r) == expected
+				}
 				if !matched {
 					continue
 				}
-				nextR, ok := ctx.cursor.peekAt(textIndex)
-				if !ok {
-					continue
+				var nextKrama int16
+				if nextInMatch != nil {
+					nextKrama = *nextInMatch
+				} else {
+					nextR, ok := ctx.cursor.peekAt(textIndex)
+					if !ok {
+						continue
+					}
+					nextIdx := kramaIndexOfChar(ctx.fromData, nextR)
+					if nextIdx < 0 {
+						continue
+					}
+					nextKrama = int16(nextIdx)
 				}
-				nextIdx := kramaIndexOfChar(ctx.fromData, nextR)
-				if nextIdx < 0 || !containsI16(rule.Following, int16(nextIdx)) {
-					continue
+				if containsI16(rule.Following, nextKrama) {
+					ctx.result.rewriteTailPieces(len(rule.Prev), replaceWithPieces(rule.ReplaceWith, ctx.toData))
 				}
-				ctx.result.rewriteTailPieces(mLen, replaceWithPieces(rule.ReplaceWith, ctx.toData))
 			} else {
 				// output
 				lp, ok := ctx.result.lastPiece()
@@ -449,6 +493,13 @@ func (ctx *transliterateCtx) applyCustomTransRules(textIndex, delta int, directR
 			lookup := ctx.fromData
 			if ruleChecksOutput(rule) {
 				lookup = ctx.toData
+			}
+			// a joiner is not added next to one already in the text (the Sinhala conjunct ZWJ
+			// before a ZWJ, or before a ZWNJ asking for no conjunct)
+			if nextInMatch == nil && rule.ReplaceText != nil && strings.HasSuffix(*rule.ReplaceText, zwj) && textIndex >= 0 {
+				if c, ok := ctx.cursor.peekAt(textIndex); ok && (c == zwjRune || c == zwnjRune) {
+					continue
+				}
 			}
 			for _, grp := range rule.ToReplace {
 				if hasNegative(grp) {
@@ -631,11 +682,14 @@ func TransliterateTextCoreWith(
 	// option flags resolved once (nil-map reads return false)
 	transOptUseTypingChars := transOpt(transOptions, optUseTypingChars)
 	optPreserveSpecificChars := transOpt(transOptions, optPreserveSpecificChars) && toName == "Normal"
-	// `direct_replace` rules are applied after every piece of a match
-	hasDirectReplaceRules := false
+	// `direct_replace` and input side `replace_prev_krama_keys` rules are applied after every
+	// piece of a match
+	hasInMatchRules := false
 	for i := range customRules {
-		if customRules[i].Type == "direct_replace" && (customRules[i].UseReplace == nil || !*customRules[i].UseReplace) {
-			hasDirectReplaceRules = true
+		r := &customRules[i]
+		if (r.UseReplace == nil || !*r.UseReplace) &&
+			(r.Type == "direct_replace" || (r.Type == "replace_prev_krama_keys" && !ruleChecksOutput(r))) {
+			hasInMatchRules = true
 			break
 		}
 	}
@@ -937,6 +991,27 @@ func TransliterateTextCoreWith(
 					}
 				}
 
+				// Decomposed (NFD) text: a letter is its base + combining marks (ī is i + U+0304),
+				// and the base can continue the letter before it (a + i is ai, k + h is kh). When
+				// the match cannot take the mark after it but its last letter can, the match stops
+				// before that letter: kaī is k a ī (कई), not kai + U+0304
+				if scanUnits > 0 && ignoreTaExtSupIndex == -1 && fromOther {
+					if mark, ok := cursor.peekAt(endIndex); ok && isLatinCombiningMark(mark) &&
+						!containsRune(potentialMatch.NextChars, mark) {
+						if last, ok := cursor.peekAt(endIndex - 1); ok {
+							headIndex := lookupData.TextToKramaMapIndex(cursor.slice(textIndex, endIndex-1), useTypingMap)
+							if headIndex >= 0 {
+								headKrama := textToKramaMap[headIndex].Value.Krama
+								if len(headKrama) > 0 && !containsI16(headKrama, -1) &&
+									lookupData.TextToKramaMapIndex(string(last)+string(mark), useTypingMap) >= 0 {
+									itemIndex = headIndex
+									break
+								}
+							}
+						}
+					}
+				}
+
 				itemIndex = potentialMatchIndex
 				break
 			}
@@ -1071,9 +1146,10 @@ func TransliterateTextCoreWith(
 						} else {
 							result.emitPieces(pieces)
 						}
-					} else if hasDirectReplaceRules && len(krama) > 1 {
-						// the direct_replace rules see every piece of a match, not only the last: Romanized
-						// sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga
+					} else if hasInMatchRules && len(krama) > 1 {
+						// the rules that can apply inside a match see every piece of it, not only the last:
+						// Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ, Sinhala ඟ (ङ्ग) -> nga, or
+						// -> ंग with the anusvAra option
 						for i, k := range krama {
 							if k < 0 {
 								continue
@@ -1081,7 +1157,8 @@ func TransliterateTextCoreWith(
 							piece := kramaTextOrEmpty(toData, int(k))
 							result.emit(piece)
 							if piece != "" && i+1 < len(krama) {
-								ctx.applyCustomTransRules(cursor.pos, 0, true)
+								// `cursor.pos` is the end of the match here, so the start is `-matchedLenUnits`
+								ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits, krama[:i+1], &krama[i+1])
 							}
 						}
 					} else {
@@ -1090,7 +1167,7 @@ func TransliterateTextCoreWith(
 				}
 
 				if len(customRules) > 0 {
-					ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits, false)
+					ctx.applyCustomTransRules(cursor.pos, -matchedLenUnits, krama, nil)
 				}
 				continue
 			} else if containsI16(krama, -1) {
@@ -1123,6 +1200,12 @@ func TransliterateTextCoreWith(
 			index = kramaIndexOfText(fromData, charToSearch)
 		}
 		if index < 0 {
+			// A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or the
+			// eyelash ra र‍्), it is not written in Normal / Romanized and does not end the
+			// syllable: क्‍ष and क‍्ष are kSha (were k‍Sha and ka‍Sha)
+			if fromBrahmic && toOther && (runeIsStr(zwjRune, charToSearch) || runeIsStr(zwnjRune, charToSearch)) {
+				continue
+			}
 			if prevContextInUse {
 				ctx.prevContextCleanup(charToSearch, nil, nil, false)
 				prevCtx.clear()
@@ -1168,7 +1251,7 @@ func TransliterateTextCoreWith(
 		}
 
 		if len(customRules) > 0 {
-			ctx.applyCustomTransRules(cursor.pos, -1, false)
+			ctx.applyCustomTransRules(cursor.pos, -1, []int16{int16(index)}, nil)
 		}
 	}
 

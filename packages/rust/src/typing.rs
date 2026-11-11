@@ -161,8 +161,13 @@ impl TypingContext {
     }
 
     /// Transliterates `input` (the context input or a part of it) in typing mode.
-    fn transliterate_input(&mut self, input: &str) -> TransliterationOutput {
-        let translit_options = self.build_translit_options();
+    ///
+    /// `at_text_end`: the input is at the end of the typed text. Else (the head of a long
+    /// context, see `commit_context_start`) the inherent vowel option does not apply, it is only
+    /// for the last vyanjana of the text (`kkk` is क्क्क, its head `kk` on its own would be क्क).
+    fn transliterate_input(&mut self, input: &str, at_text_end: bool) -> TransliterationOutput {
+        let mut translit_options = self.build_translit_options();
+        translit_options.include_inherent_vowel &= at_text_end;
         transliterate_text_core_with(
             input,
             &ScriptListEnum::Normal,
@@ -195,12 +200,12 @@ impl TypingContext {
             if split == 0 {
                 break;
             }
-            let tail = self.transliterate_input(&input[split..]);
+            let tail = self.transliterate_input(&input[split..], true);
             if !tail.output.is_empty()
                 && tail.context_length == self.curr_context_length
                 && self.curr_output.ends_with(tail.output.as_str())
             {
-                let head = self.transliterate_input(&input[..split]);
+                let head = self.transliterate_input(&input[..split], false);
                 if head.output.len() + tail.output.len() == self.curr_output.len()
                     && self.curr_output.starts_with(head.output.as_str())
                 {
@@ -263,7 +268,7 @@ impl TypingContext {
         self.curr_input.push(ch);
         self.curr_input_length += 1;
         let input = core::mem::take(&mut self.curr_input);
-        let result = self.transliterate_input(&input);
+        let result = self.transliterate_input(&input, true);
         self.curr_input = input;
 
         let context_length = result.context_length;
@@ -1035,6 +1040,35 @@ mod tests {
         }
         assert_eq!(result, "क".repeat(10_000));
         // took ~4 s (release) when each key re-transliterated the whole run, now ~0.05 s
+        let elapsed = start.elapsed();
+        assert!(
+            elapsed.as_secs_f64() < 2.0,
+            "typing 20000 keys took {elapsed:?}"
+        );
+    }
+
+    /// With the inherent vowel, the start of a run of consonants (क्क्क) on its own lost its
+    /// last halant (क्क), so the context was never committed and each key took longer
+    #[test]
+    fn long_consonant_run_with_inherent_vowel() {
+        let mut ctx = TypingContext::new(
+            Script::Devanagari,
+            Some(TypingContextOptions {
+                include_inherent_vowel: true,
+                ..Default::default()
+            }),
+        );
+        let mut result = String::new();
+        let start = std::time::Instant::now();
+        for _ in 0..20_000 {
+            let diff = ctx.take_key_input_char('k');
+            for _ in 0..diff.to_delete_chars_count {
+                result.pop();
+            }
+            result.push_str(&diff.diff_add_text);
+        }
+        assert_eq!(result, "क्".repeat(19_999) + "क");
+        // took ~6 s (release) when the context was never committed
         let elapsed = start.elapsed();
         assert!(
             elapsed.as_secs_f64() < 2.0,

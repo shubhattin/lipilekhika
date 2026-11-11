@@ -11,6 +11,18 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::slice;
 
+/// ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्)
+const ZWJ: char = '\u{200D}';
+/// ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant)
+const ZWNJ: char = '\u{200C}';
+
+/// A Combining Diacritical Mark (U+0300 - U+036F), the marks of decomposed Latin letters
+/// (ā as a + U+0304, ḥ as h + U+0323)
+#[inline]
+fn is_latin_combining_mark(c: char) -> bool {
+    ('\u{0300}'..='\u{036F}').contains(&c)
+}
+
 /// Compare a char with a &str without heap allocation.
 #[inline]
 fn char_eq_str(c: char, s: &str) -> bool {
@@ -354,12 +366,18 @@ where
         result_str_concat_status
     }
 
-    /// `direct_replace_only`: only the `direct_replace` rules (applied inside a match)
+    /// Applies the custom rules after a match (`next_in_match` is `None`), or between two pieces
+    /// of one match (only the rules that can apply there: `direct_replace` and the input side
+    /// `replace_prev_krama_keys`), `next_in_match` then is the krama of the next piece.
+    ///
+    /// - `text_index` + `delta`: the start of the match in the input
+    /// - `match_krama`: the krama of the match read so far (all of it after the match)
     fn apply_custom_trans_rules(
         &mut self,
         text_index: isize,
         delta: isize,
-        direct_replace_only: bool,
+        match_krama: &[i16],
+        next_in_match: Option<i16>,
     ) {
         let current_text_index = text_index + delta;
 
@@ -373,7 +391,11 @@ where
                     }
                 }
             }
-            if direct_replace_only && !matches!(rule, Rule::DirectReplace { .. }) {
+            let is_check_in_input =
+                |check_in: &Option<CheckInEnum>| !matches!(check_in, Some(CheckInEnum::Output));
+            if next_in_match.is_some()
+                && matches!(rule, Rule::ReplacePrevKramaKeys { check_in, .. } if !is_check_in_input(check_in))
+            {
                 continue;
             }
 
@@ -390,34 +412,48 @@ where
                         continue;
                     }
 
-                    let is_check_in_input = !matches!(check_in, Some(CheckInEnum::Output));
-                    if is_check_in_input {
+                    if is_check_in_input(check_in) {
                         if current_text_index < 0 || text_index < 0 {
                             continue;
                         }
-                        let prev_match = self.from_script_data.match_prev_krama_sequence(
-                            |i| self.cursor.peek_at_str(i as usize),
-                            current_text_index,
-                            prev,
-                        );
-
-                        if prev_match.matched
-                            && let Some(next_ch) = self.cursor.peek_at(text_index as usize)
-                        {
-                            // char buffer to store utf-8 (no heap allocation)
-                            let mut buf = [0u8; 4];
-                            let next_ch_str = next_ch.encode_utf8(&mut buf);
-                            if let Some(next_idx) =
-                                self.from_script_data.krama_index_of_text(next_ch_str)
-                            {
-                                let next_i16 = next_idx as i16;
-                                if following.contains(&next_i16) {
-                                    let pieces =
-                                        self.to_script_data.replace_with_pieces(replace_with);
-                                    self.result
-                                        .rewrite_tail_pieces(prev_match.matched_len, &pieces);
-                                }
+                        // the letters read, not the input characters: the end of `prev` is
+                        // compared with the krama of this match (a Tamil-Extended ்ரு² (ृ) starts
+                        // with the halant character but is no halant, a Sinhala ඟ is ङ्ग), the
+                        // rest with the characters before the match
+                        let mut match_krama_rev = match_krama.iter().rev().filter(|&&k| k >= 0);
+                        let mut input_index = current_text_index;
+                        let matched = prev.iter().rev().all(|&expected| {
+                            if let Some(&got) = match_krama_rev.next() {
+                                return got == expected;
                             }
+                            input_index -= 1;
+                            input_index >= 0
+                                && self
+                                    .cursor
+                                    .peek_at_str(input_index as usize)
+                                    .and_then(|s| self.from_script_data.krama_index_of_text(s))
+                                    .is_some_and(|got| got == expected as usize)
+                        });
+                        if !matched {
+                            continue;
+                        }
+                        let next_krama = match next_in_match {
+                            Some(next) => Some(next),
+                            None => self
+                                .cursor
+                                .peek_at(text_index as usize)
+                                .and_then(|next_ch| {
+                                    // char buffer to store utf-8 (no heap allocation)
+                                    let mut buf = [0u8; 4];
+                                    let next_ch_str = next_ch.encode_utf8(&mut buf);
+                                    self.from_script_data
+                                        .krama_index_of_text(next_ch_str)
+                                        .map(|i| i as i16)
+                                }),
+                        };
+                        if next_krama.is_some_and(|next| following.contains(&next)) {
+                            let pieces = self.to_script_data.replace_with_pieces(replace_with);
+                            self.result.rewrite_tail_pieces(prev.len(), &pieces);
                         }
                     } else {
                         // output
@@ -459,6 +495,18 @@ where
                     } else {
                         self.from_script_data
                     };
+                    // a joiner is not added next to one already in the text (the Sinhala
+                    // conjunct ZWJ before a ZWJ, or before a ZWNJ asking for no conjunct)
+                    if next_in_match.is_none()
+                        && replace_text.as_deref().is_some_and(|t| t.ends_with(ZWJ))
+                        && text_index >= 0
+                        && self
+                            .cursor
+                            .peek_at(text_index as usize)
+                            .is_some_and(|c| c == ZWJ || c == ZWNJ)
+                    {
+                        continue;
+                    }
 
                     for search_group in to_replace.iter() {
                         if search_group.iter().any(|&n| n < 0) {
@@ -938,9 +986,15 @@ pub fn transliterate_text_core_with(
     let is_to_tamil_ext_ = is_script_tamil_ext(to_script);
     let opt_preserve_specific_chars_ =
         trans_options.all_to_normal_preserve_specific_chars && *to_script == ScriptListEnum::Normal;
-    // `direct_replace` rules are applied after every piece of a match
-    let has_direct_replace_rules = custom_rules.iter().any(|rule| {
-        matches!(rule.borrow(), Rule::DirectReplace { use_replace, .. } if use_replace != &Some(true))
+    // `direct_replace` and input side `replace_prev_krama_keys` rules are applied after every
+    // piece of a match
+    let has_in_match_rules = custom_rules.iter().any(|rule| match rule.borrow() {
+        Rule::DirectReplace { use_replace, .. } => use_replace != &Some(true),
+        Rule::ReplacePrevKramaKeys {
+            use_replace,
+            check_in,
+            ..
+        } => use_replace != &Some(true) && !matches!(check_in, Some(CheckInEnum::Output)),
     });
 
     let mut ctx = TransliterateCtx {
@@ -1274,6 +1328,38 @@ pub fn transliterate_text_core_with(
                     }
                 }
 
+                // Decomposed (NFD) text: a letter is its base + combining marks (ī is i + U+0304),
+                // and the base can continue the letter before it (a + i is ai, k + h is kh). When
+                // the match cannot take the mark after it but its last letter can, the match stops
+                // before that letter: kaī is k a ī (कई), not kai + U+0304
+                if scan_units > 0
+                    && ignore_ta_ext_sup_num_text_index == -1
+                    && matches!(from_script_data, ScriptData::Other { .. })
+                    && let Some(mark) = ctx.cursor.peek_at(end_index)
+                    && is_latin_combining_mark(mark)
+                    && !potential_match.1.next_chars.contains(&mark)
+                    && let (Some(head), Some(last)) = (
+                        ctx.cursor.slice(text_index, end_index - 1),
+                        ctx.cursor.peek_at(end_index - 1),
+                    )
+                    && let Some(head_index) = text_to_krama_lookup_script_data
+                        .text_to_krama_map_index(head, use_typing_map)
+                    && from_text_to_krama_map[head_index]
+                        .1
+                        .krama
+                        .as_ref()
+                        .is_some_and(|krama| !krama.is_empty() && !krama.contains(&-1))
+                    && text_to_krama_lookup_script_data
+                        .text_to_krama_map_index(
+                            &with_tail(last.encode_utf8(&mut [0u8; 4]), Some(mark)),
+                            use_typing_map,
+                        )
+                        .is_some()
+                {
+                    text_to_krama_item_index = Some(head_index);
+                    break;
+                }
+
                 text_to_krama_item_index = Some(potential_match_index);
                 break;
             }
@@ -1522,10 +1608,10 @@ pub fn transliterate_text_core_with(
                             } else {
                                 ctx.result.emit_pieces(pieces);
                             }
-                        } else if has_direct_replace_rules && krama.len() > 1 {
-                            // the direct_replace rules see every piece of a match, not only the
-                            // last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct ZWJ,
-                            // Sinhala ඟ (ङ्ग) -> nga
+                        } else if has_in_match_rules && krama.len() > 1 {
+                            // the rules that can apply inside a match see every piece of it, not
+                            // only the last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct
+                            // ZWJ, Sinhala ඟ (ङ्ग) -> nga, or -> ंग with the anusvAra option
                             for (i, &k) in krama.iter().enumerate() {
                                 if k < 0 {
                                     continue;
@@ -1533,7 +1619,12 @@ pub fn transliterate_text_core_with(
                                 let piece = to_script_data.krama_text_or_empty(k);
                                 ctx.result.emit(piece);
                                 if !piece.is_empty() && i + 1 < krama.len() {
-                                    ctx.apply_custom_trans_rules(text_index as isize, 0, true);
+                                    ctx.apply_custom_trans_rules(
+                                        text_index as isize,
+                                        0,
+                                        &krama[..=i],
+                                        Some(krama[i + 1]),
+                                    );
                                 }
                             }
                         } else {
@@ -1545,7 +1636,8 @@ pub fn transliterate_text_core_with(
                         ctx.apply_custom_trans_rules(
                             ctx.cursor.pos() as isize,
                             -(matched_len_units as isize),
-                            false,
+                            krama,
+                            None,
                         );
                     }
                     continue;
@@ -1593,6 +1685,15 @@ pub fn transliterate_text_core_with(
             from_script_data.krama_index_of_text(char_to_search)
         };
         let Some(index) = idx else {
+            // A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or
+            // the eyelash ra र‍्), it is not written in Normal / Romanized and does not end the
+            // syllable: क्‍ष and क‍्ष are kSha (were k‍Sha and ka‍Sha)
+            if matches!(from_script_data, ScriptData::Brahmic { .. })
+                && matches!(to_script_data, ScriptData::Other { .. })
+                && (char_eq_str(ZWJ, char_to_search) || char_eq_str(ZWNJ, char_to_search))
+            {
+                continue;
+            }
             if ctx.prev_context_in_use {
                 ctx.prev_context_cleanup(Some((Some(char_to_search), None)), None, None);
                 ctx.prev_context.clear();
@@ -1674,7 +1775,7 @@ pub fn transliterate_text_core_with(
         }
 
         if !ctx.custom_rules.is_empty() {
-            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1, false);
+            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1, &[index as i16], None);
         }
     }
 

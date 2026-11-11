@@ -454,3 +454,45 @@
   input: अंम्
   output: அம்ம்
   reversible: true
+# Gurumukhi tippi ੰ is the anusvAra (like bindi ਂ), addak ੱ doubles the consonant after it
+# (with an aspirate, the unaspirated one + halant + it: ਪੱਥਰ पत्थर). Both were not read.
+- index: 21
+  from: Gurumukhi
+  to: Devanagari
+  input: ਪੰਜਾਬੀ ਸੰਤ ਮੁੰਡਾ ਪੱਤਰ ਮੱਖਣ ਪੱਕਾ ਅੱਖ ਪੱਥਰ ਬੱਚਾ ਅੱਛਾ ਸੱਜਣ
+  output: पंजाबी संत मुंडा पत्तर मक्खण पक्का अक्ख पत्थर बच्चा अच्छा सज्जण
+  reversible: false
+- index: 21.1
+  from: Gurumukhi
+  to: Normal
+  input: ਪੰਜਾਬੀ ਪੱਤਰ
+  output: paMjAbI pattara
+  reversible: false
+# Tamil ஂ (the anusvAra sign) is read, like in Tamil-Extended (was left as it is)
+- index: 22
+  from: Tamil
+  to: Devanagari
+  input: அஂ கஂ
+  output: अं कं
+  reversible: false
+# the Telugu nukta ఼ is read (was left as it is). Only read: क़ is written as క
+- index: 23
+  from: Telugu
+  to: Devanagari
+  input: క఼ జ఼
+  output: क़ ज़
+  reversible: false
+# historic letters read as the plain letter used for them today (were left as they are): Telugu
+# tsa ౘ / dza ౙ as చ / జ, Malayalam TTTA ഺ (alveolar ṯa) as ta
+- index: 23.1
+  from: Telugu
+  to: Devanagari
+  input: ౘ ౙా
+  output: च जा
+  reversible: false
+- index: 23.2
+  from: Malayalam
+  to: Devanagari
+  input: ഺ
+  output: त
+  reversible: false

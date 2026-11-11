@@ -135,4 +135,27 @@ describe('Typing a long text without a context break', () => {
     expect(long.ms / short.ms).toBeLessThan(12);
     // CI with coverage is many times slower than a local run
   }, 60_000);
+
+  // with the inherent vowel the start of a run of consonants (क्क्क) on its own lost its last
+  // halant (क्क), so the context was never committed
+  it('takes linear time for a run of consonants with includeInherentVowel', async () => {
+    const ctx = createTypingContext('Devanagari', { includeInherentVowel: true });
+    await ctx.ready;
+    const typeKeys = (keys: number) => {
+      ctx.clearContext();
+      let result = '';
+      const start = performance.now();
+      for (const key of 'k'.repeat(keys)) {
+        const diff = ctx.takeKeyInput(key);
+        if (diff.to_delete_chars_count > 0) result = result.slice(0, -diff.to_delete_chars_count);
+        result += diff.diff_add_text;
+      }
+      return { result, ms: performance.now() - start };
+    };
+    typeKeys(500); // warm up
+    const short = typeKeys(1_000);
+    const long = typeKeys(5_000);
+    expect(long.result).toBe('क्'.repeat(4_999) + 'क');
+    expect(long.ms / short.ms).toBeLessThan(12);
+  }, 60_000);
 });

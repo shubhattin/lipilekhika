@@ -1,5 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
+import type { KramaKeysLabelType } from '../krama_array_keys';
 import {
   COMMON_NUMBER_TYPING_DATA,
   COMMON_SCRIPT_TYPING_DATA,
@@ -378,17 +379,15 @@ const Gurumukhi: InputBrahmicScriptType = {
       text: 'ਹ',
       text_krama: ['h'],
       type: 'vyanjana'
+    },
+    {
+      // tippi, the anusvAra (like bindi ਂ) used after short vowels: ਪੰਜਾਬੀ (पंजाबी)
+      text: 'ੰ',
+      text_krama: [],
+      fallback: ['anusvAra'],
+      type: 'anya'
     }
-    // {
-    //   text: 'ੰ',
-    //   text_krama: [],
-    //   type: 'anya'
-    // },
-    // {
-    //   text: 'ੱ',
-    //   text_krama: [],
-    //   type: 'anya'
-    // },
+    // addak ੱ (doubling the consonant after it) is added below
     // {
     //   text: 'ੲ',
     //   text_krama: [],
@@ -401,5 +400,36 @@ const Gurumukhi: InputBrahmicScriptType = {
     // }
   ]
 };
+
+/** The unaspirated vyanjana of an aspirated one, what the addak doubles it with (ਪੱਥਰ पत्थर) */
+const UNASPIRATED: Partial<Record<string, KramaKeysLabelType>> = {
+  kh: 'k',
+  gh: 'g',
+  Ch: 'C',
+  jh: 'j',
+  Th: 'T',
+  Dh: 'D',
+  th: 't',
+  dh: 'd',
+  ph: 'p',
+  bh: 'b'
+};
+
+// addak ੱ doubles the vyanjana after it: ਪੱਤਰ (पत्तर), ਮੱਖਣ (मक्खण). Only read, a doubled
+// vyanjana is written with the halant (त्त -> ਤ੍ਤ)
+Gurumukhi.list.push(
+  ...Gurumukhi.list.flatMap((item): InputBrahmicScriptType['list'] => {
+    if (item.type !== 'vyanjana' || item.text.includes(HALANT)) return [];
+    const krama = item.text_krama[0];
+    return [
+      {
+        text: 'ੱ' + item.text,
+        text_krama: [],
+        fallback: [UNASPIRATED[krama] ?? krama, 'halant', krama],
+        type: 'vyanjana'
+      }
+    ];
+  })
+);
 
 export default Gurumukhi;

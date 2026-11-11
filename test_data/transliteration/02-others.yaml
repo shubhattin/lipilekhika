@@ -163,3 +163,44 @@
   input: समय़
   output: samayza
   reversible: true
+# decomposed (NFD) Romanized: a letter written as its base + a combining mark is read as that
+# letter, also when the base could continue the letter before it (a + i is ai, k + h is kh):
+# kaī is क + ई (was कै + a stray U+0304), kḥ is क् + ः (was ख् + U+0323)
+- index: 19
+  from: Romanized
+  to: Devanagari
+  input: "kaī naī dillī gaū vākḥ tatḥ āī"
+  output: कई नई दिल्ली गऊ वाक्ः तत्ः आई
+  reversible: false
+- index: 19.1
+  from: Romanized
+  to: Normal
+  input: "kaī kḥ"
+  output: kaI kH
+  reversible: false
+# a ZWJ / ZWNJ (conjunct display) is not copied into Normal / Romanized, and a ZWJ before the
+# halant does not break the conjunct (Devanagari eyelash ra र‍्य, was ra‍ya)
+- index: 20
+  from: Devanagari
+  to: Normal
+  input: "क्‍ष क्‌ष क‍्ष र‍्य र्‍य"
+  output: kSha kSha kSha rya rya
+  reversible: false
+- index: 20.1
+  from: Devanagari
+  to: Romanized
+  input: "क्‍ष र‍्य"
+  output: kṣa rya
+  reversible: false
+- index: 20.2
+  from: Gujarati
+  to: Normal
+  input: "ક્‍ષ ર‍્ય"
+  output: kSha rya
+  reversible: false
+- index: 20.3
+  from: Bengali
+  to: Normal
+  input: "ক্‍ষ ক্‌ষ"
+  output: kSha kSha
+  reversible: false
