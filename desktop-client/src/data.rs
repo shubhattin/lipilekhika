@@ -43,6 +43,7 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
     ScriptListEnum::Sinhala => "අ",
     ScriptListEnum::Normal => "a",
     ScriptListEnum::Romanized => "ā",
+    ScriptListEnum::Itrans => "IT",
     ScriptListEnum::HarvardKyoto => "HK",
     ScriptListEnum::Slp1 => "SL",
     ScriptListEnum::Gurumukhi => "ਅ",
@@ -57,7 +58,11 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
 }
 
 /// The standard romanization schemes, listed after Romanized (before the ancient scripts)
-const STANDARD_SCHEMES: &[ScriptListEnum] = &[ScriptListEnum::HarvardKyoto, ScriptListEnum::Slp1];
+const STANDARD_SCHEMES: &[ScriptListEnum] = &[
+  ScriptListEnum::Itrans,
+  ScriptListEnum::HarvardKyoto,
+  ScriptListEnum::Slp1,
+];
 
 pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
   let script_list = get_script_list_data();

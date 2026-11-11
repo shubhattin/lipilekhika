@@ -32,6 +32,7 @@ class FontConfig {
       // Base / Romanized
       case 'Normal':
       case 'Romanized':
+      case 'ITRANS':
       case 'Harvard-Kyoto':
       case 'SLP1':
         return GoogleFonts.notoSans().fontFamily!;
