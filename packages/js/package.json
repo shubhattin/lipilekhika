@@ -78,6 +78,7 @@
     "test:runtime": "vite-node scripts/runtime_check.mjs && bun scripts/runtime_check.mjs",
     "test:runtime:dist": "node scripts/runtime_check.mjs --dist && bun scripts/runtime_check.mjs --dist",
     "test:workerd": "node scripts/workerd_check.mjs",
+    "test:package": "node scripts/package_check.mjs",
     "complexity": "vite-node src/scripts/complexity.ts"
   },
   "devDependencies": {
