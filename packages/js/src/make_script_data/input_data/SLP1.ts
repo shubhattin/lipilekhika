@@ -43,16 +43,16 @@ const SLP1: InputOtherScriptType = {
     'ॗ': 'U',
     ए: 'e',
     'े': 'e',
-    ऎ: 'è',
-    'ॆ': 'è',
+    ऎ: 'e',
+    'ॆ': 'e',
     ऐ: 'E',
     'ै': 'E',
     ऍ: 'e',
     'ॅ': 'e',
     ओ: 'o',
     'ो': 'o',
-    ऒ: 'ò',
-    'ॊ': 'ò',
+    ऒ: 'o',
+    'ॊ': 'o',
     औ: 'O',
     'ौ': 'O',
     ऑ: 'o',
@@ -140,6 +140,10 @@ const SLP1: InputOtherScriptType = {
     '॥': '..'
   },
   list: [
+    // the short e / o of other languages are written as e / o (Sanskrit has only the long ones),
+    // read back from è / ò
+    { text: 'e', text_krama: ['e-svara'], duplicates: ['è'] },
+    { text: 'o', text_krama: ['o-svara'], duplicates: ['ò'] },
     {
       // ळ्ह
       text: '|',

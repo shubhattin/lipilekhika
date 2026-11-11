@@ -14,19 +14,18 @@
   input: क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़ ऩ ऱ ऴ
   output: qa qha g2a z2a r3a r3ha fa Ya n2a r2a zha
   reversible: true
-# short e / o (è ò), e / o are the long ones
+# the short e / o are written as e / o (the long ones, Sanskrit has only them), è / ò are read
+# as the short ones
 - index: 2
   from: Telugu
   to: SLP1
   input: కెరళ కొట ఎ ఒ కేరళ
-  output: kèraLa kòwa è ò keraLa
-  reversible: true
+  output: keraLa kowa e o keraLa
 - index: 3
-  from: Telugu
-  to: Harvard-Kyoto
-  input: కెరళ కొట ఎ ఒ కేరళ
-  output: kèraLa kòTa è ò keraLa
-  reversible: true
+  from: Harvard-Kyoto
+  to: Telugu
+  input: kèraLa kòTa è ò keraLa
+  output: కెరళ కొట ఎ ఒ కేరళ
 # SLP1 | is ळ्ह, written as Lh
 - index: 4
   from: SLP1
