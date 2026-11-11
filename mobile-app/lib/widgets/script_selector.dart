@@ -14,6 +14,8 @@ const Map<String, String> scriptAvatarMap = {
   'Sinhala': 'අ',
   'Normal': 'a',
   'Romanized': 'ā',
+  'Harvard-Kyoto': 'HK',
+  'SLP1': 'SL',
   'Gurumukhi': 'ਅ',
   'Assamese': 'অ',
   'Siddham': '𑖀',
@@ -28,6 +30,7 @@ const Map<String, String> scriptAvatarMap = {
 enum ScriptCategory {
   modern('Modern Indian Scripts'),
   romanized('Romanization Scripts'),
+  standard('Standard Schemes'),
   ancient('Ancient Scripts');
 
   final String label;
@@ -55,6 +58,9 @@ const List<ScriptInfo> orderedScripts = [
   // Romanization Scripts
   ScriptInfo('Normal', ScriptCategory.romanized),
   ScriptInfo('Romanized', ScriptCategory.romanized),
+  // Standard Schemes
+  ScriptInfo('Harvard-Kyoto', ScriptCategory.standard),
+  ScriptInfo('SLP1', ScriptCategory.standard),
   // Ancient Scripts
   ScriptInfo('Brahmi', ScriptCategory.ancient),
   ScriptInfo('Sharada', ScriptCategory.ancient),
