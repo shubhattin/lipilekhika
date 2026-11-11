@@ -14,6 +14,7 @@ const Map<String, String> scriptAvatarMap = {
   'Sinhala': 'අ',
   'Normal': 'a',
   'Romanized': 'ā',
+  'IAST': 'IA',
   'ITRANS': 'IT',
   'Harvard-Kyoto': 'HK',
   'SLP1': 'SL',
@@ -60,6 +61,7 @@ const List<ScriptInfo> orderedScripts = [
   ScriptInfo('Normal', ScriptCategory.romanized),
   ScriptInfo('Romanized', ScriptCategory.romanized),
   // Standard Schemes
+  ScriptInfo('IAST', ScriptCategory.standard),
   ScriptInfo('ITRANS', ScriptCategory.standard),
   ScriptInfo('Harvard-Kyoto', ScriptCategory.standard),
   ScriptInfo('SLP1', ScriptCategory.standard),

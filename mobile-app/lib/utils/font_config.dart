@@ -32,6 +32,7 @@ class FontConfig {
       // Base / Romanized
       case 'Normal':
       case 'Romanized':
+      case 'IAST':
       case 'ITRANS':
       case 'Harvard-Kyoto':
       case 'SLP1':

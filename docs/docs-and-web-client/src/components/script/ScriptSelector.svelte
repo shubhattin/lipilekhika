@@ -40,6 +40,7 @@
     Normal: 'romanized',
     Romanized: 'romanized',
     // standard romanization schemes
+    IAST: 'standard',
     ITRANS: 'standard',
     'Harvard-Kyoto': 'standard',
     SLP1: 'standard',
