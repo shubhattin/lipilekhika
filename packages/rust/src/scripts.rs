@@ -46,6 +46,10 @@ pub enum ScriptListEnum {
     Sharada,
     #[strum(serialize = "Siddham")]
     Siddham,
+    #[strum(serialize = "SLP1")]
+    Slp1,
+    #[strum(serialize = "Harvard-Kyoto")]
+    HarvardKyoto,
 }
 impl ScriptListEnum {
     /// Resolves a canonical `script_list.json` script id to the internal script enum.
@@ -72,6 +76,8 @@ impl ScriptListEnum {
             18 => Some(Self::Modi),
             20 => Some(Self::Sharada),
             21 => Some(Self::Siddham),
+            22 => Some(Self::Slp1),
+            23 => Some(Self::HarvardKyoto),
             _ => None,
         }
     }
@@ -120,6 +126,10 @@ pub enum Script {
     Sharada,
     #[strum(serialize = "Siddham")]
     Siddham,
+    #[strum(serialize = "SLP1")]
+    Slp1,
+    #[strum(serialize = "Harvard-Kyoto")]
+    HarvardKyoto,
     #[strum(serialize = "English")]
     English,
     #[strum(serialize = "Sanskrit")]
@@ -190,6 +200,12 @@ pub enum Script {
     Gur,
     #[strum(serialize = "as")]
     As_,
+    #[strum(serialize = "slp1")]
+    Slp12,
+    #[strum(serialize = "slp")]
+    Slp,
+    #[strum(serialize = "hk")]
+    Hk,
     #[strum(serialize = "sa")]
     Sa,
     #[strum(serialize = "san")]
@@ -232,6 +248,8 @@ impl Script {
             18 => Some(Self::Modi),
             20 => Some(Self::Sharada),
             21 => Some(Self::Siddham),
+            22 => Some(Self::Slp1),
+            23 => Some(Self::HarvardKyoto),
             _ => None,
         }
     }
@@ -259,6 +277,8 @@ impl From<Script> for ScriptListEnum {
             Script::Modi => ScriptListEnum::Modi,
             Script::Sharada => ScriptListEnum::Sharada,
             Script::Siddham => ScriptListEnum::Siddham,
+            Script::Slp1 => ScriptListEnum::Slp1,
+            Script::HarvardKyoto => ScriptListEnum::HarvardKyoto,
             Script::English => ScriptListEnum::Normal,
             Script::Sanskrit => ScriptListEnum::Devanagari,
             Script::Hindi => ScriptListEnum::Devanagari,
@@ -294,6 +314,9 @@ impl From<Script> for ScriptListEnum {
             Script::Rom => ScriptListEnum::Romanized,
             Script::Gur => ScriptListEnum::Gurumukhi,
             Script::As_ => ScriptListEnum::Assamese,
+            Script::Slp12 => ScriptListEnum::Slp1,
+            Script::Slp => ScriptListEnum::Slp1,
+            Script::Hk => ScriptListEnum::HarvardKyoto,
             Script::Sa => ScriptListEnum::Devanagari,
             Script::San => ScriptListEnum::Devanagari,
             Script::Hin => ScriptListEnum::Devanagari,
@@ -327,6 +350,8 @@ pub(crate) const SCRIPTS: &[(&str, u8)] = &[
     ("Modi", 18),
     ("Sharada", 20),
     ("Siddham", 21),
+    ("SLP1", 22),
+    ("Harvard-Kyoto", 23),
 ];
 /// `(language name, language id)` in `script_list.json` order.
 pub(crate) const LANGS: &[(&str, u8)] = &[
@@ -395,6 +420,9 @@ pub(crate) const SCRIPT_ALTERNATES_MAP: &[(&str, &str)] = &[
     ("rom", "Romanized"),
     ("gur", "Gurumukhi"),
     ("as", "Assamese"),
+    ("slp1", "SLP1"),
+    ("slp", "SLP1"),
+    ("hk", "Harvard-Kyoto"),
     ("sa", "Devanagari"),
     ("san", "Devanagari"),
     ("hin", "Devanagari"),

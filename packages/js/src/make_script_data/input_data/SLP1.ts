@@ -1,0 +1,158 @@
+import { script_list_obj } from '../../utils/lang_list';
+import type { InputOtherScriptType } from '../input_script_data_schema';
+import {
+  COMMON_SCRIPT_TYPING_DATA,
+  COMMON_SVARA_MATRA_TYPING_DATA,
+  COMMON_VEDIC_SANSKRIT_SYMBOLS
+} from './_common_typing';
+
+/**
+ * SLP1 (Sanskrit Library Phonetic Basic), an ASCII scheme with one letter for each sound.
+ *
+ * Case sensitive: `k` क, `K` ख, `S` श, `z` ष. Follows the tables of `vidyut-lipi` (MIT), the
+ * nuqta letters with a digit after the base letter (`k0` क़). Letters SLP1 has no form for are
+ * written as their nearest Sanskrit letter (ऍ as `e`, ॻ as `g`). The Vedic accents beyond `\`
+ * (anudAtta) and `^` (svarita) are the arrows of Normal.
+ */
+const SLP1: InputOtherScriptType = {
+  script_name: 'SLP1',
+  script_id: script_list_obj['SLP1'],
+  script_type: 'other',
+  schwa_character: 'a',
+  manual_krama_text_map: {
+    ॐ: 'AUM',
+    अ: 'a',
+    '': 'a',
+    ॳ: 'a',
+    'ऺ': 'a',
+    आ: 'A',
+    'ा': 'A',
+    ॴ: 'A',
+    'ऻ': 'A',
+    इ: 'i',
+    'ि': 'i',
+    ई: 'I',
+    'ी': 'I',
+    उ: 'u',
+    'ु': 'u',
+    ॶ: 'u',
+    'ॖ': 'u',
+    ऊ: 'U',
+    'ू': 'U',
+    ॷ: 'U',
+    'ॗ': 'U',
+    ए: 'e',
+    'े': 'e',
+    ऎ: 'è',
+    'ॆ': 'è',
+    ऐ: 'E',
+    'ै': 'E',
+    ऍ: 'e',
+    'ॅ': 'e',
+    ओ: 'o',
+    'ो': 'o',
+    ऒ: 'ò',
+    'ॊ': 'ò',
+    औ: 'O',
+    'ौ': 'O',
+    ऑ: 'o',
+    'ॉ': 'o',
+    ऋ: 'f',
+    'ृ': 'f',
+    ॠ: 'F',
+    'ॄ': 'F',
+    ऌ: 'x',
+    'ॢ': 'x',
+    ॡ: 'X',
+    'ॣ': 'X',
+    'ं': 'M',
+    'ँ': '~',
+    'ः': 'H',
+    ऽ: "'",
+    '्': '',
+    '़': '',
+    '॰': '°',
+    क: 'k',
+    kz: 'k0',
+    ख: 'K',
+    khz: 'K0',
+    ग: 'g',
+    gz: 'g0',
+    ॻ: 'g',
+    घ: 'G',
+    ङ: 'N',
+    च: 'c',
+    छ: 'C',
+    ज: 'j',
+    jz: 'j0',
+    ॼ: 'j',
+    झ: 'J',
+    ञ: 'Y',
+    त: 't',
+    थ: 'T',
+    द: 'd',
+    ध: 'D',
+    न: 'n',
+    ऩ: 'n0',
+    ट: 'w',
+    ठ: 'W',
+    ड: 'q',
+    Dz: 'q0',
+    ॾ: 'q',
+    ढ: 'Q',
+    Dhz: 'Q0',
+    ण: 'R',
+    प: 'p',
+    फ: 'P',
+    phz: 'P0',
+    ब: 'b',
+    ॿ: 'b',
+    भ: 'B',
+    म: 'm',
+    य: 'y',
+    yz: 'Y0',
+    व: 'v',
+    र: 'r',
+    ऱ: 'r2',
+    ल: 'l',
+    ळ: 'L',
+    ऴ: 'L0',
+    ह: 'h',
+    स: 's',
+    श: 'S',
+    ष: 'z',
+    // 4 vedic accent symbols
+    anudAttA: '\\',
+    'udAtta-1': '^',
+    'udAtta-2': '↑↑',
+    'udAtta-3': '↑↑↑',
+    '०': '0',
+    '१': '1',
+    '२': '2',
+    '३': '3',
+    '४': '4',
+    '५': '5',
+    '६': '6',
+    '७': '7',
+    '८': '8',
+    '९': '9',
+    '।': '.',
+    '॥': '..'
+  },
+  list: [
+    {
+      // ळ्ह
+      text: '|',
+      text_krama: [],
+      fallback: ['L', 'halant', 'h']
+    }
+  ],
+  // typed with the keys of Normal, like Romanized
+  typing_list: [
+    ...COMMON_SCRIPT_TYPING_DATA,
+    ...COMMON_SVARA_MATRA_TYPING_DATA,
+    ...COMMON_VEDIC_SANSKRIT_SYMBOLS
+  ]
+};
+
+export default SLP1;

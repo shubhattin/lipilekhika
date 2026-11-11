@@ -704,15 +704,14 @@ function get_out_script_data(
   // Scan for krama keys which did not get mapped to any text and warn
   // nuqta is optional and skipped when not present in the target script
   // a-mAtrA and a1-mAtrA are not expected to be mapped in brahmic scripts
-  // halant and saMkShepachihna are not expected to be mapped in Normal and Romanized
+  // halant and saMkShepachihna are not expected to be mapped in `other` scripts (Normal, the
+  // romanization schemes)
   {
     const ignored_krama_labels: string[] = [
       'nuqta',
       ...(res.script_type === 'brahmic'
         ? ['a-mAtrA', 'a1-mAtrA']
-        : ['Normal', 'Romanized'].includes(input_script_data.script_name)
-          ? ['halant', 'saMkShepachihna']
-          : [])
+        : ['halant', 'saMkShepachihna'])
     ];
     const unmapped_krama_keys = res.krama_text_arr
       .map((item, i) => (item[0] === '' ? KramaLabelsArray[i] : null))
