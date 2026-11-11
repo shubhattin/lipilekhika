@@ -119,7 +119,7 @@ describe('backends agree on edge inputs', () => {
   it('transliterate_wasm takes an array whose items split a surrogate pair', async () => {
     const text = '𑀓𑀸𑀫';
     const pieces = [text.slice(0, 1), text.slice(1)];
-    // a lone surrogate becomes U+FFFD in WASM and N-API (the JS backend keeps it)
+    // a lone surrogate becomes U+FFFD (in the pure JS backend too, see tests/api_edges.test.ts)
     const expected = ['\ufffd', '\ufffdाम'];
     expect(await transliterate_wasm(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);
     expect(await transliterate_node(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);
@@ -205,13 +205,19 @@ describe('node binding typing: auto clear and empty key', () => {
     expect(result).toBe('क्अ');
   });
 
-  it('reads out of range auto clear times like the TS context', async () => {
-    // TS: `elapsed > time`, so NaN / Infinity never clear and a negative time clears at any pause
+  it('reads large auto clear times like the TS context, rejects NaN and negative ones', async () => {
+    for (const time of [NaN, -1]) {
+      expect(() => createTypingContext('Devanagari', { autoContextClearTimeMs: time })).toThrow(
+        RangeError
+      );
+      expect(() => createTypingContextTs('Devanagari', { autoContextClearTimeMs: time })).toThrow(
+        RangeError
+      );
+    }
+    // `elapsed > time`: Infinity never clears
     for (const [time, expected] of [
       [Infinity, 'क'],
-      [NaN, 'क'],
-      [2 ** 32, 'क'],
-      [-1, 'क्अ']
+      [2 ** 32, 'क']
     ] as const) {
       const ctx = createTypingContext('Devanagari', { autoContextClearTimeMs: time });
       await ctx.ready;

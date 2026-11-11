@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { rm } from 'node:fs/promises';
+import { copyFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -80,8 +80,31 @@ async function main() {
     await rm(path.join(packageRoot, 'dist', 'cjs', name), { force: true });
   }
 
-  await rm(path.join(packageRoot, 'dist', 'types'), { recursive: true, force: true });
+  const dist = path.join(packageRoot, 'dist');
+  // CommonJS types for the `require` conditions: in this `"type": "module"` package a `.d.ts`
+  // describes an ES module, which a CommonJS file can not import (TS1479 with `node16`). The
+  // declarations are self-contained (bundled by api-extractor), so the same text as `.d.cts`.
+  for (const name of ['index', 'node', 'typing', 'wasm', 'wasm_slim']) {
+    await copyFile(path.join(dist, `${name}.d.ts`), path.join(dist, `${name}.d.cts`));
+  }
+  // types of `lipilekhika/lipilekhika.wasm` (for tooling that imports a `.wasm` file as a module)
+  await writeFile(
+    path.join(dist, 'lipilekhika.wasm.d.ts'),
+    [
+      '/**',
+      ' * The WASM module of Lipi Lekhika, for `initWasm` from `lipilekhika/wasm/slim`, where the',
+      ' * tooling imports a `.wasm` file as a `WebAssembly.Module` (eg. Cloudflare Workers).',
+      ' */',
+      'declare const wasmModule: WebAssembly.Module;',
+      'export default wasmModule;',
+      ''
+    ].join('\n')
+  );
+
+  await rm(path.join(dist, 'types'), { recursive: true, force: true });
+  // api-extractor writes it next to the `.d.ts` files, it is not needed in the package
   await rm(path.join(packageRoot, 'tsdoc-metadata.json'), { force: true });
+  await rm(path.join(dist, 'tsdoc-metadata.json'), { force: true });
 }
 
 await main();

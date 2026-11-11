@@ -101,6 +101,7 @@ function capitalizeFirstAndAfterDash(str: string): string {
 export type script_input_name_type = alternate_script_type | script_and_lang_list_type;
 
 export const getNormalizedScriptName = (name: script_input_name_type): script_list_type | null => {
+  if (typeof name !== 'string') return null;
   const capitalizedName = capitalizeFirstAndAfterDash(name);
   if (SCRIPT_LIST.includes(capitalizedName as script_list_type))
     return capitalizedName as script_list_type;

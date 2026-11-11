@@ -78,6 +78,11 @@ jobs:
       - name: Workers Runtime Check (dist, workerd)
         working-directory: packages/js
         run: bun run test:workerd
+      # The packed tarball installed like a user's: every entry with `import` and `require` under
+      # Node and Bun (pure JS, WASM, N-API), and its types (ESM + CommonJS, bundler)
+      - name: Package Check (packed tarball, node + bun)
+        working-directory: packages/js
+        run: bun run test:package
   tests:
     # Does not depend on wasm (rust)
     runs-on: ubuntu-latest

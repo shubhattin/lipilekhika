@@ -1,6 +1,21 @@
-use lipilekhika::scripts::Script;
 use pyo3::prelude::*;
-use std::str::FromStr;
+use pyo3::types::{PyString, PyType};
+
+/// `True` / `False` as Python writes them
+fn py_bool(value: bool) -> &'static str {
+    if value { "True" } else { "False" }
+}
+
+/// The auto clear time, a whole number of milliseconds (0 to `u64::MAX`). Taken as `i128`, so that
+/// a negative or too large Python `int` is a `ValueError` (not an `OverflowError`).
+fn clear_time_ms(ms: i128) -> PyResult<u64> {
+    u64::try_from(ms).map_err(|_| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "auto_context_clear_time_ms must be 0 to {} milliseconds, got {ms}",
+            u64::MAX
+        ))
+    })
+}
 
 #[pyfunction]
 pub fn default_auto_context_clear_time_ms() -> u64 {
@@ -17,10 +32,10 @@ pub fn default_include_inherent_vowel() -> bool {
     lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL
 }
 
-#[pyclass]
+#[pyclass(module = "lipilekhika.typing")]
 #[derive(Clone)]
 pub struct TypingContextOptions {
-    #[pyo3(get, set)]
+    #[pyo3(get)]
     auto_context_clear_time_ms: u64,
     #[pyo3(get, set)]
     use_native_numerals: bool,
@@ -33,18 +48,51 @@ impl TypingContextOptions {
     #[new]
     #[pyo3(signature = (auto_context_clear_time_ms=None, use_native_numerals=None, include_inherent_vowel=None))]
     pub fn new(
-        auto_context_clear_time_ms: Option<u64>,
+        auto_context_clear_time_ms: Option<i128>,
         use_native_numerals: Option<bool>,
         include_inherent_vowel: Option<bool>,
-    ) -> Self {
+    ) -> PyResult<Self> {
         let defaults = lipilekhika::typing::TypingContextOptions::default();
-        Self {
-            auto_context_clear_time_ms: auto_context_clear_time_ms
-                .unwrap_or(defaults.auto_context_clear_time_ms),
+        Ok(Self {
+            auto_context_clear_time_ms: match auto_context_clear_time_ms {
+                Some(ms) => clear_time_ms(ms)?,
+                None => defaults.auto_context_clear_time_ms,
+            },
             use_native_numerals: use_native_numerals.unwrap_or(defaults.use_native_numerals),
             include_inherent_vowel: include_inherent_vowel
                 .unwrap_or(defaults.include_inherent_vowel),
-        }
+        })
+    }
+
+    #[setter]
+    fn set_auto_context_clear_time_ms(&mut self, ms: i128) -> PyResult<()> {
+        self.auto_context_clear_time_ms = clear_time_ms(ms)?;
+        Ok(())
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "TypingContextOptions(auto_context_clear_time_ms={}, use_native_numerals={}, include_inherent_vowel={})",
+            self.auto_context_clear_time_ms,
+            py_bool(self.use_native_numerals),
+            py_bool(self.include_inherent_vowel)
+        )
+    }
+
+    /// `pickle` / `copy`: made again from its three values
+    #[allow(clippy::type_complexity)]
+    fn __reduce__<'py>(
+        slf: &Bound<'py, Self>,
+    ) -> PyResult<(Bound<'py, PyType>, (u64, bool, bool))> {
+        let options = slf.borrow();
+        Ok((
+            slf.get_type(),
+            (
+                options.auto_context_clear_time_ms,
+                options.use_native_numerals,
+                options.include_inherent_vowel,
+            ),
+        ))
     }
 }
 
@@ -59,10 +107,11 @@ impl From<TypingContextOptions> for lipilekhika::typing::TypingContextOptions {
 }
 
 /// Result of processing a single key in a typing context.
-#[pyclass]
+#[pyclass(module = "lipilekhika.typing")]
 #[derive(Clone)]
 pub struct TypingDiff {
-    /// Number of characters that should be deleted from the current input state.
+    /// Number of characters (code points, like `len()` of a Python `str`) that should be deleted
+    /// from the end of the current input state. The JS package counts UTF-16 code units instead.
     #[pyo3(get)]
     pub to_delete_chars_count: usize,
     /// Text that should be inserted into the current input state.
@@ -75,16 +124,20 @@ pub struct TypingDiff {
 
 #[pymethods]
 impl TypingDiff {
-    fn __repr__(&self) -> String {
-        format!(
-            "TypingDiff(to_delete_chars_count={}, diff_add_text={:?})",
-            self.to_delete_chars_count, self.diff_add_text
-        )
+    fn __repr__(&self, py: Python<'_>) -> PyResult<String> {
+        // the text as Python writes a `str`
+        let text = PyString::new(py, &self.diff_add_text).repr()?;
+        Ok(format!(
+            "TypingDiff(to_delete_chars_count={}, diff_add_text={}, context_length={})",
+            self.to_delete_chars_count, text, self.context_length
+        ))
     }
 }
 
 /// Stateful isolated context for character-by-character input typing.
-#[pyclass]
+///
+/// It holds the state of the text being typed, so it can not be pickled or copied.
+#[pyclass(module = "lipilekhika.typing")]
 pub struct TypingContext {
     pub inner: lipilekhika::typing::TypingContext,
 }
@@ -94,13 +147,29 @@ impl TypingContext {
     fn clear_context(&mut self) {
         self.inner.clear_context();
     }
-    fn take_key_input(&mut self, key: &str) -> TypingDiff {
-        let diff = self.inner.take_key_input(key);
-        TypingDiff {
+    fn take_key_input(&mut self, key: &Bound<'_, PyString>) -> PyResult<TypingDiff> {
+        // a lone surrogate is read as U+FFFD, like in the JS package
+        let key = crate::py_text(key)?;
+        let diff = self.inner.take_key_input(&*key);
+        Ok(TypingDiff {
             to_delete_chars_count: diff.to_delete_chars_count,
             diff_add_text: diff.diff_add_text,
             context_length: diff.context_length,
-        }
+        })
+    }
+
+    /// The script the context types in (a language name is resolved to its script)
+    fn get_normalized_script(&self) -> String {
+        self.inner.get_normalized_script().to_string()
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "TypingContext(script='{}', use_native_numerals={}, include_inherent_vowel={})",
+            self.inner.get_normalized_script(),
+            py_bool(self.inner.get_use_native_numerals()),
+            py_bool(self.inner.get_include_inherent_vowel())
+        )
     }
 
     fn update_use_native_numerals(&mut self, use_native_numerals: bool) {
@@ -127,11 +196,7 @@ pub fn create_typing_context(
     typing_script: &str,
     options: Option<TypingContextOptions>,
 ) -> PyResult<TypingContext> {
-    let script = Script::from_str(typing_script.trim()).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!(
-            "invalid typing_script {typing_script:?}: {e}"
-        ))
-    })?;
+    let script = crate::py_parse_script(typing_script, "typing_script")?;
     let rust_options = options.map(|o| o.into());
     Ok(TypingContext {
         inner: lipilekhika::typing::TypingContext::new(script, rust_options),
@@ -145,7 +210,7 @@ pub fn create_typing_context(
 pub type TypingDataMapItem = (String, String, Vec<String>);
 
 /// Result containing typing data for a script.
-#[pyclass]
+#[pyclass(module = "lipilekhika.typing")]
 #[derive(Clone)]
 pub struct ScriptTypingDataMap {
     /// Mappings for common characters across scripts (from krama_text_arr).
@@ -176,13 +241,11 @@ impl ScriptTypingDataMap {
 ///     ScriptTypingDataMap: The typing data map for the script.
 ///
 /// Raises:
-///     ValueError: If the script name is invalid or is 'Normal' (English).
+///     ValueError: If the script name is invalid.
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_typing_data_map(script: &str) -> PyResult<ScriptTypingDataMap> {
-    let script = Script::from_str(script.trim()).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
-    })?;
+    let script = crate::py_parse_script(script, "script")?;
 
     let data = lipilekhika::typing::get_script_typing_data_map(script);
 
@@ -225,13 +288,11 @@ pub type KramaDataItem = (String, String);
 ///     list[tuple[str, str]]: List of (character_text, list_type) tuples.
 ///
 /// Raises:
-///     ValueError: If the script name is invalid or is 'Normal' (English).
+///     ValueError: If the script name is invalid.
 #[pyfunction]
 #[pyo3(signature = (script))]
 pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
-    let script = Script::from_str(script.trim()).map_err(|e| {
-        pyo3::exceptions::PyValueError::new_err(format!("invalid script {script:?}: {e}"))
-    })?;
+    let script = crate::py_parse_script(script, "script")?;
 
     let data = lipilekhika::typing::get_script_krama_data(script);
 

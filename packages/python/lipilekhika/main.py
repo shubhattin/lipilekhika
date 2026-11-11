@@ -28,6 +28,9 @@ def transliterate(
 ) -> str:
     """Transliterates text from one script/language to another.
 
+    A lone surrogate in `text` (which can not be encoded as UTF-8) is read as U+FFFD,
+    like the JS package does.
+
     Args:
         text: The text to transliterate
         from_script: The script/language to transliterate from
@@ -38,7 +41,8 @@ def transliterate(
         The transliterated text
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If a script name or an option name is invalid
+        TypeError: If an argument or an option value has the wrong type
     """
     return _transliterate(text, from_script, to_script, options or {})
 
@@ -53,7 +57,7 @@ def preload_script_data(script_name: ScriptLangType) -> None:
         script_name: The name of the script/language to preload
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If an invalid script name is provided
     """
     _preload_script_data(script_name)
 
@@ -72,7 +76,7 @@ def get_schwa_status_for_script(script_name: ScriptLangType) -> bool | None:
         None if the script is not a brahmic script
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If an invalid script name is provided
     """
     return _get_schwa_status_for_script(script_name)
 
@@ -93,7 +97,7 @@ def get_all_options(
         The list of all supported custom options for the provided script pair
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If an invalid script name is provided
     """
     return _get_all_options(from_script, to_script)
 
@@ -111,7 +115,7 @@ def get_normalized_script_name(script_name: ScriptLangType) -> ScriptListType:
         The normalized script name
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If an invalid script name is provided
     """
     return _get_normalized_script_name(script_name)
 
@@ -125,8 +129,11 @@ SCRIPT_LIST = list[ScriptListType](SCRIPT_LIST_DATA.scripts)
 LANG_LIST = list[LangListType](SCRIPT_LIST_DATA.langs)
 """The list of all supported language names which are mapped to a script."""
 
-ALL_SCRIPT_LANG_LIST = list[ScriptAndLangListType](set(SCRIPT_LIST + LANG_LIST))
-"""Combined list of all supported scripts and languages."""
+ALL_SCRIPT_LANG_LIST = list[ScriptAndLangListType](
+    dict.fromkeys(LANG_LIST + SCRIPT_LIST)
+)
+"""Combined list of all supported scripts and languages (languages first, the same order as
+`ALL_LANG_SCRIPT_LIST` of the JS package)."""
 
 __all__ = [
     "transliterate",

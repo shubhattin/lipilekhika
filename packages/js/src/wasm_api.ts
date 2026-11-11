@@ -2,6 +2,7 @@ import { getNormalizedScriptName } from './utils/lang_list/script_normalization'
 import type { CustomOptionType } from './transliteration/transliterate';
 import type { ScriptLangType, TransliterateInput, TransliterateOutput } from './types';
 import { validate_trans_options } from './utils/validate_trans_options';
+import { validate_text } from './utils/validate_input';
 import type { WasmBackend } from '../wasm/core';
 
 /**
@@ -31,14 +32,15 @@ export function createWasmApi(loadBackend: () => Promise<WasmBackend> | WasmBack
     to: ScriptLangType,
     trans_options_?: CustomOptionType
   ): Promise<TransliterateOutput<T>> {
+    validate_text(text);
     const trans_options = validate_trans_options(trans_options_);
     const normalized_from = getNormalizedScriptName(from);
     if (!normalized_from) {
-      throw new Error(`Invalid script name: ${from}`);
+      throw new Error(`Invalid script name: ${String(from)}`);
     }
     const normalized_to = getNormalizedScriptName(to);
     if (!normalized_to) {
-      throw new Error(`Invalid script name: ${to}`);
+      throw new Error(`Invalid script name: ${String(to)}`);
     }
 
     if (normalized_from === normalized_to) {

@@ -8,6 +8,7 @@ import {
 } from './pkg/lipilekhika_wasm.js';
 import type { TransliterationOptions, TransliterateInput, TransliterateOutput } from '../src/types';
 import { script_list_obj } from '../src/utils/lang_list';
+import { to_well_formed } from '../src/utils/validate_input';
 
 /** What a binding gives to the public `transliterate_wasm` / `preloadWasm` wrappers. */
 export type WasmBackend = {
@@ -35,20 +36,17 @@ function utf8ByteLength(text: string): number {
   return utf8Encoder.encode(text).length;
 }
 
-const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
-
-/** A lone surrogate becomes U+FFFD, as when a single string is passed to WASM. Otherwise a piece
- * ending in a high surrogate and the next one starting with a low one join into one character,
- * and the byte offsets of the pieces measured on their own are no longer char boundaries. */
-const toWellFormed = (text: string) => text.replace(LONE_SURROGATE, '�');
-
 /** Pack strings into one buffer + [start, end) UTF-8 byte offset pairs for a single WASM crossing. */
 function packStrings(texts: readonly string[]): { joined: string; offsets: Uint32Array } {
   const offsets = new Uint32Array(texts.length * 2);
   let pos = 0;
   const parts: string[] = [];
   for (let i = 0; i < texts.length; i++) {
-    const t = toWellFormed(texts[i]);
+    // a lone surrogate becomes U+FFFD, as when a single string is passed to WASM. Otherwise a
+    // piece ending in a high surrogate and the next one starting with a low one join into one
+    // character, and the byte offsets of the pieces measured on their own are no longer char
+    // boundaries.
+    const t = to_well_formed(texts[i]);
     const byteLen = utf8ByteLength(t);
     offsets[i * 2] = pos;
     offsets[i * 2 + 1] = pos + byteLen;

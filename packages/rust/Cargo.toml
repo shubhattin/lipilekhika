@@ -8,9 +8,9 @@ documentation = "https://lipilekhika.in/getting-started/rust"
 keywords = ["indic-scripts", "transliteration"]
 categories = ["text-processing", "localization"]
 
-version = "1.1.2"
+version = "1.2.0"
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.88"
 # `include` bypasses .gitignore, so list only what the crate needs
 include = ["src/**/*.rs", "src/generated/*.bin", "Cargo.toml", "LICENCE*", "README*"]
 

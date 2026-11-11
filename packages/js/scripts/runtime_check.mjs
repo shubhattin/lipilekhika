@@ -96,17 +96,32 @@ async function main() {
     await main_mod.transliterate(text, from, to)
   );
 
-  // CommonJS (`require`): its own module graph, so it loads the module again
+  // CommonJS (`require`, through the package's own `exports`): its own module graph, so it loads
+  // every module again
   if (USE_DIST) {
     const require = createRequire(import.meta.url);
-    const cjs_root = require('../dist/cjs/index.cjs');
+    const cjs_root = require('lipilekhika');
     const cjs_wasm = require('lipilekhika/wasm');
+    const cjs_node = require('lipilekhika/node');
+    const cjs_typing = require('lipilekhika/typing');
     const expected = await main_mod.transliterate(text, from, to);
+    check('js   cjs (lipilekhika)', await cjs_root.transliterate(text, from, to), expected);
     check('wasm cjs (lipilekhika)', await cjs_root.transliterate_wasm(text, from, to), expected);
     check(
       'wasm cjs (lipilekhika/wasm)',
       await cjs_wasm.transliterate_wasm(text, from, to),
       expected
+    );
+    check(
+      'napi cjs (lipilekhika/node)',
+      await cjs_node.transliterate_node(text, from, to),
+      expected
+    );
+    const typed = await emulateTyping(cjs_typing.createTypingContext, TYPING_INPUT, 'Devanagari');
+    check(
+      'napi cjs typing',
+      await emulateTyping(cjs_node.createTypingContext, TYPING_INPUT, 'Devanagari'),
+      typed
     );
   }
 
@@ -148,6 +163,13 @@ const ISOLATED_CHECKS = {
   'slim (bytes)': async (slim) => {
     await slim.initWasm(WASM_BYTES());
   },
+  'slim (DataView)': async (slim) => {
+    const bytes = WASM_BYTES();
+    await slim.initWasm(new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength));
+  },
+  // a native binary that can not be found (eg. an unsupported platform): the errors are reported
+  // on the calls, the process is not ended by an unhandled rejection
+  'napi missing binary': null,
   // the `browser` build fetches `../lipilekhika.wasm`: Bun can fetch a file URL, Node can not and
   // falls back to the embedded module
   browser: null,
@@ -180,6 +202,29 @@ async function isolated(mode) {
     check('wasm shared load (lipilekhika + slim)', a, expected);
     check('wasm shared load (slim)', b, expected);
     check('wasm shared load: instantiated', instantiated, 1);
+    process.exitCode = 0;
+    return;
+  }
+  if (mode === 'napi missing binary') {
+    process.env.LIPILEKHIKA_NATIVE_LIBRARY_PATH = '/nonexistent/lipilekhika.node';
+    const node = await import(target('../dist/esm/node.mjs', ''));
+    const ctx = node.createTypingContext('Devanagari');
+    // let a rejection that nothing handles end the process (as Node does) before checking
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const errors = [];
+    await ctx.ready.catch((e) => errors.push(e.message));
+    try {
+      ctx.takeKeyInput('k');
+    } catch (e) {
+      errors.push(e.message);
+    }
+    await node.transliterate_node(text, from, to).catch((e) => errors.push(e.message));
+    check('napi missing binary: errors', errors.length, 3);
+    for (const message of errors) {
+      if (!message.includes('Missing native Lipilekhika binary')) {
+        throw new Error(`napi missing binary: unexpected error ${JSON.stringify(message)}`);
+      }
+    }
     process.exitCode = 0;
     return;
   }

@@ -21,6 +21,9 @@ permissions:
 
 env:
   NODE_VERSION: '24'
+  # the commit that is released: the tag (a `workflow_dispatch` run checks out the given tag, not
+  # the branch it was started from)
+  RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
 jobs:
   test:
@@ -29,6 +32,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -121,10 +126,19 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Build and Test Package
+        working-directory: packages/js
         run: |
-          cd packages/js
           bun run build
+          bun run check
           bun run test:run
+
+      # the built package (this platform's native binary only): every entry with `import` and
+      # `require` under Node and Bun, see `scripts/runtime_check.mjs` and `scripts/package_check.mjs`
+      - name: Runtime and Package Checks (dist)
+        working-directory: packages/js
+        run: |
+          bun run test:runtime:dist
+          bun run test:package
 
   build-native:
     needs: test
@@ -175,6 +189,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -222,12 +238,11 @@ jobs:
           name: native-binding-${{ matrix.name }}
           path: packages/js/binding/pkg/${{ matrix.node_file }}
 
-  publish:
-    name: Publish to npm
+  # Builds the package with every native binary, checks it and packs the tarball that is published
+  package:
+    name: Build and check the package
     runs-on: ubuntu-latest
     needs: [test, build-native]
-    environment:
-      name: release
     env:
       REQUIRED_NATIVE_NODE_FILES: |
         index.linux-x64-gnu.node
@@ -243,6 +258,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -270,7 +287,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Download native binding artifacts
         uses: actions/download-artifact@v4
@@ -305,9 +321,10 @@ jobs:
           wasm-pack build --profile wasm-release --target web
 
       - name: Build package with merged native artifacts
+        working-directory: packages/js
         run: |
-          cd packages/js
           bun run build
+          bun run check
           bun run test:run -- tests/check_binding.test.ts
 
       - name: Verify packaged native artifacts
@@ -319,11 +336,115 @@ jobs:
             test -f "packages/js/dist/native/$file"
           done <<< "$REQUIRED_NATIVE_NODE_FILES"
 
+      - name: Pack
+        working-directory: packages/js
+        run: |
+          mkdir -p ../../npm-package
+          npm pack --pack-destination ../../npm-package
+          ls -la ../../npm-package
+
+      # the built package and the tarball as a user installs it, before anything is published
+      - name: Runtime, Package and Workers Checks
+        working-directory: packages/js
+        run: |
+          bun run test:runtime:dist
+          node scripts/package_check.mjs --tarball ../../npm-package/*.tgz
+          bun run test:workerd
+
+      - name: Upload the package tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: npm-package/*.tgz
+          if-no-files-found: error
+
+  # The tarball installed and loaded on every platform with a GitHub runner: each loads its own
+  # native binary (`import` and `require` of every entry, see `scripts/package_check.mjs`)
+  verify-package:
+    name: Verify the package (${{ matrix.name }})
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            runner: ubuntu-latest
+            runtimes: node,bun
+          - name: linux-arm64
+            runner: ubuntu-24.04-arm
+            runtimes: node,bun
+          - name: macos-x64
+            runner: macos-15-intel
+            runtimes: node,bun
+          - name: macos-arm64
+            runner: macos-14
+            runtimes: node,bun
+          - name: windows-x64
+            runner: windows-latest
+            runtimes: node,bun
+          - name: windows-arm64
+            runner: windows-11-arm
+            # Bun is checked on the other platforms
+            runtimes: node
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout repo (for the check script)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Bun
+        if: contains(matrix.runtimes, 'bun')
+        uses: oven-sh/setup-bun@v2
+
+      - name: Download the package tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: npm-package
+
+      - name: Package Check
+        shell: bash
+        run: |
+          TARBALL=$(ls npm-package/*.tgz)
+          node packages/js/scripts/package_check.mjs --tarball "$TARBALL" --runtimes ${{ matrix.runtimes }}
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [package, verify-package]
+    environment:
+      name: release
+
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download the package tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: npm-package
+
+      # the verified tarball's files, published as they are (nothing is built again)
+      - name: Unpack the package
+        shell: bash
+        run: |
+          tar -xzf npm-package/*.tgz -C npm-package
+          ls -la npm-package/package
+
       - name: Read package.json version (publish job)
         id: pkg_version_publish
         shell: bash
         run: |
-          VERSION=$(jq -r '.version' packages/js/package.json)
+          VERSION=$(jq -r '.version' npm-package/package/package.json)
           if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
             echo "Failed to read version from package.json"
             exit 1
@@ -357,6 +478,4 @@ jobs:
           echo "Resolved npm dist-tag: $DIST_TAG"
 
       - name: Publish to npm
-        run: |
-          cd packages/js
-          npm publish --tag "${{ steps.npm_dist_tag.outputs.DIST_TAG }}"
+        run: npm publish ./npm-package/package --tag "${{ steps.npm_dist_tag.outputs.DIST_TAG }}"

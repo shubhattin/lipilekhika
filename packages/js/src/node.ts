@@ -2,14 +2,10 @@ import { getNormalizedScriptName, type ScriptLangType } from './index_main';
 import { loadNativeBinding, type NativeModule } from './native_binding';
 import type { CustomOptionType } from './transliteration/transliterate';
 import { validate_trans_options } from './utils/validate_trans_options';
+import { validate_text } from './utils/validate_input';
 import type { TransliterateInput, TransliterateOutput } from './types';
-import {
-  resolveAutoContextClearTimeMs,
-  DEFAULT_INCLUDE_INHERENT_VOWEL,
-  DEFAULT_USE_NATIVE_NUMERALS,
-  type TypingContextOptions,
-  type TypingDiff
-} from './typing';
+import type { TypingContextOptions, TypingDiff } from './typing';
+import { checkBooleanOption, resolveTypingContextOptions } from './utils/typing_options';
 
 type NativeTypingContext = InstanceType<NativeModule['NativeTypingContext']>;
 
@@ -39,18 +35,21 @@ export async function preloadNode() {
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
-    throw new Error(`Invalid script name: ${typing_lang}`);
+    throw new Error(`Invalid script name: ${String(typing_lang)}`);
   }
 
-  let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
-  let include_inherent_vowel = options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
+  const resolved_options = resolveTypingContextOptions(options);
+  let use_native_numerals = resolved_options.use_native_numerals;
+  let include_inherent_vowel = resolved_options.include_inherent_vowel;
   let native_ctx: NativeTypingContext | null = null;
   let should_clear_on_ready = false;
+  /** Why the native binding could not be loaded (eg. no binary for this platform) */
+  let load_error: unknown = null;
 
   const ready: Promise<void> = (async () => {
     const nativeMod = await loadNativeModule();
     native_ctx = new nativeMod.NativeTypingContext(normalized_typing_lang, {
-      auto_context_clear_time_ms: resolveAutoContextClearTimeMs(options),
+      auto_context_clear_time_ms: resolved_options.auto_context_clear_time_ms,
       use_native_numerals,
       include_inherent_vowel
     });
@@ -59,9 +58,15 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       native_ctx.clear_context();
     }
   })();
+  // `ready` rejects with the load error, but a context whose `ready` is never awaited must not end
+  // the process with an unhandled rejection: the error is thrown by `takeKeyInput` instead
+  ready.catch((error: unknown) => {
+    load_error = error;
+  });
 
   const getNativeContext = () => {
     if (!native_ctx) {
+      if (load_error !== null) throw load_error;
       throw new Error('Typing context not ready. Await `ctx.ready` before calling takeKeyInput.');
     }
     return native_ctx;
@@ -84,12 +89,16 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
         context_length: diff.context_length
       };
     },
+    /** @throws TypeError if the value is not a boolean */
     updateUseNativeNumerals: (useNativeNumerals: boolean) => {
-      use_native_numerals = useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+      checkBooleanOption('useNativeNumerals', useNativeNumerals, false);
+      use_native_numerals = useNativeNumerals;
       native_ctx?.update_use_native_numerals(use_native_numerals);
     },
+    /** @throws TypeError if the value is not a boolean */
     updateIncludeInherentVowel: (includeInherentVowel: boolean) => {
-      include_inherent_vowel = includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
+      checkBooleanOption('includeInherentVowel', includeInherentVowel, false);
+      include_inherent_vowel = includeInherentVowel;
       native_ctx?.update_include_inherent_vowel(include_inherent_vowel);
     },
     getUseNativeNumerals: () => native_ctx?.get_use_native_numerals() ?? use_native_numerals,
@@ -115,14 +124,15 @@ export async function transliterate_node<T extends TransliterateInput>(
   to: ScriptLangType,
   trans_options_?: CustomOptionType
 ): Promise<TransliterateOutput<T>> {
+  validate_text(text);
   const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
-    throw new Error(`Invalid script name: ${from}`);
+    throw new Error(`Invalid script name: ${String(from)}`);
   }
   const normalized_to = getNormalizedScriptName(to);
   if (!normalized_to) {
-    throw new Error(`Invalid script name: ${to}`);
+    throw new Error(`Invalid script name: ${String(to)}`);
   }
 
   if (normalized_from === normalized_to) {

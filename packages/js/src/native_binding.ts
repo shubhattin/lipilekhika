@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // this file is supposed to mirror binding/pkg/index.cjs
 // so it needs to be in sync with the generated bindings from binding/src/lib.rs
@@ -45,8 +45,17 @@ export type NativeModule = {
   ) => string;
 };
 
-const requireNativeModule = createRequire(import.meta.url);
-const CURRENT_DIR = path.dirname(fileURLToPath(import.meta.url));
+/**
+ * URL of this module. The CommonJS build has no `import.meta` (the build writes `{}.url`, so it is
+ * `undefined` there) but has `__filename`. Resolved on first use, so that importing the module
+ * never throws.
+ */
+function moduleUrl(): string {
+  const esmUrl: string | undefined = (import.meta as { url?: string }).url;
+  if (esmUrl) return esmUrl;
+  if (typeof __filename === 'string') return pathToFileURL(__filename).href;
+  throw new Error('Lipilekhika native binding: can not tell where the module is loaded from.');
+}
 const OVERRIDE_ENV_VARS = [
   'LIPILEKHIKA_NATIVE_LIBRARY_PATH',
   'NAPI_RS_NATIVE_LIBRARY_PATH'
@@ -150,7 +159,7 @@ export function loadNativeBinding(): NativeModule {
   }
 
   try {
-    nativeBinding = requireNativeModule(nativeBinaryPath) as NativeModule;
+    nativeBinding = createRequire(moduleUrl())(nativeBinaryPath) as NativeModule;
     return nativeBinding;
   } catch (cause) {
     throw new Error(`Failed to load native Lipilekhika binary from ${nativeBinaryPath}.`, {
@@ -214,5 +223,6 @@ function getSupportedTargetList() {
 }
 
 function getNativeDirCandidates() {
-  return [path.join(CURRENT_DIR, '..', 'native'), path.join(CURRENT_DIR, '..', 'binding', 'pkg')];
+  const currentDir = path.dirname(fileURLToPath(moduleUrl()));
+  return [path.join(currentDir, '..', 'native'), path.join(currentDir, '..', 'binding', 'pkg')];
 }
