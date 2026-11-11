@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
@@ -83,7 +83,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -93,11 +93,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - uses: jetli/wasm-pack-action@v0.4.0
+      # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
+      # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
+      - uses: taiki-e/install-action@v2
         with:
-          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
-          # version verified locally instead of floating on `latest`.
-          version: 'v0.14.0'
+          tool: wasm-pack@0.14.0
 
       - name: Generate Test Data
         run: |
@@ -120,7 +120,7 @@ jobs:
           cd packages/js/binding
           ./gen_node_bind.sh
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
@@ -175,7 +175,7 @@ jobs:
             target: x86_64-apple-darwin
             node_file: index.darwin-x64.node
           - name: macos-arm64
-            runner: macos-14
+            runner: macos-latest
             target: aarch64-apple-darwin
             node_file: index.darwin-arm64.node
           - name: windows-x64-msvc
@@ -190,7 +190,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
@@ -211,7 +211,7 @@ jobs:
           cargo install cargo-zigbuild --version 0.24.1 --locked
 
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -236,7 +236,7 @@ jobs:
           TARGET="${{ matrix.target }}" CROSS_COMPILE="${{ matrix.use_cross && 'true' || 'false' }}" ./gen_node_bind.sh
 
       - name: Upload target node artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: native-binding-${{ matrix.name }}
           path: packages/js/binding/pkg/${{ matrix.node_file }}
@@ -260,7 +260,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
@@ -271,7 +271,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -281,18 +281,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - uses: jetli/wasm-pack-action@v0.4.0
+      # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
+      # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
+      - uses: taiki-e/install-action@v2
         with:
-          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
-          # version verified locally instead of floating on `latest`.
-          version: 'v0.14.0'
+          tool: wasm-pack@0.14.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Download native binding artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: native-binding-*
           path: packages/js/binding/pkg
@@ -355,7 +355,7 @@ jobs:
           bun run test:workerd
 
       - name: Upload the package tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-package
           path: npm-package/*.tgz
@@ -380,7 +380,7 @@ jobs:
             runner: macos-15-intel
             runtimes: node,bun
           - name: macos-arm64
-            runner: macos-14
+            runner: macos-latest
             runtimes: node,bun
           - name: windows-x64
             runner: windows-latest
@@ -393,11 +393,11 @@ jobs:
 
     steps:
       - name: Checkout repo (for the check script)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -406,7 +406,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Download the package tarball
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: npm-package
           path: npm-package
@@ -425,13 +425,13 @@ jobs:
       name: release
 
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
       - name: Download the package tarball
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: npm-package
           path: npm-package

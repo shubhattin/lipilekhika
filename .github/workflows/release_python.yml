@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -36,7 +36,7 @@ jobs:
           bun run make-script-data
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -95,7 +95,7 @@ jobs:
         target: [x86_64, aarch64]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -120,7 +120,7 @@ jobs:
           working-directory: packages/python
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-linux-${{ matrix.target }}
           path: packages/python/dist
@@ -134,7 +134,7 @@ jobs:
         target: [x86_64, aarch64]
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -158,7 +158,7 @@ jobs:
           working-directory: packages/python
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-macos-${{ matrix.target }}
           path: packages/python/dist
@@ -176,7 +176,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -201,7 +201,7 @@ jobs:
           working-directory: packages/python
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-windows-${{ matrix.target }}
           path: packages/python/dist
@@ -212,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -236,7 +236,7 @@ jobs:
           working-directory: packages/python
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-sdist
           path: packages/python/dist
@@ -247,7 +247,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
@@ -271,7 +271,7 @@ jobs:
           working-directory: packages/python
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: wheels-android-arm64
           path: packages/python/dist
@@ -286,7 +286,7 @@ jobs:
       url: https://pypi.org/project/lipilekhika/
     steps:
       - name: Download all wheels
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: wheels-*
           path: dist
