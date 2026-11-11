@@ -388,6 +388,12 @@ func isTaExtSuperscriptTail(r rune, ok bool) bool {
 	return ok && (r == '²' || r == '³' || r == '⁴')
 }
 
+// isLatinCombiningMark reports whether `r` is a Combining Diacritical Mark (U+0300 - U+036F), the
+// marks of decomposed Latin letters (ā as a + U+0304, ḥ as h + U+0323).
+func isLatinCombiningMark(r rune) bool {
+	return r >= 0x300 && r <= 0x36f
+}
+
 func isVedicSvaraTail(r rune, ok bool) bool {
 	return ok && (r == '॒' || r == '॑' || r == '᳚' || r == '᳛')
 }

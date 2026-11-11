@@ -164,7 +164,14 @@ const (
 	contextTrimTries = 4
 )
 
-func (c *TypingContext) transliterateInput(input string) (transliterate.TransliterateOutput, error) {
+// transliterateInput transliterates `input` (the context input or a part of it) in typing mode.
+//
+// `atTextEnd`: the input is at the end of the typed text. Else (the head of a long context, see
+// commitContextStart) the inherent vowel option does not apply, it is only for the last vyanjana
+// of the text (`kkk` is क्क्क, its head `kk` on its own would be क्क).
+func (c *TypingContext) transliterateInput(input string, atTextEnd bool) (transliterate.TransliterateOutput, error) {
+	opts := c.buildTranslitOptions()
+	opts.IncludeInherentVowel = opts.IncludeInherentVowel && atTextEnd
 	return transliterate.TransliterateTextCoreWith(
 		input,
 		"Normal",
@@ -173,7 +180,7 @@ func (c *TypingContext) transliterateInput(input string) (transliterate.Translit
 		c.toScriptData,
 		c.transOptions,
 		c.customRules,
-		c.buildTranslitOptions(),
+		opts,
 		&c.scratch,
 	)
 }
@@ -199,12 +206,12 @@ func (c *TypingContext) commitContextStart() {
 			}
 		}
 		tailInput := c.currInput[split:]
-		tail, err := c.transliterateInput(tailInput)
+		tail, err := c.transliterateInput(tailInput, true)
 		if err != nil || tail.Output == "" || tail.ContextLength != c.currContextLength ||
 			!strings.HasSuffix(c.currOutput, tail.Output) {
 			continue
 		}
-		head, err := c.transliterateInput(c.currInput[:split])
+		head, err := c.transliterateInput(c.currInput[:split], false)
 		if err != nil || len(head.Output)+len(tail.Output) != len(c.currOutput) ||
 			!strings.HasPrefix(c.currOutput, head.Output) {
 			continue
@@ -251,7 +258,7 @@ func (c *TypingContext) TakeKeyInput(key string) (TypingDiff, error) {
 	c.currInputLength++
 	prevOutput := c.currOutput
 
-	result, err := c.transliterateInput(c.currInput)
+	result, err := c.transliterateInput(c.currInput, true)
 	if err != nil {
 		return TypingDiff{}, err
 	}
