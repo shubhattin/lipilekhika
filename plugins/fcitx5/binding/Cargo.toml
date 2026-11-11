@@ -10,7 +10,7 @@ name = "lipilekhika_typing"
 crate-type = ["cdylib"]
 
 [dependencies]
-lipilekhika = { path = "../../../packages/rust", features = ["std"] }
+lipilekhika = { git = "https://github.com/shubhattin/lipilekhika.git", branch = "main", features = ["std"] }
 
 [build-dependencies]
 cbindgen = "0.29.2"

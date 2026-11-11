@@ -1600,7 +1600,7 @@ name = "dart_binding"
 version = "0.1.0"
 dependencies = [
  "flutter_rust_bridge",
- "lipilekhika",
+ "lipilekhika 1.2.0",
 ]
 
 [[package]]
@@ -4024,6 +4024,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipilekhika"
+version = "1.2.0"
+source = "git+https://github.com/shubhattin/lipilekhika.git?branch=main#4110e3cb0dd7d9ac28c81182a0703bdb17612abb"
+dependencies = [
+ "bincode",
+ "derive_builder",
+ "foldhash 0.1.5",
+ "hashbrown 0.15.5",
+ "indexmap 2.12.1",
+ "once_cell",
+ "serde",
+ "strum",
+]
+
+[[package]]
 name = "lipilekhika-datagen"
 version = "0.0.0"
 dependencies = [
@@ -4044,7 +4059,7 @@ name = "lipilekhika-fcitx5-binding"
 version = "0.1.0"
 dependencies = [
  "cbindgen",
- "lipilekhika",
+ "lipilekhika 1.2.0 (git+https://github.com/shubhattin/lipilekhika.git?branch=main)",
 ]
 
 [[package]]
@@ -4063,7 +4078,7 @@ dependencies = [
  "iced_aw",
  "iced_futures",
  "image",
- "lipilekhika",
+ "lipilekhika 1.2.0",
  "octocrab",
  "posthog-rs",
  "reqwest 0.12.28",
@@ -4081,7 +4096,7 @@ name = "lipilekhika-wasm"
 version = "0.1.0"
 dependencies = [
  "js-sys",
- "lipilekhika",
+ "lipilekhika 1.2.0",
  "wasm-bindgen",
 ]
 
@@ -4089,7 +4104,7 @@ dependencies = [
 name = "lipiparivartaka"
 version = "0.1.0"
 dependencies = [
- "lipilekhika",
+ "lipilekhika 1.2.0",
  "serde",
  "serde_json",
  "tauri",
@@ -4519,7 +4534,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 name = "node_binding"
 version = "0.1.0"
 dependencies = [
- "lipilekhika",
+ "lipilekhika 1.2.0",
  "napi",
  "napi-build",
  "napi-derive",
@@ -5819,7 +5834,7 @@ dependencies = [
 name = "python_binding"
 version = "0.1.0"
 dependencies = [
- "lipilekhika",
+ "lipilekhika 1.2.0",
  "pyo3",
 ]
 
