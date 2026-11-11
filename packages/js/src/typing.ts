@@ -608,20 +608,21 @@ export async function handleTypingBeforeInputEvent(
   // Suppress the default browser insertion.
   beforeInputEvent.preventDefault?.();
 
+  await typingContext.ready;
+
   // Typing over a selection: remove it like the browser would, the key is then typed at its start
-  // in a new context (the text before the caret is not what the context holds).
+  // in a new context (the text before the caret is not what the context holds). Done only after
+  // the wait, so the selected text is kept if the script data fails to load.
   const { selectionStart: selStart, selectionEnd: selEnd } = inputElement;
-  if (selStart !== null && selEnd !== null && selStart !== selEnd) {
+  const removedSelection = selStart !== null && selEnd !== null && selStart !== selEnd;
+  if (removedSelection) {
     inputElement.setRangeText('', selStart, selEnd, 'end');
     resetTypingContext(typingContext);
   }
 
-  await typingContext.ready;
-
   // Read the caret only now: keys typed before the script data was loaded all wait above and
   // continue in order, each after the previous one has been applied.
   const selectionStart = inputElement.selectionStart ?? 0;
-  const selectionEnd = inputElement.selectionEnd ?? selectionStart;
   const anchor = typing_anchors.get(typingContext);
   if (
     !anchor ||
@@ -635,17 +636,15 @@ export async function handleTypingBeforeInputEvent(
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 
   // Replace the "context" immediately before the caret with the transliterated diff.
-  // (`selectionEnd` only differs if a selection was made while waiting: it is replaced, like
-  // the browser would have done.)
   const replaceStart = Math.max(0, selectionStart - to_delete_chars_count);
-  if (!fitsMaxLength(inputElement, replaceStart, selectionEnd, diff_add_text)) {
+  if (!fitsMaxLength(inputElement, replaceStart, selectionStart, diff_add_text)) {
     // Like the browser at `maxlength`, drop the key. The context has already taken it, so it no
     // longer matches the text.
     resetTypingContext(typingContext);
-    onValueChange?.(inputElement.value); // a replaced selection may have been removed
+    if (removedSelection) onValueChange?.(inputElement.value);
     return;
   }
-  inputElement.setRangeText(diff_add_text, replaceStart, selectionEnd, 'end');
+  inputElement.setRangeText(diff_add_text, replaceStart, selectionStart, 'end');
   setTypingAnchor(typingContext, inputElement);
 
   onValueChange?.(inputElement.value);
