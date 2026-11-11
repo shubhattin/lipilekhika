@@ -72,9 +72,17 @@ func main() {
 ## 📚 API
 
 - `lipilekhika.Transliterate(text, fromScript, toScript, transOptions)`
+- `lipilekhika.GetAllOptions(fromScript, toScript)` — the custom options of a script pair
+- `lipilekhika.GetNormalizedScriptName(name)` — the script a name refers to (`"tel"` -> `"Telugu"`)
+- `lipilekhika.PreloadScriptData(name)` — load the script data ahead of time
+- `lipilekhika.ScriptList`, `lipilekhika.LangList`, `lipilekhika.AllScriptLangList` — the script and language names
 - `typing.NewTypingContext(typingLang, options)`
 - `(*typing.TypingContext).TakeKeyInput(key)`
 - `(*typing.TypingContext).ClearContext()`
+- `typing.GetScriptTypingDataMap(script)` — the characters of a script with the keys that type them
+- `typing.GetScriptKramaData(script)` — the characters of a script with their types
+
+📖 Reference: [pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika)
 
 ## 🎯 Supported Scripts
 

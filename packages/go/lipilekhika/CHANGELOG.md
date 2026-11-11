@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.0 (Unreleased)
+
+- The API of the JS / Python / Rust packages that was missing in Go: `ScriptList`, `LangList` and `AllScriptLangList` (the script and language names), `GetAllOptions` (the custom options of a script pair), `GetNormalizedScriptName` (`"tel"` -> `"Telugu"`) and `PreloadScriptData`; in `typing`, `GetScriptTypingDataMap` (the characters of a script with the keys that type them) and `GetScriptKramaData` (the characters of a script with their types). Same output as the other packages
+- Package documentation (shown on pkg.go.dev) with an overview of the API and a link to the `typing` package
+
 ## v0.1.0
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `IncludeInherentVowel` and `UseNativeNumerals: false` typing options, now for transliteration too
