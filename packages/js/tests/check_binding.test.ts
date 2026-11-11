@@ -119,7 +119,7 @@ describe('backends agree on edge inputs', () => {
   it('transliterate_wasm takes an array whose items split a surrogate pair', async () => {
     const text = '𑀓𑀸𑀫';
     const pieces = [text.slice(0, 1), text.slice(1)];
-    // a lone surrogate becomes U+FFFD in WASM and N-API (the JS backend keeps it)
+    // a lone surrogate becomes U+FFFD (in the pure JS backend too, see tests/api_edges.test.ts)
     const expected = ['\ufffd', '\ufffdाम'];
     expect(await transliterate_wasm(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);
     expect(await transliterate_node(pieces, 'Brahmi', 'Devanagari')).toEqual(expected);

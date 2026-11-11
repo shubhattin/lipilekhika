@@ -17,7 +17,7 @@ export const validate_trans_options = (
     if (!Object.hasOwn(custom_options_json, key))
       throw new Error(`unknown trans_options key: ${key}`);
     if (value === undefined) continue;
-    if (typeof value !== 'boolean') throw new Error('trans_options value must be a boolean');
+    if (typeof value !== 'boolean') throw new TypeError('trans_options value must be a boolean');
     options[key as CustomOptionList] = value;
   }
   return options;

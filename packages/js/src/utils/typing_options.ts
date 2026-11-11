@@ -32,6 +32,10 @@ export function checkBooleanOption(name: string, value: unknown, allow_undefined
 
 /** Checks the options of `createTypingContext` (the TS and the N-API one alike) */
 export function resolveTypingContextOptions(options?: TypingContextOptions) {
+  // `null` is taken as not set, like `undefined`
+  if (options != null && (typeof options !== 'object' || Array.isArray(options))) {
+    throw new TypeError('options must be an object');
+  }
   checkBooleanOption('useNativeNumerals', options?.useNativeNumerals, true);
   checkBooleanOption('includeInherentVowel', options?.includeInherentVowel, true);
   return {

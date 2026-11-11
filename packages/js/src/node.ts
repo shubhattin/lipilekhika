@@ -35,7 +35,7 @@ export async function preloadNode() {
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
-    throw new Error(`Invalid script name: ${typing_lang}`);
+    throw new Error(`Invalid script name: ${String(typing_lang)}`);
   }
 
   const resolved_options = resolveTypingContextOptions(options);
@@ -128,11 +128,11 @@ export async function transliterate_node<T extends TransliterateInput>(
   const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
-    throw new Error(`Invalid script name: ${from}`);
+    throw new Error(`Invalid script name: ${String(from)}`);
   }
   const normalized_to = getNormalizedScriptName(to);
   if (!normalized_to) {
-    throw new Error(`Invalid script name: ${to}`);
+    throw new Error(`Invalid script name: ${String(to)}`);
   }
 
   if (normalized_from === normalized_to) {

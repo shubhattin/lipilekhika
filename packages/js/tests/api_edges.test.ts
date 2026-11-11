@@ -269,7 +269,7 @@ describe('Runtimes without newer globals (review)', () => {
       readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
         e.isDirectory()
           ? files(path.join(dir, e.name))
-          : /\.ts$/.test(e.name) && !/\.test\.ts$/.test(e.name)
+          : e.name.endsWith('.ts') && !e.name.endsWith('.test.ts')
             ? [path.join(dir, e.name)]
             : []
       );

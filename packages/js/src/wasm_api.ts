@@ -36,11 +36,11 @@ export function createWasmApi(loadBackend: () => Promise<WasmBackend> | WasmBack
     const trans_options = validate_trans_options(trans_options_);
     const normalized_from = getNormalizedScriptName(from);
     if (!normalized_from) {
-      throw new Error(`Invalid script name: ${from}`);
+      throw new Error(`Invalid script name: ${String(from)}`);
     }
     const normalized_to = getNormalizedScriptName(to);
     if (!normalized_to) {
-      throw new Error(`Invalid script name: ${to}`);
+      throw new Error(`Invalid script name: ${String(to)}`);
     }
 
     if (normalized_from === normalized_to) {

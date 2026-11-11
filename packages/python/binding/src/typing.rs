@@ -6,11 +6,13 @@ fn py_bool(value: bool) -> &'static str {
     if value { "True" } else { "False" }
 }
 
-/// The auto clear time, a whole number of milliseconds (0 or more)
-fn clear_time_ms(ms: i64) -> PyResult<u64> {
+/// The auto clear time, a whole number of milliseconds (0 to `u64::MAX`). Taken as `i128`, so that
+/// a negative or too large Python `int` is a `ValueError` (not an `OverflowError`).
+fn clear_time_ms(ms: i128) -> PyResult<u64> {
     u64::try_from(ms).map_err(|_| {
         pyo3::exceptions::PyValueError::new_err(format!(
-            "auto_context_clear_time_ms must be 0 or more milliseconds, got {ms}"
+            "auto_context_clear_time_ms must be 0 to {} milliseconds, got {ms}",
+            u64::MAX
         ))
     })
 }
@@ -46,7 +48,7 @@ impl TypingContextOptions {
     #[new]
     #[pyo3(signature = (auto_context_clear_time_ms=None, use_native_numerals=None, include_inherent_vowel=None))]
     pub fn new(
-        auto_context_clear_time_ms: Option<i64>,
+        auto_context_clear_time_ms: Option<i128>,
         use_native_numerals: Option<bool>,
         include_inherent_vowel: Option<bool>,
     ) -> PyResult<Self> {
@@ -63,7 +65,7 @@ impl TypingContextOptions {
     }
 
     #[setter]
-    fn set_auto_context_clear_time_ms(&mut self, ms: i64) -> PyResult<()> {
+    fn set_auto_context_clear_time_ms(&mut self, ms: i128) -> PyResult<()> {
         self.auto_context_clear_time_ms = clear_time_ms(ms)?;
         Ok(())
     }

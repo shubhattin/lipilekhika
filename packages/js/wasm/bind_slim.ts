@@ -29,12 +29,18 @@ const asBytes = <T>(wasm: T) =>
     ? new Uint8Array(wasm.buffer, wasm.byteOffset, wasm.byteLength)
     : wasm;
 
+/** A `WasmSource`: a module, bytes, a `Response`, a URL, or a promise (checked when awaited) */
+const isWasmSource = (wasm: unknown) =>
+  typeof wasm === 'string' ||
+  wasm instanceof WebAssembly.Module ||
+  wasm instanceof ArrayBuffer ||
+  ArrayBuffer.isView(wasm) ||
+  wasm instanceof URL ||
+  (typeof Response !== 'undefined' && wasm instanceof Response) ||
+  typeof (wasm as PromiseLike<unknown> | null)?.then === 'function';
+
 export function initWasm(wasm: WasmSource): Promise<void> {
-  if (
-    wasm === null ||
-    wasm === undefined ||
-    (typeof wasm !== 'object' && typeof wasm !== 'string')
-  ) {
+  if (!isWasmSource(wasm)) {
     return Promise.reject(
       new TypeError(
         'initWasm needs the WASM module: a WebAssembly.Module, its bytes, a Response or a URL ' +

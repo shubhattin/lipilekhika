@@ -28,13 +28,13 @@ pub(crate) fn py_text<'a>(text: &'a Bound<'_, PyString>) -> PyResult<Cow<'a, str
 
 #[pyfunction]
 #[pyo3(signature = (text, from_script, to_script, trans_options=None))]
-fn transliterate(
-    py: Python<'_>,
-    text: &Bound<'_, PyString>,
+fn transliterate<'py>(
+    py: Python<'py>,
+    text: &Bound<'py, PyString>,
     from_script: &str,
     to_script: &str,
     trans_options: Option<&Bound<'_, PyDict>>,
-) -> PyResult<String> {
+) -> PyResult<Bound<'py, PyString>> {
     let options = trans_options
         .map(|dict| -> PyResult<lipilekhika::CustomOptions> {
             let mut options = lipilekhika::CustomOptions::default();
@@ -54,10 +54,18 @@ fn transliterate(
     let from = py_parse_script(from_script, "from_script")?;
     let to = py_parse_script(to_script, "to_script")?;
 
+    // a same-script pair returns the text as it is (with a lone surrogate too, like the JS
+    // package), nothing is transliterated
+    if ScriptListEnum::from(from) == ScriptListEnum::from(to) {
+        return Ok(text.clone());
+    }
+
     let text = py_text(text)?;
     let text: &str = &text;
     // other Python threads run meanwhile (a long text takes a while)
-    Ok(py.detach(|| lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned()))
+    let output =
+        py.detach(|| lipilekhika::transliterate(text, from, to, options.as_ref()).into_owned());
+    Ok(PyString::new(py, &output))
 }
 
 #[pyfunction]

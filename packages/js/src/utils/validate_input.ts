@@ -15,8 +15,11 @@ export function validate_text(text: unknown): asserts text is TransliterateInput
   throw new TypeError('text must be a string or an array of strings');
 }
 
-/** A high surrogate not followed by a low one, or a low surrogate not preceded by a high one */
-const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
+/**
+ * A surrogate pair (kept) or a lone surrogate (replaced). No lookbehind: it is a `SyntaxError`
+ * where it is not supported (Safari before 16.4), when this module is loaded.
+ */
+const SURROGATES = /[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 
 type WellFormedString = string & {
   isWellFormed?: () => boolean;
@@ -32,7 +35,7 @@ export function to_well_formed(text: string): string {
   if (typeof s.isWellFormed === 'function' && typeof s.toWellFormed === 'function') {
     return s.isWellFormed() ? text : s.toWellFormed();
   }
-  return text.replace(LONE_SURROGATE, '�');
+  return text.replace(SURROGATES, (match) => (match.length === 2 ? match : '\ufffd'));
 }
 
 /** `true` for a code point which is a surrogate (only a lone one can be a code point) */

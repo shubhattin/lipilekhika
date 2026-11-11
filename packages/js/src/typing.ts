@@ -68,6 +68,9 @@ const prevCodePointIndex = (text: string, i: number) =>
     ? i - 2
     : i - 1;
 
+/** A monotonic clock in milliseconds; the wall clock where there is no `performance` global */
+const nowMs = () => globalThis.performance?.now() ?? Date.now();
+
 export type TypingDiff = {
   /**
    * These number of characters need to be deleted from the current "app" input state.
@@ -95,7 +98,7 @@ export type TypingDiff = {
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
-    throw new Error(`Invalid script name: ${typing_lang}`);
+    throw new Error(`Invalid script name: ${String(typing_lang)}`);
   }
   const resolved_options = resolveTypingContextOptions(options);
   let use_native_numerals = resolved_options.use_native_numerals;
@@ -111,7 +114,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   let next_trim_length = CONTEXT_TRIM_LENGTH;
 
   const auto_context_clear_time_ms = resolved_options.auto_context_clear_time_ms;
-  /** `performance.now()` of the last key: a monotonic clock, like `Instant` in the Rust context */
+  /** `nowMs()` of the last key: a monotonic clock, like `Instant` in the Rust context */
   let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -219,7 +222,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     }
     // a lone surrogate is U+FFFD, as in the Rust based contexts (a Rust string can not hold one)
     if (is_surrogate_code_point(first_code_point)) first_code_point = 0xfffd;
-    const curr_time_ms = performance.now();
+    const curr_time_ms = nowMs();
     // in whole milliseconds, like the Rust context (`Duration::as_millis`)
     if (
       last_time_ms !== null &&
@@ -656,7 +659,7 @@ type ListType = 'svara' | 'vyanjana' | 'anya' | 'mAtrA';
 export async function getScriptKramaData(script: ScriptLangType) {
   const normalized_typing_lang = getNormalizedScriptName(script);
   if (!normalized_typing_lang) {
-    throw new Error(`Invalid script name: ${script}`);
+    throw new Error(`Invalid script name: ${String(script)}`);
   }
   const script_data = await getScriptData(normalized_typing_lang);
   const data: [text: string, type: ListType][] = script_data.krama_text_arr.map((val) => [
@@ -674,7 +677,7 @@ export async function getScriptKramaData(script: ScriptLangType) {
 export async function getScriptTypingDataMap(script: ScriptLangType) {
   const normalized_typing_lang = getNormalizedScriptName(script);
   if (!normalized_typing_lang) {
-    throw new Error(`Invalid script name: ${script}`);
+    throw new Error(`Invalid script name: ${String(script)}`);
   }
   const [script_data, normal_script_data] = await Promise.all([
     getScriptData(normalized_typing_lang),

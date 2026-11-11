@@ -37,7 +37,7 @@ export {
 export const preloadScriptData = async (name: ScriptLangType) => {
   const normalizedName = getNormalizedScriptName(name);
   if (!normalizedName) {
-    throw new Error(`Invalid script name: ${name}`);
+    throw new Error(`Invalid script name: ${String(name)}`);
   }
   const scriptData = await getScriptData(normalizedName);
   return scriptData;
@@ -61,11 +61,11 @@ export async function transliterate<T extends TransliterateInput>(
   const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
-    throw new Error(`Invalid script name: ${from}`);
+    throw new Error(`Invalid script name: ${String(from)}`);
   }
   const normalized_to = getNormalizedScriptName(to);
   if (!normalized_to) {
-    throw new Error(`Invalid script name: ${to}`);
+    throw new Error(`Invalid script name: ${String(to)}`);
   }
 
   if (normalized_from === normalized_to) {
@@ -106,11 +106,11 @@ export async function getAllOptions(
 ) {
   const normalized_from = getNormalizedScriptName(from_script_name);
   if (!normalized_from) {
-    throw new Error(`Invalid script name: ${from_script_name}`);
+    throw new Error(`Invalid script name: ${String(from_script_name)}`);
   }
   const normalized_to = getNormalizedScriptName(to_script_name);
   if (!normalized_to) {
-    throw new Error(`Invalid script name: ${to_script_name}`);
+    throw new Error(`Invalid script name: ${String(to_script_name)}`);
   }
   // the text is returned as it is, no option has an effect (Hindi -> Sanskrit)
   if (normalized_from === normalized_to) return [];
@@ -135,7 +135,7 @@ export async function getSchwaStatusForScript(
 ): Promise<boolean | null> {
   const normalized_name = getNormalizedScriptName(script_name);
   if (!normalized_name) {
-    throw new Error(`Invalid script name: ${script_name}`);
+    throw new Error(`Invalid script name: ${String(script_name)}`);
   }
   const script_data = await getScriptData(normalized_name);
   if (script_data.script_type === 'brahmic') {
