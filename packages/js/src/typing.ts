@@ -407,93 +407,146 @@ function setTypingAnchor(typingContext: object, element: HTMLInputElement | HTML
 /** Clears the context and forgets where it was left */
 function resetTypingContext(typingContext: ReturnType<typeof createTypingContext>) {
   typing_anchors.delete(typingContext);
-  pending_keys.delete(typingContext);
   typingContext.clearContext();
 }
 
+type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
+
 /**
- * Keys typed before the script data of a context is loaded. They are not intercepted: the browser
- * inserts them where they are typed, and they are transliterated once the data is there
- * (`flushPendingKeys`). So a click while waiting can never put a key in the wrong place.
+ * Text typed into an element before the script data of a context is loaded. The keys are not
+ * intercepted: the browser inserts them where they are typed, so a click while waiting can never
+ * put a key in the wrong place. Meanwhile the field holds Latin text which the user can edit, and
+ * once the data is there each stretch of it typed while waiting is transliterated
+ * (`flushPendingText`).
  *
- * A run is a stretch of such keys typed one after another, at its current offset. `expected` is
- * the value of the element if nothing but these keys changed it. Anything else (a deletion, a
- * paste, the app setting the value) means the offsets can not be trusted: the keys are then left
- * as typed.
+ * `expected` is the value of the element as last seen, plus the keys the browser was about to
+ * insert. `typed` marks each of its UTF-16 code units typed while waiting. Before each key and
+ * before transliterating, the element is compared with `expected` (`syncPendingText`): text
+ * deleted since is dropped, and text from anywhere else (a paste, Enter, the app setting the
+ * value) is marked as not typed. So only text which is still exactly what was typed is
+ * transliterated.
  */
-type PendingKeys = {
-  element: HTMLInputElement | HTMLTextAreaElement;
+type PendingText = {
   expected: string;
-  /** Sorted by `start` */
-  runs: { start: number; raw: string }[];
+  typed: boolean[];
   onValueChange?: (updatedValue: string) => void;
 };
-const pending_keys = new WeakMap<object, PendingKeys>();
+type PendingTexts = {
+  /** The element of the last key: its text at the caret continues as the context */
+  last: TextInputElement;
+  elements: Map<TextInputElement, PendingText>;
+};
+const pending_texts = new WeakMap<object, PendingTexts>();
+
+const flags = (length: number, value: boolean) => Array.from({ length }, () => value);
+
+/** Updates `pending` to the current value of `element` (see `PendingText`) */
+function syncPendingText(pending: PendingText, element: TextInputElement) {
+  const before = pending.expected;
+  const after = element.value;
+  if (before === after) return;
+  // the changed part: what is left between the common start and the common end
+  const maxCommon = Math.min(before.length, after.length);
+  let prefix = 0;
+  while (prefix < maxCommon && before[prefix] === after[prefix]) prefix++;
+  let suffix = 0;
+  while (
+    suffix < maxCommon - prefix &&
+    before[before.length - 1 - suffix] === after[after.length - 1 - suffix]
+  )
+    suffix++;
+  // not `splice(...)` with the inserted part spread: that can be too many arguments
+  pending.typed = pending.typed
+    .slice(0, prefix)
+    .concat(
+      flags(after.length - prefix - suffix, false),
+      pending.typed.slice(before.length - suffix)
+    );
+  pending.expected = after;
+}
 
 /** Records a key which the browser is about to insert at the caret (not prevented) */
 function recordPendingKey(
   typingContext: object,
-  element: HTMLInputElement | HTMLTextAreaElement,
+  element: TextInputElement,
   key: string,
   onValueChange?: (updatedValue: string) => void
 ) {
-  const caret = element.selectionStart ?? 0;
-  if (caret !== element.selectionEnd) {
-    // the key replaces a selection, which may hold some of the keys
-    pending_keys.delete(typingContext);
-    return;
+  let pendingTexts = pending_texts.get(typingContext);
+  if (!pendingTexts) {
+    pendingTexts = { last: element, elements: new Map() };
+    pending_texts.set(typingContext, pendingTexts);
   }
-  // the browser does not insert a key past `maxlength`: nothing changes
-  if (!fitsMaxLength(element, caret, caret, key)) return;
-
-  let pending = pending_keys.get(typingContext);
-  if (pending && (pending.element !== element || pending.expected !== element.value)) {
-    // typed in another element, or the text was changed in some other way: the earlier keys are
-    // left as typed
-    pending = undefined;
+  pendingTexts.last = element;
+  let pending = pendingTexts.elements.get(element);
+  if (!pending) {
+    pending = {
+      expected: element.value,
+      typed: flags(element.value.length, false)
+    };
+    pendingTexts.elements.set(element, pending);
   }
-  pending ??= { element, expected: element.value, runs: [] };
-
-  if (pending.runs.some((r) => r.start < caret && caret < r.start + r.raw.length)) {
-    // typed inside a run: it is no longer a run of keys typed one after another
-    pending_keys.delete(typingContext);
-    return;
-  }
-  const run = pending.runs.find((r) => r.start + r.raw.length === caret);
-  // the runs after the key move by its length
-  for (const r of pending.runs) if (r !== run && r.start >= caret) r.start += key.length;
-  if (run) {
-    run.raw += key;
-  } else {
-    pending.runs.push({ start: caret, raw: key });
-    pending.runs.sort((a, b) => a.start - b.start);
-  }
-  pending.expected = pending.expected.slice(0, caret) + key + pending.expected.slice(caret);
+  syncPendingText(pending, element);
+  // the browser replaces the selection (if any) with the key. If `maxlength` makes it drop the
+  // key, the next sync sees that.
+  const start = element.selectionStart ?? 0;
+  const end = Math.max(start, element.selectionEnd ?? start);
+  pending.expected = pending.expected.slice(0, start) + key + pending.expected.slice(end);
+  pending.typed = pending.typed
+    .slice(0, start)
+    .concat(flags(key.length, true), pending.typed.slice(end));
   if (onValueChange) pending.onValueChange = onValueChange;
-  pending_keys.set(typingContext, pending);
+}
+
+/** Whether keys typed into `element` before the script data was loaded are not converted yet */
+function hasPendingText(typingContext: object, element: TextInputElement) {
+  return pending_texts.get(typingContext)?.elements.has(element) ?? false;
 }
 
 /**
- * Transliterates the keys recorded by `recordPendingKey`, once the script data is loaded. Each run
- * is typed in a new context. The run the caret is right after is typed last and continues as the
- * context, so that the next key carries on from it.
+ * Transliterates the text recorded by `recordPendingKey`, once the script data is loaded. Each
+ * stretch of text typed while waiting is typed in a new context. In the element typed in last,
+ * the stretch the caret is right after is typed last and continues as the context, so that the
+ * next key carries on from it.
  */
-function flushPendingKeys(typingContext: ReturnType<typeof createTypingContext>) {
-  const pending = pending_keys.get(typingContext);
-  if (!pending) return;
-  pending_keys.delete(typingContext);
-  const { element, runs } = pending;
-  if (element.value !== pending.expected) {
-    resetTypingContext(typingContext);
-    return;
+function flushPendingText(typingContext: ReturnType<typeof createTypingContext>) {
+  const pendingTexts = pending_texts.get(typingContext);
+  if (!pendingTexts) return;
+  pending_texts.delete(typingContext);
+  const { last, elements } = pendingTexts;
+  for (const [element, pending] of elements) {
+    if (element !== last) flushElement(typingContext, element, pending, false);
   }
+  // last, so that the context is left with its text
+  const lastPending = elements.get(last);
+  const continued =
+    lastPending !== undefined && flushElement(typingContext, last, lastPending, true);
+  if (continued) setTypingAnchor(typingContext, last);
+  else resetTypingContext(typingContext);
+}
 
+/** @returns whether the context continues at the caret of `element` */
+function flushElement(
+  typingContext: ReturnType<typeof createTypingContext>,
+  element: TextInputElement,
+  pending: PendingText,
+  isLast: boolean
+) {
+  syncPendingText(pending, element);
+  const { expected, typed } = pending;
   let selStart = element.selectionStart ?? 0;
   let selEnd = element.selectionEnd ?? selStart;
-  const caretRun =
-    selStart === selEnd ? runs.find((r) => r.start + r.raw.length === selStart) : undefined;
 
-  const typeRun = (raw: string) => {
+  const stretches: { start: number; end: number; out: string }[] = [];
+  for (let i = 0; i < typed.length; i++) {
+    if (!typed[i]) continue;
+    const start = i;
+    while (i < typed.length && typed[i]) i++;
+    stretches.push({ start, end: i, out: '' });
+  }
+  if (stretches.length === 0) return false;
+
+  const typeStretch = (raw: string) => {
     typingContext.clearContext();
     let out = '';
     for (const key of raw) {
@@ -502,37 +555,48 @@ function flushPendingKeys(typingContext: ReturnType<typeof createTypingContext>)
     }
     return out;
   };
-  const outputs = new Map<(typeof runs)[number], string>();
-  for (const run of runs) if (run !== caretRun) outputs.set(run, typeRun(run.raw));
-  if (caretRun) outputs.set(caretRun, typeRun(caretRun.raw));
+  const caretStretch =
+    isLast && selStart === selEnd ? stretches.find((s) => s.end === selStart) : undefined;
+  for (const s of stretches)
+    if (s !== caretStretch) s.out = typeStretch(expected.slice(s.start, s.end));
+  // typed last: the context is left with it
+  if (caretStretch)
+    caretStretch.out = typeStretch(expected.slice(caretStretch.start, caretStretch.end));
 
-  // from the last run to the first, so that the offsets of the runs before stay valid
-  let caretRunApplied = false;
-  let changed = false;
-  for (let i = runs.length - 1; i >= 0; i--) {
-    const run = runs[i];
-    const runEnd = run.start + run.raw.length;
-    const inside = (pos: number) => run.start < pos && pos < runEnd;
-    // the caret or selection was moved into the run after it was typed: leave it as typed
-    if (inside(selStart) || inside(selEnd)) continue;
-    const out = outputs.get(run)!;
-    // like a key at `maxlength`, a run which would make the text too long is left as typed
-    if (!fitsMaxLength(element, run.start, runEnd, out)) continue;
-    element.setRangeText(out, run.start, runEnd);
-    const delta = out.length - run.raw.length;
-    if (selStart >= runEnd) selStart += delta;
-    if (selEnd >= runEnd) selEnd += delta;
-    if (run === caretRun) caretRunApplied = true;
-    changed = true;
+  // `maxlength`: like a key which would make the text too long, a stretch which would is left as
+  // typed. Decided on the final length: the stretches which do not make the text longer first.
+  const maxLength = element.maxLength;
+  const limited = typeof maxLength === 'number' && maxLength >= 0;
+  let length = expected.length;
+  const converted = new Set<(typeof stretches)[number]>();
+  const delta = (s: (typeof stretches)[number]) => s.out.length - (s.end - s.start);
+  for (const s of stretches) {
+    if (delta(s) <= 0) {
+      converted.add(s);
+      length += delta(s);
+    }
   }
-  if (!changed) {
-    resetTypingContext(typingContext);
-    return;
+  for (const s of stretches) {
+    if (delta(s) > 0 && (!limited || length + delta(s) <= maxLength)) {
+      converted.add(s);
+      length += delta(s);
+    }
+  }
+  if (converted.size === 0) return false;
+
+  // from the last stretch to the first, so that the offsets of the ones before stay valid
+  const mapPos = (pos: number, s: (typeof stretches)[number]) =>
+    pos >= s.end ? pos + delta(s) : pos > s.start ? s.start + s.out.length : pos;
+  for (let i = stretches.length - 1; i >= 0; i--) {
+    const s = stretches[i];
+    if (!converted.has(s)) continue;
+    element.setRangeText(s.out, s.start, s.end);
+    selStart = mapPos(selStart, s);
+    selEnd = mapPos(selEnd, s);
   }
   element.setSelectionRange(selStart, selEnd);
-  if (caretRunApplied) setTypingAnchor(typingContext, element);
-  else resetTypingContext(typingContext);
   pending.onValueChange?.(element.value);
+  return caretStretch !== undefined && converted.has(caretStretch);
 }
 
 /**
@@ -625,6 +689,13 @@ export async function handleTypingInputEvent(
     return;
   }
 
+  // A key typed before the script data was loaded, recorded by `handleTypingBeforeInputEvent`
+  // (when both handlers are used): it is transliterated with the rest of that text.
+  if (hasPendingText(typingContext, inputElement)) {
+    onValueChange?.(inputElement.value);
+    return;
+  }
+
   // If there is a selection, we don’t have a clean incremental diff story yet.
   // Let the browser replace the selection and reset the typing context.
   const selectionStart = inputElement.selectionStart ?? 0;
@@ -702,8 +773,8 @@ export async function handleTypingBeforeInputEvent(
    * - Use `beforeinput` to "suppress" the default insertion via `preventDefault()`
    * - Apply the transliteration diff using the native `setRangeText` API
    *
-   * For non-character events (backspace/delete/paste/etc), do NOT prevent default here.
-   * Pair this with `handleTypingInputEvent` on `input` to keep state in sync for those cases.
+   * For non-character events (backspace/delete/paste/etc), do NOT prevent default here: the
+   * browser makes the edit, and the next key starts a new context.
    *
    * */
   const enabled = enabled_ ?? true;
@@ -760,13 +831,13 @@ export async function handleTypingBeforeInputEvent(
       await typingContext.ready;
     } catch (error) {
       // the keys are left as typed
-      pending_keys.delete(typingContext);
+      pending_texts.delete(typingContext);
       throw error;
     }
     // After the browser has inserted the key: the data can be there before it does (when it was
-    // already loaded). A key arriving in between converts the keys itself (below).
+    // already loaded). A key arriving in between converts the text itself (below).
     await new Promise((resolve) => setTimeout(resolve, 0));
-    flushPendingKeys(typingContext);
+    flushPendingText(typingContext);
     return;
   }
 
@@ -774,8 +845,8 @@ export async function handleTypingBeforeInputEvent(
   beforeInputEvent.preventDefault?.();
 
   await typingContext.ready;
-  // keys typed before the script data was loaded, not converted yet
-  flushPendingKeys(typingContext);
+  // text typed before the script data was loaded, not converted yet
+  flushPendingText(typingContext);
 
   // Typing over a selection: remove it like the browser would, the key is then typed at its start
   // in a new context (the text before the caret is not what the context holds). Done only after
