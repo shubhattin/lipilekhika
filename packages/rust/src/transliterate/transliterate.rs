@@ -853,7 +853,10 @@ pub fn transliterate_text_core_with(
     options: Option<TransliterationFnOptions>,
     mut buffers: impl CoreBuffers,
 ) -> TransliterationOutput {
-    let opts = options.unwrap_or_default();
+    let mut opts = options.unwrap_or_default();
+    // the custom options turn these on too (the typing context passes them as `opts`)
+    opts.use_native_numerals &= !trans_options_in.normal_to_brahmic_keep_ascii_numerals;
+    opts.include_inherent_vowel |= trans_options_in.normal_to_brahmic_include_inherent_vowel;
 
     if opts.typing_mode && *from_script != ScriptListEnum::Normal {
         panic!("Typing mode is only supported with Normal script as the input");

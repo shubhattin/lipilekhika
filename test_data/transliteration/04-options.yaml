@@ -190,3 +190,54 @@
   options:
     "all_to_normal:replace_pancham_varga_varna_with_n": true
   reversible: false
+# inherent vowel (schwa) kept at the end of a word from Normal / Romanized to Brahmic, like `includeInherentVowel` in typing
+- index: 17
+  from: Normal
+  to: Devanagari
+  input: rAm kamal namaste namste
+  output: राम कमल नमस्ते नम्स्ते
+  options:
+    "normal_to_brahmic:include_inherent_vowel": true
+  reversible: false
+- index: 17.1
+  from: Romanized
+  to: Telugu
+  input: rām kamal
+  output: రామ కమల
+  options:
+    "normal_to_brahmic:include_inherent_vowel": true
+  reversible: false
+- index: 17.2
+  from: Normal
+  to: Brahmi
+  input: kamal
+  output: 𑀓𑀫𑀮
+  options:
+    "normal_to_brahmic:include_inherent_vowel": true
+  reversible: false
+# ASCII digits kept from Normal / Romanized to Brahmic, like `useNativeNumerals: false` in typing
+- index: 18
+  from: Normal
+  to: Devanagari
+  input: 2025 k0 kAla
+  output: 2025 क्0 काल
+  options:
+    "normal_to_brahmic:keep_ascii_numerals": true
+  reversible: false
+- index: 18.1
+  from: Romanized
+  to: Brahmi
+  input: 123 kāla
+  output: 123 𑀓𑀸𑀮
+  options:
+    "normal_to_brahmic:keep_ascii_numerals": true
+  reversible: false
+- index: 18.2
+  from: Normal
+  to: Telugu
+  input: kamal 42
+  output: కమల 42
+  options:
+    "normal_to_brahmic:include_inherent_vowel": true
+    "normal_to_brahmic:keep_ascii_numerals": true
+  reversible: false

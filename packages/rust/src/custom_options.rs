@@ -27,13 +27,17 @@ pub struct CustomOptions {
     pub normal_to_all_use_typing_chars: bool,
     ///`all_to_normal:preserve_specific_chars`
     pub all_to_normal_preserve_specific_chars: bool,
+    ///`normal_to_brahmic:include_inherent_vowel`
+    pub normal_to_brahmic_include_inherent_vowel: bool,
+    ///`normal_to_brahmic:keep_ascii_numerals`
+    pub normal_to_brahmic_keep_ascii_numerals: bool,
 }
 /// Returned when [`CustomOptions::try_set`] or [`CustomOptions::get`] is called with an unknown option key.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnknownCustomOptionKey;
 impl CustomOptions {
     /// Number of supported custom options.
-    pub const ENTRY_COUNT: usize = 7;
+    pub const ENTRY_COUNT: usize = 9;
     /// Canonical keys in `custom_options.json` insertion order.
     pub const KEYS: &'static [&'static str] = &[
         "all_to_normal:replace_pancham_varga_varna_with_n",
@@ -43,6 +47,8 @@ impl CustomOptions {
         "all_to_normal:replace_avagraha_with_a",
         "normal_to_all:use_typing_chars",
         "all_to_normal:preserve_specific_chars",
+        "normal_to_brahmic:include_inherent_vowel",
+        "normal_to_brahmic:keep_ascii_numerals",
     ];
     /// Every option enabled (no runtime key lookup).
     #[inline]
@@ -55,6 +61,8 @@ impl CustomOptions {
             all_to_normal_replace_avagraha_with_a: true,
             normal_to_all_use_typing_chars: true,
             all_to_normal_preserve_specific_chars: true,
+            normal_to_brahmic_include_inherent_vowel: true,
+            normal_to_brahmic_keep_ascii_numerals: true,
         }
     }
     /// Sets an option by its canonical `category:option` key.
@@ -89,6 +97,14 @@ impl CustomOptions {
                 self.all_to_normal_preserve_specific_chars = value;
                 Ok(())
             }
+            "normal_to_brahmic:include_inherent_vowel" => {
+                self.normal_to_brahmic_include_inherent_vowel = value;
+                Ok(())
+            }
+            "normal_to_brahmic:keep_ascii_numerals" => {
+                self.normal_to_brahmic_keep_ascii_numerals = value;
+                Ok(())
+            }
             _ => Err(UnknownCustomOptionKey),
         }
     }
@@ -114,6 +130,12 @@ impl CustomOptions {
             "normal_to_all:use_typing_chars" => Ok(self.normal_to_all_use_typing_chars),
             "all_to_normal:preserve_specific_chars" => {
                 Ok(self.all_to_normal_preserve_specific_chars)
+            }
+            "normal_to_brahmic:include_inherent_vowel" => {
+                Ok(self.normal_to_brahmic_include_inherent_vowel)
+            }
+            "normal_to_brahmic:keep_ascii_numerals" => {
+                Ok(self.normal_to_brahmic_keep_ascii_numerals)
             }
             _ => Err(UnknownCustomOptionKey),
         }
@@ -149,6 +171,14 @@ impl CustomOptions {
             (
                 "all_to_normal:preserve_specific_chars",
                 self.all_to_normal_preserve_specific_chars,
+            ),
+            (
+                "normal_to_brahmic:include_inherent_vowel",
+                self.normal_to_brahmic_include_inherent_vowel,
+            ),
+            (
+                "normal_to_brahmic:keep_ascii_numerals",
+                self.normal_to_brahmic_keep_ascii_numerals,
             ),
         ]
     }

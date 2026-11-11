@@ -2,6 +2,7 @@
 
 ## js-lib@1.0.14 (Unreleased)
 
+- New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `includeInherentVowel` and `useNativeNumerals: false` typing options, now for transliteration too
 - `transliterate_wasm` on Cloudflare Workers and Vercel Edge: new `lipilekhika/wasm` entry (same API), which imports the `.wasm` file as a module on those runtimes (`workerd` / `edge-light` export conditions), fetches it as a separate file in browsers (falling back to the embedded module if it can not be loaded) and is the embedded module in Node.js, Bun and Deno. `lipilekhika/wasm/slim` (`initWasm`) takes the `.wasm` file from you, shipped as `lipilekhika/lipilekhika.wasm`. `transliterate_wasm` from `lipilekhika` is unchanged and stays the recommended one; where it can not load it now says to use `lipilekhika/wasm`
 - Fix: `transliterate_wasm` from `lipilekhika` failed with `Invalid URL` under CommonJS (`require('lipilekhika')`), where there is no `import.meta.url` to resolve its embedded module against. The embedded module is now decoded from base64 directly, no `fetch` of a `data:` URL (works in test environments without `fetch` and with a Content Security Policy that blocks `data:`)
 - Performance improvements for `transliterate_wasm` and `transliterate_node` (N-API) (Rust based)

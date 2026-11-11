@@ -226,5 +226,29 @@ export const CustomOptionsInput: InputCustomOptionsType = {
     to_script_name: ['Normal'],
     check_in: 'output',
     rules: []
+  },
+  /**
+   * Keep the inherent vowel (schwa) of a consonant not followed by a vowel, instead of adding a
+   * halant. Same as `includeInherentVowel` in typing.
+   *
+   * Example: kamal -> कमल (default कमल्), a consonant before another one still takes a halant: namste -> नम्स्ते
+   */
+  'normal_to_brahmic:include_inherent_vowel': {
+    from_script_type: 'other',
+    to_script_type: 'brahmic',
+    check_in: 'input',
+    rules: []
+  },
+  /**
+   * Keep ASCII digits (0-9) as they are, instead of writing them as the native numerals of the
+   * script. Same as `useNativeNumerals: false` in typing.
+   *
+   * Example: 2025 -> 2025 (default २०२५)
+   */
+  'normal_to_brahmic:keep_ascii_numerals': {
+    from_script_type: 'other',
+    to_script_type: 'brahmic',
+    check_in: 'input',
+    rules: []
   }
 };

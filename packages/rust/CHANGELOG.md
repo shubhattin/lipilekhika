@@ -2,6 +2,7 @@
 
 ## rust-lib@1.1.2 (Unreleased)
 
+- New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals: false` typing options, now for transliteration too
 - The generated script data is now committed (`src/generated/lipi_data.bin`, `src/scripts.rs`, `src/custom_options.rs`): no build script anymore, the crate can be installed directly from GitHub (`tag = "rust-lib@v<version>"`) and is published without `--no-verify --allow-dirty` (#141)
 - All script data and custom option rules are embedded as a single bincode blob, the script list is compiled in as constants
 - No more `[build-dependencies]` (`serde_json`, `syn`, `quote`, `prettyplease`): code generation moved to the unpublished `lipilekhika-datagen` crate

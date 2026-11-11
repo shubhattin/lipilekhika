@@ -19,6 +19,8 @@ const (
 	optUseTypingChars        = "normal_to_all:use_typing_chars"
 	optPreserveSpecificChars = "all_to_normal:preserve_specific_chars"
 	optSinhalaConjunctHalant = "all_to_sinhala:use_conjunct_enabling_halant"
+	optIncludeInherentVowel  = "normal_to_brahmic:include_inherent_vowel"
+	optKeepASCIINumerals     = "normal_to_brahmic:keep_ascii_numerals"
 )
 
 // Options holds transliteration options.
@@ -122,6 +124,8 @@ var customOptionKeys = []string{
 	"all_to_normal:replace_avagraha_with_a",
 	"normal_to_all:use_typing_chars",
 	"all_to_normal:preserve_specific_chars",
+	"normal_to_brahmic:include_inherent_vowel",
+	"normal_to_brahmic:keep_ascii_numerals",
 }
 
 // orderedCustomOptionKeys returns the enabled keys of `opts` in canonical order
@@ -613,6 +617,16 @@ func TransliterateTextCoreWith(
 	}
 	if opts.TypingMode && fromName != "Normal" {
 		return TransliterateOutput{}, &TransliterateError{Msg: "typing mode requires Normal as from script"}
+	}
+	// the custom options turn these on too (the typing context passes them as `opts`),
+	// on a copy so the caller's options are not changed
+	optKeepASCIINum := transOpt(transOptions, optKeepASCIINumerals)
+	optInherentVowel := transOpt(transOptions, optIncludeInherentVowel)
+	if (optKeepASCIINum && opts.UseNativeNumerals) || (optInherentVowel && !opts.IncludeInherentVowel) {
+		o := *opts
+		o.UseNativeNumerals = o.UseNativeNumerals && !optKeepASCIINum
+		o.IncludeInherentVowel = o.IncludeInherentVowel || optInherentVowel
+		opts = &o
 	}
 	// option flags resolved once (nil-map reads return false)
 	transOptUseTypingChars := transOpt(transOptions, optUseTypingChars)

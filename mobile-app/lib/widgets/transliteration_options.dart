@@ -33,6 +33,14 @@ const Map<String, (String, String)> customOptionDescriptions = {
     'Use Typing Characters',
     'Enables typing mode characters including duplicate alternatives and script-specific characters. Equivalent to typing mode using `createTypingContext` function.'
   ),
+  'normal_to_brahmic:include_inherent_vowel': (
+    'Include Inherent Vowel',
+    'Keeps the inherent vowel (schwa) at the end of a word instead of adding a halant: kamal -> कमल (default कमल्).'
+  ),
+  'normal_to_brahmic:keep_ascii_numerals': (
+    'Keep ASCII Numerals',
+    'Keeps ASCII digits (0-9) as they are instead of writing them as the native numerals of the script.'
+  ),
 };
 
 class TransliterationOptionsWidget extends StatefulWidget {

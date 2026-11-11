@@ -49,3 +49,20 @@ Enables typing mode characters including duplicate alternatives and script-speci
 ### `all_to_normal:preserve_specific_chars`
 
 Preserves script-specific characters when converting to Normal script. Can be useful for studying script specific characters.
+
+### `normal_to_brahmic:include_inherent_vowel`
+
+Keeps the inherent vowel (schwa) of a consonant at the end of a word from Normal/Romanized to a Brahmic script, instead of adding a halant. A consonant followed by another consonant still takes a halant. Same as the `includeInherentVowel` typing option.
+
+| Input (Normal) | Output (Devanagari) | Default |
+|----------------|---------------------|---------|
+| kamal | कमल | कमल् |
+| rAm | राम | राम् |
+
+### `normal_to_brahmic:keep_ascii_numerals`
+
+Keeps ASCII digits (0-9) as they are from Normal/Romanized to a Brahmic script, instead of writing them as the native numerals of the script. Same as `useNativeNumerals: false` in typing.
+
+| Input (Normal) | Output (Devanagari) | Default |
+|----------------|---------------------|---------|
+| 2025 kAla | 2025 काल | २०२५ काल |
