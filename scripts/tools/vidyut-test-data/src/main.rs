@@ -24,6 +24,7 @@ use vidyut_lipi::{Lipika, Scheme};
 const SCHEMES: &[(&str, Scheme)] = &[
     ("SLP1", Scheme::Slp1),
     ("Harvard-Kyoto", Scheme::HarvardKyoto),
+    ("ITRANS", Scheme::Itrans),
 ];
 
 /// Cases in a file, like the `auto-*` test data
@@ -35,6 +36,7 @@ fn normalize_output(script: &str, output: &str) -> String {
     match script {
         // ळ्ह is written as its letters (`Lh`), lipilekhika has no single form for a conjunct
         "SLP1" => move_accents_after(&output.replace('|', "Lh"), &["\\", "^"], &["M", "H", "~"]),
+        "ITRANS" => move_accents_after(output, &["\\'", "\\_", "\\\""], &["M", "H", ".N"]),
         _ => output.to_string(),
     }
 }

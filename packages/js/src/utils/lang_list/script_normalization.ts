@@ -42,6 +42,7 @@ export const ALTERNATES = [
   'slp1', // SLP1
   'slp', // SLP1
   'hk', // Harvard-Kyoto
+  'itrans', // ITRANS
 
   /* Language Alternates (Do not repeat) */
   'sa', // Devanagari (Sanskrit)
@@ -89,6 +90,7 @@ export const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_
   slp1: 'SLP1',
   slp: 'SLP1',
   hk: 'Harvard-Kyoto',
+  itrans: 'ITRANS',
   sa: 'Devanagari',
   san: 'Devanagari',
   hin: 'Devanagari',

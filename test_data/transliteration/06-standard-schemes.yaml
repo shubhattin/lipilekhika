@@ -73,3 +73,49 @@
   to: Harvard-Kyoto
   input: kRShNa jJAnam shrIH
   output: kRSNa jJAnam zrIH
+# ITRANS alternate spellings (read only)
+- index: 12
+  from: ITRANS
+  to: Devanagari
+  input: aa ii ee uu oo R^i R^I L^i L^I rAma.m ra.nga N^ga ca Ca chha JNa wa Sa shha AUM so~ham . ..
+  output: आ ई ई ऊ ऊ ऋ ॠ ऌ ॡ रामं रंग ङ्ग च छ छ ञ व ष ष ॐ सोऽहम् । ॥
+- index: 13
+  from: ITRANS
+  to: Devanagari
+  input: kShatriyaH kSatriyaH xatriyaH j~nAnam GYAnam dnyAnam Ja
+  output: क्षत्रियः क्षत्रियः क्षत्रियः ज्ञानम् ज्ञानम् ज्ञानम् ज़
+- index: 14
+  from: Devanagari
+  to: ITRANS
+  input: क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़ ऱ ऴ
+  output: qa Ka Ga za .Da .Dha fa Ya Ra zha
+  reversible: true
+- index: 15
+  from: ITRANS
+  to: Telugu
+  input: kèraLa kòTa è ò keraLa
+  output: కెరళ కొట ఎ ఒ కేరళ
+- index: 16
+  from: Devanagari
+  to: ITRANS
+  input: हँस ङ ञ च छ श ष ऌ ॡ ऋ ॠ ॐ ऽ । ॥
+  output: ha.Nsa ~Na ~na cha Cha sha Sha LLi LLI RRi RRI OM .a | ||
+  reversible: true
+# Vedic accents: \_ \' \" (vidyut-lipi), ᳛ has no ITRANS form and is ↑↑↑ (the arrows of Normal are read too)
+- index: 17
+  from: Devanagari
+  to: ITRANS
+  input: क॒ क॑ क᳚ क᳛
+  output: ka\_ ka\' ka\" ka↑↑↑
+  reversible: true
+- index: 18
+  from: ITRANS
+  to: Devanagari
+  input: ka↓ ka↑ ka↑↑ ka\` ka\_
+  output: क॒ क॑ क᳚ क॒ क॒
+- index: 19
+  from: Harvard-Kyoto
+  to: ITRANS
+  input: kRSNa jJAnam zrIH saMskRtam
+  output: kRRiShNa j~nAnam shrIH saMskRRitam
+  reversible: true

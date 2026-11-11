@@ -14,6 +14,7 @@ const Map<String, String> scriptAvatarMap = {
   'Sinhala': 'අ',
   'Normal': 'a',
   'Romanized': 'ā',
+  'ITRANS': 'IT',
   'Harvard-Kyoto': 'HK',
   'SLP1': 'SL',
   'Gurumukhi': 'ਅ',
@@ -59,6 +60,7 @@ const List<ScriptInfo> orderedScripts = [
   ScriptInfo('Normal', ScriptCategory.romanized),
   ScriptInfo('Romanized', ScriptCategory.romanized),
   // Standard Schemes
+  ScriptInfo('ITRANS', ScriptCategory.standard),
   ScriptInfo('Harvard-Kyoto', ScriptCategory.standard),
   ScriptInfo('SLP1', ScriptCategory.standard),
   // Ancient Scripts
@@ -100,8 +102,9 @@ class ScriptSelector extends StatelessWidget {
     final scripts = visibleScripts
         .map((scriptInfo) => scriptInfo.name)
         .toList(growable: false);
-    final String? initialValue =
-        scripts.contains(value) ? value : (scripts.isNotEmpty ? scripts.first : null);
+    final String? initialValue = scripts.contains(value)
+        ? value
+        : (scripts.isNotEmpty ? scripts.first : null);
 
     // Group scripts by category using the ordered list
     final groupedScripts = <ScriptCategory, List<String>>{};

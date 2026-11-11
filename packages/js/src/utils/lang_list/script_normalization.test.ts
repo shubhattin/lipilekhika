@@ -28,6 +28,8 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('slp1')).toBe('SLP1');
       expect(getNormalizedScriptName('slp')).toBe('SLP1');
       expect(getNormalizedScriptName('hk')).toBe('Harvard-Kyoto');
+      expect(getNormalizedScriptName('itrans')).toBe('ITRANS');
+      expect(getNormalizedScriptName('ITRANS')).toBe('ITRANS');
       expect(getNormalizedScriptName('gur')).toBe('Gurumukhi');
       expect(getNormalizedScriptName('as')).toBe('Assamese');
     });
