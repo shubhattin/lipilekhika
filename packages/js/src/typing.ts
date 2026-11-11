@@ -389,6 +389,31 @@ function resetTypingContext(typingContext: ReturnType<typeof createTypingContext
   typingContext.clearContext();
 }
 
+/**
+ * `input` types like `email` and `number` have no selection API: `selectionStart` is `null` and
+ * `setRangeText` throws. Keys typed into them are left to the browser.
+ */
+function hasSelectionApi(element: HTMLInputElement | HTMLTextAreaElement) {
+  return element.selectionStart !== null && element.selectionEnd !== null;
+}
+
+/**
+ * Whether replacing `[start, end)` with `text` respects the element's `maxlength` (in UTF-16 code
+ * units). The browser does not let typing grow the text past it, but `setRangeText` does not check
+ * it. Edits which do not make the text longer are always allowed, like in the browser.
+ */
+function fitsMaxLength(
+  element: HTMLInputElement | HTMLTextAreaElement,
+  start: number,
+  end: number,
+  text: string
+) {
+  const maxLength = element.maxLength;
+  if (typeof maxLength !== 'number' || maxLength < 0) return true;
+  const newLength = element.value.length - (end - start) + text.length;
+  return newLength <= maxLength || newLength <= element.value.length;
+}
+
 function keyboardEventFromTypingEvent(event: unknown): KeyboardEvent | null {
   if (typeof KeyboardEvent !== 'undefined' && event instanceof KeyboardEvent) return event;
   if (!event || typeof event !== 'object' || !('nativeEvent' in event)) return null;
@@ -448,6 +473,12 @@ export async function handleTypingInputEvent(
     return;
   }
 
+  if (!hasSelectionApi(inputElement)) {
+    onValueChange?.(inputElement.value);
+    resetTypingContext(typingContext);
+    return;
+  }
+
   // If there is a selection, we don’t have a clean incremental diff story yet.
   // Let the browser replace the selection and reset the typing context.
   const selectionStart = inputElement.selectionStart ?? 0;
@@ -492,6 +523,14 @@ export async function handleTypingInputEvent(
   // Replace: [ ... (previous context) + inserted raw char ] with transliterated diff.
   const replaceEnd = selectionStart;
   const replaceStart = Math.max(0, replaceEnd - to_delete_chars_count - inputData.length);
+  if (!fitsMaxLength(inputElement, replaceStart, replaceEnd, diff_add_text)) {
+    // Like the browser at `maxlength`, drop the key: remove the raw character it inserted. The
+    // context has already taken the key, so it no longer matches the text.
+    inputElement.setRangeText('', replaceEnd - inputData.length, replaceEnd, 'end');
+    resetTypingContext(typingContext);
+    onValueChange?.(inputElement.value);
+    return;
+  }
   inputElement.setRangeText(diff_add_text, replaceStart, replaceEnd, 'end');
   setTypingAnchor(typingContext, inputElement);
 
@@ -561,9 +600,7 @@ export async function handleTypingBeforeInputEvent(
     return;
   }
 
-  // If there is a selection, we don’t have a clean incremental diff story yet.
-  // Let the browser replace the selection and reset the typing context.
-  if ((inputElement.selectionStart ?? 0) !== (inputElement.selectionEnd ?? 0)) {
+  if (!hasSelectionApi(inputElement)) {
     resetTypingContext(typingContext);
     return;
   }
@@ -573,10 +610,19 @@ export async function handleTypingBeforeInputEvent(
 
   await typingContext.ready;
 
+  // Typing over a selection: remove it like the browser would, the key is then typed at its start
+  // in a new context (the text before the caret is not what the context holds). Done only after
+  // the wait, so the selected text is kept if the script data fails to load.
+  const { selectionStart: selStart, selectionEnd: selEnd } = inputElement;
+  const removedSelection = selStart !== null && selEnd !== null && selStart !== selEnd;
+  if (removedSelection) {
+    inputElement.setRangeText('', selStart, selEnd, 'end');
+    resetTypingContext(typingContext);
+  }
+
   // Read the caret only now: keys typed before the script data was loaded all wait above and
   // continue in order, each after the previous one has been applied.
   const selectionStart = inputElement.selectionStart ?? 0;
-  const selectionEnd = inputElement.selectionEnd ?? selectionStart;
   const anchor = typing_anchors.get(typingContext);
   if (
     !anchor ||
@@ -590,10 +636,15 @@ export async function handleTypingBeforeInputEvent(
   const { diff_add_text, to_delete_chars_count } = typingContext.takeKeyInput(inputData);
 
   // Replace the "context" immediately before the caret with the transliterated diff.
-  // (`selectionEnd` only differs if a selection was made while waiting: it is replaced, like
-  // the browser would have done.)
   const replaceStart = Math.max(0, selectionStart - to_delete_chars_count);
-  inputElement.setRangeText(diff_add_text, replaceStart, selectionEnd, 'end');
+  if (!fitsMaxLength(inputElement, replaceStart, selectionStart, diff_add_text)) {
+    // Like the browser at `maxlength`, drop the key. The context has already taken it, so it no
+    // longer matches the text.
+    resetTypingContext(typingContext);
+    if (removedSelection) onValueChange?.(inputElement.value);
+    return;
+  }
+  inputElement.setRangeText(diff_add_text, replaceStart, selectionStart, 'end');
   setTypingAnchor(typingContext, inputElement);
 
   onValueChange?.(inputElement.value);
