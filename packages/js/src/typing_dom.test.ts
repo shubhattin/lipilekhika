@@ -252,7 +252,8 @@ describe('Browser typing helpers', () => {
     const { el, ctx } = await setup();
     el.maxLength = 3;
     await typeText(el, ctx, 'namaste');
-    expect(el.value.length).toBeLessThanOrEqual(3);
+    // `s` and `t` would make it 4 units and are dropped, then `e` starts a new context and fits
+    expect(el.value).toBe('नमए');
 
     const two = await setup();
     two.el.maxLength = 2;
@@ -261,6 +262,49 @@ describe('Browser typing helpers', () => {
     const ev = await beforeInput(two.el, two.ctx, 'k'); // कक् would be 3 units
     expect(ev.defaultPrevented).toBe(true); // not typed raw either
     expect(two.el.value).toBe('क');
+  });
+
+  it('keeps the selected text when the script data fails to load', async () => {
+    const el = new FakeTextArea();
+    el.value = 'hello world';
+    el.select(0, 5);
+    const failed = Promise.reject(new Error('fetch failed'));
+    failed.catch(() => {});
+    const ctx = { ...createTypingContext('Devanagari'), ready: failed };
+    const ev = new FakeInputEvent('beforeinput', {
+      data: 'k',
+      inputType: 'insertText',
+      target: el,
+      currentTarget: el
+    });
+    await expect(handleTypingBeforeInputEvent(ctx, ev)).rejects.toThrow('fetch failed');
+    expect(el.value).toBe('hello world');
+  });
+
+  it('reports the new value to `onValueChange`', async () => {
+    const values: string[] = [];
+    const type = (el: FakeTextArea, ctx: Ctx, data: string) => {
+      const ev = new FakeInputEvent('beforeinput', {
+        data,
+        inputType: 'insertText',
+        target: el,
+        currentTarget: el
+      });
+      return handleTypingBeforeInputEvent(ctx, ev, (v) => values.push(v));
+    };
+    const { el, ctx } = await setup('hello world');
+    el.select(0, 5);
+    await type(el, ctx, 'k');
+    expect(values).toEqual(['क् world']);
+
+    // a selection removed, then the key dropped at `maxlength`: the removal is still reported
+    const limited = await setup('hello world');
+    limited.el.maxLength = 7; // " world" + क् would be 8 units
+    limited.el.select(0, 5);
+    values.length = 0;
+    await type(limited.el, limited.ctx, 'k');
+    expect(limited.el.value).toBe(' world');
+    expect(values).toEqual([' world']);
   });
 
   it('leaves inputs without a selection API (email, number) to the browser', async () => {
