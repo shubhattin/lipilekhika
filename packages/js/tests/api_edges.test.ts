@@ -76,16 +76,19 @@ describe('Lone surrogates are read as U+FFFD everywhere (as the Rust crate does)
     }
   });
 
-  it.each(Object.entries(CREATE_TYPING_CONTEXT))('typing a lone surrogate key (%s)', async (_, create) => {
-    const ctx = create('Devanagari');
-    await ctx.ready;
-    expect(ctx.takeKeyInput('k').diff_add_text).toBe('क्');
-    expect(ctx.takeKeyInput('\ud801')).toEqual({
-      to_delete_chars_count: 0,
-      diff_add_text: '�',
-      context_length: 0
-    });
-  });
+  it.each(Object.entries(CREATE_TYPING_CONTEXT))(
+    'typing a lone surrogate key (%s)',
+    async (_, create) => {
+      const ctx = create('Devanagari');
+      await ctx.ready;
+      expect(ctx.takeKeyInput('k').diff_add_text).toBe('क्');
+      expect(ctx.takeKeyInput('\ud801')).toEqual({
+        to_delete_chars_count: 0,
+        diff_add_text: '�',
+        context_length: 0
+      });
+    }
+  );
 });
 
 describe('getNormalizedScriptName', () => {
@@ -171,11 +174,16 @@ describe('Typing auto clear time, measured like the Rust context', () => {
     vi.spyOn(Date, 'now').mockImplementation(() => 0);
     const ctx = createTypingContext('Devanagari', { autoContextClearTimeMs: 0 });
     await ctx.ready;
+    // the context is kept: `kh` is ख्
     ctx.takeKeyInput('k');
     now = 1000.9; // < 1 ms later (Rust: `as_millis()` is 0, not > 0)
-    expect(ctx.takeKeyInput('a')).toMatchObject({ to_delete_chars_count: 2, diff_add_text: 'क' });
-    now = 1002.5; // 1.6 ms later
-    expect(ctx.takeKeyInput('k')).toMatchObject({ to_delete_chars_count: 0, diff_add_text: 'क्' });
+    expect(ctx.takeKeyInput('h')).toMatchObject({ to_delete_chars_count: 2, diff_add_text: 'ख्' });
+    // the context is cleared: `k` `h` are क्ह्
+    ctx.clearContext();
+    now = 2000;
+    ctx.takeKeyInput('k');
+    now = 2001.6; // 1.6 ms later
+    expect(ctx.takeKeyInput('h')).toMatchObject({ to_delete_chars_count: 0, diff_add_text: 'ह्' });
   });
 });
 

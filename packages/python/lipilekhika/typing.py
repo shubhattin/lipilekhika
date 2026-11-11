@@ -51,7 +51,8 @@ KramaDataItem = tuple[str, ListType]
 
 class TypingContextOptions:
     auto_context_clear_time_ms: int
-    """The time in milliseconds after which the context will be cleared automatically."""
+    """The time in milliseconds after which the context will be cleared automatically.
+    `0` clears it after any pause. A negative time raises `ValueError`."""
 
     use_native_numerals: bool
     """Whether to use native numerals in transliteration/typing."""
@@ -71,7 +72,11 @@ class TypingContextOptions:
 class TypingDiff:
     @property
     def to_delete_chars_count(self) -> int:  # ty:ignore[empty-body]
-        """Number of characters that should be deleted from the current input state."""
+        """Number of characters that should be deleted from the end of the current input state.
+
+        Counted in code points, like `len()` of a Python `str` (so `text[:-count]` deletes them).
+        The JS package counts UTF-16 code units instead (a character outside the BMP is 2 there).
+        """
         pass
 
     @property
@@ -90,6 +95,8 @@ class TypingDiff:
 
 
 class TypingContext:
+    """Stateful context for character by character typing (it can not be pickled or copied)."""
+
     def clear_context(self) -> None:
         """
         Clear all internal state and contexts.
@@ -103,7 +110,8 @@ class TypingContext:
         """Accepts character by character input and returns the diff.
 
         Args:
-            key: The key to take input for
+            key: The key to take input for (only its first character is used, an empty key
+                changes nothing; a lone surrogate is read as U+FFFD)
 
         Returns:
             The diff containing the number of characters to delete and the text to add
@@ -118,6 +126,10 @@ class TypingContext:
         pass
 
     def get_include_inherent_vowel(self) -> bool:  # ty:ignore[empty-body]
+        pass
+
+    def get_normalized_script(self) -> str:  # ty:ignore[empty-body]
+        """The script the context types in (a language name is resolved to its script)."""
         pass
 
 
@@ -172,9 +184,10 @@ def create_typing_context(
         - `update_include_inherent_vowel(include_inherent_vowel)`: Update inherent vowel setting
         - `get_use_native_numerals()`: Get current native numerals setting
         - `get_include_inherent_vowel()`: Get current inherent vowel setting
+        - `get_normalized_script()`: Get the script the context types in
 
     Raises:
-        Exception: If an invalid script name is provided
+        ValueError: If an invalid script name is provided
     """
     return _create_typing_context(typing_lang, options)
 
@@ -199,7 +212,7 @@ def get_script_typing_data_map(script: ScriptLangType) -> ScriptTypingDataMap:
         - mappings: List of input key sequences that produce this character
 
     Raises:
-        Exception: If an invalid script name is provided or if 'Normal' is used
+        ValueError: If an invalid script name is provided
     """
     return _get_script_typing_data_map(script)
 
@@ -220,7 +233,7 @@ def get_script_krama_data(script: ScriptLangType) -> list[KramaDataItem]:
         - list_type: One of "anya", "vyanjana", "matra", "svara"
 
     Raises:
-        Exception: If an invalid script name is provided or if 'Normal' is used
+        ValueError: If an invalid script name is provided
     """
     return _get_script_krama_data(script)
 

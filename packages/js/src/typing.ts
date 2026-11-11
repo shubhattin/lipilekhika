@@ -6,19 +6,27 @@ import {
   type CustomOptionType
 } from './transliteration/transliterate';
 import type { ScriptLangType } from './types';
+import { is_surrogate_code_point } from './utils/validate_input';
+import {
+  checkBooleanOption,
+  resolveTypingContextOptions,
+  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+  DEFAULT_INCLUDE_INHERENT_VOWEL,
+  DEFAULT_USE_NATIVE_NUMERALS,
+  resolveAutoContextClearTimeMs
+} from './utils/typing_options';
 
-/** Default time in milliseconds after which the context will be cleared automatically */
-export const DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = 4500;
-/** Default values for the typing context options */
-export const DEFAULT_USE_NATIVE_NUMERALS = true;
-/** Default value for the include inherent vowel option.
- * By default avoids schwa deletion
- */
-export const DEFAULT_INCLUDE_INHERENT_VOWEL = false;
+export {
+  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
+  DEFAULT_INCLUDE_INHERENT_VOWEL,
+  DEFAULT_USE_NATIVE_NUMERALS,
+  resolveAutoContextClearTimeMs
+};
 
 export type TypingContextOptions = {
   /** The time in milliseconds after which the context will be cleared automatically.
-   * `0` clears it after any pause.
+   * `0` clears it after any pause (a key a whole millisecond or more after the previous one),
+   * `Infinity` never. A negative number or `NaN` throws a `RangeError`.
    * @default 4500ms
    */
   autoContextClearTimeMs?: number;
@@ -41,12 +49,6 @@ export type TypingContextOptions = {
 
 const isHighSurrogate = (code: number) => code >= 0xd800 && code <= 0xdbff;
 const isLowSurrogate = (code: number) => code >= 0xdc00 && code <= 0xdfff;
-
-/** Reads the auto clear time, accepting the deprecated misspelled option name too */
-export const resolveAutoContextClearTimeMs = (options?: TypingContextOptions) =>
-  options?.autoContextClearTimeMs ??
-  options?.autoContextTClearTimeMs ??
-  DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS;
 
 /**
  * Typing keeps the input of the current context and transliterates all of it on every key. The
@@ -91,12 +93,13 @@ export type TypingDiff = {
  * @returns A closed over context object with the following methods:
  */
 export function createTypingContext(typing_lang: ScriptLangType, options?: TypingContextOptions) {
-  let use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
-  let include_inherent_vowel = options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
   const normalized_typing_lang = getNormalizedScriptName(typing_lang);
   if (!normalized_typing_lang) {
     throw new Error(`Invalid script name: ${typing_lang}`);
   }
+  const resolved_options = resolveTypingContextOptions(options);
+  let use_native_numerals = resolved_options.use_native_numerals;
+  let include_inherent_vowel = resolved_options.include_inherent_vowel;
 
   let curr_input = '';
   let curr_output = '';
@@ -107,7 +110,8 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
   /** `curr_input_length` at which `commitContextStart` is tried next */
   let next_trim_length = CONTEXT_TRIM_LENGTH;
 
-  const auto_context_clear_time_ms = resolveAutoContextClearTimeMs(options);
+  const auto_context_clear_time_ms = resolved_options.auto_context_clear_time_ms;
+  /** `performance.now()` of the last key: a monotonic clock, like `Instant` in the Rust context */
   let last_time_ms: number | null = null;
 
   let from_script_data: Awaited<ReturnType<typeof getScriptData>> | null = null;
@@ -208,13 +212,19 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       throw new Error('Typing context not ready. Await `ctx.ready` before calling takeKeyInput.');
     }
     // one code point, so that a key outside the BMP (a surrogate pair) is not split
-    const first_code_point = key?.codePointAt(0);
+    let first_code_point = key?.codePointAt(0);
     if (first_code_point === undefined) {
       // an empty key changes nothing (not even the idle timer)
       return { to_delete_chars_count: 0, diff_add_text: '', context_length: curr_context_length };
     }
-    const curr_time_ms = Date.now();
-    if (last_time_ms !== null && curr_time_ms - last_time_ms > auto_context_clear_time_ms) {
+    // a lone surrogate is U+FFFD, as in the Rust based contexts (a Rust string can not hold one)
+    if (is_surrogate_code_point(first_code_point)) first_code_point = 0xfffd;
+    const curr_time_ms = performance.now();
+    // in whole milliseconds, like the Rust context (`Duration::as_millis`)
+    if (
+      last_time_ms !== null &&
+      Math.floor(curr_time_ms - last_time_ms) > auto_context_clear_time_ms
+    ) {
       clearContext();
     }
     curr_input += String.fromCodePoint(first_code_point);
@@ -257,11 +267,15 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     ready,
     clearContext,
     takeKeyInput,
+    /** @throws TypeError if the value is not a boolean */
     updateUseNativeNumerals: (useNativeNumerals: boolean) => {
-      use_native_numerals = useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS;
+      checkBooleanOption('useNativeNumerals', useNativeNumerals, false);
+      use_native_numerals = useNativeNumerals;
     },
+    /** @throws TypeError if the value is not a boolean */
     updateIncludeInherentVowel: (includeInherentVowel: boolean) => {
-      include_inherent_vowel = includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL;
+      checkBooleanOption('includeInherentVowel', includeInherentVowel, false);
+      include_inherent_vowel = includeInherentVowel;
     },
     getUseNativeNumerals: () => use_native_numerals,
     getIncludeInherentVowel: () => include_inherent_vowel,

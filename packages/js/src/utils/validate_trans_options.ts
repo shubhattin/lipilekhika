@@ -10,6 +10,8 @@ export const validate_trans_options = (
   trans_options: CustomOptionType | undefined
 ): CustomOptionType | undefined => {
   if (trans_options === undefined || trans_options === null) return undefined;
+  if (typeof trans_options !== 'object' || Array.isArray(trans_options))
+    throw new TypeError('trans_options must be an object');
   const options: CustomOptionType = {};
   for (const [key, value] of Object.entries(trans_options)) {
     if (!Object.hasOwn(custom_options_json, key))

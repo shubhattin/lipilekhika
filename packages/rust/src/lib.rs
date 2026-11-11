@@ -622,7 +622,10 @@ mod tests {
     fn unknown_custom_option_key_is_an_error() {
         let err = CustomOptions::default().try_set("nope", true).unwrap_err();
         let boxed: alloc::boxed::Box<dyn core::error::Error> = alloc::boxed::Box::new(err);
-        assert_eq!(boxed.to_string(), "unknown custom transliteration option key");
+        assert_eq!(
+            boxed.to_string(),
+            "unknown custom transliteration option key"
+        );
         fn parse() -> Result<CustomOptions, alloc::boxed::Box<dyn core::error::Error>> {
             Ok(CustomOptions::try_from_pairs([("nope", true)])?)
         }

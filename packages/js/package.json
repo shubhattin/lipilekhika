@@ -23,38 +23,81 @@
   "browser": "./dist/lipilekhika.umd.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     },
     "./node": {
-      "types": "./dist/node.d.ts",
-      "import": "./dist/esm/node.mjs",
-      "require": "./dist/cjs/node.cjs"
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/esm/node.mjs"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/cjs/node.cjs"
+      }
     },
     "./typing": {
-      "types": "./dist/typing.d.ts",
-      "import": "./dist/esm/typing.mjs",
-      "require": "./dist/cjs/typing.cjs"
+      "import": {
+        "types": "./dist/typing.d.ts",
+        "default": "./dist/esm/typing.mjs"
+      },
+      "require": {
+        "types": "./dist/typing.d.cts",
+        "default": "./dist/cjs/typing.cjs"
+      }
     },
     "./wasm": {
-      "types": "./dist/wasm.d.ts",
-      "workerd": "./dist/esm/wasm.workerd.mjs",
-      "edge-light": "./dist/esm/wasm.edge-light.mjs",
-      "browser": {
-        "import": "./dist/esm/wasm.browser.mjs",
-        "require": "./dist/cjs/wasm.cjs"
+      "workerd": {
+        "types": "./dist/wasm.d.ts",
+        "default": "./dist/esm/wasm.workerd.mjs"
       },
-      "import": "./dist/esm/wasm.mjs",
-      "require": "./dist/cjs/wasm.cjs"
+      "edge-light": {
+        "types": "./dist/wasm.d.ts",
+        "default": "./dist/esm/wasm.edge-light.mjs"
+      },
+      "browser": {
+        "import": {
+          "types": "./dist/wasm.d.ts",
+          "default": "./dist/esm/wasm.browser.mjs"
+        },
+        "require": {
+          "types": "./dist/wasm.d.cts",
+          "default": "./dist/cjs/wasm.cjs"
+        }
+      },
+      "import": {
+        "types": "./dist/wasm.d.ts",
+        "default": "./dist/esm/wasm.mjs"
+      },
+      "require": {
+        "types": "./dist/wasm.d.cts",
+        "default": "./dist/cjs/wasm.cjs"
+      }
     },
     "./wasm/slim": {
-      "types": "./dist/wasm_slim.d.ts",
-      "import": "./dist/esm/wasm_slim.mjs",
-      "require": "./dist/cjs/wasm_slim.cjs"
+      "import": {
+        "types": "./dist/wasm_slim.d.ts",
+        "default": "./dist/esm/wasm_slim.mjs"
+      },
+      "require": {
+        "types": "./dist/wasm_slim.d.cts",
+        "default": "./dist/cjs/wasm_slim.cjs"
+      }
     },
-    "./lipilekhika.wasm": "./dist/lipilekhika.wasm",
-    "./lipilekhika.wasm?module": "./dist/lipilekhika.wasm?module",
+    "./lipilekhika.wasm": {
+      "types": "./dist/lipilekhika.wasm.d.ts",
+      "default": "./dist/lipilekhika.wasm"
+    },
+    "./lipilekhika.wasm?module": {
+      "types": "./dist/lipilekhika.wasm.d.ts",
+      "default": "./dist/lipilekhika.wasm?module"
+    },
     "./package.json": "./package.json"
   },
   "files": [

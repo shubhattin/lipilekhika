@@ -142,7 +142,10 @@ try {
     tarball = path.resolve(tarball);
   } else {
     runOrThrow('npm', ['pack', '--pack-destination', tmp], PACKAGE_ROOT);
-    tarball = path.join(tmp, readdirSync(tmp).find((f) => f.endsWith('.tgz')));
+    tarball = path.join(
+      tmp,
+      readdirSync(tmp).find((f) => f.endsWith('.tgz'))
+    );
   }
   const app = path.join(tmp, 'app');
   mkdirSync(app);
@@ -155,13 +158,11 @@ try {
     app
   );
 
-  const runtimes = (arg('--runtimes') ?? 'node,bun')
-    .split(',')
-    .filter((runtime) => {
-      if (hasRuntime(runtime)) return true;
-      console.log(`  --  ${runtime} not found, skipped`);
-      return false;
-    });
+  const runtimes = (arg('--runtimes') ?? 'node,bun').split(',').filter((runtime) => {
+    if (hasRuntime(runtime)) return true;
+    console.log(`  --  ${runtime} not found, skipped`);
+    return false;
+  });
   if (runtimes.length === 0) throw new Error('no runtime to run the checks with');
 
   let i = 0;

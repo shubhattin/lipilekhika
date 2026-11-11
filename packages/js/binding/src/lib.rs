@@ -37,9 +37,9 @@ pub struct NativeTypingContext {
     output: String,
 }
 
-/// Converts a JS auto clear time to the context's `u64` like the TS context compares it
-/// (`elapsed > time`): `NaN` and `Infinity` never clear, negative values clear after any pause
-/// (as `0`), fractions round down (the elapsed time is in whole milliseconds).
+/// Converts a JS auto clear time to the context's `u64`. The JS wrapper (`createTypingContext` of
+/// `lipilekhika/node`) has already rejected a negative time and `NaN`; `Infinity` never clears,
+/// fractions round down (the elapsed time is in whole milliseconds).
 fn clear_time_ms_from_js(ms: f64) -> u64 {
     if ms.is_nan() {
         u64::MAX
@@ -68,9 +68,9 @@ pub fn transliterate(
     to: String,
     trans_options: Option<HashMap<String, bool>>,
 ) -> Result<String> {
-    let from_script = Script::from_str(from.trim())
+    let from_script = Script::from_str(&from)
         .map_err(|e| Error::from_reason(format!("invalid from script: {e}")))?;
-    let to_script = Script::from_str(to.trim())
+    let to_script = Script::from_str(&to)
         .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
     let trans_options = match trans_options {
@@ -110,7 +110,7 @@ impl NativeTypingContext {
                 .unwrap_or(lipilekhika::typing::DEFAULT_INCLUDE_INHERENT_VOWEL),
         });
 
-        let typing_script = Script::from_str(typing_lang.trim()).map_err(|e| {
+        let typing_script = Script::from_str(&typing_lang).map_err(|e| {
             Error::from_reason(format!("invalid typing_lang script {typing_lang:?}: {e}"))
         })?;
 

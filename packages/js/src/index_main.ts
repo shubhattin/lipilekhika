@@ -8,6 +8,7 @@ import { getScriptData } from './utils/get_script_data';
 import { getNormalizedScriptName } from './utils/lang_list/script_normalization';
 import custom_options_json from './custom_options.json';
 import { validate_trans_options } from './utils/validate_trans_options';
+import { to_well_formed, validate_text } from './utils/validate_input';
 import { SCRIPT_LIST, LANG_LIST, ALL_LANG_SCRIPT_LIST } from './utils/lang_list';
 import type { ScriptLangType, TransliterateInput, TransliterateOutput } from './types';
 
@@ -56,6 +57,7 @@ export async function transliterate<T extends TransliterateInput>(
   to: ScriptLangType,
   trans_options_?: CustomOptionType
 ): Promise<TransliterateOutput<T>> {
+  validate_text(text);
   const trans_options = validate_trans_options(trans_options_);
   const normalized_from = getNormalizedScriptName(from);
   if (!normalized_from) {
@@ -70,14 +72,20 @@ export async function transliterate<T extends TransliterateInput>(
     return (typeof text === 'string' ? text : [...text]) as TransliterateOutput<T>;
   }
 
+  // a lone surrogate is read as U+FFFD, like the Rust based bindings do
   if (typeof text === 'string') {
-    const result = await transliterate_text(text, normalized_from, normalized_to, trans_options);
+    const result = await transliterate_text(
+      to_well_formed(text),
+      normalized_from,
+      normalized_to,
+      trans_options
+    );
     return result.output as TransliterateOutput<T>;
   }
 
   const outputs = await Promise.all(
     text.map((piece) =>
-      transliterate_text(piece, normalized_from, normalized_to, trans_options).then(
+      transliterate_text(to_well_formed(piece), normalized_from, normalized_to, trans_options).then(
         (result) => result.output
       )
     )

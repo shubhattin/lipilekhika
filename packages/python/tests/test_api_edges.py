@@ -23,9 +23,9 @@ class TestScriptNames:
     def test_surrounding_spaces_are_not_a_script_name(self, name):
         # JS and Rust do not accept them either
         with pytest.raises(ValueError):
-            transliterate("ka", name, "Devanagari")  # ty:ignore[invalid-argument-type]
+            transliterate("ka", name, "Devanagari")
         with pytest.raises(ValueError):
-            create_typing_context(name)  # ty:ignore[invalid-argument-type]
+            create_typing_context(name)
 
 
 class TestLoneSurrogates:
@@ -39,7 +39,11 @@ class TestLoneSurrogates:
         ctx = create_typing_context("Devanagari")
         assert ctx.take_key_input("k").diff_add_text == "क्"
         diff = ctx.take_key_input("\ud801")
-        assert (diff.to_delete_chars_count, diff.diff_add_text, diff.context_length) == (
+        assert (
+            diff.to_delete_chars_count,
+            diff.diff_add_text,
+            diff.context_length,
+        ) == (
             0,
             "�",
             0,
@@ -106,7 +110,11 @@ class TestTypingContext:
 
     def test_options_can_be_pickled_and_copied(self):
         options = TypingContextOptions(1000, False, True)
-        for clone in (pickle.loads(pickle.dumps(options)), copy.deepcopy(options), copy.copy(options)):
+        for clone in (
+            pickle.loads(pickle.dumps(options)),
+            copy.deepcopy(options),
+            copy.copy(options),
+        ):
             assert repr(clone) == repr(options)
             assert clone is not options
 

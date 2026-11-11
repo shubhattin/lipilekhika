@@ -77,6 +77,14 @@ pub fn render_custom_options_rs(
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub struct UnknownCustomOptionKey;
 
+        impl core::fmt::Display for UnknownCustomOptionKey {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                f.write_str("unknown custom transliteration option key")
+            }
+        }
+
+        impl core::error::Error for UnknownCustomOptionKey {}
+
         impl CustomOptions {
             /// Number of supported custom options.
             pub const ENTRY_COUNT: usize = #entry_count;
