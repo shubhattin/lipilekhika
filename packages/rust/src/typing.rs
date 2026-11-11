@@ -1042,6 +1042,35 @@ mod tests {
         );
     }
 
+    /// With the inherent vowel, the start of a run of consonants (क्क्क) on its own lost its
+    /// last halant (क्क), so the context was never committed and each key took longer
+    #[test]
+    fn long_consonant_run_with_inherent_vowel() {
+        let mut ctx = TypingContext::new(
+            Script::Devanagari,
+            Some(TypingContextOptions {
+                include_inherent_vowel: true,
+                ..Default::default()
+            }),
+        );
+        let mut result = String::new();
+        let start = std::time::Instant::now();
+        for _ in 0..20_000 {
+            let diff = ctx.take_key_input_char('k');
+            for _ in 0..diff.to_delete_chars_count {
+                result.pop();
+            }
+            result.push_str(&diff.diff_add_text);
+        }
+        assert_eq!(result, "क्".repeat(19_999) + "क");
+        // took ~6 s (release) when the context was never committed
+        let elapsed = start.elapsed();
+        assert!(
+            elapsed.as_secs_f64() < 2.0,
+            "typing 20000 keys took {elapsed:?}"
+        );
+    }
+
     #[test]
     fn test_get_script_typing_data_map_valid_script() {
         let data = get_script_typing_data_map(Script::Devanagari);

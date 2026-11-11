@@ -241,3 +241,41 @@
     "normal_to_brahmic:include_inherent_vowel": true
     "normal_to_brahmic:keep_ascii_numerals": true
   reversible: false
+# the anusvAra option works on the letters read, not on single input characters: a Tamil-Extended
+# vowel sign starting with the halant (்ரு² ृ) is not a nasal + halant (नृत्य was ंत्य)
+- index: 19
+  from: Tamil-Extended
+  to: Devanagari
+  input: ந்ரு²த்ய அந்ரு²தம் ந்ரூ²த ம்ரு²ப ங்ரு²க அந்த
+  output: नृत्य अनृतम् नॄत मृप ङृक अंत
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+- index: 19.1
+  from: Tamil-Extended
+  to: Telugu
+  input: ந்ரு²த்ய
+  output: నృత్య
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+# a nasal + halant + consonant written as one letter (Sinhala ඟ ङ्ग) or with the ZWJ before the
+# al-lakuna is replaced like the spelled out one (ඞ්ග)
+- index: 19.2
+  from: Sinhala
+  to: Devanagari
+  input: "ඟ ඦ ඬ ඳ ඹ ඞ්ග ඤ්ජ ණ්ඩ න්ද ම්බ ඞ‍්ග"
+  output: ंग ंज ंड ंद ंब ंग ंज ंड ंद ंब ंग
+  options:
+    "brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": true
+  reversible: false
+# the conjunct ZWJ is not added next to a joiner already in the text (was a double ZWJ, and a ZWJ
+# before an explicit ZWNJ)
+- index: 19.3
+  from: Devanagari
+  to: Sinhala
+  input: "क्‍ष क्‌ष क्ष"
+  output: "ක්‍ෂ ක්‌ෂ ක්‍ෂ"
+  options:
+    "all_to_sinhala:use_conjunct_enabling_halant": true
+  reversible: false
