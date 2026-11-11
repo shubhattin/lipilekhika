@@ -153,6 +153,78 @@ One timed pass without warm-up (JIT warm-up is included for JS), printing the sa
 - JS WASM / N-API numbers and Python run the rust build: rebuild it after rust changes (`./get_bindings.sh` in `packages/js`, `uvx maturin develop --release` in `packages/python`).
 - Absolute times depend on the machine; compare versions on the same machine and report the relative change.
 
+## Releasing
+
+Every package and app is released by its own GitHub Actions workflow, started by pushing a tag. The tag has to match the version in the version file, otherwise the workflow stops before it builds anything.
+
+| What | Tag | Version in | Changelog | Workflow | Publishes to |
+| --- | --- | --- | --- | --- | --- |
+| JS package | `js-lib@v1.2.3` | `packages/js/package.json` | [`packages/js/CHANGELOG.md`](packages/js/CHANGELOG.md) | [`release_js.yml`](.github/workflows/release_js.yml) | npm (`lipilekhika`) |
+| Rust crate | `rust-lib@v1.2.3` | `packages/rust/Cargo.toml` | [`packages/rust/CHANGELOG.md`](packages/rust/CHANGELOG.md) | [`release_rust.yml`](.github/workflows/release_rust.yml) | crates.io (`lipilekhika`), `parivartak` CLI binaries on the GitHub release |
+| Python package | `python-lib@v1.2.3` | `packages/python/pyproject.toml` | [`packages/python/CHANGELOG.md`](packages/python/CHANGELOG.md) | [`release_python.yml`](.github/workflows/release_python.yml) | PyPI (`lipilekhika`) |
+| PC app (Windows) | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | MSI installer on the GitHub release |
+| Mobile app (Android) | `mobile-app@v1.2.3` | `mobile-app/pubspec.yaml` (`version: 1.2.3+<build number>`) | [`mobile-app/CHANGELOG.md`](mobile-app/CHANGELOG.md) | [`release_mobile_app.yml`](.github/workflows/release_mobile_app.yml) | APKs (arm64-v8a, armeabi-v7a, x86_64) on the GitHub release |
+
+npm, PyPI and crates.io are published with trusted publishing (OIDC), so there are no registry tokens to set up. The npm and PyPI publish jobs run in the `release` environment.
+
+### Steps
+
+1. **Bump the version** in the version file and give the changelog a section for it: `## js-lib@1.2.3`, `## rust-lib@1.2.3`, `## python-lib@1.2.3`, `## pc-app@v1.2.3`, `## mobile-app@v1.2.3+<build number>`. For the mobile app, raise the build number after `+` too. Commit this to `main`.
+
+2. **Dry run (optional, recommended)**: start the workflow by hand with `dry_run`. It runs everything (tests, every build, the package checks) but publishes and uploads nothing:
+
+   | Workflow | A dry run instead of publishing |
+   | --- | --- |
+   | JS | `npm publish --dry-run` |
+   | Rust | `cargo publish --dry-run`, the `parivartak` binaries as run artifacts |
+   | Python | `twine check --strict` on the wheels and the sdist (they stay as `wheels-*` run artifacts) |
+   | PC app | the MSI as a run artifact |
+   | Mobile app | no upload to the release (the APKs / AAB are run artifacts) |
+
+   ```sh
+   gh workflow run release_rust.yml -f tag=rust-lib@v1.2.3 -f dry_run=true
+   ```
+
+   The Rust, Python, PC app and mobile app workflows build the branch they are started from (`main` by default), so the tag does not have to exist yet. The JS workflow builds the commit of the tag, so for a JS dry run push the tag first (`git tag js-lib@v1.2.3 && git push origin js-lib@v1.2.3`), or dry-run after step 3. Pushing the tag starts the real release, so check the run it starts.
+
+3. **Create the GitHub release** with the changelog section as its notes. This creates and pushes the tag, which starts the release workflow:
+
+   ```sh
+   # the changelog section of the version, followed by GitHub's generated list of merged PRs
+   awk '/^## js-lib@1.2.3/{f=1;next} /^## /{if(f)exit} f' packages/js/CHANGELOG.md > /tmp/notes.md
+   gh release create js-lib@v1.2.3 --generate-notes --notes-file /tmp/notes.md --target main
+   ```
+
+   The Rust, PC app and mobile app workflows upload their files to this release, so it has to exist (`gh release upload`). Create it this way instead of pushing only the tag.
+
+4. **Watch the run** and check what it published:
+
+   ```sh
+   gh run list --workflow release_js.yml -L 1
+   gh run watch <run id> --exit-status
+   ```
+
+   - npm: `npm view lipilekhika dist-tags` (npm can take a few minutes after the run to list the new version)
+   - PyPI: `https://pypi.org/project/lipilekhika/1.2.3/`
+   - crates.io: `https://crates.io/crates/lipilekhika/1.2.3`
+   - PC / mobile app: the files on the GitHub release (`gh release view pc-app@v1.2.3`)
+
+### If a release run fails
+
+Fix the cause on `main`, then run the workflow again by hand with the existing tag:
+
+```sh
+gh workflow run release_js.yml -f tag=js-lib@v1.2.3 -f npm_dist_tag=latest
+```
+
+- A registry does not take the same version twice. Running again only works if the failed run did not publish (a failure in a build or check job stops before publishing).
+- A manual JS run publishes under the npm dist-tag `beta` unless you pass `npm_dist_tag=latest`. A run started by the tag uses `latest`, or `beta` for prerelease versions like `1.2.3-beta.1`.
+- A manual JS run builds the commit of the tag, with the workflow file of the branch it is started from, so a fix to the workflow on `main` applies to a tag created before it. The other workflows build the branch they are started from (`--ref`, default `main`). Use `--ref <tag>` to build the tagged commit with the workflow file as it was at that tag.
+
+### Build tools
+
+The release workflows pin the versions of the tools that build the native code: `@napi-rs/cli` (in `packages/js/binding/gen_node_bind.sh`), `ziglang`, `cargo-zigbuild`, `flutter_rust_bridge_codegen`, Flutter and `cargo-ndk`. Without a pin, a new release of one of them can break the build of a commit that built before. Update a pin on purpose, and dry-run the release workflow afterwards. `FRB_CODEGEN_VERSION` has to match the `flutter_rust_bridge` version in `packages/dart/binding/Cargo.toml` (in both `release_mobile_app.yml` and `dart_ci.yml`).
+
 ## Questions & issues
 
 **Repository**: [github.com/shubhattin/lipilekhika](https://github.com/shubhattin/lipilekhika) · **Issues**: [Report here](https://github.com/shubhattin/lipilekhika/issues)
