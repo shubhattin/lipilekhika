@@ -761,6 +761,10 @@ func TransliterateTextCoreWith(
 	if useTypingMap {
 		textToKramaMap = toData.TypingTextToKramaMapArr
 	}
+	// `~` is a letter in some romanization schemes (Harvard-Kyoto candrabindu, ITRANS `~N`),
+	// there it is read instead of skipped
+	tildeIsText := lookupData.TextToKramaMapCharIndex('~', useTypingMap) != -1 ||
+		kramaIndexOfText(fromData, "~") != -1
 
 	// Used when converting from Tamil-Extended (superscript numbers)
 	ignoreTaExtSupIndex := -1
@@ -780,7 +784,7 @@ func TransliterateTextCoreWith(
 		}
 
 		// skip certain chars (preserve as-is)
-		if isSkipChar(ch) {
+		if isSkipChar(ch) && !(ch == '~' && tildeIsText) {
 			cursor.advance(1)
 			if prevContextInUse {
 				ctx.prevContextCleanup(" ", nil, nil, false)
