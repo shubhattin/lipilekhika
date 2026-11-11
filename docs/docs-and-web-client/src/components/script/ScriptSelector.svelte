@@ -15,6 +15,7 @@
   const CATEGORIES = {
     modern: 'Modern Indian Scripts',
     romanized: 'Romanization Scripts',
+    standard: 'Standard Schemes',
     ancient: 'Ancient Scripts'
   } as const;
 
@@ -38,6 +39,9 @@
     // romanized
     Normal: 'romanized',
     Romanized: 'romanized',
+    // standard romanization schemes
+    'Harvard-Kyoto': 'standard',
+    SLP1: 'standard',
     // ancient
     Brahmi: 'ancient',
     Sharada: 'ancient',

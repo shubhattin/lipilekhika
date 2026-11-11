@@ -39,6 +39,9 @@ export const ALTERNATES = [
   'rom', // romanized
   'gur', // Gurumukhi
   'as', // Assamese
+  'slp1', // SLP1
+  'slp', // SLP1
+  'hk', // Harvard-Kyoto
 
   /* Language Alternates (Do not repeat) */
   'sa', // Devanagari (Sanskrit)
@@ -83,6 +86,9 @@ export const ALTERNATE_TO_SCRIPT_MAP: Record<alternate_script_type, script_list_
   rom: 'Romanized',
   gur: 'Gurumukhi',
   as: 'Assamese',
+  slp1: 'SLP1',
+  slp: 'SLP1',
+  hk: 'Harvard-Kyoto',
   sa: 'Devanagari',
   san: 'Devanagari',
   hin: 'Devanagari',

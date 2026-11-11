@@ -648,6 +648,11 @@ export const transliterate_text_core = (
   const text_to_krama_next_cps = use_typing_text_to_krama_map
     ? to_script_data.next_cps_typing_text_to_krama_map
     : from_script_data.next_cps_text_to_krama_map;
+  /** `~` is a letter in some romanization schemes (Harvard-Kyoto candrabindu, ITRANS `~N`),
+   * there it is read instead of skipped */
+  const tilde_is_text =
+    textToKramaMapIndex(text_to_krama_lookup_script_data, '~', use_typing_text_to_krama_map) !==
+      -1 || kramaIndexOfText(from_script_data, '~') !== -1;
 
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
@@ -670,7 +675,7 @@ export const transliterate_text_core = (
       continue;
     }
 
-    if (isSkipChar(cp)) {
+    if (isSkipChar(cp) && !(cp === 0x7e && tilde_is_text)) {
       // ignore blank spaces
       cursor.advance(char_width);
       if (PREV_CONTEXT_IN_USE) {

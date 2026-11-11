@@ -978,6 +978,12 @@ pub fn transliterate_text_core_with(
     } else {
         &from_script_data.text_to_krama_map
     };
+    // `~` is a letter in some romanization schemes (Harvard-Kyoto candrabindu, ITRANS `~N`),
+    // there it is read instead of skipped
+    let tilde_is_text = text_to_krama_lookup_script_data
+        .text_to_krama_map_char_index('~', use_typing_map)
+        .is_some()
+        || from_script_data.krama_index_of_char('~').is_some();
 
     // Used when converting from Tamil-Extended (superscript numbers)
     let mut ignore_ta_ext_sup_num_text_index: isize = -1;
@@ -1032,7 +1038,7 @@ pub fn transliterate_text_core_with(
         }
 
         // skip certain chars (preserve as-is)
-        if is_skip_char(ch) {
+        if is_skip_char(ch) && !(ch == '~' && tilde_is_text) {
             ctx.cursor.advance(1);
             if ctx.prev_context_in_use {
                 ctx.prev_context_cleanup(Some((Some(" "), None)), None, None);

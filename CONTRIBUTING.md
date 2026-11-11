@@ -24,6 +24,17 @@ Output is written to `test_data/transliteration/`, alongside manual cases under 
 
 These are test cases generated from text data and older version of lipi lekhika, manual test cases are also there alongside it.
 
+### Standard scheme test data (vidyut-lipi)
+
+The test data of the standard romanization schemes (`test_data/transliteration/std-*/`) is generated from the output of [`vidyut-lipi`](https://github.com/ambuda-org/vidyut) (MIT) for the same inputs. Unlike the `auto-*` data it is **committed** and not regenerated in CI: rerun it by hand after changing the inputs or adding a scheme, and review the diff. From [`scripts/tools/vidyut-test-data`](scripts/tools/vidyut-test-data) (needs only Cargo, it is not part of the workspace):
+
+```sh
+cargo run --release              # all the schemes
+cargo run --release -- SLP1      # only some of them
+```
+
+Where lipilekhika writes differently from vidyut on purpose (eg. SLP1 `|` is written `Lh`), the generator changes the vidyut output, see `normalize_output` in [`src/main.rs`](scripts/tools/vidyut-test-data/src/main.rs).
+
 ## JS package (`packages/js`)
 
 `make-script-data` also regenerates the committed Rust data, so it additionally needs [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) with the `rustfmt` component (included by default with rustup). Without them the rest of the data is still generated, but it warns that the committed Rust data was not updated.

@@ -1,0 +1,75 @@
+# Standard romanization schemes. The generated cases (from vidyut-lipi) are in the std-* folders,
+# these are the cases they do not cover.
+
+# nuqta letters and the Dravidian letters, in the forms of vidyut-lipi
+- index: 0
+  from: Devanagari
+  to: SLP1
+  input: क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़ ऩ ऱ ऴ
+  output: k0a K0a g0a j0a q0a Q0a P0a Y0a n0a r2a L0a
+  reversible: true
+- index: 1
+  from: Devanagari
+  to: Harvard-Kyoto
+  input: क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़ ऩ ऱ ऴ
+  output: qa qha g2a z2a r3a r3ha fa Ya n2a r2a zha
+  reversible: true
+# the short e / o are written as e / o (the long ones, Sanskrit has only them), è / ò are read
+# as the short ones
+- index: 2
+  from: Telugu
+  to: SLP1
+  input: కెరళ కొట ఎ ఒ కేరళ
+  output: keraLa kowa e o keraLa
+- index: 3
+  from: Harvard-Kyoto
+  to: Telugu
+  input: kèraLa kòTa è ò keraLa
+  output: కెరళ కొట ఎ ఒ కేరళ
+# SLP1 | is ळ्ह, written as Lh
+- index: 4
+  from: SLP1
+  to: Devanagari
+  input: mI\|uze^ mI\Lhuze^
+  output: मी॒ळ्हुषे॑ मी॒ळ्हुषे॑
+# ~ is the candrabindu (it is skipped in the other scripts)
+- index: 5
+  from: Harvard-Kyoto
+  to: Devanagari
+  input: ha~sa pazU~stA~z ca
+  output: हँस पशूँस्ताँश् च
+  reversible: true
+- index: 6
+  from: SLP1
+  to: Devanagari
+  input: ha~sa paSU~stA~S ca
+  output: हँस पशूँस्ताँश् च
+  reversible: true
+- index: 7
+  from: Normal
+  to: Devanagari
+  input: a~b ka~kha
+  output: अ~ब् क~ख
+# the letters without a form of their own are written as the nearest Sanskrit letter
+- index: 8
+  from: Devanagari
+  to: SLP1
+  input: ऍ ऑ ॻ ॼ ॾ ॿ
+  output: e o ga ja qa ba
+- index: 9
+  from: Devanagari
+  to: Harvard-Kyoto
+  input: ऍ ऑ ॻ ॼ ॾ ॿ
+  output: e o ga ja Da ba
+# between the schemes
+- index: 10
+  from: Harvard-Kyoto
+  to: SLP1
+  input: kRSNa jJAnam saMskRtam OM
+  output: kfzRa jYAnam saMskftam AUM
+  reversible: true
+- index: 11
+  from: Normal
+  to: Harvard-Kyoto
+  input: kRShNa jJAnam shrIH
+  output: kRSNa jJAnam zrIH
