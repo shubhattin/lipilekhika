@@ -8,8 +8,12 @@ on:
     # This would work only if the package version was already not published to crates.io
     inputs:
       tag:
-        description: "Existing tag to attach release to (e.g. rust-lib@v1.2.3)"
+        description: "Existing tag to attach release to (e.g. rust-lib@v1.2.3); for a dry run it does not have to exist"
         required: true
+      dry_run:
+        description: "Dry run: run the whole workflow (build, tests, checks), but publish / upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write # Required for OIDC
@@ -21,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Test data for `cargo test` (script data artifacts are committed)
       - uses: oven-sh/setup-bun@v2
@@ -35,7 +39,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -90,14 +94,16 @@ jobs:
           fi
 
       - uses: rust-lang/crates-io-auth-action@v1
+        if: ${{ !inputs.dry_run }}
         id: auth
 
-      - name: Publish to crates.io
+      # a dry run goes through `cargo publish --dry-run`: packages and builds the crate, uploads nothing
+      - name: Publish to crates.io${{ inputs.dry_run && ' (dry run)' || '' }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           cd packages/rust
-          cargo publish -p lipilekhika
+          cargo publish -p lipilekhika ${{ inputs.dry_run && '--dry-run' || '' }}
 
   build-binaries:
     runs-on: ${{ matrix.os }}
@@ -119,7 +125,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Rust setup (with targets)
       - name: Install Rust
@@ -129,7 +135,7 @@ jobs:
 
       - name: Cache cargo registry + build (Unix)
         if: runner.os != 'Windows'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -212,7 +218,17 @@ jobs:
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
+      # a dry run keeps the binary as a workflow artifact instead
+      - name: Upload binary as artifact (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_name }}
+          retention-days: 7
+
       - name: Upload binary to release
+        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

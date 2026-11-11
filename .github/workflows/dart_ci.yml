@@ -24,7 +24,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Setup Bun for test data generation
       - uses: oven-sh/setup-bun@v2
@@ -40,7 +40,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -61,7 +61,7 @@ jobs:
       # version, so they are reused until one of those changes (skipping install + generate)
       - name: Cache Dart FFI bindings
         id: frb-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             packages/dart/lipilekhika/lib/src/rust

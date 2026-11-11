@@ -17,7 +17,7 @@ jobs:
     #     os: [ubuntu-latest]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         name: Setup Bun
 
@@ -31,7 +31,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -40,11 +40,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - uses: jetli/wasm-pack-action@v0.4.0
+      # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
+      # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
+      - uses: taiki-e/install-action@v2
         with:
-          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
-          # version verified locally instead of floating on `latest`.
-          version: 'v0.14.0'
+          tool: wasm-pack@0.14.0
       - name: Build WASM
         run: |
           cd packages/js/wasm
@@ -64,7 +64,7 @@ jobs:
 
       # Loads the JS, WASM and N-API variants under Node and Bun (source and built dist).
       # Guards against a runtime exiting early while the WASM module loads (seen with Bun).
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Runtime Check (source, vite-node + bun)
@@ -87,7 +87,7 @@ jobs:
     # Does not depend on wasm (rust)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
@@ -104,7 +104,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo registry + build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -113,11 +113,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - uses: jetli/wasm-pack-action@v0.4.0
+      # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
+      # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
+      - uses: taiki-e/install-action@v2
         with:
-          # `wasm-pack build --profile` needs wasm-pack >= 0.12; pin to the
-          # version verified locally instead of floating on `latest`.
-          version: 'v0.14.0'
+          tool: wasm-pack@0.14.0
       - name: Build WASM
         run: |
           cd packages/js/wasm
