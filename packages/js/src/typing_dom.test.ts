@@ -59,6 +59,9 @@ class FakeTextArea {
     this.selectionStart = start;
     this.selectionEnd = end;
   }
+  setSelectionRange(start: number, end: number) {
+    this.select(start, end);
+  }
 }
 class FakeInput extends FakeTextArea {}
 /** `<input type="email">` / `type="number"`: no selection API, `setRangeText` throws */
@@ -329,6 +332,273 @@ describe('Browser typing helpers', () => {
       await typeText(ref.el, ref.ctx, 'kama');
       expect(el.value, script).toBe(ref.el.value);
     }
+  });
+
+  describe('keys typed while the script data is loading', () => {
+    /** A context whose `ready` resolves (or fails) only when the test says so */
+    const heldContext = async (script: Script = 'Devanagari') => {
+      const real = createTypingContext(script);
+      await real.ready;
+      let release!: () => void;
+      let fail!: (error: Error) => void;
+      const ready = new Promise<void>((resolve, reject) => {
+        release = resolve;
+        fail = reject;
+      });
+      return { ctx: { ...real, ready }, release, fail };
+    };
+    /** Like `beforeInput`, but does not wait for the handler (it waits for the script data) */
+    const press = (
+      el: FakeTextArea,
+      ctx: Ctx,
+      data: string,
+      onValueChange?: (value: string) => void
+    ) => {
+      const ev = new FakeInputEvent('beforeinput', {
+        data,
+        inputType: 'insertText',
+        target: el,
+        currentTarget: el
+      });
+      const done = handleTypingBeforeInputEvent(ctx, ev, onValueChange);
+      if (!ev.defaultPrevented) browserInsert(el, data);
+      return done;
+    };
+    const pressAll = (el: FakeTextArea, ctx: Ctx, text: string) =>
+      [...text].map((ch) => press(el, ctx, ch));
+
+    it('shows the keys where they are typed, then transliterates them', async () => {
+      const el = new FakeTextArea();
+      el.value = 'XY';
+      el.setCaret(2);
+      const { ctx, release } = await heldContext();
+      const pending = pressAll(el, ctx, 'ka');
+      el.setCaret(0); // a click at the start while the data is loading
+      pending.push(...pressAll(el, ctx, 'ga'));
+      expect(el.value).toBe('gaXYka'); // the browser inserted the keys
+
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('गXYक');
+      expect([el.selectionStart, el.selectionEnd]).toEqual([1, 1]);
+
+      // the run at the caret continues its context
+      await beforeInput(el, ctx, 'm');
+      expect(el.value).toBe('गम्XYक');
+    });
+
+    it('transliterates queued keys in order (Telugu, Brahmi)', async () => {
+      for (const script of ['Telugu', 'Brahmi'] as const) {
+        const el = new FakeTextArea();
+        const { ctx, release } = await heldContext(script);
+        const pending = pressAll(el, ctx, 'kama');
+        release();
+        await Promise.all(pending);
+
+        const ref = await setup('', script);
+        await typeText(ref.el, ref.ctx, 'kama');
+        expect(el.value, script).toBe(ref.el.value);
+      }
+    });
+
+    it('converts the text as it was edited while waiting', async () => {
+      // a typo fixed with Backspace
+      const el = new FakeTextArea();
+      el.value = 'XY';
+      el.setCaret(2);
+      const { ctx, release } = await heldContext();
+      const pending = pressAll(el, ctx, 'kam');
+      await beforeInput(el, ctx, null, 'deleteContentBackward');
+      el.setRangeText('', 4, 5, 'end'); // what the browser does for it
+      pending.push(press(el, ctx, 'a'));
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('XYका');
+      // the context continues
+      await typeText(el, ctx, 'm');
+      expect(el.value).toBe('XYकाम्');
+
+      // a letter added inside the typed text
+      const two = new FakeTextArea();
+      const held = await heldContext();
+      const twoPending = pressAll(two, held.ctx, 'nmaste');
+      two.setCaret(1);
+      twoPending.push(press(two, held.ctx, 'a'));
+      held.release();
+      await Promise.all(twoPending);
+      expect(two.value).toBe('नमस्ते');
+      // the caret was inside the typed text: it is put after it
+      expect([two.selectionStart, two.selectionEnd]).toEqual([6, 6]);
+    });
+
+    it('does not convert text which was not typed while waiting', async () => {
+      // Enter (not typed text) between two words
+      const el = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending = pressAll(el, ctx, 'ka');
+      await beforeInput(el, ctx, '\n', 'insertLineBreak'); // the browser inserts it
+      pending.push(...pressAll(el, ctx, 'ga'));
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('क\nग');
+
+      // a paste, and text typed before
+      const two = new FakeTextArea();
+      two.value = 'om ';
+      two.setCaret(3);
+      const held = await heldContext();
+      const twoPending = pressAll(two, held.ctx, 'ka');
+      await beforeInput(two, held.ctx, 'xyz', 'insertFromPaste'); // the browser inserts it
+      twoPending.push(...pressAll(two, held.ctx, 'ga'));
+      held.release();
+      await Promise.all(twoPending);
+      expect(two.value).toBe('om कxyzग');
+
+      // the app setting the value: only text still as typed is converted
+      const app = new FakeTextArea();
+      const third = await heldContext();
+      const appPending = pressAll(app, third.ctx, 'ka');
+      app.value = 'kax';
+      third.release();
+      await Promise.all(appPending);
+      expect(app.value).toBe('कx');
+      const replaced = new FakeTextArea();
+      const fourth = await heldContext();
+      const replacedPending = pressAll(replaced, fourth.ctx, 'ka');
+      replaced.value = 'done';
+      fourth.release();
+      await Promise.all(replacedPending);
+      expect(replaced.value).toBe('done');
+    });
+
+    it('handles a long text set while waiting', async () => {
+      const el = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending = pressAll(el, ctx, 'ka');
+      const long = 'x'.repeat(200_000);
+      el.value = 'ka' + long; // eg. the app loading a saved draft
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('क' + long);
+    });
+
+    it('converts keys typed over a selection', async () => {
+      // Tab into a filled in field (selects all of it) or Ctrl+A, then typing
+      const el = new FakeTextArea();
+      el.value = 'old';
+      el.select(0, 3);
+      const { ctx, release } = await heldContext();
+      const pending = pressAll(el, ctx, 'kaga');
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('कग');
+
+      // the selection holds keys typed before
+      const two = new FakeTextArea();
+      const held = await heldContext();
+      const twoPending = pressAll(two, held.ctx, 'ka');
+      two.select(0, 2);
+      twoPending.push(...pressAll(two, held.ctx, 'ga'));
+      held.release();
+      await Promise.all(twoPending);
+      expect(two.value).toBe('ग');
+    });
+
+    it('converts the keys before a key which arrives after the data', async () => {
+      const el = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending = press(el, ctx, 'k');
+      release();
+      await ctx.ready; // the data is there, the queued key is not converted yet
+      await beforeInput(el, ctx, 'a');
+      expect(el.value).toBe('क');
+      await pending;
+      expect(el.value).toBe('क');
+    });
+
+    it('does not grow the text past `maxlength` when converting', async () => {
+      const el = new FakeTextArea();
+      el.maxLength = 1;
+      const { ctx, release } = await heldContext();
+      const pending = press(el, ctx, 'k'); // क् would be 2 units
+      release();
+      await pending;
+      expect(el.value).toBe('k');
+
+      // decided on the final length: `ka` -> क makes room for `k` -> क्
+      const two = new FakeTextArea();
+      two.value = 'X';
+      two.setCaret(0);
+      two.maxLength = 4;
+      const held = await heldContext();
+      const twoPending = pressAll(two, held.ctx, 'ka');
+      two.setCaret(3);
+      twoPending.push(press(two, held.ctx, 'k'));
+      held.release();
+      await Promise.all(twoPending);
+      expect(two.value).toBe('कXक्');
+    });
+
+    it('reports the converted value to `onValueChange` once', async () => {
+      const values: string[] = [];
+      const el = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending = [...'ka'].map((ch) => press(el, ctx, ch, (v) => values.push(v)));
+      release();
+      await Promise.all(pending);
+      expect(values).toEqual(['क']);
+    });
+
+    it('converts the keys of every element and context', async () => {
+      // two elements sharing a context
+      const one = new FakeTextArea();
+      const two = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending = [press(one, ctx, 'k'), press(two, ctx, 'a')];
+      release();
+      await Promise.all(pending);
+      expect(one.value).toBe('क्');
+      expect(two.value).toBe('अ');
+      // the context continues in the element typed in last only
+      await beforeInput(one, ctx, 'a');
+      expect(one.value).toBe('क्अ');
+
+      // the script switched while waiting (a new context for the same element)
+      const el = new FakeTextArea();
+      const deva = await heldContext('Devanagari');
+      const telugu = await heldContext('Telugu');
+      const both = [...pressAll(el, deva.ctx, 'ka'), ...pressAll(el, telugu.ctx, 'ga')];
+      telugu.release();
+      deva.release();
+      await Promise.all(both);
+      expect(el.value).toBe('कగ');
+    });
+
+    it('converts the keys once when the deprecated `input` handler is also used', async () => {
+      const el = new FakeTextArea();
+      const { ctx, release } = await heldContext();
+      const pending: Promise<unknown>[] = [];
+      for (const ch of 'kama') {
+        const init = { data: ch, inputType: 'insertText', target: el, currentTarget: el };
+        const ev = new FakeInputEvent('beforeinput', init);
+        pending.push(handleTypingBeforeInputEvent(ctx, ev));
+        expect(ev.defaultPrevented).toBe(false);
+        browserInsert(el, ch);
+        pending.push(handleTypingInputEvent(ctx, new FakeInputEvent('input', init)));
+      }
+      release();
+      await Promise.all(pending);
+      expect(el.value).toBe('कम');
+    });
+
+    it('leaves the keys as typed when the script data fails to load', async () => {
+      const el = new FakeTextArea();
+      const { ctx, fail } = await heldContext();
+      const pending = press(el, ctx, 'k');
+      fail(new Error('fetch failed'));
+      await expect(pending).rejects.toThrow('fetch failed');
+      expect(el.value).toBe('k');
+    });
   });
 });
 

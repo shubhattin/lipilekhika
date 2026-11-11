@@ -43,6 +43,17 @@ Only supported for `textarea` and `input` elements.
    ```
 </Steps>
 
+<Aside>
+   The script data of a context is loaded in the background. Keys typed before it is loaded are
+   first shown as typed (`ka`), and transliterated as soon as it is there (`क`), as they were
+   edited meanwhile (eg. a Backspace). Pasted text is left as it is.
+   To avoid this, create the context early and `await ctx.ready` (or `preloadScriptData`) before
+   the user can type, eg. when the page or the script selector loads.
+
+   With a React controlled input (`value`), also handle `onChange` as in the example below:
+   the keys typed before the script data is loaded are inserted by the browser.
+</Aside>
+
 <LinkCard
    title="Custom Typing Options"
    description="Overview of typing customizations available in Lipi Lekhika"
