@@ -8,7 +8,7 @@ documentation = "https://lipilekhika.in/getting-started/rust"
 keywords = ["indic-scripts", "transliteration"]
 categories = ["text-processing", "localization"]
 
-version = "1.2.0"
+version = "1.1.3"
 edition = "2024"
 rust-version = "1.88"
 # `include` bypasses .gitignore, so list only what the crate needs

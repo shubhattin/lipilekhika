@@ -54,7 +54,7 @@ fn main() {
         Script::Devanagari,
         None
     );
-    
+
     println!("{}", result); // नमस्कारः
 }
 ```
@@ -143,6 +143,7 @@ pub fn transliterate<'a>(
 Transliterates text from one script to another.
 
 **Parameters:**
+
 - `text` — Text to transliterate
 - `from` — Source script (`Script` enum)
 - `to` — Target script (`Script` enum)
@@ -162,6 +163,7 @@ pub fn get_all_options(
 Gets all available custom options for a script pair.
 
 **Parameters:**
+
 - `from_script` — Source script
 - `to_script` — Target script
 
@@ -178,6 +180,7 @@ pub fn get_script_typing_data_map(
 Gets typing data mappings for a script (for building custom input methods).
 
 **Parameters:**
+
 - `typing_script` — Script (`Script` enum)
 
 **Returns:** `ScriptTypingDataMap` — Typing data
@@ -200,14 +203,14 @@ use lipilekhika::typing::{TypingContext, TypingContextOptions};
 
 fn main() {
     let mut ctx = TypingContext::new(Script::Devanagari, None);
-    
+
     // Process character-by-character input
     let diff = ctx.take_key_input("n");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
-    
+
     let diff = ctx.take_key_input("a");
     println!("Delete: {}, Add: '{}'", diff.to_delete_chars_count, diff.diff_add_text);
-    
+
     // Clear context when needed
     ctx.clear_context();
 }

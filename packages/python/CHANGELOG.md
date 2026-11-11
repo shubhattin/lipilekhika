@@ -1,6 +1,6 @@
 # Changelog
 
-## python-lib@1.0.8 (Unreleased)
+## python-lib@1.0.8
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals=False` typing options, now for transliteration too
 - Performance Improvements (via rust-lib@1.2.0)
