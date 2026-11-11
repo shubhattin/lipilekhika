@@ -1116,6 +1116,28 @@ mod tests {
         assert_eq!(keys_of("ै"), [".ai"]);
     }
 
+    /// `x` types क्ष (k, halant, Sh), it was not listed as only the keys of a single krama were (#186)
+    #[test]
+    fn typing_data_map_lists_the_x_conjunct() {
+        for (script, text) in [
+            (Script::Devanagari, "क्ष"),
+            (Script::Telugu, "క్ష"),
+            (Script::Brahmi, "𑀓𑁆𑀱"),
+            (Script::Romanized, "kṣ"),
+        ] {
+            let data = get_script_typing_data_map(script);
+            let item = data
+                .common_krama_map
+                .iter()
+                .find(|item| item.2.iter().any(|key| key == "x"));
+            assert_eq!(
+                item,
+                Some(&(text.to_string(), ListType::Vyanjana, vec!["x".to_string()])),
+                "{script:?}"
+            );
+        }
+    }
+
     #[test]
     fn typing_data_map_has_no_item_without_text() {
         for script in [Script::Devanagari, Script::Tamil, Script::Romanized] {

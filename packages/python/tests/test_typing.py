@@ -258,6 +258,12 @@ class TestScriptTypingDataMap:
             assert list_type in ("anya", "vyanjana", "matra", "svara")
             assert isinstance(mappings, list)
 
+    def test_x_conjunct_is_listed(self):
+        """`x` types क्ष (k, halant, Sh), it was not listed (#186)."""
+        data_map = get_script_typing_data_map("Devanagari")
+        items = [item for item in data_map.common_krama_map if "x" in item[2]]
+        assert items == [("क्ष", "vyanjana", ["x"])]
+
     def test_script_typing_data_map_repr(self):
         """Test ScriptTypingDataMap __repr__ method."""
         data_map = get_script_typing_data_map("Devanagari")

@@ -204,3 +204,36 @@
   input: "ক্‍ষ ক্‌ষ"
   output: kSha kSha
   reversible: false
+# Candra vowels ऍ ऑ (and their mAtrAs ॅ ॉ) are aiI / auU in Normal (were ai / au, the same as ऐ औ,
+# so हॉटल came back as हौटल). Sinhala ඇ ඈ are the same vowels (#186)
+- index: 21
+  from: Devanagari
+  to: Normal
+  input: हॉटल कॅ ऍ ऑ ऐ औ
+  output: hauUTala kaiI aiI auU ai au
+  reversible: true
+- index: 21.1
+  from: Sinhala
+  to: Normal
+  input: ඇයි නැහැ ඈත කෑ ඓ
+  output: aiIyi naiIhaiI auUta kauU ai
+  reversible: true
+- index: 21.2
+  from: Gujarati
+  to: Normal
+  input: કૅ ઑ
+  output: kaiI auU
+  reversible: true
+- index: 21.3
+  from: Normal
+  to: Sinhala
+  input: aiIyi naiIhaiI
+  output: ඇයි නැහැ
+  reversible: true
+# a script without them writes ai / au (Bengali ঐ)
+- index: 21.4
+  from: Normal
+  to: Bengali
+  input: aiI kaiI auU
+  output: ঐ কৈ ঔ
+  reversible: false

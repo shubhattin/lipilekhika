@@ -496,3 +496,23 @@
   input: ഺ
   output: त
   reversible: false
+# Odia ଯ (YA) is read as the plain ya य, like ୟ (YYA): य़ is not used in Devanagari for it (#186).
+# ଯାତ୍ରା was read as य़ात्रा. Written as before, य -> ୟ and य़ -> ଯ
+- index: 24
+  from: Odia
+  to: Devanagari
+  input: ଯାତ୍ରା ଯଦି ସମୟ
+  output: यात्रा यदि समय
+  reversible: false
+- index: 24.1
+  from: Odia
+  to: Normal
+  input: ଯୋଗ ୟ
+  output: yOga ya
+  reversible: false
+- index: 24.2
+  from: Devanagari
+  to: Odia
+  input: य य़
+  output: ୟ ଯ
+  reversible: false
