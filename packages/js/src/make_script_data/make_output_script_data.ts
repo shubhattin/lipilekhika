@@ -651,6 +651,8 @@ function get_out_script_data(
   // Scan for cases where the text key is of single character with a len(krama) >= 1 and there is no next in it
   // then we can safely remove it as it directly looked up in the krama array
   // also check if it actaully exists in the krama array (to not disrupt duplicates and mAtrA duplicates)
+  // and that the direct lookup (first index wins) gives the same krama: Odia ଯ is the yz key but
+  // is read as y (a duplicate of ୟ), it was removed and so read as yz
   const index_to_remove: number[] = [];
   for (let i = 0; i < res.text_to_krama_map.length; i++) {
     const text_krama_item = res.text_to_krama_map[i];
@@ -668,7 +670,8 @@ function get_out_script_data(
           (text.length === 2 && codePoint !== undefined && codePoint > BMP_CODE_LAST_INDEX)) &&
         text_krama_ref !== null &&
         text_krama_ref !== undefined &&
-        text_krama_ref.length >= 1 &&
+        text_krama_ref.length === 1 &&
+        text_krama_ref[0] === text_krama_arr_index &&
         (text_krama_item[1].next === null ||
           text_krama_item[1].next === undefined ||
           text_krama_item[1].next.length === 0))

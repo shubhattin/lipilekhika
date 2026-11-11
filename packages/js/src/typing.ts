@@ -800,6 +800,7 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
     if (text && !normal_krama_index.has(text)) normal_krama_index.set(text, i);
   }
   const typing_map_texts = new Set<string>();
+  const multi_krama_keys: Item[] = [];
   for (let i = 0; i < script_data.typing_text_to_krama_map.length; i++) {
     const item = script_data.typing_text_to_krama_map[i];
     const normal_text_map = item[0];
@@ -809,11 +810,18 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
     if (item[1] && item[1].custom_back_ref !== undefined && item[1].custom_back_ref !== null) {
       res.script_specific_krama_map[item[1].custom_back_ref][2].push(normal_text_map);
     } else if (item[1] && item[1].krama && item[1].krama.length === 1) {
-      // ignore the ones whose length is greater than 1 (as they usually are intermediate typing states)
       const krama_index = item[1].krama[0] ?? -1;
       if (krama_index !== -1) {
         res.common_krama_map[krama_index][2].push(normal_text_map);
       }
+    } else if (item[1] && item[1].krama && item[1].krama.length > 1) {
+      // A key of several krama (`x` -> क्ष). An intermediate typing state (`AU` of `AUM`) is
+      // not a key of its own
+      if (item[1].next?.length || item[1].krama.some((i) => i === -1)) continue;
+      const text = item[1].krama.map((i) => script_data.krama_text_arr[i]?.[0] ?? '').join('');
+      const last_krama = item[1].krama[item[1].krama.length - 1];
+      const type = script_data.list[script_data.krama_text_arr[last_krama]?.[1] ?? -1]?.type;
+      multi_krama_keys.push([text, type ?? 'anya', [normal_text_map]]);
     } else if (item[1] && !item[1].krama?.length) {
       // a prefix of longer keys which is a character too (`sh` -> श, the start of `shh`)
       const krama_index = normal_krama_index.get(normal_text_map);
@@ -828,7 +836,10 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
 
   // A key whose character this script lacks falls back to an empty text (`.a1` to the
   // a1 mAtrA, which is the empty a mAtrA in Devanagari), nothing to show for it
-  res.common_krama_map = mergeDuplicateTextMappings(res.common_krama_map).filter(
+  res.common_krama_map = mergeDuplicateTextMappings([
+    ...res.common_krama_map,
+    ...multi_krama_keys
+  ]).filter(
     ([text]) => text !== ''
   );
   // the context clearing `q` has no text

@@ -10,14 +10,14 @@
   output: समय़ य़
   script: Devanagari
   preserve_check: true
+# (no preserve check: ଯ is read as the plain ya y, #186)
 - index: 2
   text: yzadi
   output: ଯଦି
   script: Odia
-  preserve_check: true
 
-# Independent candra vowels ऍ ऑ (and their mAtrAs) are typed with `aiI` / `auU`, in the scripts
-# which have them. Other scripts keep `aiI` as ai + I
+# Independent candra vowels ऍ ऑ (and their mAtrAs) are typed with `aiI` / `auU`. A script
+# without them writes ai / au, like the transliteration of Normal `aiI` (#186, was ai + I: ঐঈ)
 - index: 3
   text: aiI auU kaiI kauU
   output: ऍ ऑ कॅ कॉ
@@ -36,7 +36,7 @@
   script: Sinhala
 - index: 7
   text: aiI kaiI
-  output: ঐঈ কৈঈ
+  output: ঐ কৈ
   script: Bengali
 
 # Standalone ai / au mAtrA keys `.ai` `.au`, like `.A` `.i` ... (the input was dropped: k.ai -> क्)

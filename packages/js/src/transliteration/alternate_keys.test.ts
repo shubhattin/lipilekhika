@@ -113,3 +113,49 @@ describe('Typing data map', () => {
     }
   });
 });
+
+describe('Typing data map lists every typable key', () => {
+  // `x` types क्ष (a sequence of k, halant, Sh) and was not listed, as only the keys of a single
+  // krama were (#186)
+  it('lists x as the conjunct it types', async () => {
+    // (all the letters of Romanized are `anya`)
+    const expected: Record<string, [string, string]> = {
+      Devanagari: ['क्ष', 'vyanjana'],
+      Telugu: ['క్ష', 'vyanjana'],
+      Malayalam: ['ക്ഷ', 'vyanjana'],
+      Brahmi: ['𑀓𑁆𑀱', 'vyanjana'],
+      Romanized: ['kṣ', 'anya']
+    };
+    for (const [script, [text, type]] of Object.entries(expected)) {
+      const { common_krama_map } = await getScriptTypingDataMap(script as 'Devanagari');
+      const item = common_krama_map.find(([, , keys]) => keys.includes('x'));
+      expect(item, script).toEqual([text, type, ['x']]);
+    }
+  });
+
+  it('lists every key which types a text', async () => {
+    for (const script of SCRIPT_LIST) {
+      if (script === 'Normal') continue;
+      const [map, data] = await Promise.all([
+        getScriptTypingDataMap(script),
+        getScriptData(script)
+      ]);
+      const listed = new Set(
+        [...map.common_krama_map, ...map.script_specific_krama_map].flatMap(([, , keys]) => keys)
+      );
+      const missing: string[] = [];
+      for (const [key, value] of data.typing_text_to_krama_map) {
+        // a prefix of longer keys (`AU` of `AUM`) is not a key of its own
+        if (key === '' || value.next?.length) continue;
+        const text =
+          value.custom_back_ref !== undefined && value.custom_back_ref !== null
+            ? data.custom_script_chars_arr[value.custom_back_ref][0]
+            : (value.krama ?? []).map((i) => data.krama_text_arr[i]?.[0] ?? '').join('');
+        // the context clearing `q`, and `.a1` in a script without the a1 mAtrA
+        if (text === '') continue;
+        if (!listed.has(key)) missing.push(`${key} (${text})`);
+      }
+      expect(missing, script).toEqual([]);
+    }
+  });
+});

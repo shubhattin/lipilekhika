@@ -1,7 +1,6 @@
 import { script_list_obj } from '../../utils/lang_list';
 import type { InputBrahmicScriptType } from '../input_script_data_schema';
 import {
-  CANDRA_SVARA_TYPING_DATA,
   COMMON_NUMBER_TYPING_DATA,
   COMMON_SCRIPT_TYPING_DATA,
   COMMON_SVARA_MATRA_TYPING_DATA,
@@ -19,7 +18,6 @@ const Sinhala: InputBrahmicScriptType = {
     ...COMMON_SCRIPT_TYPING_DATA,
     ...COMMON_NUMBER_TYPING_DATA,
     ...COMMON_SVARA_MATRA_TYPING_DATA,
-    ...CANDRA_SVARA_TYPING_DATA,
     ...COMMON_VEDIC_SANSKRIT_SYMBOLS
   ],
   manual_krama_text_map: {
