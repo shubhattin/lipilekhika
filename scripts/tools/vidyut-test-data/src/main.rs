@@ -25,6 +25,7 @@ const SCHEMES: &[(&str, Scheme)] = &[
     ("SLP1", Scheme::Slp1),
     ("Harvard-Kyoto", Scheme::HarvardKyoto),
     ("ITRANS", Scheme::Itrans),
+    ("IAST", Scheme::Iast),
 ];
 
 /// Cases in a file, like the `auto-*` test data
@@ -62,6 +63,20 @@ fn has_accent_before_mark(input: &str) -> bool {
         matches!(w[0], '\u{0951}' | '\u{0952}' | '\u{1CDA}' | '\u{1CDB}')
             && matches!(w[1], '\u{0901}' | '\u{0902}' | '\u{0903}')
     })
+}
+
+/// An input left out for a scheme. IAST has no standard Vedic accents (vidyut writes combining
+/// marks for some of them, lipilekhika the arrows of Normal) and vidyut writes ꣳ as `ṁ` (the
+/// anusvAra in lipilekhika), so its inputs with Vedic marks are left out.
+fn skip_input(script: &str, input: &str) -> bool {
+    match script {
+        "IAST" => input.chars().any(|c| {
+            ('\u{0951}'..='\u{0954}').contains(&c)
+                || ('\u{1CD0}'..='\u{1CFF}').contains(&c)
+                || ('\u{A8E0}'..='\u{A8FF}').contains(&c)
+        }),
+        _ => false,
+    }
 }
 
 /// A Devanagari or Vedic Extensions character left in the output by vidyut
@@ -147,7 +162,7 @@ fn main() {
                 "an accent before an anusvAra / visarga, `move_accents_after` would reorder it: {input}"
             );
             let output = lipika.transliterate(input, Scheme::Devanagari, scheme);
-            if has_unmapped_char(&output) {
+            if skip_input(script, input) || has_unmapped_char(&output) {
                 skipped += 1;
                 continue;
             }

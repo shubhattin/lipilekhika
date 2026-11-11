@@ -96,6 +96,8 @@ mod tests {
         assert_eq!(resolve("hk"), Ok(ScriptListEnum::HarvardKyoto));
         assert_eq!(resolve("itrans"), Ok(ScriptListEnum::Itrans));
         assert_eq!(resolve("ITRANS"), Ok(ScriptListEnum::Itrans));
+        assert_eq!(resolve("iast"), Ok(ScriptListEnum::Iast));
+        assert_eq!(resolve("IAST"), Ok(ScriptListEnum::Iast));
         assert_eq!(resolve("harvard-kyoto"), Ok(ScriptListEnum::HarvardKyoto));
         assert_eq!(resolve("gur"), Ok(ScriptListEnum::Gurumukhi));
         assert_eq!(resolve("as"), Ok(ScriptListEnum::Assamese));

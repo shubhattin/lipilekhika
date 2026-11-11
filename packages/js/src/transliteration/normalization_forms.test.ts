@@ -12,9 +12,11 @@ import { SCRIPT_LIST } from '../utils/lang_list';
 
 /** Texts whose decomposed form is read differently, by script.
  * Romanized āūṁ (ॐ): the matcher does not back out of a prefix that is not read by itself, and
- * its NFD a◌̄u◌̄m◌̇ would need a◌̄u and a◌̄u◌̄m, so it is read letter by letter (आऊं) */
+ * its NFD a◌̄u◌̄m◌̇ would need a◌̄u and a◌̄u◌̄m, so it is read letter by letter (आऊं). The same
+ * for IAST oṃ (ॐ, NFD o m◌̣ would need om, which is ओम्): ओं */
 const EXCEPTIONS: Partial<Record<string, string[]>> = {
-  Romanized: ['āūṁ']
+  Romanized: ['āūṁ'],
+  IAST: ['oṃ', 'Oṃ', 'OṂ']
 };
 
 describe('Canonically equivalent (NFD / NFC) forms are read the same', () => {

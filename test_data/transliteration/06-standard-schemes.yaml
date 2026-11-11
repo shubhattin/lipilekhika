@@ -119,3 +119,44 @@
   input: kRSNa jJAnam zrIH saMskRtam
   output: kRRiShNa j~nAnam shrIH saMskRRitam
   reversible: true
+# IAST: capital letters are read (the output is small)
+- index: 20
+  from: IAST
+  to: Devanagari
+  input: Kṛṣṇa RĀMA Rāmaḥ ŚIVA Ṛṣi AIRĀVATA KHAGA Ḍhakkā Bhagavad-Gītā oṃ Oṃ OṂ soṃ
+  output: कृष्ण राम रामः शिव ऋषि ऐरावत खग ढक्का भगवद्-गीता ॐ ॐ ॐ सों
+# decomposed (NFD) capitals
+- index: 21
+  from: IAST
+  to: Devanagari
+  input: "Kr\u0323s\u0323n\u0323a R\u0325s\u0323i"
+  output: कृष्ण ऋषि
+# the ISO 15919 forms and the other avagrahas are read
+- index: 22
+  from: IAST
+  to: Devanagari
+  input: saṁskṛtam kr̥ṣṇa l̥kāra r̥̄ l̥̄ so'ham so’ham so`ham
+  output: संस्कृतम् कृष्ण ऌकार ॠ ॡ सोऽहम् सोऽहम् सोऽहम्
+# ḷ ḹ are the vocalic ऌ ॡ, ळ is ḻ (Romanized ḷ is ळ, ē / ō its long e / o)
+- index: 23
+  from: Devanagari
+  to: IAST
+  input: ऌकार ॡ ळ केरळ
+  output: ḷkāra ḹ ḻa keraḻa
+  reversible: true
+- index: 24
+  from: Romanized
+  to: IAST
+  input: kēraḷa l̥ ē e ō o ṁ
+  output: keraḻa ḷ e e o o ṃ
+- index: 25
+  from: Devanagari
+  to: IAST
+  input: क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़ ऱ ऩ ॐ हँस
+  output: qa k͟ha ġa za r̤a r̤ha fa ẏa ṟa ṉa oṃ ham̐sa
+  reversible: true
+- index: 26
+  from: IAST
+  to: Telugu
+  input: kèraḻa kòṭa keraḻa
+  output: కెరళ కొట కేరళ
