@@ -10,11 +10,11 @@
   output: समय़ य़
   script: Devanagari
   preserve_check: true
+# (no preserve check: ଯ is read as the plain ya y, #186)
 - index: 2
   text: yzadi
   output: ଯଦି
   script: Odia
-  preserve_check: true
 
 # Independent candra vowels ऍ ऑ (and their mAtrAs) are typed with `aiI` / `auU`. A script
 # without them writes ai / au, like the transliteration of Normal `aiI` (#186, was ai + I: ঐঈ)

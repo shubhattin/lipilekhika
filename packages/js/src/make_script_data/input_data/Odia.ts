@@ -327,6 +327,9 @@ const Odia: InputBrahmicScriptType = {
     {
       text: 'ୟ',
       text_krama: ['y'],
+      // ଯ (YA) is read as the plain ya too, य़ is not used in Devanagari for it: ଯାତ୍ରା -> यात्रा
+      // (was य़ात्रा). Written as before, य -> ୟ and य़ -> ଯ (#186)
+      duplicates: ['ଯ'],
       type: 'vyanjana'
     },
     {

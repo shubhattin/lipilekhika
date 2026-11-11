@@ -38,6 +38,9 @@
 - `CustomOptions` is `#[non_exhaustive]`: new options can be added without breaking code. Outside the crate it is built with `CustomOptionsBuilder`, `CustomOptions::default()` and setting fields, or `CustomOptions::try_from_pairs` (a struct literal no longer compiles)
 - `UnknownCustomOptionKey` implements `Display` and `core::error::Error` (works with `?` into `Box<dyn Error>`) ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
 - `rust-version` is 1.88 (was 1.85, the crate uses let chains, stable since 1.88) ([#180](https://github.com/shubhattin/lipilekhika/issues/180))
+- Normal: the candra vowels ऍ ऑ (and their mAtrAs ॅ ॉ) are `aiI` / `auU`, the typing keys (were `ai` / `au`, the same as ऐ औ): `हॉटल` -> `hauUTala` -> `हॉटल` (was `hauTala` -> `हौटल`). Sinhala ඇ ඈ are the same vowels, `ඇයි` -> `aiIyi` (was `aiyi`, which reads back as `ඓයි`). In a script without them Normal `aiI` is ai (ঐ, was ঐঈ), typing too; typing `kaiI` into Romanized shows `kê` (was `kaiī`) ([#186](https://github.com/shubhattin/lipilekhika/issues/186))
+- Odia `ଯ` is read as the plain ya: `ଯାତ୍ରା` -> `यात्रा` / `yAtrA` (was `य़ात्रा` / `yzAtrA`). Written as before: `य` -> `ୟ`, `य़` -> `ଯ` ([#186](https://github.com/shubhattin/lipilekhika/issues/186))
+- Typing data map (`get_script_typing_data_map`): lists every key, also the ones that type several characters: `x` -> `क्ष` ([#186](https://github.com/shubhattin/lipilekhika/issues/186))
 
 ## rust-lib@v1.1.2
 

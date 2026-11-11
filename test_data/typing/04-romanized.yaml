@@ -14,10 +14,11 @@
   script: Romanized
 
 # `aiI` and `auU` are prefixes of `aiI^` (Ê) and `auU^` (Ô). As intermediate typing entries they
-# were resolved character by character to the a-mAtrA, typed as `aaa`. They are `ai` + `I`, `au` + `U`
+# were resolved character by character to the a-mAtrA, typed as `aaa`. They are ê ô, like Normal
+# `aiI` `auU` in the transliteration (#186, were `ai` + `I`, `au` + `U`: kaiī auū)
 - index: 2
   text: kaiI auU
-  output: kaiī auū
+  output: kê ô
   script: Romanized
 - index: 3
   text: kaiI^ auU^

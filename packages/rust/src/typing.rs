@@ -5,6 +5,7 @@
 use crate::custom_options::CustomOptions;
 use crate::scripts::{Script, ScriptListEnum};
 use alloc::string::{String, ToString};
+use alloc::vec;
 use alloc::vec::Vec;
 use hashbrown::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
@@ -517,6 +518,7 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
             .map(|(_, i)| *i)
     };
     let mut typing_map_texts: HashSet<&str> = HashSet::new();
+    let mut multi_krama_keys: Vec<TypingDataMapItem> = Vec::new();
 
     // Populate mappings from typing_text_to_krama_map
     for (normal_text_map, item) in &script_data.typing_text_to_krama_map {
@@ -541,7 +543,6 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
                 entry.2.push(normal_text_map.clone());
             }
         } else if let Some(ref krama) = item.krama {
-            // Ignore entries with length > 1 (intermediate typing states)
             if krama.len() == 1 {
                 let krama_index = krama[0];
                 if krama_index >= 0
@@ -549,6 +550,24 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
                 {
                     entry.2.push(normal_text_map.clone());
                 }
+            } else if item.next.as_ref().is_none_or(|next| next.is_empty())
+                && krama.iter().all(|&i| i >= 0)
+            {
+                // A key of several krama (`x` -> क्ष). An intermediate typing state (`AU` of
+                // `AUM`) is not a key of its own
+                let text: String = krama
+                    .iter()
+                    .filter_map(|&i| script_data.krama_text_arr.get(i as usize))
+                    .map(|(text, _)| text.as_str())
+                    .collect();
+                let list_type = krama
+                    .last()
+                    .and_then(|&i| script_data.krama_text_arr.get(i as usize))
+                    .and_then(|(_, list_index)| *list_index)
+                    .and_then(|idx| script_data.list.get(idx as usize))
+                    .map(ListType::from_list)
+                    .unwrap_or(ListType::Anya);
+                multi_krama_keys.push((text, list_type, vec![normal_text_map.clone()]));
             }
         }
     }
@@ -566,6 +585,7 @@ pub fn get_script_typing_data_map(typing_script: Script) -> ScriptTypingDataMap 
     // Merge duplicates
     // A key whose character this script lacks falls back to an empty text (`.a1` to the
     // a1 mAtrA, which is the empty a mAtrA in Devanagari), nothing to show for it
+    common_krama_map.extend(multi_krama_keys);
     common_krama_map = merge_duplicate_text_mappings(common_krama_map)
         .into_iter()
         .filter(|(text, _, _)| !text.is_empty())
@@ -1119,11 +1139,12 @@ mod tests {
     /// `x` types क्ष (k, halant, Sh), it was not listed as only the keys of a single krama were (#186)
     #[test]
     fn typing_data_map_lists_the_x_conjunct() {
-        for (script, text) in [
-            (Script::Devanagari, "क्ष"),
-            (Script::Telugu, "క్ష"),
-            (Script::Brahmi, "𑀓𑁆𑀱"),
-            (Script::Romanized, "kṣ"),
+        // (all the letters of Romanized are `anya`)
+        for (script, text, list_type) in [
+            (Script::Devanagari, "क्ष", ListType::Vyanjana),
+            (Script::Telugu, "క్ష", ListType::Vyanjana),
+            (Script::Brahmi, "𑀓𑁆𑀱", ListType::Vyanjana),
+            (Script::Romanized, "kṣ", ListType::Anya),
         ] {
             let data = get_script_typing_data_map(script);
             let item = data
@@ -1132,7 +1153,7 @@ mod tests {
                 .find(|item| item.2.iter().any(|key| key == "x"));
             assert_eq!(
                 item,
-                Some(&(text.to_string(), ListType::Vyanjana, vec!["x".to_string()])),
+                Some(&(text.to_string(), list_type, vec!["x".to_string()])),
                 "{script:?}"
             );
         }

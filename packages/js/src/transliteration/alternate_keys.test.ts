@@ -118,17 +118,18 @@ describe('Typing data map lists every typable key', () => {
   // `x` types क्ष (a sequence of k, halant, Sh) and was not listed, as only the keys of a single
   // krama were (#186)
   it('lists x as the conjunct it types', async () => {
-    const expected: Record<string, string> = {
-      Devanagari: 'क्ष',
-      Telugu: 'క్ష',
-      Malayalam: 'ക്ഷ',
-      Brahmi: '𑀓𑁆𑀱',
-      Romanized: 'kṣ'
+    // (all the letters of Romanized are `anya`)
+    const expected: Record<string, [string, string]> = {
+      Devanagari: ['क्ष', 'vyanjana'],
+      Telugu: ['క్ష', 'vyanjana'],
+      Malayalam: ['ക്ഷ', 'vyanjana'],
+      Brahmi: ['𑀓𑁆𑀱', 'vyanjana'],
+      Romanized: ['kṣ', 'anya']
     };
-    for (const [script, text] of Object.entries(expected)) {
+    for (const [script, [text, type]] of Object.entries(expected)) {
       const { common_krama_map } = await getScriptTypingDataMap(script as 'Devanagari');
       const item = common_krama_map.find(([, , keys]) => keys.includes('x'));
-      expect(item, script).toEqual([text, 'vyanjana', ['x']]);
+      expect(item, script).toEqual([text, type, ['x']]);
     }
   });
 

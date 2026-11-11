@@ -230,7 +230,7 @@ fn main() {
   - `diff_add_text: String` — Text to insert
 
 - **`ScriptTypingDataMap`** — Typing data for a script (from `get_script_typing_data_map`)
-  - `common_krama_map: Vec<TypingDataMapItem>` — Common character mappings
+  - `common_krama_map: Vec<TypingDataMapItem>` — Common character mappings (also keys that type several characters, `x` -> `क्ष`)
   - `script_specific_krama_map: Vec<TypingDataMapItem>` — Script-specific mappings
 
 - **`ListType`** — Character type enum: `Anya`, `Vyanjana`, `Matra`, `Svara`

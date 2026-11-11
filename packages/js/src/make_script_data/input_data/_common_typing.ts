@@ -107,24 +107,6 @@ export const COMMON_SCRIPT_TYPING_DATA = [
   }
 ] satisfies InputTypingListDataType[];
 
-/** Independent candra vowels ऍ ऑ (and their mAtrAs ॅ ॉ after a vyanjana): `aiI` `auU`.
- *
- * Only for the scripts which have them (Devanagari, Gujarati, Sinhala ...), elsewhere `aiI`
- * stays `ai` + `I` (in Romanized `aiI` is the start of `aiI^` -> Ê)
- */
-export const CANDRA_SVARA_TYPING_DATA = [
-  {
-    type: 'duplicates',
-    ref_krama_key: 'aiI-svara',
-    duplicates: ['aiI']
-  },
-  {
-    type: 'duplicates',
-    ref_krama_key: 'auU-svara',
-    duplicates: ['auU']
-  }
-] satisfies InputTypingListDataType[];
-
 export const COMMON_NUMBER_TYPING_DATA = [
   {
     type: 'duplicates',

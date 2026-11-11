@@ -449,6 +449,10 @@ class TestKramaDataItem:
 
         # For each character in typing data, verify it matches in krama data
         for typing_char, typing_type, _ in typing_data.common_krama_map:
+            if typing_char not in krama_map:
+                # a key of several krama: `x` -> क्ष (k, halant, Sh)
+                assert all(char in krama_map for char in typing_char), typing_char
+                continue
             assert typing_char in krama_map, (
                 f"Character {typing_char} in typing data but not in krama data"
             )
