@@ -244,11 +244,11 @@ Steps:
    git push origin packages/go/lipilekhika/v1.2.3
    ```
 
-3. GitHub release with the changelog section as its notes (only for the release notes, Go does not use it):
+3. GitHub release with the changelog section as its notes (only for the release notes, Go does not use it). Its title is the tag name, like the other releases:
 
    ```sh
    awk '/^## v1.2.3/{f=1;next} /^## /{if(f)exit} f' packages/go/lipilekhika/CHANGELOG.md > /tmp/notes.md
-   gh release create packages/go/lipilekhika/v1.2.3 --verify-tag --generate-notes --notes-file /tmp/notes.md --title "go: v1.2.3"
+   gh release create packages/go/lipilekhika/v1.2.3 --verify-tag --generate-notes --notes-file /tmp/notes.md
    ```
 
 4. Have the proxy fetch the version (otherwise the first user does that), then check it:
