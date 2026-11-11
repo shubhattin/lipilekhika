@@ -153,6 +153,12 @@ export type InputOtherScriptType = {
   script_type: 'other';
   /** Schwa deletion character, usually `a` */
   schwa_character: string;
+  /** Read the capital forms of the texts too (only read, the output stays as it is): the first
+   * letter capital (`Kh`, `Ā`) and all of them (`KH`, `AI`). For a scheme where capital letters
+   * have no meaning of their own, like IAST (`Kṛṣṇa`, `RĀMA`). Not for one that uses them as
+   * letters (Harvard-Kyoto `T` ट, SLP1 `K` ख). A capital form that is already a text keeps it.
+   */
+  case_insensitive?: boolean;
   manual_krama_text_map: {
     [key in KramaKeysExtendedType]?: string;
   };

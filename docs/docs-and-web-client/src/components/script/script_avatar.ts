@@ -13,6 +13,7 @@ export const SCRIPT_AVATAR_MAP: Record<ScriptListType, string> = {
   Sinhala: 'අ',
   Normal: 'a',
   Romanized: 'ā',
+  IAST: 'IA',
   ITRANS: 'IT',
   'Harvard-Kyoto': 'HK',
   SLP1: 'SL',

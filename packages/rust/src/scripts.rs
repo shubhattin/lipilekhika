@@ -52,6 +52,8 @@ pub enum ScriptListEnum {
     HarvardKyoto,
     #[strum(serialize = "ITRANS")]
     Itrans,
+    #[strum(serialize = "IAST")]
+    Iast,
 }
 impl ScriptListEnum {
     /// Resolves a canonical `script_list.json` script id to the internal script enum.
@@ -81,6 +83,7 @@ impl ScriptListEnum {
             22 => Some(Self::Slp1),
             23 => Some(Self::HarvardKyoto),
             24 => Some(Self::Itrans),
+            25 => Some(Self::Iast),
             _ => None,
         }
     }
@@ -135,6 +138,8 @@ pub enum Script {
     HarvardKyoto,
     #[strum(serialize = "ITRANS")]
     Itrans,
+    #[strum(serialize = "IAST")]
+    Iast,
     #[strum(serialize = "English")]
     English,
     #[strum(serialize = "Sanskrit")]
@@ -213,6 +218,8 @@ pub enum Script {
     Hk,
     #[strum(serialize = "itrans")]
     Itrans2,
+    #[strum(serialize = "iast")]
+    Iast2,
     #[strum(serialize = "sa")]
     Sa,
     #[strum(serialize = "san")]
@@ -258,6 +265,7 @@ impl Script {
             22 => Some(Self::Slp1),
             23 => Some(Self::HarvardKyoto),
             24 => Some(Self::Itrans),
+            25 => Some(Self::Iast),
             _ => None,
         }
     }
@@ -288,6 +296,7 @@ impl From<Script> for ScriptListEnum {
             Script::Slp1 => ScriptListEnum::Slp1,
             Script::HarvardKyoto => ScriptListEnum::HarvardKyoto,
             Script::Itrans => ScriptListEnum::Itrans,
+            Script::Iast => ScriptListEnum::Iast,
             Script::English => ScriptListEnum::Normal,
             Script::Sanskrit => ScriptListEnum::Devanagari,
             Script::Hindi => ScriptListEnum::Devanagari,
@@ -327,6 +336,7 @@ impl From<Script> for ScriptListEnum {
             Script::Slp => ScriptListEnum::Slp1,
             Script::Hk => ScriptListEnum::HarvardKyoto,
             Script::Itrans2 => ScriptListEnum::Itrans,
+            Script::Iast2 => ScriptListEnum::Iast,
             Script::Sa => ScriptListEnum::Devanagari,
             Script::San => ScriptListEnum::Devanagari,
             Script::Hin => ScriptListEnum::Devanagari,
@@ -363,6 +373,7 @@ pub(crate) const SCRIPTS: &[(&str, u8)] = &[
     ("SLP1", 22),
     ("Harvard-Kyoto", 23),
     ("ITRANS", 24),
+    ("IAST", 25),
 ];
 /// `(language name, language id)` in `script_list.json` order.
 pub(crate) const LANGS: &[(&str, u8)] = &[
@@ -435,6 +446,7 @@ pub(crate) const SCRIPT_ALTERNATES_MAP: &[(&str, &str)] = &[
     ("slp", "SLP1"),
     ("hk", "Harvard-Kyoto"),
     ("itrans", "ITRANS"),
+    ("iast", "IAST"),
     ("sa", "Devanagari"),
     ("san", "Devanagari"),
     ("hin", "Devanagari"),

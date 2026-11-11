@@ -456,11 +456,27 @@ function get_out_script_data(
       readable.set(text, { krama: value.krama, fallback_list_ref: value.fallback_list_ref });
     }
     const variants = new Map<string, { krama: number[]; fallback_list_ref?: number | null }>();
+    const add_variant = (
+      variant: string,
+      value: { krama: number[]; fallback_list_ref?: number | null }
+    ) => {
+      if (!readable.has(variant) && !variants.has(variant)) variants.set(variant, value);
+    };
+    // the capital forms (`case_insensitive`), they also get their NFD / NFC forms
+    const case_insensitive =
+      input_script_data.script_type === 'other' && input_script_data.case_insensitive === true;
     for (const [text, value] of readable) {
-      for (const form of ['NFD', 'NFC'] as const) {
-        const variant = text.normalize(form);
-        if (variant !== text && !readable.has(variant) && !variants.has(variant))
-          variants.set(variant, value);
+      const case_forms = [text];
+      if (case_insensitive) {
+        const [first, ...rest] = [...text];
+        case_forms.push(first.toUpperCase() + rest.join(''), text.toUpperCase());
+      }
+      for (const case_form of case_forms) {
+        if (case_form !== text) add_variant(case_form, value);
+        for (const form of ['NFD', 'NFC'] as const) {
+          const variant = case_form.normalize(form);
+          if (variant !== text) add_variant(variant, value);
+        }
       }
     }
     for (const [variant, value] of variants) {

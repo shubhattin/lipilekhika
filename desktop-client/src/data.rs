@@ -43,6 +43,7 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
     ScriptListEnum::Sinhala => "අ",
     ScriptListEnum::Normal => "a",
     ScriptListEnum::Romanized => "ā",
+    ScriptListEnum::Iast => "IA",
     ScriptListEnum::Itrans => "IT",
     ScriptListEnum::HarvardKyoto => "HK",
     ScriptListEnum::Slp1 => "SL",
@@ -59,6 +60,7 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
 
 /// The standard romanization schemes, listed after Romanized (before the ancient scripts)
 const STANDARD_SCHEMES: &[ScriptListEnum] = &[
+  ScriptListEnum::Iast,
   ScriptListEnum::Itrans,
   ScriptListEnum::HarvardKyoto,
   ScriptListEnum::Slp1,
