@@ -2,6 +2,7 @@
 
 ## v0.0.4 (Unreleased)
 
+- New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `IncludeInherentVowel` and `UseNativeNumerals: false` typing options, now for transliteration too
 - Core rewritten as a port of the Rust implementation: ~3.5x faster transliteration, ~2.6x faster typing, ~98% fewer allocations
 - Fix: output now matches Rust / JS, incl. Tamil-Extended superscripts and Vedic svaras, Romanized combining marks, and `replace_pancham_varga_varna_with_anusvAra` dropping the following consonant
 - Fix: custom rules are applied in a fixed order (`custom_options.json` order, like Rust), was random

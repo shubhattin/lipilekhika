@@ -483,8 +483,14 @@ type TransliterateCtx = {
 const DEFAULT_USE_NATIVE_NUMERALS_MODE = true;
 const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE = false;
 
-/** These options are not available on the main `transliterate` function of the `index.ts` */
-type CustomOptionsType = {
+/**
+ * Options of the core transliterator call (not the custom transliteration options).
+ *
+ * Not available on the main `transliterate` function of the `index.ts`, which uses the
+ * `normal_to_brahmic:keep_ascii_numerals` and `normal_to_brahmic:include_inherent_vowel`
+ * custom options instead (either one turns the behaviour on).
+ */
+type TransliterationFnOptions = {
   /** This enables typing mode, returns a context length which will be used to clear the external context */
   typing_mode?: boolean;
   /** Use native numerals in transliteration/typing */
@@ -508,12 +514,15 @@ export const transliterate_text_core = (
   to_script_data: ScriptData,
   trans_options: CustomOptionType,
   custom_rules: CustomRulesType,
-  options?: CustomOptionsType
+  options?: TransliterationFnOptions
 ) => {
-  const use_native_numerals = options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS_MODE;
+  const use_native_numerals =
+    (options?.useNativeNumerals ?? DEFAULT_USE_NATIVE_NUMERALS_MODE) &&
+    trans_options['normal_to_brahmic:keep_ascii_numerals'] !== true;
   const typing_mode = options?.typing_mode ?? false;
   const include_inherent_vowel =
-    options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL_MODE;
+    (options?.includeInherentVowel ?? DEFAULT_INCLUDE_INHERENT_VOWEL_MODE) ||
+    trans_options['normal_to_brahmic:include_inherent_vowel'] === true;
   if (typing_mode && from_script_name !== 'Normal') {
     throw new Error('Typing mode is only supported with Normal script as the input');
   }
@@ -1160,7 +1169,7 @@ export const transliterate_text = async (
   from_script_name: script_list_type,
   to_script_name: script_list_type,
   transliteration_input_options?: CustomOptionType,
-  options?: CustomOptionsType
+  options?: TransliterationFnOptions
 ) => {
   const typing_mode = options?.typing_mode ?? false;
   if (typing_mode && from_script_name !== 'Normal') {
@@ -1170,19 +1179,18 @@ export const transliterate_text = async (
     getScriptData(from_script_name),
     getScriptData(to_script_name)
   ]);
-  const { trans_options, custom_rules } = resolve_transliteration_rules(
-    from_script_data,
-    to_script_data,
-    transliteration_input_options
-  );
+  // Keep only the custom options active for this script pair and flatten the rules of the
+  // enabled ones into one list: the core reads these, not the input options.
+  const { trans_options: active_resolved_trans_options, custom_rules: resolved_custom_rules } =
+    resolve_transliteration_rules(from_script_data, to_script_data, transliteration_input_options);
   return transliterate_text_core(
     text,
     from_script_name,
     to_script_name,
     from_script_data,
     to_script_data,
-    trans_options,
-    custom_rules,
+    active_resolved_trans_options,
+    resolved_custom_rules,
     options
   );
 };

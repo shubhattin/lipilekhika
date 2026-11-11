@@ -853,7 +853,10 @@ pub fn transliterate_text_core_with(
     options: Option<TransliterationFnOptions>,
     mut buffers: impl CoreBuffers,
 ) -> TransliterationOutput {
-    let opts = options.unwrap_or_default();
+    let mut opts = options.unwrap_or_default();
+    // the custom options turn these on too (the typing context passes them as `opts`)
+    opts.use_native_numerals &= !trans_options_in.normal_to_brahmic_keep_ascii_numerals;
+    opts.include_inherent_vowel |= trans_options_in.normal_to_brahmic_include_inherent_vowel;
 
     if opts.typing_mode && *from_script != ScriptListEnum::Normal {
         panic!("Typing mode is only supported with Normal script as the input");
@@ -1714,7 +1717,12 @@ pub fn transliterate_text(
     let from_data = ScriptData::get_script_data(&from_script);
     let to_data = ScriptData::get_script_data(&to_script);
 
-    let resolved = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
+    // Keep only the custom options active for this script pair and flatten the rules of the
+    // enabled ones into one list: the core reads these, not the input options.
+    let ResolvedTransliterationRules {
+        trans_options: active_resolved_trans_options,
+        custom_rules: resolved_custom_rules,
+    } = resolve_transliteration_rules(from_data, to_data, transliteration_input_options);
 
     transliterate_text_core(
         text,
@@ -1722,8 +1730,8 @@ pub fn transliterate_text(
         &to_script,
         from_data,
         to_data,
-        &resolved.trans_options,
-        &resolved.custom_rules,
+        &active_resolved_trans_options,
+        &resolved_custom_rules,
         options,
     )
 }

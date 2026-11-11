@@ -2,6 +2,7 @@
 
 ## python-lib@1.0.8 (Unreleased)
 
+- New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals=False` typing options, now for transliteration too
 - Performance Improvements (via rust-lib@@1.1.2)
 - Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)
 - Fix: Tamil-Extended superscripts moved after a following independent vowel: `ghaA` -> `க⁴ஆ` (was `கஆ⁴`) ([#150](https://github.com/shubhattin/lipilekhika/pull/150))
