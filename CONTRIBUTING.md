@@ -155,7 +155,7 @@ One timed pass without warm-up (JIT warm-up is included for JS), printing the sa
 
 ## Releasing
 
-Every package and app is released by its own GitHub Actions workflow, started by pushing a tag. The tag has to match the version in the version file, otherwise the workflow stops before it builds anything.
+Every package and app except Go is released by its own GitHub Actions workflow, started by pushing a tag. The tag has to match the version in the version file, otherwise the workflow stops before it builds anything. The Go package has no workflow, its release is the tag itself: see [Go package](#go-package) below.
 
 | What | Tag | Version in | Changelog | Workflow | Publishes to |
 | --- | --- | --- | --- | --- | --- |
@@ -220,6 +220,50 @@ gh workflow run release_js.yml -f tag=js-lib@v1.2.3 -f npm_dist_tag=latest
 - A registry does not take the same version twice. Running again only works if the failed run did not publish (a failure in a build or check job stops before publishing).
 - A manual JS run publishes under the npm dist-tag `beta` unless you pass `npm_dist_tag=latest`. A run started by the tag uses `latest`, or `beta` for prerelease versions like `1.2.3-beta.1`.
 - A manual JS run builds the commit of the tag, with the workflow file of the branch it is started from, so a fix to the workflow on `main` applies to a tag created before it. The other workflows build the branch they are started from (`--ref`, default `main`). Use `--ref <tag>` to build the tagged commit with the workflow file as it was at that tag.
+
+### Go package
+
+Go has no package registry to publish to: a version of the module is a git tag of this repo, and Go fetches the code of the tagged commit.
+
+- **Module path**: `github.com/shubhattin/lipilekhika/packages/go/lipilekhika` (the `module` line of [`go.mod`](packages/go/lipilekhika/go.mod)), which is also the import path.
+- **Tag**: the module is in a subdirectory, so its version tags carry the directory as a prefix: `packages/go/lipilekhika/v1.2.3`. A tag without the prefix (`v1.2.3`, `go-lib@v1.2.3`) is not seen by Go.
+- **Version**: only the tag has it, `go.mod` has no version field. The changelog is [`packages/go/lipilekhika/CHANGELOG.md`](packages/go/lipilekhika/CHANGELOG.md).
+- **Script data**: the module embeds `data/gob/*.gob` (`//go:embed` in `data/embed.go`). They are committed, and the tagged commit is exactly what users download, nothing is built for them. `bun run make-script-data` regenerates them, and Go CI ([`go_ci.yml`](.github/workflows/go_ci.yml)) fails when they are out of date. So tag a commit of `main` whose Go CI passed.
+- **Distribution**: on the first `go get` of a version, the Go module proxy (`proxy.golang.org`) downloads the tagged directory and keeps it, and the checksum database records its hash (users get it in `go.sum`). [pkg.go.dev](https://pkg.go.dev/github.com/shubhattin/lipilekhika/packages/go/lipilekhika) shows the documentation of the versions the proxy has.
+- **A version can not be changed**: once the proxy has it, moving or re-creating the tag does not change what users get (and a direct download from git then fails the checksum check). Fix a bad release with a new version; a `retract` directive in `go.mod` marks the bad one.
+- **Version numbers**: `v0.x.y` makes no compatibility promise. `v2.0.0` and later need the module path to end in `/v2` (`.../packages/go/lipilekhika/v2`), so go from `v0` to `v1`, not to `v2`.
+
+Steps:
+
+1. Give the changelog a section for the version (`## v1.2.3`), commit it to `main` and wait for Go CI to pass.
+
+2. Tag that commit (an annotated tag, like the earlier ones) and push the tag:
+
+   ```sh
+   git tag -a packages/go/lipilekhika/v1.2.3 -m "packages/go/lipilekhika/v1.2.3"
+   git push origin packages/go/lipilekhika/v1.2.3
+   ```
+
+3. GitHub release with the changelog section as its notes (only for the release notes, Go does not use it):
+
+   ```sh
+   awk '/^## v1.2.3/{f=1;next} /^## /{if(f)exit} f' packages/go/lipilekhika/CHANGELOG.md > /tmp/notes.md
+   gh release create packages/go/lipilekhika/v1.2.3 --verify-tag --generate-notes --notes-file /tmp/notes.md --title "go: v1.2.3"
+   ```
+
+4. Have the proxy fetch the version (otherwise the first user does that), then check it:
+
+   ```sh
+   GOPROXY=proxy.golang.org go list -m github.com/shubhattin/lipilekhika/packages/go/lipilekhika@v1.2.3
+   curl https://proxy.golang.org/github.com/shubhattin/lipilekhika/packages/go/lipilekhika/@latest
+   ```
+
+   Then use it like a user, in an empty directory outside the repo:
+
+   ```sh
+   go mod init example.com/try
+   go get github.com/shubhattin/lipilekhika/packages/go/lipilekhika@v1.2.3
+   ```
 
 ### Build tools
 

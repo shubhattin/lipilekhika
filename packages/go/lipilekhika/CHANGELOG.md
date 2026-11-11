@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.4 (Unreleased)
+## v0.1.0
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `IncludeInherentVowel` and `UseNativeNumerals: false` typing options, now for transliteration too
 - Core rewritten as a port of the Rust implementation: ~3.5x faster transliteration, ~2.6x faster typing, ~98% fewer allocations
