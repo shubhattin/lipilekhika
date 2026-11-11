@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to attach release to (e.g. mobile-app@v1.2.3)"
+        description: "Existing tag to attach release to (e.g. mobile-app@v1.2.3); for a dry run it does not have to exist"
         required: true
+      dry_run:
+        description: "Dry run: run the whole workflow (build, tests, checks), but publish / upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # Required for uploading to releases
@@ -239,8 +243,10 @@ jobs:
           path: mobile-app/build/app/outputs/bundle/release/lipilekhika_${{ steps.get_version.outputs.VERSION }}.aab
           retention-days: 30
 
-      # Upload architecture-specific APKs to the GitHub release (with --clobber to allow re-runs)
+      # Upload architecture-specific APKs to the GitHub release (with --clobber to allow re-runs);
+      # a dry run only keeps the APKs / AAB as the workflow artifacts above
       - name: Upload APKs to release
+        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

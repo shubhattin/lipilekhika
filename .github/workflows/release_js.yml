@@ -14,6 +14,10 @@ on:
         description: "npm dist-tag to publish under (e.g. beta, latest)"
         required: false
         default: "beta"
+      dry_run:
+        description: "Dry run: run the whole workflow (build, tests, checks), but publish / upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write  # Required for OIDC
@@ -480,5 +484,6 @@ jobs:
           echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_OUTPUT"
           echo "Resolved npm dist-tag: $DIST_TAG"
 
-      - name: Publish to npm
-        run: npm publish ./npm-package/package --tag "${{ steps.npm_dist_tag.outputs.DIST_TAG }}"
+      # a dry run goes through `npm publish --dry-run`: the same checks and file list, nothing is published
+      - name: Publish to npm${{ inputs.dry_run && ' (dry run)' || '' }}
+        run: npm publish ./npm-package/package --tag "${{ steps.npm_dist_tag.outputs.DIST_TAG }}" ${{ inputs.dry_run && '--dry-run' || '' }}

@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to attach release to (e.g. pc-app@v1.2.3)"
+        description: "Existing tag to attach release to (e.g. pc-app@v1.2.3); for a dry run it does not have to exist"
         required: true
+      dry_run:
+        description: "Dry run: run the whole workflow (build, tests, checks), but publish / upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # Required for creating releases + uploading assets
@@ -168,8 +172,18 @@ jobs:
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
+      # a dry run keeps the installer as a workflow artifact instead
+      - name: Upload MSI as artifact (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pc-app-msi
+          path: desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
+          retention-days: 7
+
       # Create GitHub Release and upload assets using the normalized tag
       - name: Upload binary to release
+        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash

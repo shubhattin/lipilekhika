@@ -8,8 +8,12 @@ on:
     # This would work only if the package version was already not published to PyPI
     inputs:
       tag:
-        description: "Existing tag to attach release to (e.g. python-lib@v1.2.3)"
+        description: "Existing tag to attach release to (e.g. python-lib@v1.2.3); for a dry run it does not have to exist"
         required: true
+      dry_run:
+        description: "Dry run: run the whole workflow (build, tests, checks), but publish / upload nothing"
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -295,7 +299,14 @@ jobs:
       - name: List all wheels
         run: ls -la dist/
 
+      # a dry run checks the wheels and the sdist (metadata, README rendering) and publishes nothing;
+      # they stay downloadable as the `wheels-*` artifacts of the run
+      - name: Check the distributions (dry run)
+        if: ${{ inputs.dry_run }}
+        run: pipx run twine check --strict dist/*
+
       - name: Publish to PyPI
+        if: ${{ !inputs.dry_run }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
