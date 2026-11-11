@@ -42,8 +42,10 @@ class FakeKeyboardEvent extends FakeEvent {
 }
 class FakeTextArea {
   value = '';
-  selectionStart = 0;
-  selectionEnd = 0;
+  selectionStart: number | null = 0;
+  selectionEnd: number | null = 0;
+  /** -1 when the element has no `maxlength`, like the DOM property */
+  maxLength = -1;
   setRangeText(text: string, start: number, end: number, mode: string) {
     this.value = this.value.slice(0, start) + text + this.value.slice(end);
     if (mode === 'end') this.selectionStart = this.selectionEnd = start + text.length;
@@ -52,8 +54,35 @@ class FakeTextArea {
   setCaret(pos: number) {
     this.selectionStart = this.selectionEnd = pos;
   }
+  /** Selects a range, like a mouse drag or Shift + arrows would */
+  select(start: number, end: number) {
+    this.selectionStart = start;
+    this.selectionEnd = end;
+  }
 }
 class FakeInput extends FakeTextArea {}
+/** `<input type="email">` / `type="number"`: no selection API, `setRangeText` throws */
+class FakeEmailInput extends FakeInput {
+  selectionStart = null;
+  selectionEnd = null;
+  setRangeText(): never {
+    throw new Error(
+      "InvalidStateError: The input element's type ('email') does not support selection."
+    );
+  }
+}
+
+/** What the browser does for an edit it is not prevented from making */
+const browserInsert = (el: FakeTextArea, data: string) => {
+  if (el.selectionStart === null || el.selectionEnd === null) {
+    el.value += data;
+    return;
+  }
+  const replaced = el.selectionEnd - el.selectionStart;
+  // the browser does not let typing grow the text past `maxlength`
+  if (el.maxLength >= 0 && el.value.length - replaced + data.length > el.maxLength) return;
+  FakeTextArea.prototype.setRangeText.call(el, data, el.selectionStart, el.selectionEnd, 'end');
+};
 
 // Stubbed by hand, not with `vi.stubGlobal`, as the tests also run under `bun test`
 const FAKE_GLOBALS = {
@@ -99,9 +128,7 @@ const beforeInput = async (
 ) => {
   const ev = new FakeInputEvent('beforeinput', { data, inputType, target: el, currentTarget: el });
   const done = handleTypingBeforeInputEvent(ctx, ev, undefined, enabled);
-  if (!ev.defaultPrevented && data !== null) {
-    el.setRangeText(data, el.selectionStart, el.selectionEnd, 'end');
-  }
+  if (!ev.defaultPrevented && data !== null) browserInsert(el, data);
   await done;
   return ev;
 };
@@ -208,6 +235,45 @@ describe('Browser typing helpers', () => {
     expect(el.value).toBe('क्xअ');
   });
 
+  it('replaces a selection with the transliterated key', async () => {
+    const { el, ctx } = await setup('hello world');
+    el.select(0, 5);
+    const ev = await beforeInput(el, ctx, 'k');
+    expect(ev.defaultPrevented).toBe(true);
+    await typeText(el, ctx, 'Sha');
+    expect(el.value).toBe('क्ष world');
+    // a selection in the middle of a word starts a new context there
+    el.select(el.value.length - 3, el.value.length); // "rld"
+    await typeText(el, ctx, 'ma');
+    expect(el.value).toBe('क्ष woम');
+  });
+
+  it('does not grow the text past `maxlength`', async () => {
+    const { el, ctx } = await setup();
+    el.maxLength = 3;
+    await typeText(el, ctx, 'namaste');
+    expect(el.value.length).toBeLessThanOrEqual(3);
+
+    const two = await setup();
+    two.el.maxLength = 2;
+    await typeText(two.el, two.ctx, 'ka'); // क् (2 units) then क (1)
+    expect(two.el.value).toBe('क');
+    const ev = await beforeInput(two.el, two.ctx, 'k'); // कक् would be 3 units
+    expect(ev.defaultPrevented).toBe(true); // not typed raw either
+    expect(two.el.value).toBe('क');
+  });
+
+  it('leaves inputs without a selection API (email, number) to the browser', async () => {
+    const el = new FakeEmailInput();
+    const ctx = createTypingContext('Devanagari');
+    await ctx.ready;
+    for (const ch of 'ka') {
+      const ev = await beforeInput(el, ctx, ch);
+      expect(ev.defaultPrevented).toBe(false);
+    }
+    expect(el.value).toBe('ka');
+  });
+
   it('applies keys typed before the script data is loaded in order', async () => {
     for (const script of ['Telugu', 'Brahmi'] as const) {
       const el = new FakeTextArea();
@@ -225,7 +291,9 @@ describe('Browser typing helpers', () => {
 describe('Browser typing helpers: deprecated `input` event handler', () => {
   /** Like a browser: inserts the data, then fires `input` */
   const input = async (el: FakeTextArea, ctx: Ctx, data: string, enabled = true) => {
-    el.setRangeText(data, el.selectionStart, el.selectionEnd, 'end');
+    const before = el.value;
+    browserInsert(el, data);
+    if (el.value === before) return; // blocked by `maxlength`: no `input` event
     const ev = new FakeInputEvent('input', {
       data,
       inputType: 'insertText',
@@ -255,5 +323,20 @@ describe('Browser typing helpers: deprecated `input` event handler', () => {
     await input(el, ctx, 'x', false);
     await input(el, ctx, 'a');
     expect(el.value).toBe('क्xअ');
+  });
+
+  it('does not grow the text past `maxlength`', async () => {
+    const { el, ctx } = await setup();
+    el.maxLength = 1;
+    await input(el, ctx, 'k'); // the browser inserts "k", क् would be 2 units
+    expect(el.value).toBe('');
+  });
+
+  it('leaves inputs without a selection API (email, number) to the browser', async () => {
+    const el = new FakeEmailInput();
+    const ctx = createTypingContext('Devanagari');
+    await ctx.ready;
+    for (const ch of 'ka') await input(el, ctx, ch);
+    expect(el.value).toBe('ka');
   });
 });
