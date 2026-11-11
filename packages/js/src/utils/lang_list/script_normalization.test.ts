@@ -82,6 +82,7 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('Romanized')).toBe('Romanized');
       expect(getNormalizedScriptName('SLP1')).toBe('SLP1');
       expect(getNormalizedScriptName('Harvard-Kyoto')).toBe('Harvard-Kyoto');
+      // @ts-ignore
       expect(getNormalizedScriptName('harvard-kyoto')).toBe('Harvard-Kyoto');
       expect(getNormalizedScriptName('Gurumukhi')).toBe('Gurumukhi');
       expect(getNormalizedScriptName('Assamese')).toBe('Assamese');
