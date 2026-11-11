@@ -46,6 +46,14 @@ const Telugu: InputBrahmicScriptType = {
   },
   list: [
     {
+      // the nukta (క఼ -> क़, was not read). Only read: Telugu writes a vyanjana with the nukta as
+      // the plain one (क़ -> క, श़ -> శ)
+      text: '఼',
+      text_krama: [],
+      fallback: ['nuqta'],
+      type: 'anya'
+    },
+    {
       text: 'ఓం',
       text_krama: ['AUM'],
       duplicates: ['ॐ'],

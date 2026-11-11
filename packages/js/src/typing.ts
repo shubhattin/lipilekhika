@@ -138,7 +138,12 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
     next_trim_length = CONTEXT_TRIM_LENGTH;
   }
 
-  const transliterateInput = (input: string) =>
+  /**
+   * @param at_text_end the input is at the end of the typed text. Else (the head of a long
+   * context, see `commitContextStart`) the inherent vowel option does not apply, it is only for
+   * the last vyanjana of the text (`kkk` is क्क्क, its head `kk` on its own would be क्क)
+   */
+  const transliterateInput = (input: string, at_text_end = true) =>
     transliterate_text_core(
       input,
       'Normal',
@@ -150,7 +155,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
       {
         typing_mode: true,
         useNativeNumerals: use_native_numerals,
-        includeInherentVowel: include_inherent_vowel
+        includeInherentVowel: include_inherent_vowel && at_text_end
       }
     );
 
@@ -178,7 +183,7 @@ export function createTypingContext(typing_lang: ScriptLangType, options?: Typin
         !curr_output.endsWith(tail.output)
       )
         continue;
-      const head = transliterateInput(curr_input.substring(0, split));
+      const head = transliterateInput(curr_input.substring(0, split), false);
       if (head.output.length + tail.output.length !== curr_output.length) continue;
       if (!curr_output.startsWith(head.output)) continue;
       curr_input = tail_input;

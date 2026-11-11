@@ -161,8 +161,13 @@ impl TypingContext {
     }
 
     /// Transliterates `input` (the context input or a part of it) in typing mode.
-    fn transliterate_input(&mut self, input: &str) -> TransliterationOutput {
-        let translit_options = self.build_translit_options();
+    ///
+    /// `at_text_end`: the input is at the end of the typed text. Else (the head of a long
+    /// context, see `commit_context_start`) the inherent vowel option does not apply, it is only
+    /// for the last vyanjana of the text (`kkk` is क्क्क, its head `kk` on its own would be क्क).
+    fn transliterate_input(&mut self, input: &str, at_text_end: bool) -> TransliterationOutput {
+        let mut translit_options = self.build_translit_options();
+        translit_options.include_inherent_vowel &= at_text_end;
         transliterate_text_core_with(
             input,
             &ScriptListEnum::Normal,
@@ -195,12 +200,12 @@ impl TypingContext {
             if split == 0 {
                 break;
             }
-            let tail = self.transliterate_input(&input[split..]);
+            let tail = self.transliterate_input(&input[split..], true);
             if !tail.output.is_empty()
                 && tail.context_length == self.curr_context_length
                 && self.curr_output.ends_with(tail.output.as_str())
             {
-                let head = self.transliterate_input(&input[..split]);
+                let head = self.transliterate_input(&input[..split], false);
                 if head.output.len() + tail.output.len() == self.curr_output.len()
                     && self.curr_output.starts_with(head.output.as_str())
                 {
@@ -263,7 +268,7 @@ impl TypingContext {
         self.curr_input.push(ch);
         self.curr_input_length += 1;
         let input = core::mem::take(&mut self.curr_input);
-        let result = self.transliterate_input(&input);
+        let result = self.transliterate_input(&input, true);
         self.curr_input = input;
 
         let context_length = result.context_length;

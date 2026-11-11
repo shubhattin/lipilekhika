@@ -68,6 +68,14 @@ const Tamil: InputBrahmicScriptType = {
       duplicates: ['ॐ'],
       type: 'anya'
     },
+    {
+      // the anusvAra sign (as in Tamil-Extended), used for Sanskrit in Tamil. Only read, the
+      // anusvAra is written as ம்
+      text: 'ஂ',
+      text_krama: [],
+      fallback: ['anusvAra'],
+      type: 'anya'
+    },
 
     {
       text: 'அ',

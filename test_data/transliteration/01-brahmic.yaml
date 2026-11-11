@@ -475,10 +475,10 @@
   input: அஂ கஂ
   output: अं कं
   reversible: false
-# Telugu has the nukta ఼ (was not read, and nukta letters lost it)
+# the Telugu nukta ఼ is read (was left as it is). Only read: क़ is written as క
 - index: 23
   from: Telugu
   to: Devanagari
   input: క఼ జ఼
   output: क़ ज़
-  reversible: true
+  reversible: false
