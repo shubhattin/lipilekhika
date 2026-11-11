@@ -1261,11 +1261,14 @@ func Transliterate(
 	if err != nil {
 		return "", err
 	}
+	// Keep only the custom options active for this script pair and flatten the rules of the
+	// enabled ones into one list: the core reads these, not the input options.
 	resolved := resolveTransliterationRules(fromData, toData, customOpts, transOptions)
+	activeResolvedTransOptions, resolvedCustomRules := resolved.TransOptions, resolved.CustomRules
 	out, err := TransliterateTextCore(
 		text, fromNorm, toNorm,
 		fromData, toData,
-		resolved.TransOptions, resolved.CustomRules,
+		activeResolvedTransOptions, resolvedCustomRules,
 		nil,
 	)
 	if err != nil {

@@ -1179,19 +1179,18 @@ export const transliterate_text = async (
     getScriptData(from_script_name),
     getScriptData(to_script_name)
   ]);
-  const { trans_options, custom_rules } = resolve_transliteration_rules(
-    from_script_data,
-    to_script_data,
-    transliteration_input_options
-  );
+  // Keep only the custom options active for this script pair and flatten the rules of the
+  // enabled ones into one list: the core reads these, not the input options.
+  const { trans_options: active_resolved_trans_options, custom_rules: resolved_custom_rules } =
+    resolve_transliteration_rules(from_script_data, to_script_data, transliteration_input_options);
   return transliterate_text_core(
     text,
     from_script_name,
     to_script_name,
     from_script_data,
     to_script_data,
-    trans_options,
-    custom_rules,
+    active_resolved_trans_options,
+    resolved_custom_rules,
     options
   );
 };
