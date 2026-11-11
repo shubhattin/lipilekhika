@@ -482,3 +482,17 @@
   input: క఼ జ఼
   output: क़ ज़
   reversible: false
+# historic letters read as the plain letter used for them today (were left as they are): Telugu
+# tsa ౘ / dza ౙ as చ / జ, Malayalam TTTA ഺ (alveolar ṯa) as ta
+- index: 23.1
+  from: Telugu
+  to: Devanagari
+  input: ౘ ౙా
+  output: च जा
+  reversible: false
+- index: 23.2
+  from: Malayalam
+  to: Devanagari
+  input: ഺ
+  output: त
+  reversible: false

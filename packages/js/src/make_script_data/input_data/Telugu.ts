@@ -46,6 +46,19 @@ const Telugu: InputBrahmicScriptType = {
   },
   list: [
     {
+      // historic dental affricates tsa / dza (C. P. Brown's notation, now written చ / జ). Only read
+      text: 'ౘ',
+      text_krama: [],
+      fallback: ['C'],
+      type: 'vyanjana'
+    },
+    {
+      text: 'ౙ',
+      text_krama: [],
+      fallback: ['j'],
+      type: 'vyanjana'
+    },
+    {
       // the nukta (క఼ -> क़, was not read). Only read: Telugu writes a vyanjana with the nukta as
       // the plain one (क़ -> క, श़ -> శ)
       text: '఼',

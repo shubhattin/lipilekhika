@@ -92,6 +92,14 @@ const Malayalam: InputBrahmicScriptType = {
   ],
   list: [
     {
+      // TTTA, the alveolar ṯa of scholarly transcriptions (ordinary writing has റ്റ for ṯṯa), read
+      // as ta (ISO 15919 pairs it with त़). Only read
+      text: 'ഺ',
+      text_krama: [],
+      fallback: ['t'],
+      type: 'vyanjana'
+    },
+    {
       text: '്',
       text_krama: ['halant'],
       type: 'anya',
