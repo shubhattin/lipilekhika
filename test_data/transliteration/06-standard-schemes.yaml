@@ -160,3 +160,11 @@
   to: Telugu
   input: kèraḻa kòṭa keraḻa
   output: కెరళ కొట కేరళ
+# prefixes of longer ITRANS texts read as their letters: AU (of AUM), dn (of dny), LL / RR (of
+# LLi / RRi, a halant between the consonants)
+- index: 27
+  from: Devanagari
+  to: ITRANS
+  input: मैं जाऊँगा काऊ आऊ उद्नयन कळ्ळ कऱ्ऱ
+  output: maiM jAU.NgA kAU AU udnayana kaLLa kaRRa
+  reversible: true
