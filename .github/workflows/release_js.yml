@@ -163,11 +163,13 @@ jobs:
             target: aarch64-unknown-linux-musl
             node_file: index.linux-arm64-musl.node
             use_cross: true
+          # built with the Android NDK of the runner (`ANDROID_NDK_LATEST_HOME`), not cargo-zigbuild:
+          # zig has no Android system libraries (libdl, liblog, libm), so the link fails with it.
+          # @napi-rs/cli up to 3.10.8 set the NDK linker even with `--cross-compile`, 3.10.9+ does not
           - name: android-arm64
             runner: ubuntu-latest
             target: aarch64-linux-android
             node_file: index.android-arm64.node
-            use_cross: true
           - name: macos-x64
             runner: macos-15-intel
             target: x86_64-apple-darwin
@@ -204,8 +206,9 @@ jobs:
         if: matrix.use_cross
         shell: bash
         run: |
-          pip3 install ziglang
-          cargo install cargo-zigbuild
+          # pinned: a new zig / cargo-zigbuild release can break the build of an unchanged commit
+          pip3 install ziglang==0.17.1
+          cargo install cargo-zigbuild --version 0.24.1 --locked
 
       - name: Cache cargo registry + build
         uses: actions/cache@v4

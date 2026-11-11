@@ -25,7 +25,11 @@ fi
 
 rm -rf "$OUTPUT_DIR"
 
-bunx --package @napi-rs/cli napi build \
+# pinned: bunx would fetch the latest @napi-rs/cli on every run, so a new release could change the
+# build of an unchanged commit (3.10.9 stopped setting the Android NDK linker with --cross-compile)
+NAPI_CLI_VERSION="3.10.12"
+
+bunx --package "@napi-rs/cli@${NAPI_CLI_VERSION}" napi build \
   "${NAPI_BUILD_ARGS[@]}" \
   --js index.cjs \
   --dts index.d.ts
