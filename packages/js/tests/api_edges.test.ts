@@ -193,3 +193,90 @@ describe('initWasm (lipilekhika/wasm/slim) argument', () => {
     await expect(initWasm(source as never)).rejects.toThrow(/initWasm/);
   });
 });
+
+// review of #188
+describe('Arguments of other types (review)', () => {
+  it('a Symbol script name is an invalid script name (not a conversion error)', async () => {
+    for (const fn of Object.values(TRANSLITERATE)) {
+      await expect(fn('ka', Symbol('x') as never, 'Devanagari')).rejects.toThrow(
+        'Invalid script name: Symbol(x)'
+      );
+    }
+    for (const create of Object.values(CREATE_TYPING_CONTEXT)) {
+      expect(() => create(Symbol('x') as never)).toThrow('Invalid script name: Symbol(x)');
+    }
+  });
+
+  it.each(Object.entries(CREATE_TYPING_CONTEXT))(
+    'typing options that are not an object throw a TypeError (%s)',
+    (_, create) => {
+      for (const options of [5, 'x', [], true]) {
+        expect(() => create('Devanagari', options as never)).toThrow(
+          new TypeError('options must be an object')
+        );
+      }
+      // not set
+      expect(() => create('Devanagari', undefined)).not.toThrow();
+      expect(() => create('Devanagari', null as never)).not.toThrow();
+    }
+  );
+
+  it('a trans_options value that is not a boolean is a TypeError', async () => {
+    for (const fn of Object.values(TRANSLITERATE)) {
+      await expect(
+        fn('ka', 'Normal', 'Devanagari', { 'normal_to_all:use_typing_chars': 0 } as never)
+      ).rejects.toThrow(new TypeError('trans_options value must be a boolean'));
+    }
+  });
+
+  it.each([[{}], [[]], [new Map()]])('initWasm rejects %s with a TypeError', async (source) => {
+    await expect(initWasm(source as never)).rejects.toThrow(TypeError);
+    await expect(initWasm(source as never)).rejects.toThrow(/initWasm/);
+  });
+});
+
+describe('Runtimes without newer globals (review)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('typing works without the `performance` global', async () => {
+    vi.stubGlobal('performance', undefined);
+    const ctx = createTypingContext('Devanagari');
+    await ctx.ready;
+    expect(ctx.takeKeyInput('k').diff_add_text).toBe('क्');
+    expect(ctx.takeKeyInput('a').diff_add_text).toBe('');
+  });
+
+  it('lone surrogates are replaced without String.prototype.isWellFormed', async () => {
+    const proto = String.prototype as { isWellFormed?: unknown; toWellFormed?: unknown };
+    const { isWellFormed, toWellFormed } = proto;
+    delete proto.isWellFormed;
+    delete proto.toWellFormed;
+    try {
+      expect(await transliterate('ka\ud800kha\udc00😀', 'Normal', 'Devanagari')).toBe('क�ख�😀');
+    } finally {
+      proto.isWellFormed = isWellFormed;
+      proto.toWellFormed = toWellFormed;
+    }
+  });
+
+  it('the library source has no regex lookbehind (a SyntaxError in Safari < 16.4)', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const path = await import('node:path');
+    const files = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+        e.isDirectory()
+          ? files(path.join(dir, e.name))
+          : /\.ts$/.test(e.name) && !/\.test\.ts$/.test(e.name)
+            ? [path.join(dir, e.name)]
+            : []
+      );
+    const root = path.resolve(__dirname, '..');
+    for (const file of [...files(path.join(root, 'src')), ...files(path.join(root, 'wasm'))]) {
+      if (file.includes(`${path.sep}pkg${path.sep}`) || file.includes('make_script_data')) continue;
+      expect(readFileSync(file, 'utf8').includes('(?<'), file).toBe(false);
+    }
+  });
+});

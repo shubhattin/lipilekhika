@@ -144,3 +144,22 @@ class TestGil:
         # holding the GIL the ticker got about 1 tick in the whole call
         assert elapsed > 0.02, "the text is too short to measure"
         assert ticks >= 5, f"{ticks} ticks in {elapsed:.3f} s"
+
+
+class TestReviewEdges:
+    """Review of #188"""
+
+    def test_same_script_returns_the_text_as_it_is(self):
+        # like the JS package, which returns the input of a same-script pair unchanged
+        assert transliterate("ka\ud800", "Normal", "Normal") == "ka\ud800"
+        assert transliterate("क\ud800", "Hindi", "Sanskrit") == "क\ud800"
+        assert transliterate("ka", "Normal", "Normal") == "ka"
+
+    @pytest.mark.parametrize("ms", [2**64, -(2**63) - 1])
+    def test_out_of_range_auto_clear_time_is_a_value_error(self, ms):
+        # was OverflowError, like a negative time it is a ValueError
+        with pytest.raises(ValueError, match="auto_context_clear_time_ms"):
+            TypingContextOptions(ms)
+
+    def test_large_auto_clear_time_is_accepted(self):
+        assert TypingContextOptions(2**64 - 1).auto_context_clear_time_ms == 2**64 - 1
