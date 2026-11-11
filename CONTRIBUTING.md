@@ -56,7 +56,7 @@ Tests need native bindings — run once (or after binding changes in rust packag
 
 ## Rust package (`packages/rust`)
 
-Requires [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) >= 1.85. The script data is committed, so building needs only Cargo. Run `bun run gen:test-data` from the repo root before running the tests.
+Requires [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) >= 1.88. The script data is committed, so building needs only Cargo. Run `bun run gen:test-data` from the repo root before running the tests.
 
 From `packages/rust`:
 

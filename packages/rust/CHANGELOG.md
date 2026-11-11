@@ -1,6 +1,6 @@
 # Changelog
 
-## rust-lib@1.1.2 (Unreleased)
+## rust-lib@1.2.0 (Unreleased)
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals: false` typing options, now for transliteration too
 - The generated script data is now committed (`src/generated/lipi_data.bin`, `src/scripts.rs`, `src/custom_options.rs`): no build script anymore, the crate can be installed directly from GitHub (`tag = "rust-lib@v<version>"`) and is published without `--no-verify --allow-dirty` (#141)
@@ -35,6 +35,8 @@
 - Fix: typing a long run of consonants with `include_inherent_vowel` takes linear time (each key re-transliterated the whole run: 16k keys took ~20 s in JS) ([#181](https://github.com/shubhattin/lipilekhika/issues/181))
 - Fix: decomposed (NFD) Romanized is read like the precomposed letters also where the base of a letter could continue the letter before it: `kaī` (`i` + U+0304) -> `कई` (was `कै` + a stray U+0304), `kḥ` (`h` + U+0323) -> `क्ः` (was `ख्` + U+0323); a ZWJ / ZWNJ is not written in Normal / Romanized and does not end the syllable: `क्‍ष`, `क‍्ष`, `र‍्य` -> `kSha`, `kSha`, `rya` (were `k‍Sha`, `ka‍Sha`, `ra‍ya`), in every script (only Bengali `র‍্য` was read) ([#182](https://github.com/shubhattin/lipilekhika/issues/182))
 - Fix: characters that were not read: Gurumukhi tippi `ੰ` is the anusvAra (`ਪੰਜਾਬੀ` -> `पंजाबी` / `paMjAbI`, was `पੰजाबी`) and addak `ੱ` doubles the vyanjana after it (`ਪੱਤਰ` -> `पत्तर`, `ਮੱਖਣ` -> `मक्खण`, was `पੱतर`), Tamil `ஂ` is the anusvAra (`அஂ` -> `अं`), the Telugu nukta `఼` (`క఼` -> `क़`), the historic Telugu tsa / dza `ౘ` `ౙ` as `చ` `జ` and Malayalam TTTA `ഺ` (alveolar ṯa) as `ത`. All are only read: the anusvAra is written as bindi `ਂ` / `ம்`, a doubled vyanjana with the halant, a Telugu vyanjana with the nukta as the plain one ([#183](https://github.com/shubhattin/lipilekhika/issues/183))
+- `UnknownCustomOptionKey` implements `Display` and `core::error::Error` (works with `?` into `Box<dyn Error>`) ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
+- `rust-version` is 1.88 (was 1.85, the crate uses let chains, stable since 1.88) ([#180](https://github.com/shubhattin/lipilekhika/issues/180))
 
 ## rust-lib@v1.1.2
 

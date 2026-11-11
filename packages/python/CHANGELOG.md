@@ -3,7 +3,7 @@
 ## python-lib@1.0.8 (Unreleased)
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals=False` typing options, now for transliteration too
-- Performance Improvements (via rust-lib@@1.1.2)
+- Performance Improvements (via rust-lib@1.2.0)
 - Typing: standalone mAtrA keys (`.A`, `.LR`, ... and intermediate states like `.L`) no longer attach to the previous vyanjana or emit the raw input: `k.L` -> `क्ळ`, `k.LR` -> `क्ॢ` (`कळ`, `कॢ` with inherent vowel)
 - Fix: Tamil-Extended superscripts moved after a following independent vowel: `ghaA` -> `க⁴ஆ` (was `கஆ⁴`) ([#150](https://github.com/shubhattin/lipilekhika/pull/150))
 - Fix: halant of a consonant placed after the next character for custom script characters, prefix-only keys and ASCII digits: `kqq` -> `क्q` (was `कq्`), `kc` -> `क्c`, `k0` -> `क्0` (with `useNativeNumerals: false`); typing `k.h` -> `क्` (was `क््`) ([#156](https://github.com/shubhattin/lipilekhika/pull/156))
@@ -32,6 +32,10 @@
 - Fix: typing a long run of consonants with `include_inherent_vowel` takes linear time (each key re-transliterated the whole run: 16k keys took ~20 s in JS) ([#181](https://github.com/shubhattin/lipilekhika/issues/181))
 - Fix: decomposed (NFD) Romanized is read like the precomposed letters also where the base of a letter could continue the letter before it: `kaī` (`i` + U+0304) -> `कई` (was `कै` + a stray U+0304), `kḥ` (`h` + U+0323) -> `क्ः` (was `ख्` + U+0323); a ZWJ / ZWNJ is not written in Normal / Romanized and does not end the syllable: `क्‍ष`, `क‍्ष`, `र‍्य` -> `kSha`, `kSha`, `rya` (were `k‍Sha`, `ka‍Sha`, `ra‍ya`), in every script (only Bengali `র‍্য` was read) ([#182](https://github.com/shubhattin/lipilekhika/issues/182))
 - Fix: characters that were not read: Gurumukhi tippi `ੰ` is the anusvAra (`ਪੰਜਾਬੀ` -> `पंजाबी` / `paMjAbI`, was `पੰजाबी`) and addak `ੱ` doubles the vyanjana after it (`ਪੱਤਰ` -> `पत्तर`, `ਮੱਖਣ` -> `मक्खण`, was `पੱतर`), Tamil `ஂ` is the anusvAra (`அஂ` -> `अं`), the Telugu nukta `఼` (`క఼` -> `क़`), the historic Telugu tsa / dza `ౘ` `ౙ` as `చ` `జ` and Malayalam TTTA `ഺ` (alveolar ṯa) as `ത`. All are only read: the anusvAra is written as bindi `ਂ` / `ம்`, a doubled vyanjana with the halant, a Telugu vyanjana with the nukta as the plain one ([#183](https://github.com/shubhattin/lipilekhika/issues/183))
+- Script names with spaces around them (`' Hindi'`) are not accepted, like in the JS package and the Rust crate (they were trimmed) ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
+- A lone surrogate in the text or a typed key is read as U+FFFD, like the JS package does (raised `UnicodeEncodeError`); `transliterate` releases the GIL, other Python threads run during a long transliteration ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
+- `ALL_SCRIPT_LANG_LIST` has a fixed order (the JS package's, it changed between runs), `SCRIPT_LIST_DATA.lang_script_map` / `script_alternates_map` keep the order of the data ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
+- Typing: `TypingContext.get_normalized_script()`; a negative `auto_context_clear_time_ms` raises `ValueError` (was `OverflowError`); reprs for `TypingDiff` (with `context_length`), `TypingContext` and `TypingContextOptions`, which can be pickled and copied; the typing classes are in `lipilekhika.typing` (`__module__` was `builtins`); `to_delete_chars_count` is documented as code points (UTF-16 code units in the JS package); the docstrings name the raised exceptions (`ValueError`, `TypeError`) ([#185](https://github.com/shubhattin/lipilekhika/issues/185))
 
 ## python-lib@1.0.7
 

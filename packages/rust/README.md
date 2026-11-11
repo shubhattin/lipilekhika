@@ -38,7 +38,7 @@ Or directly from GitHub. This is a monorepo with packages for several languages,
 lipilekhika = { git = "https://github.com/shubhattin/lipilekhika", tag = "rust-lib@vX.Y.Z" }
 ```
 
-> Installing from GitHub works for releases after `rust-lib@v1.1.2` (older tags did not commit the generated script data).
+> Installing from GitHub works from `rust-lib@v1.2.0` on (older tags did not commit the generated script data).
 
 ## 🚀 Quick Start
 
@@ -189,7 +189,7 @@ For character-by-character real-time input. **Without** the `std` feature, call 
 Enable in `Cargo.toml`:
 
 ```toml
-lipilekhika = { version = "1.1", features = ["std"] }
+lipilekhika = { version = "1.2", features = ["std"] }
 ```
 
 Example:
