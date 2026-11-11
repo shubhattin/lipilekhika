@@ -43,6 +43,14 @@ Only supported for `textarea` and `input` elements.
    ```
 </Steps>
 
+<Aside>
+   The script data of a context is loaded in the background. Keys typed before it is loaded are
+   first shown as typed (`ka`), and transliterated as soon as it is there (`क`). If the text was
+   changed in some other way meanwhile (eg. a Backspace), they are left as typed.
+   To avoid this, create the context early and `await ctx.ready` (or `preloadScriptData`) before
+   the user can type, eg. when the page or the script selector loads.
+</Aside>
+
 <LinkCard
    title="Custom Typing Options"
    description="Overview of typing customizations available in Lipi Lekhika"

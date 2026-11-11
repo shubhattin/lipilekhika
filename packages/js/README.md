@@ -228,7 +228,7 @@ const ctx = createTypingContext('Telugu');
 
 **Returns:** `TypingContext` with:
 
-- `ready: Promise<void>` — Await before using (ensures script data loaded)
+- `ready: Promise<void>` — Await before using (ensures script data loaded). With `handleTypingBeforeInputEvent`, keys typed before it resolves are shown as typed and transliterated once it does: create the context early and await `ready` before the user can type to avoid this
 - `takeKeyInput(char: string)` — Process character input and return diff
 - `clearContext()` — Clear internal state
 - `updateUseNativeNumerals(value: boolean)` — Update numeral preference
