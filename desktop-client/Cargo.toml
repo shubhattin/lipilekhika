@@ -5,15 +5,11 @@ edition = "2024"
 publish = false
 
 [dependencies]
-iced = { version = "0.14.0", features = ["image", "advanced", "svg"] }
-iced_aw = { version = "0.13.0", features = ["full"] }
+gpui-kit = "0.9.1"
 lipilekhika = { path = "../packages/rust", features = ["std"] }
-iced_futures = "0.14.0"
 crossbeam-channel = "0.5.15"
-tray-icon = "0.21.3"
-image = "0.25"
-smol = "2.0.2"
-dark-light = "2.0.0"
+tray-icon = { version = "0.21.3", default-features = false }
+image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 octocrab = { version = "0.38", features = ["timeout"] }
@@ -24,6 +20,12 @@ reqwest = { version = "0.12", features = [
 posthog-rs = { version = "0.3.5", default-features = false }
 dirs = "6.0.0"
 uuid = { version = "1.19", features = ["v4"] }
+unicode-general-category = "1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# tray-icon draws the tray menu with GTK on Linux, its thread runs the GTK main loop
+gtk = "0.18"
+glib = "0.18"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62.2", features = [

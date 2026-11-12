@@ -95,3 +95,157 @@ pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
     })
     .collect()
 }
+
+/// The script picker's sections, in display order
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScriptCategory {
+  Modern,
+  Latin,
+  Ancient,
+}
+
+impl ScriptCategory {
+  pub const ALL: [ScriptCategory; 3] = [Self::Modern, Self::Latin, Self::Ancient];
+
+  pub fn title(self) -> &'static str {
+    match self {
+      Self::Modern => "Modern Indian Scripts",
+      Self::Latin => "Latin Scripts",
+      Self::Ancient => "Ancient Scripts",
+    }
+  }
+}
+
+/// The scripts in the order (and sections) of the web app's script picker
+pub const SCRIPT_ORDER: &[(ScriptListEnum, ScriptCategory)] = &[
+  (ScriptListEnum::Devanagari, ScriptCategory::Modern),
+  (ScriptListEnum::Telugu, ScriptCategory::Modern),
+  (ScriptListEnum::Tamil, ScriptCategory::Modern),
+  (ScriptListEnum::Bengali, ScriptCategory::Modern),
+  (ScriptListEnum::Kannada, ScriptCategory::Modern),
+  (ScriptListEnum::Gujarati, ScriptCategory::Modern),
+  (ScriptListEnum::Malayalam, ScriptCategory::Modern),
+  (ScriptListEnum::Odia, ScriptCategory::Modern),
+  (ScriptListEnum::Gurumukhi, ScriptCategory::Modern),
+  (ScriptListEnum::Assamese, ScriptCategory::Modern),
+  (ScriptListEnum::Sinhala, ScriptCategory::Modern),
+  (ScriptListEnum::TamilExtended, ScriptCategory::Modern),
+  (ScriptListEnum::PurnaDevanagari, ScriptCategory::Modern),
+  // latin: Lipi Lekhika's own schemes first, then the standard ones
+  (ScriptListEnum::Normal, ScriptCategory::Latin),
+  (ScriptListEnum::Romanized, ScriptCategory::Latin),
+  (ScriptListEnum::Iast, ScriptCategory::Latin),
+  (ScriptListEnum::Itrans, ScriptCategory::Latin),
+  (ScriptListEnum::HarvardKyoto, ScriptCategory::Latin),
+  (ScriptListEnum::Slp1, ScriptCategory::Latin),
+  // ancient
+  (ScriptListEnum::Brahmi, ScriptCategory::Ancient),
+  (ScriptListEnum::Sharada, ScriptCategory::Ancient),
+  (ScriptListEnum::Granth, ScriptCategory::Ancient),
+  (ScriptListEnum::Modi, ScriptCategory::Ancient),
+  (ScriptListEnum::Siddham, ScriptCategory::Ancient),
+];
+
+/// A short line under the script name in the picker; also searched
+pub fn script_hint(script: ScriptListEnum) -> Option<&'static str> {
+  Some(match script {
+    ScriptListEnum::Devanagari => "Hindi, Sanskrit, Marathi, Nepali",
+    ScriptListEnum::Gurumukhi => "Punjabi",
+    ScriptListEnum::Bengali => "Bangla",
+    ScriptListEnum::Odia => "Oriya",
+    ScriptListEnum::TamilExtended => "Tamil with superscript marks",
+    ScriptListEnum::PurnaDevanagari => "Devanagari for all Indian scripts",
+    ScriptListEnum::Normal => "Plain English letters",
+    ScriptListEnum::Romanized => "With diacritics",
+    ScriptListEnum::Iast => "kṛṣṇa",
+    ScriptListEnum::Itrans => "kRRiShNa",
+    ScriptListEnum::HarvardKyoto => "kRSNa",
+    ScriptListEnum::Slp1 => "kfzRa",
+    _ => return None,
+  })
+}
+
+/// Extra search terms that are not shown (codes and aliases)
+pub fn script_keywords(script: ScriptListEnum) -> &'static [&'static str] {
+  match script {
+    ScriptListEnum::Devanagari => &["dev", "hi", "hin", "sa", "san", "mar", "ne", "nep"],
+    ScriptListEnum::Telugu => &["te", "tel"],
+    ScriptListEnum::Tamil => &["tam", "ta"],
+    ScriptListEnum::TamilExtended => &["tam-ext", "ta-ext"],
+    ScriptListEnum::Bengali => &["ben", "be"],
+    ScriptListEnum::Kannada => &["ka", "kan"],
+    ScriptListEnum::Gujarati => &["gu", "guj"],
+    ScriptListEnum::Malayalam => &["mal"],
+    ScriptListEnum::Odia => &["or", "od"],
+    ScriptListEnum::Sinhala => &["si", "sin", "sinh", "sinhalese"],
+    ScriptListEnum::Gurumukhi => &["gur", "pun", "gurmukhi"],
+    ScriptListEnum::Assamese => &["as"],
+    ScriptListEnum::Normal => &["en", "eng", "english", "ascii", "custom"],
+    ScriptListEnum::Romanized => &["rom", "roman", "custom"],
+    ScriptListEnum::HarvardKyoto => &["hk"],
+    ScriptListEnum::Slp1 => &["slp"],
+    ScriptListEnum::Granth => &["grantha"],
+    _ => &[],
+  }
+}
+
+fn norm(s: &str) -> String {
+  s.chars()
+    .filter(|c| !matches!(c, ' ' | '_' | '-'))
+    .flat_map(char::to_lowercase)
+    .collect()
+}
+
+/// Whether a picker search `query` matches the script (name, alias, hint or section)
+pub fn script_matches(script: ScriptListEnum, query: &str) -> bool {
+  let q = norm(query);
+  if q.is_empty() {
+    return true;
+  }
+  let name = norm(script.as_ref());
+  if name.contains(&q) {
+    return true;
+  }
+  if script_keywords(script)
+    .iter()
+    .any(|k| norm(k).starts_with(&q))
+  {
+    return true;
+  }
+  if script_hint(script).is_some_and(|h| norm(h).contains(&q)) {
+    return true;
+  }
+  let category = SCRIPT_ORDER
+    .iter()
+    .find(|(s, _)| *s == script)
+    .map(|(_, c)| *c);
+  category.is_some_and(|c| norm(c.title()).starts_with(&q))
+}
+
+/// The font family the script is shown in (the bundled fonts, see `ui::fonts`)
+pub fn script_font_family(script: ScriptListEnum) -> Option<&'static str> {
+  Some(match script {
+    ScriptListEnum::Devanagari | ScriptListEnum::PurnaDevanagari => "Noto Sans Devanagari",
+    ScriptListEnum::Telugu => "Noto Sans Telugu",
+    ScriptListEnum::Tamil => "Noto Sans Tamil",
+    ScriptListEnum::TamilExtended => "Noto Sans Tamil",
+    ScriptListEnum::Bengali | ScriptListEnum::Assamese => "Noto Sans Bengali",
+    ScriptListEnum::Kannada => "Noto Sans Kannada",
+    ScriptListEnum::Gujarati => "Noto Sans Gujarati",
+    ScriptListEnum::Malayalam => "Noto Sans Malayalam",
+    ScriptListEnum::Odia => "Noto Sans Oriya",
+    ScriptListEnum::Sinhala => "Noto Sans Sinhala",
+    ScriptListEnum::Gurumukhi => "Noto Sans Gurmukhi",
+    ScriptListEnum::Brahmi => "Noto Sans Brahmi",
+    ScriptListEnum::Granth => "Noto Sans Grantha",
+    ScriptListEnum::Modi => "Noto Sans Modi",
+    ScriptListEnum::Sharada => "Satisar Sharada",
+    ScriptListEnum::Siddham => "Noto Sans Siddham",
+    ScriptListEnum::Normal
+    | ScriptListEnum::Romanized
+    | ScriptListEnum::Iast
+    | ScriptListEnum::Itrans
+    | ScriptListEnum::HarvardKyoto
+    | ScriptListEnum::Slp1 => "Noto Sans",
+  })
+}

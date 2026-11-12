@@ -9,6 +9,13 @@ mod mac;
 use crossbeam_channel::Sender;
 use std::sync::Arc;
 
+/// Whether this platform has the system wide typing (the keyboard hook).
+///
+/// On Linux the app runs without it (the UI, Lipi Parivartaka and the typing help all work), the
+/// system wide typing there is the Fcitx5 plugin.
+pub const SYSTEM_TYPING_SUPPORTED: bool = cfg!(any(windows, target_os = "macos"));
+
+#[cfg_attr(not(any(windows, target_os = "macos")), allow(dead_code))]
 pub fn run(
   _app_state: Arc<crate::AppState>,
   _tx_ui: Sender<crate::ThreadMessage>,
@@ -26,12 +33,6 @@ pub fn run(
 
   #[cfg(not(any(windows, target_os = "macos")))]
   {
-    Err(
-      std::io::Error::new(
-        std::io::ErrorKind::Unsupported,
-        "lipilekhika-ui desktop client is not supported on this platform yet",
-      )
-      .into(),
-    )
+    Ok(())
   }
 }

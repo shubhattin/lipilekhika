@@ -18,6 +18,7 @@ mod platform;
 mod posthog;
 mod tray;
 mod ui;
+mod version_check;
 
 /// shared app state for both the platform specific hook code, UI, etc
 pub struct AppState {
@@ -36,6 +37,7 @@ pub struct ThreadMessage {
 }
 #[derive(Debug)]
 pub enum ThreadMessageOrigin {
+  #[cfg_attr(not(any(windows, target_os = "macos")), allow(dead_code))]
   KeyboardHook,
   UI,
   Tray,
@@ -51,14 +53,37 @@ pub enum ThreadMessageType {
   TriggerTypingNotification,
   /// send from tray
   MaximizeUI,
+  /// send from tray: open the Lipi Parivartaka window
+  OpenParivartaka,
   // Close app request from hook (shortcut)
   CloseApp,
 }
 
+/// What the app opens with, from the command line
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StartupView {
+  /// the typing tool window (default)
+  Main,
+  /// only the Lipi Parivartaka window (`--parivartaka`), as its own start menu entry did before
+  Parivartaka,
+  /// only the typing help (`--typing-help`, `--compare` for its Compare tab)
+  TypingHelp { compare: bool },
+}
+
 fn main() {
+  let has_arg = |name: &str| std::env::args().any(|a| a == name);
+  let startup_view = if has_arg("--parivartaka") {
+    StartupView::Parivartaka
+  } else if has_arg("--typing-help") || has_arg("--compare") {
+    StartupView::TypingHelp {
+      compare: has_arg("--compare"),
+    }
+  } else {
+    StartupView::Main
+  };
+
   // Create separate channels for UI and Tray
   // Each component gets its own dedicated receiver to avoid message competition
-  // the non-mpsc model was causing some issues we are still sticking with crossbeam_channel for now
   let (tx_ui, rx_ui) = crossbeam_channel::bounded::<ThreadMessage>(100);
   let (tx_tray, rx_tray) = crossbeam_channel::bounded::<ThreadMessage>(100);
 
@@ -79,17 +104,19 @@ fn main() {
     persitent_state: Mutex::new(persitent_state),
   });
 
-  // Start keyboard hook thread
-  let state_clone = Arc::clone(&app_state);
-  let tx_ui_clone = tx_ui.clone();
-  let tx_tray_clone = tx_tray.clone();
-  let _handle_hook = thread::spawn(move || {
-    // platform-specific keyboard handler thread
-    if let Err(err) = platform::run(state_clone, tx_ui_clone, tx_tray_clone) {
-      eprintln!("{err}");
-      std::process::exit(1);
-    }
-  });
+  // Start keyboard hook thread (Windows and macOS only, Linux has no system wide typing yet)
+  if platform::SYSTEM_TYPING_SUPPORTED {
+    let state_clone = Arc::clone(&app_state);
+    let tx_ui_clone = tx_ui.clone();
+    let tx_tray_clone = tx_tray.clone();
+    thread::spawn(move || {
+      // platform-specific keyboard handler thread
+      if let Err(err) = platform::run(state_clone, tx_ui_clone, tx_tray_clone) {
+        eprintln!("{err}");
+        std::process::exit(1);
+      }
+    });
+  }
 
   // Start tray icon thread
   let state_clone = Arc::clone(&app_state);
@@ -101,7 +128,5 @@ fn main() {
   });
 
   // starts the UI event loop
-  let state_clone = Arc::clone(&app_state);
-  let tx_tray_clone = tx_tray.clone();
-  ui::run(state_clone, rx_ui, tx_tray_clone).unwrap();
+  ui::run(app_state, rx_ui, tx_tray, startup_view);
 }

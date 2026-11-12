@@ -1,85 +1,56 @@
-use iced::{
-  Alignment, Background, Color, Element, Length, Point, Size, Task,
-  widget::{center, container, text},
-  window,
-};
-use std::time::Duration;
+//! The "Typing : On/Off" popup shown after the shortcut or the tray toggles the typing.
 
-#[derive(Clone, Debug)]
-pub struct NotificationConfig {
-  /// notification timeout
-  pub timeout: Duration,
+use super::styles::GREEN;
+use gpui_kit::component::{ActiveTheme as _, Icon, h_flex};
+use gpui_kit::{
+  Context, IntoElement, ParentElement as _, Render, Styled as _, Window, div, px, rgb,
+};
+
+pub struct TypingNotification {
+  enabled: bool,
 }
 
-impl Default for NotificationConfig {
-  fn default() -> Self {
-    Self {
-      timeout: Duration::from_millis(1400),
-    }
+impl TypingNotification {
+  pub fn new(enabled: bool) -> Self {
+    Self { enabled }
   }
 }
 
-pub fn open_notification_window() -> (window::Id, Task<window::Id>) {
-  #[cfg(target_os = "windows")]
-  let platform_specific = window::settings::PlatformSpecific {
-    skip_taskbar: true,
-    ..Default::default()
-  };
-
-  let settings = window::Settings {
-    decorations: false,
-    resizable: false,
-    level: window::Level::AlwaysOnTop,
-    size: iced::Size::new(150.0, 40.0),
-    position: window::Position::SpecificWith(get_top_center_position),
-    exit_on_close_request: false,
-    #[cfg(target_os = "windows")]
-    platform_specific,
-    ..Default::default()
-  };
-
-  window::open(settings)
-}
-
-fn get_top_center_position(_w: Size<f32>, scr: Size<f32>) -> Point<f32> {
-  Point::new(scr.width / 2.0, scr.height * 0.05)
-}
-
-pub fn notification_timeout<Message: Clone + Send + 'static>(
-  config: &NotificationConfig,
-  on_timeout: Message,
-) -> Task<Message> {
-  let timeout = config.timeout;
-  Task::future(async move {
-    smol::Timer::after(timeout).await;
-    on_timeout
-  })
-}
-
-pub fn view_notification<'a, Message: 'a>(message_text: &'a str) -> Element<'a, Message> {
-  let notification_style = |_theme: &iced::Theme| container::Style {
-    background: Some(Background::Color(Color::from_rgb(0.15, 0.15, 0.15))),
-    border: iced::Border {
-      color: Color::from_rgb(0.3, 0.3, 0.3),
-      width: 1.0,
-      radius: 8.0.into(),
-    },
-    ..Default::default()
-  };
-
-  container(
-    center(
-      text(message_text)
-        .size(20)
-        .color(Color::WHITE)
-        .align_x(Alignment::Center),
-    )
-    .width(Length::Fill)
-    .height(Length::Fill),
-  )
-  .style(notification_style)
-  .width(Length::Fill)
-  .height(Length::Fill)
-  .padding(0)
-  .into()
+impl Render for TypingNotification {
+  fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    let icon = if self.enabled {
+      gpui_kit::assets::IconName::Keyboard
+    } else {
+      gpui_kit::assets::IconName::KeyboardOff
+    };
+    let accent = if self.enabled {
+      GREEN.base()
+    } else {
+      cx.theme().muted_foreground
+    };
+    div()
+      .size_full()
+      .flex()
+      .items_center()
+      .justify_center()
+      .rounded(px(12.))
+      .bg(rgb(0x18181b))
+      .border_1()
+      .border_color(rgb(0x3f3f46))
+      .child(
+        h_flex()
+          .gap_2()
+          .items_center()
+          .text_color(rgb(0xfafafa))
+          .child(Icon::new(icon).size(px(18.)).text_color(accent))
+          .child(div().text_lg().child("Typing"))
+          .child(
+            div()
+              .text_lg()
+              .font_weight(gpui_kit::FontWeight::SEMIBOLD)
+              .text_color(accent)
+              .child(if self.enabled { "On" } else { "Off" }),
+          ),
+      )
+  }
 }

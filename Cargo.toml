@@ -3,7 +3,6 @@ members = [
     "desktop-client",
     "packages/rust",
     "packages/rust/datagen",
-    "desktop-client/lipiparivartaka/src-tauri",
     "packages/js/wasm",
     "packages/js/binding",
     "packages/python/binding",
