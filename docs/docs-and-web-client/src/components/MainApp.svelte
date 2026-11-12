@@ -46,6 +46,7 @@
     TEXT_FILE_ACCEPT
   } from './app/text_file';
   import { loadSavedText, saveText, type SaveResult } from './app/saved_text';
+  import TextBoxMenu from './app/TextBoxMenu.svelte';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
   import { PILL_TOGGLE } from './typing_help/pill';
@@ -160,7 +161,24 @@
     });
   });
 
-  // Opening a .txt file into the source box, from the Open button or dropped on the box
+  // Saving a box as .txt: from its ⋯ menu, or Ctrl/Cmd+S while the box has focus (in place of
+  // the browser's "save page", which is never what is wanted here)
+  const saveSourceFile = () => {
+    if (input_text) downloadTextFile(input_text, textFileName('source', typing_script));
+  };
+  const saveOutputFile = () => {
+    if (outputText) downloadTextFile(outputText, textFileName('output', to_script));
+  };
+  const isSaveShortcut = (e: KeyboardEvent) =>
+    (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 's';
+  // what the shortcut is called here; the page is prerendered, so Apple is checked on mount
+  let save_shortcut = $state('Ctrl+S');
+  onMount(() => {
+    if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) save_shortcut = '⌘S';
+  });
+
+  // Opening a .txt file into the source box, from its ⋯ menu, the Open button on an empty
+  // box, or dropped on the box
   let file_drag_over = $state(false);
   let file_input = $state<HTMLInputElement | null>(null);
   let file_error = $state<string | null>(null);
@@ -405,18 +423,24 @@
                     Source<span class="hidden @[22.5rem]:inline">&nbsp;text</span>
                   </label>
                   <CopyButton text={() => input_text} label="Copy source text" />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="size-8"
-                    title="Save source as .txt"
-                    disabled={!input_text}
-                    onclick={() =>
-                      downloadTextFile(input_text, textFileName('source', typing_script))}
-                  >
-                    <Download class="size-4" />
-                    <span class="sr-only">Save source as .txt</span>
-                  </Button>
+                  <TextBoxMenu
+                    label="More actions for the source text"
+                    items={[
+                      {
+                        label: 'Open .txt file…',
+                        icon: FolderOpen,
+                        onclick: () => file_input?.click()
+                      },
+                      {
+                        label: 'Save as .txt',
+                        icon: Download,
+                        onclick: saveSourceFile,
+                        disabled: !input_text,
+                        shortcut: save_shortcut
+                      }
+                    ]}
+                    hint="You can also drop a .txt file on the box"
+                  />
                   {#if typing_script !== 'Normal'}
                     <TypingHelpButton
                       class="ml-1"
@@ -564,6 +588,11 @@
                   )}
                 onblur={() => from_input_typing_context.clearContext()}
                 onkeydown={(e) => {
+                  if (isSaveShortcut(e)) {
+                    e.preventDefault();
+                    saveSourceFile();
+                    return;
+                  }
                   // Ctrl/Cmd+Z right after a Clear or an opened file brings the old text back
                   // (the box's own undo history doesn't know about either)
                   if (
@@ -586,9 +615,9 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              <!-- Always there, for Open .txt. Labels shorten on narrow boxes: "Open .txt" ≥ 19rem
-                   (≥ 26rem while Undo shows), "Clear" ≥ 15rem (≥ 22rem while Undo shows), "Undo clear" in
-                   full ≥ 22rem. -->
+              <!-- Always there: an empty box offers Open .txt here (it is also in the ⋯ menu).
+                   Labels shorten on narrow boxes while Undo shows: "Undo clear" and "Clear" in
+                   full ≥ 17rem (otherwise "Clear" ≥ 15rem). -->
               <div class="@container/strip">
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
@@ -609,24 +638,17 @@
                     />
                   {/if}
                   <div class="ml-auto flex items-center gap-1">
-                    <button
-                      type="button"
-                      class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-                      onclick={() => file_input?.click()}
-                      title="Open a .txt file (or drop one on the box)"
-                    >
-                      <FolderOpen class="size-3.5" />
-                      <span
-                        class={can_undo
-                          ? 'hidden @[26rem]/strip:inline'
-                          : 'hidden @[19rem]/strip:inline'}>Open .txt</span
+                    {#if !input_text && !can_undo}
+                      <button
+                        type="button"
+                        class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                        onclick={() => file_input?.click()}
+                        title="Open a .txt file (or drop one on the box)"
                       >
-                      <span
-                        class={can_undo
-                          ? 'sr-only @[26rem]/strip:hidden'
-                          : 'sr-only @[19rem]/strip:hidden'}>Open .txt file</span
-                      >
-                    </button>
+                        <FolderOpen class="size-3.5" />
+                        Open .txt
+                      </button>
+                    {/if}
                     {#if can_undo && replaced}
                       <button
                         type="button"
@@ -637,7 +659,7 @@
                           : 'Go back to the text before the file was opened (Ctrl+Z)'}
                       >
                         <Undo2 class="size-3.5" />
-                        Undo<span class="hidden @[22rem]/strip:inline"
+                        Undo<span class="hidden @[17rem]/strip:inline"
                           >{replaced.by === 'clear' ? 'clear' : 'open'}</span
                         >
                       </button>
@@ -652,12 +674,12 @@
                         <X class="size-3.5" />
                         <span
                           class={can_undo
-                            ? 'hidden @[22rem]/strip:inline'
+                            ? 'hidden @[17rem]/strip:inline'
                             : 'hidden @[15rem]/strip:inline'}>Clear</span
                         >
                         <span
                           class={can_undo
-                            ? 'sr-only @[22rem]/strip:hidden'
+                            ? 'sr-only @[17rem]/strip:hidden'
                             : 'sr-only @[15rem]/strip:hidden'}>Clear source text</span
                         >
                       </button>
@@ -717,17 +739,18 @@
                 Output
               </label>
               <CopyButton text={() => outputText} label="Copy output text" />
-              <Button
-                variant="ghost"
-                size="icon"
-                class="size-8"
-                title="Save output as .txt"
-                disabled={!outputText}
-                onclick={() => downloadTextFile(outputText, textFileName('output', to_script))}
-              >
-                <Download class="size-4" />
-                <span class="sr-only">Save output as .txt</span>
-              </Button>
+              <TextBoxMenu
+                label="More actions for the output"
+                items={[
+                  {
+                    label: 'Save as .txt',
+                    icon: Download,
+                    onclick: saveOutputFile,
+                    disabled: !outputText,
+                    shortcut: save_shortcut
+                  }
+                ]}
+              />
               <div class="ml-auto flex items-center gap-2">
                 {#if !auto_convert}
                   <Button
@@ -753,6 +776,11 @@
               placeholder="The transliteration appears here"
               value={outputText}
               readonly
+              onkeydown={(e) => {
+                if (!isSaveShortcut(e)) return;
+                e.preventDefault();
+                saveOutputFile();
+              }}
             />
           </div>
         </section>
