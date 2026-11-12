@@ -2,16 +2,14 @@ import type { ScriptListType } from 'lipilekhika';
 
 export const CATEGORIES = {
   modern: 'Modern Indian Scripts',
-  romanized: 'Romanization',
-  standard: 'Standard Schemes',
+  latin: 'Latin Scripts',
   ancient: 'Ancient Scripts'
 } as const;
 
 /** Short labels for chips / tabs / rails */
 export const CATEGORY_SHORT: Record<CategoryType, string> = {
   modern: 'Modern',
-  romanized: 'Roman',
-  standard: 'Schemes',
+  latin: 'Latin',
   ancient: 'Ancient'
 };
 
@@ -34,14 +32,13 @@ export const SCRIPT_CATEGORY: Record<ScriptListType, CategoryType> = {
   Sinhala: 'modern',
   'Tamil-Extended': 'modern',
   'Purna-Devanagari': 'modern',
-  // romanized
-  Normal: 'romanized',
-  Romanized: 'romanized',
-  // standard romanization schemes
-  IAST: 'standard',
-  ITRANS: 'standard',
-  'Harvard-Kyoto': 'standard',
-  SLP1: 'standard',
+  // latin: Lipi Lekhika's own schemes first, then the standard ones
+  Normal: 'latin',
+  Romanized: 'latin',
+  IAST: 'latin',
+  ITRANS: 'latin',
+  'Harvard-Kyoto': 'latin',
+  SLP1: 'latin',
   // ancient
   Brahmi: 'ancient',
   Sharada: 'ancient',
@@ -49,6 +46,9 @@ export const SCRIPT_CATEGORY: Record<ScriptListType, CategoryType> = {
   Modi: 'ancient',
   Siddham: 'ancient'
 };
+
+/** Lipi Lekhika's own romanization schemes, tagged "custom" in the picker */
+export const CUSTOM_SCHEMES: ReadonlySet<ScriptListType> = new Set(['Normal', 'Romanized']);
 
 /** A short line under the script name; also searched */
 export const SCRIPT_HINT: Partial<Record<ScriptListType, string>> = {
@@ -80,8 +80,8 @@ const SCRIPT_KEYWORDS: Partial<Record<ScriptListType, string[]>> = {
   Sinhala: ['si', 'sin', 'sinh', 'sinhalese'],
   Gurumukhi: ['gur', 'pun', 'gurmukhi'],
   Assamese: ['as'],
-  Normal: ['en', 'eng', 'english', 'latin', 'ascii'],
-  Romanized: ['rom', 'roman'],
+  Normal: ['en', 'eng', 'english', 'ascii', 'custom'],
+  Romanized: ['rom', 'roman', 'custom'],
   'Harvard-Kyoto': ['hk'],
   SLP1: ['slp'],
   Granth: ['grantha']
@@ -93,6 +93,9 @@ export const listScripts = (have_normal_script: boolean) =>
   SCRIPT_ORDER.filter((s) => have_normal_script || s !== 'Normal');
 
 const norm = (s: string) => s.toLowerCase().replace(/[\s_-]+/g, '');
+
+/** Score of a query that only matches the script's section name */
+const SECTION_MATCH = 10;
 
 /**
  * Ranks a script against a query: 0 = no match, higher is better.
@@ -112,12 +115,20 @@ export const scoreScript = (script: ScriptListType, query: string): number => {
   if (keywords.some((k) => norm(k).startsWith(q))) return 50;
   if (name.includes(q)) return 40;
   if (norm(hint).includes(q)) return 20;
+  // a section name ("latin", "ancient") lists the whole section
+  if (norm(CATEGORY_SHORT[SCRIPT_CATEGORY[script]]).startsWith(q)) return SECTION_MATCH;
   return 0;
 };
 
-/** Scripts matching `query`, in display order */
-export const filterScripts = (scripts: ScriptListType[], query: string) =>
-  scripts.filter((s) => scoreScript(s, query) > 0);
+/**
+ * Scripts matching `query`, in display order. A section name ("latin") lists its whole
+ * section, but only when nothing else matches, so "mod" gives Modi, not all of Modern.
+ */
+export const filterScripts = (scripts: ScriptListType[], query: string) => {
+  const scored = scripts.map((s) => [s, scoreScript(s, query)] as const);
+  const direct = scored.filter(([, n]) => n > SECTION_MATCH);
+  return (direct.length ? direct : scored.filter(([, n]) => n > 0)).map(([s]) => s);
+};
 
 export const groupByCategory = (scripts: ScriptListType[]) =>
   (Object.keys(CATEGORIES) as CategoryType[])

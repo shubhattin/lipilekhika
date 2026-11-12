@@ -17,6 +17,7 @@
     CATEGORY_SHORT,
     SCRIPT_CATEGORY,
     SCRIPT_HINT,
+    CUSTOM_SCHEMES,
     filterScripts,
     groupByCategory,
     listScripts,
@@ -185,7 +186,15 @@
                     >
                       <ScriptGlyph script={s} class="size-6 text-xs sm:size-7 sm:text-sm" />
                       <span class="flex min-w-0 flex-1 flex-col leading-tight">
-                        <span class="truncate">{s}</span>
+                        <span class="flex min-w-0 items-center gap-1.5">
+                          <span class="truncate">{s}</span>
+                          {#if CUSTOM_SCHEMES.has(s)}
+                            <span
+                              class="shrink-0 rounded border border-border px-1 text-[0.6rem] leading-3.5 font-medium tracking-wide text-muted-foreground uppercase"
+                              title="Lipi Lekhika's own scheme">custom</span
+                            >
+                          {/if}
+                        </span>
                         {#if SCRIPT_HINT[s]}
                           <span class="truncate text-xs text-muted-foreground"
                             >{SCRIPT_HINT[s]}</span
