@@ -978,6 +978,7 @@ impl Parivartaka {
               .when_some(font, |el, f| el.font_family(f))
               .child(
                 Textarea::new(&self.source)
+                  .large()
                   .bordered(false)
                   .h_full()
                   .aria_label("Source text"),
@@ -1139,6 +1140,7 @@ impl Parivartaka {
           }))
           .child(
             Textarea::new(&self.output)
+              .large()
               .bordered(false)
               .readonly(true)
               .h_full()

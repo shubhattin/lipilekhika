@@ -10,7 +10,6 @@ use gpui_kit::component::button::{Button, ButtonVariants as _};
 use gpui_kit::component::checkbox::Checkbox;
 use gpui_kit::component::popover::Popover;
 use gpui_kit::component::select::{Select, SelectEvent};
-use gpui_kit::component::tab::{Tab, TabBar};
 use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
@@ -315,7 +314,7 @@ impl TypingHelp {
         )
       })
       .child(
-        h_flex().flex_wrap().gap_2().items_start().children(
+        h_flex().flex_wrap().gap_2().items_stretch().children(
           group
             .cells
             .iter()
@@ -462,6 +461,58 @@ impl TypingHelp {
       })
   }
 
+  /// The Typing map / Compare switch, a segmented control like the web app's tabs
+  fn tabs(&self, selected: usize, cx: &mut Context<Self>) -> impl IntoElement {
+    let theme = cx.theme().clone();
+    let tab = |ix: usize, icon: Icon, label: &'static str, cx: &mut Context<Self>| {
+      let active = ix == selected;
+      h_flex()
+        .id(SharedString::from(format!("help-tab-{ix}")))
+        .gap_1p5()
+        .items_center()
+        .px_3()
+        .h(px(28.))
+        .rounded(px(6.))
+        .text_sm()
+        .cursor_pointer()
+        .map(|el| {
+          if active {
+            el.bg(theme.background)
+              .text_color(theme.foreground)
+              .font_weight(gpui_kit::FontWeight::MEDIUM)
+              .shadow_xs()
+          } else {
+            el.text_color(theme.muted_foreground)
+              .hover(|s| s.text_color(theme.foreground))
+          }
+        })
+        .on_click(cx.listener(move |this, _, _, cx| {
+          this.set_tab(
+            if ix == 0 {
+              HelpTab::Typing
+            } else {
+              HelpTab::Compare
+            },
+            cx,
+          )
+        }))
+        .child(icon.size(px(14.)))
+        .child(label)
+    };
+    h_flex()
+      .p(px(3.))
+      .gap_0p5()
+      .rounded(px(8.))
+      .bg(theme.muted)
+      .child(tab(0, Icon::new(IconName::Map), "Typing map", cx))
+      .child(tab(
+        1,
+        Icon::new(gpui_kit::assets::IconName::ArrowLeftRight),
+        "Compare",
+        cx,
+      ))
+  }
+
   fn alternates_info(&self, cx: &App) -> impl IntoElement {
     let font = script_font_family(self.script);
     let example = self.alternates_example.clone();
@@ -559,7 +610,7 @@ impl Render for TypingHelp {
       );
 
     let toolbar = h_flex()
-      .flex_wrap()
+      .flex_none()
       .items_center()
       .gap_3()
       .px_5()
@@ -571,27 +622,7 @@ impl Render for TypingHelp {
           .w(px(230.))
           .menu_max_h(px(420.)),
       )
-      .child(
-        TabBar::new("help-tabs")
-          .segmented()
-          .selected_index(tab_index)
-          .on_click(cx.listener(|this, ix: &usize, _, cx| {
-            this.set_tab(
-              if *ix == 0 {
-                HelpTab::Typing
-              } else {
-                HelpTab::Compare
-              },
-              cx,
-            )
-          }))
-          .child(Tab::new().icon(IconName::Map).label("Typing map"))
-          .child(
-            Tab::new()
-              .icon(Icon::new(gpui_kit::assets::IconName::ArrowLeftRight))
-              .label("Compare"),
-          ),
-      )
+      .child(self.tabs(tab_index, cx))
       .map(|el| match self.tab {
         HelpTab::Compare => el.child(
           h_flex()

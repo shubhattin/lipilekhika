@@ -26,6 +26,13 @@ use std::time::Duration;
 
 pub use typing_help::HelpTab;
 
+/// The main window's height (it has a note about the Fcitx5 plugin on Linux)
+const MAIN_HEIGHT: f32 = if crate::platform::SYSTEM_TYPING_SUPPORTED {
+  450.
+} else {
+  530.
+};
+
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
 pub const RELEASES_URL: &str = "https://github.com/shubhattin/lipilekhika/releases";
@@ -165,6 +172,7 @@ fn window_options(
   height: f32,
   resizable: bool,
   min: Option<(f32, f32)>,
+  child: bool,
   cx: &App,
 ) -> WindowOptions {
   let bounds = Bounds::centered(None, size(px(width), px(height)), cx);
@@ -182,7 +190,14 @@ fn window_options(
     window_decorations: Some(WindowDecorations::Server),
     focus: true,
     show: true,
-    kind: WindowKind::Normal,
+    // On Linux the other windows are children of the window they are opened from: tiling
+    // compositors (Hyprland, sway) float them at their size instead of tiling them. Elsewhere a
+    // child window would stay above its parent and minimize with it.
+    kind: if child && cfg!(target_os = "linux") {
+      WindowKind::Floating
+    } else {
+      WindowKind::Normal
+    },
     ..Default::default()
   }
 }
@@ -193,7 +208,7 @@ pub fn show_main(cx: &mut App) {
     let _ = handle.update(cx, |_, window, _| window.activate_window());
     return;
   }
-  let options = window_options("Lipi Lekhika", 470., 400., false, None, cx);
+  let options = window_options("Lipi Lekhika", 480., MAIN_HEIGHT, false, None, false, cx);
   match gpui_kit::open_window(options, cx, |window, cx| {
     cx.new(|cx| main_window::MainWindow::new(window, cx))
   }) {
@@ -223,6 +238,7 @@ pub fn open_parivartaka(cx: &mut App) {
     800.,
     true,
     Some((720., 560.)),
+    Controller::global(cx).main.is_some(),
     cx,
   );
   match gpui_kit::open_window(options, cx, |window, cx| {
@@ -249,7 +265,15 @@ pub fn open_typing_help(script: ScriptListEnum, tab: HelpTab, cx: &mut App) {
     });
     return;
   }
-  let options = window_options("Typing help", 940., 780., true, Some((560., 480.)), cx);
+  let options = window_options(
+    "Typing help",
+    940.,
+    780.,
+    true,
+    Some((560., 480.)),
+    Controller::global(cx).main.is_some() || Controller::global(cx).parivartaka.is_some(),
+    cx,
+  );
   match gpui_kit::open_window(options, cx, |window, cx| {
     cx.new(|cx| typing_help::TypingHelp::new(script, tab, window, cx))
   }) {

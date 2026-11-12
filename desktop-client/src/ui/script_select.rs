@@ -54,7 +54,23 @@ impl SelectItem for ScriptItem {
   }
 
   fn display_title(&self) -> Option<AnyElement> {
-    None
+    let mut glyph = div()
+      .w(px(20.))
+      .flex()
+      .justify_center()
+      .opacity(0.8)
+      .child(get_script_avatar(self.script));
+    if let Some(font) = script_font_family(self.script) {
+      glyph = glyph.font_family(font);
+    }
+    Some(
+      h_flex()
+        .gap_2()
+        .items_center()
+        .child(glyph)
+        .child(self.title.clone())
+        .into_any_element(),
+    )
   }
 
   fn render(&self, _: &mut Window, cx: &mut App) -> impl IntoElement {
