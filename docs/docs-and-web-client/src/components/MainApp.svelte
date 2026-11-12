@@ -25,8 +25,8 @@
   import * as Popover from '~/lib/components/ui/popover';
   import { ArrowLeftRight, KeyboardIcon, SettingsIcon, X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
-  import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import CopyButton from './CopyButton.svelte';
+  import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
   import PresetSelector from './script/PresetSelector.svelte';
@@ -240,16 +240,7 @@
                 </label>
                 <CopyButton text={() => input_text} label="Copy source text" />
                 {#if typing_script !== 'Normal'}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="size-8"
-                    onclick={() => (typing_modal_open = true)}
-                    title="Typing help"
-                  >
-                    <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-                    <span class="sr-only">Typing Help</span>
-                  </Button>
+                  <TypingHelpButton class="ml-1" onclick={() => (typing_modal_open = true)} />
                 {/if}
               </div>
               <div class="flex items-center gap-1.5">

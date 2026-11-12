@@ -7,12 +7,10 @@
   } from 'lipilekhika/typing';
   import { getFontClass } from '$components/script/font_list';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
-  import { Icon } from 'svelte-icons-pack';
-  import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { ArrowRight } from 'lucide-svelte';
-  import Button from '~/lib/components/ui/button/button.svelte';
   import ScriptSelector from '$components/script/ScriptSelector.svelte';
   import CopyButton from '$components/CopyButton.svelte';
+  import TypingHelpButton from '$components/typing_help/TypingHelpButton.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
@@ -50,16 +48,7 @@
     <div class="ml-auto flex items-center gap-1">
       <CopyButton text={() => $input_text_atom} />
       {#if $typing_script_atom !== 'Normal'}
-        <Button
-          variant="ghost"
-          size="icon"
-          class="size-8"
-          onclick={() => (typing_modal_open = true)}
-          title="Typing help"
-        >
-          <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-          <span class="sr-only">Typing Help</span>
-        </Button>
+        <TypingHelpButton onclick={() => (typing_modal_open = true)} />
       {/if}
     </div>
   </div>
