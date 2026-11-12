@@ -90,11 +90,11 @@
   ].join('\n');
 
   const card_class =
-    'rounded-2xl border border-border/60 bg-linear-to-b from-white to-slate-50 shadow-[0_10px_30px_rgba(15,23,42,0.06)] dark:bg-card/60 dark:bg-none dark:shadow-none';
+    'rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05),0_8px_24px_rgba(15,23,42,0.06)] dark:border-border/60 dark:bg-card/60 dark:shadow-none';
 </script>
 
 <section
-  class="border-t border-border/40 bg-linear-to-b from-muted/30 via-background to-background py-16"
+  class="border-t border-slate-200/80 bg-slate-100/60 py-16 dark:border-border/40 dark:bg-linear-to-b dark:from-muted/30 dark:via-background dark:to-background"
 >
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
     <div class="flex flex-col items-center gap-5 text-center sm:mb-2">
@@ -154,7 +154,7 @@
             </div>
             <p class="text-xs leading-relaxed text-muted-foreground">{pkg.description}</p>
             <div
-              class="mt-auto flex items-center gap-1 rounded-lg border border-border/60 bg-muted/60 py-1 pr-1 pl-3 dark:bg-background/60"
+              class="mt-auto flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 py-1 pr-1 pl-3 dark:border-border/60 dark:bg-background/60"
             >
               <code class="min-w-0 flex-1 truncate font-mono text-xs" title={pkg.install}>
                 <span class="mr-1.5 text-muted-foreground select-none">$</span>{pkg.install}
@@ -173,7 +173,7 @@
       <div class="flex min-w-0 flex-col gap-3 lg:col-span-2">
         <div class={'overflow-hidden ' + card_class}>
           <div
-            class="flex items-center justify-between border-b border-border/60 px-4 py-2 text-xs text-muted-foreground"
+            class="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-border/60 text-xs text-muted-foreground"
           >
             <span class="font-medium">Quick start</span>
             <span class="font-mono">index.ts</span>
@@ -193,7 +193,7 @@
             {#each INTEGRATIONS as integration (integration.name)}
               <a
                 href={integration.href}
-                class="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-sm transition-all hover:border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 dark:border-border/60 dark:bg-background/60 text-sm transition-all hover:border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 <Icon src={integration.icon} className="size-4" />
                 {integration.name}

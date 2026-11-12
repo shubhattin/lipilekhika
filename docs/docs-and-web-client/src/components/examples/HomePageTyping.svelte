@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Textarea } from '~/lib/components/ui/textarea';
-  import { transliterate } from 'lipilekhika';
   import {
     createTypingContext,
     handleTypingBeforeInputEvent,
@@ -15,24 +14,9 @@
   import ScriptSelector from '$components/script/ScriptSelector.svelte';
   import CopyButton from '$components/CopyButton.svelte';
 
-  /** Short phrases typed with the Normal (English letters) key scheme */
-  const EXAMPLES = ['namaste', 'saMskRtam', 'shrI rAmaH', 'vandE mAtaram'];
-
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
   let typing_modal_open = $state(false);
-  let textarea_el = $state<HTMLTextAreaElement | null>(null);
-
-  const useExample = async (example: string) => {
-    try {
-      const text = await transliterate(example, 'Normal', $typing_script_atom);
-      textarea_typing_context.clearContext();
-      input_text_atom.set(text);
-      textarea_el?.focus();
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   $effect(() => {
     textarea_typing_context.ready;
@@ -81,7 +65,6 @@
   </div>
 
   <Textarea
-    bind:ref={textarea_el}
     autocomplete="off"
     spellcheck="false"
     autocapitalize="none"
@@ -97,18 +80,6 @@
     onblur={() => textarea_typing_context.clearContext()}
     onkeydown={(e) => clearTypingContextOnKeyDown(e, textarea_typing_context)}
   />
-  <div class="flex flex-wrap items-center gap-1.5">
-    <span class="mr-0.5 text-xs text-muted-foreground">Try:</span>
-    {#each EXAMPLES as example (example)}
-      <button
-        type="button"
-        class="rounded-md border border-border/60 bg-background/60 px-2 py-0.5 font-mono text-xs text-foreground/80 transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
-        onclick={() => useExample(example)}
-      >
-        {example}
-      </button>
-    {/each}
-  </div>
 </div>
 
 {#if typing_modal_open && $typing_script_atom !== 'Normal'}
