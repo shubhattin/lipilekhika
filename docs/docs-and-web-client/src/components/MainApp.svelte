@@ -21,12 +21,20 @@
   import { Button } from '~/lib/components/ui/button';
   import { Switch } from '~/lib/components/ui/switch';
   import { Textarea } from '~/lib/components/ui/textarea';
+  import { Toggle } from '~/lib/components/ui/toggle';
+  import { cn } from '~/lib/utils.js';
   import { Separator } from '~/lib/components/ui/separator';
   import * as Popover from '~/lib/components/ui/popover';
-  import { ArrowLeftRight, KeyboardIcon, SettingsIcon, X } from 'lucide-svelte';
+  import { ArrowLeftRight, KeyboardIcon, KeyboardOffIcon, SettingsIcon, X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
-  import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import CopyButton from './CopyButton.svelte';
+  import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
+  import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
+  import { PILL_TOGGLE } from './typing_help/pill';
+  import {
+    getTypingOptionExamples,
+    type TypingOptionExamples
+  } from './typing_help/option_examples';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
   import PresetSelector from './script/PresetSelector.svelte';
@@ -73,6 +81,23 @@
   let from_input_typing_context = $derived(createTypingContext(typing_script));
 
   let typing_modal_open = $state(false);
+
+  // live examples of the typing options in the current script, for the settings popover
+  let option_examples = $state<TypingOptionExamples | null>(null);
+  $effect(() => {
+    const for_script = typing_script;
+    getTypingOptionExamples(for_script)
+      .then((e) => {
+        if (for_script === typing_script) option_examples = e;
+      })
+      .catch(() => (option_examples = null));
+  });
+  // the quick toggles under the text, only where the options do something
+  const show_option_chips = $derived(
+    typing_enabled &&
+      typing_script !== 'Normal' &&
+      !!(option_examples?.vowel || option_examples?.numerals)
+  );
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -208,13 +233,18 @@
 <!-- Anchored to the top, not centred: the platform banner below the card only appears
      after load (it needs the user agent), and centring would push the card up when it does -->
 <div class="mt-12 flex min-h-[90vh] flex-col items-center overflow-hidden px-4 pt-4 sm:pt-6">
-  <div class="mx-auto w-full max-w-6xl px-0 sm:px-6">
+  <div class="mx-auto w-full max-w-page px-0 sm:px-6">
     <form
       class="space-y-6 rounded-2xl border border-border bg-card p-4 shadow-2xl shadow-black/5 sm:space-y-8 sm:p-8 dark:shadow-black/30"
       onsubmit={handleSubmit}
     >
-      <!-- From / To Sections -->
-      <div class="relative grid gap-6 lg:grid-cols-2 lg:gap-14">
+      <!-- From / To Sections. The text boxes grow with the screen height (--text-box-h):
+           stacked, each takes about half of it; side by side on large screens, they fill
+           what the header, the rows around them and the platform banner under the card leave,
+           so all of it fits on screen with a little room to spare. -->
+      <div
+        class="relative grid gap-6 [--text-box-h:clamp(200px,calc(50dvh-90px),480px)] lg:grid-cols-2 lg:gap-14 lg:[--text-box-h:clamp(300px,calc(100dvh-500px),900px)]"
+      >
         <!-- Swap (desktop): sits in the gap between the two columns, level with the script selectors -->
         <div class="absolute top-[1.625rem] left-1/2 z-10 hidden -translate-x-1/2 lg:block">
           {@render swap_button()}
@@ -230,85 +260,123 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <div class="flex min-h-8 items-center justify-between gap-2">
-              <div class="flex items-center gap-1">
-                <label
-                  for="source-text"
-                  class="mr-1 text-sm font-medium tracking-wide text-muted-foreground"
-                >
-                  Source text
-                </label>
-                <CopyButton text={() => input_text} label="Copy source text" />
-                {#if typing_script !== 'Normal'}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="size-8"
-                    onclick={() => (typing_modal_open = true)}
-                    title="Typing help"
+            <!-- Labels come and go with the row's own width (it is half the page on large
+                 screens): "Source text" ≥ 20rem, help as icon, "Help" ≥ 18rem, "How to type"
+                 ≥ 22.5rem, the Alt+X hint ≥ 25rem. Measured to fit, keep in step if the row
+                 changes. -->
+            <div class="@container">
+              <div class="flex min-h-8 items-center justify-between gap-2">
+                <div class="flex items-center gap-1">
+                  <label
+                    for="source-text"
+                    class="mr-1 text-sm font-medium tracking-wide whitespace-nowrap text-muted-foreground"
                   >
-                    <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-                    <span class="sr-only">Typing Help</span>
-                  </Button>
-                {/if}
-              </div>
-              <div class="flex items-center gap-1.5">
-                <label
-                  class="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/40"
-                  title="Realtime typing (Alt+X to toggle)"
-                >
-                  <KeyboardIcon class="size-5" />
-                  <span class="hidden sm:inline">Typing</span>
-                  <kbd
-                    class="hidden rounded border border-border bg-muted px-1 font-mono text-[0.65rem] leading-4 sm:inline"
-                    >Alt+X</kbd
+                    Source<span class="hidden @[20rem]:inline">&nbsp;text</span>
+                  </label>
+                  <CopyButton text={() => input_text} label="Copy source text" />
+                  {#if typing_script !== 'Normal'}
+                    <TypingHelpButton
+                      class="ml-1"
+                      labels={{
+                        short: 'hidden @[18rem]:inline @[22.5rem]:hidden',
+                        full: 'hidden @[22.5rem]:inline',
+                        padded: '@[18rem]:px-2.5'
+                      }}
+                      onclick={() => (typing_modal_open = true)}
+                    />
+                  {/if}
+                </div>
+                <div class="flex items-center gap-1">
+                  <Toggle
+                    bind:pressed={typing_enabled}
+                    class={cn(PILL_TOGGLE, 'h-7 gap-1.5 px-2.5')}
+                    aria-label="Realtime typing"
+                    title={typing_enabled
+                      ? 'Realtime typing is on: English keys type in the script. Click or Alt+X to turn off'
+                      : 'Realtime typing is off: keys type as they are. Click or Alt+X to turn on'}
                   >
-                  <Switch bind:checked={typing_enabled} aria-label="Realtime typing" />
-                </label>
-                <Popover.Root>
-                  <Popover.Trigger>
-                    <Button variant="ghost" size="icon" class="size-8" title="Typing options">
-                      <SettingsIcon class="size-4" />
-                      <span class="sr-only">Typing options</span>
-                    </Button>
-                  </Popover.Trigger>
-                  <Popover.Content class="w-80">
-                    <div class="space-y-4">
-                      <h4 class="leading-none font-medium">Typing Options</h4>
-                      <div class="space-y-3">
-                        <div class="flex items-center justify-between gap-4">
-                          <label for="use-native-numerals" class="flex flex-col gap-1 text-sm">
-                            <span class="font-medium">Use Native Numerals</span>
-                            <span class="text-xs text-muted-foreground"
-                              >Convert numbers to script numerals</span
-                            >
-                          </label>
-                          <Switch id="use-native-numerals" bind:checked={useNativeNumerals} />
+                    {#if typing_enabled}
+                      <KeyboardIcon class="size-3.5" />
+                    {:else}
+                      <KeyboardOffIcon class="size-3.5" />
+                    {/if}
+                    Typing
+                    <kbd
+                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[25rem]:inline"
+                      >Alt+X</kbd
+                    >
+                  </Toggle>
+                  <Popover.Root>
+                    <Popover.Trigger>
+                      <Button variant="ghost" size="icon" class="size-8" title="Typing options">
+                        <SettingsIcon class="size-4" />
+                        <span class="sr-only">Typing options</span>
+                      </Button>
+                    </Popover.Trigger>
+                    <Popover.Content class="w-80">
+                      <div class="space-y-4">
+                        <h4 class="leading-none font-medium">Typing Options</h4>
+                        <div class="space-y-3">
+                          <div class="flex items-center justify-between gap-4">
+                            <label for="use-native-numerals" class="flex flex-col gap-1 text-sm">
+                              <span class="font-medium">Use Native Numerals</span>
+                              <span class="text-xs text-muted-foreground"
+                                >Convert numbers to script numerals{#if option_examples?.numerals}
+                                  <span class="whitespace-nowrap"
+                                    >(1 → <span class={getFontClass(typing_script)}
+                                      >{option_examples.numerals.on}</span
+                                    >)</span
+                                  >{/if}</span
+                              >
+                            </label>
+                            <Switch id="use-native-numerals" bind:checked={useNativeNumerals} />
+                          </div>
+                          <Separator />
+                          <div class="flex items-center justify-between gap-4">
+                            <label for="include-inherent-vowel" class="flex flex-col gap-1 text-sm">
+                              <span class="font-medium">Include Inherent Vowel</span>
+                              <span class="text-xs text-muted-foreground"
+                                >Add inherent vowel (schwa) to consonants{#if option_examples?.vowel}
+                                  <span class="whitespace-nowrap"
+                                    >(k → <span class={getFontClass(typing_script)}
+                                      >{option_examples.vowel.on}</span
+                                    >
+                                    instead of
+                                    <span class={getFontClass(typing_script)}
+                                      >{option_examples.vowel.off}</span
+                                    >)</span
+                                  >{/if}</span
+                              >
+                            </label>
+                            <Switch
+                              id="include-inherent-vowel"
+                              bind:checked={includeInherentVowel}
+                            />
+                          </div>
                         </div>
-                        <Separator />
-                        <div class="flex items-center justify-between gap-4">
-                          <label for="include-inherent-vowel" class="flex flex-col gap-1 text-sm">
-                            <span class="font-medium">Include Inherent Vowel</span>
-                            <span class="text-xs text-muted-foreground"
-                              >Add inherent vowel (schwa) to consonants</span
-                            >
-                          </label>
-                          <Switch id="include-inherent-vowel" bind:checked={includeInherentVowel} />
-                        </div>
+                        {#if option_examples?.vowel || option_examples?.numerals}
+                          <p class="border-t pt-3 text-xs text-muted-foreground">
+                            Quick toggles for both sit at the bottom of the text box.
+                          </p>
+                        {/if}
                       </div>
-                    </div>
-                  </Popover.Content>
-                </Popover.Root>
+                    </Popover.Content>
+                  </Popover.Root>
+                </div>
               </div>
             </div>
-            <div class="relative">
+            <!-- The box draws the border, so the pills and Clear get a strip of their own under
+                 the text instead of floating over it. -->
+            <div
+              class="flex h-(--text-box-h) flex-col rounded-md border border-input bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30"
+            >
               <Textarea
                 id="source-text"
                 bind:ref={source_textarea}
                 autocomplete="off"
                 spellcheck="false"
                 autocapitalize="none"
-                class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto pb-8 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
+                class={'field-sizing-fixed min-h-0 flex-1 resize-none overflow-auto border-0 bg-transparent text-base shadow-none focus-visible:ring-0 md:text-base dark:bg-transparent ' +
                   getFontClass(typing_script)}
                 placeholder={typing_enabled && typing_script !== 'Normal'
                   ? `Type with English letters to write in ${typing_script}…`
@@ -332,16 +400,37 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              {#if input_text}
-                <button
-                  type="button"
-                  class="absolute right-2 bottom-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-                  onclick={clearInput}
-                  title="Clear source text"
+              {#if show_option_chips || input_text}
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  class="flex min-h-9 cursor-text items-center gap-2 px-2 pb-2"
+                  onmousedown={(e) => {
+                    // the strip is part of the box: a click on its empty part goes to the text
+                    if (e.target === e.currentTarget) {
+                      e.preventDefault();
+                      source_textarea?.focus();
+                    }
+                  }}
                 >
-                  <X class="size-3.5" />
-                  Clear
-                </button>
+                  {#if show_option_chips}
+                    <TypingOptionChips
+                      script={typing_script}
+                      bind:useNativeNumerals
+                      bind:includeInherentVowel
+                    />
+                  {/if}
+                  {#if input_text}
+                    <button
+                      type="button"
+                      class="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      onclick={clearInput}
+                      title="Clear source text"
+                    >
+                      <X class="size-3.5" />
+                      Clear
+                    </button>
+                  {/if}
+                </div>
               {/if}
             </div>
           </div>
@@ -390,7 +479,7 @@
             </div>
             <Textarea
               id="output-text"
-              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
+              class={'field-sizing-fixed h-(--text-box-h) min-h-0 resize-none overflow-auto bg-muted/30 text-base md:text-base ' +
                 getFontClass(to_script)}
               placeholder="The transliteration appears here"
               value={outputText}

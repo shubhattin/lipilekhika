@@ -7,12 +7,10 @@
   } from 'lipilekhika/typing';
   import { getFontClass } from '$components/script/font_list';
   import { input_text_atom, typing_script_atom } from '$components/script/state';
-  import { Icon } from 'svelte-icons-pack';
-  import { BiHelpCircle } from 'svelte-icons-pack/bi';
   import { ArrowRight } from 'lucide-svelte';
-  import Button from '~/lib/components/ui/button/button.svelte';
   import ScriptSelector from '$components/script/ScriptSelector.svelte';
   import CopyButton from '$components/CopyButton.svelte';
+  import TypingHelpButton from '$components/typing_help/TypingHelpButton.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
@@ -41,7 +39,8 @@
     <ArrowRight class="size-3.5 transition-transform group-hover:translate-x-0.5" />
   </a>
 </div>
-<div class="space-y-3">
+<!-- the help labels follow this row's width (see TypingHelpButton), measured to fit -->
+<div class="@container space-y-3">
   <div class="flex items-center gap-2">
     <span class="hidden shrink-0 text-xs font-semibold text-muted-foreground sm:inline-block"
       >Script:</span
@@ -50,16 +49,14 @@
     <div class="ml-auto flex items-center gap-1">
       <CopyButton text={() => $input_text_atom} />
       {#if $typing_script_atom !== 'Normal'}
-        <Button
-          variant="ghost"
-          size="icon"
-          class="size-8"
+        <TypingHelpButton
+          labels={{
+            short: 'hidden @[19rem]:inline @[21.5rem]:hidden',
+            full: 'hidden @[21.5rem]:inline',
+            padded: '@[19rem]:px-2.5'
+          }}
           onclick={() => (typing_modal_open = true)}
-          title="Typing help"
-        >
-          <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-          <span class="sr-only">Typing Help</span>
-        </Button>
+        />
       {/if}
     </div>
   </div>

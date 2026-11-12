@@ -19,6 +19,20 @@ Add additional Tailwind styles to this file:
 https://tailwindcss.com/docs/adding-custom-styles#using-custom-css
 */
 
+/*
+  Width of the site pages (header, home, app, footer), so they all line up. It grows on
+  large screens instead of leaving wide empty margins: 72rem, then 80rem at xl, 90rem at 2xl.
+*/
+@utility max-w-page {
+  max-width: var(--container-6xl);
+  @media (width >= theme(--breakpoint-xl)) {
+    max-width: var(--container-7xl);
+  }
+  @media (width >= theme(--breakpoint-2xl)) {
+    max-width: 90rem;
+  }
+}
+
 /* Shadcn UI Theme */
 
 @custom-variant dark (&:is(.dark *));

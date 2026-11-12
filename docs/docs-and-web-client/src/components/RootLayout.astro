@@ -10,11 +10,14 @@ type Props = {
   title: string;
   description?: string;
   index?: boolean;
+  /** wider page on large screens (`max-w-page`), for the app; text pages read better narrower */
+  wide?: boolean;
 };
 
 const index_site = Astro.props.index ?? true;
 
-const { title, description }: Props = Astro.props;
+const { title, description, wide = false }: Props = Astro.props;
+const page_width = wide ? 'max-w-page' : 'max-w-6xl';
 
 const shareImageInfo = {
   url: 'https://cdn.jsdelivr.net/gh/shubhattin/lipilekhika/docs/docs-and-web-client/others/project_banner.jpg',
@@ -81,13 +84,13 @@ const shareImageInfo = {
   </head>
   <body class="dark bg-background">
     <div class="min-h-screen">
-      <Header client:idle />
+      <Header client:idle {wide} />
 
       <slot />
 
       <!-- Footer -->
       <footer class="border-t border-border/40 py-8">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class:list={['mx-auto px-4 sm:px-6', page_width]}>
           <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
               <span
