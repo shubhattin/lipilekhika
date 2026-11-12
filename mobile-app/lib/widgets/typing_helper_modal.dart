@@ -119,59 +119,97 @@ class _TypingHelperModalState extends State<TypingHelperModal> {
     }
   }
 
+  /// ई with its keys (I, ee, ii) in the selected script, the example of the info
+  Cell? get _alternatesExample {
+    for (final section in _layout?.sections ?? const <Section>[]) {
+      for (final group in section.groups) {
+        for (final cell in group.cells) {
+          if (cell?.id == 'I' && cell!.main.primary != null) return cell;
+        }
+      }
+    }
+    return null;
+  }
+
   void _showAlternatesInfo() {
+    final example = _alternatesExample;
     showDialog<void>(
       context: context,
       builder: (context) {
         final theme = Theme.of(context);
-        final muted = theme.colorScheme.onSurfaceVariant;
-        final code = TextStyle(
-          fontFamily: 'monospace',
-          color: theme.colorScheme.onSurface,
-        );
-        final strong = TextStyle(
-          color: theme.colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
-        );
+        final colorScheme = theme.colorScheme;
+        final muted = colorScheme.onSurfaceVariant;
+        final keys = example == null
+            ? const <String>[]
+            : [
+                example.main.primary!,
+                ...example.main.alternates.where((k) => !k.startsWith('.')),
+              ];
         return AlertDialog(
           title: const Text('Alternate keys'),
-          content: DefaultTextStyle.merge(
-            style: TextStyle(color: muted, height: 1.4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(TextSpan(children: [
-                  const TextSpan(
-                      text:
-                          'Many characters can be typed in more than one way, '
-                          'like ई with '),
-                  TextSpan(text: 'I', style: code),
-                  const TextSpan(text: ', '),
-                  TextSpan(text: 'ee', style: code),
-                  const TextSpan(text: ' or '),
-                  TextSpan(text: 'ii', style: code),
-                  const TextSpan(
-                      text: '. The first key is the main one, the rest are '
-                          'alternates.'),
-                ])),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Other keys for the same letter. The first one is the main key.',
+                style: TextStyle(color: muted, height: 1.4),
+              ),
+              if (example != null) ...[
                 const SizedBox(height: 12),
-                Text.rich(TextSpan(children: [
-                  const TextSpan(text: 'Alternates always work while '),
-                  TextSpan(text: 'typing', style: strong),
-                  const TextSpan(text: '. When you '),
-                  TextSpan(text: 'convert text', style: strong),
-                  const TextSpan(text: ' (transliterate), some of them, like '),
-                  TextSpan(text: 'ee', style: code),
-                  const TextSpan(text: ' → ई or '),
-                  TextSpan(text: 'x', style: code),
-                  const TextSpan(text: ' → क्ष, only work with the '),
-                  TextSpan(text: 'Use Typing Characters', style: strong),
-                  const TextSpan(
-                      text: ' option turned on in Transliteration Options.'),
-                ])),
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      for (final (i, key) in keys.indexed) ...[
+                        if (i == 1)
+                          Text('or',
+                              style: TextStyle(fontSize: 12, color: muted)),
+                        i == 0 ? _KeyCap(key) : _AltKey(key),
+                      ],
+                      Text('→', style: TextStyle(color: muted)),
+                      Text(
+                        example.main.text,
+                        style: FontConfig.getTextStyleForScript(
+                          _script,
+                          baseStyle: TextStyle(
+                            fontSize: 24,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
-            ),
+              const SizedBox(height: 12),
+              Text.rich(
+                TextSpan(children: [
+                  const TextSpan(
+                      text: 'All of them work while typing. When converting '
+                          'text, some alternates need the '),
+                  TextSpan(
+                    text: 'Use Typing Characters',
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const TextSpan(text: ' option.'),
+                ]),
+                style: TextStyle(fontSize: 13, color: muted, height: 1.4),
+              ),
+            ],
           ),
           actions: [
             TextButton(
