@@ -1,9 +1,32 @@
 import { atom } from 'nanostores';
-import type { ScriptListType } from 'lipilekhika';
+import { SCRIPT_LIST, type ScriptListType } from 'lipilekhika';
 import { PRESETS, type PresetListType } from '~/tools/presets';
 import { DEFAULT_USE_NATIVE_NUMERALS, DEFAULT_INCLUDE_INHERENT_VOWEL } from 'lipilekhika/typing';
 
-const isPreset = (value: string): value is PresetListType => value in PRESETS;
+/** Own keys only — `'constructor' in PRESETS` would otherwise pass. */
+const isPreset = (value: string): value is PresetListType => Object.hasOwn(PRESETS, value);
+
+const isScript = (value: string): value is ScriptListType =>
+  (SCRIPT_LIST as string[]).includes(value);
+
+/** `localStorage` can be missing or throw (SSR, private mode, blocked site data). */
+const readStorage = (key: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const writeStorage = (key: string, value: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // storage unavailable or full: the value just won't persist
+  }
+};
 
 /** `Boolean("false")` is true — parse stored booleans explicitly. */
 const parseStoredBoolean = (value: string | null, defaultValue: boolean): boolean => {
@@ -30,14 +53,12 @@ const DEFAULT_FROM: ScriptListType = 'Devanagari';
  */
 export const typing_script_atom = atom<ScriptListType>(
   (() => {
-    if (typeof window === 'undefined') return DEFAULT_FROM;
-    const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.TYPING_SCRIPT);
-    return localStorageValue ? (localStorageValue as ScriptListType) : DEFAULT_FROM;
+    const localStorageValue = readStorage(LOCAL_STORAGE_KEYS.TYPING_SCRIPT);
+    return localStorageValue && isScript(localStorageValue) ? localStorageValue : DEFAULT_FROM;
   })()
 );
 typing_script_atom.subscribe((value) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(LOCAL_STORAGE_KEYS.TYPING_SCRIPT, value);
+  writeStorage(LOCAL_STORAGE_KEYS.TYPING_SCRIPT, value);
 });
 
 const DEFAULT_PRESET: PresetListType = 'none';
@@ -46,36 +67,30 @@ const DEFAULT_PRESET: PresetListType = 'none';
  */
 export const current_preset_atom = atom<PresetListType>(
   (() => {
-    if (typeof window === 'undefined') return DEFAULT_PRESET;
-    const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.CURRENT_PRESET);
+    const localStorageValue = readStorage(LOCAL_STORAGE_KEYS.CURRENT_PRESET);
     return localStorageValue && isPreset(localStorageValue) ? localStorageValue : DEFAULT_PRESET;
   })()
 );
 current_preset_atom.subscribe((value) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(LOCAL_STORAGE_KEYS.CURRENT_PRESET, value);
+  writeStorage(LOCAL_STORAGE_KEYS.CURRENT_PRESET, value);
 });
 
 export const use_native_numerals_atom = atom<boolean>(
   (() => {
-    if (typeof window === 'undefined') return DEFAULT_USE_NATIVE_NUMERALS;
-    const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.USE_NATIVE_NUMERALS);
+    const localStorageValue = readStorage(LOCAL_STORAGE_KEYS.USE_NATIVE_NUMERALS);
     return parseStoredBoolean(localStorageValue, DEFAULT_USE_NATIVE_NUMERALS);
   })()
 );
 use_native_numerals_atom.subscribe((value) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(LOCAL_STORAGE_KEYS.USE_NATIVE_NUMERALS, value.toString());
+  writeStorage(LOCAL_STORAGE_KEYS.USE_NATIVE_NUMERALS, value.toString());
 });
 
 export const include_inherent_vowel_atom = atom<boolean>(
   (() => {
-    if (typeof window === 'undefined') return DEFAULT_INCLUDE_INHERENT_VOWEL;
-    const localStorageValue = localStorage.getItem(LOCAL_STORAGE_KEYS.INCLUDE_INHERENT_VOWEL);
+    const localStorageValue = readStorage(LOCAL_STORAGE_KEYS.INCLUDE_INHERENT_VOWEL);
     return parseStoredBoolean(localStorageValue, DEFAULT_INCLUDE_INHERENT_VOWEL);
   })()
 );
 include_inherent_vowel_atom.subscribe((value) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(LOCAL_STORAGE_KEYS.INCLUDE_INHERENT_VOWEL, value.toString());
+  writeStorage(LOCAL_STORAGE_KEYS.INCLUDE_INHERENT_VOWEL, value.toString());
 });

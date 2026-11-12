@@ -3,6 +3,8 @@
   import * as Avatar from '~/lib/components/ui/avatar';
   import { type ScriptListType } from 'lipilekhika';
   import { getScriptAvatar } from '$components/script/script_avatar';
+  import { Skeleton } from '~/lib/components/ui/skeleton';
+  import { onMount } from 'svelte';
 
   let {
     script = $bindable(),
@@ -51,30 +53,43 @@
     Modi: 'ancient',
     Siddham: 'ancient'
   };
+
+  // The page is prerendered with the default script while the real one can come from
+  // localStorage, so show a same-sized placeholder until the client has taken over
+  // instead of flashing the wrong script name.
+  let mounted = $state(false);
+  onMount(() => (mounted = true));
 </script>
 
-<Select.Root type="single" bind:value={script}>
-  <Select.Trigger class="h-8 w-48 gap-x-0 space-x-0 border-border/50 bg-background/50 text-sm">
-    <Avatar.Root>
-      <Avatar.Fallback>{getScriptAvatar(script)}</Avatar.Fallback>
-    </Avatar.Root>
-    {script}
-  </Select.Trigger>
-  <Select.Content class="max-h-96">
-    {#each Object.entries(CATEGORIES) as [category, name]}
-      <Select.Group>
-        <Select.Label>{name}</Select.Label>
-        {#each Object.entries(scripts).filter(([, cat]) => cat === category) as [script_]}
-          {#if have_normal_script || script_ !== 'Normal'}
-            <Select.Item value={script_} label={script_} aria-label={script_}>
-              <Avatar.Root>
-                <Avatar.Fallback>{getScriptAvatar(script_ as ScriptListType)}</Avatar.Fallback>
-              </Avatar.Root>
-              {script_}
-            </Select.Item>
-          {/if}
-        {/each}
-      </Select.Group>
-    {/each}
-  </Select.Content>
-</Select.Root>
+{#if !mounted}
+  <Skeleton
+    class="h-9 w-48 border border-border/50 bg-muted/40 dark:bg-input/30"
+    aria-hidden="true"
+  />
+{:else}
+  <Select.Root type="single" bind:value={script}>
+    <Select.Trigger class="h-8 w-48 gap-x-0 space-x-0 border-border/50 bg-background/50 text-sm">
+      <Avatar.Root>
+        <Avatar.Fallback>{getScriptAvatar(script)}</Avatar.Fallback>
+      </Avatar.Root>
+      {script}
+    </Select.Trigger>
+    <Select.Content class="max-h-96">
+      {#each Object.entries(CATEGORIES) as [category, name]}
+        <Select.Group>
+          <Select.Label>{name}</Select.Label>
+          {#each Object.entries(scripts).filter(([, cat]) => cat === category) as [script_]}
+            {#if have_normal_script || script_ !== 'Normal'}
+              <Select.Item value={script_} label={script_} aria-label={script_}>
+                <Avatar.Root>
+                  <Avatar.Fallback>{getScriptAvatar(script_ as ScriptListType)}</Avatar.Fallback>
+                </Avatar.Root>
+                {script_}
+              </Select.Item>
+            {/if}
+          {/each}
+        </Select.Group>
+      {/each}
+    </Select.Content>
+  </Select.Root>
+{/if}

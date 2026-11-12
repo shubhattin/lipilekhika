@@ -10,11 +10,14 @@
   let {
     availableOptions,
     options = $bindable(),
-    presetSelector
+    presetSelector,
+    onManualChange
   }: {
     availableOptions: string[];
     options: TransliterationOptions;
     presetSelector?: Snippet;
+    /** Called only when the user toggles an option, never for programmatic updates */
+    onManualChange?: () => void;
   } = $props();
 
   let showOptions = $state(false);
@@ -103,6 +106,7 @@
                 <Switch
                   id={option}
                   bind:checked={options[option as keyof TransliterationOptions]}
+                  onCheckedChange={() => onManualChange?.()}
                 />
                 <span class="block max-w-40 truncate text-xs sm:max-w-full" title={option}>
                   {CUSTOM_OPTION_DESCRIPTION[option as CustomOptionList]?.[0] ?? option}
