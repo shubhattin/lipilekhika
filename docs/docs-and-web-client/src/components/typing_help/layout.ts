@@ -94,8 +94,6 @@ const SVARA_ITEMS = [
   'auU'
 ];
 
-export const VARGA_COLUMNS = ['Unvoiced', 'Aspirated', 'Voiced', 'Voiced aspirated', 'Nasal'];
-
 export const VARGA_SPECS: GroupSpec[] = [
   { id: 'ka', title: 'Ka-varga', hint: 'velar', columns: 5, items: ['k', 'kh', 'g', 'gh', 'G'] },
   {
@@ -405,40 +403,11 @@ export async function buildLayout(
   };
 }
 
-/** The keys of a glyph to show, with the alternates or only the main key */
-export const glyphKeys = (glyph: Glyph | undefined, show_alternates: boolean) => {
-  if (!glyph?.primary) return [];
-  return show_alternates ? [glyph.primary, ...glyph.alternates] : [glyph.primary];
-};
-
-/** Whether a cell matches a search query, by any of its keys or by its text */
-export const cellMatches = (cell: Cell, query: string) => {
-  const q = query.trim();
-  if (!q) return true;
-  const keys = [
-    cell.main.primary,
-    ...cell.main.alternates,
-    cell.sign?.primary,
-    ...(cell.sign?.alternates ?? [])
-  ];
-  if (keys.some((k) => k === q)) return true;
-  const ql = q.toLowerCase();
-  return (
-    keys.some((k) => k?.toLowerCase().startsWith(ql)) ||
-    cell.main.text === q ||
-    cell.sign?.text === q ||
-    cell.other?.text === q ||
-    (cell.label?.toLowerCase().includes(ql) ?? false)
-  );
-};
-
-/** What a typing help variant gets to render */
+/** What the typing help renders a layout with */
 export type HelpContext = {
   layout: Layout;
   mode: 'typing' | 'compare';
   show_alternates: boolean;
-  /** the search query, only for the variants with a search box */
-  query: string;
   /** font class of the selected script */
   font: string;
   /** font class of the compared script */

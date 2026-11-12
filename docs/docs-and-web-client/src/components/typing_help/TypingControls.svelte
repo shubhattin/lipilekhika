@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TypingControls } from './layout';
 
-  /** The typing controls as one compact box, shared by all the variants */
+  /** The keys which change how the typing works, as one compact box */
   let { controls, font }: { controls: TypingControls; font: string } = $props();
 
   const kbd =
