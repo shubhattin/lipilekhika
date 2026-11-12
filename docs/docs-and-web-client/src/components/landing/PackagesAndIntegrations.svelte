@@ -173,7 +173,7 @@
       <div class="flex min-w-0 flex-col gap-3 lg:col-span-2">
         <div class={'overflow-hidden ' + card_class}>
           <div
-            class="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-border/60 text-xs text-muted-foreground"
+            class="flex items-center justify-between border-b border-slate-200 px-4 py-2 text-xs text-muted-foreground dark:border-border/60"
           >
             <span class="font-medium">Quick start</span>
             <span class="font-mono">index.ts</span>
@@ -193,7 +193,7 @@
             {#each INTEGRATIONS as integration (integration.name)}
               <a
                 href={integration.href}
-                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 dark:border-border/60 dark:bg-background/60 text-sm transition-all hover:border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm transition-all hover:border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none dark:border-border/60 dark:bg-background/60"
               >
                 <Icon src={integration.icon} className="size-4" />
                 {integration.name}
