@@ -18,13 +18,26 @@
     type HelpContext
   } from './typing_help/layout';
 
-  let { open = $bindable(), script: script_input }: { open: boolean; script: ScriptListType } =
-    $props();
+  let {
+    open = $bindable(),
+    script: script_input,
+    initial_tab = 'typing',
+    initial_compare = 'Romanized'
+  }: {
+    open: boolean;
+    script: ScriptListType;
+    /** the tab to open on */
+    initial_tab?: 'typing' | 'compare';
+    /** the script the Compare tab starts with */
+    initial_compare?: ScriptListType;
+  } = $props();
 
   // svelte-ignore state_referenced_locally
   let script = $state<ScriptListType>(script_input === 'Normal' ? 'Devanagari' : script_input);
-  let compare = $state<ScriptListType>('Romanized');
-  let tab = $state<'typing' | 'compare'>('typing');
+  // svelte-ignore state_referenced_locally
+  let compare = $state<ScriptListType>(initial_compare);
+  // svelte-ignore state_referenced_locally
+  let tab = $state<'typing' | 'compare'>(initial_tab);
   let show_alternates = $state(true);
 
   let layout_prom = $derived(tab === 'typing' ? buildLayout(script) : buildLayout(script, compare));
