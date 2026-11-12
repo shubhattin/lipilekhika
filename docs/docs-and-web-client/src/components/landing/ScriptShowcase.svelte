@@ -22,10 +22,11 @@
     { script: 'Gurumukhi', native: 'ਗੁਰਮੁਖੀ' },
     { script: 'Odia', native: 'ଓଡ଼ିଆ' },
     { script: 'Sinhala', native: 'සිංහල' },
-    { script: 'Romanized', native: 'IAST' }
+    { script: 'Tamil-Extended' }
   ];
+  const ROMAN_SCHEMES: ScriptListType[] = ['Romanized', 'IAST', 'ITRANS', 'Harvard-Kyoto', 'SLP1'];
   const ANCIENT_SCRIPTS: ScriptListType[] = ['Brahmi', 'Granth', 'Modi', 'Sharada', 'Siddham'];
-  const ALL_SCRIPTS = [...SCRIPTS.map((s) => s.script), ...ANCIENT_SCRIPTS];
+  const ALL_SCRIPTS = [...SCRIPTS.map((s) => s.script), ...ROMAN_SCHEMES, ...ANCIENT_SCRIPTS];
 
   let outputs = $state<Partial<Record<ScriptListType, string>>>({});
   let run_id = 0;
@@ -75,21 +76,26 @@
     {@render card(script, native)}
   {/each}
 </div>
-<div
-  class="mt-8 mb-4 flex items-center gap-3 text-xs font-medium tracking-wide text-muted-foreground uppercase"
->
-  <span class="h-px flex-1 bg-border/60"></span>
-  Ancient scripts
-  <span class="h-px flex-1 bg-border/60"></span>
-</div>
-<div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
-  {#each ANCIENT_SCRIPTS as script (script)}
-    {@render card(script)}
-  {/each}
-</div>
+{@render group('Romanization schemes', ROMAN_SCHEMES)}
+{@render group('Ancient scripts', ANCIENT_SCRIPTS)}
 <p class="mt-6 text-center text-xs text-muted-foreground">
-  Also supported: Purna-Devanagari, Tamil-Extended and the Normal (English letters) input scheme.
+  Also supported: Purna-Devanagari and the Normal (English letters) input scheme.
 </p>
+
+{#snippet group(title: string, scripts: ScriptListType[])}
+  <div
+    class="mt-8 mb-4 flex items-center gap-3 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+  >
+    <span class="h-px flex-1 bg-border/60"></span>
+    {title}
+    <span class="h-px flex-1 bg-border/60"></span>
+  </div>
+  <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+    {#each scripts as script (script)}
+      {@render card(script)}
+    {/each}
+  </div>
+{/snippet}
 
 {#snippet card(script: ScriptListType, native?: string)}
   {@const is_current = has_input && script === $typing_script_atom}
@@ -102,7 +108,7 @@
   >
     <span class="flex items-center gap-2">
       <span
-        class={'inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-sm text-foreground/80 ' +
+        class={'inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md bg-muted px-1 text-xs text-foreground/80 ' +
           getFontClass(script)}>{getScriptAvatar(script)}</span
       >
       <span class="truncate text-xs font-medium text-muted-foreground">{script}</span>

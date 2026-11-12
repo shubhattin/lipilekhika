@@ -403,7 +403,12 @@
               <CopyButton text={() => outputText} label="Copy output text" />
               <div class="ml-auto flex items-center gap-2">
                 {#if !auto_convert}
-                  <Button type="submit" size="sm" variant="secondary" class="h-8 gap-1.5 font-semibold">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="secondary"
+                    class="h-8 gap-1.5 font-semibold"
+                  >
                     <Icon src={SiConvertio} className="size-4" />
                     Convert
                   </Button>

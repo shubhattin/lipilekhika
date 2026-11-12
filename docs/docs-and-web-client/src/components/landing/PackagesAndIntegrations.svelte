@@ -30,7 +30,8 @@
       name: 'JavaScript',
       icon: JavaScriptIcon,
       icon_class: 'size-8',
-      description: 'Typesafe and tree-shakable, for ESM, CommonJS and UMD. Includes the typing module.',
+      description:
+        'Typesafe and tree-shakable, for ESM, CommonJS and UMD. Includes the typing module.',
       install: 'npm install lipilekhika',
       guide: '/getting-started/javascript',
       registry: { label: 'npm', url: 'https://www.npmjs.com/package/lipilekhika' }
@@ -158,7 +159,11 @@
               <code class="min-w-0 flex-1 truncate font-mono text-xs" title={pkg.install}>
                 <span class="mr-1.5 text-muted-foreground select-none">$</span>{pkg.install}
               </code>
-              <CopyButton text={pkg.install} label={`Copy ${pkg.name} install command`} class="size-7" />
+              <CopyButton
+                text={pkg.install}
+                label={`Copy ${pkg.name} install command`}
+                class="size-7"
+              />
             </div>
           </div>
         {/each}
@@ -173,7 +178,8 @@
             <span class="font-medium">Quick start</span>
             <span class="font-mono">index.ts</span>
           </div>
-          <pre class="overflow-x-auto px-4 py-3 font-mono text-xs leading-relaxed sm:text-[0.8rem]"><code
+          <pre
+            class="overflow-x-auto px-4 py-3 font-mono text-xs leading-relaxed sm:text-[0.8rem]"><code
               >{@html QUICK_START_HTML}</code
             ></pre>
         </div>
