@@ -405,14 +405,30 @@
             <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
               >From</span
             >
-            <ScriptSeleector bind:script={typing_script} />
+            <!-- The typing guide sits by the script it is about, where the selector leaves room
+                 (the row under it has none on a phone). Its label goes with the row's width:
+                 "How to type" ≥ 20rem, "Help" ≥ 17.5rem, otherwise just the icon. -->
+            <div class="@container/script">
+              <div class="flex items-center gap-3">
+                <ScriptSeleector bind:script={typing_script} />
+                {#if typing_script !== 'Normal'}
+                  <TypingHelpButton
+                    labels={{
+                      short: 'hidden @[17.5rem]/script:inline @[20rem]/script:hidden',
+                      full: 'hidden @[20rem]/script:inline',
+                      padded: '@[17.5rem]/script:px-2.5'
+                    }}
+                    onclick={() => (typing_modal_open = true)}
+                  />
+                {/if}
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col gap-2">
             <!-- Labels come and go with the row's own width (it is half the page on large
-                 screens): "Source text" ≥ 22.5rem, help as icon, "Help" ≥ 20.5rem, "How to type"
-                 ≥ 25rem, the Alt+X hint ≥ 27.5rem, "Typing" on its toggle ≥ 17rem. Measured to fit, keep in step if the row
-                 changes. -->
+                 screens): "Source text" ≥ 17.5rem, the Alt+X hint ≥ 20rem, "Typing" on its
+                 toggle ≥ 13rem. Measured to fit, keep in step if the row changes. -->
             <div class="@container">
               <div class="flex min-h-8 items-center justify-between gap-2">
                 <div class="flex items-center gap-1">
@@ -420,7 +436,7 @@
                     for="source-text"
                     class="mr-1 text-sm font-medium tracking-wide whitespace-nowrap text-muted-foreground"
                   >
-                    Source<span class="hidden @[22.5rem]:inline">&nbsp;text</span>
+                    Source<span class="hidden @[17.5rem]:inline">&nbsp;text</span>
                   </label>
                   <CopyButton text={() => input_text} label="Copy source text" />
                   <TextBoxMenu
@@ -441,17 +457,6 @@
                     ]}
                     hint="You can also drop a .txt file on the box"
                   />
-                  {#if typing_script !== 'Normal'}
-                    <TypingHelpButton
-                      class="ml-1"
-                      labels={{
-                        short: 'hidden @[20.5rem]:inline @[25rem]:hidden',
-                        full: 'hidden @[25rem]:inline',
-                        padded: '@[20.5rem]:px-2.5'
-                      }}
-                      onclick={() => (typing_modal_open = true)}
-                    />
-                  {/if}
                 </div>
                 <div class="flex items-center gap-1">
                   <Toggle
@@ -467,9 +472,9 @@
                     {:else}
                       <KeyboardOffIcon class="size-3.5" />
                     {/if}
-                    <span class="hidden @[17rem]:inline">Typing</span>
+                    <span class="hidden @[13rem]:inline">Typing</span>
                     <kbd
-                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[27.5rem]:inline"
+                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[20rem]:inline"
                       >Alt+X</kbd
                     >
                   </Toggle>
