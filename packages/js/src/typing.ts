@@ -1075,9 +1075,7 @@ export async function getScriptTypingDataMap(script: ScriptLangType) {
   res.common_krama_map = mergeDuplicateTextMappings([
     ...res.common_krama_map,
     ...multi_krama_keys
-  ]).filter(
-    ([text]) => text !== ''
-  );
+  ]).filter(([text]) => text !== '');
   // the context clearing `q` has no text
   res.script_specific_krama_map = mergeDuplicateTextMappings(res.script_specific_krama_map).filter(
     ([text]) => text !== ''

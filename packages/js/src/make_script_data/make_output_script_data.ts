@@ -806,9 +806,7 @@ function get_out_script_data(
   {
     const ignored_krama_labels: string[] = [
       'nuqta',
-      ...(res.script_type === 'brahmic'
-        ? ['a-mAtrA', 'a1-mAtrA']
-        : ['halant', 'saMkShepachihna'])
+      ...(res.script_type === 'brahmic' ? ['a-mAtrA', 'a1-mAtrA'] : ['halant', 'saMkShepachihna'])
     ];
     const unmapped_krama_keys = res.krama_text_arr
       .map((item, i) => (item[0] === '' ? KramaLabelsArray[i] : null))
