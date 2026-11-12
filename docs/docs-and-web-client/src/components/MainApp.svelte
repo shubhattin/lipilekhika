@@ -56,12 +56,6 @@
 
   let source_textarea = $state<HTMLTextAreaElement | null>(null);
 
-  const countWords = (text: string) => {
-    const trimmed = text.trim();
-    return trimmed ? trimmed.split(/\s+/).length : 0;
-  };
-  const formatWords = (count: number) => `${count} ${count === 1 ? 'word' : 'words'}`;
-
   const clearInput = () => {
     from_input_typing_context.clearContext();
     input_text = '';
@@ -118,31 +112,28 @@
     outputText = currentInputText;
   };
 
-  // Flag to track if options are being set programmatically (to avoid resetting preset)
-  let isApplyingPreset = false;
-  // Flag to track if preset was reset due to manual option change (to avoid reapplying "none" preset)
-  let isResettingPresetDueToManualChange = false;
-  // Track previous preset to detect actual user-initiated preset changes
-  let previousPreset: PresetListType = current_preset;
+  // Set when the user toggles an option by hand: the preset drops to 'none' but the
+  // options they picked must stay, so the next preset application is skipped once.
+  let keepOptionsOnNextApply = false;
+  // Only the latest `getAllOptions` call may write, so a slow earlier one can't win a race.
+  let applyRun = 0;
 
   // Apply preset options when preset changes or scripts change
   $effect(() => {
     const _currentPreset = current_preset;
     const _typingScript = typing_script;
     const _toScript = to_script;
+    const run = ++applyRun;
 
     getAllOptions(_typingScript, _toScript).then((all_options) => {
+      if (run !== applyRun) return;
       untrack(() => {
         availableOptions = all_options;
 
-        // Skip applying options if preset was reset due to manual option change
-        if (isResettingPresetDueToManualChange) {
-          isResettingPresetDueToManualChange = false;
-          previousPreset = _currentPreset;
+        if (keepOptionsOnNextApply) {
+          keepOptionsOnNextApply = false;
           return;
         }
-
-        isApplyingPreset = true;
 
         const newOptions: TransliterationOptions = Object.fromEntries(
           all_options.map((v) => [v, false])
@@ -167,28 +158,16 @@
         }
 
         options = newOptions;
-        previousPreset = _currentPreset;
-        // Reset flag after a microtask to allow the options assignment to complete
-        queueMicrotask(() => {
-          isApplyingPreset = false;
-        });
       });
     });
   });
 
-  // Reset preset to 'none' when options are manually modified
-  $effect(() => {
-    // Track options changes
-    $state.snapshot(options);
-
-    untrack(() => {
-      // Only reset if not applying preset programmatically and preset is not already 'none'
-      if (!isApplyingPreset && current_preset !== 'none') {
-        isResettingPresetDueToManualChange = true;
-        current_preset = 'none';
-      }
-    });
-  });
+  // A hand-toggled option no longer matches the preset, so drop it to 'none'
+  const handleManualOptionChange = () => {
+    if (current_preset === 'none') return;
+    keepOptionsOnNextApply = true;
+    current_preset = 'none';
+  };
 
   $effect(() => {
     from_input_typing_context.updateUseNativeNumerals(useNativeNumerals);
@@ -226,7 +205,9 @@
   });
 </script>
 
-<div class="mt-12 flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-4">
+<!-- Anchored to the top, not centred: the platform banner below the card only appears
+     after load (it needs the user agent), and centring would push the card up when it does -->
+<div class="mt-12 flex min-h-[90vh] flex-col items-center overflow-hidden px-4 pt-4 sm:pt-6">
   <div class="mx-auto w-full max-w-6xl px-0 sm:px-6">
     <form
       class="space-y-6 rounded-2xl border border-border bg-card p-4 shadow-2xl shadow-black/5 sm:space-y-8 sm:p-8 dark:shadow-black/30"
@@ -351,22 +332,17 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              <div
-                class="pointer-events-none absolute right-2 bottom-2 left-3 flex items-center justify-between text-xs text-muted-foreground"
-              >
-                <span>{formatWords(countWords(input_text))}</span>
-                {#if input_text}
-                  <button
-                    type="button"
-                    class="pointer-events-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors hover:bg-accent/60 hover:text-foreground"
-                    onclick={clearInput}
-                    title="Clear source text"
-                  >
-                    <X class="size-3.5" />
-                    Clear
-                  </button>
-                {/if}
-              </div>
+              {#if input_text}
+                <button
+                  type="button"
+                  class="absolute right-2 bottom-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                  onclick={clearInput}
+                  title="Clear source text"
+                >
+                  <X class="size-3.5" />
+                  Clear
+                </button>
+              {/if}
             </div>
           </div>
         </section>
@@ -412,26 +388,19 @@
                 </Label>
               </div>
             </div>
-            <div class="relative">
-              <Textarea
-                id="output-text"
-                class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 pb-8 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
-                  getFontClass(to_script)}
-                placeholder="The transliteration appears here"
-                value={outputText}
-                readonly
-              />
-              <div
-                class="pointer-events-none absolute right-3 bottom-2 left-3 text-xs text-muted-foreground"
-              >
-                {formatWords(countWords(outputText))}
-              </div>
-            </div>
+            <Textarea
+              id="output-text"
+              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
+                getFontClass(to_script)}
+              placeholder="The transliteration appears here"
+              value={outputText}
+              readonly
+            />
           </div>
         </section>
       </div>
 
-      <CustomOptions {availableOptions} bind:options>
+      <CustomOptions {availableOptions} bind:options onManualChange={handleManualOptionChange}>
         {#snippet presetSelector()}
           <PresetSelector bind:preset={current_preset} />
         {/snippet}
