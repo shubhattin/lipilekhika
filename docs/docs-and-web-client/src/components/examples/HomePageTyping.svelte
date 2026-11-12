@@ -9,21 +9,14 @@
   import { input_text_atom, typing_script_atom } from '$components/script/state';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
-  import { BsCopy } from 'svelte-icons-pack/bs';
+  import { ArrowRight } from 'lucide-svelte';
   import Button from '~/lib/components/ui/button/button.svelte';
   import ScriptSelector from '$components/script/ScriptSelector.svelte';
+  import CopyButton from '$components/CopyButton.svelte';
 
   let textarea_typing_context = $derived(createTypingContext($typing_script_atom));
 
   let typing_modal_open = $state(false);
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  };
 
   $effect(() => {
     textarea_typing_context.ready;
@@ -40,8 +33,12 @@
     ></span>
     <p class="text-sm font-semibold text-foreground">Try typing</p>
   </div>
-  <a href="/app" class="text-xs text-muted-foreground transition-colors hover:text-foreground">
+  <a
+    href="/app"
+    class="group inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+  >
     Open full app
+    <ArrowRight class="size-3.5 transition-transform group-hover:translate-x-0.5" />
   </a>
 </div>
 <div class="space-y-3">
@@ -50,30 +47,30 @@
       >Script:</span
     >
     <ScriptSelector bind:script={$typing_script_atom} have_normal_script={false} />
-    <Button
-      variant="ghost"
-      size="icon"
-      class="size-8"
-      onclick={() => copyToClipboard($input_text_atom)}
-      title="Copy text"
-    >
-      <Icon src={BsCopy} className="size-4" />
-      <span class="sr-only">Copy text</span>
-    </Button>
-    {#if $typing_script_atom !== 'Normal'}
-      <Button variant="ghost" size="icon" class="size-8" onclick={() => (typing_modal_open = true)}>
-        <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
-        <span class="sr-only">Typing Help</span>
-      </Button>
-    {/if}
+    <div class="ml-auto flex items-center gap-1">
+      <CopyButton text={() => $input_text_atom} />
+      {#if $typing_script_atom !== 'Normal'}
+        <Button
+          variant="ghost"
+          size="icon"
+          class="size-8"
+          onclick={() => (typing_modal_open = true)}
+          title="Typing help"
+        >
+          <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
+          <span class="sr-only">Typing Help</span>
+        </Button>
+      {/if}
+    </div>
   </div>
 
   <Textarea
     autocomplete="off"
     spellcheck="false"
     autocapitalize="none"
-    placeholder={`Start typing to see realtime transliteration in ${$typing_script_atom}...`}
-    class={'min-h-24 resize-none border-border/50 bg-background/50 text-base transition-colors placeholder:text-muted-foreground/60 focus:bg-background ' +
+    aria-label="Try typing"
+    placeholder={`Type with English letters to write in ${$typing_script_atom}…`}
+    class={'min-h-28 resize-none border-slate-200 bg-slate-50/70 text-lg shadow-none transition-colors placeholder:text-base placeholder:text-muted-foreground/70 focus:bg-white md:text-lg dark:border-border/50 dark:bg-background/50 dark:focus:bg-background dark:focus-visible:border-ring ' +
       getFontClass($typing_script_atom)}
     bind:value={$input_text_atom}
     onbeforeinput={(e) =>
@@ -83,9 +80,6 @@
     onblur={() => textarea_typing_context.clearContext()}
     onkeydown={(e) => clearTypingContextOnKeyDown(e, textarea_typing_context)}
   />
-  <a href="/app" class="w-full text-xs text-muted-foreground hover:text-foreground"
-    >Convert text in App</a
-  >
 </div>
 
 {#if typing_modal_open && $typing_script_atom !== 'Normal'}
