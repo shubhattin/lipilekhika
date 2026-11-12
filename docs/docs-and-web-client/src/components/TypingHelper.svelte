@@ -29,6 +29,25 @@
 
   let layout_prom = $derived(tab === 'typing' ? buildLayout(script) : buildLayout(script, compare));
 
+  /** ई with its keys (I, ee, ii) in the selected script, the example of the alternate keys info */
+  let alternates_example = $state<{ text: string; keys: string[] } | null>(null);
+  $effect(() => {
+    const for_script = script;
+    buildLayout(for_script)
+      .then((layout) => {
+        // a slower load of a script picked before
+        if (for_script !== script) return;
+        const cell = layout.sections[0]?.groups[0]?.cells.find((c) => c?.id === 'I');
+        if (cell?.main.primary) {
+          alternates_example = {
+            text: cell.main.text,
+            keys: [cell.main.primary, ...cell.main.alternates.filter((k) => !k.startsWith('.'))]
+          };
+        } else alternates_example = null;
+      })
+      .catch(() => (alternates_example = null));
+  });
+
   type Tone = { card: string; glyph: string; bar: string };
   // full class names, so that tailwind finds them
   const TONES = {
@@ -192,20 +211,30 @@
               >
                 <Info class="size-4" />
               </Popover.Trigger>
-              <Popover.Content align="end" class="w-80 space-y-2 text-sm">
+              <Popover.Content align="end" class="w-72 space-y-2.5 text-sm">
                 <p class="font-semibold">Alternate keys</p>
                 <p class="text-muted-foreground">
-                  Many characters can be typed in more than one way, like ई with <code>I</code>,
-                  <code>ee</code> or <code>ii</code>. The first key is the main one, the rest are
-                  alternates.
+                  Other keys for the same letter. The first one is the main key.
                 </p>
-                <p class="text-muted-foreground">
-                  Alternates always work while <span class="text-foreground">typing</span>. When you
-                  <span class="text-foreground">convert text</span>
-                  (transliterate), some of them, like <code>ee</code> → ई or <code>x</code> → क्ष,
-                  only work with the
-                  <span class="font-medium text-foreground">Use Typing Characters</span> option turned
-                  on in Transliteration Options.
+                {#if alternates_example}
+                  <div class="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2">
+                    {#each alternates_example.keys as key, i (key)}
+                      {#if i === 1}<span class="text-xs text-muted-foreground">or</span>{/if}
+                      <code
+                        class={i === 0
+                          ? 'rounded border border-b-2 bg-background px-1.5 font-semibold'
+                          : 'rounded border px-1 text-muted-foreground'}>{key}</code
+                      >
+                    {/each}
+                    <span class="text-muted-foreground">→</span>
+                    <span class="text-2xl leading-none {getFontClass(script)}"
+                      >{alternates_example.text}</span
+                    >
+                  </div>
+                {/if}
+                <p class="text-xs text-muted-foreground">
+                  All of them work while typing. When converting text, some alternates need the
+                  <span class="font-medium text-foreground">Use Typing Characters</span> option.
                 </p>
               </Popover.Content>
             </Popover.Root>
