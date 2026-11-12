@@ -427,7 +427,8 @@
 
           <div class="flex flex-col gap-2">
             <!-- Labels come and go with the row's own width (it is half the page on large
-                 screens): "Source text" ≥ 17.5rem, the Alt+X hint ≥ 20rem, "Typing" on its
+                 screens): "Source text" ≥ 17.5rem, the Alt+X hint ≥ 20rem (not on
+                 touch screens, which have no Alt key), "Typing" on its
                  toggle ≥ 13rem. Measured to fit, keep in step if the row changes. -->
             <div class="@container">
               <div class="flex min-h-8 items-center justify-between gap-2">
@@ -474,7 +475,7 @@
                     {/if}
                     <span class="hidden @[13rem]:inline">Typing</span>
                     <kbd
-                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[20rem]:inline"
+                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[20rem]:not-pointer-coarse:inline"
                       >Alt+X</kbd
                     >
                   </Toggle>
