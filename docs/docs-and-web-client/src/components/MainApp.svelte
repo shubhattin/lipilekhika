@@ -28,6 +28,7 @@
   import {
     ArrowLeftRight,
     Download,
+    FolderOpen,
     KeyboardIcon,
     KeyboardOffIcon,
     SettingsIcon,
@@ -36,13 +37,13 @@
   } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import CopyButton from './CopyButton.svelte';
-  import SourceFileMenu from './app/SourceFileMenu.svelte';
   import {
     downloadTextFile,
     isFileDrag,
     readTextFile,
     textFileName,
-    TextFileError
+    TextFileError,
+    TEXT_FILE_ACCEPT
   } from './app/text_file';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
@@ -112,6 +113,7 @@
 
   // Opening a .txt file into the source box, from the menu or dropped on the box
   let file_drag_over = $state(false);
+  let file_input = $state<HTMLInputElement | null>(null);
   let file_error = $state<string | null>(null);
   let file_error_timeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -346,12 +348,18 @@
                     Source<span class="hidden @[22.5rem]:inline">&nbsp;text</span>
                   </label>
                   <CopyButton text={() => input_text} label="Copy source text" />
-                  <SourceFileMenu
-                    onopen={openTextFile}
-                    ondownload={() =>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="size-8"
+                    title="Save source as .txt"
+                    disabled={!input_text}
+                    onclick={() =>
                       downloadTextFile(input_text, textFileName('source', typing_script))}
-                    can_download={!!input_text}
-                  />
+                  >
+                    <Download class="size-4" />
+                    <span class="sr-only">Save source as .txt</span>
+                  </Button>
                   {#if typing_script !== 'Normal'}
                     <TypingHelpButton
                       class="ml-1"
@@ -521,7 +529,10 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              {#if show_option_chips || input_text || can_undo}
+              <!-- Always there, for Open .txt. Labels shorten on narrow boxes: "Open .txt" ≥ 19rem
+                   (≥ 26rem while Undo shows), "Clear" ≥ 15rem (≥ 22rem while Undo shows), "Undo clear" in
+                   full ≥ 22rem. -->
+              <div class="@container/strip">
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
                   class="flex min-h-9 cursor-text items-center gap-2 px-2 pb-2"
@@ -540,34 +551,76 @@
                       bind:includeInherentVowel
                     />
                   {/if}
-                  {#if can_undo && replaced}
+                  <div class="ml-auto flex items-center gap-1">
                     <button
                       type="button"
-                      class="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-                      onclick={undoReplace}
-                      title={replaced.by === 'clear'
-                        ? 'Bring back the cleared text (Ctrl+Z)'
-                        : 'Go back to the text before the file was opened (Ctrl+Z)'}
+                      class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      onclick={() => file_input?.click()}
+                      title="Open a .txt file (or drop one on the box)"
                     >
-                      <Undo2 class="size-3.5" />
-                      {replaced.by === 'clear' ? 'Undo clear' : 'Undo open'}
+                      <FolderOpen class="size-3.5" />
+                      <span
+                        class={can_undo
+                          ? 'hidden @[26rem]/strip:inline'
+                          : 'hidden @[19rem]/strip:inline'}>Open .txt</span
+                      >
+                      <span
+                        class={can_undo
+                          ? 'sr-only @[26rem]/strip:hidden'
+                          : 'sr-only @[19rem]/strip:hidden'}>Open .txt file</span
+                      >
                     </button>
-                  {/if}
-                  {#if input_text}
-                    <button
-                      type="button"
-                      class:ml-auto={!can_undo}
-                      class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-                      onclick={clearInput}
-                      title="Clear source text"
-                    >
-                      <X class="size-3.5" />
-                      Clear
-                    </button>
-                  {/if}
+                    {#if can_undo && replaced}
+                      <button
+                        type="button"
+                        class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-primary transition-colors hover:bg-primary/10"
+                        onclick={undoReplace}
+                        title={replaced.by === 'clear'
+                          ? 'Bring back the cleared text (Ctrl+Z)'
+                          : 'Go back to the text before the file was opened (Ctrl+Z)'}
+                      >
+                        <Undo2 class="size-3.5" />
+                        Undo<span class="hidden @[22rem]/strip:inline"
+                          >{replaced.by === 'clear' ? 'clear' : 'open'}</span
+                        >
+                      </button>
+                    {/if}
+                    {#if input_text}
+                      <button
+                        type="button"
+                        class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                        onclick={clearInput}
+                        title="Clear source text"
+                      >
+                        <X class="size-3.5" />
+                        <span
+                          class={can_undo
+                            ? 'hidden @[22rem]/strip:inline'
+                            : 'hidden @[15rem]/strip:inline'}>Clear</span
+                        >
+                        <span
+                          class={can_undo
+                            ? 'sr-only @[22rem]/strip:hidden'
+                            : 'sr-only @[15rem]/strip:hidden'}>Clear source text</span
+                        >
+                      </button>
+                    {/if}
+                  </div>
                 </div>
-              {/if}
+              </div>
             </div>
+            <input
+              bind:this={file_input}
+              type="file"
+              accept={TEXT_FILE_ACCEPT}
+              class="hidden"
+              onchange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                // reset, so picking the same file again still fires `change`
+                e.currentTarget.value = '';
+                if (file) openTextFile(file);
+              }}
+            />
             {#if file_error}
               <p role="alert" class="px-1 text-xs text-destructive">{file_error}</p>
             {/if}
