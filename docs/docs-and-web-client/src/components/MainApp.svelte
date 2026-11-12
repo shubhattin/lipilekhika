@@ -344,13 +344,14 @@
 <!-- A file dropped outside the source box would open in the tab in place of the app.
      Leaving the page (reload, closing the tab, back to another site, a link to a page
      outside the client router) only asks first when the text couldn't be saved (too long,
-     or storage blocked); saved text comes back on the next visit. Moves between pages of
+     or storage blocked), and never in dev; saved text comes back on the next visit. Moves between pages of
      the site keep it anyway: it lives in a shared store. -->
 <svelte:window
   onbeforeunload={(e) => {
     flushSave();
-    // nothing to lose when the text is saved; ask only when it couldn't be
-    if (!input_text.trim() || saved_text === input_text) return;
+    // nothing to lose when the text is saved; ask only when it couldn't be. Never in local
+    // dev: the prompt gets in the way of the dev server's own reloads.
+    if (import.meta.env.DEV || !input_text.trim() || saved_text === input_text) return;
     e.preventDefault();
     // older browsers only ask when returnValue is set
     e.returnValue = '';
