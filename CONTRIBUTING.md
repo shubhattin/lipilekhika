@@ -115,6 +115,25 @@ go run ./bench/benchmark.go                # cold single-pass benchmark (see Ben
 go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 ```
 
+## Desktop app (`desktop-client`)
+
+The PC app (Lipi Lekhika, with Lipi Parivartaka and the typing help as its windows) is written in Rust with [GPUI](https://www.gpui.rs) and [GPUI Kit](https://gpui-kit.com). It is a member of the Cargo workspace, so `cargo fmt --all` covers it.
+
+From the repo root:
+
+```sh
+cargo run -p lipilekhika-ui                    # the typing tool
+cargo run -p lipilekhika-ui -- --parivartaka   # only Lipi Parivartaka (its start menu entry)
+cargo run -p lipilekhika-ui -- --typing-help   # only the typing help (--compare for its Compare tab)
+cargo test -p lipilekhika-ui
+```
+
+- The system wide typing (the keyboard hook, Alt+X) is there on Windows and macOS. On Linux the app runs without it (that typing is the [Fcitx5 plugin](plugins/fcitx5)); everything else works.
+- Linux needs the usual GPUI libraries (`libxkbcommon`, `wayland`, `vulkan` drivers, `fontconfig`, `freetype`) and GTK 3 with `libayatana-appindicator` for the tray icon.
+- GPUI builds are large (a debug `target/` is several GB): `CARGO_TARGET_DIR` can put it on another disk.
+- `desktop-client/vendor/gpui-pre-linux` is a patched copy of GPUI's Linux backend, see [its README](desktop-client/vendor/README.md).
+- The script fonts are bundled in the binary (`desktop-client/assets/fonts`).
+
 ## Formatting
 
 Format your changes before committing. Run the formatter for each package you touched; every one of them can also be run in check mode (shown in the comments) to verify without writing.
@@ -123,7 +142,6 @@ Format your changes before committing. Run the formatter for each package you to
 | --- | --- | --- | --- |
 | JS package (`packages/js`) | [oxfmt](https://oxc.rs) | `packages/js` | `bun run format` (check: `bunx oxfmt --check`) |
 | Docs & web client (`docs/docs-and-web-client`) | [Prettier](https://prettier.io) | `docs/docs-and-web-client` | `bun run format` (check: `bunx prettier --check .`) |
-| Desktop app frontend (`desktop-client/lipiparivartaka`) | Prettier | `desktop-client/lipiparivartaka` | `bun run format` (check: `bunx prettier --check .`) |
 | All Rust crates (one Cargo workspace) | [rustfmt](https://github.com/rust-lang/rustfmt) | repo root | `cargo fmt --all` (check: `cargo fmt --all --check`) |
 | Python package (`packages/python`) | [Ruff](https://docs.astral.sh/ruff/) | `packages/python` | `uvx ruff format .` (check: `uvx ruff format --check .`) |
 | Go package (`packages/go/lipilekhika`) | gofmt | `packages/go/lipilekhika` | `gofmt -w .` (check: `gofmt -l .` lists unformatted files) |

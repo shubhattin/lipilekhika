@@ -37,34 +37,27 @@ Write-Host "`n[1/7] Creating directories..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Path $StagingDir -Force | Out-Null
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
-# Copy executables
+# Copy the executable (Lipi Parivartaka is a window of it: `lipilekhika.exe --parivartaka`)
 Write-Host "`n[2/7] Copying executables..." -ForegroundColor Yellow
 $TargetReleaseDir = Join-Path $RootDir "target\release"
 
 # Copy from release build target
 $LipilekikaExe = Join-Path $TargetReleaseDir "lipilekhika-ui.exe"
-$LipiparivartakaExe = Join-Path $TargetReleaseDir "lipiparivartaka.exe"
 
 if (-not (Test-Path $LipilekikaExe)) {
     Write-Error "lipilekhika-ui.exe not found at $LipilekikaExe"
     exit 1
 }
-if (-not (Test-Path $LipiparivartakaExe)) {
-    Write-Error "lipiparivartaka.exe not found at $LipiparivartakaExe"
-    exit 1
-}
 
 Copy-Item -Path $LipilekikaExe -Destination (Join-Path $StagingDir "lipilekhika.exe") -Force
-Copy-Item -Path $LipiparivartakaExe -Destination (Join-Path $StagingDir "lipiparivartaka.exe") -Force
 
 
 Write-Host "  - Copied lipilekhika.exe" -ForegroundColor Green
-Write-Host "  - Copied lipiparivartaka.exe" -ForegroundColor Green
 
 # Copy icon files
 Write-Host "`n[3/7] Copying icon files..." -ForegroundColor Yellow
 $LipilekhikaIcon = Join-Path $ScriptDir "assets\icon.ico"
-$LipiparivartakaIcon = Join-Path $ScriptDir "lipiparivartaka\assets\icon.ico"
+$LipiparivartakaIcon = Join-Path $ScriptDir "assets\lipiparivartaka.ico"
 
 if (-not (Test-Path $LipilekhikaIcon)) {
     Write-Error "Lipi Lekhika icon not found at $LipilekhikaIcon"

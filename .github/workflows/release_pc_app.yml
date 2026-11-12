@@ -59,17 +59,6 @@ jobs:
         run: |
           cargo build --release -p lipilekhika-ui
 
-      - name: Prepare Tauri Build
-        run: |
-          cd docs/docs-and-web-client
-          bun install
-
-      - name: Build lipiparivartaka (Windows)
-        run: |
-          cd desktop-client/lipiparivartaka
-          bun install
-          bun tauri build
-
       # Extract version from Cargo.toml
       - name: Get version
         id: get_version

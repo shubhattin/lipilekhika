@@ -104,8 +104,13 @@ fn main() {
     persitent_state: Mutex::new(persitent_state),
   });
 
+  // Lipi Parivartaka (or the typing help) opened on its own, from its start menu entry, runs
+  // without the keyboard hook and the tray: the typing tool may be running already, and a second
+  // hook would type every key twice.
+  let standalone = startup_view != StartupView::Main;
+
   // Start keyboard hook thread (Windows and macOS only, Linux has no system wide typing yet)
-  if platform::SYSTEM_TYPING_SUPPORTED {
+  if platform::SYSTEM_TYPING_SUPPORTED && !standalone {
     let state_clone = Arc::clone(&app_state);
     let tx_ui_clone = tx_ui.clone();
     let tx_tray_clone = tx_tray.clone();
@@ -118,14 +123,16 @@ fn main() {
     });
   }
 
-  // Start tray icon thread
-  let state_clone = Arc::clone(&app_state);
-  let tx_ui_clone = tx_ui.clone();
-  let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
+  if !standalone {
+    // Start tray icon thread
+    let state_clone = Arc::clone(&app_state);
+    let tx_ui_clone = tx_ui.clone();
+    let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
 
-  thread::spawn(|| {
-    posthog::init_posthog();
-  });
+    thread::spawn(|| {
+      posthog::init_posthog();
+    });
+  }
 
   // starts the UI event loop
   ui::run(app_state, rx_ui, tx_tray, startup_view);
