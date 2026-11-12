@@ -1,0 +1,193 @@
+---
+title: Script Guide
+description: What each supported script is, and where it behaves differently
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ScriptHelpLinks from '$components/typing_help/ScriptHelpLinks.svelte';
+import '../../../styles/fonts.css';
+
+Every script Lipi Lekhika supports, and the few places where one behaves differently from what you might expect. Script names and codes for the API are on [Supported Scripts](/reference/supported_scripts).
+
+The examples write **भगवद्गीता** (Bhagavad Gītā) in each script. Under each script name, **typing map** shows the keys for each letter and **compare** sets it beside a related script, letter by letter.
+
+## Lipi Lekhika's own schemes
+
+Two schemes for writing Indian scripts in Latin letters, made by Lipi Lekhika. Unlike the [standard schemes](#standard-romanization-schemes), which were designed for Sanskrit, they keep every distinction of every supported script, such as the short and long e and o of the South Indian scripts and the Tamil ழ ற ன.
+
+| Script | Letters | भगवद्गीता | धर्मक्षेत्रे |
+| --- | --- | --- | --- |
+| Normal <ScriptHelpLinks client:visible script="Normal" /> | Plain keyboard letters (ASCII) | `bhagavadgItA` | `dharmakShEtrE` |
+| Romanized <ScriptHelpLinks client:visible script="Romanized" /> | Latin letters with diacritics | <span class="font-romanized">bhagavadgītā</span> | <span class="font-romanized">dharmakṣētrē</span> |
+
+Romanized is Normal with diacritics: each Normal letter has exactly one Romanized form (`A` ā, `Sh` ṣ, `T` ṭ…).
+
+### Normal
+
+An ASCII scheme mixing [Harvard-Kyoto](https://en.wikipedia.org/wiki/Harvard-Kyoto) and [ITRANS](https://en.wikipedia.org/wiki/ITRANS), extended to all Indian scripts. It is case sensitive: long vowels and retroflex consonants are capitals (`A` आ, `T` ट, `N` ण), and aspirates add `h` (`kh` ख, `Th` ठ).
+
+<ScriptHelpLinks client:visible script="Normal" labelled />
+
+<Aside title="The one difference that matters most">
+**Capital `E` and `O` are the long ए ओ; small `e` and `o` are the short ऎ ऒ.**
+
+Sanskrit has only the long e and o, so Harvard-Kyoto and ITRANS use `e` and `o` for them and have nothing left for the short ones, which Telugu, Kannada, Malayalam and Tamil need. Telugu ఏడు (seven) is `EDu`, ఎనిమిది (eight) is `enimidi`, and Sanskrit देव is `dEva`.
+</Aside>
+
+<details>
+<summary>Normal compared with Harvard-Kyoto and ITRANS</summary>
+
+| Letter | Normal | Harvard-Kyoto | ITRANS |
+| --- | --- | --- | --- |
+| ए ఏ / ऎ ఎ (long / short e) | `E` / `e` | `e` (both) | `e` (both) |
+| ओ ఓ / ऒ ఒ (long / short o) | `O` / `o` | `o` (both) | `o` (both) |
+| च छ | `ch` `Ch` | `c` `ch` | `ch` `Ch` |
+| श ष | `sh` `Sh` | `z` `S` | `sh` `Sh` |
+| ऋ ॠ | `R` `RR` | `R` `RR` | `RRi` `RRI` |
+| ऌ ॡ | `LR` `LRR` | `lR` `lRR` | `LLi` `LLI` |
+| ङ ञ | `G` `J` | `G` `J` | `~N` `~n` |
+| ँ (candrabindu) | `MM` | `~` | `.N` |
+| ॐ | `AUM` | `OM` | `OM` |
+| ऽ (avagraha) | `` ` `` | `'` | `.a` |
+| । ॥ | `.` `..` | `.` `..` | `\|` `\|\|` |
+| ॅ ॉ (as in डॉक्टर) | `aiI` `auU` | `e` `o` | `e` `o` |
+| ழ / ற ன (Tamil) | `Lz` / `rz` `nz` | `zh` / `r2` `n2` | `zh` / `R` `n` |
+
+Nukta letters add `z` (क़ `kz`, ज़ `jz`, फ़ `phz`), and Vedic accents are arrows (`↑` udātta, `↓` anudātta).
+
+| Word | Normal | Harvard-Kyoto | ITRANS |
+| --- | --- | --- | --- |
+| कृष्ण | `kRShNa` | `kRSNa` | `kRRiShNa` |
+| पञ्च | `paJcha` | `paJca` | `pa~ncha` |
+| सोऽहम् | ``sO`ham`` | `so'ham` | `so.aham` |
+| Tamil தமிழ் | `tamiLz` | `tamizh` | `tamizh` |
+
+<Aside type="tip" title="Typing is more forgiving">
+Converting text reads only the forms above, so `raama` gives रअम. [Typing](/app) also accepts `aa` for आ, `ii` or `ee` for ई and `uu` or `oo` for ऊ.
+</Aside>
+
+</details>
+
+### Romanized
+
+The same letters as Normal with diacritics, close to [IAST](https://en.wikipedia.org/wiki/International_Alphabet_of_Sanskrit_Transliteration) and [ISO 15919](https://en.wikipedia.org/wiki/ISO_15919). **Long e and o are ē and ō**, plain `e` `o` the short ones, as in Normal. For Sanskrit this only changes the look (<span class="font-romanized">dēva</span> for _deva_). It looks much like IAST but some letters differ, so convert IAST text from the **IAST** script.
+
+<ScriptHelpLinks client:visible script="Romanized" labelled />
+
+<details>
+<summary>Romanized compared with IAST</summary>
+
+| Letter | Romanized | IAST |
+| --- | --- | --- |
+| ए ओ / ऎ ऒ (long / short) | <span class="font-romanized">ē ō</span> / <span class="font-romanized">e o</span> | e o (both; è ò read as short) |
+| च छ | <span class="font-romanized">ch Ch</span> | c ch |
+| ं (anusvāra) | <span class="font-romanized">ṁ</span> (ṃ also read) | ṃ |
+| ऌ ॡ | <span class="font-romanized">l̥ l̥̄</span> | ḷ ḹ |
+| ळ / ऴ (ழ) | <span class="font-romanized">ḷ</span> / <span class="font-romanized">ḻ</span> | ḻ (both) |
+| ॅ ॉ | <span class="font-romanized">ê ô</span> | e o |
+| ऽ (avagraha) | <span class="font-romanized">`</span> | ' |
+| क़ ज़ फ़ | <span class="font-romanized">kz jz phz</span> | q z f |
+
+Watch two of these when converting: **ch** is च in Romanized but छ in IAST, and **ḷ** is ळ in Romanized but the vowel ऌ in IAST. IAST also ignores case, while in Romanized capitals carry meaning (`Ch` is छ), so write it in lowercase.
+
+| Word | Romanized | IAST |
+| --- | --- | --- |
+| पञ्च | <span class="font-romanized">pañcha</span> | pañca |
+| संस्कृतम् | <span class="font-romanized">saṁskṛtam</span> | saṃskṛtam |
+| डॉक्टर | <span class="font-romanized">ḍôkṭara</span> | ḍokṭara |
+| Malayalam മലയാളം | <span class="font-romanized">malayāḷaṁ</span> | malayāḻaṃ |
+
+</details>
+
+## Extended scripts
+
+### Tamil-Extended
+
+Tamil has one letter where Sanskrit has four: க is k, kh, g and gh alike. Tamil-Extended tells them apart with a superscript number:
+
+| Sanskrit | क ka | ख kha | ग ga | घ gha |
+| --- | --- | --- | --- | --- |
+| Tamil-Extended | <span class="font-tamil-extended">க</span> | <span class="font-tamil-extended">க²</span> | <span class="font-tamil-extended">க³</span> | <span class="font-tamil-extended">க⁴</span> |
+
+<ScriptHelpLinks client:visible script="Tamil-Extended" labelled />
+
+<details>
+<summary>Examples: Tamil and Tamil-Extended compared</summary>
+
+| Devanagari | Tamil | Tamil-Extended |
+| --- | --- | --- |
+| <span class="font-devanagari">भगवद्गीता</span> | <span class="font-tamil">பகவத்கீதா</span> | <span class="font-tamil-extended">ப⁴க³வத்³கீ³தா</span> |
+| <span class="font-devanagari">दुःख</span> | <span class="font-tamil">துஃக</span> | <span class="font-tamil-extended">து³ஃக²</span> |
+| <span class="font-devanagari">कृष्ण</span> | <span class="font-tamil">கிருஷ்ண</span> | <span class="font-tamil-extended">க்ரு²ஷ்ண</span> |
+| <span class="font-devanagari">सिंह</span> | <span class="font-tamil">ஸிம்ஹ</span> | <span class="font-tamil-extended">ஸிஂஹ</span> |
+
+It also writes ऋ as <span class="font-tamil-extended">ரு²</span>, keeps the anusvāra as <span class="font-tamil-extended">ஂ</span> instead of <span class="font-tamil">ம்</span>, and can write Vedic accents.
+
+</details>
+
+### Purna-Devanagari
+
+_Pūrṇa_ means complete: Devanagari with the letters needed to write any Indian script without losing a sound. Plain Devanagari has no short e and o, so Telugu, Kannada, Malayalam and Tamil text loses that difference in it.
+
+<ScriptHelpLinks client:visible script="Purna-Devanagari" labelled />
+
+<details>
+<summary>What Purna-Devanagari adds, with examples</summary>
+
+| Added | Letters | For |
+| --- | --- | --- |
+| Short e, o | <span class="font-devanagari">ऎ ॆ ऒ ॊ</span> | Telugu, Kannada, Malayalam, Tamil |
+| Kashmiri vowels | <span class="font-devanagari">ॳ ॴ ॵ ॶ ॷ</span> | Kashmiri |
+| Sindhi consonants | <span class="font-devanagari">ॻ ॼ ॾ ॿ</span> | Sindhi |
+
+| Telugu | Devanagari | Purna-Devanagari |
+| --- | --- | --- |
+| <span class="font-telugu">ఎనిమిది</span> (eight) | <span class="font-devanagari">एनिमिदि</span> | <span class="font-devanagari">ऎनिमिदि</span> |
+| <span class="font-telugu">ఒకటి</span> (one) | <span class="font-devanagari">ओकटि</span> | <span class="font-devanagari">ऒकटि</span> |
+
+From Purna-Devanagari, ఎనిమిది converts back unchanged; from plain Devanagari it comes back as ఏనిమిది.
+
+</details>
+
+## Modern Indian Scripts
+
+| Script | Used for | भगवद्गीता | Notes |
+| --- | --- | --- | --- |
+| Devanagari <ScriptHelpLinks client:visible script="Devanagari" /> | Sanskrit, Hindi, Marathi, Nepali | <span class="font-devanagari">भगवद्गीता</span> | No short e and o (ऎ ऒ become ए ओ); see [Purna-Devanagari](#purna-devanagari) |
+| Telugu <ScriptHelpLinks client:visible script="Telugu" /> | Telugu | <span class="font-telugu">భగవద్గీతా</span> | Short and long e, o: ఎ ఏ, ఒ ఓ |
+| Tamil <ScriptHelpLinks client:visible script="Tamil" /> | Tamil | <span class="font-tamil">பகவத்கீதா</span> | One letter for k, kh, g, gh (and each such group); see [Tamil-Extended](#tamil-extended) |
+| Bengali <ScriptHelpLinks client:visible script="Bengali" /> | Bengali (Bangla) | <span class="font-bengali">ভগবদ্গীতা</span> | ব for both b and v |
+| Kannada <ScriptHelpLinks client:visible script="Kannada" /> | Kannada | <span class="font-kannada">ಭಗವದ್ಗೀತಾ</span> | Short and long e, o: ಎ ಏ, ಒ ಓ |
+| Gujarati <ScriptHelpLinks client:visible script="Gujarati" /> | Gujarati | <span class="font-gujarati">ભગવદ્ગીતા</span> | |
+| Malayalam <ScriptHelpLinks client:visible script="Malayalam" /> | Malayalam | <span class="font-malayalam">ഭഗവദ്ഗീതാ</span> | Short and long e, o: എ ഏ, ഒ ഓ |
+| Odia <ScriptHelpLinks client:visible script="Odia" /> | Odia (Oriya) | <span class="font-odia">ଭଗଵଦ୍ଗୀତା</span> | |
+| Gurumukhi <ScriptHelpLinks client:visible script="Gurumukhi" /> | Punjabi | <span class="font-gurmukhi">ਭਗਵਦ੍ਗੀਤਾ</span> | Sanskrit conjuncts keep a visible halant (ਧਰ੍ਮ) |
+| Assamese <ScriptHelpLinks client:visible script="Assamese" /> | Assamese | <span class="font-assamese">ভগৱদ্গীতা</span> | Bengali script with ৰ for r and ৱ for v |
+| Sinhala <ScriptHelpLinks client:visible script="Sinhala" /> | Sinhala | <span class="font-sinhala">භගවද්ගීතා</span> | |
+| Tamil-Extended <ScriptHelpLinks client:visible script="Tamil-Extended" /> | Sanskrit in Tamil script | <span class="font-tamil-extended">ப⁴க³வத்³கீ³தா</span> | Tamil with superscript marks, [above](#tamil-extended) |
+| Purna-Devanagari <ScriptHelpLinks client:visible script="Purna-Devanagari" /> | Any Indian script in Devanagari | <span class="font-devanagari">भगवद्गीता</span> | Devanagari for all Indian scripts, [above](#purna-devanagari) |
+
+## Standard Romanization Schemes
+
+Well-known schemes for Sanskrit in Latin letters. They follow their published standards, so they have no separate short e and o: Telugu ఎ and ఏ both become `e`.
+
+| Script | भगवद्गीता | Notes |
+| --- | --- | --- |
+| IAST <ScriptHelpLinks client:visible script="IAST" /> | bhagavadgītā | Diacritics; capitals are read too (_Kṛṣṇa_), and è ò as short e, o |
+| ITRANS <ScriptHelpLinks client:visible script="ITRANS" /> | `bhagavadgItA` | ASCII, ITRANS 5.3 with its alternate spellings (`kRRiShNa`, `kR^iShNa`) |
+| Harvard-Kyoto <ScriptHelpLinks client:visible script="Harvard-Kyoto" /> | `bhagavadgItA` | ASCII, case sensitive (`kRSNa`) |
+| SLP1 <ScriptHelpLinks client:visible script="SLP1" /> | `BagavadgItA` | ASCII, one letter per sound (`kfzRa`) |
+
+## Ancient Scripts
+
+Historic scripts, mostly for Sanskrit. They need a font on your device; this page and the [web app](/app) load one.
+
+| Script | भगवद्गीता | About |
+| --- | --- | --- |
+| Brahmi <ScriptHelpLinks client:visible script="Brahmi" /> | <span class="font-brahmi">𑀪𑀕𑀯𑀤𑁆𑀕𑀻𑀢𑀸</span> | The ancestor of all Brahmic scripts, known from Ashoka's inscriptions |
+| Sharada <ScriptHelpLinks client:visible script="Sharada" /> | <span class="font-sharada">𑆨𑆓𑆮𑆢𑇀𑆓𑆵𑆠𑆳</span> | Kashmir, for Sanskrit and Kashmiri manuscripts |
+| Granth <ScriptHelpLinks client:visible script="Granth" /> | <span class="font-grantha">𑌭𑌗𑌵𑌦𑍍𑌗𑍀𑌤𑌾</span> | Grantha, for Sanskrit in Tamil Nadu and Kerala |
+| Modi <ScriptHelpLinks client:visible script="Modi" /> | <span class="font-modi">𑘥𑘐𑘪𑘟𑘿𑘐𑘲𑘝𑘰</span> | A cursive script for Marathi |
+| Siddham <ScriptHelpLinks client:visible script="Siddham" /> | <span class="font-siddham">𑖥𑖐𑖪𑖟𑖿𑖐𑖱𑖝𑖯</span> | Sanskrit Buddhist texts, still used in East Asia |

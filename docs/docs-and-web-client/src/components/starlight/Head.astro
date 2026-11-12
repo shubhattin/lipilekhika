@@ -11,3 +11,18 @@ import Posthog from '../Posthog.astro';
 </VtbotStarlight>
 
 <Posthog />
+
+<!-- Starlight marks dark mode with data-theme, the shadcn components with the .dark class.
+     Mirror one onto the other so the Svelte islands (like the typing help) follow the theme.
+     Also watch class: view transitions swap the attributes of <html>. -->
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    const sync = () => root.classList.toggle('dark', root.dataset.theme === 'dark');
+    sync();
+    new MutationObserver(sync).observe(root, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'class']
+    });
+  })();
+</script>
