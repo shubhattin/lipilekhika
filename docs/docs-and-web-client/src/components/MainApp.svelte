@@ -74,6 +74,19 @@
 
   let typing_modal_open = $state(false);
 
+  // TODO: remove once a typing help variant is picked
+  const HELP_VARIANTS = [
+    { label: 'Help1', title: 'Chart', load: () => import('./typing_help/HelpChart.svelte') },
+    { label: 'Help2', title: 'Cards', load: () => import('./typing_help/HelpCards.svelte') },
+    {
+      label: 'Help3',
+      title: 'Table + search',
+      load: () => import('./typing_help/HelpTable.svelte')
+    }
+  ];
+  let help_variant = $state<number | null>(null);
+  let help_variant_open = $state(false);
+
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     try {
@@ -407,12 +420,41 @@
       </CustomOptions>
     </form>
     {@render pwa_snippet?.()}
+
+    <div
+      class="mt-8 flex flex-wrap items-center justify-center gap-2 rounded-lg border border-dashed p-3"
+    >
+      <span class="text-xs text-muted-foreground">Typing help variants (preview):</span>
+      {#each HELP_VARIANTS as variant, i (variant.label)}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          title={variant.title}
+          onclick={() => {
+            help_variant = i;
+            help_variant_open = true;
+          }}
+        >
+          {variant.label}
+          <span class="text-xs text-muted-foreground">{variant.title}</span>
+        </Button>
+      {/each}
+    </div>
   </div>
 
   {#if typing_modal_open && typing_script !== 'Normal'}
     {#await import('./TypingHelper.svelte') then { default: TypingHelper }}
       <TypingHelper bind:open={typing_modal_open} script={typing_script} />
     {/await}
+  {/if}
+
+  {#if help_variant !== null && help_variant_open}
+    {#key help_variant}
+      {#await HELP_VARIANTS[help_variant].load() then { default: Help }}
+        <Help bind:open={help_variant_open} script={typing_script} />
+      {/await}
+    {/key}
   {/if}
 </div>
 
