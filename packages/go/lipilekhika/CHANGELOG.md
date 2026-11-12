@@ -4,6 +4,8 @@
 
 - The API of the JS / Python / Rust packages that was missing in Go: `ScriptList`, `LangList` and `AllScriptLangList` (the script and language names), `GetAllOptions` (the custom options of a script pair), `GetNormalizedScriptName` (`"tel"` -> `"Telugu"`) and `PreloadScriptData`; in `typing`, `GetScriptTypingDataMap` (the characters of a script with the keys that type them) and `GetScriptKramaData` (the characters of a script with their types). Same output as the other packages
 - Package documentation (shown on pkg.go.dev) with an overview of the API and a link to the `typing` package
+- New scripts: the standard romanization schemes **IAST** (`iast`), **ITRANS** (`itrans`), **Harvard-Kyoto** (`hk`) and **SLP1** (`slp1`, `slp`) ([#135](https://github.com/shubhattin/lipilekhika/issues/135)). They follow the tables of [vidyut-lipi](https://github.com/ambuda-org/vidyut): `e` / `o` are the long ए / ओ (the short ones of other languages are written `e` / `o` too), nuqta letters in its forms (IAST `q` क़, ITRANS `.D` ड़, HK `z2` ज़, SLP1 `k0` क़). IAST reads capital letters (`Kṛṣṇa`, `RĀMA`) and the ISO 15919 forms (`ṁ`, `r̥`); ITRANS reads its alternate spellings (`aa`, `R^i`, `chh`, `x`, `GY`, ...)
+- `~` in the input is read where the input script has it as a letter (Harvard-Kyoto / SLP1 candrabindu, ITRANS `~N`), it was always passed through
 
 ## v0.1.0
 

@@ -17,6 +17,10 @@ const FONT_LIST: Record<ScriptListType, string> = {
   //
   Normal: 'font-normal',
   Romanized: 'font-romanized',
+  IAST: 'font-romanized',
+  ITRANS: 'font-romanized',
+  'Harvard-Kyoto': 'font-romanized',
+  SLP1: 'font-romanized',
   //
   Brahmi: 'font-brahmi',
   Granth: 'font-grantha',

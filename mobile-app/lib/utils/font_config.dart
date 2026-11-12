@@ -32,6 +32,10 @@ class FontConfig {
       // Base / Romanized
       case 'Normal':
       case 'Romanized':
+      case 'IAST':
+      case 'ITRANS':
+      case 'Harvard-Kyoto':
+      case 'SLP1':
         return GoogleFonts.notoSans().fontFamily!;
 
       // Indic Scripts - Using Noto Sans fonts via Google Fonts

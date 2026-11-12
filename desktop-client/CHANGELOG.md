@@ -3,6 +3,7 @@
 ## Unreleased (pc-app@v1.0.12)
 
 - Performance improvements (rust-lib@v1.1.2)
+- New standard romanization schemes IAST, ITRANS, Harvard-Kyoto and SLP1, listed after Romanized
 
 ## pc-app@v1.0.11
 

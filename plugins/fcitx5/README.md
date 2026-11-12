@@ -70,4 +70,4 @@ Settings are in `~/.config/fcitx5/conf/lipilekhika.conf` (auto-generated) or via
 
 ## Supported Scripts
 
-Devanagari, Telugu, Tamil, Tamil-Extended, Bengali, Kannada, Gujarati, Malayalam, Odia, Sinhala, Romanized, Gurumukhi, Assamese, Purna-Devanagari, Brahmi, Granth, Modi, Sharada, Siddham
+Devanagari, Telugu, Tamil, Tamil-Extended, Bengali, Kannada, Gujarati, Malayalam, Odia, Sinhala, Romanized, IAST, Gurumukhi, Assamese, Purna-Devanagari, Brahmi, Granth, Modi, Sharada, Siddham

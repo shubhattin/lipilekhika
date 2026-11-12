@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New *Standard Schemes* group with IAST, ITRANS, Harvard-Kyoto and SLP1
+
 ## mobile-app@v0.2.7+10
 
 - Performance Improvement

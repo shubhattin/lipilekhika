@@ -1,5 +1,10 @@
 # Changelog
 
+## python-lib@1.1.0 (Unreleased)
+
+- New scripts: the standard romanization schemes **IAST** (`iast`), **ITRANS** (`itrans`), **Harvard-Kyoto** (`hk`) and **SLP1** (`slp1`, `slp`) ([#135](https://github.com/shubhattin/lipilekhika/issues/135)). They follow the tables of [vidyut-lipi](https://github.com/ambuda-org/vidyut): `e` / `o` are the long ए / ओ (the short ones of other languages are written `e` / `o` too), nuqta letters in its forms (IAST `q` क़, ITRANS `.D` ड़, HK `z2` ज़, SLP1 `k0` क़). IAST reads capital letters (`Kṛṣṇa`, `RĀMA`) and the ISO 15919 forms (`ṁ`, `r̥`); ITRANS reads its alternate spellings (`aa`, `R^i`, `chh`, `x`, `GY`, ...)
+- `~` in the input is read where the input script has it as a letter (Harvard-Kyoto / SLP1 candrabindu, ITRANS `~N`), it was always passed through
+
 ## python-lib@1.0.8
 
 - New custom transliteration options `normal_to_brahmic:include_inherent_vowel` (`kamal` -> `कमल`, default `कमल्`) and `normal_to_brahmic:keep_ascii_numerals` (`2025` stays `2025`, default `२०२५`), from Normal / Romanized to Brahmic scripts: the `include_inherent_vowel` and `use_native_numerals=False` typing options, now for transliteration too

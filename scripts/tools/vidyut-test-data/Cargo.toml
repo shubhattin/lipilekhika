@@ -1,0 +1,13 @@
+[package]
+name = "vidyut-test-data"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Generates the standard scheme transliteration test data with vidyut-lipi"
+
+# Not a member of the repo workspace: it is run by hand and its output is committed
+[workspace]
+
+[dependencies]
+vidyut-lipi = "=0.2.0"
+serde_json = "1"

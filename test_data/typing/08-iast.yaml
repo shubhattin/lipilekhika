@@ -1,0 +1,19 @@
+# Typing into IAST, with the keys of Normal. e / o are the long ए / ओ (Normal E / O and e / o)
+- index: 0
+  text: kRShNa rAma shiva namaste E O oM
+  output: kṛṣṇa rāma śiva namaste e o oṃ
+  script: IAST
+# ḷ is the vocalic ऌ (Normal LR), ळ is ḻ (Normal L)
+- index: 1
+  text: LRkAra LRR L
+  output: ḷkāra ḹ ḻ
+  script: IAST
+# capital letters: ^ after the key, # for the plain capital
+- index: 2
+  text: R^AmA sh^iva A^nanda E^ka O^m Sh^aShTha G^a J^a T^a D^a N^a M^ H^
+  output: Ṛāmā Śiva Ānanda Eka Om Ṣaṣṭha Ṅa Ña Ṭa Ḍa Ṇa Ṃ Ḥ
+  script: IAST
+- index: 3
+  text: R#Ama A#nanda
+  output: Rāma Ananda
+  script: IAST

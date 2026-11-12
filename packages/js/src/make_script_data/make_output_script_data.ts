@@ -438,6 +438,87 @@ function get_out_script_data(
     }
   }
 
+  // A prefix (of two or more code points) of a longer text that is not read by itself: the
+  // matcher does not back out of it, so it needs a krama of its own. In `other` scripts it is read
+  // as the texts it is made of (longest first), with a halant between two consonants as one match
+  // is not split by the runtimes: ITRANS AU (of AUM) आऊ, dn (of dny) द्न, LL (of LLi) ळ्ळ (was ळळ).
+  // A prefix with a part that is not read (ITRANS R^ of R^i) is left as it is. Normal and Romanized
+  // have their own handling of these (`c`, Romanized `sh` below) and are kept as they are.
+  if (
+    res.script_type === 'other' &&
+    !['Normal', 'Romanized'].includes(input_script_data.script_name)
+  ) {
+    const halant_index = kramaLabelIndex('halant');
+    const is_vyanjana = (krama_index: number) => {
+      const key = KramaKeysArray[krama_index];
+      const cp = key?.codePointAt(0) ?? -1;
+      return (
+        key?.length === 1 &&
+        ((cp >= 0x915 && cp <= 0x939) ||
+          (cp >= 0x958 && cp <= 0x95f) ||
+          (cp >= 0x979 && cp <= 0x97f))
+      );
+    };
+    const krama_texts = new Set(res.krama_text_arr.map(([text]) => text).filter((text) => text));
+    const is_prefix_to_resolve = ([text, value]: OutputScriptData['text_to_krama_map'][number]) => {
+      const krama = value.krama;
+      return (
+        [...text].length >= 2 &&
+        !krama_texts.has(text) &&
+        (value.next?.length ?? 0) > 0 &&
+        (!krama?.length ||
+          krama.includes(-1) ||
+          krama.some((k, i) => i > 0 && is_vyanjana(krama[i - 1]) && is_vyanjana(k)))
+      );
+    };
+    /** text -> its krama, the texts that are read (the first krama index wins) */
+    const readable = new Map<string, number[]>();
+    for (let i = 0; i < res.krama_text_arr.length; i++) {
+      const text = res.krama_text_arr[i][0];
+      if (text && !readable.has(text)) readable.set(text, [i]);
+    }
+    for (const entry of res.text_to_krama_map) {
+      const [text, { krama }] = entry;
+      if (
+        krama?.length &&
+        !krama.includes(-1) &&
+        !readable.has(text) &&
+        !is_prefix_to_resolve(entry)
+      )
+        readable.set(text, krama);
+    }
+    for (const entry of res.text_to_krama_map) {
+      if (!is_prefix_to_resolve(entry)) continue;
+      const code_points = [...entry[0]];
+      const krama: number[] = [];
+      let start = 0;
+      while (start < code_points.length) {
+        let end = code_points.length;
+        let piece_krama: number[] | undefined;
+        for (; end > start; end--) {
+          piece_krama = readable.get(code_points.slice(start, end).join(''));
+          if (piece_krama) break;
+        }
+        if (!piece_krama) break;
+        if (krama.length && is_vyanjana(krama.at(-1)!) && is_vyanjana(piece_krama[0]))
+          krama.push(halant_index);
+        krama.push(...piece_krama);
+        start = end;
+      }
+      if (start !== code_points.length) continue;
+      entry[1].krama = krama;
+      // its shorter prefixes need their krama in the entry too (not only in krama_text_arr):
+      // ITRANS A of AU had none, kAU was read as का
+      for (let j = 1; j < code_points.length; j++) {
+        const prefix = code_points.slice(0, j).join('');
+        const prefix_entry = res.text_to_krama_map.find(([text]) => text === prefix);
+        const prefix_krama = readable.get(prefix);
+        if (prefix_entry && !prefix_entry[1].krama?.length && prefix_krama)
+          prefix_entry[1].krama = [...prefix_krama];
+      }
+    }
+  }
+
   // Canonically equivalent forms (Unicode NFD / NFC) of a text are read like it. A keyboard or
   // font may store a two-part vowel sign as its parts (Malayalam ൊ as െ + ാ, Tamil ஔ as ஒ + ௗ),
   // NFC keeps some letters decomposed (Gurumukhi ਸ਼ as ਸ + ਼, it is excluded from composition)
@@ -456,11 +537,27 @@ function get_out_script_data(
       readable.set(text, { krama: value.krama, fallback_list_ref: value.fallback_list_ref });
     }
     const variants = new Map<string, { krama: number[]; fallback_list_ref?: number | null }>();
+    const add_variant = (
+      variant: string,
+      value: { krama: number[]; fallback_list_ref?: number | null }
+    ) => {
+      if (!readable.has(variant) && !variants.has(variant)) variants.set(variant, value);
+    };
+    // the capital forms (`case_insensitive`), they also get their NFD / NFC forms
+    const case_insensitive =
+      input_script_data.script_type === 'other' && input_script_data.case_insensitive === true;
     for (const [text, value] of readable) {
-      for (const form of ['NFD', 'NFC'] as const) {
-        const variant = text.normalize(form);
-        if (variant !== text && !readable.has(variant) && !variants.has(variant))
-          variants.set(variant, value);
+      const case_forms = [text];
+      if (case_insensitive) {
+        const [first, ...rest] = [...text];
+        case_forms.push(first.toUpperCase() + rest.join(''), text.toUpperCase());
+      }
+      for (const case_form of case_forms) {
+        if (case_form !== text) add_variant(case_form, value);
+        for (const form of ['NFD', 'NFC'] as const) {
+          const variant = case_form.normalize(form);
+          if (variant !== text) add_variant(variant, value);
+        }
       }
     }
     for (const [variant, value] of variants) {
@@ -704,15 +801,14 @@ function get_out_script_data(
   // Scan for krama keys which did not get mapped to any text and warn
   // nuqta is optional and skipped when not present in the target script
   // a-mAtrA and a1-mAtrA are not expected to be mapped in brahmic scripts
-  // halant and saMkShepachihna are not expected to be mapped in Normal and Romanized
+  // halant and saMkShepachihna are not expected to be mapped in `other` scripts (Normal, the
+  // romanization schemes)
   {
     const ignored_krama_labels: string[] = [
       'nuqta',
       ...(res.script_type === 'brahmic'
         ? ['a-mAtrA', 'a1-mAtrA']
-        : ['Normal', 'Romanized'].includes(input_script_data.script_name)
-          ? ['halant', 'saMkShepachihna']
-          : [])
+        : ['halant', 'saMkShepachihna'])
     ];
     const unmapped_krama_keys = res.krama_text_arr
       .map((item, i) => (item[0] === '' ? KramaLabelsArray[i] : null))

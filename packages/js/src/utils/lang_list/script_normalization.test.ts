@@ -25,6 +25,13 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('sin')).toBe('Sinhala');
       expect(getNormalizedScriptName('en')).toBe('Normal');
       expect(getNormalizedScriptName('rom')).toBe('Romanized');
+      expect(getNormalizedScriptName('slp1')).toBe('SLP1');
+      expect(getNormalizedScriptName('slp')).toBe('SLP1');
+      expect(getNormalizedScriptName('hk')).toBe('Harvard-Kyoto');
+      expect(getNormalizedScriptName('itrans')).toBe('ITRANS');
+      expect(getNormalizedScriptName('iast')).toBe('IAST');
+      expect(getNormalizedScriptName('IAST')).toBe('IAST');
+      expect(getNormalizedScriptName('ITRANS')).toBe('ITRANS');
       expect(getNormalizedScriptName('gur')).toBe('Gurumukhi');
       expect(getNormalizedScriptName('as')).toBe('Assamese');
     });
@@ -77,6 +84,10 @@ describe('getNormalizedScriptName', () => {
       expect(getNormalizedScriptName('Sinhala')).toBe('Sinhala');
       expect(getNormalizedScriptName('Normal')).toBe('Normal');
       expect(getNormalizedScriptName('Romanized')).toBe('Romanized');
+      expect(getNormalizedScriptName('SLP1')).toBe('SLP1');
+      expect(getNormalizedScriptName('Harvard-Kyoto')).toBe('Harvard-Kyoto');
+      // @ts-ignore
+      expect(getNormalizedScriptName('harvard-kyoto')).toBe('Harvard-Kyoto');
       expect(getNormalizedScriptName('Gurumukhi')).toBe('Gurumukhi');
       expect(getNormalizedScriptName('Assamese')).toBe('Assamese');
     });

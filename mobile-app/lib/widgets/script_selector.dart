@@ -14,6 +14,10 @@ const Map<String, String> scriptAvatarMap = {
   'Sinhala': 'අ',
   'Normal': 'a',
   'Romanized': 'ā',
+  'IAST': 'IA',
+  'ITRANS': 'IT',
+  'Harvard-Kyoto': 'HK',
+  'SLP1': 'SL',
   'Gurumukhi': 'ਅ',
   'Assamese': 'অ',
   'Siddham': '𑖀',
@@ -28,6 +32,7 @@ const Map<String, String> scriptAvatarMap = {
 enum ScriptCategory {
   modern('Modern Indian Scripts'),
   romanized('Romanization Scripts'),
+  standard('Standard Schemes'),
   ancient('Ancient Scripts');
 
   final String label;
@@ -55,6 +60,11 @@ const List<ScriptInfo> orderedScripts = [
   // Romanization Scripts
   ScriptInfo('Normal', ScriptCategory.romanized),
   ScriptInfo('Romanized', ScriptCategory.romanized),
+  // Standard Schemes
+  ScriptInfo('IAST', ScriptCategory.standard),
+  ScriptInfo('ITRANS', ScriptCategory.standard),
+  ScriptInfo('Harvard-Kyoto', ScriptCategory.standard),
+  ScriptInfo('SLP1', ScriptCategory.standard),
   // Ancient Scripts
   ScriptInfo('Brahmi', ScriptCategory.ancient),
   ScriptInfo('Sharada', ScriptCategory.ancient),
@@ -94,8 +104,9 @@ class ScriptSelector extends StatelessWidget {
     final scripts = visibleScripts
         .map((scriptInfo) => scriptInfo.name)
         .toList(growable: false);
-    final String? initialValue =
-        scripts.contains(value) ? value : (scripts.isNotEmpty ? scripts.first : null);
+    final String? initialValue = scripts.contains(value)
+        ? value
+        : (scripts.isNotEmpty ? scripts.first : null);
 
     // Group scripts by category using the ordered list
     final groupedScripts = <ScriptCategory, List<String>>{};

@@ -43,6 +43,10 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
     ScriptListEnum::Sinhala => "අ",
     ScriptListEnum::Normal => "a",
     ScriptListEnum::Romanized => "ā",
+    ScriptListEnum::Iast => "IA",
+    ScriptListEnum::Itrans => "IT",
+    ScriptListEnum::HarvardKyoto => "HK",
+    ScriptListEnum::Slp1 => "SL",
     ScriptListEnum::Gurumukhi => "ਅ",
     ScriptListEnum::Assamese => "অ",
     ScriptListEnum::Siddham => "𑖀",
@@ -54,21 +58,40 @@ pub fn get_script_avatar(script: ScriptListEnum) -> &'static str {
   }
 }
 
+/// The standard romanization schemes, listed after Romanized (before the ancient scripts)
+const STANDARD_SCHEMES: &[ScriptListEnum] = &[
+  ScriptListEnum::Iast,
+  ScriptListEnum::Itrans,
+  ScriptListEnum::HarvardKyoto,
+  ScriptListEnum::Slp1,
+];
+
 pub fn get_ordered_script_list() -> Vec<ScriptDisplay> {
   let script_list = get_script_list_data();
 
-  script_list
+  let mut scripts: Vec<ScriptListEnum> = script_list
     .scripts
     .iter()
     .map(|script_name| {
-      let script = normalize_script(script_name)
-        .unwrap_or_else(|| panic!("unsupported script name in script list: {script_name}"));
-      let avatar = get_script_avatar(script);
-      let label = script.to_string();
-      ScriptDisplay {
-        script_name: script,
-        display_label: format!("{} - {}", avatar, label),
-      }
+      normalize_script(script_name)
+        .unwrap_or_else(|| panic!("unsupported script name in script list: {script_name}"))
+    })
+    .filter(|script| !STANDARD_SCHEMES.contains(script))
+    .collect();
+  let after_romanized = scripts
+    .iter()
+    .position(|script| *script == ScriptListEnum::Romanized)
+    .map_or(scripts.len(), |i| i + 1);
+  scripts.splice(
+    after_romanized..after_romanized,
+    STANDARD_SCHEMES.iter().copied(),
+  );
+
+  scripts
+    .into_iter()
+    .map(|script| ScriptDisplay {
+      script_name: script,
+      display_label: format!("{} - {}", get_script_avatar(script), script),
     })
     .collect()
 }
