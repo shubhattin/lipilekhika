@@ -21,7 +21,7 @@
   spellcheck="false"
   autocapitalize="none"
   placeholder="Type in देवनागरी..."
-  class="h-20 border-(--sl-color-gray-5) bg-transparent text-(--sl-color-white) shadow-none transition-colors placeholder:text-(--sl-color-gray-3) hover:border-(--sl-color-gray-4) focus-visible:border-(--sl-color-gray-3) focus-visible:ring-0 sm:h-30 dark:bg-transparent"
+  class="h-20 border-(--sl-color-gray-5) bg-transparent text-(--sl-color-white) shadow-none transition-colors placeholder:text-(--sl-color-gray-3) hover:border-(--sl-color-gray-4) sm:h-30 dark:bg-transparent"
   bind:value={textarea_text}
   onbeforeinput={(e) =>
     handleTypingBeforeInputEvent(
