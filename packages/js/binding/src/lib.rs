@@ -70,8 +70,8 @@ pub fn transliterate(
 ) -> Result<String> {
     let from_script = Script::from_str(&from)
         .map_err(|e| Error::from_reason(format!("invalid from script: {e}")))?;
-    let to_script = Script::from_str(&to)
-        .map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
+    let to_script =
+        Script::from_str(&to).map_err(|e| Error::from_reason(format!("invalid to script: {e}")))?;
 
     let trans_options = match trans_options {
         None => None,
