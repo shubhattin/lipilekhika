@@ -31,6 +31,7 @@
     KeyboardIcon,
     KeyboardOffIcon,
     SettingsIcon,
+    Undo2,
     X
   } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
@@ -79,9 +80,33 @@
 
   let source_textarea = $state<HTMLTextAreaElement | null>(null);
 
-  const clearInput = () => {
+  /**
+   * The text that Clear or an opened file replaced, so a slip can be taken back. It stays
+   * on offer until the box changes again (typing after a Clear means the old text is gone
+   * on purpose).
+   */
+  let replaced = $state<{ text: string; by: 'clear' | 'open'; after: string } | null>(null);
+  const can_undo = $derived(replaced !== null && replaced.after === input_text);
+
+  const replaceInput = (text: string, by: 'clear' | 'open') => {
+    if (input_text && input_text !== text) replaced = { text: input_text, by, after: text };
     from_input_typing_context.clearContext();
-    input_text = '';
+    input_text = text;
+  };
+
+  const undoReplace = () => {
+    if (!replaced || !can_undo) return;
+    const { text } = replaced;
+    replaced = null;
+    from_input_typing_context.clearContext();
+    input_text = text;
+    source_textarea?.focus();
+    // the caret goes to the end, after the binding has put the text back in the box
+    queueMicrotask(() => source_textarea?.setSelectionRange(text.length, text.length));
+  };
+
+  const clearInput = () => {
+    replaceInput('', 'clear');
     source_textarea?.focus();
   };
 
@@ -94,9 +119,7 @@
     clearTimeout(file_error_timeout);
     file_error = null;
     try {
-      const text = await readTextFile(file);
-      from_input_typing_context.clearContext();
-      input_text = text;
+      replaceInput(await readTextFile(file), 'open');
     } catch (err) {
       if (!(err instanceof TextFileError)) console.error(err);
       file_error = err instanceof TextFileError ? err.message : `Couldn't read ${file.name}`;
@@ -264,8 +287,17 @@
   });
 </script>
 
-<!-- A file dropped outside the source box would open in the tab in place of the app -->
+<!-- A file dropped outside the source box would open in the tab in place of the app.
+     Leaving the page (reload, closing the tab, back to another site, a link to a page
+     outside the client router) loses the source text, so the browser asks first while
+     there is some. Moves between pages of the site keep it: it lives in a shared store. -->
 <svelte:window
+  onbeforeunload={(e) => {
+    if (!input_text.trim()) return;
+    e.preventDefault();
+    // older browsers only ask when returnValue is set
+    e.returnValue = '';
+  }}
   ondragover={(e) => isFileDrag(e) && e.preventDefault()}
   ondrop={(e) => isFileDrag(e) && e.preventDefault()}
 />
@@ -467,6 +499,19 @@
                   )}
                 onblur={() => from_input_typing_context.clearContext()}
                 onkeydown={(e) => {
+                  // Ctrl/Cmd+Z right after a Clear or an opened file brings the old text back
+                  // (the box's own undo history doesn't know about either)
+                  if (
+                    can_undo &&
+                    (e.ctrlKey || e.metaKey) &&
+                    !e.shiftKey &&
+                    !e.altKey &&
+                    e.key.toLowerCase() === 'z'
+                  ) {
+                    e.preventDefault();
+                    undoReplace();
+                    return;
+                  }
                   // Toggle typing on Alt+X
                   if (e.altKey && (e.key === 'x' || e.key === 'X')) {
                     e.preventDefault();
@@ -476,7 +521,7 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              {#if show_option_chips || input_text}
+              {#if show_option_chips || input_text || can_undo}
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
                   class="flex min-h-9 cursor-text items-center gap-2 px-2 pb-2"
@@ -495,10 +540,24 @@
                       bind:includeInherentVowel
                     />
                   {/if}
+                  {#if can_undo && replaced}
+                    <button
+                      type="button"
+                      class="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
+                      onclick={undoReplace}
+                      title={replaced.by === 'clear'
+                        ? 'Bring back the cleared text (Ctrl+Z)'
+                        : 'Go back to the text before the file was opened (Ctrl+Z)'}
+                    >
+                      <Undo2 class="size-3.5" />
+                      {replaced.by === 'clear' ? 'Undo clear' : 'Undo open'}
+                    </button>
+                  {/if}
                   {#if input_text}
                     <button
                       type="button"
-                      class="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      class:ml-auto={!can_undo}
+                      class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
                       onclick={clearInput}
                       title="Clear source text"
                     >
