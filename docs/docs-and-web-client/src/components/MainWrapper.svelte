@@ -30,7 +30,16 @@
   bind:useNativeNumerals={$use_native_numerals_atom}
   bind:includeInherentVowel={$include_inherent_vowel_atom}
   {transliterate_func}
+  container_class="px-4 pt-20 pb-12 sm:pt-24"
 >
+  {#snippet header_snippet()}
+    <div class="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 sm:mb-6">
+      <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Transliterate</h1>
+      <p class="text-sm text-muted-foreground">
+        Type or paste text, pick the scripts, and it converts as you type.
+      </p>
+    </div>
+  {/snippet}
   {#snippet pwa_snippet()}
     <div class="mt-8">
       <PlatformDownload />

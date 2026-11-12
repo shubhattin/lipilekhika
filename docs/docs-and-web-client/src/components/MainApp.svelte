@@ -23,10 +23,10 @@
   import { Textarea } from '~/lib/components/ui/textarea';
   import { Separator } from '~/lib/components/ui/separator';
   import * as Popover from '~/lib/components/ui/popover';
-  import { KeyboardIcon, SettingsIcon } from 'lucide-svelte';
+  import { ArrowLeftRight, KeyboardIcon, SettingsIcon, X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import { BiHelpCircle } from 'svelte-icons-pack/bi';
-  import { BsCopy } from 'svelte-icons-pack/bs';
+  import CopyButton from './CopyButton.svelte';
   import ScriptSeleector from './script/ScriptSelector.svelte';
   import CustomOptions from './script/CustomOptions.svelte';
   import PresetSelector from './script/PresetSelector.svelte';
@@ -39,20 +39,40 @@
     typing_script = $bindable(),
     to_script = $bindable(),
     pwa_snippet,
+    header_snippet,
     transliterate_func,
     current_preset = $bindable('none'),
     useNativeNumerals = $bindable(DEFAULT_USE_NATIVE_NUMERALS),
-    includeInherentVowel = $bindable(DEFAULT_INCLUDE_INHERENT_VOWEL)
+    includeInherentVowel = $bindable(DEFAULT_INCLUDE_INHERENT_VOWEL),
+    container_class = 'mt-12 flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-4'
   }: {
     input_text: string;
     typing_script: ScriptListType;
     to_script: ScriptListType;
     pwa_snippet?: Snippet;
+    /** Optional content above the converter card */
+    header_snippet?: Snippet;
     transliterate_func: typeof transliterate;
     current_preset?: PresetListType;
     useNativeNumerals: boolean;
     includeInherentVowel: boolean;
+    /** Classes of the outermost wrapper, lets each host (web, desktop) set its own page spacing */
+    container_class?: string;
   } = $props();
+
+  let source_textarea = $state<HTMLTextAreaElement | null>(null);
+
+  const countWords = (text: string) => {
+    const trimmed = text.trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  };
+  const formatWords = (count: number) => `${count} ${count === 1 ? 'word' : 'words'}`;
+
+  const clearInput = () => {
+    from_input_typing_context.clearContext();
+    input_text = '';
+    source_textarea?.focus();
+  };
 
   let outputText = $state('');
   let options = $state<TransliterationOptions>({});
@@ -102,14 +122,6 @@
     to_script = currentFrom;
     input_text = currentOutputText;
     outputText = currentInputText;
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   };
 
   // Flag to track if options are being set programmatically (to avoid resetting preset)
@@ -220,80 +232,70 @@
   });
 </script>
 
-<div class="mt-12 flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-4">
+<div class={container_class}>
   <div class="mx-auto w-full max-w-6xl px-0 sm:px-6">
+    {@render header_snippet?.()}
     <form
-      class="space-y-8 rounded-xl border border-border bg-card p-6 shadow-2xl sm:p-8"
+      class="space-y-6 rounded-2xl border border-border bg-card p-4 shadow-2xl shadow-black/5 sm:space-y-8 sm:p-8 dark:shadow-black/30"
       onsubmit={handleSubmit}
     >
       <!-- From / To Sections -->
-      <div class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
+      <div class="relative grid gap-6 lg:grid-cols-2 lg:gap-14">
+        <!-- Swap (desktop): sits in the gap between the two columns, level with the script selectors -->
+        <div class="absolute top-[1.625rem] left-1/2 z-10 hidden -translate-x-1/2 lg:block">
+          {@render swap_button()}
+        </div>
+
         <!-- From Section -->
-        <section class="flex flex-col gap-5">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex flex-col gap-2.5">
-              <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                >From</span
-              >
-              <ScriptSeleector bind:script={typing_script} />
-            </div>
-            <div class="hidden items-center justify-center lg:flex">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Swap scripts"
-                onclick={handleSwap}
-                class="h-10 w-10 rounded-full text-lg"
-              >
-                ⇄
-              </Button>
-            </div>
+        <section class="flex min-w-0 flex-col gap-4">
+          <div class="flex flex-col gap-2.5">
+            <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+              >From</span
+            >
+            <ScriptSeleector bind:script={typing_script} />
           </div>
 
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
+          <div class="flex flex-col gap-2">
+            <div class="flex min-h-8 items-center justify-between gap-2">
+              <div class="flex items-center gap-1">
                 <label
                   for="source-text"
-                  class="text-sm font-medium tracking-wide text-muted-foreground"
+                  class="mr-1 text-sm font-medium tracking-wide text-muted-foreground"
                 >
                   Source text
                 </label>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="size-8"
-                  onclick={() => copyToClipboard(input_text)}
-                  title="Copy source text"
-                >
-                  <Icon src={BsCopy} className="size-4" />
-                  <span class="sr-only">Copy source text</span>
-                </Button>
+                <CopyButton text={() => input_text} label="Copy source text" />
                 {#if typing_script !== 'Normal'}
                   <Button
                     variant="ghost"
                     size="icon"
                     class="size-8"
                     onclick={() => (typing_modal_open = true)}
+                    title="Typing help"
                   >
                     <Icon src={BiHelpCircle} className="size-6 fill-sky-500 dark:fill-sky-400" />
                     <span class="sr-only">Typing Help</span>
                   </Button>
                 {/if}
               </div>
-              <div class="flex items-center gap-2">
-                <span class="hidden text-xs text-muted-foreground sm:inline-block"
-                  >Use <span class="font-bold">Alt+x</span> to toggle</span
+              <div class="flex items-center gap-1.5">
+                <label
+                  class="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent/40"
+                  title="Realtime typing (Alt+X to toggle)"
                 >
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-                  <KeyboardIcon class="h-7 w-10" />
-                  <Switch bind:checked={typing_enabled} />
+                  <KeyboardIcon class="size-5" />
+                  <span class="hidden sm:inline">Typing</span>
+                  <kbd
+                    class="hidden rounded border border-border bg-muted px-1 font-mono text-[0.65rem] leading-4 sm:inline"
+                    >Alt+X</kbd
+                  >
+                  <Switch bind:checked={typing_enabled} aria-label="Realtime typing" />
                 </label>
                 <Popover.Root>
                   <Popover.Trigger>
-                    <Button variant="ghost" size="icon" class="h-8 w-8">
-                      <SettingsIcon class="h-4 w-4" />
+                    <Button variant="ghost" size="icon" class="size-8" title="Typing options">
+                      <SettingsIcon class="size-4" />
+                      <span class="sr-only">Typing options</span>
                     </Button>
                   </Popover.Trigger>
                   <Popover.Content class="w-80">
@@ -325,97 +327,108 @@
                 </Popover.Root>
               </div>
             </div>
-            <Textarea
-              id="source-text"
-              autocomplete="off"
-              spellcheck="false"
-              autocapitalize="none"
-              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
-                getFontClass(typing_script)}
-              placeholder="Enter text to transliterate..."
-              bind:value={input_text}
-              onbeforeinput={(e) =>
-                handleTypingBeforeInputEvent(
-                  from_input_typing_context,
-                  e,
-                  (new_value) => (input_text = new_value),
-                  typing_enabled
-                )}
-              onblur={() => from_input_typing_context.clearContext()}
-              onkeydown={(e) => {
-                // Toggle typing on Alt+X
-                if (e.altKey && (e.key === 'x' || e.key === 'X')) {
-                  e.preventDefault();
-                  typing_enabled = !typing_enabled;
-                  return;
-                }
-                clearTypingContextOnKeyDown(e, from_input_typing_context);
-              }}
-            />
+            <div class="relative">
+              <Textarea
+                id="source-text"
+                bind:ref={source_textarea}
+                autocomplete="off"
+                spellcheck="false"
+                autocapitalize="none"
+                class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto pb-8 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
+                  getFontClass(typing_script)}
+                placeholder={typing_enabled && typing_script !== 'Normal'
+                  ? `Type with English letters to write in ${typing_script}…`
+                  : 'Enter text to transliterate…'}
+                bind:value={input_text}
+                onbeforeinput={(e) =>
+                  handleTypingBeforeInputEvent(
+                    from_input_typing_context,
+                    e,
+                    (new_value) => (input_text = new_value),
+                    typing_enabled
+                  )}
+                onblur={() => from_input_typing_context.clearContext()}
+                onkeydown={(e) => {
+                  // Toggle typing on Alt+X
+                  if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+                    e.preventDefault();
+                    typing_enabled = !typing_enabled;
+                    return;
+                  }
+                  clearTypingContextOnKeyDown(e, from_input_typing_context);
+                }}
+              />
+              <div
+                class="pointer-events-none absolute right-2 bottom-2 left-3 flex items-center justify-between text-xs text-muted-foreground"
+              >
+                <span>{formatWords(countWords(input_text))}</span>
+                {#if input_text}
+                  <button
+                    type="button"
+                    class="pointer-events-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors hover:bg-accent/60 hover:text-foreground"
+                    onclick={clearInput}
+                    title="Clear source text"
+                  >
+                    <X class="size-3.5" />
+                    Clear
+                  </button>
+                {/if}
+              </div>
+            </div>
           </div>
         </section>
 
         <!-- To Section -->
-        <section class="flex flex-col gap-5">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex w-full flex-col gap-2.5">
+        <section class="flex min-w-0 flex-col gap-4">
+          <div class="flex items-end justify-between gap-4">
+            <div class="flex flex-col gap-2.5">
               <span class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >To</span
               >
               <ScriptSeleector bind:script={to_script} have_normal_script={true} />
             </div>
-            <div class="flex items-center justify-center lg:hidden">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label="Swap scripts"
-                onclick={handleSwap}
-                class="h-10 w-10 rounded-full text-lg"
-              >
-                ⇄
-              </Button>
+            <div class="lg:hidden">
+              {@render swap_button()}
             </div>
           </div>
 
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-2">
-                <label
-                  for="output-text"
-                  class="text-sm font-medium tracking-wide text-muted-foreground sm:block"
-                >
-                  Output
-                </label>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="size-8"
-                  onclick={() => copyToClipboard(outputText)}
-                  title="Copy output text"
-                >
-                  <Icon src={BsCopy} className="size-4" />
-                  <span class="sr-only">Copy output text</span>
-                </Button>
+          <div class="flex flex-col gap-2">
+            <div class="flex min-h-8 items-center gap-1">
+              <label
+                for="output-text"
+                class="mr-1 text-sm font-medium tracking-wide text-muted-foreground"
+              >
+                Output
+              </label>
+              <CopyButton text={() => outputText} label="Copy output text" />
+              <div class="ml-auto flex items-center gap-2">
+                {#if !auto_convert}
+                  <Button type="submit" size="sm" variant="secondary" class="h-8 gap-1.5 font-semibold">
+                    <Icon src={SiConvertio} className="size-4" />
+                    Convert
+                  </Button>
+                {/if}
+                <Label class="cursor-pointer" title="Convert while typing">
+                  <span class="text-xs font-medium text-muted-foreground">Auto convert</span>
+                  <Switch bind:checked={auto_convert} />
+                </Label>
               </div>
-              <Label>
-                <span class="text-sm font-medium tracking-wide text-muted-foreground">Auto </span>
-                <Switch bind:checked={auto_convert} />
-              </Label>
-              {#if !auto_convert}
-                <Button type="submit" size="sm" variant="ghost" class="gap-1.5 font-semibold">
-                  <Icon src={SiConvertio} className="size-4" />
-                  Convert
-                </Button>
-              {/if}
             </div>
-            <Textarea
-              id="output-text"
-              class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 sm:min-h-[240px] md:min-h-[280px] lg:min-h-[320px] xl:min-h-[360px] ' +
-                getFontClass(to_script)}
-              value={outputText}
-              readonly
-            />
+            <div class="relative">
+              <Textarea
+                id="output-text"
+                class={'field-sizing-fixed min-h-[200px] resize-none overflow-auto bg-muted/30 pb-8 text-base sm:min-h-[240px] md:min-h-[280px] md:text-base lg:min-h-[320px] xl:min-h-[360px] ' +
+                  getFontClass(to_script)}
+                placeholder="The transliteration appears here"
+                value={outputText}
+                readonly
+              />
+              <div
+                class="pointer-events-none absolute right-3 bottom-2 left-3 text-xs text-muted-foreground"
+              >
+                {formatWords(countWords(outputText))}
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -435,3 +448,17 @@
     {/await}
   {/if}
 </div>
+
+{#snippet swap_button()}
+  <Button
+    type="button"
+    variant="outline"
+    size="icon"
+    aria-label="Swap scripts"
+    title="Swap scripts and text"
+    onclick={handleSwap}
+    class="size-9 rounded-full bg-card shadow-sm transition-transform hover:rotate-180"
+  >
+    <ArrowLeftRight class="size-4" />
+  </Button>
+{/snippet}
