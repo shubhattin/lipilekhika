@@ -94,7 +94,7 @@
 </script>
 
 <section
-  class="border-t border-slate-200/80 bg-slate-100/60 py-16 dark:border-border/40 dark:bg-linear-to-b dark:from-muted/30 dark:via-background dark:to-background"
+  class="border-t border-slate-200/80 bg-slate-100/60 py-16 dark:border-border/40 dark:bg-transparent dark:bg-linear-to-b dark:from-muted/30 dark:via-background dark:to-background"
 >
   <div class="mx-auto max-w-6xl px-4 sm:px-6">
     <div class="flex flex-col items-center gap-5 text-center sm:mb-2">
