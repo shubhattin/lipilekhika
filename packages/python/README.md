@@ -34,7 +34,7 @@ pip install lipilekhika
 from lipilekhika import transliterate
 
 # Transliterate from Normal script to Devanagari
-result = transliterate('na jAyatE mriyatE vA', 'Normal', 'Devanagari')
+result = transliterate("na jAyatE mriyatE vA", "Normal", "Devanagari")
 print(result)  # न जायते म्रियते वा
 ```
 
@@ -44,10 +44,10 @@ print(result)  # न जायते म्रियते वा
 from lipilekhika import transliterate
 
 result = transliterate(
-    'गङ्गा',
-    'Devanagari',
-    'Gujarati',
-    {'brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra': True}
+    "गङ्गा",
+    "Devanagari",
+    "Gujarati",
+    {"brahmic_to_brahmic:replace_pancham_varga_varna_with_anusvAra": True},
 )
 print(result)  # ગંગા (instead of ગઙ્ગા)
 ```
@@ -63,7 +63,7 @@ print(result)  # ગંગા (instead of ગઙ્ગા)
 ```python
 from lipilekhika import transliterate
 
-result = transliterate('namaste', 'Normal', 'Devanagari')
+result = transliterate("namaste", "Normal", "Devanagari")
 # Returns: नमस्ते
 ```
 
@@ -82,7 +82,7 @@ result = transliterate('namaste', 'Normal', 'Devanagari')
 ```python
 from lipilekhika import preload_script_data
 
-preload_script_data('Telugu')
+preload_script_data("Telugu")
 ```
 
 ---
@@ -92,7 +92,7 @@ preload_script_data('Telugu')
 ```python
 from lipilekhika import get_all_options
 
-options = get_all_options('Normal', 'Devanagari')
+options = get_all_options("Normal", "Devanagari")
 # Returns: list of available option keys
 ```
 
@@ -102,7 +102,7 @@ options = get_all_options('Normal', 'Devanagari')
 from lipilekhika import SCRIPT_LIST, LANG_LIST, ALL_SCRIPT_LANG_LIST
 
 print(SCRIPT_LIST)  # ['Devanagari', 'Bengali', 'Telugu', ...]
-print(LANG_LIST)    # ['Sanskrit', 'Hindi', 'Marathi', ...]
+print(LANG_LIST)  # ['Sanskrit', 'Hindi', 'Marathi', ...]
 ```
 
 | Export | Description |
@@ -118,7 +118,7 @@ Enable real-time transliteration as users type character by character.
 ```python
 from lipilekhika.typing import create_typing_context
 
-ctx = create_typing_context('Telugu')
+ctx = create_typing_context("Telugu")
 
 # Process each character
 for char in "namaste":
@@ -140,10 +140,10 @@ from lipilekhika.typing import create_typing_context, TypingContextOptions
 options = TypingContextOptions(
     auto_context_clear_time_ms=4500,
     use_native_numerals=True,
-    include_inherent_vowel=False
+    include_inherent_vowel=False,
 )
 
-ctx = create_typing_context('Devanagari', options)
+ctx = create_typing_context("Devanagari", options)
 ```
 
 **Returns:** `TypingContext` with:
@@ -158,7 +158,7 @@ ctx = create_typing_context('Devanagari', options)
 from lipilekhika.typing import get_script_typing_data_map
 
 # Get detailed typing mappings for a script
-typing_map = get_script_typing_data_map('Telugu')
+typing_map = get_script_typing_data_map("Telugu")
 # Useful for building typing helper UIs
 ```
 

@@ -115,6 +115,26 @@ go run ./bench/benchmark.go                # cold single-pass benchmark (see Ben
 go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 ```
 
+## Formatting
+
+Format your changes before committing. Run the formatter for each package you touched; every one of them can also be run in check mode (shown in the comments) to verify without writing.
+
+| Code | Formatter | Run from | Command |
+| --- | --- | --- | --- |
+| JS package (`packages/js`) | [oxfmt](https://oxc.rs) | `packages/js` | `bun run format` (check: `bunx oxfmt --check`) |
+| Docs & web client (`docs/docs-and-web-client`) | [Prettier](https://prettier.io) | `docs/docs-and-web-client` | `bun run format` (check: `bunx prettier --check .`) |
+| Desktop app frontend (`desktop-client/lipiparivartaka`) | Prettier | `desktop-client/lipiparivartaka` | `bun run format` (check: `bunx prettier --check .`) |
+| All Rust crates (one Cargo workspace) | [rustfmt](https://github.com/rust-lang/rustfmt) | repo root | `cargo fmt --all` (check: `cargo fmt --all --check`) |
+| Python package (`packages/python`) | [Ruff](https://docs.astral.sh/ruff/) | `packages/python` | `uvx ruff format .` (check: `uvx ruff format --check .`) |
+| Go package (`packages/go/lipilekhika`) | gofmt | `packages/go/lipilekhika` | `gofmt -w .` (check: `gofmt -l .` lists unformatted files) |
+| Dart package & mobile app (`packages/dart/lipilekhika`, `mobile-app`) | [dart format](https://dart.dev/tools/dart-format) (ships with the Dart/Flutter SDK) | that directory | `dart format .` (check: `dart format --output=none --set-exit-if-changed .`) |
+
+Notes:
+
+- `rustfmt` comes with rustup by default; the per-crate settings live in the `rustfmt.toml` files (`packages/rust`, `desktop-client`).
+- Ruff isn't a project dependency, so it runs through `uvx` (like `ty`); it also formats the Python code blocks in `packages/python/README.md`.
+- The committed Rust script data is formatted by its generator (`datagen`), so `cargo fmt` leaves it unchanged. The flutter_rust_bridge output (`frb_generated.rs`) is gitignored, so whatever `cargo fmt` does to it doesn't show up in a diff.
+
 ## Benchmarks
 
 Every package has two kinds of benchmark over the same [`test_data/`](test_data/) cases (`bun run gen:test-data`), using the generated script data. **Run both**: the statistical suite to judge a change, the cold pass to see first-run latency and a quick cross-language table.
