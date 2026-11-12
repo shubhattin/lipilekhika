@@ -39,25 +39,19 @@
     typing_script = $bindable(),
     to_script = $bindable(),
     pwa_snippet,
-    header_snippet,
     transliterate_func,
     current_preset = $bindable('none'),
     useNativeNumerals = $bindable(DEFAULT_USE_NATIVE_NUMERALS),
-    includeInherentVowel = $bindable(DEFAULT_INCLUDE_INHERENT_VOWEL),
-    container_class = 'mt-12 flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-4'
+    includeInherentVowel = $bindable(DEFAULT_INCLUDE_INHERENT_VOWEL)
   }: {
     input_text: string;
     typing_script: ScriptListType;
     to_script: ScriptListType;
     pwa_snippet?: Snippet;
-    /** Optional content above the converter card */
-    header_snippet?: Snippet;
     transliterate_func: typeof transliterate;
     current_preset?: PresetListType;
     useNativeNumerals: boolean;
     includeInherentVowel: boolean;
-    /** Classes of the outermost wrapper, lets each host (web, desktop) set its own page spacing */
-    container_class?: string;
   } = $props();
 
   let source_textarea = $state<HTMLTextAreaElement | null>(null);
@@ -232,9 +226,8 @@
   });
 </script>
 
-<div class={container_class}>
+<div class="mt-12 flex min-h-[90vh] flex-col items-center justify-center overflow-hidden px-4 pt-4">
   <div class="mx-auto w-full max-w-6xl px-0 sm:px-6">
-    {@render header_snippet?.()}
     <form
       class="space-y-6 rounded-2xl border border-border bg-card p-4 shadow-2xl shadow-black/5 sm:space-y-8 sm:p-8 dark:shadow-black/30"
       onsubmit={handleSubmit}

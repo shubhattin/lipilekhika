@@ -3,8 +3,8 @@ import RootLayout from '$components/RootLayout.astro';
 import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
-import ScriptShowcase from '$components/landing/ScriptShowcase.svelte';
-import { Globe, ArrowRight, ChevronDown } from 'lucide-svelte';
+import ScriptTrans from '$components/landing/ScriptTrans.svelte';
+import { Globe, ArrowRight } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
 import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
@@ -14,10 +14,24 @@ const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
 const LINUX_FCITX_PLUGIN_URL =
   'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
 
+/** [English name, native name] for the Supported Scripts banner */
+const SUPPORTED_SCRIPTS = [
+  ['Devanagari', 'देवनागरी'],
+  ['Telugu', 'తెలుగు'],
+  ['Bengali', 'বাংলা'],
+  ['Tamil', 'தமிழ்'],
+  ['Kannada', 'ಕನ್ನಡ'],
+  ['Gujarati', 'ગુજરાતી'],
+  ['Malayalam', 'മലയാളം'],
+  ['Gurmukhi', 'ਗੁਰਮੁਖੀ'],
+  ['Odia', 'ଓଡ଼ିଆ'],
+  ['Sinhala', 'සිංහල']
+] as const;
+
 /** Secondary (download) buttons share one neutral look; the icon carries the platform colour.
  * No `display` here, so each button can pick `inline-flex` or `hidden sm:inline-flex`. */
 const DOWNLOAD_BUTTON_CLASS =
-  'h-11 items-center justify-center gap-2 rounded-lg border border-border bg-background/70 text-sm font-medium whitespace-nowrap text-foreground shadow-sm backdrop-blur-sm transition-all group-hover:-translate-y-0.5 group-hover:bg-accent/40 group-hover:shadow-md hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-md active:translate-y-0 dark:bg-card/60 dark:group-hover:bg-card dark:hover:bg-card';
+  'h-11 items-center justify-center gap-2 rounded-lg border border-border bg-background/70 text-sm font-medium whitespace-nowrap text-foreground shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-md active:translate-y-0 dark:bg-card/60 dark:hover:bg-card';
 ---
 
 <RootLayout
@@ -26,7 +40,7 @@ const DOWNLOAD_BUTTON_CLASS =
 >
   <!-- Hero Section -->
   <section
-    class="relative flex flex-col items-center justify-center overflow-hidden px-4 pt-24 pb-16 sm:pt-28 sm:pb-20 xl:pt-32"
+    class="relative flex flex-col items-center justify-center overflow-hidden px-4 pt-24 sm:pt-28 xl:pt-32"
   >
     <!-- Background gradient effects -->
     <div
@@ -76,41 +90,14 @@ const DOWNLOAD_BUTTON_CLASS =
               />
             </a>
 
-            <!-- Android: default click -> Play Store, caret menu -> APK -->
-            <div
-              class="cta-split group relative inline-flex h-11 min-w-0 flex-1 basis-0 sm:flex-none sm:basis-auto"
+            <a
+              href={ANDROID_DOWNLOAD_URL}
+              rel="noopener noreferrer"
+              class={`${DOWNLOAD_BUTTON_CLASS} inline-flex min-w-0 flex-1 basis-0 px-3.5 sm:flex-none sm:basis-auto`}
             >
-              <!-- href={PLAY_STORE_URL} -->
-              <a
-                href={ANDROID_DOWNLOAD_URL}
-                rel="noopener noreferrer"
-                class={`${DOWNLOAD_BUTTON_CLASS} inline-flex w-full min-w-0 flex-1 rounded-r-none border-r-0 px-3.5`}
-              >
-                <Icon src={SiAndroid} className="size-4 fill-emerald-600 dark:fill-emerald-400" />
-                <span>Android</span>
-              </a>
-
-              <details class="relative">
-                <summary
-                  aria-label="Android download options"
-                  class={`${DOWNLOAD_BUTTON_CLASS} inline-flex w-9 cursor-pointer rounded-l-none`}
-                >
-                  <ChevronDown class="size-4 text-muted-foreground" />
-                </summary>
-
-                <div
-                  class="absolute right-0 z-20 mt-2 w-40 overflow-hidden rounded-lg border border-border/60 bg-background/95 shadow-lg shadow-black/10 backdrop-blur-sm"
-                >
-                  <a
-                    rel="noopener noreferrer"
-                    href={ANDROID_DOWNLOAD_URL}
-                    class="block px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-                  >
-                    Download APK
-                  </a>
-                </div>
-              </details>
-            </div>
+              <Icon src={SiAndroid} className="size-4 fill-emerald-600 dark:fill-emerald-400" />
+              <span>Android</span>
+            </a>
 
             <a
               rel="noopener noreferrer"
@@ -162,12 +149,37 @@ const DOWNLOAD_BUTTON_CLASS =
         </div>
       </div>
     </div>
+    <section class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div class="flex justify-center">
+        <div class="w-full max-w-xl text-center">
+          <ScriptTrans client:load />
+        </div>
+      </div>
+    </section>
   </section>
 
-  <!-- Live script showcase -->
-  <section id="scripts" class="scroll-mt-16 border-t border-border/40 py-16">
+  <!-- Supported Scripts Banner -->
+  <section
+    class="border-y border-border/40 bg-linear-to-b from-muted/40 via-background to-background py-8 pt-4"
+  >
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
-      <ScriptShowcase client:visible />
+      <p class="mb-4 text-center text-sm font-medium text-muted-foreground">Supported Scripts</p>
+      <div class="flex flex-wrap justify-center gap-3 text-lg sm:text-xl">
+        {
+          SUPPORTED_SCRIPTS.map(([name, native]) => (
+            <span
+              title={name}
+              class="rounded-full border border-border/60 bg-linear-to-b from-white/90 to-slate-50/80 px-3 py-1 shadow-sm shadow-slate-200/80 dark:rounded-md dark:bg-background/50 dark:bg-none dark:shadow-none"
+            >
+              {native}
+            </span>
+          ))
+        }
+      </div>
+      <p class="mt-4 text-center text-xs text-muted-foreground">
+        + Ancient scripts: Brahmi, Grantha, Modi, Sharada, Siddham<br />
+        + Standard schemes: IAST, ITRANS, Harvard-Kyoto, SLP1
+      </p>
     </div>
   </section>
 
@@ -176,13 +188,3 @@ const DOWNLOAD_BUTTON_CLASS =
 
   <PackagesAndIntegrations client:visible />
 </RootLayout>
-
-<style is:global>
-  /* Hide the default disclosure triangle for the Android options menu */
-  .cta-split summary::-webkit-details-marker {
-    display: none;
-  }
-  .cta-split summary {
-    list-style: none;
-  }
-</style>
