@@ -45,6 +45,7 @@
     TextFileError,
     TEXT_FILE_ACCEPT
   } from './app/text_file';
+  import { loadSavedText, saveText, type SaveResult } from './app/saved_text';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
   import { PILL_TOGGLE } from './typing_help/pill';
@@ -108,10 +109,58 @@
 
   const clearInput = () => {
     replaceInput('', 'clear');
+    // the saved copy goes now, not after the delay: Clear is how people remove it
+    saveNow();
     source_textarea?.focus();
   };
 
-  // Opening a .txt file into the source box, from the menu or dropped on the box
+  // The source text is kept in this browser, a moment after typing stops, and comes back on
+  // the next visit. Saving waits until the saved text has been checked on mount, so the empty
+  // box at load doesn't overwrite it.
+  const SAVE_DELAY_MS = 500;
+  let save_ready = false;
+  let save_timeout: ReturnType<typeof setTimeout> | undefined;
+  /** what storage holds, as far as we know (`null`: unknown, or nothing could be saved) */
+  let saved_text: string | null = null;
+  let save_status = $state<SaveResult>('saved');
+  /** the text brought back on load, for the note under the box until it is edited */
+  let restored_text = $state<string | null>(null);
+
+  const saveNow = () => {
+    if (!save_ready) return;
+    clearTimeout(save_timeout);
+    save_timeout = undefined;
+    const text = input_text;
+    save_status = saveText(text);
+    saved_text = save_status === 'saved' ? text : null;
+  };
+  /** a pending save is written right away (the page is being hidden or left) */
+  const flushSave = () => {
+    if (save_timeout !== undefined) saveNow();
+  };
+
+  onMount(() => {
+    const saved = loadSavedText();
+    save_ready = true;
+    // text already in the box came from this visit (another page of the site), so it is newer
+    if (!input_text && saved) {
+      input_text = saved;
+      restored_text = saved;
+      saved_text = saved;
+    } else if (input_text !== (saved ?? '')) saveNow();
+    else saved_text = input_text;
+  });
+
+  $effect(() => {
+    input_text;
+    untrack(() => {
+      if (!save_ready || input_text === saved_text) return;
+      clearTimeout(save_timeout);
+      save_timeout = setTimeout(saveNow, SAVE_DELAY_MS);
+    });
+  });
+
+  // Opening a .txt file into the source box, from the Open button or dropped on the box
   let file_drag_over = $state(false);
   let file_input = $state<HTMLInputElement | null>(null);
   let file_error = $state<string | null>(null);
@@ -289,17 +338,24 @@
   });
 </script>
 
+<!-- A pending save is written as soon as the page is hidden: a phone may discard a hidden
+     tab without any unload event. -->
+<svelte:document onvisibilitychange={() => document.visibilityState === 'hidden' && flushSave()} />
 <!-- A file dropped outside the source box would open in the tab in place of the app.
      Leaving the page (reload, closing the tab, back to another site, a link to a page
-     outside the client router) loses the source text, so the browser asks first while
-     there is some. Moves between pages of the site keep it: it lives in a shared store. -->
+     outside the client router) only asks first when the text couldn't be saved (too long,
+     or storage blocked); saved text comes back on the next visit. Moves between pages of
+     the site keep it anyway: it lives in a shared store. -->
 <svelte:window
   onbeforeunload={(e) => {
-    if (!input_text.trim()) return;
+    flushSave();
+    // nothing to lose when the text is saved; ask only when it couldn't be
+    if (!input_text.trim() || saved_text === input_text) return;
     e.preventDefault();
     // older browsers only ask when returnValue is set
     e.returnValue = '';
   }}
+  onpagehide={flushSave}
   ondragover={(e) => isFileDrag(e) && e.preventDefault()}
   ondrop={(e) => isFileDrag(e) && e.preventDefault()}
 />
@@ -590,7 +646,7 @@
                         type="button"
                         class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
                         onclick={clearInput}
-                        title="Clear source text"
+                        title="Clear source text (and the copy kept in this browser)"
                       >
                         <X class="size-3.5" />
                         <span
@@ -623,6 +679,16 @@
             />
             {#if file_error}
               <p role="alert" class="px-1 text-xs text-destructive">{file_error}</p>
+            {/if}
+            {#if restored_text !== null && input_text === restored_text}
+              <p class="px-1 text-xs text-muted-foreground">
+                Your text from last time. It's kept in this browser until you clear it.
+              </p>
+            {:else if save_status === 'too_large' && input_text}
+              <p class="px-1 text-xs text-muted-foreground">
+                This text is too long to keep in this browser, so it won't be here next time. Save
+                it as .txt to keep it.
+              </p>
             {/if}
           </div>
         </section>
