@@ -4,14 +4,73 @@
   import TypingControls from './TypingControls.svelte';
   import { displayText, isInvisible, type Cell, type HelpContext } from './layout';
 
-  /** Help 2: labelled sections of cards with a section nav */
-  let { open = $bindable(), script }: { open: boolean; script: ScriptListType } = $props();
+  /** Help 2: labelled sections of cards with a section nav, Help 4 is the same in colour */
+  let {
+    open = $bindable(),
+    script,
+    colorful = false,
+    variant_label = 'Help 2 · Cards'
+  }: {
+    open: boolean;
+    script: ScriptListType;
+    /** colour the cards by their group, like the chart of Help 1 */
+    colorful?: boolean;
+    variant_label?: string;
+  } = $props();
+
+  type Tone = { card: string; glyph: string; bar: string };
+  // full class names, so that tailwind finds them
+  const TONES = {
+    sky: {
+      card: 'border-sky-500/25 bg-sky-500/5 hover:border-sky-500/50 hover:bg-sky-500/10',
+      glyph: 'text-sky-700 dark:text-sky-300',
+      bar: 'bg-sky-500'
+    },
+    rose: {
+      card: 'border-rose-500/25 bg-rose-500/5 hover:border-rose-500/50 hover:bg-rose-500/10',
+      glyph: 'text-rose-700 dark:text-rose-300',
+      bar: 'bg-rose-500'
+    },
+    emerald: {
+      card: 'border-emerald-500/25 bg-emerald-500/5 hover:border-emerald-500/50 hover:bg-emerald-500/10',
+      glyph: 'text-emerald-700 dark:text-emerald-300',
+      bar: 'bg-emerald-500'
+    },
+    violet: {
+      card: 'border-violet-500/25 bg-violet-500/5 hover:border-violet-500/50 hover:bg-violet-500/10',
+      glyph: 'text-violet-700 dark:text-violet-300',
+      bar: 'bg-violet-500'
+    },
+    amber: {
+      card: 'border-amber-500/25 bg-amber-500/5 hover:border-amber-500/50 hover:bg-amber-500/10',
+      glyph: 'text-amber-700 dark:text-amber-300',
+      bar: 'bg-amber-500'
+    },
+    fuchsia: {
+      card: 'border-fuchsia-500/25 bg-fuchsia-500/5 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/10',
+      glyph: 'text-fuchsia-700 dark:text-fuchsia-300',
+      bar: 'bg-fuchsia-500'
+    }
+  } satisfies Record<string, Tone>;
+  const PLAIN: Tone = {
+    card: 'bg-card hover:border-foreground/25 hover:bg-accent/40',
+    glyph: '',
+    bar: ''
+  };
+
+  const toneOf = (section: string, group: string): Tone => {
+    if (!colorful) return PLAIN;
+    if (section === 'svara') return TONES.sky;
+    if (section === 'vyanjana') return group === 'conjuncts' ? TONES.emerald : TONES.rose;
+    if (section === 'other') return group === 'numerals' ? TONES.violet : TONES.amber;
+    return group === 'signs' ? TONES.sky : TONES.fuchsia;
+  };
 
   const SECTION_ACCENT: Record<string, string> = {
     svara: 'bg-sky-500',
     vyanjana: 'bg-rose-500',
     other: 'bg-amber-500',
-    special: 'bg-violet-500'
+    special: 'bg-fuchsia-500'
   };
 
   let section_els = $state<Record<string, HTMLElement | undefined>>({});
@@ -27,18 +86,26 @@
   {/if}
 {/snippet}
 
-{#snippet card(cell: Cell | null, ctx: HelpContext)}
+{#snippet card(cell: Cell | null, ctx: HelpContext, tone: Tone)}
   {#if !cell}
     <div class="rounded-lg border border-dashed border-border/60" aria-hidden="true"></div>
   {:else}
     <div
-      class="flex min-w-0 flex-col items-center gap-1 rounded-lg border bg-card px-1.5 py-2 text-center transition-colors hover:border-foreground/25 hover:bg-accent/40"
+      class="flex min-w-0 flex-col items-center gap-1 rounded-lg border px-1.5 py-2 text-center transition-colors {tone.card}"
       title={cell.label}
     >
       <div class="flex items-baseline gap-2">
-        {@render glyph(cell.main.text, cell.label, `text-2xl leading-tight ${ctx.font}`)}
+        {@render glyph(
+          cell.main.text,
+          cell.label,
+          `text-2xl leading-tight ${ctx.font} ${tone.glyph}`
+        )}
         {#if cell.sign}
-          <span class="text-2xl leading-tight text-muted-foreground {ctx.font}">
+          <span
+            class="text-2xl leading-tight {ctx.font} {colorful
+              ? tone.glyph + ' opacity-75'
+              : 'text-muted-foreground'}"
+          >
             {displayText(cell.sign.text)}
           </span>
         {/if}
@@ -77,7 +144,7 @@
   {/if}
 {/snippet}
 
-<HelpShell bind:open {script} variant_label="Help 2 · Cards">
+<HelpShell bind:open {script} {variant_label}>
   {#snippet body(ctx)}
     <nav
       class="sticky -top-4 z-10 -mx-4 -mt-4 mb-4 flex gap-1.5 overflow-x-auto border-b bg-background/95 px-4 py-2 backdrop-blur sm:-mx-5 sm:px-5"
@@ -106,9 +173,13 @@
           </div>
           <div class="space-y-4">
             {#each section.groups as group (group.id)}
+              {@const tone = toneOf(section.id, group.id)}
               <div>
                 {#if group.title !== section.title}
                   <div class="mb-1.5 flex items-baseline gap-2">
+                    {#if colorful}
+                      <span class="h-3 w-1 self-center rounded-full {tone.bar}"></span>
+                    {/if}
                     <h4 class="text-sm font-semibold">{group.title}</h4>
                     {#if group.hint}
                       <span class="text-xs text-muted-foreground">{group.hint}</span>
@@ -123,7 +194,7 @@
                       : 'grid grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-1.5 sm:gap-2'}
                 >
                   {#each group.cells as cell, i (cell?.id ?? i)}
-                    {@render card(cell, ctx)}
+                    {@render card(cell, ctx, tone)}
                   {/each}
                 </div>
               </div>

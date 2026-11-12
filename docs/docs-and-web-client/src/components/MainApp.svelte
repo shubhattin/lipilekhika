@@ -82,6 +82,11 @@
       label: 'Help3',
       title: 'Table + search',
       load: () => import('./typing_help/HelpTable.svelte')
+    },
+    {
+      label: 'Help4',
+      title: 'Colour cards',
+      load: () => import('./typing_help/HelpCardsColor.svelte')
     }
   ];
   let help_variant = $state<number | null>(null);

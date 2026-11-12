@@ -5,7 +5,10 @@
   import * as Tabs from '~/lib/components/ui/tabs';
   import { Skeleton } from '~/lib/components/ui/skeleton';
   import { cn } from '~/lib/utils';
-  import { Keyboard, Map as MapIcon, ArrowLeftRight, Search, X } from 'lucide-svelte';
+  import * as Popover from '~/lib/components/ui/popover';
+  import { Checkbox } from '~/lib/components/ui/checkbox';
+  import { Label } from '~/lib/components/ui/label';
+  import { Keyboard, Map as MapIcon, ArrowLeftRight, Search, X, Info } from 'lucide-svelte';
   import ScriptSelector from '../script/ScriptSelector.svelte';
   import { getFontClass } from '../script/font_list';
   import { buildLayout, type HelpContext } from './layout';
@@ -77,13 +80,40 @@
             <ScriptSelector bind:script={compare} have_normal_script={true} />
           </div>
         {:else}
-          <label
-            class="ml-auto flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm text-muted-foreground select-none hover:text-foreground"
-          >
-            <input type="checkbox" class="size-4 accent-primary" bind:checked={show_alternates} />
-            <span class="sm:hidden">Alternates</span>
-            <span class="hidden sm:inline">Alternate keys</span>
-          </label>
+          <div class="ml-auto flex items-center gap-1">
+            <Checkbox id="show-alternate-keys" bind:checked={show_alternates} />
+            <Label
+              for="show-alternate-keys"
+              class="cursor-pointer pl-1 text-sm font-normal text-muted-foreground select-none hover:text-foreground"
+            >
+              <span class="sm:hidden">Alternates</span>
+              <span class="hidden sm:inline">Show alternate keys</span>
+            </Label>
+            <Popover.Root>
+              <Popover.Trigger
+                class="rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                aria-label="About alternate keys"
+              >
+                <Info class="size-4" />
+              </Popover.Trigger>
+              <Popover.Content align="end" class="w-80 space-y-2 text-sm">
+                <p class="font-semibold">Alternate keys</p>
+                <p class="text-muted-foreground">
+                  Many characters can be typed in more than one way, like ई with <code>I</code>,
+                  <code>ee</code> or <code>ii</code>. The first key is the main one, the rest are
+                  alternates.
+                </p>
+                <p class="text-muted-foreground">
+                  Alternates always work while <span class="text-foreground">typing</span>. When you
+                  <span class="text-foreground">convert text</span>
+                  (transliterate), some of them, like <code>ee</code> → ई or <code>x</code> → क्ष,
+                  only work with the
+                  <span class="font-medium text-foreground">Use Typing Characters</span> option turned
+                  on in Transliteration Options.
+                </p>
+              </Popover.Content>
+            </Popover.Root>
+          </div>
         {/if}
         {#if searchable}
           <div class="relative order-last w-full">
