@@ -39,7 +39,8 @@
     <ArrowRight class="size-3.5 transition-transform group-hover:translate-x-0.5" />
   </a>
 </div>
-<div class="space-y-3">
+<!-- the help labels follow this row's width (see TypingHelpButton), measured to fit -->
+<div class="@container space-y-3">
   <div class="flex items-center gap-2">
     <span class="hidden shrink-0 text-xs font-semibold text-muted-foreground sm:inline-block"
       >Script:</span
@@ -48,7 +49,14 @@
     <div class="ml-auto flex items-center gap-1">
       <CopyButton text={() => $input_text_atom} />
       {#if $typing_script_atom !== 'Normal'}
-        <TypingHelpButton onclick={() => (typing_modal_open = true)} />
+        <TypingHelpButton
+          labels={{
+            short: 'hidden @[19rem]:inline @[21.5rem]:hidden',
+            full: 'hidden @[21.5rem]:inline',
+            padded: '@[19rem]:px-2.5'
+          }}
+          onclick={() => (typing_modal_open = true)}
+        />
       {/if}
     </div>
   </div>

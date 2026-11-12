@@ -1,15 +1,32 @@
 <!--
   Opens the typing guide. A labelled pill instead of a bare "?" icon, which people tended
-  to skip: "How to type" on wider screens, "Help" on phones, just the icon on the
-  narrowest ones where the row has no room for a label. Until the guide has been
-  opened once, a small pulsing dot draws the eye to it.
+  to skip: "How to type" where there is room, "Help" where it is tighter, just the icon
+  where no label fits. Until the guide has been opened once, a small pulsing dot draws the
+  eye to it.
+
+  Where the labels switch depends on what else shares the row, so the host can pass its
+  own `labels` classes, usually container queries (`@[18rem]:inline`) on an `@container`
+  around the row.
 -->
 <script lang="ts">
   import { BookOpen } from 'lucide-svelte';
   import { onMount } from 'svelte';
   import { cn } from '~/lib/utils.js';
 
-  let { onclick, class: className = '' }: { onclick: () => void; class?: string } = $props();
+  let {
+    onclick,
+    class: className = '',
+    labels = {
+      short: 'hidden min-[400px]:inline sm:hidden',
+      full: 'hidden sm:inline',
+      padded: 'min-[400px]:px-2.5'
+    }
+  }: {
+    onclick: () => void;
+    class?: string;
+    /** when each label shows, and the wider padding that goes with a label */
+    labels?: { short: string; full: string; padded: string };
+  } = $props();
 
   const SEEN_KEY = 'lipilekhika-typing-guide-seen';
 
@@ -40,15 +57,16 @@
   type="button"
   onclick={open}
   title="Typing guide: which English keys make which letters"
+  aria-label="Typing help"
   class={cn(
-    'relative inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 text-xs font-medium text-sky-700 transition-colors outline-none hover:border-sky-500/50 hover:bg-sky-500/15 focus-visible:ring-[3px] focus-visible:ring-sky-500/40 min-[400px]:px-2.5 dark:text-sky-300',
+    'relative inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 text-xs font-medium text-sky-700 transition-colors outline-none hover:border-sky-500/50 hover:bg-sky-500/15 focus-visible:ring-[3px] focus-visible:ring-sky-500/40 dark:text-sky-300',
+    labels.padded,
     className
   )}
 >
   <BookOpen class="size-3.5" />
-  <span class="hidden min-[400px]:inline sm:hidden">Help</span>
-  <span class="hidden sm:inline">How to type</span>
-  <span class="sr-only min-[400px]:hidden">Typing help</span>
+  <span class={labels.short}>Help</span>
+  <span class={labels.full}>How to type</span>
   {#if !seen}
     <span class="absolute -top-0.5 -right-0.5 flex size-2" aria-hidden="true">
       <span class="absolute inline-flex size-full animate-ping rounded-full bg-sky-400 opacity-75"

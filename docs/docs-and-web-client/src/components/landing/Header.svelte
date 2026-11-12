@@ -4,13 +4,33 @@
   import { BsGithub } from 'svelte-icons-pack/bs';
   import { SiNpm } from 'svelte-icons-pack/si';
   import { Icon } from 'svelte-icons-pack';
+  import { cn } from '~/lib/utils.js';
+
+  /** follow the wider app page (`max-w-page`) instead of the usual width */
+  let { wide = false }: { wide?: boolean } = $props();
 </script>
 
+<!--
+  The header is narrower on text pages than on the app (`wide`), so its contents sit in a
+  different place on each. The view transition names make the logo and the links slide to
+  their new spot on navigation instead of jumping, and keep the bar itself steady while the
+  page underneath changes.
+-->
 <header
   class="fixed top-0 right-0 left-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md"
+  style:view-transition-name="site-header"
 >
-  <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-    <a href="/" class="flex items-center gap-2.5 transition-opacity hover:opacity-80">
+  <div
+    class={cn(
+      'mx-auto flex h-14 items-center justify-between px-4 sm:px-6',
+      wide ? 'max-w-page' : 'max-w-6xl'
+    )}
+  >
+    <a
+      href="/"
+      class="flex items-center gap-2.5 transition-opacity hover:opacity-80"
+      style:view-transition-name="site-header-logo"
+    >
       <span
         class="inline-block size-8 bg-contain bg-center bg-no-repeat"
         style="background-image: url('/favicon.svg');"
@@ -20,7 +40,7 @@
       <span class="text-lg font-semibold tracking-tight">Lipi Lekhika</span>
     </a>
 
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-1" style:view-transition-name="site-header-links">
       <Button
         variant="ghost"
         size="icon"
