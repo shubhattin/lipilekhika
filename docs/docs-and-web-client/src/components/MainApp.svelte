@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, untrack, type Snippet } from 'svelte';
+  import { onMount, tick, untrack, type Snippet } from 'svelte';
   import {
     type transliterate,
     preloadScriptData,
@@ -47,6 +47,7 @@
   } from './app/text_file';
   import { loadSavedText, saveText, type SaveResult } from './app/saved_text';
   import TextBoxMenu from './app/TextBoxMenu.svelte';
+  import { editKindOf, TextHistory, type TextSnapshot } from './app/text_history';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
   import { PILL_TOGGLE } from './typing_help/pill';
@@ -91,21 +92,48 @@
   let replaced = $state<{ text: string; by: 'clear' | 'open'; after: string } | null>(null);
   const can_undo = $derived(replaced !== null && replaced.after === input_text);
 
-  const replaceInput = (text: string, by: 'clear' | 'open') => {
-    if (input_text && input_text !== text) replaced = { text: input_text, by, after: text };
+  // Undo/redo for the source box (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y): see text_history.ts
+  const text_history = new TextHistory();
+  const snapshot = (): TextSnapshot => ({
+    text: input_text,
+    start: source_textarea?.selectionStart ?? input_text.length,
+    end: source_textarea?.selectionEnd ?? input_text.length
+  });
+  const applySnapshot = async (s: TextSnapshot) => {
+    from_input_typing_context.clearContext();
+    input_text = s.text;
+    source_textarea?.focus();
+    // the caret goes back where it was, once the binding has put the text in the box
+    await tick();
+    source_textarea?.setSelectionRange(s.start, s.end);
+  };
+  const undoText = () => {
+    const prev = text_history.undo(snapshot());
+    if (prev) applySnapshot(prev);
+  };
+  const redoText = () => {
+    const next = text_history.redo(snapshot());
+    if (next) applySnapshot(next);
+  };
+
+  /** A change made in code (Clear, an opened file): an undo step of its own */
+  const setInputText = (text: string) => {
+    if (text === input_text) return;
+    text_history.record(snapshot(), 'other');
     from_input_typing_context.clearContext();
     input_text = text;
   };
 
+  const replaceInput = (text: string, by: 'clear' | 'open') => {
+    if (input_text && input_text !== text) replaced = { text: input_text, by, after: text };
+    setInputText(text);
+  };
+
+  /** the Undo clear / Undo open button: the same undo as Ctrl+Z */
   const undoReplace = () => {
-    if (!replaced || !can_undo) return;
-    const { text } = replaced;
+    if (!can_undo) return;
     replaced = null;
-    from_input_typing_context.clearContext();
-    input_text = text;
-    source_textarea?.focus();
-    // the caret goes to the end, after the binding has put the text back in the box
-    queueMicrotask(() => source_textarea?.setSelectionRange(text.length, text.length));
+    undoText();
   };
 
   const clearInput = () => {
@@ -259,6 +287,9 @@
     const currentOutputText = outputText;
     typing_script = currentTo;
     to_script = currentFrom;
+    // the old steps are text in the other script now; Swap again is the undo for a swap
+    text_history.clear();
+    from_input_typing_context.clearContext();
     input_text = currentOutputText;
     outputText = currentInputText;
   };
@@ -594,13 +625,26 @@
                   ? `Type with English letters to write in ${typing_script}…`
                   : 'Enter text to transliterate…'}
                 bind:value={input_text}
-                onbeforeinput={(e) =>
+                onbeforeinput={(e) => {
+                  // the browser's own undo (Edit menu, iOS shake) goes to ours, which knows
+                  // the typed text
+                  if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+                    e.preventDefault();
+                    if (e.inputType === 'historyUndo') undoText();
+                    else redoText();
+                    return;
+                  }
+                  // a composed word (phone keyboards, IMEs) is recorded once, as it starts
+                  if (!e.isComposing)
+                    text_history.record(snapshot(), editKindOf(e.inputType), e.data);
                   handleTypingBeforeInputEvent(
                     from_input_typing_context,
                     e,
                     (new_value) => (input_text = new_value),
                     typing_enabled
-                  )}
+                  );
+                }}
+                oncompositionstart={() => text_history.record(snapshot(), 'type')}
                 onblur={() => from_input_typing_context.clearContext()}
                 onkeydown={(e) => {
                   if (isSaveShortcut(e)) {
@@ -608,17 +652,12 @@
                     saveSourceFile();
                     return;
                   }
-                  // Ctrl/Cmd+Z right after a Clear or an opened file brings the old text back
-                  // (the box's own undo history doesn't know about either)
-                  if (
-                    can_undo &&
-                    (e.ctrlKey || e.metaKey) &&
-                    !e.shiftKey &&
-                    !e.altKey &&
-                    e.key.toLowerCase() === 'z'
-                  ) {
+                  // undo (Ctrl/Cmd+Z) and redo (Ctrl/Cmd+Shift+Z, Ctrl+Y)
+                  const key = e.key.toLowerCase();
+                  if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
                     e.preventDefault();
-                    undoReplace();
+                    if (key === 'z' && !e.shiftKey) undoText();
+                    else redoText();
                     return;
                   }
                   // Toggle typing on Alt+X
