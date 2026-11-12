@@ -25,9 +25,24 @@
   import { cn } from '~/lib/utils.js';
   import { Separator } from '~/lib/components/ui/separator';
   import * as Popover from '~/lib/components/ui/popover';
-  import { ArrowLeftRight, KeyboardIcon, KeyboardOffIcon, SettingsIcon, X } from 'lucide-svelte';
+  import {
+    ArrowLeftRight,
+    Download,
+    KeyboardIcon,
+    KeyboardOffIcon,
+    SettingsIcon,
+    X
+  } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
   import CopyButton from './CopyButton.svelte';
+  import SourceFileMenu from './app/SourceFileMenu.svelte';
+  import {
+    downloadTextFile,
+    isFileDrag,
+    readTextFile,
+    textFileName,
+    TextFileError
+  } from './app/text_file';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
   import TypingOptionChips from './typing_help/TypingOptionChips.svelte';
   import { PILL_TOGGLE } from './typing_help/pill';
@@ -68,6 +83,25 @@
     from_input_typing_context.clearContext();
     input_text = '';
     source_textarea?.focus();
+  };
+
+  // Opening a .txt file into the source box, from the menu or dropped on the box
+  let file_drag_over = $state(false);
+  let file_error = $state<string | null>(null);
+  let file_error_timeout: ReturnType<typeof setTimeout> | undefined;
+
+  const openTextFile = async (file: File) => {
+    clearTimeout(file_error_timeout);
+    file_error = null;
+    try {
+      const text = await readTextFile(file);
+      from_input_typing_context.clearContext();
+      input_text = text;
+    } catch (err) {
+      if (!(err instanceof TextFileError)) console.error(err);
+      file_error = err instanceof TextFileError ? err.message : `Couldn't read ${file.name}`;
+      file_error_timeout = setTimeout(() => (file_error = null), 6000);
+    }
   };
 
   let outputText = $state('');
@@ -230,6 +264,12 @@
   });
 </script>
 
+<!-- A file dropped outside the source box would open in the tab in place of the app -->
+<svelte:window
+  ondragover={(e) => isFileDrag(e) && e.preventDefault()}
+  ondrop={(e) => isFileDrag(e) && e.preventDefault()}
+/>
+
 <!-- Anchored to the top, not centred: the platform banner below the card only appears
      after load (it needs the user agent), and centring would push the card up when it does -->
 <div class="mt-12 flex min-h-[90vh] flex-col items-center overflow-hidden px-4 pt-4 sm:pt-6">
@@ -261,8 +301,8 @@
 
           <div class="flex flex-col gap-2">
             <!-- Labels come and go with the row's own width (it is half the page on large
-                 screens): "Source text" ≥ 20rem, help as icon, "Help" ≥ 18rem, "How to type"
-                 ≥ 22.5rem, the Alt+X hint ≥ 25rem. Measured to fit, keep in step if the row
+                 screens): "Source text" ≥ 22.5rem, help as icon, "Help" ≥ 20.5rem, "How to type"
+                 ≥ 25rem, the Alt+X hint ≥ 27.5rem, "Typing" on its toggle ≥ 17rem. Measured to fit, keep in step if the row
                  changes. -->
             <div class="@container">
               <div class="flex min-h-8 items-center justify-between gap-2">
@@ -271,16 +311,22 @@
                     for="source-text"
                     class="mr-1 text-sm font-medium tracking-wide whitespace-nowrap text-muted-foreground"
                   >
-                    Source<span class="hidden @[20rem]:inline">&nbsp;text</span>
+                    Source<span class="hidden @[22.5rem]:inline">&nbsp;text</span>
                   </label>
                   <CopyButton text={() => input_text} label="Copy source text" />
+                  <SourceFileMenu
+                    onopen={openTextFile}
+                    ondownload={() =>
+                      downloadTextFile(input_text, textFileName('source', typing_script))}
+                    can_download={!!input_text}
+                  />
                   {#if typing_script !== 'Normal'}
                     <TypingHelpButton
                       class="ml-1"
                       labels={{
-                        short: 'hidden @[18rem]:inline @[22.5rem]:hidden',
-                        full: 'hidden @[22.5rem]:inline',
-                        padded: '@[18rem]:px-2.5'
+                        short: 'hidden @[20.5rem]:inline @[25rem]:hidden',
+                        full: 'hidden @[25rem]:inline',
+                        padded: '@[20.5rem]:px-2.5'
                       }}
                       onclick={() => (typing_modal_open = true)}
                     />
@@ -300,9 +346,9 @@
                     {:else}
                       <KeyboardOffIcon class="size-3.5" />
                     {/if}
-                    Typing
+                    <span class="hidden @[17rem]:inline">Typing</span>
                     <kbd
-                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[25rem]:inline"
+                      class="hidden rounded border border-current/20 px-1 font-mono text-[0.6rem] leading-4 opacity-70 @[27.5rem]:inline"
                       >Alt+X</kbd
                     >
                   </Toggle>
@@ -367,9 +413,39 @@
             </div>
             <!-- The box draws the border, so the pills and Clear get a strip of their own under
                  the text instead of floating over it. -->
+            <!-- A .txt file dropped here opens in it (dropped anywhere else, the window ignores it) -->
             <div
-              class="flex h-(--text-box-h) flex-col rounded-md border border-input bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30"
+              class={cn(
+                'relative flex h-(--text-box-h) flex-col rounded-md border border-input bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30',
+                file_drag_over && 'border-primary ring-[3px] ring-primary/30'
+              )}
+              role="group"
+              aria-label="Source text box"
+              ondragover={(e) => {
+                if (!isFileDrag(e)) return;
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+                file_drag_over = true;
+              }}
+              ondragleave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+                  file_drag_over = false;
+              }}
+              ondrop={(e) => {
+                if (!isFileDrag(e)) return;
+                e.preventDefault();
+                file_drag_over = false;
+                const file = e.dataTransfer?.files[0];
+                if (file) openTextFile(file);
+              }}
             >
+              {#if file_drag_over}
+                <div
+                  class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/85 text-sm font-medium text-foreground"
+                >
+                  Drop a .txt file to open it here
+                </div>
+              {/if}
               <Textarea
                 id="source-text"
                 bind:ref={source_textarea}
@@ -433,6 +509,9 @@
                 </div>
               {/if}
             </div>
+            {#if file_error}
+              <p role="alert" class="px-1 text-xs text-destructive">{file_error}</p>
+            {/if}
           </div>
         </section>
 
@@ -459,6 +538,17 @@
                 Output
               </label>
               <CopyButton text={() => outputText} label="Copy output text" />
+              <Button
+                variant="ghost"
+                size="icon"
+                class="size-8"
+                title="Save output as .txt"
+                disabled={!outputText}
+                onclick={() => downloadTextFile(outputText, textFileName('output', to_script))}
+              >
+                <Download class="size-4" />
+                <span class="sr-only">Save output as .txt</span>
+              </Button>
               <div class="ml-auto flex items-center gap-2">
                 {#if !auto_convert}
                   <Button
