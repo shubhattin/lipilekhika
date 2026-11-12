@@ -438,15 +438,15 @@
             >
             <!-- The typing guide sits by the script it is about, where the selector leaves room
                  (the row under it has none on a phone). Its label goes with the row's width:
-                 "How to type" ≥ 20rem, "Help" ≥ 17.5rem, otherwise just the icon. -->
+                 "How to type" from md, "Help" on phones (≥ 17.5rem), otherwise just the icon. -->
             <div class="@container/script">
               <div class="flex items-center gap-3">
                 <ScriptSeleector bind:script={typing_script} />
                 {#if typing_script !== 'Normal'}
                   <TypingHelpButton
                     labels={{
-                      short: 'hidden @[17.5rem]/script:inline @[20rem]/script:hidden',
-                      full: 'hidden @[20rem]/script:inline',
+                      short: 'hidden max-md:@[17.5rem]/script:inline',
+                      full: 'hidden md:inline',
                       padded: '@[17.5rem]/script:px-2.5'
                     }}
                     onclick={() => (typing_modal_open = true)}
@@ -760,7 +760,7 @@
             {/if}
             {#if restored_text !== null && input_text === restored_text}
               <p class="px-1 text-xs text-muted-foreground">
-                Your text from last time. It's kept in this browser until you clear it.
+                Restored from your last visit. Clear removes it from this browser.
               </p>
             {:else if save_status === 'too_large' && input_text}
               <p class="px-1 text-xs text-muted-foreground">
