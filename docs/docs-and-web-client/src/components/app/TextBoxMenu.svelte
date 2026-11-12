@@ -1,12 +1,13 @@
 <!--
   A text box's less used actions (open or save a .txt file) behind a ⋯ button, so the row
-  above the box keeps only what is used all the time.
+  above the box keeps only what is used all the time. Used where that row is short (phones).
 -->
 <script lang="ts">
   import type { Component } from 'svelte';
   import { Button } from '~/lib/components/ui/button';
   import * as Popover from '~/lib/components/ui/popover';
   import { Ellipsis } from 'lucide-svelte';
+  import { cn } from '~/lib/utils.js';
 
   type Item = {
     label: string;
@@ -21,13 +22,16 @@
   let {
     label,
     items,
-    hint
+    hint,
+    class: className = ''
   }: {
     /** what the button is for, e.g. "More actions for the source text" */
     label: string;
     items: Item[];
     /** a small line under the items */
     hint?: string;
+    /** for the ⋯ button */
+    class?: string;
   } = $props();
 
   let open = $state(false);
@@ -39,7 +43,7 @@
 <Popover.Root bind:open>
   <Popover.Trigger>
     {#snippet child({ props })}
-      <Button {...props} variant="ghost" size="icon" class="size-8" title={label}>
+      <Button {...props} variant="ghost" size="icon" class={cn('size-8', className)} title={label}>
         <Ellipsis class="size-4" />
         <span class="sr-only">{label}</span>
       </Button>

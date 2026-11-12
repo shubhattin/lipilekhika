@@ -440,7 +440,16 @@
                     Source<span class="hidden @[17.5rem]:inline">&nbsp;text</span>
                   </label>
                   <CopyButton text={() => input_text} label="Copy source text" />
+                  <!-- Save sits beside Copy where there is room (md and up); a phone gets a ⋯ menu
+                       with Open and Save instead, to keep the row short -->
+                  {@render save_button(
+                    'Save source as .txt',
+                    !input_text,
+                    saveSourceFile,
+                    'hidden md:inline-flex'
+                  )}
                   <TextBoxMenu
+                    class="md:hidden"
                     label="More actions for the source text"
                     items={[
                       {
@@ -621,8 +630,8 @@
                   clearTypingContextOnKeyDown(e, from_input_typing_context);
                 }}
               />
-              <!-- Always there: an empty box offers Open .txt here (it is also in the ⋯ menu).
-                   Labels shorten on narrow boxes while Undo shows: "Undo clear" and "Clear" in
+              <!-- Always there, for Open .txt: on md and up always, on a phone only while the box
+                   is empty (it is also in the ⋯ menu there). Labels shorten on narrow boxes while Undo shows: "Undo clear" and "Clear" in
                    full ≥ 17rem (otherwise "Clear" ≥ 15rem). -->
               <div class="@container/strip">
                 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -644,17 +653,18 @@
                     />
                   {/if}
                   <div class="ml-auto flex items-center gap-1">
-                    {#if !input_text && !can_undo}
-                      <button
-                        type="button"
-                        class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-                        onclick={() => file_input?.click()}
-                        title="Open a .txt file (or drop one on the box)"
-                      >
-                        <FolderOpen class="size-3.5" />
-                        Open .txt
-                      </button>
-                    {/if}
+                    <button
+                      type="button"
+                      class={cn(
+                        'shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground',
+                        !input_text && !can_undo ? 'inline-flex' : 'hidden md:inline-flex'
+                      )}
+                      onclick={() => file_input?.click()}
+                      title="Open a .txt file (or drop one on the box)"
+                    >
+                      <FolderOpen class="size-3.5" />
+                      Open .txt
+                    </button>
                     {#if can_undo && replaced}
                       <button
                         type="button"
@@ -745,18 +755,7 @@
                 Output
               </label>
               <CopyButton text={() => outputText} label="Copy output text" />
-              <TextBoxMenu
-                label="More actions for the output"
-                items={[
-                  {
-                    label: 'Save as .txt',
-                    icon: Download,
-                    onclick: saveOutputFile,
-                    disabled: !outputText,
-                    shortcut: save_shortcut
-                  }
-                ]}
-              />
+              {@render save_button('Save output as .txt', !outputText, saveOutputFile)}
               <div class="ml-auto flex items-center gap-2">
                 {#if !auto_convert}
                   <Button
@@ -807,6 +806,20 @@
     {/await}
   {/if}
 </div>
+
+{#snippet save_button(title: string, disabled: boolean, onclick: () => void, extra_class = '')}
+  <Button
+    variant="ghost"
+    size="icon"
+    class={cn('size-8', extra_class)}
+    title={`${title} (${save_shortcut})`}
+    {disabled}
+    {onclick}
+  >
+    <Download class="size-4" />
+    <span class="sr-only">{title}</span>
+  </Button>
+{/snippet}
 
 {#snippet swap_button()}
   <Button
