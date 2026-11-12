@@ -70,7 +70,7 @@
     autocapitalize="none"
     aria-label="Try typing"
     placeholder={`Type with English letters to write in ${$typing_script_atom}…`}
-    class={'min-h-28 resize-none border-border/50 bg-background/50 text-lg transition-colors placeholder:text-base placeholder:text-muted-foreground/60 focus:bg-background md:text-lg ' +
+    class={'min-h-28 resize-none border-slate-200 bg-slate-50/70 text-lg shadow-none transition-colors placeholder:text-base placeholder:text-muted-foreground/70 focus:bg-white focus-visible:border-primary/60 focus-visible:ring-primary/15 md:text-lg dark:border-border/50 dark:bg-background/50 dark:focus:bg-background ' +
       getFontClass($typing_script_atom)}
     bind:value={$input_text_atom}
     onbeforeinput={(e) =>
