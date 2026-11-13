@@ -2,11 +2,11 @@
 
 import pytest
 
+from lipilekhika.types import ScriptLangType
 from lipilekhika.typing import (
     DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS,
     DEFAULT_INCLUDE_INHERENT_VOWEL,
     DEFAULT_USE_NATIVE_NUMERALS,
-    KramaDataItem,
     ScriptTypingDataMap,
     TypingContext,
     TypingContextOptions,
@@ -15,7 +15,6 @@ from lipilekhika.typing import (
     get_script_krama_data,
     get_script_typing_data_map,
 )
-from lipilekhika.types import ScriptLangType
 
 
 class TestConstants:
@@ -371,7 +370,7 @@ class TestGetScriptKramaData:
         """Test that krama data contains all expected character types."""
         krama_data = get_script_krama_data("Devanagari")
 
-        types_found = set(item[1] for item in krama_data)
+        types_found = {item[1] for item in krama_data}
 
         # Should have at least some of the major types
         assert len(types_found) > 0
@@ -395,8 +394,8 @@ class TestGetScriptKramaData:
 
         # Types should match at the same indices
         for i in range(min(10, len(dev_data), len(tamil_data))):
-            dev_char, dev_type = dev_data[i]
-            tamil_char, tamil_type = tamil_data[i]
+            _, dev_type = dev_data[i]
+            _, tamil_type = tamil_data[i]
 
             # Same index should have same type
             assert dev_type == tamil_type
