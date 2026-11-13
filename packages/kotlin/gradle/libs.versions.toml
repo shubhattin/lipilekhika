@@ -1,14 +1,12 @@
 [versions]
 agp = "9.5.1"
 kotlin = "2.4.21"
-jna = "5.19.1"
 junit = "4.13.2"
 snakeyaml-engine = "3.2"
 spotless = "8.11.0"
 ktfmt = "0.64"
 
 [libraries]
-jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml-engine" }

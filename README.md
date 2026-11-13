@@ -64,12 +64,12 @@ Benchmarks on the shared [`test_data`](./test_data) corpus. **Speed** is how man
 | Go                      |      55.4 |      3.58× |
 | Go, multi-thread        |      16.0 |     12.39× |
 | Python ¹                |      37.4 |      5.31× |
+| Kotlin ¹ (JVM)          |      39.9 |      4.97× |
 | N-API ¹, Bun            |      44.1 |      4.49× |
 | N-API ¹, Node.js        |      53.2 |      3.73× |
 | WebAssembly ¹, Bun      |      50.8 |      3.90× |
 | WebAssembly ¹, Node.js  |      65.0 |      3.05× |
 | Dart ¹ ²                |     106.0 |      1.87× |
-| Kotlin ¹ ³              |     507.9 |      0.39× |
 | JavaScript, Bun         |     130.3 |      1.52× |
 | **JavaScript**, Node.js |     198.3 |      1.00× |
 
@@ -78,16 +78,16 @@ Benchmarks on the shared [`test_data`](./test_data) corpus. **Speed** is how man
 | Implementation          | Time (ms) |      Speed |
 | ----------------------- | --------: | ---------: |
 | **Rust**                |       112 | **15.31×** |
+| Kotlin ¹ (JVM)          |       243 |      7.06× |
 | Python ¹                |       250 |      6.87× |
 | Go                      |       267 |      6.43× |
 | N-API ¹, Node.js        |       408 |      4.20× |
 | N-API ¹, Bun            |       411 |      4.17× |
 | Dart ¹ ²                |       957 |      1.79× |
-| Kotlin ¹ ³              |     14695 |      0.12× |
 | JavaScript, Bun         |      1254 |      1.37× |
 | **JavaScript**, Node.js |      1715 |      1.00× |
 
-¹ via the Rust core. ² single cold pass [script](./packages/dart/lipilekhika/scripts/benchmark.dart). ³ on the JVM, every call goes through JNA (typing: one call per key).
+¹ via the Rust core. ² single cold pass [script](./packages/dart/lipilekhika/scripts/benchmark.dart).
 
 Averages of the statistical suites: Rust [criterion](./packages/rust/src/benches/benchmark.rs), JS / WASM / N-API [mitata](./packages/js/scripts/bench_suite.mjs) (the built package), Go [`testing.B`](./packages/go/lipilekhika/benchmark_test.go), Python [pytest-benchmark](./packages/python/benchmarks/bench_lipilekhika.py), Kotlin [`Benchmark.kt`](./packages/kotlin/lipilekhika/src/test/kotlin/com/shubhattin/lipilekhika/core/Benchmark.kt). See [Contributing](./CONTRIBUTING.md#benchmarks) for how to run them.
 

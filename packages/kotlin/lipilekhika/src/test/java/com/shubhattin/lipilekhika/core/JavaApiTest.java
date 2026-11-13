@@ -3,14 +3,12 @@ package com.shubhattin.lipilekhika.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import com.shubhattin.lipilekhika.core.ffi.LipiException;
-import com.shubhattin.lipilekhika.core.ffi.TypingContext;
 import java.util.Map;
 import org.junit.Test;
 
 /**
- * The API as Java sees it: static methods of `Lipilekhika` and `LipilekhikaTyping`. Java does not
- * see the Kotlin type aliases, so it imports their classes from the `ffi` package.
+ * The API as Java sees it: static methods of `Lipilekhika` and `LipilekhikaTyping`, and the
+ * classes (`TypingContext`, `LipiException`, ...) of the package.
  */
 public class JavaApiTest {
     @Test

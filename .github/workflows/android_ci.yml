@@ -60,11 +60,34 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # formatting (ktfmt), Android lint, the unit tests, and a debug build (the Rust library
-      # only for x86_64, enough to check the build)
+      # formatting (ktfmt), Android lint, the unit tests, a debug build and a release build (R8,
+      # with the keep rules of the native methods; signed with the debug key). The Rust library
+      # only for x86_64, enough to check the build
       - name: Check, lint, test and build
         working-directory: mobile-app/android
-        run: ./gradlew --console=plain spotlessCheck :app:lintDebug :app:testDebugUnitTest :app:assembleDebug -Plipilekhika.abis=x86_64
+        run: ./gradlew --console=plain spotlessCheck :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease -Plipilekhika.abis=x86_64
+
+      # the release APK has the Rust library (loaded through JNI), and the native methods keep
+      # their names after R8
+      - name: Verify the release APK
+        shell: bash
+        run: |
+          APK=mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          unzip -l "$APK" | grep "\.so" | tee /tmp/libs.txt
+          grep -q "lib/x86_64/liblipilekhika_kotlin.so" /tmp/libs.txt || { echo "missing the Rust library"; exit 1; }
+          DEXDUMP=$(ls -d "$ANDROID_HOME"/build-tools/*/dexdump | tail -1)
+          mkdir -p /tmp/dex && unzip -oq "$APK" 'classes*.dex' -d /tmp/dex
+          for dex in /tmp/dex/classes*.dex; do "$DEXDUMP" "$dex"; done > /tmp/dex.txt
+          for method in transliterate typingContextNew nativeTakeKeyInput; do
+            grep -q "name *: '$method'" /tmp/dex.txt || { echo "native method $method renamed or removed by R8"; exit 1; }
+          done
+
+      - name: Upload the release APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-release-x86_64
+          path: mobile-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
 
       - name: Upload the lint report
         if: always()

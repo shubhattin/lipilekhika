@@ -5,20 +5,10 @@ edition = "2024"
 publish = false
 
 [lib]
-# the library the Kotlin code loads: liblipilekhika_kotlin.so
+# the library the Kotlin code loads (System.loadLibrary): liblipilekhika_kotlin.so
 name = "lipilekhika_kotlin"
 crate-type = ["cdylib"]
 
-[[bin]]
-# generates the Kotlin code from the built library (Gradle runs it), with `--features bindgen`
-name = "uniffi-bindgen"
-path = "src/bin/uniffi-bindgen.rs"
-required-features = ["bindgen"]
-
-[features]
-# the uniffi-bindgen tool, only for the host build (the Android libraries don't need it)
-bindgen = ["uniffi/cli"]
-
 [dependencies]
 lipilekhika = { path = "../../rust", features = ["std"] }
-uniffi = "0.32.2"
+jni = { version = "0.21.1", default-features = false }

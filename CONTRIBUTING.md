@@ -122,7 +122,7 @@ go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 
 ## Kotlin package (`packages/kotlin`)
 
-Kotlin bindings of the Rust library for the native Android app ([UniFFI](https://mozilla.github.io/uniffi-rs/)). It is internal, not published (like the Dart package). See [its README](packages/kotlin/README.md) for the API.
+Kotlin bindings of the Rust library for the native Android app (JNI, with the [`jni`](https://crates.io/crates/jni) crate). It is internal, not published (like the Dart package). See [its README](packages/kotlin/README.md) for the API.
 
 Requires Rust, a JDK 17 or newer, the Android SDK (`ANDROID_HOME`, or `sdk.dir` in `packages/kotlin/local.properties`), and for the Android build the NDK (installed by Gradle) and [cargo-ndk](https://github.com/bbqsrc/cargo-ndk) with the Android Rust targets (`rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android`). The Gradle wrapper downloads Gradle. Run `bun run gen:test-data` first.
 
@@ -134,7 +134,8 @@ From `packages/kotlin`:
 ./gradlew spotlessApply                    # format (check: ./gradlew spotlessCheck)
 ```
 
-- Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests, and the `uniffi-bindgen` tool), `generateBindings` (the Kotlin code, into `build/generated/uniffi`), and `cargoNdk` (the Android libraries).
+- Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests) and `cargoNdk` (the Android libraries).
+- The JNI glue is written by hand: a Kotlin `external fun` (in `NativeLib.kt`, or a `native...` method of `TypingContext`) and its Rust function `Java_com_shubhattin_lipilekhika_core_<Class>_<method>` in `binding/src` must change together.
 - `-Plipilekhika.abis=arm64-v8a` builds for only some ABIs (the default is in `gradle.properties`).
 
 ## Android app (`mobile-app/android`)
