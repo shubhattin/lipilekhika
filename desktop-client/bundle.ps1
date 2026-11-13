@@ -231,7 +231,13 @@ Set-Content -Path (Join-Path $PortableDir "portable") -Encoding ASCII -Value @(
 $ZipName = "lipilekhika-$Version-windows-x64-portable.zip"
 $ZipPath = Join-Path $BundleBuildDir $ZipName
 if (Test-Path $ZipPath) { Remove-Item -Force $ZipPath }
-Compress-Archive -Path $PortableDir -DestinationPath $ZipPath
+# Windows' tar (bsdtar) writes the paths with "/" like zip tools expect; Compress-Archive of
+# Windows PowerShell writes "\", which other unzip tools take as part of the file name
+& tar.exe -a -c -f $ZipPath -C $PortableRoot "Lipi Lekhika"
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "tar could not build the portable zip (exit code $LASTEXITCODE)"
+    exit 1
+}
 Write-Host "  - Portable zip: $ZipPath" -ForegroundColor Green
 
 # Output values for CI (GitHub Actions)
