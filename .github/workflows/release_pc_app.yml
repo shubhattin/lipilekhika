@@ -1,9 +1,29 @@
-name: Release PC App (Windows)
+name: Release PC App
+
+# Lipi Lekhika for Windows (the MSI and the portable zip), and Lipi Parivartaka on its own for
+# Linux and macOS (the app built without the `typing-tool` feature), all in the pc-app release.
 
 on:
   push:
     tags:
       - "pc-app@v*"
+    # builds on main keep a warm cache: a tag can only use the caches of the default branch
+    branches:
+      - main
+    paths:
+      - "desktop-client/**"
+      - "packages/rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/release_pc_app.yml"
+  # the build check for PRs that change the app (only artifacts, nothing published)
+  pull_request:
+    paths:
+      - "desktop-client/**"
+      - "packages/rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/release_pc_app.yml"
   workflow_dispatch:
     inputs:
       tag:
@@ -19,65 +39,113 @@ permissions:
 
 env:
   PC_APP_POSTHOG_KEY: ${{ vars.PC_APP_POSTHOG_KEY }}
+  # a release is published for a pushed tag, or a manual run that is not a dry run
+  PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+
+# a newer push to the same branch or PR replaces a running build (tags always run to the end)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
+  # The version, and the release tag the builds upload to
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+      tag: ${{ steps.normalized_tag.outputs.TAG }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      # Extract version from Cargo.toml
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep -m1 -E '^version\s*=' desktop-client/Cargo.toml | sed -E 's/.*"(.*)".*/\1/')
+          echo "Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      # Resolve the release tag (from input on workflow_dispatch, else from the pushed tag)
+      - name: Resolve release tag
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            # github.ref_name is the short ref (tag or branch)
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      # Basic validation: ensure resolved tag contains the package version
+      - name: Verify tag matches version
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
+        shell: bash
+        run: |
+          TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Resolved TAG = $TAG"
+          echo "Cargo VERSION = $VERSION"
+          if [[ "$TAG" != *"$VERSION"* ]]; then
+            echo "Tag ($TAG) does not contain version ($VERSION). Aborting upload."
+            exit 1
+          fi
+
+      # Normalize the tag to the canonical `pc-app@v<version>` form
+      - name: Normalize tag for release upload
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
+        id: normalized_tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
+          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
+          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
+          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          VERSION="${VERSION#v}"
+
+          if [[ "$RAW_TAG" == pc-app@* ]]; then
+            TAG_SUFFIX="${RAW_TAG#pc-app@}"
+            TAG_SUFFIX="${TAG_SUFFIX#v}"
+            NORMALIZED_TAG="pc-app@v${TAG_SUFFIX}"
+          else
+            NORMALIZED_TAG="pc-app@v${VERSION}"
+          fi
+
+          echo "Normalized TAG=$NORMALIZED_TAG"
+          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
+
+  # Lipi Lekhika for Windows: the MSI installer and the portable zip
   build-windows:
+    needs: meta
     runs-on: windows-latest
     env:
       # Chocolatey needs an exact version string. Update this when you want to bump WiX.
       WIX_VERSION: 3.14.1.20250415
+      VERSION: ${{ needs.meta.outputs.version }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
 
-      # JS Step (matches release_rust.yml)
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Make Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
-
-      # Rust (desktop-client)
+      # The script data is committed, building needs only Cargo
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      # caches the dependencies' builds (the app itself is built every time)
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-pc-app-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pc-app-cargo-
+          shared-key: pc-app
+          # only main and tags save (PR caches can't be used by anything else)
+          save-if: ${{ github.event_name != 'pull_request' }}
 
+      # the app, and `Lipi Parivartaka.exe` of the portable zip
       - name: Build lipilekhika-ui (Windows)
         run: |
-          cargo build --release -p lipilekhika-ui
-
-      - name: Prepare Tauri Build
-        run: |
-          cd docs/docs-and-web-client
-          bun install
-
-      - name: Build lipiparivartaka (Windows)
-        run: |
-          cd desktop-client/lipiparivartaka
-          bun install
-          bun tauri build
-
-      # Extract version from Cargo.toml
-      - name: Get version
-        id: get_version
-        shell: powershell
-        run: |
-          $ver = (Select-String -Path desktop-client/Cargo.toml -Pattern 'version\s*=\s*"(.*?)"' | Select-Object -First 1).Matches[0].Groups[1].Value
-          Write-Host "Version: $ver"
-          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          cargo build --release -p lipilekhika-ui -p lipiparivartaka-launcher
 
       # Install WiX Toolset
       - name: Install WiX Toolset
@@ -117,80 +185,154 @@ jobs:
           $wixBin | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
           Write-Host "WiX Toolset added to PATH: $wixBin"
 
-      # Build MSI Installer
-      - name: Build MSI Installer
+      # Build the MSI installer and the portable zip
+      - name: Build MSI Installer and portable zip
         shell: powershell
         run: |
           cd desktop-client
           .\bundle.ps1 -CI
 
-      # Resolve the release tag (from input on workflow_dispatch, else from the pushed tag)
-      - name: Resolve release tag
-        id: release_tag
-        shell: bash
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            echo "TAG=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          else
-            # github.ref_name is the short ref (tag or branch)
-            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
-
-      # Basic validation: ensure resolved tag contains the package version
-      - name: Verify tag matches version
-        id: verify_tag
-        shell: bash
-        run: |
-          TAG="${{ steps.release_tag.outputs.TAG }}"
-          VERSION="${{ steps.get_version.outputs.VERSION }}"
-          echo "Resolved TAG = $TAG"
-          echo "Cargo VERSION = $VERSION"
-          if [[ "$TAG" != *"$VERSION"* ]]; then
-            echo "Tag ($TAG) does not contain version ($VERSION). Aborting upload."
-            exit 1
-          fi
-
-      # Normalize the tag to the canonical `pc-app@v<version>` form
-      - name: Normalize tag for release upload
-        id: normalized_tag
-        shell: bash
-        run: |
-          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
-          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
-          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
-          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
-          VERSION="${VERSION#v}"
-
-          if [[ "$RAW_TAG" == pc-app@* ]]; then
-            TAG_SUFFIX="${RAW_TAG#pc-app@}"
-            TAG_SUFFIX="${TAG_SUFFIX#v}"
-            NORMALIZED_TAG="pc-app@v${TAG_SUFFIX}"
-          else
-            NORMALIZED_TAG="pc-app@v${VERSION}"
-          fi
-
-          echo "Normalized TAG=$NORMALIZED_TAG"
-          echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
-
-      # a dry run keeps the installer as a workflow artifact instead
-      - name: Upload MSI as artifact (dry run)
-        if: ${{ inputs.dry_run }}
+      # without a release (dry run, PR, main) the installer and the zip are kept as workflow artifacts
+      - name: Upload MSI as artifact
+        if: ${{ env.PUBLISH != 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: pc-app-msi
-          path: desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
+          path: desktop-client/bundle_build/lipilekhika-${{ env.VERSION }}.msi
           retention-days: 7
 
-      # Create GitHub Release and upload assets using the normalized tag
-      - name: Upload binary to release
-        if: ${{ !inputs.dry_run }}
+      - name: Upload portable zip as artifact
+        if: ${{ env.PUBLISH != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pc-app-portable
+          path: desktop-client/bundle_build/lipilekhika-${{ env.VERSION }}-windows-x64-portable.zip
+          retention-days: 7
+
+      - name: Upload to release
+        if: ${{ env.PUBLISH == 'true' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          TAG="${{ steps.normalized_tag.outputs.TAG }}"
-          MSI_PATH="desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi"
+          TAG="${{ needs.meta.outputs.tag }}"
+          # the MSI keeps its name: the app's updater and the website download it by that name
+          MSI_PATH="desktop-client/bundle_build/lipilekhika-$VERSION.msi"
+          ZIP_PATH="desktop-client/bundle_build/lipilekhika-$VERSION-windows-x64-portable.zip"
 
-          echo "Uploading $MSI_PATH to release $TAG"
+          echo "Uploading $MSI_PATH and $ZIP_PATH to release $TAG"
           # --clobber replaces existing asset with the same name
-          gh release upload "$TAG" "$MSI_PATH" --clobber
+          gh release upload "$TAG" "$MSI_PATH" "$ZIP_PATH" --clobber
+
+  # Lipi Parivartaka for Linux (x86_64): built on the oldest supported Ubuntu, so it runs on
+  # systems with glibc 2.35 or newer (Ubuntu 22.04, Debian 12, Fedora 36...)
+  build-linux:
+    needs: meta
+    runs-on: ubuntu-22.04
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: pc-app-linux
+          save-if: ${{ github.event_name != 'pull_request' }}
+
+      # GPUI's Linux backend (X11 and Wayland)
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libxkbcommon-dev libxkbcommon-x11-dev libxcb1-dev libx11-xcb-dev \
+            libwayland-dev libvulkan-dev libfontconfig1-dev libfreetype-dev
+
+      - name: Build Lipi Parivartaka
+        run: cargo build --release -p lipilekhika-ui --no-default-features
+
+      # the libraries it needs at runtime (no GTK: that is only the tray of the full app)
+      - name: Check the binary
+        run: |
+          ldd target/release/lipilekhika-ui
+          if ldd target/release/lipilekhika-ui | grep -q gtk; then
+            echo "Lipi Parivartaka must not link GTK"
+            exit 1
+          fi
+          objdump -T target/release/lipilekhika-ui | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+
+      - name: Bundle
+        run: sh desktop-client/packaging/bundle-linux.sh target/release/lipilekhika-ui "$VERSION" dist
+
+      - name: Upload as artifact
+        if: ${{ env.PUBLISH != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: parivartaka-linux
+          path: dist/lipiparivartaka-${{ env.VERSION }}-linux-x86_64.tar.gz
+          retention-days: 7
+
+      - name: Upload to release
+        if: ${{ env.PUBLISH == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ needs.meta.outputs.tag }}" \
+            "dist/lipiparivartaka-$VERSION-linux-x86_64.tar.gz" --clobber
+
+  # Lipi Parivartaka for macOS: one app for Apple silicon and Intel Macs (macOS 12+, GPUI's
+  # Metal shaders need it)
+  build-macos:
+    needs: meta
+    runs-on: macos-15
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: pc-app-macos
+          save-if: ${{ github.event_name != 'pull_request' }}
+
+      - name: Build Lipi Parivartaka (Apple silicon and Intel)
+        run: |
+          cargo build --release -p lipilekhika-ui --no-default-features --target aarch64-apple-darwin
+          cargo build --release -p lipilekhika-ui --no-default-features --target x86_64-apple-darwin
+
+      - name: Bundle
+        run: |
+          sh desktop-client/packaging/bundle-macos.sh \
+            target/aarch64-apple-darwin/release/lipilekhika-ui \
+            target/x86_64-apple-darwin/release/lipilekhika-ui \
+            "$VERSION" dist
+
+      - name: Upload as artifact
+        if: ${{ env.PUBLISH != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: parivartaka-macos
+          path: dist/lipiparivartaka-${{ env.VERSION }}-macos-universal.zip
+          retention-days: 7
+
+      - name: Upload to release
+        if: ${{ env.PUBLISH == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ needs.meta.outputs.tag }}" \
+            "dist/lipiparivartaka-$VERSION-macos-universal.zip" --clobber

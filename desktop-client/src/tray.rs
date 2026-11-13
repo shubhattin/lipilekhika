@@ -19,6 +19,7 @@ enum TrayMenuEvent {
   InherentVowel,
   Quit,
   OpenApp,
+  OpenParivartaka,
   ScriptSelected(ScriptListEnum),
 }
 
@@ -41,6 +42,7 @@ impl MenuEventMapper {
 
 /// menu item and event ids
 const MENU_ID_OPEN_APP: &str = "open_app";
+const MENU_ID_OPEN_PARIVARTAKA: &str = "open_parivartaka";
 const MENU_ID_TYPING_ON: &str = "typing_on";
 const MENU_ID_NATIVE_NUMERALS: &str = "native_numerals";
 const MENU_ID_INHERENT_VOWEL: &str = "inherent_vowel";
@@ -81,6 +83,14 @@ impl TrayManager {
     let open_app_item = MenuItem::with_id(MENU_ID_OPEN_APP, "Open App", true, None);
     tray_menu.append(&open_app_item)?;
     event_mapper.register(MENU_ID_OPEN_APP.to_string(), TrayMenuEvent::OpenApp);
+
+    let open_parivartaka_item =
+      MenuItem::with_id(MENU_ID_OPEN_PARIVARTAKA, "Lipi Parivartaka", true, None);
+    tray_menu.append(&open_parivartaka_item)?;
+    event_mapper.register(
+      MENU_ID_OPEN_PARIVARTAKA.to_string(),
+      TrayMenuEvent::OpenParivartaka,
+    );
 
     tray_menu.append(&PredefinedMenuItem::separator())?;
 
@@ -266,6 +276,9 @@ impl TrayManager {
         // Send message to UI to restore the minimized window
         messages.push(ThreadMessageType::MaximizeUI);
       }
+      TrayMenuEvent::OpenParivartaka => {
+        messages.push(ThreadMessageType::OpenParivartaka);
+      }
       TrayMenuEvent::ScriptSelected(script) => {
         let current_options = {
           let ctx = self.app_state.typing_context.lock().unwrap();
@@ -306,6 +319,12 @@ pub fn run_tray_thread(
   rx: Receiver<ThreadMessage>,
 ) -> std::thread::JoinHandle<()> {
   std::thread::spawn(move || {
+    #[cfg(target_os = "linux")]
+    if let Err(e) = gtk::init() {
+      eprintln!("Failed to initialize GTK for the tray icon: {}", e);
+      return;
+    }
+    #[cfg_attr(target_os = "linux", allow(unused_mut))]
     let mut tray_manager = match TrayManager::new(Arc::clone(&app_state)) {
       Ok(manager) => manager,
       Err(e) => {
@@ -377,40 +396,115 @@ pub fn run_tray_thread(
       }
     }
 
-    // Non-Windows platforms fallback
-    #[cfg(not(target_os = "windows"))]
+    // Linux: tray-icon draws its menu with GTK, so this thread runs the GTK main loop and polls
+    // the channels from it
+    #[cfg(target_os = "linux")]
+    {
+      // the tray is created after GTK is initialized (see above), on this same thread
+      let tray_manager = std::cell::RefCell::new(tray_manager);
+      glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        poll_tray_events(
+          &mut tray_manager.borrow_mut(),
+          &rx,
+          &menu_channel,
+          &tray_icon_channel,
+          &tx_ui,
+          &send_messages,
+        );
+        glib::ControlFlow::Continue
+      });
+      gtk::main();
+    }
+
+    // Other platforms (macOS)
+    #[cfg(not(any(target_os = "windows", target_os = "linux")))]
     {
       loop {
-        // Check for thread messages (RerenderTray)
-        while let Ok(thread_msg) = rx.try_recv() {
-          // Only process messages not originating from Tray
-          if !matches!(thread_msg.origin, ThreadMessageOrigin::Tray) {
-            match thread_msg.msg {
-              ThreadMessageType::RerenderTray => {
-                tray_manager.update_ui();
-              }
-              _ => {} // Ignore other message types
-            }
-          }
-        }
-
-        // Check for menu events (non-blocking with timeout)
-        if let Ok(event) = menu_channel.recv_timeout(std::time::Duration::from_millis(100)) {
-          let messages = tray_manager.handle_menu_event(event);
-          send_messages(&tx_ui, messages);
-        }
-
-        // Handle tray icon click events (double-click to open app)
-        while let Ok(event) = tray_icon_channel.try_recv() {
-          if let TrayIconEvent::DoubleClick { .. } = event {
-            // Double-click on tray icon opens the app
-            let _ = tx_ui.send(ThreadMessage {
-              origin: ThreadMessageOrigin::Tray,
-              msg: ThreadMessageType::MaximizeUI,
-            });
-          }
-        }
+        poll_tray_events(
+          &mut tray_manager,
+          &rx,
+          &menu_channel,
+          &tray_icon_channel,
+          &tx_ui,
+          &send_messages,
+        );
+        std::thread::sleep(std::time::Duration::from_millis(50));
       }
     }
   })
+}
+
+/// One round of the tray's work: the messages for it, its menu clicks and icon clicks.
+#[cfg(not(target_os = "windows"))]
+fn poll_tray_events(
+  tray_manager: &mut TrayManager,
+  rx: &Receiver<ThreadMessage>,
+  menu_channel: &tray_icon::menu::MenuEventReceiver,
+  tray_icon_channel: &tray_icon::TrayIconEventReceiver,
+  tx_ui: &Sender<ThreadMessage>,
+  send_messages: &impl Fn(&Sender<ThreadMessage>, Vec<ThreadMessageType>),
+) {
+  while let Ok(thread_msg) = rx.try_recv() {
+    // Only process messages not originating from Tray
+    if !matches!(thread_msg.origin, ThreadMessageOrigin::Tray)
+      && let ThreadMessageType::RerenderTray = thread_msg.msg
+    {
+      tray_manager.update_ui();
+    }
+  }
+
+  while let Ok(event) = menu_channel.try_recv() {
+    let messages = tray_manager.handle_menu_event(event);
+    send_messages(tx_ui, messages);
+  }
+
+  // Handle tray icon click events (double-click to open app)
+  while let Ok(event) = tray_icon_channel.try_recv() {
+    if let TrayIconEvent::DoubleClick { .. } = event {
+      let _ = tx_ui.send(ThreadMessage {
+        origin: ThreadMessageOrigin::Tray,
+        msg: ThreadMessageType::MaximizeUI,
+      });
+    }
+  }
+}
+
+/// Whether the system shows tray icons: the app can wait in the tray. Windows and macOS always
+/// do. On Linux a tray host has to run (KDE, most panels; GNOME only with the AppIndicator
+/// extension): without one the app closes instead of hiding.
+pub fn is_available() -> bool {
+  #[cfg(target_os = "linux")]
+  {
+    static AVAILABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *AVAILABLE.get_or_init(linux_tray_host_running)
+  }
+  #[cfg(not(target_os = "linux"))]
+  {
+    true
+  }
+}
+
+/// Asks the session bus whether the StatusNotifier host (which shows the tray icons) is there
+#[cfg(target_os = "linux")]
+fn linux_tray_host_running() -> bool {
+  use gtk::gio;
+  use gtk::glib::{ToVariant as _, VariantTy};
+  let Ok(bus) = gio::bus_get_sync(gio::BusType::Session, None::<&gio::Cancellable>) else {
+    return false;
+  };
+  bus
+    .call_sync(
+      Some("org.freedesktop.DBus"),
+      "/org/freedesktop/DBus",
+      "org.freedesktop.DBus",
+      "NameHasOwner",
+      Some(&("org.kde.StatusNotifierWatcher",).to_variant()),
+      Some(VariantTy::new("(b)").unwrap()),
+      gio::DBusCallFlags::NONE,
+      1000,
+      None::<&gio::Cancellable>,
+    )
+    .ok()
+    .and_then(|reply| reply.get::<(bool,)>())
+    .is_some_and(|(running,)| running)
 }

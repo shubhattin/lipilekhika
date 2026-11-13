@@ -5,15 +5,11 @@ edition = "2024"
 publish = false
 
 [dependencies]
-iced = { version = "0.14.0", features = ["image", "advanced", "svg"] }
-iced_aw = { version = "0.13.0", features = ["full"] }
+gpui-kit = "0.9.1"
 lipilekhika = { path = "../packages/rust", features = ["std"] }
-iced_futures = "0.14.0"
 crossbeam-channel = "0.5.15"
-tray-icon = "0.21.3"
-image = "0.25"
-smol = "2.0.2"
-dark-light = "2.0.0"
+tray-icon = { version = "0.21.3", default-features = false, optional = true }
+image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 octocrab = { version = "0.38", features = ["timeout"] }
@@ -24,6 +20,15 @@ reqwest = { version = "0.12", features = [
 posthog-rs = { version = "0.3.5", default-features = false }
 dirs = "6.0.0"
 uuid = { version = "1.19", features = ["v4"] }
+unicode-general-category = "1"
+# one running app: a second start hands its request to the first (named pipe / unix socket)
+interprocess = { version = "2", optional = true }
+raw-window-handle = "0.6"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# tray-icon draws the tray menu with GTK on Linux, its thread runs the GTK main loop
+gtk = { version = "0.18", optional = true }
+glib = { version = "0.18", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62.2", features = [
@@ -32,13 +37,34 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_Globalization",
+    "Win32_System_Threading",
+    "Win32_Graphics_Dwm",
+    # the portable app's fonts (AddFontResourceEx)
+    "Win32_Graphics_Gdi",
 ] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-core-graphics = "0.25"
-core-foundation = "0.10"
-foreign-types = "0.5"
+core-graphics = { version = "0.25", optional = true }
+core-foundation = { version = "0.10", optional = true }
+foreign-types = { version = "0.5", optional = true }
+
+[features]
+default = ["typing-tool"]
+# The full Lipi Lekhika: the typing tool's main window, the tray, the system wide typing (the
+# keyboard hook) and one running app. Without it (`--no-default-features`) the build is Lipi
+# Parivartaka on its own: it opens straight into it and quits with it (`lipiparivartaka`, the
+# Linux and macOS downloads).
+typing-tool = [
+    "dep:tray-icon",
+    "dep:interprocess",
+    "dep:gtk",
+    "dep:glib",
+    "dep:core-graphics",
+    "dep:core-foundation",
+    "dep:foreign-types",
+]
 
 [build-dependencies]
 embed-resource = "2"
 dotenvy = "0.15.7"
+static_vcruntime = "3"

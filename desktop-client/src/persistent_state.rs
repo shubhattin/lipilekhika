@@ -5,16 +5,39 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use toml::from_str;
 
-fn app_config_path() -> PathBuf {
+/// A file in the app's data directory (`<data dir>/lipilekhika/<name>`, the `data` folder next to
+/// the exe in the portable app)
+pub fn app_data_path(name: &str) -> PathBuf {
+  if let Some(mut path) = crate::portable::data_dir() {
+    path.push(name);
+    return path;
+  }
   let mut path = match dirs::data_dir() {
     Some(p) => p,
-    None => return PathBuf::from("app_conf.toml"), // fallback to current dir
+    None => return PathBuf::from(name), // fallback to current dir
   };
   path.push("lipilekhika");
   fs::create_dir_all(&path).ok();
-  path.push("app_conf.toml");
-  // unique anonymous identifier
+  path.push(name);
   path
+}
+
+fn app_config_path() -> PathBuf {
+  app_data_path("app_conf.toml")
+}
+
+fn default_theme() -> ThemePreference {
+  ThemePreference::System
+}
+
+/// The colour theme picked in the app
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ThemePreference {
+  /// follows the light/dark setting of the system
+  System,
+  Light,
+  Dark,
 }
 
 fn default_true() -> bool {
@@ -41,6 +64,17 @@ pub struct PersitentState {
 
   #[serde(default = "default_false")]
   pub inherent_vowel: bool,
+
+  #[serde(default = "default_theme")]
+  pub theme: ThemePreference,
+
+  /// the newer version the update popup was shown for
+  #[serde(default)]
+  pub update_prompt_version: String,
+
+  /// on how many starts the popup was shown for it (Later stops it)
+  #[serde(default)]
+  pub update_prompt_count: u8,
 }
 
 impl Default for PersitentState {
@@ -50,6 +84,9 @@ impl Default for PersitentState {
       typing_status: default_true(),
       native_numerals: default_true(),
       inherent_vowel: default_false(),
+      theme: default_theme(),
+      update_prompt_version: String::new(),
+      update_prompt_count: 0,
     }
   }
 }

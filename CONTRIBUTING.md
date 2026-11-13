@@ -119,6 +119,27 @@ go run ./bench/benchmark.go                # cold single-pass benchmark (see Ben
 go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 ```
 
+## Desktop app (`desktop-client`)
+
+The PC app (Lipi Lekhika, with Lipi Parivartaka and the typing help as its windows) is written in Rust with [GPUI](https://www.gpui.rs) and [GPUI Kit](https://gpui-kit.com). It is a member of the Cargo workspace, so `cargo fmt --all` covers it.
+
+From the repo root:
+
+```sh
+cargo run -p lipilekhika-ui                    # the typing tool
+cargo run -p lipilekhika-ui -- --parivartaka   # only Lipi Parivartaka (its start menu entry)
+cargo run -p lipilekhika-ui -- --typing-help   # only the typing help (--compare for its Compare tab)
+cargo test -p lipilekhika-ui
+cargo run -p lipilekhika-ui --no-default-features   # Lipi Parivartaka on its own (the Linux/macOS download)
+```
+
+- The system wide typing (the keyboard hook, Alt+X) is there on Windows and macOS. On Linux the app runs without it (that typing is the [Fcitx5 plugin](plugins/fcitx5)); everything else works.
+- Linux needs the usual GPUI libraries (`libxkbcommon`, `wayland`, `vulkan` drivers, `fontconfig`, `freetype`) and GTK 3 with `libayatana-appindicator` for the tray icon.
+- GPUI builds are large (a debug `target/` is several GB): `CARGO_TARGET_DIR` can put it on another disk.
+- `desktop-client/vendor/gpui-pre-linux` is a patched copy of GPUI's Linux backend, see [its README](desktop-client/vendor/README.md).
+- The script fonts are bundled in the binary (`desktop-client/assets/fonts`).
+- Releases: Windows gets the MSI and the portable zip (`bundle.ps1`; a `portable` file next to the exe makes it portable, see `src/portable.rs`, and `desktop-client/launcher` is its `Lipi Parivartaka.exe`). Linux and macOS get Lipi Parivartaka on its own, built without the default `typing-tool` feature (no main window, tray, keyboard hook or GTK) and packed by `desktop-client/packaging/bundle-linux.sh` / `bundle-macos.sh`.
+
 ## Formatting
 
 Format your changes before committing. Run the formatter for each package you touched; every one of them can also be run in check mode (shown in the comments) to verify without writing.
@@ -127,7 +148,6 @@ Format your changes before committing. Run the formatter for each package you to
 | --- | --- | --- | --- |
 | JS package (`packages/js`) | [oxfmt](https://oxc.rs) | `packages/js` | `bun run format` (check: `bunx oxfmt --check`) |
 | Docs & web client (`docs/docs-and-web-client`) | [Prettier](https://prettier.io) | `docs/docs-and-web-client` | `bun run format` (check: `bunx prettier --check .`) |
-| Desktop app frontend (`desktop-client/lipiparivartaka`) | Prettier | `desktop-client/lipiparivartaka` | `bun run format` (check: `bunx prettier --check .`) |
 | All Rust crates (one Cargo workspace) | [rustfmt](https://github.com/rust-lang/rustfmt) | repo root | `cargo fmt --all` (check: `cargo fmt --all --check`) |
 | Python package (`packages/python`) | [Ruff](https://docs.astral.sh/ruff/) | `packages/python` | `uvx ruff format .` (check: `uvx ruff format --check .`) |
 | Go package (`packages/go/lipilekhika`) | gofmt | `packages/go/lipilekhika` | `gofmt -w .` (check: `gofmt -l .` lists unformatted files) |
@@ -197,7 +217,7 @@ Every package and app except Go is released by its own GitHub Actions workflow, 
 | JS package | `js-lib@v1.2.3` | `packages/js/package.json` | [`packages/js/CHANGELOG.md`](packages/js/CHANGELOG.md) | [`release_js.yml`](.github/workflows/release_js.yml) | npm (`lipilekhika`) |
 | Rust crate | `rust-lib@v1.2.3` | `packages/rust/Cargo.toml` | [`packages/rust/CHANGELOG.md`](packages/rust/CHANGELOG.md) | [`release_rust.yml`](.github/workflows/release_rust.yml) | crates.io (`lipilekhika`), `parivartak` CLI binaries on the GitHub release |
 | Python package | `python-lib@v1.2.3` | `packages/python/pyproject.toml` | [`packages/python/CHANGELOG.md`](packages/python/CHANGELOG.md) | [`release_python.yml`](.github/workflows/release_python.yml) | PyPI (`lipilekhika`) |
-| PC app (Windows) | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | MSI installer on the GitHub release |
+| PC app | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | Windows MSI and portable zip, Lipi Parivartaka for Linux and macOS, on the GitHub release |
 | Mobile app (Android) | `mobile-app@v1.2.3` | `mobile-app/pubspec.yaml` (`version: 1.2.3+<build number>`) | [`mobile-app/CHANGELOG.md`](mobile-app/CHANGELOG.md) | [`release_mobile_app.yml`](.github/workflows/release_mobile_app.yml) | APKs (arm64-v8a, armeabi-v7a, x86_64) on the GitHub release |
 
 npm, PyPI and crates.io are published with trusted publishing (OIDC), so there are no registry tokens to set up. The npm and PyPI publish jobs run in the `release` environment.
