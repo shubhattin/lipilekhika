@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shubhattin.lipilekhika.core.LipiException
@@ -171,14 +170,6 @@ fun ConvertSheet(
                         else -> {
                             val f = from ?: return@Column
                             val t = to ?: return@Column
-                            Text(
-                                text,
-                                fontFamily = scriptFont(f),
-                                fontSize = 15.sp,
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis,
-                                color = colors.mutedForeground,
-                            )
                             ScriptBar(
                                 from = f,
                                 to = t,
