@@ -8,7 +8,7 @@
 //   (`moduleResolution` `nodenext`) and for a bundler (`moduleResolution` `bundler`)
 //
 //   bun run build && bun run test:package
-//   node scripts/package_check.mjs --tarball lipilekhika-1.0.14.tgz   (a tarball packed before)
+//   node scripts/package_check.mjs --tarball lipilekhika-1.1.0.tgz   (a tarball packed before)
 //   node scripts/package_check.mjs --runtimes node                     (only Node)
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';

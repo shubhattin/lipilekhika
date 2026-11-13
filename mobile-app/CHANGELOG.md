@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## mobile-app@v0.3.0+11
 
 - **A native app** (Kotlin, Jetpack Compose) replaces the Flutter app. It installs as an update and keeps your scripts, preset and theme.
 - New look, the same as the web app: denser layout, smaller corners, the Geist font, and the script fonts built in (they work offline).
@@ -8,10 +8,10 @@
 - **Share → Lipi Lekhika** opens the shared text in the app.
 - **Quick Settings tile** "Convert clipboard".
 - Searchable script picker, with Modern / Latin / Ancient sections and aliases (`hi`, `tam`, `hk`, ...).
-- Open and save `.txt` files, Undo / Redo, Clear with "Undo clear", and the text kept between launches (turn off *Remember text* in the text box's ⋮ menu to not keep it).
+- Open and save `.txt` files, Undo / Redo, Clear with "Undo clear", and the text kept between launches (turn off _Remember text_ in the text box's ⋮ menu to not keep it).
 - Quick toggles for the inherent vowel (`k → क`) and native numerals (`1 → १`) in the text box, and live examples in the typing options. Both options are now remembered.
 - The preset is always visible above the options.
-- New *Standard Schemes* group with IAST, ITRANS, Harvard-Kyoto and SLP1
+- New _Standard Schemes_ group with IAST, ITRANS, Harvard-Kyoto and SLP1
 
 ## mobile-app@v0.2.7+10
 

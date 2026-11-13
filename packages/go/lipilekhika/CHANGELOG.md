@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.0 (Unreleased)
+## v0.2.0
 
 - The API of the JS / Python / Rust packages that was missing in Go: `ScriptList`, `LangList` and `AllScriptLangList` (the script and language names), `GetAllOptions` (the custom options of a script pair), `GetNormalizedScriptName` (`"tel"` -> `"Telugu"`) and `PreloadScriptData`; in `typing`, `GetScriptTypingDataMap` (the characters of a script with the keys that type them) and `GetScriptKramaData` (the characters of a script with their types). Same output as the other packages
 - Package documentation (shown on pkg.go.dev) with an overview of the API and a link to the `typing` package
