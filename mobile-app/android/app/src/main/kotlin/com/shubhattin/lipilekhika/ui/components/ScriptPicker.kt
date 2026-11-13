@@ -2,7 +2,9 @@ package com.shubhattin.lipilekhika.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,10 +96,9 @@ fun ScriptSelectButton(
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
+                modifier = Modifier.weight(1f),
             )
             if (meta.custom) CustomBadge()
-            Spacer(Modifier.weight(1f, fill = false))
             Icon(
                 Icons.Outlined.ExpandMore,
                 contentDescription = null,
@@ -282,7 +284,7 @@ private fun ScriptRow(meta: ScriptMeta, selected: Boolean, onClick: () -> Unit) 
             Modifier.fillMaxWidth()
                 .roundedClickable(onClick)
                 .background(
-                    if (selected) colors.accent.copy(alpha = 0.6f)
+                    if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
                     else MaterialTheme.colorScheme.surface
                 )
                 .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -317,5 +319,73 @@ private fun ScriptRow(meta: ScriptMeta, selected: Boolean, onClick: () -> Unit) 
         } else {
             Spacer(Modifier.width(24.dp))
         }
+    }
+}
+
+/**
+ * The two scripts in one bar, like a translate app: `[from] ⇄ [to]`. Each side opens its picker,
+ * the button in the middle swaps them (and the texts).
+ */
+@Composable
+fun ScriptBar(
+    from: String,
+    to: String,
+    onFrom: () -> Unit,
+    onTo: () -> Unit,
+    onSwap: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalLipiColors.current
+    LipiCard(modifier) {
+        Row(
+            Modifier.padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ScriptSide("From", from, onFrom, Modifier.weight(1f))
+            Box(
+                Modifier.size(38.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .clickable(onClick = onSwap),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.SwapHoriz,
+                    "Swap scripts and text",
+                    Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+            ScriptSide("To", to, onTo, Modifier.weight(1f))
+        }
+    }
+}
+
+/** One side of the [ScriptBar]: the avatar, a small label and the script name */
+@Composable
+private fun ScriptSide(label: String, script: String, onClick: () -> Unit, modifier: Modifier) {
+    val colors = LocalLipiColors.current
+    Row(
+        modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ScriptAvatar(script, size = 32.dp)
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = colors.mutedForeground)
+            Text(
+                // a zero width space after the hyphen: the line can break there (and not
+                // inside a word, "Tamil-Exte nded")
+                script.replace("-", "-\u200B"),
+                style = MaterialTheme.typography.titleSmall,
+                // a long name (Tamil-Extended, Purna-Devanagari) goes on two lines at its hyphen
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(Icons.Outlined.ExpandMore, null, Modifier.size(16.dp), tint = colors.mutedForeground)
     }
 }

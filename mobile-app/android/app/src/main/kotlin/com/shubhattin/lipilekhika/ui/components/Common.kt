@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -25,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -32,6 +35,7 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shubhattin.lipilekhika.data.Scripts
+import com.shubhattin.lipilekhika.ui.theme.LocalDarkTheme
 import com.shubhattin.lipilekhika.ui.theme.LocalLipiColors
 import com.shubhattin.lipilekhika.ui.theme.scriptFont
 import kotlinx.coroutines.delay
@@ -118,7 +123,10 @@ fun copyText(context: Context, text: String) {
     }
 }
 
-/** A small rounded toggle / action chip (the web's "pill") */
+/**
+ * A small rounded toggle / action chip (the web's "pill"). Built from a plain clickable row, not a
+ * `Surface(onClick)`, which would force a 48dp tall touch area and make it look chunky.
+ */
 @Composable
 fun Pill(
     onClick: () -> Unit,
@@ -129,22 +137,42 @@ fun Pill(
     content: @Composable () -> Unit,
 ) {
     val colors = LocalLipiColors.current
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = CircleShape,
-        color = if (active) activeColor.copy(alpha = 0.12f) else Color.Transparent,
-        contentColor = if (active) activeColor else colors.mutedForeground,
-        border = BorderStroke(1.dp, if (active) activeColor.copy(alpha = 0.45f) else colors.border),
+    val fg = if (active) activeColor else colors.mutedForeground
+    Row(
+        modifier =
+            modifier
+                .clip(CircleShape)
+                .background(
+                    if (active) activeColor.copy(alpha = 0.14f) else colors.muted.copy(alpha = 0.6f)
+                )
+                .border(
+                    1.dp,
+                    if (active) activeColor.copy(alpha = 0.35f) else colors.border,
+                    CircleShape,
+                )
+                .clickable(onClick = onClick)
+                .padding(contentPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(contentPadding),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            content()
+        CompositionLocalProvider(LocalContentColor provides fg) {
+            ProvideTextStyle(MaterialTheme.typography.labelMedium.copy(color = fg)) { content() }
         }
     }
+}
+
+/** A card of the page: its own surface, a hairline border and rounded corners */
+@Composable
+fun LipiCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val colors = LocalLipiColors.current
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = colors.card,
+        border = BorderStroke(1.dp, colors.border),
+        shadowElevation = if (LocalDarkTheme.current) 0.dp else 1.dp,
+        content = content,
+    )
 }
 
 /** The small uppercase label of a section ("FROM", "TO") */

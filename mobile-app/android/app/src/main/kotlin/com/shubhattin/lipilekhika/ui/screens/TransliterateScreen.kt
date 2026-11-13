@@ -1,5 +1,6 @@
 package com.shubhattin.lipilekhika.ui.screens
 
+import android.text.InputType
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -8,7 +9,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,12 +21,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -39,26 +39,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.Redo
 import androidx.compose.material.icons.automirrored.outlined.Undo
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.KeyboardHide
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,11 +63,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.PlatformTextInputInterceptor
+import androidx.compose.ui.platform.PlatformTextInputMethodRequest
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,12 +79,11 @@ import com.shubhattin.lipilekhika.state.AppStore
 import com.shubhattin.lipilekhika.state.SourceNote
 import com.shubhattin.lipilekhika.ui.components.CopyButton
 import com.shubhattin.lipilekhika.ui.components.IconAction
+import com.shubhattin.lipilekhika.ui.components.LipiCard
 import com.shubhattin.lipilekhika.ui.components.OptionsPanel
 import com.shubhattin.lipilekhika.ui.components.Pill
-import com.shubhattin.lipilekhika.ui.components.PresetSelector
+import com.shubhattin.lipilekhika.ui.components.ScriptBar
 import com.shubhattin.lipilekhika.ui.components.ScriptPickerSheet
-import com.shubhattin.lipilekhika.ui.components.ScriptSelectButton
-import com.shubhattin.lipilekhika.ui.components.SectionLabel
 import com.shubhattin.lipilekhika.ui.components.TypingOptionChips
 import com.shubhattin.lipilekhika.ui.components.TypingOptionsSheet
 import com.shubhattin.lipilekhika.ui.theme.LocalLipiColors
@@ -102,9 +98,16 @@ private enum class Sheet {
     TYPING_HELP,
 }
 
+/** What the file buttons do (the launchers live in the screen) */
+private class TextActions(
+    val open: () -> Unit,
+    val saveSource: () -> Unit,
+    val saveOutput: () -> Unit,
+)
+
 /**
- * The transliteration page: the source box (with realtime typing), the output and the options, the
- * same parts as the web app's /app. Two columns side by side on a wide screen.
+ * The transliteration page: the script bar, the source card (with realtime typing), the output card
+ * and the options, the same parts as the web app's /app. Side by side on a wide screen.
  */
 @Composable
 fun TransliterateScreen(store: AppStore) {
@@ -147,41 +150,45 @@ fun TransliterateScreen(store: AppStore) {
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 720.dp
-        // like the web's clamp(200px, 50dvh - 90px, 480px)
-        val boxHeight = (maxHeight.value * 0.5f - 60).coerceIn(190f, 460f).dp
+        // the two boxes share the height of the screen (the preset and the options are just
+        // below, a scroll away), and grow with their text up to about half the screen
+        val minBox =
+            if (wide) ((maxHeight.value - 190f)).coerceIn(160f, 560f).dp
+            else ((maxHeight.value - 300f) / 2f).coerceIn(132f, 400f).dp
+        val maxBox = (maxHeight.value * 0.45f).coerceIn(220f, 520f).dp.coerceAtLeast(minBox)
 
         Column(
             Modifier.fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 14.dp, vertical = 12.dp)
                 .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            ScriptBar(
+                from = store.fromScript,
+                to = store.toScript,
+                onFrom = { sheet = Sheet.FROM },
+                onTo = { sheet = Sheet.TO },
+                onSwap = store::swap,
+            )
             if (wide) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SourcePanel(store, boxHeight, actions, { sheet = it }, Modifier.weight(1f))
-                    OutputPanel(
-                        store,
-                        boxHeight,
-                        actions,
-                        { sheet = it },
-                        Modifier.weight(1f),
-                        showSwap = true,
-                    )
+                    SourceCard(store, minBox, maxBox, actions, { sheet = it }, Modifier.weight(1f))
+                    OutputCard(store, minBox, maxBox, actions, Modifier.weight(1f))
                 }
             } else {
-                SourcePanel(store, boxHeight, actions, { sheet = it })
-                OutputPanel(store, boxHeight, actions, { sheet = it }, showSwap = true)
+                SourceCard(store, minBox, maxBox, actions, { sheet = it })
+                OutputCard(store, minBox, maxBox, actions)
             }
-            Column(
-                Modifier.widthIn(max = 720.dp).fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                PresetSelector(store.presetKey, store::selectPreset)
-                OptionsPanel(store.options, store::setOption)
-            }
-            Spacer(Modifier.height(8.dp))
+            OptionsPanel(
+                presetKey = store.presetKey,
+                onPreset = store::selectPreset,
+                options = store.options,
+                onToggle = store::setOption,
+                modifier = Modifier.widthIn(max = 760.dp),
+            )
+            Spacer(Modifier.height(4.dp))
         }
     }
 
@@ -190,7 +197,7 @@ fun TransliterateScreen(store: AppStore) {
             ScriptPickerSheet(
                 current = store.fromScript,
                 withNormal = false,
-                title = "Type in (from)",
+                title = "Type in",
                 onSelect = {
                     store.selectFrom(it)
                     sheet = null
@@ -223,30 +230,42 @@ fun TransliterateScreen(store: AppStore) {
     }
 }
 
-/** What the file buttons do (the launchers live in the screen) */
-private class TextActions(
-    val open: () -> Unit,
-    val saveSource: () -> Unit,
-    val saveOutput: () -> Unit,
-)
+/** The keyboard as Compose asks for it */
+private val PlainKeyboard = PlatformTextInputInterceptor { request, next ->
+    next.startInputMethod(request)
+}
 
-/** A bordered box, the web's card */
-@Composable
-private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, LocalLipiColors.current.border),
-        content = content,
+/**
+ * The keyboard for realtime typing: "visible password" text (what Flutter asks for when suggestions
+ * are off). Keyboards like Gboard then neither suggest nor compose words, so each key reaches the
+ * typing on its own; unlike a password field it is not secret (no secure keyboard, the screen can
+ * be captured).
+ */
+private val NoSuggestionsKeyboard = PlatformTextInputInterceptor { request, next ->
+    next.startInputMethod(
+        PlatformTextInputMethodRequest { outAttributes ->
+            val connection = request.createInputConnection(outAttributes)
+            outAttributes.inputType =
+                InputType.TYPE_CLASS_TEXT or
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                    InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            connection
+        }
     )
 }
 
+/** The text style of the two boxes, in the font of their script */
+@Composable
+private fun boxTextStyle(script: String, color: Color) =
+    TextStyle(fontFamily = scriptFont(script), fontSize = 19.sp, lineHeight = 30.sp, color = color)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SourcePanel(
+private fun SourceCard(
     store: AppStore,
-    boxHeight: Dp,
+    minBox: Dp,
+    maxBox: Dp,
     actions: TextActions,
     openSheet: (Sheet) -> Unit,
     modifier: Modifier = Modifier,
@@ -262,31 +281,30 @@ private fun SourcePanel(
     var menu by remember { mutableStateOf(false) }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        SectionLabel("From")
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            ScriptSelectButton(from, { openSheet(Sheet.FROM) }, Modifier.weight(1f))
-            if (from != "Normal") {
-                HelpPill(seen = store.typingGuideSeen) {
-                    store.markTypingGuideSeen()
-                    openSheet(Sheet.TYPING_HELP)
-                }
-            }
-        }
-        Panel {
+        LipiCard {
             Column {
-                // toolbar
+                // the top row: typing on/off, the guide, and the box's actions
                 Row(
-                    Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 2.dp),
+                    Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Text(
-                        "Source",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = colors.mutedForeground,
-                    )
+                    Pill(onClick = store::toggleTyping, active = store.typingEnabled) {
+                        Icon(
+                            if (store.typingEnabled) Icons.Outlined.Keyboard
+                            else Icons.Outlined.KeyboardHide,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Text("Typing")
+                    }
+                    if (from != "Normal") {
+                        HelpPill(seen = store.typingGuideSeen) {
+                            store.markTypingGuideSeen()
+                            openSheet(Sheet.TYPING_HELP)
+                        }
+                    }
+                    Spacer(Modifier.weight(1f))
                     CopyButton(
                         "Copy source text",
                         { store.source.text.toString() },
@@ -295,6 +313,14 @@ private fun SourcePanel(
                     Box {
                         IconAction(Icons.Outlined.MoreVert, "More", { menu = true })
                         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Typing options") },
+                                leadingIcon = { Icon(Icons.Outlined.Tune, null) },
+                                onClick = {
+                                    menu = false
+                                    openSheet(Sheet.TYPING_OPTIONS)
+                                },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Open .txt file…") },
                                 leadingIcon = { Icon(Icons.Outlined.FileOpen, null) },
@@ -314,67 +340,45 @@ private fun SourcePanel(
                             )
                         }
                     }
-                    Spacer(Modifier.weight(1f))
-                    Pill(onClick = store::toggleTyping, active = store.typingEnabled) {
-                        Icon(
-                            if (store.typingEnabled) Icons.Outlined.Keyboard
-                            else Icons.Outlined.KeyboardHide,
-                            contentDescription = null,
-                            modifier = Modifier.size(15.dp),
-                        )
-                        Text("Typing", style = MaterialTheme.typography.labelMedium)
-                    }
-                    IconAction(
-                        Icons.Outlined.Settings,
-                        "Typing options",
-                        { openSheet(Sheet.TYPING_OPTIONS) },
-                    )
                 }
-                HorizontalDivider(color = colors.border)
-                // the text box
-                Box(Modifier.fillMaxWidth().height(boxHeight)) {
-                    val font = scriptFont(from)
+                // the text: grows with its content. While typing in a script the keyboard is
+                // asked for "visible password" text: no suggestions or autocorrect, so each key
+                // comes on its own (the typing needs that), without it being a secret field
+                InterceptPlatformTextInput(if (typing) NoSuggestionsKeyboard else PlainKeyboard) {
                     BasicTextField(
                         state = store.source,
                         modifier =
-                            Modifier.fillMaxSize()
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                            Modifier.fillMaxWidth()
+                                .heightIn(min = minBox, max = maxBox)
+                                .padding(horizontal = 16.dp, vertical = 10.dp)
                                 .onFocusChanged { if (!it.isFocused) store.clearTypingContext() },
                         inputTransformation = if (typing) store.typingTransformation else null,
-                        textStyle =
-                            TextStyle(
-                                fontFamily = font,
-                                fontSize = 18.sp,
-                                lineHeight = 28.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
+                        textStyle = boxTextStyle(from, MaterialTheme.colorScheme.onSurface),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        // while typing in a script, a password-type keyboard: no suggestions or
-                        // autocorrect, and each key comes on its own (the typing needs that)
                         keyboardOptions =
                             KeyboardOptions(
-                                keyboardType =
-                                    if (typing) KeyboardType.Password else KeyboardType.Text,
                                 autoCorrectEnabled = false,
                                 capitalization = KeyboardCapitalization.None,
                             ),
                         lineLimits = TextFieldLineLimits.MultiLine(),
                         decorator = { field ->
-                            if (text.isEmpty()) {
-                                Text(
-                                    if (typing) "Type with English letters to write in $from…"
-                                    else "Enter text to transliterate…",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.mutedForeground,
-                                )
+                            Box {
+                                if (text.isEmpty()) {
+                                    Text(
+                                        if (typing) "Type with English letters to write in $from"
+                                        else "Enter text to transliterate",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = colors.mutedForeground.copy(alpha = 0.8f),
+                                    )
+                                }
+                                field()
                             }
-                            field()
                         },
                     )
                 }
-                // the strip at the bottom of the box
+                // the bottom row: the typing toggles, undo / redo, clear
                 Row(
-                    Modifier.fillMaxWidth().padding(start = 8.dp, end = 4.dp, bottom = 4.dp),
+                    Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
@@ -388,33 +392,33 @@ private fun SourcePanel(
                         )
                     }
                     Spacer(Modifier.weight(1f))
-                    IconAction(
-                        Icons.AutoMirrored.Outlined.Undo,
-                        "Undo",
-                        store::undo,
-                        enabled = canUndo,
-                    )
-                    IconAction(
-                        Icons.AutoMirrored.Outlined.Redo,
-                        "Redo",
-                        store::redo,
-                        enabled = canRedo,
-                    )
+                    if (canUndo || canRedo) {
+                        IconAction(
+                            Icons.AutoMirrored.Outlined.Undo,
+                            "Undo",
+                            store::undo,
+                            enabled = canUndo,
+                        )
+                        IconAction(
+                            Icons.AutoMirrored.Outlined.Redo,
+                            "Redo",
+                            store::redo,
+                            enabled = canRedo,
+                        )
+                    }
                     when {
                         replaced != null ->
-                            TextButton(
-                                onClick = store::undoReplace,
-                                contentPadding = PaddingValues(horizontal = 10.dp),
-                            ) {
+                            Pill(onClick = store::undoReplace, active = true) {
+                                Icon(
+                                    Icons.AutoMirrored.Outlined.Undo,
+                                    null,
+                                    Modifier.size(14.dp),
+                                )
                                 Text(if (replaced.by == "clear") "Undo clear" else "Undo open")
                             }
                         text.isEmpty() ->
-                            TextButton(
-                                onClick = actions.open,
-                                contentPadding = PaddingValues(horizontal = 10.dp),
-                            ) {
-                                Icon(Icons.Outlined.FileOpen, null, Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
+                            Pill(onClick = actions.open) {
+                                Icon(Icons.Outlined.FileOpen, null, Modifier.size(14.dp))
                                 Text("Open .txt")
                             }
                         else ->
@@ -448,104 +452,70 @@ private fun SourceNoteText(note: SourceNote?) {
         message,
         style = MaterialTheme.typography.bodySmall,
         color = if (error) MaterialTheme.colorScheme.error else colors.mutedForeground,
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = Modifier.padding(horizontal = 6.dp),
     )
 }
 
 @Composable
-private fun OutputPanel(
+private fun OutputCard(
     store: AppStore,
-    boxHeight: Dp,
+    minBox: Dp,
+    maxBox: Dp,
     actions: TextActions,
-    openSheet: (Sheet) -> Unit,
     modifier: Modifier = Modifier,
-    showSwap: Boolean,
 ) {
     val colors = LocalLipiColors.current
     val output = store.output
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        SectionLabel("To")
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            ScriptSelectButton(store.toScript, { openSheet(Sheet.TO) }, Modifier.weight(1f))
-            if (showSwap) {
-                OutlinedIconButton(
-                    onClick = store::swap,
-                    modifier = Modifier.size(40.dp),
-                    border = BorderStroke(1.dp, colors.border),
-                ) {
-                    Icon(Icons.Outlined.SwapVert, "Swap scripts and text", Modifier.size(20.dp))
+    val primary = MaterialTheme.colorScheme.primary
+    LipiCard(modifier) {
+        Column(Modifier.background(primary.copy(alpha = 0.035f))) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Pill(onClick = store::toggleAutoConvert, active = store.autoConvert) {
+                    Icon(Icons.Outlined.Bolt, null, Modifier.size(15.dp))
+                    Text("Auto convert")
                 }
-            }
-        }
-        Panel {
-            Column {
-                Row(
-                    Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Output",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = colors.mutedForeground,
-                    )
-                    CopyButton("Copy output text", { store.output }, enabled = output.isNotEmpty())
-                    IconAction(
-                        Icons.Outlined.Save,
-                        "Save as .txt",
-                        actions.saveOutput,
-                        enabled = output.isNotEmpty(),
-                    )
-                    Spacer(Modifier.weight(1f))
-                    if (!store.autoConvert) {
-                        FilledTonalButton(
-                            onClick = store::convertNow,
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            modifier = Modifier.height(32.dp),
-                        ) {
-                            Icon(Icons.Outlined.Sync, null, Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Convert", style = MaterialTheme.typography.labelMedium)
-                        }
-                        Spacer(Modifier.width(6.dp))
+                if (!store.autoConvert) {
+                    Pill(
+                        onClick = store::convertNow,
+                        active = true,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 5.dp),
+                    ) {
+                        Icon(Icons.Outlined.Sync, null, Modifier.size(15.dp))
+                        Text("Convert")
                     }
-                    Text(
-                        "Auto",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.mutedForeground,
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Switch(
-                        checked = store.autoConvert,
-                        onCheckedChange = { store.toggleAutoConvert() },
-                        modifier = Modifier.offset(y = 0.dp),
-                    )
                 }
-                HorizontalDivider(color = colors.border)
-                Box(
-                    Modifier.fillMaxWidth()
-                        .height(boxHeight)
-                        .background(colors.muted.copy(alpha = 0.5f))
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                ) {
-                    if (output.isEmpty()) {
+                Spacer(Modifier.weight(1f))
+                CopyButton("Copy output text", { store.output }, enabled = output.isNotEmpty())
+                IconAction(
+                    Icons.Outlined.Save,
+                    "Save as .txt",
+                    actions.saveOutput,
+                    enabled = output.isNotEmpty(),
+                )
+            }
+            Box(
+                Modifier.fillMaxWidth()
+                    .heightIn(min = minBox, max = maxBox)
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 16.dp)
+            ) {
+                if (output.isEmpty()) {
+                    Text(
+                        "The ${store.toScript} text shows here",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.mutedForeground.copy(alpha = 0.8f),
+                    )
+                } else {
+                    SelectionContainer {
                         Text(
-                            "The output shows here",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colors.mutedForeground,
+                            output,
+                            style =
+                                boxTextStyle(store.toScript, MaterialTheme.colorScheme.onSurface),
                         )
-                    } else {
-                        SelectionContainer {
-                            Text(
-                                output,
-                                fontFamily = scriptFont(store.toScript),
-                                fontSize = 18.sp,
-                                lineHeight = 28.sp,
-                            )
-                        }
                     }
                 }
             }
@@ -556,11 +526,11 @@ private fun OutputPanel(
 /** "Help": the typing guide, with a pulsing dot until it was opened once */
 @Composable
 private fun HelpPill(seen: Boolean, onClick: () -> Unit) {
-    val sky = androidx.compose.ui.graphics.Color(0xFF0EA5E9)
+    val sky = Color(0xFF0EA5E9)
     Box {
         Pill(onClick = onClick, active = true, activeColor = sky) {
             Icon(Icons.AutoMirrored.Outlined.MenuBook, null, Modifier.size(15.dp))
-            Text("Help", style = MaterialTheme.typography.labelMedium)
+            Text("Help")
         }
         if (!seen) {
             val pulse = rememberInfiniteTransition(label = "pulse")
@@ -573,7 +543,7 @@ private fun HelpPill(seen: Boolean, onClick: () -> Unit) {
                 )
             Box(
                 Modifier.align(Alignment.TopEnd)
-                    .offset(x = 2.dp, y = (-2).dp)
+                    .offset(x = 1.dp, y = (-1).dp)
                     .size(8.dp)
                     .alpha(alpha)
                     .background(sky, CircleShape)
