@@ -119,6 +119,23 @@ go run ./bench/benchmark.go                # cold single-pass benchmark (see Ben
 go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 ```
 
+## Kotlin package (`packages/kotlin`)
+
+Kotlin bindings of the Rust library for the native Android app ([UniFFI](https://mozilla.github.io/uniffi-rs/)). It is internal, not published (like the Dart package). See [its README](packages/kotlin/README.md) for the API.
+
+Requires Rust, a JDK 17 or newer, the Android SDK (`ANDROID_HOME`, or `sdk.dir` in `packages/kotlin/local.properties`), and for the Android build the NDK (installed by Gradle) and [cargo-ndk](https://github.com/bbqsrc/cargo-ndk) with the Android Rust targets (`rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android`). The Gradle wrapper downloads Gradle. Run `bun run gen:test-data` first.
+
+From `packages/kotlin`:
+
+```sh
+./gradlew :lipilekhika:testDebugUnitTest   # tests on this machine's JVM (test_data and the API)
+./gradlew :lipilekhika:assembleRelease     # the AAR, with the library for each Android ABI
+./gradlew spotlessApply                    # format (check: ./gradlew spotlessCheck)
+```
+
+- Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests, and the `uniffi-bindgen` tool), `generateBindings` (the Kotlin code, into `build/generated/uniffi`), and `cargoNdk` (the Android libraries).
+- `-Plipilekhika.abis=arm64-v8a` builds for only some ABIs (the default is in `gradle.properties`).
+
 ## Desktop app (`desktop-client`)
 
 The PC app (Lipi Lekhika, with Lipi Parivartaka and the typing help as its windows) is written in Rust with [GPUI](https://www.gpui.rs) and [GPUI Kit](https://gpui-kit.com). It is a member of the Cargo workspace, so `cargo fmt --all` covers it.
@@ -151,6 +168,7 @@ Format your changes before committing. Run the formatter for each package you to
 | All Rust crates (one Cargo workspace) | [rustfmt](https://github.com/rust-lang/rustfmt) | repo root | `cargo fmt --all` (check: `cargo fmt --all --check`) |
 | Python package (`packages/python`) | [Ruff](https://docs.astral.sh/ruff/) | `packages/python` | `uvx ruff format .` (check: `uvx ruff format --check .`) |
 | Go package (`packages/go/lipilekhika`) | gofmt | `packages/go/lipilekhika` | `gofmt -w .` (check: `gofmt -l .` lists unformatted files) |
+| Kotlin package (`packages/kotlin`) | [ktfmt](https://github.com/facebook/ktfmt) (kotlinlang style) via [Spotless](https://github.com/diffplug/spotless) | `packages/kotlin` | `./gradlew spotlessApply` (check: `./gradlew spotlessCheck`) |
 | Dart package & mobile app (`packages/dart/lipilekhika`, `mobile-app`) | [dart format](https://dart.dev/tools/dart-format) (ships with the Dart/Flutter SDK) | that directory | `dart format .` (check: `dart format --output=none --set-exit-if-changed .`) |
 
 Notes:
