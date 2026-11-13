@@ -1,5 +1,8 @@
 name: Release Mobile App
 
+# The native Android app (mobile-app/android, Kotlin + Jetpack Compose). The old Flutter app's
+# workflow is kept in mobile-app/flutter/release_mobile_app.yml.
+
 on:
   push:
     tags:
@@ -20,10 +23,6 @@ permissions:
 env:
   MOBILE_APP_POSTHOG_KEY: ${{ vars.MOBILE_APP_POSTHOG_KEY }}
   # Build tools are pinned, so that a new release of one can not break the build of an unchanged commit.
-  # keep in sync with `flutter_rust_bridge` in packages/dart/binding/Cargo.toml (and pubspec.lock),
-  # and with FRB_CODEGEN_VERSION in dart_ci.yml
-  FRB_CODEGEN_VERSION: 2.11.1
-  FLUTTER_VERSION: 3.47.9
   CARGO_NDK_VERSION: 4.1.2
 
 jobs:
@@ -37,14 +36,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Extract version from pubspec.yaml (do this early for verification)
+      # The version is app.versionName in mobile-app/android/gradle.properties
       - name: Get version
         id: get_version
         shell: bash
         run: |
-          VERSION=$(grep "^version:" mobile-app/pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)
+          VERSION=$(sed -n 's/^app\.versionName=//p' mobile-app/android/gradle.properties | tr -d '\r')
           if [[ -z "$VERSION" ]]; then
-            echo "Could not determine version from mobile-app/pubspec.yaml"
+            echo "Could not determine version from mobile-app/android/gradle.properties"
             exit 1
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -63,7 +62,6 @@ jobs:
 
       # Verify tag contains the app version
       - name: Verify tag matches version
-        id: verify_tag
         shell: bash
         run: |
           TAG="${{ steps.release_tag.outputs.TAG }}"
@@ -80,12 +78,9 @@ jobs:
         id: normalized_tag
         shell: bash
         run: |
-          RAW_TAG="${{ steps.release_tag.outputs.TAG }}"
-          VERSION_RAW="${{ steps.get_version.outputs.VERSION }}"
-          RAW_TAG="$(echo -n "$RAW_TAG" | tr -d '\r\n')"
-          VERSION="$(echo -n "$VERSION_RAW" | tr -d '\r\n')"
+          RAW_TAG="$(echo -n "${{ steps.release_tag.outputs.TAG }}" | tr -d '\r\n')"
+          VERSION="$(echo -n "${{ steps.get_version.outputs.VERSION }}" | tr -d '\r\n')"
           VERSION="${VERSION#v}"
-
           if [[ "$RAW_TAG" == mobile-app@* ]]; then
             TAG_SUFFIX="${RAW_TAG#mobile-app@}"
             TAG_SUFFIX="${TAG_SUFFIX#v}"
@@ -93,26 +88,26 @@ jobs:
           else
             NORMALIZED_TAG="mobile-app@v${VERSION}"
           fi
-
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
-      # Setup Java (required for Android build)
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
           distribution: "temurin"
           java-version: "17"
 
-      # Setup Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      # Setup Rust
+      # the NDK of the Kotlin package (cargo-ndk uses it)
+      - name: Install the NDK
+        run: sdkmanager --install "ndk;$(grep -oP 'ndkVersion = "\K[^"]+' packages/kotlin/lipilekhika/build.gradle.kts)"
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Cache cargo registry + build
         uses: actions/cache@v6
@@ -125,126 +120,61 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-android-
 
-      # Install cargo-ndk
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --version "$CARGO_NDK_VERSION" --locked
 
-      # Setup Flutter
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
-      # Install flutter_rust_bridge_codegen (prebuilt release binary of the pinned version: the
-      # generated bindings have to match the `flutter_rust_bridge` runtime the binding crate pins)
-      - name: Install flutter_rust_bridge_codegen
-        run: |
-          FILE="flutter_rust_bridge_codegen-x86_64-unknown-linux-musl-v${FRB_CODEGEN_VERSION}.tgz"
-          URL="https://github.com/fzyzcjy/flutter_rust_bridge/releases/download/v${FRB_CODEGEN_VERSION}/${FILE}"
-          curl -fsSLO "$URL"
-          curl -fsSLO "$URL.sha256"
-          echo "$(cat "$FILE.sha256")  $FILE" | sha256sum -c
-          tar -xzf "$FILE" -C ~/.cargo/bin flutter_rust_bridge_codegen
-          rm "$FILE" "$FILE.sha256"
-          flutter_rust_bridge_codegen --version
-
-      # Generate Dart FFI bindings
-      - name: Generate Dart bindings
-        run: |
-          cd packages/dart/lipilekhika
-          flutter_rust_bridge_codegen generate
-
-      # Build Android native libraries
-      - name: Build Android native libraries
-        run: |
-          cd packages/dart/binding
-          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 \
-            -o ../lipilekhika/android/src/main/jniLibs \
-            build --release
-
-      # Verify native libraries were built
-      - name: Verify native libraries
-        run: |
-          ls -la packages/dart/lipilekhika/android/src/main/jniLibs/*/
-
-      # Decode keystore
       - name: Decode Keystore
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > mobile-app/android/app/release.keystore
-          echo "ANDROID_KEYSTORE_PATH=$(pwd)/mobile-app/android/app/release.keystore" >> $GITHUB_ENV
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> $GITHUB_ENV
 
-      # Install Flutter dependencies for the app
-      - name: Install Flutter dependencies
+      # The split APKs (one per ABI, version code ABI × 1000 + versionCode as the Flutter app had),
+      # the universal APK, and the AAB for the Play Console
+      - name: Build release APKs and AAB
+        working-directory: mobile-app/android
+        run: ./gradlew --console=plain spotlessCheck :app:assembleRelease :app:bundleRelease -Papp.splitAbi=true
+
+      - name: Rename outputs
+        id: outputs
+        shell: bash
         run: |
-          cd mobile-app
-          flutter pub get
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          APK_DIR=mobile-app/android/app/build/outputs/apk/release
+          OUT=mobile-app/android/app/build/release-files
+          mkdir -p "$OUT"
+          ls -la "$APK_DIR"
+          for abi in arm64-v8a armeabi-v7a x86_64 universal; do
+            mv "$APK_DIR/app-$abi-release.apk" "$OUT/lipilekhika_${VERSION}_${abi}.apk"
+          done
+          mv mobile-app/android/app/build/outputs/bundle/release/app-release.aab "$OUT/lipilekhika_${VERSION}.aab"
+          ls -la "$OUT"
+          echo "OUT=$OUT" >> $GITHUB_OUTPUT
 
-      # Build release APK (split per ABI)
-      - name: Build release APK
+      # Each split APK has only its ABI's native libraries (the Rust library and nothing else)
+      - name: Verify native libraries
+        shell: bash
         run: |
-          cd mobile-app
-          flutter build apk --release --split-per-abi
+          OUT="${{ steps.outputs.outputs.OUT }}"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            unzip -l "$OUT/lipilekhika_${VERSION}_${abi}.apk" | grep "lib/" | tee /tmp/libs.txt
+            grep -q "lib/$abi/liblipilekhika_kotlin.so" /tmp/libs.txt || { echo "missing the $abi library"; exit 1; }
+            if grep -v "lib/$abi/" /tmp/libs.txt | grep -q "\.so"; then echo "other ABIs in the $abi APK"; exit 1; fi
+          done
 
-      # Rename APKs to lipilekhika_version_arch.apk format
-      - name: Rename split APKs
-        run: |
-          cd mobile-app/build/app/outputs/flutter-apk
-          mv app-arm64-v8a-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_arm64-v8a.apk
-          mv app-armeabi-v7a-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_armeabi-v7a.apk
-          mv app-x86_64-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_x86_64.apk
-
-      # Upload split APKs as artifacts
-      - name: Upload split APKs as artifacts
+      - name: Upload APKs and AAB as artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: release-apks
-          path: |
-            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_arm64-v8a.apk
-            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_armeabi-v7a.apk
-            mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_x86_64.apk
+          name: release-files
+          path: ${{ steps.outputs.outputs.OUT }}/*
           retention-days: 30
 
-      # Also build a fat APK (all architectures in one)
-      - name: Build universal APK
-        run: |
-          cd mobile-app
-          flutter build apk --release
-
-      - name: Rename universal APK
-        run: |
-          cd mobile-app/build/app/outputs/flutter-apk
-          mv app-release.apk lipilekhika_${{ steps.get_version.outputs.VERSION }}_universal.apk
-
-      - name: Upload universal APK as artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: release-apk-universal
-          path: mobile-app/build/app/outputs/flutter-apk/lipilekhika_${{ steps.get_version.outputs.VERSION }}_universal.apk
-          retention-days: 30
-
-      # Build AAB for Google Play Console
-      - name: Build release AAB
-        run: |
-          cd mobile-app
-          flutter build appbundle --release
-
-      - name: Rename AAB
-        run: |
-          cd mobile-app/build/app/outputs/bundle/release
-          mv app-release.aab lipilekhika_${{ steps.get_version.outputs.VERSION }}.aab
-
-      - name: Upload AAB as artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: release-aab
-          path: mobile-app/build/app/outputs/bundle/release/lipilekhika_${{ steps.get_version.outputs.VERSION }}.aab
-          retention-days: 30
-
-      # Upload architecture-specific APKs to the GitHub release (with --clobber to allow re-runs);
-      # a dry run only keeps the APKs / AAB as the workflow artifacts above
+      # Upload the APKs to the GitHub release (with --clobber to allow re-runs);
+      # a dry run only keeps them as the workflow artifacts above
       - name: Upload APKs to release
         if: ${{ !inputs.dry_run }}
         env:
@@ -253,17 +183,8 @@ jobs:
         run: |
           TAG="${{ steps.normalized_tag.outputs.TAG }}"
           VERSION="${{ steps.get_version.outputs.VERSION }}"
-          APK_DIR="mobile-app/build/app/outputs/flutter-apk"
-
-          echo "Uploading architecture-specific APKs to release $TAG"
-
-          # Upload arm64-v8a APK
-          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_arm64-v8a.apk" --clobber
-
-          # Upload armeabi-v7a APK
-          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_armeabi-v7a.apk" --clobber
-
-          # Upload x86_64 APK
-          gh release upload "$TAG" "$APK_DIR/lipilekhika_${VERSION}_x86_64.apk" --clobber
-
-          echo "Successfully uploaded all APKs to release"
+          OUT="${{ steps.outputs.outputs.OUT }}"
+          for abi in arm64-v8a armeabi-v7a x86_64 universal; do
+            gh release upload "$TAG" "$OUT/lipilekhika_${VERSION}_${abi}.apk" --clobber
+          done
+          echo "Uploaded the APKs to release $TAG"
