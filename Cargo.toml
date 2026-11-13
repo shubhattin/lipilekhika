@@ -15,9 +15,6 @@ resolver = "3"
 # a patched copy of GPUI's Linux backend, see desktop-client/vendor/README.md
 exclude = ["desktop-client/vendor"]
 
-[patch.crates-io]
-gpui-pre-linux = { path = "desktop-client/vendor/gpui-pre-linux" }
-
 [profile.bench]
 lto = true
 codegen-units = 1

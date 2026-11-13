@@ -5,3 +5,9 @@ rustflags = ["-C", "target-feature=-crt-static"]
 
 [target.aarch64-unknown-linux-musl]
 rustflags = ["-C", "target-feature=-crt-static"]
+
+# A patched copy of GPUI's Linux backend for the desktop app, see desktop-client/vendor/README.md.
+# Here and not in the root Cargo.toml: the Python sdist (maturin) ships the root Cargo.toml but
+# not desktop-client/, so a [patch] there points at a missing path and the wheel build fails.
+[patch.crates-io]
+gpui-pre-linux = { path = "desktop-client/vendor/gpui-pre-linux" }
