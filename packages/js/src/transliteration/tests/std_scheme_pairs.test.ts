@@ -2,8 +2,8 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { transliterate } from '../index';
-import type { script_list_type } from '../utils/lang_list';
+import { transliterate } from '../../index';
+import type { script_list_type } from '../../utils/lang_list';
 
 /**
  * Between two romanizations, at least one of them a standard scheme, the text is transliterated
@@ -12,7 +12,7 @@ import type { script_list_type } from '../utils/lang_list';
 const SCHEMES: script_list_type[] = ['SLP1', 'Harvard-Kyoto', 'ITRANS', 'IAST'];
 const ROMANIZATIONS: script_list_type[] = [...SCHEMES, 'Romanized', 'Normal'];
 
-const folder = path.resolve(__dirname, '../../../../test_data/transliteration/std-slp1');
+const folder = path.resolve(__dirname, '../../../../../test_data/transliteration/std-slp1');
 const inputs = fs
   .readdirSync(folder)
   .filter((file) => file.endsWith('.yaml'))

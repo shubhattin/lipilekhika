@@ -4,18 +4,18 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import type { script_input_name_type } from '../utils/lang_list/script_normalization';
-import { TestDataTypeSchema } from './test_commons';
-import { VEDIC_SVARAS } from './helpers';
-import { transliterate as transliterate_js, preloadScriptData } from '../index';
-// import { transliterate_node } from '../node';
-// import { transliterate_wasm } from '../index_wasm';
+import type { script_input_name_type } from '../../utils/lang_list/script_normalization';
+import { TestDataTypeSchema } from '../test_commons';
+import { VEDIC_SVARAS } from '../helpers';
+import { transliterate as transliterate_js, preloadScriptData } from '../../index';
+// import { transliterate_node } from '../../node';
+// import { transliterate_wasm } from '../../index_wasm';
 
 const transliterate_fn = transliterate_js;
 // const transliterate_fn = transliterate_node;
 // const transliterate_fn = transliterate_wasm;
 
-const TEST_DATA_FOLDER = path.resolve(__dirname, '../../../../test_data/transliteration');
+const TEST_DATA_FOLDER = path.resolve(__dirname, '../../../../../test_data/transliteration');
 const TEST_FILES_TO_IGNORE: string[] = [];
 
 const listYamlFiles = (directory: string): string[] => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { transliterate } from '../index';
-import { getScriptData } from '../utils/get_script_data';
-import { SCRIPT_LIST } from '../utils/lang_list';
+import { transliterate } from '../../index';
+import { getScriptData } from '../../utils/get_script_data';
+import { SCRIPT_LIST } from '../../utils/lang_list';
 
 /**
  * Text can be in any Unicode normalization form: a keyboard or font may store a two-part vowel

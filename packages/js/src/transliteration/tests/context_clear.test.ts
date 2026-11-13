@@ -1,4 +1,4 @@
-import { transliterate_text } from './transliterate';
+import { transliterate_text } from '../transliterate';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -17,7 +17,7 @@ const schema = z.object({
   context: z.number()
 });
 
-const data_folder = path.join(__dirname, '../../../../test_data/typing/context');
+const data_folder = path.join(__dirname, '../../../../../test_data/typing/context');
 
 describe('Context Clear (Typing Mode)', () => {
   for (const file of fs.readdirSync(data_folder)) {

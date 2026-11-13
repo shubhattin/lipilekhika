@@ -2,10 +2,10 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { transliterate } from '../index';
-import { getScriptData } from '../utils/get_script_data';
-import { SCRIPT_LIST } from '../utils/lang_list';
-import type { script_list_type } from '../utils/lang_list';
+import { transliterate } from '../../index';
+import { getScriptData } from '../../utils/get_script_data';
+import { SCRIPT_LIST } from '../../utils/lang_list';
+import type { script_list_type } from '../../utils/lang_list';
 
 /**
  * A letter can have more than one spelling in a romanization (ITRANS `A` / `aa`, `kSh` / `x`,
@@ -104,7 +104,7 @@ const REWRITES: Partial<Record<script_list_type, [string, (text: string) => stri
   SLP1: [['|', sub(/Lh/g, '|')]]
 };
 
-const STD_DATA_FOLDER = path.resolve(__dirname, '../../../../test_data/transliteration');
+const STD_DATA_FOLDER = path.resolve(__dirname, '../../../../../test_data/transliteration');
 
 describe('The standard scheme test data in its alternate spellings', () => {
   for (const [script, rewrites] of Object.entries(REWRITES) as [

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { transliterate } from '../index';
-import { getScriptData } from '../utils/get_script_data';
-import { SCRIPT_LIST } from '../utils/lang_list';
+import { transliterate } from '../../index';
+import { getScriptData } from '../../utils/get_script_data';
+import { SCRIPT_LIST } from '../../utils/lang_list';
 import { kramaLabelIndex } from '@lipilekhika/script-data/krama_array_keys';
-import { emulateTyping } from './test_commons';
-import { getScriptTypingDataMap } from '../typing';
+import { emulateTyping } from '../test_commons';
+import { getScriptTypingDataMap } from '../../typing';
 
 /**
  * Alternate krama keys (A1, u1, g1, ...) have a distinct form only in some scripts

@@ -1,15 +1,15 @@
 import path from 'path';
-import { emulateTyping, TestDataTypeSchema, typing_test_data_schema } from './test_commons';
+import { emulateTyping, TestDataTypeSchema, typing_test_data_schema } from '../test_commons';
 import { describe, expect, it } from 'vitest';
 import YAML from 'yaml';
 import * as fs from 'node:fs';
-import type { script_and_lang_list_type } from '../utils/lang_list';
-import { transliterate } from '../index';
-import { VEDIC_SVARAS } from './helpers';
+import type { script_and_lang_list_type } from '../../utils/lang_list';
+import { transliterate } from '../../index';
+import { VEDIC_SVARAS } from '../helpers';
 
 const INPUT_FOLDERS = [
-  path.join(__dirname, '../../../../test_data/transliteration/auto-nor-brahmic'),
-  path.join(__dirname, '../../../../test_data/transliteration/auto-nor-other')
+  path.join(__dirname, '../../../../../test_data/transliteration/auto-nor-brahmic'),
+  path.join(__dirname, '../../../../../test_data/transliteration/auto-nor-other')
 ];
 
 describe('Emulate Typing', () => {
@@ -50,7 +50,7 @@ describe('Emulate Typing', () => {
   }
 });
 
-const TEST_DATA_FOLDER = path.join(__dirname, '../../../../test_data/typing');
+const TEST_DATA_FOLDER = path.join(__dirname, '../../../../../test_data/typing');
 
 describe('Typing Mode', () => {
   const yamlFiles = listYamlFiles(TEST_DATA_FOLDER);

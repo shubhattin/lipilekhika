@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest';
-import { get_active_custom_options } from './transliterate';
-import { getScriptData } from '../utils/get_script_data';
-import type { script_list_type } from '../utils/lang_list';
-import type { CustomOptionList, CustomOptionType } from './transliterate';
+import { get_active_custom_options } from '../transliterate';
+import { getScriptData } from '../../utils/get_script_data';
+import type { script_list_type } from '../../utils/lang_list';
+import type { CustomOptionList, CustomOptionType } from '../transliterate';
 
 const COMBINATIONS: [script_list_type, script_list_type, CustomOptionType, CustomOptionList[]][] = [
   // All to Normal
