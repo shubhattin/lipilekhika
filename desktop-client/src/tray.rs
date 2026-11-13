@@ -468,3 +468,43 @@ fn poll_tray_events(
     }
   }
 }
+
+/// Whether the system shows tray icons: the app can wait in the tray. Windows and macOS always
+/// do. On Linux a tray host has to run (KDE, most panels; GNOME only with the AppIndicator
+/// extension): without one the app closes instead of hiding.
+pub fn is_available() -> bool {
+  #[cfg(target_os = "linux")]
+  {
+    static AVAILABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *AVAILABLE.get_or_init(linux_tray_host_running)
+  }
+  #[cfg(not(target_os = "linux"))]
+  {
+    true
+  }
+}
+
+/// Asks the session bus whether the StatusNotifier host (which shows the tray icons) is there
+#[cfg(target_os = "linux")]
+fn linux_tray_host_running() -> bool {
+  use gtk::gio;
+  use gtk::glib::{ToVariant as _, VariantTy};
+  let Ok(bus) = gio::bus_get_sync(gio::BusType::Session, None::<&gio::Cancellable>) else {
+    return false;
+  };
+  bus
+    .call_sync(
+      Some("org.freedesktop.DBus"),
+      "/org/freedesktop/DBus",
+      "org.freedesktop.DBus",
+      "NameHasOwner",
+      Some(&("org.kde.StatusNotifierWatcher",).to_variant()),
+      Some(VariantTy::new("(b)").unwrap()),
+      gio::DBusCallFlags::NONE,
+      1000,
+      None::<&gio::Cancellable>,
+    )
+    .ok()
+    .and_then(|reply| reply.get::<(bool,)>())
+    .is_some_and(|(running,)| running)
+}

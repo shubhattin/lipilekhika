@@ -42,8 +42,14 @@ const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
 
 /// Closing the main window keeps the app running in the tray, where the system wide typing goes
 /// on (Windows, macOS). Linux has no system wide typing: closing the main window quits there, its
-/// header has a button to hide it to the tray.
+/// header has a button to hide it to the tray (when there is a tray).
 const CLOSE_TO_TRAY: bool = crate::platform::SYSTEM_TYPING_SUPPORTED;
+
+/// Whether the main window's close button hides it to the tray: [`CLOSE_TO_TRAY`], and the system
+/// shows tray icons. Without a tray the app closes, it would be out of reach otherwise.
+fn close_to_tray() -> bool {
+  CLOSE_TO_TRAY && crate::tray::is_available()
+}
 
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
@@ -264,8 +270,9 @@ fn close_owned_windows(owner: WindowId, cx: &mut App) {
 /// The main window is closing (its close button, Alt+F4)
 fn main_should_close(window: &mut Window, cx: &mut App) -> bool {
   close_owned_windows(window.window_handle().window_id(), cx);
-  if CLOSE_TO_TRAY {
+  if close_to_tray() {
     cx.global_mut::<Controller>().main_in_tray = true;
+    show_popup(notification::Popup::InTray, cx);
   }
   true
 }
@@ -314,6 +321,7 @@ pub fn hide_main_to_tray(window: &mut gpui_kit::Window, cx: &mut App) {
   close_owned_windows(window.window_handle().window_id(), cx);
   cx.global_mut::<Controller>().main_in_tray = true;
   window.remove_window();
+  show_popup(notification::Popup::InTray, cx);
 }
 
 pub fn open_parivartaka(cx: &mut App) {
@@ -426,13 +434,18 @@ pub fn open_typing_help(
 
 /// The small "Typing : On/Off" popup at the top of the screen (from the shortcut or the tray)
 pub fn show_typing_notification(cx: &mut App) {
-  if let Some(old) = cx.global_mut::<Controller>().notification.take() {
-    let _ = old.update(cx, |_, window, _| window.remove_window());
-  }
   let enabled = Controller::app_state(cx)
     .typing_enabled
     .load(Ordering::SeqCst);
-  let (w, h) = (190., 50.);
+  show_popup(notification::Popup::Typing(enabled), cx);
+}
+
+/// A short popup at the top of the screen (it takes no focus and goes away by itself)
+fn show_popup(popup: notification::Popup, cx: &mut App) {
+  if let Some(old) = cx.global_mut::<Controller>().notification.take() {
+    let _ = old.update(cx, |_, window, _| window.remove_window());
+  }
+  let (w, h) = (popup.width(), 50.);
   let origin = cx
     .primary_display()
     .map(|d| {
@@ -468,7 +481,7 @@ pub fn show_typing_notification(cx: &mut App) {
   };
   match cx.open_window(options, |window, cx| {
     native::round_corners(window);
-    cx.new(|_| notification::TypingNotification::new(enabled))
+    cx.new(|_| notification::PopupView::new(popup))
   }) {
     Ok(handle) => {
       let handle: AnyWindowHandle = handle.into();
@@ -486,7 +499,7 @@ pub fn show_typing_notification(cx: &mut App) {
       })
       .detach();
     }
-    Err(err) => eprintln!("Failed to open the typing notification: {err}"),
+    Err(err) => eprintln!("Failed to open the popup: {err}"),
   }
 }
 
@@ -536,11 +549,15 @@ fn on_window_closed(id: WindowId, cx: &mut App) {
     .app_state
     .app_window_active
     .store(any_active, Ordering::SeqCst);
-  // Closing the main window quits the app when it does not close to the tray (Linux). Without the
-  // main window (Lipi Parivartaka opened on its own there), the app quits with its last window.
-  let others_open = controller.parivartaka.is_some() || controller.helper.is_some();
-  let main_gone = controller.main.is_none() && !controller.main_in_tray;
-  if main_closed || (main_gone && !others_open) {
+  // Closing the main window quits the app when it does not close to the tray. The app quits with
+  // its last window too, unless the main window was hidden to the tray: Lipi Parivartaka (or the
+  // typing help) started on its own leaves nothing behind in the tray. Only when the system wide
+  // typing was turned on meanwhile (from the tray) does the app stay there.
+  let none_open =
+    controller.main.is_none() && controller.parivartaka.is_none() && controller.helper.is_none();
+  let typing_on = controller.app_state.typing_enabled.load(Ordering::SeqCst);
+  let stays_in_tray = controller.main_in_tray || (typing_on && close_to_tray());
+  if main_closed || (none_open && !stays_in_tray) {
     cx.quit();
   }
 }
@@ -609,8 +626,8 @@ pub fn run(
         helper: None,
         notification: None,
         active_windows: HashSet::new(),
-        // started for another window: the main window waits in the tray
-        main_in_tray: CLOSE_TO_TRAY && startup_view != StartupView::Main,
+        // set when the main window is hidden to the tray
+        main_in_tray: false,
         theme,
         update: update::UpdateState::default(),
       });

@@ -165,14 +165,17 @@ impl MainWindow {
       .child(div().flex_1())
       .child(Self::theme_button(cx))
       .child(super::about::more_button(AboutOf::LipiLekhika))
-      .child(
-        Button::new("to-tray")
-          .ghost()
-          .small()
-          .icon(IconName::WindowMinimize)
-          .tooltip("Hide to the tray (the app keeps running)")
-          .on_click(|_, window, cx| super::hide_main_to_tray(window, cx)),
-      )
+      // only where the system shows the tray icon (the app would be out of reach otherwise)
+      .when(crate::tray::is_available(), |el| {
+        el.child(
+          Button::new("to-tray")
+            .ghost()
+            .small()
+            .icon(IconName::WindowMinimize)
+            .tooltip("Hide to the tray (the app keeps running)")
+            .on_click(|_, window, cx| super::hide_main_to_tray(window, cx)),
+        )
+      })
   }
 
   /// The way into Lipi Parivartaka: a large two line button
