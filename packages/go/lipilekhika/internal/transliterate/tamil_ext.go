@@ -17,26 +17,26 @@ import (
 //
 // eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒), ரு॒॑² (ऋ॒॑)
 //
-// In the match the superscript takes the place of these, which are read next. On a match it sets
-// `taExtSkipIndex` (the superscript, skipped when the cursor gets there) and
-// `taExtSuperscriptDetached`.
+// In the match the superscript takes the place of these, which are read next.
 //
 //   - `nextChars`: the characters that can continue the current match
 //   - `charToSearch`: the text of the current match, `endIndex` the index after it
 //   - `nthCh`, `nthOk`: the character at `endIndex`
 //
-// It returns the index in the text to krama map of the match with the superscript, `-1` if this
-// is not the case
+// It returns the index in the text to krama map of the match with the superscript (`-1` if this
+// is not the case), the index of the superscript in the input (it is skipped when the cursor gets
+// there, see `taExtSkipIndex`) and `detached`: only Vedic svaras are in between and no superscript
+// was being skipped, the superscript is not advanced over with the match.
 func (ctx *transliterateCtx) taExtMatchWithSuperscript(
 	nextChars []rune,
 	charToSearch string,
 	endIndex int,
 	nthCh rune,
 	nthOk bool,
-) int {
+) (matchIndex, supIndex int, detached bool) {
 	cursor := &ctx.cursor
 	fromData := ctx.fromData
-	supIndex := endIndex
+	supIndex = endIndex
 	hasSign := nthOk && (runeIsStr(nthCh, fromData.Halant) || isMatraChar(fromData, nthCh))
 	if hasSign {
 		supIndex++
@@ -59,20 +59,16 @@ func (ctx *transliterateCtx) taExtMatchWithSuperscript(
 		// no superscript is being skipped, or (with only svaras in between) the
 		// skipped one is inside this match: the ² of க்² in க்²ரு॑² (खृ॑)
 		!(ctx.taExtSkipIndex == -1 || (!hasSign && ctx.taExtSkipIndex < endIndex)) {
-		return -1
+		return -1, -1, false
 	}
-	matchIndex := fromData.TextToKramaMapIndex(charToSearch+string(supCh), false)
+	matchIndex = fromData.TextToKramaMapIndex(charToSearch+string(supCh), false)
 	if matchIndex < 0 {
-		return -1
+		return -1, -1, false
 	}
 	// With only svaras in between, a superscript already skipped inside this
 	// match (the ² of க்² in க்²ரு॑²) makes up for the one after the svaras in
 	// the match length, so the whole match is advanced over.
-	if !hasSign {
-		ctx.taExtSuperscriptDetached = ctx.taExtSkipIndex == -1
-	}
-	ctx.taExtSkipIndex = supIndex
-	return matchIndex
+	return matchIndex, supIndex, !hasSign && ctx.taExtSkipIndex == -1
 }
 
 // taExtSplitBeforeHalantMatra (Step 1, from Tamil-Extended): the match ends with a halant, or a
@@ -142,11 +138,12 @@ func (ctx *transliterateCtx) taExtSplitBeforeHalantMatra(
 //
 // (only relevant while skipping a Tamil-Extended superscript; evaluated lazily)
 func (ctx *transliterateCtx) taExtUnconsumedSuperscriptUnits(
+	superscriptDetached bool,
 	matchedText string,
 	matchedCharCount int,
 	m *scriptdata.TextToKramaMap,
 ) int {
-	if ctx.taExtSuperscriptDetached {
+	if superscriptDetached {
 		return 1
 	}
 	if ctx.taExtSkipIndex != -1 && matchedCharCount > 1 && len(m.Krama) > 0 &&

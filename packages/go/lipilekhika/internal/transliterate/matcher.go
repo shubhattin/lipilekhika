@@ -123,8 +123,10 @@ func (ctx *transliterateCtx) nfdSplitBeforeMarkedLetter(matchIndex, textIndex, e
 // scanLongestMatch follows the `next` characters of the entries of the map to the longest text at
 // `textIndex`, where the character is `ch`.
 //
-// It returns the index in `ctx.textToKramaMap`, `-1` if no match
-func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
+// It returns the index in `ctx.textToKramaMap` (`-1` if no match), and from Tamil-Extended the
+// superscript read with the match (`supIndex`, `-1` if none, and `supDetached`, see
+// `taExtMatchWithSuperscript`)
+func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) (matchIndex, supIndex int, supDetached bool) {
 	cursor := &ctx.cursor
 	lookupData, useTypingMap := ctx.lookupData, ctx.useTypingMap
 	scanUnits := 0
@@ -141,7 +143,6 @@ func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
 		// The single-char fast path never reads `charToSearch` unless the match
 		// has a `next` list, so build the slice lazily.
 		charToSearch := ""
-		var matchIndex int
 		if singleCharLookup {
 			// more scan units only needed in case ta-ext so safe to do
 			matchIndex = lookupData.TextToKramaMapCharIndex(ch, useTypingMap)
@@ -150,7 +151,7 @@ func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
 			matchIndex = lookupData.TextToKramaMapIndex(charToSearch, useTypingMap)
 		}
 		if matchIndex < 0 {
-			return -1
+			return -1, -1, false
 		}
 		potentialMatch := &ctx.textToKramaMap[matchIndex].Value
 
@@ -164,7 +165,7 @@ func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
 				if isSingleVowel {
 					lastValidVowelMatchIndex = matchIndex
 				} else if lastValidVowelMatchIndex >= 0 {
-					return lastValidVowelMatchIndex
+					return lastValidVowelMatchIndex, -1, false
 				}
 			}
 		}
@@ -179,12 +180,11 @@ func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
 				if singleCharLookup {
 					charToSearch = cursor.slice(textIndex, endIndex)
 				}
-				taExtIndex := ctx.taExtMatchWithSuperscript(nextChars, charToSearch, endIndex, nthCh, nthOk)
-				if taExtIndex < 0 {
-					taExtIndex = ctx.taExtSplitBeforeHalantMatra(nextChars, charToSearch, endIndex, nthCh, nthOk)
+				if index, sup, detached := ctx.taExtMatchWithSuperscript(nextChars, charToSearch, endIndex, nthCh, nthOk); index >= 0 {
+					return index, sup, detached
 				}
-				if taExtIndex >= 0 {
-					return taExtIndex
+				if index := ctx.taExtSplitBeforeHalantMatra(nextChars, charToSearch, endIndex, nthCh, nthOk); index >= 0 {
+					return index, -1, false
 				}
 			}
 
@@ -197,10 +197,10 @@ func (ctx *transliterateCtx) scanLongestMatch(ch rune, textIndex int) int {
 
 		if scanUnits > 0 && ctx.taExtSkipIndex == -1 && ctx.fromIsOther {
 			if headIndex := ctx.nfdSplitBeforeMarkedLetter(matchIndex, textIndex, endIndex); headIndex >= 0 {
-				return headIndex
+				return headIndex, -1, false
 			}
 		}
-		return matchIndex
+		return matchIndex, -1, false
 	}
 }
 
@@ -245,24 +245,22 @@ func (ctx *transliterateCtx) splitOmInsideWord(matchIndex, textIndex int) int {
 
 // matchTextToKrama is Step 1: match text_to_krama_map / typing_text_to_krama_map
 //
-// It can set `taExtSkipIndex` and `taExtSuperscriptDetached` (from Tamil-Extended).
+// It only reads the context: a Tamil-Extended superscript read with the match is returned (the
+// loop then skips it), also when the match itself is dropped here.
 //
 // (the Tamil-Extended matches index into `fromData.TextToKramaMapArr`, which is
 // `ctx.textToKramaMap` as the typing map is only used with `Normal` as the input)
 //
-// `ch` is the character at `textIndex`. It returns the index in `ctx.textToKramaMap`, `-1` if no
-// match
-func (ctx *transliterateCtx) matchTextToKrama(ch rune, textIndex int) int {
-	ctx.taExtSuperscriptDetached = false
-	matchIndex := ctx.scanLongestMatch(ch, textIndex)
+// `ch` is the character at `textIndex`. The results are the ones of scanLongestMatch.
+func (ctx *transliterateCtx) matchTextToKrama(ch rune, textIndex int) (matchIndex, supIndex int, supDetached bool) {
+	matchIndex, supIndex, supDetached = ctx.scanLongestMatch(ch, textIndex)
 	if matchIndex < 0 {
-		return -1
+		return
 	}
 	if ctx.isDeadConsonantSignWithoutBase(matchIndex, textIndex) {
-		return -1
+		matchIndex = -1
+	} else if ctx.omOnlyAtWordStart {
+		matchIndex = ctx.splitOmInsideWord(matchIndex, textIndex)
 	}
-	if ctx.omOnlyAtWordStart {
-		return ctx.splitOmInsideWord(matchIndex, textIndex)
-	}
-	return matchIndex
+	return
 }

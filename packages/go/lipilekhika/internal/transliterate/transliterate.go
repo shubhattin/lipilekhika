@@ -113,6 +113,12 @@ func (ctx *transliterateCtx) emitPreservedCustomChar(textIndex int) bool {
 	return true
 }
 
+// mayBePassthroughChar is the cheap test before emitPassthroughChar (small enough to be inlined
+// into the loop, so a letter costs no call here)
+func (ctx *transliterateCtx) mayBePassthroughChar(ch rune) bool {
+	return isSkipChar(ch) || (ch >= '0' && ch <= '9') || ctx.preserveSpecificChars
+}
+
 // emitPassthroughChar handles the characters that are copied as they are (not looked up in the
 // script data).
 //
@@ -282,7 +288,9 @@ func (ctx *transliterateCtx) emitPrefixOnlyMatch(matchedText string, next []stri
 // of the match, `ch`.
 //
 // It returns `false` when the entry has no krama of its own: its text is read in Step 2
-func (ctx *transliterateCtx) emitMatch(matchIndex int, ch rune) bool {
+//
+// `superscriptDetached`: see taExtMatchWithSuperscript
+func (ctx *transliterateCtx) emitMatch(matchIndex int, ch rune, superscriptDetached bool) bool {
 	entry := &ctx.textToKramaMap[matchIndex]
 	matchedText := entry.Text
 	m := &entry.Value
@@ -292,7 +300,7 @@ func (ctx *transliterateCtx) emitMatch(matchIndex int, ch rune) bool {
 	if len(matchedText) != utf8.RuneLen(ch) {
 		matchedCharCount = utf8.RuneCountInString(matchedText)
 	}
-	ctx.cursor.advance(matchedCharCount - ctx.taExtUnconsumedSuperscriptUnits(matchedText, matchedCharCount, m))
+	ctx.cursor.advance(matchedCharCount - ctx.taExtUnconsumedSuperscriptUnits(superscriptDetached, matchedText, matchedCharCount, m))
 
 	if ctx.useTypingChars && m.CustomBackRef != nil &&
 		*m.CustomBackRef >= 0 && int(*m.CustomBackRef) < len(ctx.toData.CustomScriptCharsArr) {
@@ -440,14 +448,18 @@ func TransliterateTextCoreWith(
 		if ctx.skipConsumedTaExtSuperscript(textIndex) {
 			continue
 		}
-		if ctx.emitPassthroughChar(ch, textIndex) {
+		if ctx.mayBePassthroughChar(ch) && ctx.emitPassthroughChar(ch, textIndex) {
 			continue
 		}
 
 		// Step 1: match text_to_krama_map / typing_text_to_krama_map
-		matchIndex := ctx.matchTextToKrama(ch, textIndex)
+		matchIndex, supIndex, supDetached := ctx.matchTextToKrama(ch, textIndex)
+		// a Tamil-Extended superscript read with the match is skipped when the cursor gets there
+		if supIndex >= 0 {
+			ctx.taExtSkipIndex = supIndex
+		}
 		if matchIndex >= 0 {
-			if ctx.emitMatch(matchIndex, ch) {
+			if ctx.emitMatch(matchIndex, ch, supDetached) {
 				continue
 			}
 		} else {

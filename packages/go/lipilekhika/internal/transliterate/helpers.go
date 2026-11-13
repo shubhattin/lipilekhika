@@ -234,10 +234,13 @@ type prevContextEntry struct {
 type prevContextBuilder struct {
 	arr [prevContextMaxLen]prevContextEntry
 	len int
+	// kind of the last item (`ListKindNone` if there is none), the one read for every character
+	last scriptdata.ListKind
 }
 
 func (p *prevContextBuilder) clear() {
 	p.len = 0
+	p.last = scriptdata.ListKindNone
 }
 
 func (p *prevContextBuilder) length() int {
@@ -263,6 +266,12 @@ func (p *prevContextBuilder) typeAt(i int) scriptdata.ListKind {
 	return scriptdata.ListKindNone
 }
 
+// lastKind returns the kind of the last item (`ListKindNone` if there is none): `typeAt(-1)`,
+// cheap enough to be inlined with its caller.
+func (p *prevContextBuilder) lastKind() scriptdata.ListKind {
+	return p.last
+}
+
 // textAt returns the text at index `i` ("" if missing; stored texts are never empty).
 func (p *prevContextBuilder) textAt(i int) string {
 	if e := p.at(i); e != nil {
@@ -277,6 +286,7 @@ func (p *prevContextBuilder) push(text string, kind scriptdata.ListKind) {
 		return
 	}
 	entry := prevContextEntry{text: text, kind: kind}
+	p.last = kind
 	if p.len == prevContextMaxLen {
 		copy(p.arr[:], p.arr[1:])
 		p.arr[prevContextMaxLen-1] = entry

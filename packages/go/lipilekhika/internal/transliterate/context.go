@@ -65,11 +65,9 @@ type transliterateCtx struct {
 	sinhalaConjunctHalant bool
 	// Index of a Tamil-Extended superscript that was read with the match before it (a halant, a
 	// mAtrA or Vedic svaras are written in between), to be skipped when the cursor gets there.
-	// `-1` if none. Used when converting from Tamil-Extended
+	// `-1` if none. Used when converting from Tamil-Extended. Only the main loop writes it (from
+	// the result of Step 1), the matcher reads it.
 	taExtSkipIndex int
-	// the matched text ends with a Tamil-Extended superscript that is not next to the rest of
-	// it in the input (a Vedic svara is in between), so it is not to be advanced over
-	taExtSuperscriptDetached bool
 }
 
 // init sets up the context for a call. `text` is the prepared input (typing aliases and the
@@ -159,18 +157,28 @@ func (ctx *transliterateCtx) init(
 }
 
 // prevEndsWithVyanjana reports whether the last context item is a vyanjana, or a vyanjana + nuqta
+//
+// (It and resultEndsWithTaExtSuperscript run for every character. The Go compiler only inlines
+// small functions, so each is the cheap test, with the rare one in a function of its own.)
 func (ctx *transliterateCtx) prevEndsWithVyanjana() bool {
-	prev := &ctx.prevCtx
-	return prev.typeAt(-1) == scriptdata.ListKindVyanjana ||
-		(ctx.hasNuqta &&
-			prev.typeAt(-2) == scriptdata.ListKindVyanjana &&
-			prev.textAt(-1) == ctx.brahmicNuqta)
+	return ctx.prevCtx.lastKind() == scriptdata.ListKindVyanjana || ctx.prevEndsWithVyanjanaNuqta()
+}
+
+// prevEndsWithVyanjanaNuqta reports whether the last two context items are a vyanjana + nuqta
+func (ctx *transliterateCtx) prevEndsWithVyanjanaNuqta() bool {
+	return ctx.hasNuqta &&
+		ctx.prevCtx.typeAt(-2) == scriptdata.ListKindVyanjana &&
+		ctx.prevCtx.textAt(-1) == ctx.brahmicNuqta
 }
 
 // resultEndsWithTaExtSuperscript reports whether the result ends with a Tamil-Extended
 // superscript (a mAtrA, halant or Vedic svara written next goes before it)
 func (ctx *transliterateCtx) resultEndsWithTaExtSuperscript() bool {
-	return ctx.isToTamilExt && isTaExtSuperscriptTail(ctx.result.lastChar())
+	return ctx.isToTamilExt && ctx.resultLastCharIsTaExtSuperscript()
+}
+
+func (ctx *transliterateCtx) resultLastCharIsTaExtSuperscript() bool {
+	return isTaExtSuperscriptTail(ctx.result.lastChar())
 }
 
 // emitHalant emits the (skipped) halant in other -> brahmic conversion
@@ -230,7 +238,7 @@ func (ctx *transliterateCtx) emitPendingSchwa(itemText string, itemKind scriptda
 // It returns `true` when the item (the mAtrA) was written to the result here
 func (ctx *transliterateCtx) joinToPrevVyanjana(itemText string, itemList *scriptdata.ListItem) bool {
 	itemKind := itemList.Kind()
-	prevIsVyanjana := ctx.prevCtx.typeAt(-1) == scriptdata.ListKindVyanjana
+	prevIsVyanjana := ctx.prevCtx.lastKind() == scriptdata.ListKindVyanjana
 	if prevIsVyanjana &&
 		(itemKind == scriptdata.ListKindMatra || itemKind == scriptdata.ListKindSvara) {
 		linkedMatra := itemText
