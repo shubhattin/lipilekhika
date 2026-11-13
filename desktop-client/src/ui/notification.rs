@@ -2,6 +2,7 @@
 
 use super::styles::GREEN;
 use gpui_kit::component::{ActiveTheme as _, Icon, h_flex};
+use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
   Context, IntoElement, ParentElement as _, Render, Styled as _, Window, div, px, rgb,
 };
@@ -28,15 +29,17 @@ impl Render for TypingNotification {
     } else {
       cx.theme().muted_foreground
     };
+    // On Windows the system rounds the window (and draws its border), the box fills it square.
+    // Elsewhere the window is transparent and the box is rounded.
     div()
       .size_full()
       .flex()
       .items_center()
       .justify_center()
-      .rounded(px(12.))
       .bg(rgb(0x18181b))
-      .border_1()
-      .border_color(rgb(0x3f3f46))
+      .when(!cfg!(windows), |el| {
+        el.rounded(px(12.)).border_1().border_color(rgb(0x3f3f46))
+      })
       .child(
         h_flex()
           .gap_2()

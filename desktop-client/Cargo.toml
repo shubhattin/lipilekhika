@@ -21,6 +21,9 @@ posthog-rs = { version = "0.3.5", default-features = false }
 dirs = "6.0.0"
 uuid = { version = "1.19", features = ["v4"] }
 unicode-general-category = "1"
+# one running app: a second start hands its request to the first (named pipe / unix socket)
+interprocess = "2"
+raw-window-handle = "0.6"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # tray-icon draws the tray menu with GTK on Linux, its thread runs the GTK main loop
@@ -34,6 +37,8 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Input_KeyboardAndMouse",
     "Win32_Globalization",
+    "Win32_System_Threading",
+    "Win32_Graphics_Dwm",
 ] }
 
 [target.'cfg(target_os = "macos")'.dependencies]

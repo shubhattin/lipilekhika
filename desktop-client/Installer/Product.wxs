@@ -20,6 +20,12 @@
         Schedule="afterInstallInitialize"
         DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
+    <!-- The app needs Windows 10 or newer (Rust and GPUI do). Windows Installer reports 603 on
+         Windows 8.1, 10 and 11, so this stops Windows 7 and 8 with a clear message. -->
+    <Condition Message="Lipi Lekhika needs Windows 10 or newer.">
+      <![CDATA[Installed OR VersionNT >= 603]]>
+    </Condition>
+
     <MediaTemplate EmbedCab="yes" />
     
     <Feature Id="ProductFeature" Title="Lipi Lekhika" Level="1">

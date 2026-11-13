@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 
 use windows::Win32::Foundation::{HINSTANCE, LPARAM, LRESULT, WPARAM};
+use windows::Win32::System::Threading::GetCurrentProcessId;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
   GetAsyncKeyState, GetKeyState, GetKeyboardLayout, GetKeyboardState, INPUT, INPUT_0,
   INPUT_KEYBOARD, KEYBD_EVENT_FLAGS, KEYBDINPUT, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE,
@@ -15,8 +16,8 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
   VK_CONTROL, VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-  CallNextHookEx, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT, LLKHF_ALTDOWN, SetWindowsHookExW,
-  UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
+  CallNextHookEx, GetForegroundWindow, GetWindowThreadProcessId, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT,
+  LLKHF_ALTDOWN, SetWindowsHookExW, UnhookWindowsHookEx, WH_KEYBOARD_LL, WH_MOUSE_LL,
 };
 
 thread_local! {
@@ -297,6 +298,19 @@ unsafe extern "system" fn low_level_mouse_proc(
   unsafe { CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam) }
 }
 
+/// Whether the window in front (the one getting the keys) is one of the app's own
+fn is_own_window_in_front() -> bool {
+  unsafe {
+    let hwnd = GetForegroundWindow();
+    if hwnd.is_invalid() {
+      return false;
+    }
+    let mut pid = 0u32;
+    GetWindowThreadProcessId(hwnd, Some(&mut pid));
+    pid == GetCurrentProcessId()
+  }
+}
+
 /// Low-level keyboard hook procedure
 unsafe extern "system" fn low_level_keyboard_proc(
   code: i32,
@@ -320,6 +334,12 @@ unsafe extern "system" fn low_level_keyboard_proc(
       // If we don't do this (and if we hold locks while injecting), the hook can deadlock / stop working.
       let is_injected = (kb.flags.0 & LLKHF_INJECTED_FLAG) != 0;
       if is_injected {
+        return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
+      }
+
+      // The app's own windows get their keys untouched: Lipi Parivartaka types with its own
+      // typing (and its own Alt+X), the main window handles Alt+X itself
+      if is_own_window_in_front() {
         return CallNextHookEx(Some(HHOOK::default()), code, wparam, lparam);
       }
 

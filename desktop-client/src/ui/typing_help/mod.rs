@@ -13,9 +13,9 @@ use gpui_kit::component::select::{Select, SelectEvent};
 use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-  Anchor, AnyElement, App, Context, Entity, Hsla, InteractiveElement as _, IntoElement,
-  ParentElement as _, Render, ScrollHandle, SharedString, StatefulInteractiveElement as _,
-  Styled as _, Subscription, Window, div, px,
+  Anchor, AnyElement, App, Context, Entity, FocusHandle, Hsla, InteractiveElement as _,
+  IntoElement, KeyDownEvent, ParentElement as _, Render, ScrollHandle, SharedString,
+  StatefulInteractiveElement as _, Styled as _, Subscription, Window, div, px,
 };
 use layout::{Cell, Group, Layout, SectionId, TypingControls, display_text, is_invisible};
 use lipilekhika::ScriptListEnum;
@@ -39,6 +39,8 @@ pub struct TypingHelp {
   script_select: Entity<ScriptSelectState>,
   compare_select: Entity<ScriptSelectState>,
   scroll: ScrollHandle,
+  /// the window's keys (Alt+X) reach the view through it
+  focus: FocusHandle,
   _subscriptions: Vec<Subscription>,
 }
 
@@ -90,7 +92,12 @@ impl TypingHelp {
         }
       }),
       cx.observe_window_appearance(window, |_, _, cx| super::on_system_appearance_changed(cx)),
+      cx.observe_window_activation(window, |_, window, cx| {
+        super::window_activation_changed(window, cx)
+      }),
     ];
+    let focus = cx.focus_handle();
+    window.focus(&focus, cx);
     let mut this = Self {
       script,
       compare,
@@ -101,6 +108,7 @@ impl TypingHelp {
       script_select,
       compare_select,
       scroll: ScrollHandle::new(),
+      focus,
       _subscriptions: subscriptions,
     };
     this.rebuild();
@@ -737,9 +745,17 @@ impl Render for TypingHelp {
     }
 
     v_flex()
+      .id("typing-help")
+      .track_focus(&self.focus)
       .size_full()
       .bg(theme.background)
       .text_color(theme.foreground)
+      .capture_key_down(|event: &KeyDownEvent, _, cx| {
+        if super::is_typing_toggle_key(event) {
+          super::toggle_typing_from_shortcut(cx);
+          cx.stop_propagation();
+        }
+      })
       .child(header)
       .child(toolbar)
       .child(nav)

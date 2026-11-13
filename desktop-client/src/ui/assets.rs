@@ -21,6 +21,7 @@ icon_assets!(pub ExtraIcons, [
   Type,
   Clipboard,
   ClipboardCheck,
+  Columns2,
 ]);
 
 pub struct AppAssets;

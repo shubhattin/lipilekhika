@@ -16,6 +16,7 @@ mod data;
 mod persistent_state;
 mod platform;
 mod posthog;
+mod single_instance;
 mod tray;
 mod ui;
 mod version_check;
@@ -26,6 +27,10 @@ pub struct AppState {
   /// both typing script and typing options are stored in the typing context
   pub typing_context: Mutex<TypingContext>,
   pub persitent_state: Mutex<PersitentState>,
+  /// one of the app's windows is in front: the keyboard hook leaves its keys alone (macOS; on
+  /// Windows the hook asks the system)
+  #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+  pub app_window_active: AtomicBool,
 }
 
 /// use to pass messages between threads
@@ -41,6 +46,8 @@ pub enum ThreadMessageOrigin {
   KeyboardHook,
   UI,
   Tray,
+  /// a second start of the app, handed over to the running one
+  OtherStart,
 }
 #[derive(Debug)]
 pub enum ThreadMessageType {
@@ -64,7 +71,7 @@ pub enum ThreadMessageType {
 pub enum StartupView {
   /// the typing tool window (default)
   Main,
-  /// only the Lipi Parivartaka window (`--parivartaka`), as its own start menu entry did before
+  /// only the Lipi Parivartaka window (`--parivartaka`), the typing tool stays in the tray
   Parivartaka,
   /// only the typing help (`--typing-help`, `--compare` for its Compare tab)
   TypingHelp { compare: bool },
@@ -81,6 +88,11 @@ fn main() {
   } else {
     StartupView::Main
   };
+
+  // the app runs once: a second start only brings the running app forward
+  if single_instance::forward_to_running_app(startup_view) {
+    return;
+  }
 
   // Create separate channels for UI and Tray
   // Each component gets its own dedicated receiver to avoid message competition
@@ -102,15 +114,12 @@ fn main() {
     typing_context: Mutex::new(typing_context),
     typing_enabled: AtomicBool::new(false),
     persitent_state: Mutex::new(persitent_state),
+    app_window_active: AtomicBool::new(false),
   });
 
-  // Lipi Parivartaka (or the typing help) opened on its own, from its start menu entry, runs
-  // without the keyboard hook and the tray: the typing tool may be running already, and a second
-  // hook would type every key twice.
-  let standalone = startup_view != StartupView::Main;
-
-  // Start keyboard hook thread (Windows and macOS only, Linux has no system wide typing yet)
-  if platform::SYSTEM_TYPING_SUPPORTED && !standalone {
+  // Start keyboard hook thread (Windows and macOS only, Linux has no system wide typing yet).
+  // The hook leaves the app's own windows alone: Lipi Parivartaka types with its own typing.
+  if platform::SYSTEM_TYPING_SUPPORTED {
     let state_clone = Arc::clone(&app_state);
     let tx_ui_clone = tx_ui.clone();
     let tx_tray_clone = tx_tray.clone();
@@ -123,16 +132,16 @@ fn main() {
     });
   }
 
-  if !standalone {
-    // Start tray icon thread
-    let state_clone = Arc::clone(&app_state);
-    let tx_ui_clone = tx_ui.clone();
-    let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
+  // Start tray icon thread
+  let state_clone = Arc::clone(&app_state);
+  let tx_ui_clone = tx_ui.clone();
+  let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
 
-    thread::spawn(|| {
-      posthog::init_posthog();
-    });
-  }
+  thread::spawn(|| {
+    posthog::init_posthog();
+  });
+
+  single_instance::listen(tx_ui.clone());
 
   // starts the UI event loop
   ui::run(app_state, rx_ui, tx_tray, startup_view);

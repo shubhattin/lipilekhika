@@ -191,6 +191,11 @@ pub fn build_event_tap_callback(
       return CallbackResult::Keep;
     }
 
+    // The app's own windows (Lipi Parivartaka has its own typing) get their keys untouched
+    if state.app_state.app_window_active.load(Ordering::SeqCst) {
+      return CallbackResult::Keep;
+    }
+
     let keycode = event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE) as u16;
     let flags = event.get_flags();
     let is_keydown = matches!(event_type, CGEventType::KeyDown);

@@ -2,11 +2,13 @@
 
 mod assets;
 mod main_window;
+mod native;
 mod notification;
 mod option_examples;
 mod parivartaka;
 mod script_select;
 mod styles;
+mod title_bar;
 mod typing_help;
 
 use crate::persistent_state::ThemePreference;
@@ -15,23 +17,32 @@ use crate::{AppState, StartupView, ThreadMessage, ThreadMessageOrigin, ThreadMes
 use crossbeam_channel::{Receiver, Sender};
 use gpui_kit::component::{Theme, ThemeMode};
 use gpui_kit::{
-  AnyWindowHandle, App, AppContext as _, Bounds, Global, QuitMode, SharedString, TitlebarOptions,
-  WindowAppearance, WindowBounds, WindowDecorations, WindowId, WindowKind, WindowOptions, point,
-  px, size,
+  AnyWindowHandle, App, AppContext as _, Bounds, Global, KeyDownEvent, QuitMode, SharedString,
+  TitlebarOptions, Window, WindowAppearance, WindowBackgroundAppearance, WindowBounds,
+  WindowDecorations, WindowId, WindowKind, WindowOptions, point, px, size,
 };
 use lipilekhika::ScriptListEnum;
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
 pub use typing_help::HelpTab;
 
-/// The main window's height (it has a note about the Fcitx5 plugin on Linux)
-const MAIN_HEIGHT: f32 = if crate::platform::SYSTEM_TYPING_SUPPORTED {
-  450.
+/// The main window's height (it has a note about the Fcitx5 plugin on Linux; on Windows the
+/// window's own title bar replaces the header)
+const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
+  490.
+} else if crate::platform::SYSTEM_TYPING_SUPPORTED {
+  510.
 } else {
-  530.
+  592.
 };
+
+/// Closing the main window keeps the app running in the tray, where the system wide typing goes
+/// on (Windows, macOS). Linux has no system wide typing: closing the main window quits there, its
+/// header has a button to hide it to the tray.
+const CLOSE_TO_TRAY: bool = crate::platform::SYSTEM_TYPING_SUPPORTED;
 
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
@@ -62,11 +73,10 @@ pub struct Controller {
   tx_tray: Sender<ThreadMessage>,
   main: Option<AnyWindowHandle>,
   parivartaka: Option<AnyWindowHandle>,
-  helper: Option<(
-    AnyWindowHandle,
-    gpui_kit::WeakEntity<typing_help::TypingHelp>,
-  )>,
+  helper: Option<Helper>,
   notification: Option<AnyWindowHandle>,
+  /// the app's windows that are active (in front), see [`window_activation_changed`]
+  active_windows: HashSet<WindowId>,
   /// the main window was closed to the tray (the app keeps running)
   main_in_tray: bool,
   pub theme: ThemePreference,
@@ -74,6 +84,14 @@ pub struct Controller {
 }
 
 impl Global for Controller {}
+
+/// The typing help window, a child of the window it was opened from
+struct Helper {
+  handle: AnyWindowHandle,
+  view: gpui_kit::WeakEntity<typing_help::TypingHelp>,
+  /// the main window or Lipi Parivartaka: the help stays above it and closes with it
+  owner: Option<WindowId>,
+}
 
 impl Controller {
   pub fn global(cx: &App) -> &Self {
@@ -166,34 +184,42 @@ pub fn on_system_appearance_changed(cx: &mut App) {
 
 // ---- Windows ----
 
-fn window_options(
-  title: &str,
+/// How a window opens
+struct WindowSpec {
+  title: &'static str,
   width: f32,
   height: f32,
   resizable: bool,
+  minimizable: bool,
   min: Option<(f32, f32)>,
+  /// a child of the window it is opened from
   child: bool,
-  cx: &App,
-) -> WindowOptions {
-  let bounds = Bounds::centered(None, size(px(width), px(height)), cx);
+  /// draws [`title_bar::title_bar`] itself (on Windows)
+  own_title_bar: bool,
+}
+
+fn window_options(spec: WindowSpec, cx: &App) -> WindowOptions {
+  let bounds = Bounds::centered(None, size(px(spec.width), px(spec.height)), cx);
+  let own_title_bar = spec.own_title_bar && title_bar::CUSTOM_TITLE_BAR;
   WindowOptions {
     window_bounds: Some(WindowBounds::Windowed(bounds)),
     titlebar: Some(TitlebarOptions {
-      title: Some(SharedString::from(title.to_string())),
-      appears_transparent: false,
+      title: Some(SharedString::from(spec.title)),
+      appears_transparent: own_title_bar,
       traffic_light_position: None,
     }),
-    is_resizable: resizable,
-    window_min_size: min.map(|(w, h)| size(px(w), px(h))),
+    is_resizable: spec.resizable,
+    is_minimizable: spec.minimizable,
+    window_min_size: spec.min.map(|(w, h)| size(px(w), px(h))),
     app_id: Some("lipilekhika".into()),
     icon: assets::app_icon_rgba(),
     window_decorations: Some(WindowDecorations::Server),
     focus: true,
     show: true,
     // On Linux the other windows are children of the window they are opened from: tiling
-    // compositors (Hyprland, sway) float them at their size instead of tiling them. Elsewhere a
-    // child window would stay above its parent and minimize with it.
-    kind: if child && cfg!(target_os = "linux") {
+    // compositors (Hyprland, sway) float them at their size instead of tiling them. On Windows
+    // the owner is set after the window opens (`native::set_owner`).
+    kind: if spec.child && cfg!(target_os = "linux") {
       WindowKind::Floating
     } else {
       WindowKind::Normal
@@ -202,14 +228,93 @@ fn window_options(
   }
 }
 
+/// Every app window tells when it becomes active or inactive: while one is in front the
+/// keyboard hook leaves the keys alone (Lipi Parivartaka types with its own typing)
+pub fn window_activation_changed(window: &Window, cx: &mut App) {
+  let id = window.window_handle().window_id();
+  let active = window.is_window_active();
+  let controller = cx.global_mut::<Controller>();
+  if active {
+    controller.active_windows.insert(id);
+  } else {
+    controller.active_windows.remove(&id);
+  }
+  let any_active = !controller.active_windows.is_empty();
+  controller
+    .app_state
+    .app_window_active
+    .store(any_active, Ordering::SeqCst);
+}
+
+/// Alt+X or Alt+C: in the app's own windows the keyboard hook does not see the keys, the main
+/// window and the typing help toggle the system wide typing with them (Lipi Parivartaka toggles
+/// its own typing)
+pub fn is_typing_toggle_key(event: &KeyDownEvent) -> bool {
+  let m = &event.keystroke.modifiers;
+  crate::platform::SYSTEM_TYPING_SUPPORTED
+    && m.alt
+    && !m.control
+    && !m.platform
+    && (event.keystroke.key.eq_ignore_ascii_case("x")
+      || event.keystroke.key.eq_ignore_ascii_case("c"))
+}
+
+/// Closes the windows that belong to `owner` (the typing help), before `owner` closes: the system
+/// would destroy them with it behind GPUI's back
+fn close_owned_windows(owner: WindowId, cx: &mut App) {
+  let controller = cx.global_mut::<Controller>();
+  if !controller
+    .helper
+    .as_ref()
+    .is_some_and(|h| h.owner == Some(owner))
+  {
+    return;
+  }
+  let Some(helper) = controller.helper.take() else {
+    return;
+  };
+  let _ = helper.handle.update(cx, |_, window, _| {
+    native::set_owner(window, None);
+    window.remove_window();
+  });
+}
+
+/// The main window is closing (its close button, Alt+F4)
+fn main_should_close(window: &mut Window, cx: &mut App) -> bool {
+  close_owned_windows(window.window_handle().window_id(), cx);
+  if CLOSE_TO_TRAY {
+    cx.global_mut::<Controller>().main_in_tray = true;
+  }
+  true
+}
+
+/// Lipi Parivartaka is closing
+fn parivartaka_should_close(window: &mut Window, cx: &mut App) -> bool {
+  close_owned_windows(window.window_handle().window_id(), cx);
+  true
+}
+
 /// Shows the main window, opening it again if it was closed to the tray
 pub fn show_main(cx: &mut App) {
   if let Some(handle) = Controller::global(cx).main {
     let _ = handle.update(cx, |_, window, _| window.activate_window());
     return;
   }
-  let options = window_options("Lipi Lekhika", 480., MAIN_HEIGHT, false, None, false, cx);
+  let options = window_options(
+    WindowSpec {
+      title: "Lipi Lekhika",
+      width: 480.,
+      height: MAIN_HEIGHT,
+      resizable: false,
+      minimizable: true,
+      min: None,
+      child: false,
+      own_title_bar: true,
+    },
+    cx,
+  );
   match gpui_kit::open_window(options, cx, |window, cx| {
+    window.on_window_should_close(cx, main_should_close);
     cx.new(|cx| main_window::MainWindow::new(window, cx))
   }) {
     Ok((handle, _)) => {
@@ -223,6 +328,7 @@ pub fn show_main(cx: &mut App) {
 
 /// Closes the main window, the app keeps running in the tray
 pub fn hide_main_to_tray(window: &mut gpui_kit::Window, cx: &mut App) {
+  close_owned_windows(window.window_handle().window_id(), cx);
   cx.global_mut::<Controller>().main_in_tray = true;
   window.remove_window();
 }
@@ -232,16 +338,23 @@ pub fn open_parivartaka(cx: &mut App) {
     let _ = handle.update(cx, |_, window, _| window.activate_window());
     return;
   }
+  // its own window, not a child of the main window: it stays open when the main window is
+  // hidden to the tray (on Linux a child, to float on tiling compositors)
   let options = window_options(
-    "Lipi Parivartaka",
-    1180.,
-    800.,
-    true,
-    Some((720., 560.)),
-    Controller::global(cx).main.is_some(),
+    WindowSpec {
+      title: "Lipi Parivartaka",
+      width: 1180.,
+      height: 800.,
+      resizable: true,
+      minimizable: false,
+      min: Some((720., 560.)),
+      child: cfg!(target_os = "linux") && Controller::global(cx).main.is_some(),
+      own_title_bar: true,
+    },
     cx,
   );
   match gpui_kit::open_window(options, cx, |window, cx| {
+    window.on_window_should_close(cx, parivartaka_should_close);
     cx.new(|cx| parivartaka::Parivartaka::new(window, cx))
   }) {
     Ok((handle, _)) => cx.global_mut::<Controller>().parivartaka = Some(handle),
@@ -249,36 +362,66 @@ pub fn open_parivartaka(cx: &mut App) {
   }
 }
 
-/// Opens the typing help (or brings it forward) on `tab` for `script`
-pub fn open_typing_help(script: ScriptListEnum, tab: HelpTab, cx: &mut App) {
+/// Opens the typing help (or brings it forward) on `tab` for `script`, as a child of `opener`
+pub fn open_typing_help(
+  script: ScriptListEnum,
+  tab: HelpTab,
+  opener: Option<&Window>,
+  cx: &mut App,
+) {
   let script = if script == ScriptListEnum::Normal {
     ScriptListEnum::Devanagari
   } else {
     script
   };
-  if let Some((handle, view)) = Controller::global(cx).helper.clone() {
-    let _ = handle.update(cx, |_, window, cx| {
-      if let Some(view) = view.upgrade() {
-        view.update(cx, |view, cx| view.show(script, tab, window, cx));
-      }
-      window.activate_window();
-    });
-    return;
+  let owner = opener.map(|w| (w.window_handle().window_id(), native::handle_of(w)));
+  let owner_id = owner.map(|(id, _)| id);
+  if let Some(helper) = Controller::global(cx).helper.as_ref() {
+    if helper.owner == owner_id {
+      let (handle, view) = (helper.handle, helper.view.clone());
+      let _ = handle.update(cx, |_, window, cx| {
+        if let Some(view) = view.upgrade() {
+          view.update(cx, |view, cx| view.show(script, tab, window, cx));
+        }
+        window.activate_window();
+      });
+      return;
+    }
+    // asked for from the other window: it moves over to that one
+    if let Some(old) = helper.owner {
+      close_owned_windows(old, cx);
+    }
+  }
+  if let Some(helper) = cx.global_mut::<Controller>().helper.take() {
+    let _ = helper
+      .handle
+      .update(cx, |_, window, _| window.remove_window());
   }
   let options = window_options(
-    "Typing help",
-    940.,
-    780.,
-    true,
-    Some((560., 480.)),
-    Controller::global(cx).main.is_some() || Controller::global(cx).parivartaka.is_some(),
+    WindowSpec {
+      title: "Typing help",
+      width: 940.,
+      height: 780.,
+      resizable: true,
+      minimizable: true,
+      min: Some((560., 480.)),
+      child: owner.is_some(),
+      own_title_bar: false,
+    },
     cx,
   );
   match gpui_kit::open_window(options, cx, |window, cx| {
+    if let Some((_, native_owner)) = owner {
+      native::set_owner(window, native_owner);
+    }
     cx.new(|cx| typing_help::TypingHelp::new(script, tab, window, cx))
   }) {
     Ok((handle, view)) => {
-      cx.global_mut::<Controller>().helper = Some((handle, view.downgrade()));
+      cx.global_mut::<Controller>().helper = Some(Helper {
+        handle,
+        view: view.downgrade(),
+        owner: owner_id,
+      });
     }
     Err(err) => eprintln!("Failed to open the typing help: {err}"),
   }
@@ -317,9 +460,17 @@ pub fn show_typing_notification(cx: &mut App) {
     is_minimizable: false,
     app_id: Some("lipilekhika".into()),
     window_decorations: Some(WindowDecorations::Client),
+    // Windows rounds the window itself (`native::round_corners`), elsewhere the popup draws its
+    // rounded box on a transparent window
+    window_background: if cfg!(windows) {
+      WindowBackgroundAppearance::Opaque
+    } else {
+      WindowBackgroundAppearance::Transparent
+    },
     ..Default::default()
   };
-  match cx.open_window(options, |_, cx| {
+  match cx.open_window(options, |window, cx| {
+    native::round_corners(window);
     cx.new(|_| notification::TypingNotification::new(enabled))
   }) {
     Ok(handle) => {
@@ -344,11 +495,22 @@ pub fn show_typing_notification(cx: &mut App) {
 
 /// Turns the system wide typing on or off
 pub fn set_typing_enabled(enabled: bool, cx: &mut App) {
-  Controller::app_state(cx)
-    .typing_enabled
-    .store(enabled, Ordering::SeqCst);
+  let state = Controller::app_state(cx);
+  state.typing_enabled.store(enabled, Ordering::SeqCst);
+  if !enabled {
+    state.typing_context.lock().unwrap().clear_context();
+  }
   Controller::notify_tray(cx);
   cx.refresh_windows();
+}
+
+/// Alt+X in the main window or the typing help: like the shortcut elsewhere, with its popup
+pub fn toggle_typing_from_shortcut(cx: &mut App) {
+  let enabled = Controller::app_state(cx)
+    .typing_enabled
+    .load(Ordering::SeqCst);
+  set_typing_enabled(!enabled, cx);
+  show_typing_notification(cx);
 }
 
 fn on_window_closed(id: WindowId, cx: &mut App) {
@@ -364,15 +526,21 @@ fn on_window_closed(id: WindowId, cx: &mut App) {
   if controller
     .helper
     .as_ref()
-    .is_some_and(|(h, _)| h.window_id() == id)
+    .is_some_and(|h| h.handle.window_id() == id)
   {
     controller.helper = None;
   }
   if controller.notification.is_some_and(|h| h.window_id() == id) {
     controller.notification = None;
   }
-  // Closing the main window quits the app (closing it to the tray does not). Without the main
-  // window (Lipi Parivartaka opened on its own), the app quits with its last window.
+  controller.active_windows.remove(&id);
+  let any_active = !controller.active_windows.is_empty();
+  controller
+    .app_state
+    .app_window_active
+    .store(any_active, Ordering::SeqCst);
+  // Closing the main window quits the app when it does not close to the tray (Linux). Without the
+  // main window (Lipi Parivartaka opened on its own there), the app quits with its last window.
   let others_open = controller.parivartaka.is_some() || controller.helper.is_some();
   let main_gone = controller.main.is_none() && !controller.main_in_tray;
   if main_closed || (main_gone && !others_open) {
@@ -494,7 +662,9 @@ pub fn run(
         parivartaka: None,
         helper: None,
         notification: None,
-        main_in_tray: false,
+        active_windows: HashSet::new(),
+        // started for another window: the main window waits in the tray
+        main_in_tray: CLOSE_TO_TRAY && startup_view != StartupView::Main,
         theme,
         update: UpdateState::default(),
       });
@@ -517,7 +687,7 @@ pub fn run(
           } else {
             HelpTab::Typing
           };
-          open_typing_help(typing_script(cx), tab, cx)
+          open_typing_help(typing_script(cx), tab, None, cx)
         }
       }
       cx.activate(true);

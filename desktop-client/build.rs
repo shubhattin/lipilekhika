@@ -34,12 +34,13 @@ fn main() {
   let minor = parts.next().unwrap_or(0);
   let patch = parts.next().unwrap_or(0);
 
-  // Compose a .rc content that includes an icon and VERSIONINFO
+  // Compose a .rc content that includes an icon and VERSIONINFO.
+  // The icon has the id 1: GPUI loads the windows' title bar icon by that id.
   let rc = format!(
     r#"
 #include <windows.h>
 
-IDI_APP_ICON ICON "assets/icon.ico"
+1 ICON "assets/icon.ico"
 
 1 VERSIONINFO
  FILEVERSION {major},{minor},{patch},0

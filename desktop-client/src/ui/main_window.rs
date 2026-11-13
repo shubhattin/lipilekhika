@@ -3,7 +3,8 @@
 
 use super::option_examples::{TypingOptionExamples, typing_option_examples};
 use super::script_select::{ScriptSelectState, new_script_select, set_script_select};
-use super::styles::{GREEN, kbd};
+use super::styles::{EMERALD, GREEN, SKY, VIOLET, kbd};
+use super::title_bar::{CUSTOM_TITLE_BAR, Control, title_bar};
 use super::{Controller, HelpTab, typing_script};
 use crate::persistent_state::ThemePreference;
 use crate::platform::SYSTEM_TYPING_SUPPORTED;
@@ -18,7 +19,8 @@ use gpui_kit::component::{
 };
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-  Anchor, AnyElement, App, Context, Entity, IntoElement, ParentElement as _, Render, SharedString,
+  Anchor, AnyElement, App, Context, Entity, FocusHandle, InteractiveElement as _, IntoElement,
+  KeyDownEvent, ParentElement as _, Render, SharedString, StatefulInteractiveElement as _,
   Styled as _, Subscription, Window, div, img, px,
 };
 use lipilekhika::ScriptListEnum;
@@ -32,6 +34,8 @@ pub struct MainWindow {
   /// the script the select shows, to follow changes from the tray
   shown_script: ScriptListEnum,
   examples: TypingOptionExamples,
+  /// the window's keys (Alt+X) reach the view through it
+  focus: FocusHandle,
   _subscriptions: Vec<Subscription>,
 }
 
@@ -47,11 +51,17 @@ impl MainWindow {
         this.set_script(*script, cx);
       }),
       cx.observe_window_appearance(window, |_, _, cx| super::on_system_appearance_changed(cx)),
+      cx.observe_window_activation(window, |_, window, cx| {
+        super::window_activation_changed(window, cx)
+      }),
     ];
+    let focus = cx.focus_handle();
+    window.focus(&focus, cx);
     Self {
       script_select,
       shown_script: script,
       examples: typing_option_examples(script),
+      focus,
       _subscriptions: subscriptions,
     }
   }
@@ -176,14 +186,69 @@ impl MainWindow {
     });
   }
 
-  fn header(&self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+  /// The theme menu
+  fn theme_button(cx: &App) -> AnyElement {
     let theme_pref = Controller::global(cx).theme;
     let theme_icon = match theme_pref {
       ThemePreference::System => Icon::new(gpui_kit::assets::IconName::SunMoon),
       ThemePreference::Light => Icon::new(IconName::Sun),
       ThemePreference::Dark => Icon::new(IconName::Moon),
     };
-    let _ = window;
+    Button::new("theme")
+      .ghost()
+      .small()
+      .icon(theme_icon)
+      .tooltip("Theme")
+      .dropdown_menu_with_anchor(Anchor::TopRight, move |menu, _, _| {
+        let item = |label: &'static str, pref: ThemePreference| {
+          PopupMenuItem::new(label)
+            .checked(theme_pref == pref)
+            .on_click(move |_, _, cx| super::set_theme(pref, cx))
+        };
+        menu
+          .item(item("System", ThemePreference::System))
+          .item(item("Light", ThemePreference::Light))
+          .item(item("Dark", ThemePreference::Dark))
+      })
+      .into_any_element()
+  }
+
+  /// The ⋯ menu: about, links, quit
+  fn more_button() -> AnyElement {
+    Button::new("more")
+      .ghost()
+      .small()
+      .icon(IconName::Ellipsis)
+      .tooltip("More")
+      .dropdown_menu_with_anchor(Anchor::TopRight, |menu, _, _| {
+        menu
+          .item(
+            PopupMenuItem::new("About Lipi Lekhika")
+              .icon(IconName::Info)
+              .on_click(|_, window, cx| Self::open_about(window, cx)),
+          )
+          .item(
+            PopupMenuItem::new("GitHub")
+              .icon(IconName::Github)
+              .on_click(|_, _, cx| cx.open_url(super::GITHUB_URL)),
+          )
+          .item(
+            PopupMenuItem::new("Website")
+              .icon(IconName::Globe)
+              .on_click(|_, _, cx| cx.open_url(super::WEBSITE_URL)),
+          )
+          .separator()
+          .item(
+            PopupMenuItem::new("Quit")
+              .icon(IconName::WindowClose)
+              .on_click(|_, _, cx| cx.quit()),
+          )
+      })
+      .into_any_element()
+  }
+
+  /// The header where the system draws the title bar (macOS) or none (Linux)
+  fn header(&self, cx: &mut Context<Self>) -> impl IntoElement {
     h_flex()
       .items_center()
       .gap_2p5()
@@ -205,55 +270,8 @@ impl MainWindow {
           ),
       )
       .child(div().flex_1())
-      .child(
-        Button::new("theme")
-          .ghost()
-          .small()
-          .icon(theme_icon)
-          .tooltip("Theme")
-          .dropdown_menu_with_anchor(Anchor::TopRight, move |menu, _, _| {
-            let item = |label: &'static str, pref: ThemePreference| {
-              PopupMenuItem::new(label)
-                .checked(theme_pref == pref)
-                .on_click(move |_, _, cx| super::set_theme(pref, cx))
-            };
-            menu
-              .item(item("System", ThemePreference::System))
-              .item(item("Light", ThemePreference::Light))
-              .item(item("Dark", ThemePreference::Dark))
-          }),
-      )
-      .child(
-        Button::new("more")
-          .ghost()
-          .small()
-          .icon(IconName::Ellipsis)
-          .tooltip("More")
-          .dropdown_menu_with_anchor(Anchor::TopRight, |menu, _, _| {
-            menu
-              .item(
-                PopupMenuItem::new("About Lipi Lekhika")
-                  .icon(IconName::Info)
-                  .on_click(|_, window, cx| Self::open_about(window, cx)),
-              )
-              .item(
-                PopupMenuItem::new("GitHub")
-                  .icon(IconName::Github)
-                  .on_click(|_, _, cx| cx.open_url(super::GITHUB_URL)),
-              )
-              .item(
-                PopupMenuItem::new("Website")
-                  .icon(IconName::Globe)
-                  .on_click(|_, _, cx| cx.open_url(super::WEBSITE_URL)),
-              )
-              .separator()
-              .item(
-                PopupMenuItem::new("Quit")
-                  .icon(IconName::WindowClose)
-                  .on_click(|_, _, cx| cx.quit()),
-              )
-          }),
-      )
+      .child(Self::theme_button(cx))
+      .child(Self::more_button())
       .child(
         Button::new("to-tray")
           .ghost()
@@ -261,6 +279,62 @@ impl MainWindow {
           .icon(IconName::WindowMinimize)
           .tooltip("Hide to the tray (the app keeps running)")
           .on_click(|_, window, cx| super::hide_main_to_tray(window, cx)),
+      )
+  }
+
+  /// The way into Lipi Parivartaka: a large two line button
+  fn parivartaka_button(cx: &App) -> impl IntoElement {
+    let theme = cx.theme();
+    h_flex()
+      .id("parivartaka")
+      .items_center()
+      .gap_3()
+      .px_4()
+      .py_2p5()
+      .rounded(theme.radius_lg)
+      .border_1()
+      .border_color(EMERALD.alpha(0.45))
+      .bg(EMERALD.alpha(0.08))
+      .cursor_pointer()
+      .hover(|s| s.bg(EMERALD.alpha(0.15)))
+      .active(|s| s.bg(EMERALD.alpha(0.22)))
+      .on_click(|_, _, cx| super::open_parivartaka(cx))
+      .child(
+        div()
+          .flex()
+          .flex_none()
+          .items_center()
+          .justify_center()
+          .size(px(36.))
+          .rounded_full()
+          .bg(EMERALD.alpha(0.18))
+          .child(
+            Icon::new(gpui_kit::assets::IconName::ArrowLeftRight)
+              .size(px(18.))
+              .text_color(EMERALD.text(cx)),
+          ),
+      )
+      .child(
+        v_flex()
+          .flex_1()
+          .gap_0()
+          .child(
+            div()
+              .text_base()
+              .font_weight(gpui_kit::FontWeight::SEMIBOLD)
+              .child("Lipi Parivartaka"),
+          )
+          .child(
+            div()
+              .text_xs()
+              .text_color(theme.muted_foreground)
+              .child("Convert text from one script to another"),
+          ),
+      )
+      .child(
+        Icon::new(IconName::ChevronRight)
+          .size(px(18.))
+          .text_color(theme.muted_foreground),
       )
   }
 
@@ -570,15 +644,13 @@ impl Render for MainWindow {
     let theme = cx.theme().clone();
     let script = self.shown_script;
 
-    v_flex()
-      .size_full()
-      .bg(theme.background)
-      .text_color(theme.foreground)
+    let content = v_flex()
+      .flex_1()
       .px_5()
-      .pt_4()
+      .pt(if CUSTOM_TITLE_BAR { px(6.) } else { px(16.) })
       .pb_4()
       .gap_3p5()
-      .child(self.header(window, cx))
+      .when(!CUSTOM_TITLE_BAR, |el| el.child(self.header(cx)))
       .child(
         v_flex()
           .gap_1p5()
@@ -601,29 +673,25 @@ impl Render for MainWindow {
               .outline()
               .small()
               .flex_1()
-              .icon(gpui_kit::assets::IconName::Keyboard)
+              .icon(Icon::new(gpui_kit::assets::IconName::Keyboard).text_color(SKY.text(cx)))
               .label("Typing help")
-              .on_click(move |_, _, cx| super::open_typing_help(script, HelpTab::Typing, cx)),
+              .on_click(move |_, window, cx| {
+                super::open_typing_help(script, HelpTab::Typing, Some(window), cx)
+              }),
           )
           .child(
             Button::new("compare")
               .outline()
               .small()
               .flex_1()
-              .icon(gpui_kit::assets::IconName::ArrowLeftRight)
-              .label("Compare")
-              .on_click(move |_, _, cx| super::open_typing_help(script, HelpTab::Compare, cx)),
-          )
-          .child(
-            Button::new("parivartaka")
-              .primary()
-              .small()
-              .flex_1()
-              .icon(gpui_kit::assets::IconName::Languages)
-              .label("Lipi Parivartaka")
-              .on_click(|_, _, cx| super::open_parivartaka(cx)),
+              .icon(Icon::new(gpui_kit::assets::IconName::Columns2).text_color(VIOLET.text(cx)))
+              .label("Compare scripts")
+              .on_click(move |_, window, cx| {
+                super::open_typing_help(script, HelpTab::Compare, Some(window), cx)
+              }),
           ),
       )
+      .child(Self::parivartaka_button(cx))
       .when(!SYSTEM_TYPING_SUPPORTED, |el| {
         el.child(
           Alert::info(
@@ -633,10 +701,29 @@ impl Render for MainWindow {
           .small(),
         )
       })
-      .children(self.update_banner(cx))
+      .children(self.update_banner(cx));
+
+    v_flex()
+      .id("main-window")
+      .track_focus(&self.focus)
+      .size_full()
+      .bg(theme.background)
+      .text_color(theme.foreground)
+      .capture_key_down(|event: &KeyDownEvent, _, cx| {
+        if super::is_typing_toggle_key(event) {
+          super::toggle_typing_from_shortcut(cx);
+          cx.stop_propagation();
+        }
+      })
+      .when(CUSTOM_TITLE_BAR, |el| {
+        el.child(title_bar(
+          "Lipi Lekhika",
+          vec![Self::theme_button(cx), Self::more_button()],
+          &[Control::Minimize, Control::Close],
+          window,
+          cx,
+        ))
+      })
+      .child(content)
   }
 }
-
-// silence an unused import on some platforms
-#[allow(unused_imports)]
-use gpui_kit::InteractiveElement as _Unused;

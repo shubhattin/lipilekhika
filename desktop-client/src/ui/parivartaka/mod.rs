@@ -7,7 +7,8 @@ mod settings;
 
 use super::option_examples::{TypingOptionExamples, typing_option_examples};
 use super::script_select::{ScriptSelectState, new_script_select, set_script_select};
-use super::styles::{GREEN, kbd};
+use super::styles::{AMBER, EMERALD, GREEN, SKY, kbd};
+use super::title_bar::{CUSTOM_TITLE_BAR, Control, title_bar};
 use super::{Controller, HelpTab};
 use crate::data::script_font_family;
 use crate::persistent_state::ThemePreference;
@@ -138,6 +139,9 @@ impl Parivartaka {
         }
       }),
       cx.observe_window_appearance(window, |_, _, cx| super::on_system_appearance_changed(cx)),
+      cx.observe_window_activation(window, |_, window, cx| {
+        super::window_activation_changed(window, cx)
+      }),
     ];
 
     let live = LiveTyping::new(
@@ -634,7 +638,7 @@ impl Parivartaka {
       .icon(if copied {
         Icon::new(IconName::Check).text_color(GREEN.text(cx))
       } else {
-        Icon::new(IconName::Copy)
+        Icon::new(IconName::Copy).text_color(SKY.text(cx))
       })
       .tooltip(if source {
         "Copy source text"
@@ -659,7 +663,7 @@ impl Parivartaka {
       .ghost()
       .small()
       .disabled(empty)
-      .icon(Icon::new(gpui_kit::assets::IconName::Download))
+      .icon(Icon::new(gpui_kit::assets::IconName::Download).text_color(AMBER.text(cx)))
       .tooltip(SharedString::from(format!(
         "Save {} as .txt ({shortcut})",
         if source { "source" } else { "output" }
@@ -882,9 +886,11 @@ impl Parivartaka {
                 Button::new("how-to-type")
                   .ghost()
                   .small()
-                  .icon(Icon::new(gpui_kit::assets::IconName::Keyboard))
+                  .icon(Icon::new(gpui_kit::assets::IconName::Keyboard).text_color(SKY.text(cx)))
                   .label("How to type")
-                  .on_click(move |_, _, cx| super::open_typing_help(from, HelpTab::Typing, cx)),
+                  .on_click(move |_, window, cx| {
+                    super::open_typing_help(from, HelpTab::Typing, Some(window), cx)
+                  }),
               )
             }),
         ),
@@ -907,7 +913,7 @@ impl Parivartaka {
             Button::new("open-file")
               .ghost()
               .small()
-              .icon(IconName::FolderOpen)
+              .icon(Icon::new(IconName::FolderOpen).text_color(AMBER.text(cx)))
               .tooltip("Open a .txt file (or drop one on the box)")
               .on_click(cx.listener(|this, _, window, cx| this.pick_file(window, cx))),
           )
@@ -998,7 +1004,7 @@ impl Parivartaka {
                   Button::new("open-file-strip")
                     .ghost()
                     .xsmall()
-                    .icon(IconName::FolderOpen)
+                    .icon(Icon::new(IconName::FolderOpen).text_color(AMBER.text(cx)))
                     .label("Open .txt")
                     .on_click(cx.listener(|this, _, window, cx| this.pick_file(window, cx))),
                 )
@@ -1288,9 +1294,35 @@ impl Parivartaka {
       })
   }
 
+  /// The theme menu
+  fn theme_button(cx: &App) -> AnyElement {
+    let theme_pref = Controller::global(cx).theme;
+    Button::new("theme")
+      .ghost()
+      .small()
+      .icon(match theme_pref {
+        ThemePreference::System => Icon::new(gpui_kit::assets::IconName::SunMoon),
+        ThemePreference::Light => Icon::new(IconName::Sun),
+        ThemePreference::Dark => Icon::new(IconName::Moon),
+      })
+      .tooltip("Theme")
+      .dropdown_menu_with_anchor(Anchor::TopRight, move |menu, _, _| {
+        let item = |label: &'static str, pref: ThemePreference| {
+          PopupMenuItem::new(label)
+            .checked(theme_pref == pref)
+            .on_click(move |_, _, cx| super::set_theme(pref, cx))
+        };
+        menu
+          .item(item("System", ThemePreference::System))
+          .item(item("Light", ThemePreference::Light))
+          .item(item("Dark", ThemePreference::Dark))
+      })
+      .into_any_element()
+  }
+
+  /// The header where the system draws the title bar (macOS) or none (Linux)
   fn header(&self, cx: &mut Context<Self>) -> impl IntoElement {
     let theme = cx.theme().clone();
-    let theme_pref = Controller::global(cx).theme;
     h_flex()
       .items_center()
       .gap_3()
@@ -1312,28 +1344,7 @@ impl Parivartaka {
           ),
       )
       .child(div().flex_1())
-      .child(
-        Button::new("theme")
-          .ghost()
-          .small()
-          .icon(match theme_pref {
-            ThemePreference::System => Icon::new(gpui_kit::assets::IconName::SunMoon),
-            ThemePreference::Light => Icon::new(IconName::Sun),
-            ThemePreference::Dark => Icon::new(IconName::Moon),
-          })
-          .tooltip("Theme")
-          .dropdown_menu_with_anchor(Anchor::TopRight, move |menu, _, _| {
-            let item = |label: &'static str, pref: ThemePreference| {
-              PopupMenuItem::new(label)
-                .checked(theme_pref == pref)
-                .on_click(move |_, _, cx| super::set_theme(pref, cx))
-            };
-            menu
-              .item(item("System", ThemePreference::System))
-              .item(item("Light", ThemePreference::Light))
-              .item(item("Dark", ThemePreference::Dark))
-          }),
-      )
+      .child(Self::theme_button(cx))
   }
 }
 
@@ -1344,7 +1355,7 @@ impl Render for Parivartaka {
     let swap = Button::new("swap")
       .outline()
       .rounded_full()
-      .icon(Icon::new(gpui_kit::assets::IconName::ArrowLeftRight))
+      .icon(Icon::new(gpui_kit::assets::IconName::ArrowLeftRight).text_color(EMERALD.text(cx)))
       .tooltip("Swap scripts and text")
       .on_click(cx.listener(|this, _, window, cx| this.swap(window, cx)));
 
@@ -1369,23 +1380,38 @@ impl Render for Parivartaka {
         .into_any_element()
     };
 
+    let content = v_flex()
+      .flex_1()
+      .min_h_0()
+      .px_6()
+      .pt(if CUSTOM_TITLE_BAR { px(8.) } else { px(20.) })
+      .pb_5()
+      .gap_5()
+      .when(!CUSTOM_TITLE_BAR, |el| el.child(self.header(cx)))
+      .child(columns)
+      .child(self.options_section(cx));
+
     v_flex()
       .id("parivartaka")
       .size_full()
       .bg(theme.background)
       .text_color(theme.foreground)
-      .px_6()
-      .py_5()
-      .gap_5()
       .on_drag_move::<ExternalPaths>(cx.listener(|this, _, _, cx| {
         if !this.file_drag_over {
           this.file_drag_over = true;
           cx.notify();
         }
       }))
-      .child(self.header(cx))
-      .child(columns)
-      .child(self.options_section(cx))
+      .when(CUSTOM_TITLE_BAR, |el| {
+        el.child(title_bar(
+          "Lipi Parivartaka",
+          vec![Self::theme_button(cx)],
+          &[Control::Maximize, Control::Close],
+          window,
+          cx,
+        ))
+      })
+      .child(content)
       .when(false, |el| el.track_focus(&self.source.focus_handle(cx)))
   }
 }
