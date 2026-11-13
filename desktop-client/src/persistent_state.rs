@@ -62,6 +62,14 @@ pub struct PersitentState {
 
   #[serde(default = "default_theme")]
   pub theme: ThemePreference,
+
+  /// the newer version the update popup was shown for
+  #[serde(default)]
+  pub update_prompt_version: String,
+
+  /// on how many starts the popup was shown for it (Later stops it)
+  #[serde(default)]
+  pub update_prompt_count: u8,
 }
 
 impl Default for PersitentState {
@@ -72,6 +80,8 @@ impl Default for PersitentState {
       native_numerals: default_true(),
       inherent_vowel: default_false(),
       theme: default_theme(),
+      update_prompt_version: String::new(),
+      update_prompt_count: 0,
     }
   }
 }

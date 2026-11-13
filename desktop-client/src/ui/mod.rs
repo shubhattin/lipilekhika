@@ -1,5 +1,6 @@
 //! The GPUI app: the typing tool's main window, the typing help and Lipi Parivartaka.
 
+mod about;
 mod assets;
 mod main_window;
 mod native;
@@ -10,9 +11,9 @@ mod script_select;
 mod styles;
 mod title_bar;
 mod typing_help;
+mod update;
 
 use crate::persistent_state::ThemePreference;
-use crate::version_check::{self, UpdateResult, VersionCheckResult};
 use crate::{AppState, StartupView, ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 use crossbeam_channel::{Receiver, Sender};
 use gpui_kit::component::{Theme, ThemeMode};
@@ -30,13 +31,13 @@ use std::time::Duration;
 pub use typing_help::HelpTab;
 
 /// The main window's height (it has a note about the Fcitx5 plugin on Linux; on Windows the
-/// window's own title bar replaces the header)
+/// window's own title bar replaces the header). Its last line is the version and the update link.
 const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
-  490.
+  520.
 } else if crate::platform::SYSTEM_TYPING_SUPPORTED {
-  510.
+  540.
 } else {
-  592.
+  622.
 };
 
 /// Closing the main window keeps the app running in the tray, where the system wide typing goes
@@ -47,25 +48,6 @@ const CLOSE_TO_TRAY: bool = crate::platform::SYSTEM_TYPING_SUPPORTED;
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
 pub const RELEASES_URL: &str = "https://github.com/shubhattin/lipilekhika/releases";
-
-/// The update banner's state
-#[derive(Debug, Clone, Default)]
-pub struct UpdateState {
-  pub check: Option<VersionCheckResult>,
-  pub dismissed: bool,
-  pub in_progress: bool,
-}
-
-impl UpdateState {
-  /// The newer version, when there is one to offer
-  pub fn available_version(&self) -> Option<&str> {
-    let check = self.check.as_ref()?;
-    if !check.update_available {
-      return None;
-    }
-    check.latest_version.as_deref()
-  }
-}
 
 /// The app wide state of the UI: the windows that are open and the shared settings
 pub struct Controller {
@@ -80,7 +62,7 @@ pub struct Controller {
   /// the main window was closed to the tray (the app keeps running)
   main_in_tray: bool,
   pub theme: ThemePreference,
-  pub update: UpdateState,
+  pub update: update::UpdateState,
 }
 
 impl Global for Controller {}
@@ -321,6 +303,7 @@ pub fn show_main(cx: &mut App) {
       let controller = cx.global_mut::<Controller>();
       controller.main = Some(handle);
       controller.main_in_tray = false;
+      update::prompt_update(cx);
     }
     Err(err) => eprintln!("Failed to open the main window: {err}"),
   }
@@ -368,7 +351,10 @@ pub fn open_parivartaka(cx: &mut App) {
     window.on_window_should_close(cx, parivartaka_should_close);
     cx.new(|cx| parivartaka::Parivartaka::new(window, cx))
   }) {
-    Ok((handle, _)) => cx.global_mut::<Controller>().parivartaka = Some(handle),
+    Ok((handle, _)) => {
+      cx.global_mut::<Controller>().parivartaka = Some(handle);
+      update::prompt_update(cx);
+    }
     Err(err) => eprintln!("Failed to open Lipi Parivartaka: {err}"),
   }
 }
@@ -559,57 +545,6 @@ fn on_window_closed(id: WindowId, cx: &mut App) {
   }
 }
 
-// ---- Update check ----
-
-fn start_version_check(cx: &mut App) {
-  cx.spawn(async move |cx| {
-    let result = cx
-      .background_executor()
-      .spawn(async { version_check::check_for_updates() })
-      .await;
-    let _ = cx.update(|cx| {
-      cx.global_mut::<Controller>().update.check = Some(result);
-      cx.refresh_windows();
-    });
-  })
-  .detach();
-}
-
-/// The update button: installs the new MSI on Windows, opens the releases page elsewhere
-pub fn run_update(cx: &mut App) {
-  let controller = cx.global::<Controller>();
-  if controller.update.in_progress {
-    return;
-  }
-  let Some(check) = controller.update.check.clone() else {
-    return;
-  };
-  if !cfg!(windows) {
-    cx.open_url(RELEASES_URL);
-    return;
-  }
-  let (Some(url), Some(version)) = (check.windows_msi_download_url, check.latest_version) else {
-    return;
-  };
-  cx.global_mut::<Controller>().update.in_progress = true;
-  cx.refresh_windows();
-  cx.spawn(async move |cx| {
-    let result = cx
-      .background_executor()
-      .spawn(async move { version_check::download_and_install_update(url, version) })
-      .await;
-    let _ = cx.update(|cx| match result {
-      UpdateResult::InstallerLaunched => cx.quit(),
-      other => {
-        eprintln!("Update failed: {other:?}");
-        cx.global_mut::<Controller>().update.in_progress = false;
-        cx.refresh_windows();
-      }
-    });
-  })
-  .detach();
-}
-
 // ---- Messages from the hook and the tray ----
 
 fn handle_thread_message(msg: ThreadMessage, cx: &mut App) {
@@ -677,7 +612,7 @@ pub fn run(
         // started for another window: the main window waits in the tray
         main_in_tray: CLOSE_TO_TRAY && startup_view != StartupView::Main,
         theme,
-        update: UpdateState::default(),
+        update: update::UpdateState::default(),
       });
       apply_theme(cx);
       parivartaka::init(cx);
@@ -687,7 +622,7 @@ pub fn run(
         .detach();
 
       start_thread_bridge(rx_ui, cx);
-      start_version_check(cx);
+      update::start_version_check(cx);
 
       match startup_view {
         StartupView::Main => show_main(cx),

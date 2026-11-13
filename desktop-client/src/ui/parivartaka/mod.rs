@@ -5,6 +5,7 @@ mod history;
 mod live_typing;
 mod settings;
 
+use super::about::AboutOf;
 use super::option_examples::{TypingOptionExamples, typing_option_examples};
 use super::script_select::{ScriptSelectState, new_script_select, set_script_select};
 use super::styles::{AMBER, EMERALD, GREEN, SKY, kbd};
@@ -1345,6 +1346,7 @@ impl Parivartaka {
       )
       .child(div().flex_1())
       .child(Self::theme_button(cx))
+      .child(super::about::more_button(AboutOf::LipiParivartaka))
   }
 }
 
@@ -1389,7 +1391,10 @@ impl Render for Parivartaka {
       .gap_5()
       .when(!CUSTOM_TITLE_BAR, |el| el.child(self.header(cx)))
       .child(columns)
-      .child(self.options_section(cx));
+      .child(self.options_section(cx))
+      .children(
+        super::update::update_link(cx).map(|link| h_flex().mt(px(-8.)).justify_end().child(link)),
+      );
 
     v_flex()
       .id("parivartaka")
@@ -1405,7 +1410,10 @@ impl Render for Parivartaka {
       .when(CUSTOM_TITLE_BAR, |el| {
         el.child(title_bar(
           "Lipi Parivartaka",
-          vec![Self::theme_button(cx)],
+          vec![
+            Self::theme_button(cx),
+            super::about::more_button(AboutOf::LipiParivartaka),
+          ],
           &[Control::Maximize, Control::Close],
           window,
           cx,

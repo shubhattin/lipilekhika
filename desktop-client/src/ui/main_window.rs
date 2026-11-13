@@ -1,6 +1,7 @@
 //! The typing tool's main window: the script, typing on/off, the typing options, and the ways
 //! into the typing help and Lipi Parivartaka.
 
+use super::about::AboutOf;
 use super::option_examples::{TypingOptionExamples, typing_option_examples};
 use super::script_select::{ScriptSelectState, new_script_select, set_script_select};
 use super::styles::{EMERALD, GREEN, SKY, VIOLET, kbd};
@@ -14,9 +15,7 @@ use gpui_kit::component::menu::{DropdownMenu as _, PopupMenuItem};
 use gpui_kit::component::popover::Popover;
 use gpui_kit::component::select::{Select, SelectEvent};
 use gpui_kit::component::switch::Switch;
-use gpui_kit::component::{
-  ActiveTheme as _, Icon, IconName, Sizable as _, WindowExt as _, h_flex, v_flex,
-};
+use gpui_kit::component::{ActiveTheme as _, Icon, IconName, Sizable as _, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
   Anchor, AnyElement, App, Context, Entity, FocusHandle, InteractiveElement as _, IntoElement,
@@ -114,78 +113,6 @@ impl MainWindow {
     cx.refresh_windows();
   }
 
-  fn open_about(window: &mut Window, cx: &mut App) {
-    window.open_dialog(cx, |dialog, _, cx| {
-      let update = Controller::global(cx).update.clone();
-      dialog.w(px(340.)).child(
-        v_flex()
-          .items_center()
-          .gap_3()
-          .py_2()
-          .child(img(super::assets::app_icon()).size(px(56.)))
-          .child(
-            v_flex()
-              .items_center()
-              .gap_0p5()
-              .child(
-                div()
-                  .text_xl()
-                  .font_weight(gpui_kit::FontWeight::SEMIBOLD)
-                  .child("Lipi Lekhika"),
-              )
-              .child(
-                div()
-                  .text_xs()
-                  .text_color(cx.theme().muted_foreground)
-                  .child(format!("Version {}", env!("CARGO_PKG_VERSION"))),
-              ),
-          )
-          .child(
-            div()
-              .text_sm()
-              .text_center()
-              .text_color(cx.theme().muted_foreground)
-              .child("Type Indian Languages with full Speed and Accuracy"),
-          )
-          .child(
-            h_flex()
-              .gap_2()
-              .child(
-                Button::new("about-github")
-                  .outline()
-                  .small()
-                  .icon(IconName::Github)
-                  .label("GitHub")
-                  .on_click(|_, _, cx| cx.open_url(super::GITHUB_URL)),
-              )
-              .child(
-                Button::new("about-website")
-                  .outline()
-                  .small()
-                  .icon(IconName::Globe)
-                  .label("lipilekhika.in")
-                  .on_click(|_, _, cx| cx.open_url(super::WEBSITE_URL)),
-              ),
-          )
-          .when_some(update.available_version().map(str::to_string), |el, v| {
-            el.child(
-              Button::new("about-update")
-                .success()
-                .small()
-                .loading(update.in_progress)
-                .icon(gpui_kit::assets::IconName::CircleArrowDown)
-                .label(if update.in_progress {
-                  "Updating…".to_string()
-                } else {
-                  format!("Update to v{v}")
-                })
-                .on_click(|_, _, cx| super::run_update(cx)),
-            )
-          }),
-      )
-    });
-  }
-
   /// The theme menu
   fn theme_button(cx: &App) -> AnyElement {
     let theme_pref = Controller::global(cx).theme;
@@ -209,40 +136,6 @@ impl MainWindow {
           .item(item("System", ThemePreference::System))
           .item(item("Light", ThemePreference::Light))
           .item(item("Dark", ThemePreference::Dark))
-      })
-      .into_any_element()
-  }
-
-  /// The ⋯ menu: about, links, quit
-  fn more_button() -> AnyElement {
-    Button::new("more")
-      .ghost()
-      .small()
-      .icon(IconName::Ellipsis)
-      .tooltip("More")
-      .dropdown_menu_with_anchor(Anchor::TopRight, |menu, _, _| {
-        menu
-          .item(
-            PopupMenuItem::new("About Lipi Lekhika")
-              .icon(IconName::Info)
-              .on_click(|_, window, cx| Self::open_about(window, cx)),
-          )
-          .item(
-            PopupMenuItem::new("GitHub")
-              .icon(IconName::Github)
-              .on_click(|_, _, cx| cx.open_url(super::GITHUB_URL)),
-          )
-          .item(
-            PopupMenuItem::new("Website")
-              .icon(IconName::Globe)
-              .on_click(|_, _, cx| cx.open_url(super::WEBSITE_URL)),
-          )
-          .separator()
-          .item(
-            PopupMenuItem::new("Quit")
-              .icon(IconName::WindowClose)
-              .on_click(|_, _, cx| cx.quit()),
-          )
       })
       .into_any_element()
   }
@@ -271,7 +164,7 @@ impl MainWindow {
       )
       .child(div().flex_1())
       .child(Self::theme_button(cx))
-      .child(Self::more_button())
+      .child(super::about::more_button(AboutOf::LipiLekhika))
       .child(
         Button::new("to-tray")
           .ghost()
@@ -577,59 +470,6 @@ impl MainWindow {
         cx,
       ))
   }
-
-  fn update_banner(&self, cx: &mut Context<Self>) -> Option<impl IntoElement> {
-    let update = Controller::global(cx).update.clone();
-    let version = update.available_version()?.to_string();
-    if update.dismissed {
-      return None;
-    }
-    let theme = cx.theme();
-    Some(
-      h_flex()
-        .items_center()
-        .gap_2()
-        .px_3()
-        .py_2()
-        .rounded(theme.radius)
-        .bg(GREEN.alpha(0.1))
-        .border_1()
-        .border_color(GREEN.alpha(0.35))
-        .child(
-          Icon::new(gpui_kit::assets::IconName::Sparkles)
-            .size(px(16.))
-            .text_color(GREEN.text(cx)),
-        )
-        .child(
-          div()
-            .flex_1()
-            .text_sm()
-            .child(format!("Version {version} is available")),
-        )
-        .child(
-          Button::new("update-later")
-            .ghost()
-            .xsmall()
-            .label("Later")
-            .on_click(|_, _, cx| {
-              cx.global_mut::<Controller>().update.dismissed = true;
-              cx.refresh_windows();
-            }),
-        )
-        .child(
-          Button::new("update-now")
-            .success()
-            .xsmall()
-            .loading(update.in_progress)
-            .label(if update.in_progress {
-              "Updating…"
-            } else {
-              "Update"
-            })
-            .on_click(|_, _, cx| super::run_update(cx)),
-        ),
-    )
-  }
 }
 
 impl Render for MainWindow {
@@ -701,7 +541,16 @@ impl Render for MainWindow {
           .small(),
         )
       })
-      .children(self.update_banner(cx));
+      .child(
+        // the version, and the update when there is one
+        h_flex()
+          .items_center()
+          .justify_between()
+          .text_xs()
+          .text_color(theme.muted_foreground)
+          .child(format!("Version {}", env!("CARGO_PKG_VERSION")))
+          .children(super::update::update_link(cx)),
+      );
 
     v_flex()
       .id("main-window")
@@ -718,7 +567,10 @@ impl Render for MainWindow {
       .when(CUSTOM_TITLE_BAR, |el| {
         el.child(title_bar(
           "Lipi Lekhika",
-          vec![Self::theme_button(cx), Self::more_button()],
+          vec![
+            Self::theme_button(cx),
+            super::about::more_button(AboutOf::LipiLekhika),
+          ],
           &[Control::Minimize, Control::Close],
           window,
           cx,

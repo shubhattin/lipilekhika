@@ -4,7 +4,16 @@ use std::process::Command;
 
 /// Current app version from Cargo.toml
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-// pub const CURRENT_VERSION: &str = "0.0.1";
+
+/// The version compared with the latest release. Debug builds take `LIPILEKHIKA_TEST_VERSION`
+/// (`0.0.1`: an update is offered) to try the update popup.
+fn current_version() -> String {
+  #[cfg(debug_assertions)]
+  if let Ok(v) = std::env::var("LIPILEKHIKA_TEST_VERSION") {
+    return v;
+  }
+  CURRENT_VERSION.to_string()
+}
 
 /// Result of a version check
 #[derive(Debug, Clone, Default)]
@@ -111,7 +120,7 @@ async fn check_for_updates_fetch()
       }
 
       // Found the latest stable release
-      let update_available = is_version_greater(version, CURRENT_VERSION);
+      let update_available = is_version_greater(version, &current_version());
 
       return Ok(VersionCheckResult {
         update_available,
