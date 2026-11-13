@@ -4,6 +4,23 @@ on:
   push:
     tags:
       - "pc-app@v*"
+    # builds on main keep a warm cache: a tag can only use the caches of the default branch
+    branches:
+      - main
+    paths:
+      - "desktop-client/**"
+      - "packages/rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/release_pc_app.yml"
+  # the Windows build check for PRs that change the app (only an artifact, nothing published)
+  pull_request:
+    paths:
+      - "desktop-client/**"
+      - "packages/rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/release_pc_app.yml"
   workflow_dispatch:
     inputs:
       tag:
@@ -19,6 +36,13 @@ permissions:
 
 env:
   PC_APP_POSTHOG_KEY: ${{ vars.PC_APP_POSTHOG_KEY }}
+  # a release is published for a pushed tag, or a manual run that is not a dry run
+  PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+
+# a newer push to the same branch or PR replaces a running build (tags always run to the end)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   build-windows:
@@ -31,29 +55,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v7
 
-      # JS Step (matches release_rust.yml)
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Make Script Data
-        run: |
-          cd packages/js
-          bun install
-          bun run make-script-data
-
-      # Rust (desktop-client)
+      # The script data is committed, building needs only Cargo
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      # caches the dependencies' builds (the app itself is built every time)
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-pc-app-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pc-app-cargo-
+          shared-key: pc-app
+          # only main and tags save (PR caches can't be used by anything else)
+          save-if: ${{ github.event_name != 'pull_request' }}
 
       - name: Build lipilekhika-ui (Windows)
         run: |
@@ -115,6 +127,7 @@ jobs:
 
       # Resolve the release tag (from input on workflow_dispatch, else from the pushed tag)
       - name: Resolve release tag
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         id: release_tag
         shell: bash
         run: |
@@ -127,6 +140,7 @@ jobs:
 
       # Basic validation: ensure resolved tag contains the package version
       - name: Verify tag matches version
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         id: verify_tag
         shell: bash
         run: |
@@ -141,6 +155,7 @@ jobs:
 
       # Normalize the tag to the canonical `pc-app@v<version>` form
       - name: Normalize tag for release upload
+        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         id: normalized_tag
         shell: bash
         run: |
@@ -161,9 +176,9 @@ jobs:
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
-      # a dry run keeps the installer as a workflow artifact instead
-      - name: Upload MSI as artifact (dry run)
-        if: ${{ inputs.dry_run }}
+      # without a release (dry run, PR, main) the installer is kept as a workflow artifact
+      - name: Upload MSI as artifact
+        if: ${{ env.PUBLISH != 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: pc-app-msi
@@ -172,7 +187,7 @@ jobs:
 
       # Create GitHub Release and upload assets using the normalized tag
       - name: Upload binary to release
-        if: ${{ !inputs.dry_run }}
+        if: ${{ env.PUBLISH == 'true' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
         shell: bash
