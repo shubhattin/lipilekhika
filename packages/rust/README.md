@@ -23,7 +23,7 @@
 
 ## ⚡ Performance
 
-The fastest Lipi Lekhika implementation—about **9× faster** than pure JavaScript on the shared benchmark suite. [See the full benchmark table →](https://github.com/shubhattin/lipilekhika#-performance)
+The fastest Lipi Lekhika implementation—about **8× faster** than pure JavaScript on the shared benchmark suite. [See the full benchmark table →](https://github.com/shubhattin/lipilekhika#-performance)
 
 ## 📥 Installation
 

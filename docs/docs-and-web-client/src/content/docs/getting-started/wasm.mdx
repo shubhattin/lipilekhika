@@ -9,7 +9,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 import { LinkCard } from '@astrojs/starlight/components';
 import { Aside } from '@astrojs/starlight/components';
 
-`transliterate_wasm` runs the 🦀 Rust implementation compiled to WebAssembly. It has the same API as `transliterate` and is about 2.5–4× faster. It is part of the `lipilekhika` package, no extra install needed.
+`transliterate_wasm` runs the 🦀 Rust implementation compiled to WebAssembly. It has the same API as `transliterate` and is about 2.5–3× faster. It is part of the `lipilekhika` package, no extra install needed.
 
 ## Usage
 
@@ -201,7 +201,7 @@ Loads the module from `wasm`: a `WebAssembly.Module`, bytes (`BufferSource`), a 
 
 ## WASM or JavaScript?
 
-In the benchmarks WASM transliterates the test corpus in 59 ms on Node.js and 47 ms on Bun, against 219 ms and 122 ms for `transliterate`.
+In the benchmarks WASM transliterates the test corpus in 65 ms on Node.js and 51 ms on Bun, against 198 ms and 130 ms for `transliterate`.
 
 <Aside type="tip" title="One load, every script ready">
   The WASM module contains the data of all scripts, so it is loaded once (one cold start) and after that any script pair is instant, including when the user switches scripts. `transliterate` instead loads each script's data on its first use, a separate fetch per script in the browser (see `preloadScriptData`).

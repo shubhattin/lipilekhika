@@ -1,7 +1,22 @@
 # Plan: make the transliteration core easier to read (JS, Rust, Go)
 
-Status: plan only, nothing is changed yet. Written against `main` at `9d83bb8`. All line numbers
+Status: the core is implemented (see the outcome note). Written against `main` at `9d83bb8`. All line numbers
 below are from that commit, find the code by the quoted names if the lines have moved.
+
+> **Outcome (the core, sections 4 to 8, is done).** What differs from the plan below:
+>
+> - **Step 1 does not write the context.** The Tamil-Extended superscript it reads is returned
+>   (Rust `TextMatch`, Go three results, JS the `matched_superscript_*` result fields) and only
+>   the main loop sets `ta_ext_skip_index`. There is no `ta_ext_superscript_detached` field.
+> - **Speed needed more than the split.** As separate calls the steps were 4 to 13% slower in
+>   Rust and 6% in Go (the fields of the context are reloaded after every call, and the typing
+>   copy of the core was not specialised). Rust: the per character steps are
+>   `#[inline(always)]`, the rare cases `#[inline(never)]` (see the module comment of
+>   `transliterate.rs`). Go: the hot predicates are split to fit the inliner. Result vs `main`:
+>   Rust -7% / -8% / -1% / -4%, Go 0% / -7% / -15% / -21%, JS (built package) not slower.
+> - **The JS benchmarks run the built package** (`packages/js/scripts/*.mjs`), not vite-node,
+>   which measured the split itself (section 3.3 names the old commands).
+> - Section 9 (typing data map, DOM handlers, script data generator) is not started.
 
 This document is written to be handed to an implementing agent. Read all of it before starting.
 Read [CONTRIBUTING.md](../../CONTRIBUTING.md) and [AGENTS.md](../../AGENTS.md) first.
