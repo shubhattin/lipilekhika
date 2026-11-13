@@ -38,7 +38,7 @@ export const is_ios_atom = atom<boolean>(
 );
 
 // Platform detection for download prompts
-export type Platform = 'android' | 'windows' | 'linux' | 'ios' | 'macos' | 'unknown';
+export type Platform = 'android' | 'windows' | 'linux' | 'chromeos' | 'ios' | 'macos' | 'unknown';
 
 export const detect_platform = (): Platform => {
   if (typeof window === 'undefined') return 'unknown';
@@ -56,14 +56,19 @@ export const detect_platform = (): Platform => {
     return 'ios';
   }
 
-  // Check macOS
+  // Check macOS (iPadOS Safari says it is a Mac: a Mac with a touch screen is an iPad)
   if (/macintosh|macintel|mac os x/.test(userAgent) || platform.includes('mac')) {
-    return 'macos';
+    return window.navigator.maxTouchPoints > 1 ? 'ios' : 'macos';
   }
 
   // Check Windows
   if (/windows|win32|win64/.test(userAgent) || platform.includes('win')) {
     return 'windows';
+  }
+
+  // Check ChromeOS (before Linux: its user agent has `X11; CrOS`)
+  if (/\bcros\b/.test(userAgent)) {
+    return 'chromeos';
   }
 
   // Check Linux (after Android check)

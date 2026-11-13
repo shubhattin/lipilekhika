@@ -4,6 +4,7 @@ import { ArrowRight, Download, ExternalLink, Globe } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
 import { SiAndroid, SiApple, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 import { findLatestRelease, parseTagVersion, type GitHubRelease } from '~/lib/github';
+import { detect_platform } from '~/tools/pwa_state';
 
 // The links are the `/redirect/*` routes of the Netlify `_redirects` file (made at build time from
 // the latest releases), so the links of this page do not change with a release
@@ -148,6 +149,17 @@ const PLATFORMS: Platform[] = [
   }
 ];
 
+/**
+ * Marks the page with this device's platform (`data-platform` on the wrapper) before it is drawn,
+ * so CSS shows its download and puts it first without a jump. It is `detect_platform` itself (its
+ * source, it uses nothing outside of it): an inline script can not import it.
+ */
+const PLATFORM_SCRIPT = `(() => {
+  const platform = (${detect_platform.toString()})();
+  if (${JSON.stringify(['windows', 'android', 'macos', 'linux'])}.includes(platform))
+    document.currentScript.parentElement.dataset.platform = platform;
+})();`;
+
 const CTA_CLASS =
   'inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-amber-500 bg-linear-to-b from-amber-400 to-amber-500 px-5 text-sm font-semibold whitespace-nowrap text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:from-amber-300 hover:to-amber-400 active:translate-y-0';
 ---
@@ -156,14 +168,14 @@ const CTA_CLASS =
   title="Download Lipi Lekhika"
   description="Download Lipi Lekhika for Windows (installer or portable) and Android, and Lipi Parivartaka for macOS and Linux."
 >
-  <section class="relative overflow-hidden px-4 pt-24 pb-16 sm:px-6 sm:pt-28">
+  <section class="download-page relative overflow-hidden px-4 pt-24 pb-16 sm:px-6 sm:pt-28">
+    <script is:inline set:html={PLATFORM_SCRIPT} />
     <div
       class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]"
     >
     </div>
 
     <div class="mx-auto max-w-3xl">
-      <!-- the download for this device (shown by the script below) -->
       <div class="text-center">
         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Download Lipi Lekhika</h1>
         <p class="mx-auto mt-3 max-w-xl text-muted-foreground">
@@ -171,9 +183,10 @@ const CTA_CLASS =
         </p>
       </div>
 
+      <!-- the download for this device; the web app for the others (and without JavaScript) -->
       {
         PLATFORMS.map((p) => (
-          <div data-featured={p.id} class="featured mt-8 hidden flex-col items-center text-center">
+          <div data-featured={p.id} class="featured mt-8 flex-col items-center text-center">
             <a href={p.files[0].href} class={CTA_CLASS}>
               <Download class="size-4" />
               Download for {p.name}
@@ -184,17 +197,30 @@ const CTA_CLASS =
               {p.version && ` · version ${p.version}`}
               {p.files[0].size && ` · ${p.files[0].size}`}
             </p>
+            <p class="mt-1 text-xs text-muted-foreground">
+              Not your device? Every download is below.
+            </p>
           </div>
         ))
       }
+      <div data-featured="web" class="featured mt-8 flex-col items-center text-center">
+        <a href="/app" class={CTA_CLASS}>
+          <Globe class="size-4" />
+          Use online
+        </a>
+        <p class="mt-2.5 max-w-sm text-xs text-muted-foreground">
+          The web app runs in the browser and works offline: install it from the browser's menu. The
+          apps for Windows, Android, macOS and Linux are below.
+        </p>
+      </div>
 
-      <!-- every platform and file -->
+      <!-- every platform and file; this device's first -->
       <div
-        class="mt-12 divide-y divide-border/60 overflow-hidden rounded-xl border border-border/60 bg-white/70 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm dark:bg-card/40 dark:shadow-none"
+        class="mt-12 flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white/70 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm dark:bg-card/40 dark:shadow-none"
       >
         {
           PLATFORMS.map((p) => (
-            <section data-platform={p.id} class="platform p-5 sm:p-6">
+            <section data-id={p.id} class="platform -mt-px border-t border-border/60 p-5 sm:p-6">
               <div class="flex items-start gap-3.5">
                 <div class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70">
                   <Icon src={p.icon} className={`size-[18px] ${p.iconClass}`} />
@@ -205,7 +231,7 @@ const CTA_CLASS =
                     {p.version && (
                       <span class="text-xs text-muted-foreground tabular-nums">v{p.version}</span>
                     )}
-                    <span class="this-device hidden rounded-full bg-primary/10 px-2 py-px text-[11px] font-medium text-primary">
+                    <span class="this-device rounded-full bg-primary/10 px-2 py-px text-[11px] font-medium text-primary">
                       This device
                     </span>
                   </div>
@@ -243,7 +269,7 @@ const CTA_CLASS =
           ))
         }
 
-        <section class="p-5 sm:p-6">
+        <section class="-mt-px border-t border-border/60 p-5 sm:p-6">
           <div class="flex items-start gap-3.5">
             <div
               class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70"
@@ -253,8 +279,8 @@ const CTA_CLASS =
             <div class="min-w-0 flex-1">
               <h2 class="font-semibold">Web app</h2>
               <p class="mt-0.5 text-sm text-muted-foreground">
-                For iPhone, iPad and everything else: runs in the browser, and can be installed from
-                its menu.
+                For iPhone, iPad, Chromebooks and everything else: runs in the browser, and can be
+                installed from its menu.
               </p>
               <a
                 href="/app"
@@ -281,22 +307,35 @@ const CTA_CLASS =
       </p>
     </div>
   </section>
-
-  <!-- the download for this device at the top, and its platform first in the list -->
-  <script>
-    import { detect_platform } from '../tools/pwa_state';
-
-    // on the first load too (the site uses Astro's client router)
-    document.addEventListener('astro:page-load', () => {
-      const platform = detect_platform();
-      const featured = document.querySelector<HTMLElement>(
-        `.featured[data-featured="${platform}"]`
-      );
-      featured?.classList.replace('hidden', 'flex');
-      const row = document.querySelector<HTMLElement>(`.platform[data-platform="${platform}"]`);
-      if (!row) return;
-      row.querySelector('.this-device')?.classList.remove('hidden');
-      row.parentElement?.prepend(row);
-    });
-  </script>
 </RootLayout>
+
+<style>
+  /* without a platform (iPhone, iPad, Chromebook, unknown, no JavaScript): the web app, and the
+     list in its usual order */
+  .featured,
+  .this-device {
+    display: none;
+  }
+  .download-page:not([data-platform]) .featured[data-featured='web'] {
+    display: flex;
+  }
+  /* with a platform: its download, and its row first and marked */
+  .download-page[data-platform='windows'] .featured[data-featured='windows'],
+  .download-page[data-platform='android'] .featured[data-featured='android'],
+  .download-page[data-platform='macos'] .featured[data-featured='macos'],
+  .download-page[data-platform='linux'] .featured[data-featured='linux'] {
+    display: flex;
+  }
+  .download-page[data-platform='windows'] .platform[data-id='windows'],
+  .download-page[data-platform='android'] .platform[data-id='android'],
+  .download-page[data-platform='macos'] .platform[data-id='macos'],
+  .download-page[data-platform='linux'] .platform[data-id='linux'] {
+    order: -1;
+  }
+  .download-page[data-platform='windows'] .platform[data-id='windows'] .this-device,
+  .download-page[data-platform='android'] .platform[data-id='android'] .this-device,
+  .download-page[data-platform='macos'] .platform[data-id='macos'] .this-device,
+  .download-page[data-platform='linux'] .platform[data-id='linux'] .this-device {
+    display: inline;
+  }
+</style>
