@@ -44,6 +44,11 @@ class Prefs(context: Context) {
         get() = sp.getString(THEME, "system") ?: "system"
         set(value) = sp.edit { putString(THEME, value) }
 
+    /** "Remember text": the source text is kept for the next launch (on unless turned off) */
+    var rememberText: Boolean
+        get() = sp.getBoolean(REMEMBER_TEXT, true)
+        set(value) = sp.edit { putBoolean(REMEMBER_TEXT, value) }
+
     /** The typing guide was opened once (no more pulsing dot) */
     var typingGuideSeen: Boolean
         get() = sp.getBoolean(TYPING_GUIDE_SEEN, false)
@@ -91,6 +96,7 @@ class Prefs(context: Context) {
         const val INHERENT_VOWEL = "includeInherentVowel"
         const val THEME = "theme"
         const val TYPING_GUIDE_SEEN = "typingGuideSeen"
+        const val REMEMBER_TEXT = "rememberText"
         const val QUICK_FROM = "quickFrom"
         const val QUICK_TO = "quickTo"
         const val MIGRATED = "migratedFromFlutter"

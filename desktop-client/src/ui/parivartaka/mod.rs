@@ -104,7 +104,10 @@ impl Parivartaka {
     let from_select = new_script_select(from, true, window, cx);
     let to_select = new_script_select(to, true, window, cx);
 
-    let restored = settings::load_saved_text();
+    let restored = settings
+      .remember_text
+      .then(settings::load_saved_text)
+      .flatten();
     let source = cx.new(|cx| {
       TextareaState::new(window, cx)
         .placeholder(Self::placeholder(&settings))
@@ -413,6 +416,9 @@ impl Parivartaka {
   }
 
   fn schedule_save(&mut self, cx: &mut Context<Self>) {
+    if !self.settings.remember_text {
+      return;
+    }
     let text = self.last.text.clone();
     self.save_task = Some(cx.spawn(async move |_, cx| {
       cx.background_executor().timer(SAVE_DELAY).await;
@@ -424,6 +430,23 @@ impl Parivartaka {
         })
         .await;
     }));
+  }
+
+  /// "Remember text": off also removes the saved copy now (not only later saves), on keeps the
+  /// text right away
+  fn set_remember_text(&mut self, on: bool, cx: &mut Context<Self>) {
+    self.settings.remember_text = on;
+    self.save_settings(cx);
+    if on {
+      self.schedule_save(cx);
+    } else {
+      self.save_task = None;
+      self.restored = None;
+      if let Err(err) = settings::save_text("") {
+        eprintln!("Couldn't remove the saved source text: {err}");
+      }
+    }
+    cx.notify();
   }
 
   // ---- Settings ----
@@ -672,7 +695,9 @@ impl Parivartaka {
       .on_click(cx.listener(move |this, _, window, cx| this.save_file(source, window, cx)))
   }
 
+  /// The settings popover (the gear): the typing options, and "Remember text"
   fn typing_settings(&self, cx: &mut Context<Self>) -> impl IntoElement {
+    let remember = self.settings.remember_text;
     let font = script_font_family(self.from());
     let examples = self.examples.clone();
     let native = self.settings.use_native_numerals;
@@ -685,7 +710,7 @@ impl Parivartaka {
           .ghost()
           .small()
           .icon(IconName::Settings)
-          .tooltip("Typing options"),
+          .tooltip("Settings: typing options, remember text"),
       )
       .w(px(320.))
       .child({
@@ -754,7 +779,6 @@ impl Parivartaka {
             native,
             Self::set_native_numerals,
           ))
-          .child(div().h(px(1.)).bg(theme.border))
           .child(row(
             "opt-inherent-vowel",
             "Include inherent vowel",
@@ -768,15 +792,22 @@ impl Parivartaka {
             |el| {
               el.child(
                 div()
-                  .pt_3()
-                  .border_t_1()
-                  .border_color(theme.border)
-                  .text_xs()
+                  .mt(px(-4.))
+                  .text_size(px(11.))
                   .text_color(theme.muted_foreground)
                   .child("Quick toggles for both sit at the bottom of the text box."),
               )
             },
           )
+          .child(div().h(px(1.)).bg(theme.border))
+          .child(row(
+            "opt-remember-text",
+            "Remember text",
+            "Keep the text for the next time the app opens",
+            None,
+            remember,
+            Self::set_remember_text,
+          ))
       })
   }
 
@@ -861,7 +892,9 @@ impl Parivartaka {
     chips
   }
 
-  fn source_section(&self, cx: &mut Context<Self>) -> impl IntoElement {
+  /// `wide`: side by side with the output; stacked, a section keeps at least its content's
+  /// height (the boxes, the note under the source box), so nothing overlaps the next one
+  fn source_section(&self, wide: bool, cx: &mut Context<Self>) -> impl IntoElement {
     let theme = cx.theme().clone();
     let from = self.from();
     let typing_on = self.settings.typing_enabled;
@@ -871,7 +904,7 @@ impl Parivartaka {
     v_flex()
       .flex_1()
       .min_w_0()
-      .min_h_0()
+      .when(wide, |el| el.min_h_0())
       .gap_3()
       .child(
         v_flex().gap_2().child(Self::label("FROM", cx)).child(
@@ -1061,20 +1094,23 @@ impl Parivartaka {
               .px_1()
               .text_xs()
               .text_color(theme.muted_foreground)
-              .child("Restored from your last session. Clear removes it."),
+              .child(
+                "Restored from your last session. Clear removes it; to stop keeping text, turn \
+                 off Remember text in the settings (the gear).",
+              ),
           )
         },
       )
   }
 
-  fn output_section(&self, cx: &mut Context<Self>) -> impl IntoElement {
+  fn output_section(&self, wide: bool, cx: &mut Context<Self>) -> impl IntoElement {
     let theme = cx.theme().clone();
     let font = script_font_family(self.to());
     let auto = self.settings.auto_convert;
     v_flex()
       .flex_1()
       .min_w_0()
-      .min_h_0()
+      .when(wide, |el| el.min_h_0())
       .gap_3()
       .child(
         v_flex().gap_2().child(Self::label("TO", cx)).child(
@@ -1367,18 +1403,18 @@ impl Render for Parivartaka {
         .min_h_0()
         .items_stretch()
         .gap_4()
-        .child(self.source_section(cx))
+        .child(self.source_section(wide, cx))
         .child(v_flex().pt(px(22.)).child(swap))
-        .child(self.output_section(cx))
+        .child(self.output_section(wide, cx))
         .into_any_element()
     } else {
       v_flex()
         .flex_1()
         .min_h_0()
         .gap_4()
-        .child(self.source_section(cx))
+        .child(self.source_section(wide, cx))
         .child(h_flex().justify_center().child(swap))
-        .child(self.output_section(cx))
+        .child(self.output_section(wide, cx))
         .into_any_element()
     };
 

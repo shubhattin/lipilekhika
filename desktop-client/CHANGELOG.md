@@ -3,7 +3,7 @@
 ## Unreleased (pc-app@v1.0.12)
 
 - **New app, written with GPUI** ([GPUI Kit](https://gpui-kit.com)) in place of iced, with a light and a dark theme (or the system's)
-- **Lipi Parivartaka is now part of the app** (a window of it, no more Tauri/JS): realtime typing, presets and options, swap, open and save `.txt` (also by dropping a file on the box), undo/redo, copy, and the text is kept between runs. Its start menu entry opens it on its own (`lipilekhika.exe --parivartaka`)
+- **Lipi Parivartaka is now part of the app** (a window of it, no more Tauri/JS): realtime typing, presets and options, swap, open and save `.txt` (also by dropping a file on the box), undo/redo, copy, and the text is kept between runs (*Remember text* in the settings popover turns this off and removes the kept copy). Its start menu entry opens it on its own (`lipilekhika.exe --parivartaka`)
 - New typing help, the same as the web app's: the typing map and the comparison of scripts, by section, with the alternate keys
 - Searchable script picker, by Modern, Latin and Ancient scripts
 - The app runs on Linux too (without the system wide typing, which is the Fcitx5 plugin there)

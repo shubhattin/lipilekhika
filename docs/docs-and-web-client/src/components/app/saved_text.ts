@@ -4,6 +4,8 @@
  */
 
 const STORAGE_KEY = 'lipilekhika-app-source-text';
+/** `'0'` when the user turned "Remember text" off; missing means on (the default) */
+const REMEMBER_KEY = 'lipilekhika-app-remember-text';
 
 /** Longer text isn't kept: browsers allow about 5 MB per site, shared with everything else. */
 export const MAX_SAVED_TEXT_CHARS = 500_000;
@@ -19,7 +21,8 @@ export const loadSavedText = (): string | null => {
   }
 };
 
-const removeSavedText = () => {
+/** Removes the saved copy (also when "Remember text" is turned off) */
+export const removeSavedText = () => {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
@@ -47,5 +50,23 @@ export const saveText = (text: string): SaveResult => {
     if (!isQuotaError(err)) return 'unavailable';
     removeSavedText();
     return 'too_large';
+  }
+};
+
+/** Whether the text is kept for the next visit ("Remember text", on unless turned off) */
+export const loadRememberText = (): boolean => {
+  try {
+    return localStorage.getItem(REMEMBER_KEY) !== '0';
+  } catch {
+    return true;
+  }
+};
+
+export const saveRememberText = (on: boolean) => {
+  try {
+    if (on) localStorage.removeItem(REMEMBER_KEY);
+    else localStorage.setItem(REMEMBER_KEY, '0');
+  } catch {
+    // nothing to do: it stays on for the next visit
   }
 };
