@@ -64,6 +64,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
+      # the NDK version of `ndkVersion` in packages/kotlin/lipilekhika/build.gradle.kts (cargo-ndk
+      # uses it; Gradle only installs an NDK for its own native builds)
+      - name: Install the NDK
+        run: sdkmanager --install "ndk;$(grep -oP 'ndkVersion = "\K[^"]+' packages/kotlin/lipilekhika/build.gradle.kts)"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 

@@ -112,9 +112,17 @@ val cargoNdk =
         val out = outputDir.get().asFile
         workingDir = repoRoot
         val ndkDir = androidComponents.sdkComponents.ndkDirectory
+        val ndkVersion = android.ndkVersion
         doFirst {
             out.deleteRecursively()
-            environment("ANDROID_NDK_HOME", ndkDir.get().asFile.path)
+            val ndk = ndkDir.orNull?.asFile
+            if (ndk == null || !ndk.isDirectory) {
+                throw GradleException(
+                    "the Android NDK $ndkVersion is not installed: " +
+                        "sdkmanager --install \"ndk;$ndkVersion\""
+                )
+            }
+            environment("ANDROID_NDK_HOME", ndk.path)
         }
         commandLine(
             buildList {
