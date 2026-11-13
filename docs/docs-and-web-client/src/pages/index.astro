@@ -6,7 +6,7 @@ import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations
 import ScriptTrans from '$components/landing/ScriptTrans.svelte';
 import { Globe, ArrowRight } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
-import { SiAndroid, SiApple, SiLinux, SiWindows } from 'svelte-icons-pack/si';
+import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
 const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
 const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
@@ -117,16 +117,6 @@ const DOWNLOAD_BUTTON_CLASS =
             >
               <Icon src={SiLinux} className="size-4 fill-foreground/80" />
               <span>Linux</span>
-            </a>
-
-            <a
-              href={MAC_PARIVARTAKA_URL}
-              rel="noopener noreferrer"
-              title="Lipi Parivartaka for Mac: convert text between scripts"
-              class={`${DOWNLOAD_BUTTON_CLASS} hidden px-3.5 sm:inline-flex`}
-            >
-              <Icon src={SiApple} className="size-4 fill-foreground/80" />
-              <span>macOS</span>
             </a>
           </div>
 

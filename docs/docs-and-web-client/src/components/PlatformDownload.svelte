@@ -127,7 +127,8 @@
         <div class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
           Linux Fcitx5 Plugin
         </div>
-        <div class="truncate text-xs text-slate-500 dark:text-slate-400">
+        <!-- wraps on narrow screens: the link must stay visible -->
+        <div class="text-xs leading-snug text-slate-500 dark:text-slate-400">
           System-wide input method, and the
           <a
             class="underline underline-offset-2 hover:text-slate-700 dark:hover:text-slate-200"
