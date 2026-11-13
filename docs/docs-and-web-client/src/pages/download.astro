@@ -1,0 +1,302 @@
+---
+import RootLayout from '$components/RootLayout.astro';
+import { ArrowRight, Download, ExternalLink, Globe } from 'lucide-svelte';
+import { Icon } from 'svelte-icons-pack';
+import { SiAndroid, SiApple, SiLinux, SiWindows } from 'svelte-icons-pack/si';
+import { findLatestRelease, parseTagVersion, type GitHubRelease } from '~/lib/github';
+
+// The links are the `/redirect/*` routes of the Netlify `_redirects` file (made at build time from
+// the latest releases), so the links of this page do not change with a release
+const URLS = {
+  windowsMsi: '/redirect/pc-app-release-win-download',
+  windowsPortable: '/redirect/pc-app-release-win-portable',
+  androidApk: '/redirect/mobile-app-release-apk',
+  androidReleasePage: '/redirect/mobile-app-release-page',
+  linuxParivartaka: '/redirect/pc-app-release-linux-parivartaka',
+  macParivartaka: '/redirect/pc-app-release-macos-parivartaka',
+  fcitx5Plugin: 'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md',
+  allReleases: 'https://github.com/shubhattin/lipilekhika/releases'
+};
+
+// the versions and file sizes, only shown when the GitHub API answers (the page builds without)
+const token = import.meta.env.GITHUB_TOKEN ?? process.env.GITHUB_TOKEN;
+const [pcRelease, mobileRelease] = await Promise.all([
+  findLatestRelease('pc-app@v', 'shubhattin', 'lipilekhika', token),
+  findLatestRelease('mobile-app@v', 'shubhattin', 'lipilekhika', token)
+]);
+const pcVersion = pcRelease ? parseTagVersion(pcRelease.tag_name, 'pc-app@v') : null;
+const mobileVersion = mobileRelease
+  ? parseTagVersion(mobileRelease.tag_name, 'mobile-app@v')
+  : null;
+
+/** The size of a release file, like "13 MB" */
+const fileSize = (release: GitHubRelease | null, name: string) => {
+  const asset = release?.assets.find((a) => a.name === name);
+  return asset ? `${Math.round(asset.size / 1048576)} MB` : null;
+};
+
+type File = {
+  label: string;
+  /** the kind of file, or what the link is */
+  kind: string;
+  href: string;
+  size?: string | null;
+  external?: boolean;
+};
+type Platform = {
+  id: 'windows' | 'android' | 'macos' | 'linux';
+  name: string;
+  icon: typeof SiWindows;
+  iconClass: string;
+  version: string | null;
+  /** what you get on this platform */
+  summary: string;
+  files: File[];
+  notes: string[];
+};
+
+const PLATFORMS: Platform[] = [
+  {
+    id: 'windows',
+    name: 'Windows',
+    icon: SiWindows,
+    iconClass: 'fill-sky-600 dark:fill-sky-400',
+    version: pcVersion,
+    summary: 'Type in Indian scripts in every app, and convert text with Lipi Parivartaka.',
+    files: [
+      {
+        label: 'Installer',
+        kind: '.msi',
+        href: URLS.windowsMsi,
+        size: fileSize(pcRelease, `lipilekhika-${pcVersion}.msi`)
+      },
+      {
+        label: 'Portable',
+        kind: '.zip, unzip and run',
+        href: URLS.windowsPortable,
+        size: fileSize(pcRelease, `lipilekhika-${pcVersion}-windows-x64-portable.zip`)
+      }
+    ],
+    notes: ['64-bit (x64)', 'Updates itself from the app']
+  },
+  {
+    id: 'android',
+    name: 'Android',
+    icon: SiAndroid,
+    iconClass: 'fill-emerald-600 dark:fill-emerald-400',
+    version: mobileVersion,
+    summary: 'Convert selected text in any app, from Share, or the clipboard with a quick tile.',
+    files: [
+      {
+        label: 'APK',
+        kind: 'universal, for every phone',
+        href: URLS.androidApk,
+        size: fileSize(mobileRelease, `lipilekhika_${mobileVersion}_universal.apk`)
+      },
+      {
+        label: 'Smaller APKs',
+        kind: 'one per architecture',
+        href: URLS.androidReleasePage,
+        external: true
+      }
+    ],
+    notes: ['Android 7.0 or newer']
+  },
+  {
+    id: 'macos',
+    name: 'macOS',
+    icon: SiApple,
+    iconClass: 'fill-foreground/80',
+    version: pcVersion,
+    summary: 'Lipi Parivartaka: type and convert text between scripts.',
+    files: [
+      {
+        label: 'Lipi Parivartaka',
+        kind: '.zip',
+        href: URLS.macParivartaka,
+        size: fileSize(pcRelease, `lipiparivartaka-${pcVersion}-macos-universal.zip`)
+      }
+    ],
+    notes: [
+      'macOS 12 or newer, Apple silicon and Intel',
+      'Not notarized: allow it once in System Settings → Privacy & Security'
+    ]
+  },
+  {
+    id: 'linux',
+    name: 'Linux',
+    icon: SiLinux,
+    iconClass: 'fill-foreground/80',
+    version: pcVersion,
+    summary:
+      'Type in Indian scripts with the Fcitx5 plugin, and convert text with Lipi Parivartaka.',
+    files: [
+      {
+        label: 'Lipi Parivartaka',
+        kind: '.tar.gz',
+        href: URLS.linuxParivartaka,
+        size: fileSize(pcRelease, `lipiparivartaka-${pcVersion}-linux-x86_64.tar.gz`)
+      },
+      {
+        label: 'Fcitx5 plugin',
+        kind: 'how to install',
+        href: URLS.fcitx5Plugin,
+        external: true
+      }
+    ],
+    notes: ['x86_64, install.sh adds it to the app menu']
+  }
+];
+
+const CTA_CLASS =
+  'inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-amber-500 bg-linear-to-b from-amber-400 to-amber-500 px-5 text-sm font-semibold whitespace-nowrap text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:from-amber-300 hover:to-amber-400 active:translate-y-0';
+---
+
+<RootLayout
+  title="Download Lipi Lekhika"
+  description="Download Lipi Lekhika for Windows (installer or portable) and Android, and Lipi Parivartaka for macOS and Linux."
+>
+  <section class="relative overflow-hidden px-4 pt-24 pb-16 sm:px-6 sm:pt-28">
+    <div
+      class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]"
+    >
+    </div>
+
+    <div class="mx-auto max-w-3xl">
+      <!-- the download for this device (shown by the script below) -->
+      <div class="text-center">
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Download Lipi Lekhika</h1>
+        <p class="mx-auto mt-3 max-w-xl text-muted-foreground">
+          Free and open source. Works offline.
+        </p>
+      </div>
+
+      {
+        PLATFORMS.map((p) => (
+          <div data-featured={p.id} class="featured mt-8 hidden flex-col items-center text-center">
+            <a href={p.files[0].href} class={CTA_CLASS}>
+              <Download class="size-4" />
+              Download for {p.name}
+            </a>
+            <p class="mt-2.5 text-xs text-muted-foreground">
+              {p.files[0].label}
+              {p.files[0].kind.startsWith('.') ? ` (${p.files[0].kind})` : ''}
+              {p.version && ` · version ${p.version}`}
+              {p.files[0].size && ` · ${p.files[0].size}`}
+            </p>
+          </div>
+        ))
+      }
+
+      <!-- every platform and file -->
+      <div
+        class="mt-12 divide-y divide-border/60 overflow-hidden rounded-xl border border-border/60 bg-white/70 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm dark:bg-card/40 dark:shadow-none"
+      >
+        {
+          PLATFORMS.map((p) => (
+            <section data-platform={p.id} class="platform p-5 sm:p-6">
+              <div class="flex items-start gap-3.5">
+                <div class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70">
+                  <Icon src={p.icon} className={`size-[18px] ${p.iconClass}`} />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-baseline gap-x-2">
+                    <h2 class="font-semibold">{p.name}</h2>
+                    {p.version && (
+                      <span class="text-xs text-muted-foreground tabular-nums">v{p.version}</span>
+                    )}
+                    <span class="this-device hidden rounded-full bg-primary/10 px-2 py-px text-[11px] font-medium text-primary">
+                      This device
+                    </span>
+                  </div>
+                  <p class="mt-0.5 text-sm text-muted-foreground">{p.summary}</p>
+
+                  <div class="mt-3 flex flex-col gap-1.5">
+                    {p.files.map((f) => (
+                      <a
+                        href={f.href}
+                        {...(f.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        class="group flex items-center gap-3 rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-sm transition-colors hover:border-primary/40 hover:bg-accent/40"
+                      >
+                        <span class="min-w-0 flex-1">
+                          <span class="font-medium">{f.label}</span>
+                          <span class="ml-1.5 text-xs text-muted-foreground">{f.kind}</span>
+                        </span>
+                        {f.size && (
+                          <span class="hidden text-xs text-muted-foreground tabular-nums sm:inline">
+                            {f.size}
+                          </span>
+                        )}
+                        {f.external ? (
+                          <ExternalLink class="size-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
+                        ) : (
+                          <Download class="size-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
+                        )}
+                      </a>
+                    ))}
+                  </div>
+
+                  <p class="mt-2.5 text-xs text-muted-foreground">{p.notes.join(' · ')}</p>
+                </div>
+              </div>
+            </section>
+          ))
+        }
+
+        <section class="p-5 sm:p-6">
+          <div class="flex items-start gap-3.5">
+            <div
+              class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70"
+            >
+              <Globe class="size-[18px] text-primary" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <h2 class="font-semibold">Web app</h2>
+              <p class="mt-0.5 text-sm text-muted-foreground">
+                For iPhone, iPad and everything else: runs in the browser, and can be installed from
+                its menu.
+              </p>
+              <a
+                href="/app"
+                class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                Use online <ArrowRight class="size-3.5" />
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <p class="mt-6 text-center text-xs text-muted-foreground">
+        Developers: the <a
+          href="/getting-started/introduction"
+          class="underline underline-offset-2 hover:text-foreground">packages</a
+        > for JavaScript, Python, Rust and Go. Older versions and changelogs:{' '}
+        <a
+          href={URLS.allReleases}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline underline-offset-2 hover:text-foreground">GitHub Releases</a
+        >.
+      </p>
+    </div>
+  </section>
+
+  <!-- the download for this device at the top, and its platform first in the list -->
+  <script>
+    import { detect_platform } from '../tools/pwa_state';
+
+    // on the first load too (the site uses Astro's client router)
+    document.addEventListener('astro:page-load', () => {
+      const platform = detect_platform();
+      const featured = document.querySelector<HTMLElement>(
+        `.featured[data-featured="${platform}"]`
+      );
+      featured?.classList.replace('hidden', 'flex');
+      const row = document.querySelector<HTMLElement>(`.platform[data-platform="${platform}"]`);
+      if (!row) return;
+      row.querySelector('.this-device')?.classList.remove('hidden');
+      row.parentElement?.prepend(row);
+    });
+  </script>
+</RootLayout>

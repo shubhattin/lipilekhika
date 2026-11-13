@@ -10,8 +10,6 @@ import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
 const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
 const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-apk';
-// Lipi Parivartaka on its own (convert text between scripts)
-const MAC_PARIVARTAKA_URL = '/redirect/pc-app-release-macos-parivartaka';
 // const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
 const LINUX_FCITX_PLUGIN_URL =
   'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
@@ -120,30 +118,15 @@ const DOWNLOAD_BUTTON_CLASS =
             </a>
           </div>
 
-          <!-- Mobile-only: Desktop downloads -->
-          <div class="mt-4 text-center text-xs text-muted-foreground sm:hidden">
-            Desktop downloads:
-
-            <a
-              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
-              href={WINDOWS_DOWNLOAD_URL}
-            >
-              Windows
+          <!-- every platform and file (portable Windows app, Lipi Parivartaka, ...) -->
+          <div class="mt-4 text-center text-xs text-muted-foreground lg:text-left">
+            <a href="/download" class="underline underline-offset-2 hover:text-foreground">
+              All downloads
             </a>
-
-            <a
-              href={LINUX_FCITX_PLUGIN_URL}
-              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
+            <span class="hidden sm:inline"
+              >&nbsp;· Windows portable, macOS and Linux (Lipi Parivartaka)</span
             >
-              Linux
-            </a>
-
-            <a
-              href={MAC_PARIVARTAKA_URL}
-              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
-            >
-              macOS
-            </a>
+            <span class="sm:hidden">&nbsp;· Windows, macOS and Linux</span>
           </div>
         </div>
 
