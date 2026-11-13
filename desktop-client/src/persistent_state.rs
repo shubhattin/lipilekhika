@@ -5,8 +5,13 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use toml::from_str;
 
-/// A file in the app's data directory (`<data dir>/lipilekhika/<name>`)
+/// A file in the app's data directory (`<data dir>/lipilekhika/<name>`, the `data` folder next to
+/// the exe in the portable app)
 pub fn app_data_path(name: &str) -> PathBuf {
+  if let Some(mut path) = crate::portable::data_dir() {
+    path.push(name);
+    return path;
+  }
   let mut path = match dirs::data_dir() {
     Some(p) => p,
     None => return PathBuf::from(name), // fallback to current dir

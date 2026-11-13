@@ -1,0 +1,14 @@
+[package]
+name = "lipiparivartaka-launcher"
+version = "1.0.11"
+edition = "2024"
+publish = false
+description = "Lipi Parivartaka.exe of the portable Windows app: starts lipilekhika.exe --parivartaka"
+
+[[bin]]
+name = "lipiparivartaka-launcher"
+path = "src/main.rs"
+
+[build-dependencies]
+embed-resource = "2"
+static_vcruntime = "3"

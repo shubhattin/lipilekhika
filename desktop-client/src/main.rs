@@ -15,6 +15,7 @@ use std::{
 mod data;
 mod persistent_state;
 mod platform;
+mod portable;
 mod posthog;
 mod single_instance;
 mod tray;
@@ -142,6 +143,9 @@ fn main() {
   });
 
   single_instance::listen(tx_ui.clone());
+
+  // the portable app's fonts, there for all apps until the app quits
+  let _fonts = portable::SessionFonts::load();
 
   // starts the UI event loop
   ui::run(app_state, rx_ui, tx_tray, startup_view);

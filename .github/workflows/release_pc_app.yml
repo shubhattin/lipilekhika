@@ -67,9 +67,10 @@ jobs:
           # only main and tags save (PR caches can't be used by anything else)
           save-if: ${{ github.event_name != 'pull_request' }}
 
+      # the app, and `Lipi Parivartaka.exe` of the portable zip
       - name: Build lipilekhika-ui (Windows)
         run: |
-          cargo build --release -p lipilekhika-ui
+          cargo build --release -p lipilekhika-ui -p lipiparivartaka-launcher
 
       # Extract version from Cargo.toml
       - name: Get version
@@ -118,8 +119,8 @@ jobs:
           $wixBin | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
           Write-Host "WiX Toolset added to PATH: $wixBin"
 
-      # Build MSI Installer
-      - name: Build MSI Installer
+      # Build the MSI installer and the portable zip
+      - name: Build MSI Installer and portable zip
         shell: powershell
         run: |
           cd desktop-client
@@ -176,13 +177,21 @@ jobs:
           echo "Normalized TAG=$NORMALIZED_TAG"
           echo "TAG=$NORMALIZED_TAG" >> $GITHUB_OUTPUT
 
-      # without a release (dry run, PR, main) the installer is kept as a workflow artifact
+      # without a release (dry run, PR, main) the installer and the zip are kept as workflow artifacts
       - name: Upload MSI as artifact
         if: ${{ env.PUBLISH != 'true' }}
         uses: actions/upload-artifact@v7
         with:
           name: pc-app-msi
           path: desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi
+          retention-days: 7
+
+      - name: Upload portable zip as artifact
+        if: ${{ env.PUBLISH != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pc-app-portable
+          path: desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}-windows-x64-portable.zip
           retention-days: 7
 
       # Create GitHub Release and upload assets using the normalized tag
@@ -193,8 +202,11 @@ jobs:
         shell: bash
         run: |
           TAG="${{ steps.normalized_tag.outputs.TAG }}"
-          MSI_PATH="desktop-client/bundle_build/lipilekhika-${{ steps.get_version.outputs.VERSION }}.msi"
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          # the MSI keeps its name: the app's updater and the website download it by that name
+          MSI_PATH="desktop-client/bundle_build/lipilekhika-$VERSION.msi"
+          ZIP_PATH="desktop-client/bundle_build/lipilekhika-$VERSION-windows-x64-portable.zip"
 
-          echo "Uploading $MSI_PATH to release $TAG"
+          echo "Uploading $MSI_PATH and $ZIP_PATH to release $TAG"
           # --clobber replaces existing asset with the same name
-          gh release upload "$TAG" "$MSI_PATH" --clobber
+          gh release upload "$TAG" "$MSI_PATH" "$ZIP_PATH" --clobber

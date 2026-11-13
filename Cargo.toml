@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "desktop-client",
+    "desktop-client/launcher",
     "packages/rust",
     "packages/rust/datagen",
     "packages/js/wasm",

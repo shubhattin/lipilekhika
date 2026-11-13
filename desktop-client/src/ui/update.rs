@@ -2,7 +2,8 @@
 //! it does not take the keys) on its first few starts, with Later to stop it. After that, or when
 //! the popup is closed, a small link at the bottom of the windows offers the update.
 //!
-//! The update installs the new MSI on Windows; elsewhere it opens the releases page.
+//! The update installs the new MSI on Windows; elsewhere (and in the portable app) it opens the
+//! new version's release page.
 
 use super::Controller;
 use super::styles::GREEN;
@@ -56,7 +57,13 @@ pub fn start_version_check(cx: &mut App) {
   .detach();
 }
 
-/// The update: installs the new MSI on Windows, opens the releases page elsewhere
+/// Whether the update installs the new version itself (the MSI on Windows), else it opens the
+/// release page
+fn installs_update() -> bool {
+  cfg!(windows) && !crate::portable::is_portable()
+}
+
+/// The update: installs the new MSI on Windows, opens the release page elsewhere
 pub fn run_update(cx: &mut App) {
   let controller = cx.global::<Controller>();
   if controller.update.in_progress {
@@ -65,8 +72,11 @@ pub fn run_update(cx: &mut App) {
   let Some(check) = controller.update.check.clone() else {
     return;
   };
-  if !cfg!(windows) {
-    cx.open_url(super::RELEASES_URL);
+  if !installs_update() {
+    match &check.latest_version {
+      Some(version) => cx.open_url(&format!("{}/tag/pc-app%40v{version}", super::RELEASES_URL)),
+      None => cx.open_url(super::RELEASES_URL),
+    }
     return;
   }
   let (Some(url), Some(version)) = (check.windows_msi_download_url, check.latest_version) else {
@@ -150,7 +160,7 @@ fn prompt_window(cx: &App) -> Option<AnyWindowHandle> {
 struct UpdatePopup;
 
 fn popup(version: String) -> Notification {
-  let message = if cfg!(windows) {
+  let message = if installs_update() {
     "Install it now, or later from the link at the bottom of the window."
   } else {
     "Download it now, or later from the link at the bottom of the window."
@@ -217,10 +227,10 @@ pub fn update_link(cx: &App) -> Option<AnyElement> {
       .child(div().underline().child(update_label(version, in_progress)))
       .hover(|s| s.opacity(0.8))
       .tooltip(|window, cx| {
-        gpui_kit::component::tooltip::Tooltip::new(if cfg!(windows) {
+        gpui_kit::component::tooltip::Tooltip::new(if installs_update() {
           "Installs the new version (the app restarts)"
         } else {
-          "Opens the releases page"
+          "Opens the new version's page to download it"
         })
         .build(window, cx)
       })

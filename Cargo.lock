@@ -4536,6 +4536,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "lipiparivartaka-launcher"
+version = "1.0.11"
+dependencies = [
+ "embed-resource 2.5.2",
+ "static_vcruntime",
+]
+
+[[package]]
 name = "litemap"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
