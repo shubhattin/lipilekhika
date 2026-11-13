@@ -13,7 +13,7 @@
 
 ## ✨ Features
 
-- 🔄 **Bidirectional Transliteration** — Convert between 15+ Indian Brahmic scripts
+- 🔄 **Bidirectional Transliteration** — Supports all the modern Indian scripts, along with the standard romanization schemes such as IAST, ITRANS, SLP1 and Harvard-Kyoto ([script guide](https://lipilekhika.in/reference/script_guide/))
 - ⚡ **High Performance** — Zero-overhead abstractions and optimized algorithms
 - 🛡️ **Type Safe** — Leverages Rust's type system for safety and correctness
 - 🎯 **Customizable Options** — Fine-tune transliteration and typing behaviour

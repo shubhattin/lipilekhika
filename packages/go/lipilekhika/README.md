@@ -11,7 +11,7 @@
 
 ## ✨ Features
 
-- 🔄 **Bidirectional Transliteration** — Convert between 15+ Indian Brahmic scripts
+- 🔄 **Bidirectional Transliteration** — Supports all the modern Indian scripts, along with the standard romanization schemes such as IAST, ITRANS, SLP1 and Harvard-Kyoto ([script guide](https://lipilekhika.in/reference/script_guide/))
 - ⌨️ **Realtime Typing** — Stateful context for character-by-character input
 - 🎯 **Customizable Options** — Fine-tune transliteration and typing behaviour
 - 📦 **Embedded Script Data** — All data bundled for predictable runtime behaviour
