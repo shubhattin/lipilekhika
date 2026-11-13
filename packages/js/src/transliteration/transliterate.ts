@@ -40,6 +40,17 @@ const ZWNJ = '‌';
  * a + U+0304, ḥ as h + U+0323) */
 const isLatinCombiningMark = (cp: number): boolean => cp >= 0x300 && cp <= 0x36f;
 
+const ALPHABETIC_REGEX = /\p{Alphabetic}/u;
+/** A code point of a word: a letter (Unicode `Alphabetic`) or a Latin combining mark */
+const isWordCp = (cp: number): boolean =>
+  cp !== -1 && (isLatinCombiningMark(cp) || ALPHABETIC_REGEX.test(String.fromCodePoint(cp)));
+
+/** The krama index of ॐ (`AUM`, the first krama key) */
+const OM_KRAMA_INDEX = 0;
+
+/** The standard romanization schemes */
+const STANDARD_SCHEMES: readonly string[] = ['SLP1', 'Harvard-Kyoto', 'ITRANS', 'IAST'];
+
 /** These Characters can be skipped/ignore while transliterating the input text
  *
  * `' '`, `'\n'`, `'\r'`, `'\t'`, `','`, `'~'`, `'!'`, `'@'`, `'?'`, `'%'`
@@ -654,6 +665,14 @@ export const transliterate_text_core = (
     textToKramaMapIndex(text_to_krama_lookup_script_data, '~', use_typing_text_to_krama_map) !==
       -1 || kramaIndexOfText(from_script_data, '~') !== -1;
 
+  /** Between two romanizations, one of them a standard scheme, ॐ is read only at the start of a
+   * word (there is no vyanjana context to tell `logoṃ` लोगों from ॐ). Normal and Romanized are
+   * kept as they were. */
+  const om_only_at_word_start =
+    from_script_data.script_type === 'other' &&
+    to_script_data.script_type === 'other' &&
+    (STANDARD_SCHEMES.includes(from_script_name) || STANDARD_SCHEMES.includes(to_script_name));
+
   /** A flag to indicate when to ignore the tamil extended numeral
    * Used when converting from tamil extended
    */
@@ -962,6 +981,32 @@ export const transliterate_text_core = (
       !sign_has_base(from_script_data, cursor, char_index)
     )
       text_to_krama_item_index = -1;
+    // ॐ inside a word (after a letter) is read as the letters of its text, the longest part of it
+    // which is read: IAST logoṃ is लोगों, SLP1 jAUM जाऊं (to a brahmic script the same is done
+    // after a vyanjana, `check_vowel_retraction`)
+    if (
+      om_only_at_word_start &&
+      text_to_krama_item_index !== -1 &&
+      char_index > 0 &&
+      isWordCp(cursor.cpAt(cursor.prevCharIndex(char_index)))
+    ) {
+      const [matched_text, { krama }] = text_to_krama_map[text_to_krama_item_index];
+      if (krama?.length === 1 && krama[0] === OM_KRAMA_INDEX) {
+        const code_points = [...matched_text];
+        for (let end = code_points.length - 1; end > 0; end--) {
+          const index = textToKramaMapIndex(
+            text_to_krama_lookup_script_data,
+            code_points.slice(0, end).join(''),
+            use_typing_text_to_krama_map
+          );
+          const part_krama = index !== -1 ? text_to_krama_map[index][1].krama : null;
+          if (part_krama && part_krama.length > 0 && !part_krama.includes(-1)) {
+            text_to_krama_item_index = index;
+            break;
+          }
+        }
+      }
+    }
     // (the Tamil-Extended matches index into `from_script_data.text_to_krama_map`, which
     // is `text_to_krama_map` as typing map is only used with `Normal` as the input)
     const text_to_krama_item: TextToKramaItem | null =

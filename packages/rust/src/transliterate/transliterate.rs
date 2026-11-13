@@ -23,6 +23,25 @@ fn is_latin_combining_mark(c: char) -> bool {
     ('\u{0300}'..='\u{036F}').contains(&c)
 }
 
+/// A char of a word: a letter (Unicode `Alphabetic`) or a Latin combining mark
+fn is_word_char(c: char) -> bool {
+    c.is_alphabetic() || is_latin_combining_mark(c)
+}
+
+/// The krama index of ॐ (`AUM`, the first krama key)
+const OM_KRAMA_INDEX: i16 = 0;
+
+/// The standard romanization schemes
+fn is_standard_scheme(script: &ScriptListEnum) -> bool {
+    matches!(
+        script,
+        ScriptListEnum::Slp1
+            | ScriptListEnum::HarvardKyoto
+            | ScriptListEnum::Itrans
+            | ScriptListEnum::Iast
+    )
+}
+
 /// Compare a char with a &str without heap allocation.
 #[inline]
 fn char_eq_str(c: char, s: &str) -> bool {
@@ -978,6 +997,12 @@ pub fn transliterate_text_core_with(
     } else {
         &from_script_data.text_to_krama_map
     };
+    // Between two romanizations, one of them a standard scheme, ॐ is read only at the start of a
+    // word (there is no vyanjana context to tell `logoṃ` लोगों from ॐ). Normal and Romanized are
+    // kept as they were.
+    let om_only_at_word_start = matches!(from_script_data, ScriptData::Other { .. })
+        && matches!(to_script_data, ScriptData::Other { .. })
+        && (is_standard_scheme(from_script) || is_standard_scheme(to_script));
     // `~` is a letter in some romanization schemes (Harvard-Kyoto candrabindu, ITRANS `~N`),
     // there it is read instead of skipped
     let tilde_is_text = text_to_krama_lookup_script_data
@@ -1377,6 +1402,37 @@ pub fn transliterate_text_core_with(
                 || use_typing_map
                 || sign_has_base(from_script_data, ctx.cursor, text_index)
         });
+        // ॐ inside a word (after a letter) is read as the letters of its text, the longest part of
+        // it which is read: IAST logoṃ is लोगों, SLP1 jAUM जाऊं (to a brahmic script the same is
+        // done after a vyanjana, `check_vowel_retraction`)
+        let text_to_krama_item_index = match text_to_krama_item_index {
+            Some(i)
+                if om_only_at_word_start
+                    && text_index > 0
+                    && ctx.cursor.peek_at(text_index - 1).is_some_and(is_word_char)
+                    && from_text_to_krama_map[i].1.krama.as_deref() == Some(&[OM_KRAMA_INDEX]) =>
+            {
+                let matched_text = from_text_to_krama_map[i].0.as_str();
+                let part_index = matched_text
+                    .char_indices()
+                    .rev()
+                    .map(|(end, _)| end)
+                    .filter(|&end| end > 0)
+                    .find_map(|end| {
+                        text_to_krama_lookup_script_data
+                            .text_to_krama_map_index(&matched_text[..end], use_typing_map)
+                            .filter(|&index| {
+                                from_text_to_krama_map[index]
+                                    .1
+                                    .krama
+                                    .as_ref()
+                                    .is_some_and(|k| !k.is_empty() && !k.contains(&-1))
+                            })
+                    });
+                Some(part_index.unwrap_or(i))
+            }
+            other => other,
+        };
         let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
         if let Some(text_to_krama_item) = text_to_krama_item {
             let (matched_text, map) = text_to_krama_item;

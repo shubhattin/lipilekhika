@@ -2,6 +2,7 @@ package transliterate
 
 import (
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/shubhattin/lipilekhika/packages/go/lipilekhika/internal/scriptdata"
@@ -392,6 +393,24 @@ func isTaExtSuperscriptTail(r rune, ok bool) bool {
 // marks of decomposed Latin letters (ā as a + U+0304, ḥ as h + U+0323).
 func isLatinCombiningMark(r rune) bool {
 	return r >= 0x300 && r <= 0x36f
+}
+
+// isWordRune reports a rune of a word: a letter (Unicode Alphabetic) or a Latin combining mark
+func isWordRune(r rune) bool {
+	return isLatinCombiningMark(r) || unicode.IsLetter(r) || unicode.Is(unicode.Nl, r) ||
+		unicode.Is(unicode.Other_Alphabetic, r)
+}
+
+// omKramaIndex is the krama index of ॐ (`AUM`, the first krama key)
+const omKramaIndex = 0
+
+// isStandardScheme reports the standard romanization schemes
+func isStandardScheme(name string) bool {
+	switch name {
+	case "SLP1", "Harvard-Kyoto", "ITRANS", "IAST":
+		return true
+	}
+	return false
 }
 
 func isVedicSvaraTail(r rune, ok bool) bool {
