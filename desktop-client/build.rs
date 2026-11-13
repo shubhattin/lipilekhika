@@ -20,6 +20,12 @@ fn main() {
     return;
   }
 
+  // Link the VC++ runtime into the exe, so it starts on a fresh Windows without the
+  // "VCRUNTIME140.dll was not found" error (the Universal CRT is part of Windows 10+)
+  if env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+    static_vcruntime::metabuild();
+  }
+
   // Read crate version
   let ver = env::var("CARGO_PKG_VERSION").expect("CARGO_PKG_VERSION not set");
   // parse version parts into integers (major, minor, patch)
