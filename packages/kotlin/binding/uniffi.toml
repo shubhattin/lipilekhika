@@ -1,0 +1,4 @@
+# Configuration of the generated Kotlin code
+[bindings.kotlin]
+package_name = "com.shubhattin.lipilekhika.core.ffi"
+cdylib_name = "lipilekhika_kotlin"

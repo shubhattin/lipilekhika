@@ -1,0 +1,82 @@
+name: Kotlin Package CI
+
+on:
+  push:
+    paths:
+      - 'packages/kotlin/**'
+      - 'packages/rust/**'
+      - 'packages/js/**'
+      - 'test_data/**'
+      - 'scripts/**'
+      - 'Cargo.lock'
+      - '.github/workflows/kotlin_ci.yml'
+  workflow_dispatch:
+
+# a newer push to the same branch cancels the run still in progress
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # pinned, like in the mobile app release workflow
+  CARGO_NDK_VERSION: 4.1.2
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Setup Bun for test data generation
+      - uses: oven-sh/setup-bun@v2
+        name: Setup Bun
+
+      - name: Generate Test Data
+        run: |
+          bun install
+          bun run gen:test-data
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-kotlin-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-kotlin-
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --version "$CARGO_NDK_VERSION" --locked
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # formatting (ktfmt), the unit tests on the JVM (test_data), and the Android build of the
+      # library (cargo-ndk for each ABI, packed into the AAR)
+      - name: Check, test and build
+        working-directory: packages/kotlin
+        run: ./gradlew --console=plain spotlessCheck :lipilekhika:testDebugUnitTest :lipilekhika:assembleRelease
+
+      - name: Check the AAR has the native libraries
+        working-directory: packages/kotlin
+        run: |
+          unzip -l lipilekhika/build/outputs/aar/lipilekhika-release.aar | tee /tmp/aar.txt
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            grep -q "jni/$abi/liblipilekhika_kotlin.so" /tmp/aar.txt || { echo "missing $abi"; exit 1; }
+          done

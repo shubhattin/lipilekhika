@@ -1,0 +1,4 @@
+# the Gradle wrapper scripts (as Gradle generates them)
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
