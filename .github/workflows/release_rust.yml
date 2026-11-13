@@ -31,7 +31,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile --filter './'
           bun run gen:test-data
 
       # Rust setup

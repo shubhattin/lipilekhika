@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - "packages/js/**"
+      - "lipi_script_data/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
       - "packages/rust/**"
       - "docs/docs-and-web-client/**"
       - ".github/workflows/deploy_web_client.yml"
@@ -48,8 +52,7 @@ jobs:
       # Generate script data
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
+          bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'
           bun run make-script-data
 
       # wasm-pack bundles a wasm-opt that can choke on current rustc output ("Only 1 table
@@ -64,7 +67,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd docs/docs-and-web-client
-          bun install
+          bun install --frozen-lockfile
           bun run build
 
       # Deploy to Netlify

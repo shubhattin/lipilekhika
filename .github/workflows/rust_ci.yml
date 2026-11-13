@@ -4,7 +4,10 @@ on:
   push:
     paths:
       - 'packages/rust/**'
-      - 'packages/js/**'
+      - 'lipi_script_data/**'
+      - 'package.json'
+      - 'bun.lock'
+      - 'bunfig.toml'
       - 'test_data/**'
       - 'scripts/**'
       - 'Cargo.toml'
@@ -67,8 +70,7 @@ jobs:
             ${{ runner.os }}-cargo-
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
+          bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'
           bun run make-script-data
       - name: Check generated Rust data is up to date
         run: |
@@ -83,7 +85,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile --filter './'
           bun run gen:test-data
       # Rust
       - name: Install Rust

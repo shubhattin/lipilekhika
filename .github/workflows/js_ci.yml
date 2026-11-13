@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - "packages/js/**"
+      - "lipi_script_data/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
       - "packages/rust/**"
       - "test_data/**"
       - "scripts/**"
@@ -24,8 +28,7 @@ jobs:
       # Compile wasm
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
+          bun install --frozen-lockfile
           bun run make-script-data
       ## Rust
       - name: Install Rust
@@ -58,7 +61,6 @@ jobs:
       - name: Typescript and Build Check
         run: |
           cd packages/js
-          bun install
           bun run build
           bun run check
 
@@ -91,13 +93,12 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run gen:test-data
 
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
+          bun install --frozen-lockfile
           bun run make-script-data
 
       ## Rust
