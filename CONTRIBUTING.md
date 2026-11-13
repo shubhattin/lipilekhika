@@ -126,6 +126,7 @@ cargo run -p lipilekhika-ui                    # the typing tool
 cargo run -p lipilekhika-ui -- --parivartaka   # only Lipi Parivartaka (its start menu entry)
 cargo run -p lipilekhika-ui -- --typing-help   # only the typing help (--compare for its Compare tab)
 cargo test -p lipilekhika-ui
+cargo run -p lipilekhika-ui --no-default-features   # Lipi Parivartaka on its own (the Linux/macOS download)
 ```
 
 - The system wide typing (the keyboard hook, Alt+X) is there on Windows and macOS. On Linux the app runs without it (that typing is the [Fcitx5 plugin](plugins/fcitx5)); everything else works.
@@ -133,6 +134,7 @@ cargo test -p lipilekhika-ui
 - GPUI builds are large (a debug `target/` is several GB): `CARGO_TARGET_DIR` can put it on another disk.
 - `desktop-client/vendor/gpui-pre-linux` is a patched copy of GPUI's Linux backend, see [its README](desktop-client/vendor/README.md).
 - The script fonts are bundled in the binary (`desktop-client/assets/fonts`).
+- Releases: Windows gets the MSI and the portable zip (`bundle.ps1`; a `portable` file next to the exe makes it portable, see `src/portable.rs`, and `desktop-client/launcher` is its `Lipi Parivartaka.exe`). Linux and macOS get Lipi Parivartaka on its own, built without the default `typing-tool` feature (no main window, tray, keyboard hook or GTK) and packed by `desktop-client/packaging/bundle-linux.sh` / `bundle-macos.sh`.
 
 ## Formatting
 
@@ -211,7 +213,7 @@ Every package and app except Go is released by its own GitHub Actions workflow, 
 | JS package | `js-lib@v1.2.3` | `packages/js/package.json` | [`packages/js/CHANGELOG.md`](packages/js/CHANGELOG.md) | [`release_js.yml`](.github/workflows/release_js.yml) | npm (`lipilekhika`) |
 | Rust crate | `rust-lib@v1.2.3` | `packages/rust/Cargo.toml` | [`packages/rust/CHANGELOG.md`](packages/rust/CHANGELOG.md) | [`release_rust.yml`](.github/workflows/release_rust.yml) | crates.io (`lipilekhika`), `parivartak` CLI binaries on the GitHub release |
 | Python package | `python-lib@v1.2.3` | `packages/python/pyproject.toml` | [`packages/python/CHANGELOG.md`](packages/python/CHANGELOG.md) | [`release_python.yml`](.github/workflows/release_python.yml) | PyPI (`lipilekhika`) |
-| PC app (Windows) | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | MSI installer on the GitHub release |
+| PC app | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | Windows MSI and portable zip, Lipi Parivartaka for Linux and macOS, on the GitHub release |
 | Mobile app (Android) | `mobile-app@v1.2.3` | `mobile-app/pubspec.yaml` (`version: 1.2.3+<build number>`) | [`mobile-app/CHANGELOG.md`](mobile-app/CHANGELOG.md) | [`release_mobile_app.yml`](.github/workflows/release_mobile_app.yml) | APKs (arm64-v8a, armeabi-v7a, x86_64) on the GitHub release |
 
 npm, PyPI and crates.io are published with trusted publishing (OIDC), so there are no registry tokens to set up. The npm and PyPI publish jobs run in the `release` environment.

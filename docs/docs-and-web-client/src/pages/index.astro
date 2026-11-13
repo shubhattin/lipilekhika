@@ -6,10 +6,12 @@ import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations
 import ScriptTrans from '$components/landing/ScriptTrans.svelte';
 import { Globe, ArrowRight } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
-import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
+import { SiAndroid, SiApple, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
 const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
 const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
+// Lipi Parivartaka on its own (convert text between scripts)
+const MAC_PARIVARTAKA_URL = '/redirect/pc-app-release-macos-parivartaka';
 // const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
 const LINUX_FCITX_PLUGIN_URL =
   'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
@@ -116,6 +118,16 @@ const DOWNLOAD_BUTTON_CLASS =
               <Icon src={SiLinux} className="size-4 fill-foreground/80" />
               <span>Linux</span>
             </a>
+
+            <a
+              href={MAC_PARIVARTAKA_URL}
+              rel="noopener noreferrer"
+              title="Lipi Parivartaka for Mac: convert text between scripts"
+              class={`${DOWNLOAD_BUTTON_CLASS} hidden px-3.5 sm:inline-flex`}
+            >
+              <Icon src={SiApple} className="size-4 fill-foreground/80" />
+              <span>macOS</span>
+            </a>
           </div>
 
           <!-- Mobile-only: Desktop downloads -->
@@ -134,6 +146,13 @@ const DOWNLOAD_BUTTON_CLASS =
               class="ml-1.5 underline underline-offset-2 hover:text-foreground"
             >
               Linux
+            </a>
+
+            <a
+              href={MAC_PARIVARTAKA_URL}
+              class="ml-1.5 underline underline-offset-2 hover:text-foreground"
+            >
+              macOS
             </a>
           </div>
         </div>

@@ -1,5 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 // ^ hides console in windows release builds
+// Lipi Parivartaka on its own (no `typing-tool` feature) leaves the typing tool's helpers unused
+// (the linker drops them); only its modules (main window, tray, hook) are left out
+#![cfg_attr(not(feature = "typing-tool"), allow(dead_code))]
 
 use lipilekhika::Script;
 use lipilekhika::typing::{
@@ -17,7 +20,9 @@ mod persistent_state;
 mod platform;
 mod portable;
 mod posthog;
+#[cfg(feature = "typing-tool")]
 mod single_instance;
+#[cfg(feature = "typing-tool")]
 mod tray;
 mod ui;
 mod version_check;
@@ -43,7 +48,10 @@ pub struct ThreadMessage {
 }
 #[derive(Debug)]
 pub enum ThreadMessageOrigin {
-  #[cfg_attr(not(any(windows, target_os = "macos")), allow(dead_code))]
+  #[cfg_attr(
+    not(all(feature = "typing-tool", any(windows, target_os = "macos"))),
+    allow(dead_code)
+  )]
   KeyboardHook,
   UI,
   Tray,
@@ -80,7 +88,8 @@ pub enum StartupView {
 
 fn main() {
   let has_arg = |name: &str| std::env::args().any(|a| a == name);
-  let startup_view = if has_arg("--parivartaka") {
+  // Lipi Parivartaka on its own (without the typing tool) opens straight into it
+  let startup_view = if !cfg!(feature = "typing-tool") || has_arg("--parivartaka") {
     StartupView::Parivartaka
   } else if has_arg("--typing-help") || has_arg("--compare") {
     StartupView::TypingHelp {
@@ -91,6 +100,7 @@ fn main() {
   };
 
   // the app runs once: a second start only brings the running app forward
+  #[cfg(feature = "typing-tool")]
   if single_instance::forward_to_running_app(startup_view) {
     return;
   }
@@ -134,14 +144,16 @@ fn main() {
   }
 
   // Start tray icon thread
-  let state_clone = Arc::clone(&app_state);
-  let tx_ui_clone = tx_ui.clone();
-  let _handle_tray = tray::run_tray_thread(state_clone, tx_ui_clone, rx_tray);
+  #[cfg(feature = "typing-tool")]
+  let _handle_tray = tray::run_tray_thread(Arc::clone(&app_state), tx_ui.clone(), rx_tray);
+  #[cfg(not(feature = "typing-tool"))]
+  drop(rx_tray);
 
   thread::spawn(|| {
     posthog::init_posthog();
   });
 
+  #[cfg(feature = "typing-tool")]
   single_instance::listen(tx_ui.clone());
 
   // the portable app's fonts, there for all apps until the app quits

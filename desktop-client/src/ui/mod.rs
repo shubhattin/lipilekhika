@@ -1,7 +1,9 @@
 //! The GPUI app: the typing tool's main window, the typing help and Lipi Parivartaka.
 
 mod about;
+mod app_menu;
 mod assets;
+#[cfg(feature = "typing-tool")]
 mod main_window;
 mod native;
 mod notification;
@@ -48,8 +50,31 @@ const CLOSE_TO_TRAY: bool = crate::platform::SYSTEM_TYPING_SUPPORTED;
 /// Whether the main window's close button hides it to the tray: [`CLOSE_TO_TRAY`], and the system
 /// shows tray icons. Without a tray the app closes, it would be out of reach otherwise.
 fn close_to_tray() -> bool {
-  CLOSE_TO_TRAY && crate::tray::is_available()
+  #[cfg(feature = "typing-tool")]
+  {
+    CLOSE_TO_TRAY && crate::tray::is_available()
+  }
+  // Lipi Parivartaka on its own has no tray
+  #[cfg(not(feature = "typing-tool"))]
+  {
+    false
+  }
 }
+
+/// The app's name: Lipi Parivartaka on its own is a part of Lipi Lekhika, without the typing tool
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))] // the macOS menu bar
+pub const APP_NAME: &str = if cfg!(feature = "typing-tool") {
+  "Lipi Lekhika"
+} else {
+  "Lipi Parivartaka"
+};
+
+/// The windows' app id (Wayland, X11 class): the launchers find the app's icon by it
+const APP_ID: &str = if cfg!(feature = "typing-tool") {
+  "lipilekhika"
+} else {
+  "lipiparivartaka"
+};
 
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
@@ -199,7 +224,7 @@ fn window_options(spec: WindowSpec, cx: &App) -> WindowOptions {
     is_resizable: spec.resizable,
     is_minimizable: spec.minimizable,
     window_min_size: spec.min.map(|(w, h)| size(px(w), px(h))),
-    app_id: Some("lipilekhika".into()),
+    app_id: Some(APP_ID.into()),
     icon: assets::app_icon_rgba(),
     window_decorations: Some(WindowDecorations::Server),
     focus: true,
@@ -283,7 +308,14 @@ fn parivartaka_should_close(window: &mut Window, cx: &mut App) -> bool {
   true
 }
 
+/// Lipi Parivartaka on its own has no main window: its window comes forward
+#[cfg(not(feature = "typing-tool"))]
+pub fn show_main(cx: &mut App) {
+  open_parivartaka(cx);
+}
+
 /// Shows the main window, opening it again if it was closed to the tray
+#[cfg(feature = "typing-tool")]
 pub fn show_main(cx: &mut App) {
   if let Some(handle) = Controller::global(cx).main {
     let _ = handle.update(cx, |_, window, _| window.activate_window());
@@ -468,7 +500,7 @@ fn show_popup(popup: notification::Popup, cx: &mut App) {
     is_movable: false,
     is_resizable: false,
     is_minimizable: false,
-    app_id: Some("lipilekhika".into()),
+    app_id: Some(APP_ID.into()),
     window_decorations: Some(WindowDecorations::Client),
     // Windows rounds the window itself (`native::round_corners`), elsewhere the popup draws its
     // rounded box on a transparent window
@@ -632,6 +664,7 @@ pub fn run(
         update: update::UpdateState::default(),
       });
       apply_theme(cx);
+      app_menu::init(cx);
       parivartaka::init(cx);
       typing_help::init(cx);
 

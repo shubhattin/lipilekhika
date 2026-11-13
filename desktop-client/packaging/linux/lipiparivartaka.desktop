@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Lipi Parivartaka
+GenericName=Script Converter
+Comment=Convert text from one Indian script to another (Lipi Lekhika)
+Exec=lipiparivartaka
+Icon=lipiparivartaka
+Terminal=false
+Categories=Utility;TextTools;
+Keywords=transliterate;transliteration;script;indic;sanskrit;devanagari;lipi;lekhika;
+StartupWMClass=lipiparivartaka

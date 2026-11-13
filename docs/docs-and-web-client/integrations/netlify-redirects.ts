@@ -6,6 +6,8 @@ import {
   findLatestRelease,
   getWindowsDownloadUrl,
   getWindowsPortableDownloadUrl,
+  getLinuxParivartakaDownloadUrl,
+  getMacParivartakaDownloadUrl,
   getAndroidReleasePage
 } from '../src/lib/github';
 
@@ -48,6 +50,15 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
           const portableUrl = getWindowsPortableDownloadUrl(pcRelease);
           if (portableUrl) {
             redirects.push(`/redirect/pc-app-release-win-portable ${portableUrl} 302`);
+          }
+          // Lipi Parivartaka on its own, for Linux and macOS
+          const linuxUrl = getLinuxParivartakaDownloadUrl(pcRelease);
+          if (linuxUrl) {
+            redirects.push(`/redirect/pc-app-release-linux-parivartaka ${linuxUrl} 302`);
+          }
+          const macUrl = getMacParivartakaDownloadUrl(pcRelease);
+          if (macUrl) {
+            redirects.push(`/redirect/pc-app-release-macos-parivartaka ${macUrl} 302`);
           }
         } else {
           logger.warn('Could not find Windows PC app release');
