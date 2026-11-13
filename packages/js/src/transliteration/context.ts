@@ -95,11 +95,16 @@ export type TransliterateCtx = {
   sinhala_conjunct_halant: boolean;
   /** Index of a Tamil-Extended superscript that was read with the match before it (a halant, a
    * mAtrA or Vedic svaras are written in between), to be skipped when the cursor gets there.
-   * `-1` if none. Used when converting from tamil extended */
+   * `-1` if none. Used when converting from tamil extended. Only the main loop writes it (from
+   * the result of Step 1), the matcher reads it. */
   ta_ext_skip_index: number;
-  /** the matched text ends with a Tamil-Extended superscript that is not next to the rest of
-   * it in the input (a Vedic svara is in between), so the superscript is not to be advanced over */
-  ta_ext_superscript_detached: boolean;
+  /** Result of Step 1 (`match_text_to_krama`, which sets the two on every call, a second and
+   * third return value without an allocation): index of the Tamil-Extended superscript read with
+   * the match, which is not next to it in the input. `-1` if none */
+  matched_superscript_index: number;
+  /** Result of Step 1: only Vedic svaras are between the match and its superscript, and no
+   * superscript was being skipped, so the superscript is not advanced over with the match */
+  matched_superscript_detached: boolean;
 };
 
 /**
@@ -190,7 +195,8 @@ export function create_transliterate_ctx(
       to_script_name === 'Sinhala' &&
       trans_options['all_to_sinhala:use_conjunct_enabling_halant'] === true,
     ta_ext_skip_index: -1,
-    ta_ext_superscript_detached: false
+    matched_superscript_index: -1,
+    matched_superscript_detached: false
   };
 }
 

@@ -297,7 +297,9 @@ function split_om_inside_word(
 /**
  * Step 1: Search for the character in the text_to_krama_map
  *
- * Can set `ctx.ta_ext_skip_index` and `ctx.ta_ext_superscript_detached` (from Tamil-Extended).
+ * Only reads the context, but for its own results: from Tamil-Extended a superscript read with
+ * the match is given in `ctx.matched_superscript_index` / `ctx.matched_superscript_detached`
+ * (the loop then skips it), also when the match itself is dropped here.
  *
  * (the Tamil-Extended matches index into `from_script_data.text_to_krama_map`, which
  * is `ctx.text_to_krama_map` as typing map is only used with `Normal` as the input)
@@ -311,7 +313,8 @@ export function match_text_to_krama(
   char_index: number,
   char_width: number
 ): number {
-  ctx.ta_ext_superscript_detached = false;
+  ctx.matched_superscript_index = -1;
+  ctx.matched_superscript_detached = false;
   const match_index = scan_longest_match(ctx, cp, char_index, char_width);
   if (match_index === -1) return -1;
   if (is_dead_consonant_sign_without_base(ctx, match_index, char_index)) return -1;

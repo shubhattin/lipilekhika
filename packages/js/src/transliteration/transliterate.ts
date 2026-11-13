@@ -524,6 +524,8 @@ export const transliterate_text_core = (
     // Step 1: Search for the character in the text_to_krama_map
     /** index in `text_to_krama_map`, `-1` if no match */
     const match_index = match_text_to_krama(ctx, cp, char_index, char_width);
+    // a Tamil-Extended superscript read with the match is skipped when the cursor gets there
+    if (ctx.matched_superscript_index !== -1) ctx.ta_ext_skip_index = ctx.matched_superscript_index;
     if (match_index !== -1) {
       if (emit_match(ctx, match_index, char_index)) continue;
     } else {

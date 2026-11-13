@@ -26,8 +26,8 @@ import {
  * eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒), ரு॒॑² (ऋ॒॑)
  *
  * In the match the superscript takes the place of these, which are read next. On a match sets
- * `ctx.ta_ext_skip_index` (the superscript, skipped when the cursor gets there) and
- * `ctx.ta_ext_superscript_detached`.
+ * the superscript results of Step 1, `ctx.matched_superscript_index` (the loop skips it when the
+ * cursor gets there) and `ctx.matched_superscript_detached`.
  *
  * @param next the characters that can continue the current match
  * @param char_to_search the text of the current match
@@ -78,8 +78,8 @@ export function ta_ext_match_with_superscript(
   // With only svaras in between, a superscript already skipped inside this match
   // (the ² of க்² in க்²ரு॑²) makes up for the one after the svaras in the match
   // length, so the whole match is advanced over.
-  if (!has_sign) ctx.ta_ext_superscript_detached = ctx.ta_ext_skip_index === -1;
-  ctx.ta_ext_skip_index = sup_index;
+  ctx.matched_superscript_detached = !has_sign && ctx.ta_ext_skip_index === -1;
+  ctx.matched_superscript_index = sup_index;
   return match_index;
 }
 
@@ -154,7 +154,7 @@ export function ta_ext_unconsumed_superscript_units(
 ): number {
   // condtional subtarct 1 when a superscript number is present in the current match
   // (only relevant while skipping a Tamil-Extended superscript)
-  return ctx.ta_ext_superscript_detached ||
+  return ctx.matched_superscript_detached ||
     (ctx.ta_ext_skip_index !== -1 &&
       matched_text.length > 1 &&
       listItemOfKrama(ctx.from_script_data, map.krama?.[0] ?? -1)?.type === 'vyanjana' &&
