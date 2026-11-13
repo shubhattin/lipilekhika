@@ -1,0 +1,4 @@
+[install]
+# Same layout as the separate installs had before the workspace: one node_modules at the root.
+# docs/docs-and-web-client is not part of the workspace, it has its own bun.lock.
+linker = "hoisted"

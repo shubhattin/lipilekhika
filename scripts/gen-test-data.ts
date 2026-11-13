@@ -2,13 +2,13 @@
 
 import { lipi_parivartak as old_lipi_parivartak } from "./tools/old_lipi_lekhika";
 import * as fs from "node:fs";
-import { type script_list_type } from "../packages/js/src/utils/lang_list";
+import { type script_list_type } from "../lipi_script_data/src/lang_list";
 import chalk from "chalk";
 import path from "node:path";
 import {
   type KramaKeysLabelType,
   resolveKramaKeysExtendedType,
-} from "../packages/js/src/make_script_data/krama_array_keys";
+} from "../lipi_script_data/src/krama_array_keys";
 
 type TestData = {
   index: number;

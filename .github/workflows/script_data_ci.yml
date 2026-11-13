@@ -1,0 +1,46 @@
+name: Script Data CI
+
+# The shared script data (`lipi_script_data`): its generator, schemas and the checks of the
+# generated data. Whether the committed Rust / Go data is up to date is checked by their CI.
+on:
+  push:
+    paths:
+      - "lipi_script_data/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/workflows/script_data_ci.yml"
+  workflow_dispatch:
+
+# a newer push to the same branch cancels the run still in progress
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+
+      # only the root and the script data package (not the JS package's build/test tools)
+      - name: Install
+        run: bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'
+
+      - name: Typecheck
+        working-directory: lipi_script_data
+        run: bun run check
+      - name: Lint
+        working-directory: lipi_script_data
+        run: bun run lint
+      - name: Format Check
+        working-directory: lipi_script_data
+        run: bun x oxfmt --check
+
+      - name: Generate Script Data
+        run: bun run make-script-data
+      # the generated data against its schemas, and checks of its entries
+      - name: Test
+        working-directory: lipi_script_data
+        run: bun run test

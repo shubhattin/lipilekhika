@@ -1,8 +1,11 @@
 import type { ScriptData } from '../utils/get_script_data';
 import custom_options_json from '../custom_options.json';
-import type { TransOptionsType } from '../make_script_data/custom_options_input';
+import type {
+  CustomOptionKey,
+  TransOptionsType
+} from '@lipilekhika/script-data/custom_options_input';
 
-export type CustomOptionList = keyof typeof custom_options_json;
+export type CustomOptionList = CustomOptionKey;
 export type CustomOptionType = Partial<Record<CustomOptionList, boolean>>;
 
 /** The rules of the enabled custom options, flattened into one list */

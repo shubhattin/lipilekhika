@@ -1,5 +1,5 @@
 import type { script_list_type } from '../../utils/lang_list';
-import type { OutputScriptData } from '../../make_script_data/output_script_data_schema';
+import type { OutputScriptData } from '@lipilekhika/script-data/output_script_data_schema';
 import { fetchScriptDataPayload } from '@lipilekhika/script-data-source';
 import { CharIndexTable, single_code_point } from './char_table';
 

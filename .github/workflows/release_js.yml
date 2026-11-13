@@ -105,13 +105,11 @@ jobs:
 
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run gen:test-data
 
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
           bun run make-script-data
 
       - name: Build WASM
@@ -229,8 +227,7 @@ jobs:
       - name: Install JS dependencies
         shell: bash
         run: |
-          cd packages/js
-          bun install
+          bun install --frozen-lockfile
 
       - name: Build native binding for target
         shell: bash
@@ -313,13 +310,11 @@ jobs:
 
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile
           bun run gen:test-data
 
       - name: Generate Script Data
         run: |
-          cd packages/js
-          bun install
           bun run make-script-data
 
       - name: Build WASM

@@ -18,11 +18,39 @@ async function main() {
   const packageRoot = path.resolve(path.dirname(thisFile), '.');
 
   await rm(path.join(packageRoot, 'dist'), { recursive: true, force: true });
-  runStep('Make Script Data', 'bun', ['make-script-data'], { cwd: packageRoot });
+  runStep('Make Script Data', 'bun', ['run', 'make-script-data'], {
+    cwd: path.resolve(packageRoot, '../../lipi_script_data')
+  });
   runStep('Build UMD', 'bun', ['cross-env', 'VITE_IS_UMD_BUILD_MODE=true', 'vite', 'build'], {
     cwd: packageRoot
   });
   runStep('Build ESM and CJS', 'bun', ['vite', 'build'], { cwd: packageRoot });
+
+  // Declarations with `tsc` (TypeScript 7 has no compiler API for a Vite plugin), bundled into
+  // one self-contained `.d.ts` per entry by api-extractor below. The shared script data package
+  // (`@lipilekhika/script-data`) is `.ts` source, its declarations go to `dist/types/script-data`,
+  // where `scripts/tsconfig.api-extractor.json` resolves its imports, so they are inlined too.
+  const declarationArgs = ['--noEmit', 'false', '--declaration', '--emitDeclarationOnly'];
+  runStep(
+    'Declarations',
+    'bun',
+    ['x', 'tsc', '-p', 'tsconfig.json', ...declarationArgs, '--outDir', 'dist/types'],
+    { cwd: packageRoot }
+  );
+  runStep(
+    'Declarations (script data)',
+    'bun',
+    [
+      'x',
+      'tsc',
+      '-p',
+      '../../lipi_script_data/tsconfig.json',
+      ...declarationArgs,
+      '--outDir',
+      'dist/types/script-data'
+    ],
+    { cwd: packageRoot }
+  );
 
   runStep(
     '.d.ts file unification (index)',

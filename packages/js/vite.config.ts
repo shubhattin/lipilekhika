@@ -1,7 +1,6 @@
 // vite.config.ts
 import { defineConfig } from 'vite';
 import path from 'node:path';
-import dts from 'unplugin-dts/vite';
 import MacroPlugin from 'unplugin-macros/vite';
 import fs from 'node:fs';
 import { normalizePath, type Plugin } from 'vite';
@@ -30,8 +29,6 @@ export default defineConfig({
     }
   },
   plugins: [
-    // unplugin-dts uses `outDirs` (string | …); maps to former vite-plugin-dts `outDir`.
-    dts({ include: ['src', 'wasm/wasm_modules.d.ts'], outDirs: 'dist/types' }),
     MacroPlugin(),
     ...(IS_UMD_BUILD_MODE
       ? [copyAndMinifyJsonPlugin()]
@@ -39,8 +36,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      // Duplicates rolldownOptions.input; kept because unplugin-dts reads
-      // config.build.lib.entry in configResolved (see unplugin-dts source).
+      // Duplicates rolldownOptions.input (library mode needs an entry)
       entry: IS_UMD_BUILD_MODE
         ? path.resolve(__dirname, 'src/index.umd.ts')
         : {
@@ -195,11 +191,15 @@ function wasmModuleImportsPlugin(): Plugin {
         if (!rewritten.has(expected)) this.error(`wasm build: ${expected} was not rewritten`);
       }
     },
-    renderChunk(code) {
+    renderChunk(code, _chunk, outputOptions) {
       if (!code.includes(BROWSER_URL_PLACEHOLDER)) return null;
       return code.replaceAll(
         BROWSER_URL_PLACEHOLDER,
-        `new URL('../${path.basename(WASM_DIST_PATH)}', import.meta.url)`
+        outputOptions.format === 'es'
+          ? `new URL('../${path.basename(WASM_DIST_PATH)}', import.meta.url)`
+          : // the browser build is ESM only (its `.cjs` file is removed by build.ts), and rolldown
+            // rejects `import.meta` in a CommonJS chunk
+            "(() => { throw new Error('lipilekhika: the browser WASM build is ESM only'); })()"
       );
     },
     closeBundle() {

@@ -17,7 +17,7 @@ from .types import (
 )
 
 # ^ generated on build time
-# with `bun make-script-data` in packages/js
+# with `bun run make-script-data` (repo root, see lipi_script_data)
 
 
 def transliterate(

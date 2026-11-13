@@ -1,6 +1,6 @@
 * text=auto eol=lf
 
-# Committed generated script data (`bun run make-script-data` in packages/js)
+# Committed generated script data (`bun run make-script-data` from the repo root)
 packages/rust/src/generated/*.bin binary
 packages/go/lipilekhika/data/gob/*.gob binary
 packages/rust/src/scripts.rs linguist-generated

@@ -5,7 +5,10 @@ on:
     paths:
       - 'packages/dart/**'
       - 'packages/rust/**'
-      - 'packages/js/**'
+      - 'lipi_script_data/**'
+      - 'package.json'
+      - 'bun.lock'
+      - 'bunfig.toml'
       - 'test_data/**'
       - 'scripts/**'
       - '.github/workflows/dart_ci.yml'
@@ -32,7 +35,7 @@ jobs:
 
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile --filter './'
           bun run gen:test-data
 
       # Setup Rust

@@ -3,7 +3,10 @@ name: Go Package CI
 on:
   push:
     paths:
-      - "packages/js/**"
+      - "lipi_script_data/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
       - "packages/go/**"
       - ".github/workflows/go_ci.yml"
       - "test_data/**"
@@ -17,12 +20,12 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Generate Test Data
         run: |
-          bun install
+          bun install --frozen-lockfile --filter './'
           bun run gen:test-data
       - name: Generate Script Data JSON
         run: |
-          cd packages/js
-          bun make-script-data
+          bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'
+          bun run make-script-data
       - name: Setup Go
         uses: actions/setup-go@v7
         with:
