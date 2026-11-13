@@ -146,7 +146,12 @@ fun OptionsPanel(
                                 onCheckedChange = { onToggle(key, it) },
                                 modifier = Modifier.scale(0.8f),
                                 colors =
-                                    SwitchDefaults.colors(uncheckedBorderColor = colors.border),
+                                    SwitchDefaults.colors(
+                                        uncheckedThumbColor = colors.mutedForeground,
+                                        uncheckedTrackColor = colors.muted,
+                                        uncheckedBorderColor =
+                                            colors.mutedForeground.copy(alpha = 0.5f),
+                                    ),
                             )
                         }
                     }

@@ -21,7 +21,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
@@ -376,14 +378,22 @@ private fun ScriptSide(label: String, script: String, onClick: () -> Unit, modif
         ScriptAvatar(script, size = 32.dp)
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.labelSmall, color = colors.mutedForeground)
-            Text(
-                // a zero width space after the hyphen: the line can break there (and not
-                // inside a word, "Tamil-Exte nded")
-                script.replace("-", "-\u200B"),
-                style = MaterialTheme.typography.titleSmall,
-                // a long name (Tamil-Extended, Purna-Devanagari) goes on two lines at its hyphen
-                maxLines = 2,
+            // a name breaks only at its hyphen ("Tamil-" / "Extended"), never inside a word:
+            // when it does not fit, the text gets a little smaller instead
+            BasicText(
+                script.replace("-", "-\n"),
+                style =
+                    MaterialTheme.typography.titleSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                maxLines = if ('-' in script) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
+                autoSize =
+                    TextAutoSize.StepBased(
+                        minFontSize = 10.sp,
+                        maxFontSize = 14.sp,
+                        stepSize = 0.5.sp,
+                    ),
             )
         }
         Icon(Icons.Outlined.ExpandMore, null, Modifier.size(16.dp), tint = colors.mutedForeground)

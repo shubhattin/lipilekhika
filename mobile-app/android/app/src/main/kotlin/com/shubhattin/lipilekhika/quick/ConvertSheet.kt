@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,8 +55,8 @@ import com.shubhattin.lipilekhika.data.ScriptCategory
 import com.shubhattin.lipilekhika.data.ScriptDetect
 import com.shubhattin.lipilekhika.data.Scripts
 import com.shubhattin.lipilekhika.ui.components.IconAction
+import com.shubhattin.lipilekhika.ui.components.ScriptBar
 import com.shubhattin.lipilekhika.ui.components.ScriptPickerSheet
-import com.shubhattin.lipilekhika.ui.components.ScriptSelectButton
 import com.shubhattin.lipilekhika.ui.theme.LocalLipiColors
 import com.shubhattin.lipilekhika.ui.theme.scriptFont
 import kotlinx.coroutines.Dispatchers
@@ -180,22 +179,17 @@ fun ConvertSheet(
                                 overflow = TextOverflow.Ellipsis,
                                 color = colors.mutedForeground,
                             )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                ScriptSelectButton(f, { picker = "from" }, Modifier.weight(1f))
-                                IconAction(
-                                    Icons.Outlined.SwapHoriz,
-                                    "Swap scripts",
-                                    {
-                                        from = t
-                                        to = f
-                                        prefs.quickTo = f
-                                    },
-                                )
-                                ScriptSelectButton(t, { picker = "to" }, Modifier.weight(1f))
-                            }
+                            ScriptBar(
+                                from = f,
+                                to = t,
+                                onFrom = { picker = "from" },
+                                onTo = { picker = "to" },
+                                onSwap = {
+                                    from = t
+                                    to = f
+                                    prefs.quickTo = f
+                                },
+                            )
                             Surface(
                                 shape = MaterialTheme.shapes.large,
                                 color = colors.muted,
