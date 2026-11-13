@@ -136,6 +136,35 @@ export function getWindowsDownloadUrl(release: GitHubRelease): string | null {
 }
 
 /**
+ * Download URL of a file of a PC app release, or the release's page when the release does not
+ * have that file (an older release, from before the file was added)
+ * @param release - The GitHub release object
+ * @param fileName - The file's name for the release's version
+ */
+function getPcAppFileUrl(
+  release: GitHubRelease,
+  fileName: (version: string) => string
+): string | null {
+  const version = parseTagVersion(release.tag_name, 'pc-app@v');
+  if (!version) return null;
+
+  const asset = release.assets.find((a) => a.name === fileName(version));
+  return (
+    asset?.browser_download_url ??
+    `https://github.com/shubhattin/lipilekhika/releases/tag/pc-app%40v${version}`
+  );
+}
+
+/**
+ * Get download URL for the portable Windows app (zip)
+ * @param release - The GitHub release object
+ * @returns Download URL (or the release page) or null if not a PC app release
+ */
+export function getWindowsPortableDownloadUrl(release: GitHubRelease): string | null {
+  return getPcAppFileUrl(release, (v) => `lipilekhika-${v}-windows-x64-portable.zip`);
+}
+
+/**
  * Get download URL for Android APK
  * @param release - The GitHub release object
  * @returns Download URL or null if not found

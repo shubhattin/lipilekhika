@@ -7,6 +7,7 @@
   import PWAInstall from './PWAInstall.svelte';
 
   const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
+  const WINDOWS_PORTABLE_URL = '/redirect/pc-app-release-win-portable';
   // const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
   const LINUX_FCITX_PLUGIN_URL =
     'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
@@ -77,7 +78,13 @@
           Get the Windows App
         </div>
         <div class="truncate text-xs text-cyan-600 dark:text-cyan-400">
-          Native desktop experience
+          Installer, or the
+          <a
+            class="underline underline-offset-2 hover:text-cyan-800 dark:hover:text-cyan-200"
+            href={WINDOWS_PORTABLE_URL}
+            target="_blank"
+            rel="noopener noreferrer">portable zip</a
+          >
         </div>
       </div>
       <Button

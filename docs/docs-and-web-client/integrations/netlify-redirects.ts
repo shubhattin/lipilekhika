@@ -2,7 +2,12 @@ import type { AstroIntegration } from 'astro';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { findLatestRelease, getWindowsDownloadUrl, getAndroidReleasePage } from '../src/lib/github';
+import {
+  findLatestRelease,
+  getWindowsDownloadUrl,
+  getWindowsPortableDownloadUrl,
+  getAndroidReleasePage
+} from '../src/lib/github';
 
 interface NetlifyRedirectsOptions {
   /** Additional static redirects to include */
@@ -39,6 +44,10 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
           if (windowsUrl) {
             redirects.push(`/redirect/pc-app-release-win-download ${windowsUrl} 302`);
             logger.info(`Windows download: ${pcRelease.tag_name}`);
+          }
+          const portableUrl = getWindowsPortableDownloadUrl(pcRelease);
+          if (portableUrl) {
+            redirects.push(`/redirect/pc-app-release-win-portable ${portableUrl} 302`);
           }
         } else {
           logger.warn('Could not find Windows PC app release');

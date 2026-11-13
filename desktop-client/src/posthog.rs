@@ -3,16 +3,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, path::PathBuf};
 use uuid::Uuid;
 
+/// The file with the unique anonymous identifier
 fn install_id_path() -> PathBuf {
-  let mut path = match dirs::data_dir() {
-    Some(p) => p,
-    None => return PathBuf::from("install_id"), // fallback to current dir
-  };
-  path.push("lipilekhika");
-  fs::create_dir_all(&path).ok();
-  path.push("install_id");
-  // unique anonymous identifier
-  path
+  crate::persistent_state::app_data_path("install_id")
 }
 
 fn unique_ananymouse_id() -> String {
@@ -48,6 +41,7 @@ pub fn init_posthog() {
   let _ = event.insert_prop("app", "lipilekhika");
   let _ = event.insert_prop("platform", std::env::consts::OS);
   let _ = event.insert_prop("app_version", env!("CARGO_PKG_VERSION"));
+  let _ = event.insert_prop("portable", crate::portable::is_portable());
   let _ = event.insert_prop(
     "started_at",
     SystemTime::now()
