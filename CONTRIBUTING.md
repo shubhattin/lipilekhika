@@ -211,6 +211,7 @@ Warm-up, many samples and statistics (spread / percentiles, memory or allocation
 | JS, Bun | `bun run bench:suite:bun` | same suite under Bun |
 | Go | `go test -run '^$' -bench . -benchmem -count 10` | `testing.B`, compare runs with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat) |
 | Python | `uv run pytest benchmarks/bench_lipilekhika.py` | [pytest-benchmark](https://pytest-benchmark.readthedocs.io) |
+| Kotlin | `./gradlew :lipilekhika:testDebugUnitTest --tests '*Benchmark*' -Plipilekhika.bench=true --rerun` | [`Benchmark.kt`](packages/kotlin/lipilekhika/src/test/kotlin/com/shubhattin/lipilekhika/core/Benchmark.kt) (JUnit, skipped in the normal test run), on this machine's JVM |
 
 Comparing two versions (eg. `main` and your branch):
 

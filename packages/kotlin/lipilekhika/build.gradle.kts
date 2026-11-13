@@ -160,6 +160,14 @@ tasks.withType<Test>().configureEach {
     dependsOn(cargoBuildHost)
     systemProperty("jna.library.path", hostLibDir.path)
     systemProperty("lipilekhika.testDataDir", repoRoot.resolve("test_data").path)
+    // the benchmark (`Benchmark.kt`) only runs with `-Plipilekhika.bench=true`
+    systemProperty(
+        "lipilekhika.bench",
+        providers.gradleProperty("lipilekhika.bench").getOrElse("false"),
+    )
+    // its timings are printed
+    if (providers.gradleProperty("lipilekhika.bench").orNull == "true")
+        testLogging.showStandardStreams = true
     maxHeapSize = "1g"
     // JNA loads the library (Java 22+ warns about native access otherwise)
     if (javaLauncher.get().metadata.languageVersion.asInt() >= 22) {
