@@ -95,7 +95,7 @@
         <RegistryValue Root="HKCU" Key="Software\LipiLekhika" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
 
-      <!-- Start Menu shortcut for Lipi Parivartaka: the same exe with --parivartaka (opens it in the
+      <!-- Start Menu shortcut for Lipi Parivartaka: the same exe with the parivartaka flag (opens it in the
            running app), with the old Lipi Parivartaka icon -->
       <Component Id="LipiparivartakaStartMenuShortcut" Guid="f6a7b8c9-d0e1-2345-fabc-678901234567" Directory="ApplicationProgramsFolder">
         <Shortcut Id="LipiparivartakaStartMenuLink" 
