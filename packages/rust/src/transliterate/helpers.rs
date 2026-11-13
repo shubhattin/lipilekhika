@@ -674,6 +674,113 @@ pub fn apply_typing_input_aliases<'a>(
     Cow::Owned(result)
 }
 
+/// ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्)
+pub const ZWJ: char = '\u{200D}';
+/// ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant)
+pub const ZWNJ: char = '\u{200C}';
+
+/// A Combining Diacritical Mark (U+0300 - U+036F), the marks of decomposed Latin letters
+/// (ā as a + U+0304, ḥ as h + U+0323)
+#[inline]
+pub fn is_latin_combining_mark(c: char) -> bool {
+    ('\u{0300}'..='\u{036F}').contains(&c)
+}
+
+/// A char of a word: a letter (Unicode `Alphabetic`) or a Latin combining mark
+pub fn is_word_char(c: char) -> bool {
+    c.is_alphabetic() || is_latin_combining_mark(c)
+}
+
+/// The krama index of ॐ (`AUM`, the first krama key)
+pub const OM_KRAMA_INDEX: i16 = 0;
+
+/// The standard romanization schemes
+pub fn is_standard_scheme(script: &ScriptListEnum) -> bool {
+    matches!(
+        script,
+        ScriptListEnum::Slp1
+            | ScriptListEnum::HarvardKyoto
+            | ScriptListEnum::Itrans
+            | ScriptListEnum::Iast
+    )
+}
+
+/// These characters are copied as they are (they are not looked up in the script data)
+#[inline]
+pub fn is_skip_char(c: char) -> bool {
+    matches!(
+        c,
+        ' ' | '\n' | '\r' | '\t' | ',' | '~' | '!' | '@' | '?' | '%'
+    )
+}
+
+/// Compare a char with a &str without heap allocation.
+#[inline]
+pub fn char_eq_str(c: char, s: &str) -> bool {
+    let mut buf = [0u8; 4];
+    let encoded = c.encode_utf8(&mut buf);
+    encoded == s
+}
+
+/// `text` followed by `tail` (eg the Tamil-Extended superscript looked up with a match)
+pub fn with_tail(text: &str, tail: Option<char>) -> String {
+    let mut s = String::with_capacity(text.len() + 4);
+    s.push_str(text);
+    if let Some(c) = tail {
+        s.push(c);
+    }
+    s
+}
+
+/// `true` if any krama index is not `-1` (the krama writes something in the target script)
+#[inline]
+pub fn krama_has_output(krama: &[i16]) -> bool {
+    krama.iter().any(|&k| k != -1)
+}
+
+/// A krama that is read as a whole: not empty, and no `-1` (prefix only) entry
+#[inline]
+pub fn is_fully_read_krama(krama: Option<&[i16]>) -> bool {
+    krama.is_some_and(|krama| !krama.is_empty() && !krama.contains(&-1))
+}
+
+/// Emit the target-script text of each krama index directly (negative/missing entries
+/// produce nothing), without first collecting the pieces into a buffer.
+#[inline]
+pub fn emit_krama_pieces(
+    result: &mut ResultStringBuilder,
+    to_script_data: &ScriptData,
+    krama: &[i16],
+) {
+    for &k in krama {
+        if k >= 0 {
+            result.emit(to_script_data.krama_text_or_empty(k));
+        }
+    }
+}
+
+impl ScriptData {
+    /// The list item (type info) of the `krama_text_arr` entry `krama_index`
+    #[inline]
+    pub fn list_item_of_krama_index(&self, krama_index: usize) -> Option<&List> {
+        let list_ref = self.krama_text_arr.get(krama_index)?.1?;
+        self.list.get(list_ref as usize)
+    }
+
+    /// [`Self::list_item_of_krama_index`] for a krama index as it is stored (`-1`: none)
+    #[inline]
+    pub fn list_item_of_krama(&self, krama_index: i16) -> Option<&List> {
+        self.list_item_of_krama_index(krama_index as usize)
+    }
+
+    /// Whether the character is a mAtrA (vowel sign) of the script
+    pub fn is_matra_char(&self, c: char) -> bool {
+        self.krama_index_of_char(c)
+            .and_then(|i| self.list_item_of_krama_index(i))
+            .is_some_and(|k| k.is_matra())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{InputTextCursor, push_str_small};

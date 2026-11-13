@@ -453,3 +453,104 @@ func applyTypingInputAliases(text, toScriptName string) string {
 	}
 	return text
 }
+
+const (
+	// ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्)
+	zwjRune = '\u200d'
+	// ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant)
+	zwnjRune = '\u200c'
+	zwj      = string(zwjRune)
+)
+
+func hasNegative(v []int16) bool {
+	for _, n := range v {
+		if n < 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func containsI16(v []int16, x int16) bool {
+	for _, n := range v {
+		if n == x {
+			return true
+		}
+	}
+	return false
+}
+
+func containsRune(v []rune, x rune) bool {
+	for _, n := range v {
+		if n == x {
+			return true
+		}
+	}
+	return false
+}
+
+// runeIsStr reports whether `s` is exactly the single rune `r`.
+func runeIsStr(r rune, s string) bool {
+	sr, size := utf8.DecodeRuneInString(s)
+	return size > 0 && size == len(s) && sr == r
+}
+
+// firstRuneDiffers reports whether the first runes of `a` and `b` differ (an empty string has none).
+func firstRuneDiffers(a, b string) bool {
+	if a == "" || b == "" {
+		return a != b
+	}
+	ra, _ := utf8.DecodeRuneInString(a)
+	rb, _ := utf8.DecodeRuneInString(b)
+	return ra != rb
+}
+
+// emitKramaPieces emits the target-script text of each krama index directly
+// (negative/missing entries produce nothing), without first collecting the pieces.
+func emitKramaPieces(result *resultStringBuilder, toData *scriptdata.ScriptData, krama []int16) {
+	for _, k := range krama {
+		if k >= 0 {
+			result.emit(kramaTextOrEmpty(toData, int(k)))
+		}
+	}
+}
+
+func hasKramaOtherThanNeg1(krama []int16) bool {
+	for _, k := range krama {
+		if k != -1 {
+			return true
+		}
+	}
+	return false
+}
+
+// anyKramaKind reports whether any krama entry's list item has the given kind
+// (`ListKindNone` matches entries without a list item).
+func anyKramaKind(s *scriptdata.ScriptData, krama []int16, kind scriptdata.ListKind) bool {
+	for _, k := range krama {
+		if kramaListItem(s, int(k)).Kind() == kind {
+			return true
+		}
+	}
+	return false
+}
+
+func lastRuneIsVedicSvara(s string) bool {
+	if s == "" {
+		return false
+	}
+	r, _ := utf8.DecodeLastRuneInString(s)
+	return isVedicSvaraTail(r, true)
+}
+
+// isFullyReadKrama reports a krama that is read as a whole: not empty, and no `-1` (prefix only)
+// entry
+func isFullyReadKrama(krama []int16) bool {
+	return len(krama) > 0 && !containsI16(krama, -1)
+}
+
+// isMatraChar reports whether the character is a mAtrA (vowel sign) of the script
+func isMatraChar(s *scriptdata.ScriptData, r rune) bool {
+	i := kramaIndexOfChar(s, r)
+	return i >= 0 && kramaListItem(s, i).Kind() == scriptdata.ListKindMatra
+}

@@ -421,3 +421,79 @@ export const applyTypingInputAliases = (text: string, to_script_name: script_lis
     }
   return text;
 };
+
+/** ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्) */
+export const ZWJ = '‍';
+/** ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant) */
+export const ZWNJ = '‌';
+
+/** A Combining Diacritical Mark (U+0300 - U+036F), the marks of decomposed Latin letters (ā as
+ * a + U+0304, ḥ as h + U+0323) */
+export const isLatinCombiningMark = (cp: number): boolean => cp >= 0x300 && cp <= 0x36f;
+
+const ALPHABETIC_REGEX = /\p{Alphabetic}/u;
+/** A code point of a word: a letter (Unicode `Alphabetic`) or a Latin combining mark */
+export const isWordCp = (cp: number): boolean =>
+  cp !== -1 && (isLatinCombiningMark(cp) || ALPHABETIC_REGEX.test(String.fromCodePoint(cp)));
+
+/** The krama index of ॐ (`AUM`, the first krama key) */
+export const OM_KRAMA_INDEX = 0;
+
+/** The standard romanization schemes */
+export const STANDARD_SCHEMES: readonly string[] = ['SLP1', 'Harvard-Kyoto', 'ITRANS', 'IAST'];
+
+/** These Characters can be skipped/ignore while transliterating the input text
+ *
+ * `' '`, `'\n'`, `'\r'`, `'\t'`, `','`, `'~'`, `'!'`, `'@'`, `'?'`, `'%'`
+ */
+export const isSkipChar = (cp: number): boolean => {
+  switch (cp) {
+    case 0x20: // ' '
+    case 0x0a: // '\n'
+    case 0x0d: // '\r'
+    case 0x09: // '\t'
+    case 0x2c: // ','
+    case 0x7e: // '~'
+    case 0x21: // '!'
+    case 0x40: // '@'
+    case 0x3f: // '?'
+    case 0x25: // '%'
+      return true;
+    default:
+      return false;
+  }
+};
+
+/** `true` if any krama index is not equal to `value` (allocation-free `krama.some(k => k !== value)`) */
+export const has_krama_other_than = (krama: readonly number[], value: number): boolean => {
+  for (let i = 0; i < krama.length; i++) if (krama[i] !== value) return true;
+  return false;
+};
+
+/** A krama that is read as a whole: not empty, and no `-1` (prefix only) entry */
+export const is_fully_read_krama = (
+  krama: readonly number[] | null | undefined
+): krama is readonly number[] =>
+  krama !== null && krama !== undefined && krama.length > 0 && !krama.includes(-1);
+
+/** The list item (type info) of the `krama_text_arr` entry `krama_index`, `undefined` if none */
+export const listItemOfKrama = (
+  script_data: ScriptData,
+  krama_index: number
+): ScriptData['list'][number] | undefined =>
+  script_data.list[script_data.krama_text_arr[krama_index]?.[1] ?? -1];
+
+/** Whether the character is a mAtrA (vowel sign) of the script */
+export const isMatraCp = (script_data: ScriptData, cp: number): boolean =>
+  listItemOfKrama(script_data, kramaIndexOfChar(script_data, cp))?.type === 'mAtrA';
+
+/** Emit the target-script text of each krama index directly, without first collecting the pieces */
+export const emit_krama_pieces = (
+  result: ReturnType<typeof string_builder>,
+  to_script_data: ScriptData,
+  krama: readonly number[]
+) => {
+  for (let i = 0; i < krama.length; i++) {
+    if (krama[i] >= 0) result.emit(kramaTextOrEmpty(to_script_data, krama[i]));
+  }
+};

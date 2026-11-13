@@ -1,803 +1,45 @@
-use crate::custom_options::CustomOptions;
-use crate::script_data::{CheckInEnum, CustomOptionScriptTypeEnum, List, Rule, ScriptData};
-use crate::scripts::ScriptListEnum;
-use crate::transliterate::helpers::{
-    self, InputTextCursor, PrevContextBuilder, PrevContextItem, ResultStringBuilder,
-    is_script_tamil_ext, is_ta_ext_superscript_tail, is_vedic_svara_tail,
+//! The transliteration core.
+//!
+//! [`transliterate_text_core_with`] reads the input once, character by character:
+//!
+//! 1. The input is prepared: the typing aliases, then the custom rules that are a plain replace
+//!    on the input (`apply_custom_replace_rules`).
+//! 2. A character that is copied as it is (space, punctuation, an ASCII digit when native
+//!    numerals are off, a preserved custom character) is emitted and the loop goes on.
+//! 3. Step 1 (`matcher.rs`): the longest text of the text to krama map at this position.
+//!    `emit_match` writes its krama in the target script.
+//! 4. Step 2 (`emit_krama_char`): a character without a match (or a match without a krama of its
+//!    own) is looked up in the krama array directly. An unknown character is copied.
+//! 5. Before every item is written `prev_context_cleanup` (`context.rs`) looks at the last items
+//!    (`prev_context`): between a brahmic and an `other` script the inherent vowel, the halant
+//!    and the mAtrA form of a vowel depend on what came before (`ContextMode`).
+//! 6. After every match the custom rules of the enabled options are applied on the end of the
+//!    result (`custom_rules.rs`), and at the end the ones that are a plain replace on the output.
+//!
+//! Tamil-Extended has its own handling in Step 1 and when writing (`tamil_ext.rs`).
+
+use super::context::{ContextMode, TransliterateCtx, context_text_of_match};
+use super::custom_rules::apply_custom_replace_rules;
+use super::helpers::{
+    self, InputTextCursor, PrevContextBuilder, ResultStringBuilder, ZWJ, ZWNJ, char_eq_str,
+    emit_krama_pieces, is_skip_char, is_ta_ext_superscript_tail, krama_has_output,
 };
-use alloc::borrow::{Cow, ToOwned};
+use super::matcher::only_read_in_longer_text;
+use crate::custom_options::CustomOptions;
+use crate::script_data::{CheckInEnum, List, Rule, ScriptData, TextToKramaMap};
+use crate::scripts::ScriptListEnum;
+use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::borrow::Borrow;
-use core::slice;
 
-/// ZERO WIDTH JOINER: asks for a conjunct / half form, eg. क्‍ष (shown as the half क्)
-const ZWJ: char = '\u{200D}';
-/// ZERO WIDTH NON-JOINER: asks for no conjunct, eg. क्‌ष (shown with the visible halant)
-const ZWNJ: char = '\u{200C}';
-
-/// A Combining Diacritical Mark (U+0300 - U+036F), the marks of decomposed Latin letters
-/// (ā as a + U+0304, ḥ as h + U+0323)
-#[inline]
-fn is_latin_combining_mark(c: char) -> bool {
-    ('\u{0300}'..='\u{036F}').contains(&c)
-}
-
-/// A char of a word: a letter (Unicode `Alphabetic`) or a Latin combining mark
-fn is_word_char(c: char) -> bool {
-    c.is_alphabetic() || is_latin_combining_mark(c)
-}
-
-/// The krama index of ॐ (`AUM`, the first krama key)
-const OM_KRAMA_INDEX: i16 = 0;
-
-/// The standard romanization schemes
-fn is_standard_scheme(script: &ScriptListEnum) -> bool {
-    matches!(
-        script,
-        ScriptListEnum::Slp1
-            | ScriptListEnum::HarvardKyoto
-            | ScriptListEnum::Itrans
-            | ScriptListEnum::Iast
-    )
-}
-
-/// Compare a char with a &str without heap allocation.
-#[inline]
-fn char_eq_str(c: char, s: &str) -> bool {
-    let mut buf = [0u8; 4];
-    let encoded = c.encode_utf8(&mut buf);
-    encoded == s
-}
-
-/// Emit the target-script text of each krama index directly (negative/missing entries
-/// produce nothing), without first collecting the pieces into a buffer.
-#[inline]
-/// `text` followed by `tail` (eg the Tamil-Extended superscript looked up with a match)
-fn with_tail(text: &str, tail: Option<char>) -> String {
-    let mut s = String::with_capacity(text.len() + 4);
-    s.push_str(text);
-    if let Some(c) = tail {
-        s.push(c);
-    }
-    s
-}
-
-fn emit_krama_pieces(result: &mut ResultStringBuilder, to_script_data: &ScriptData, krama: &[i16]) {
-    for &k in krama {
-        if k >= 0 {
-            result.emit(to_script_data.krama_text_or_empty(k));
-        }
-    }
-}
-
-/// Whether the text before `index` is a syllable that a sign written as a dead consonant (the
-/// Tamil anusvAra ம், see `dead_consonant_sign_index`) can go with: a vyanjana (with its inherent
-/// vowel), a svara or a mAtrA, looking past Vedic svaras. Else (the start of a word, after a
-/// halant, a digit or a sign) it is the consonant + halant (ஸாத்ம்ய -> सात्म्य, not सात्ंय).
-fn sign_has_base(script_data: &ScriptData, cursor: &InputTextCursor, index: usize) -> bool {
-    let mut end = index;
-    while end > 0 && is_vedic_svara_tail(cursor.peek_at(end - 1)) {
-        end -= 1;
-    }
-    let Some(prev) = end.checked_sub(1).and_then(|i| cursor.peek_at(i)) else {
-        return false;
-    };
-    let krama_index = script_data.krama_index_of_char(prev).or_else(|| {
-        // a vowel sign or vowel written as its parts (ௌ as ெ + ௗ): the text of the last two
-        let map_index =
-            script_data.text_to_krama_map_index(cursor.slice(end.checked_sub(2)?, end)?, false)?;
-        usize::try_from(
-            *script_data.text_to_krama_map[map_index]
-                .1
-                .krama
-                .as_ref()?
-                .last()?,
-        )
-        .ok()
-    });
-    krama_index
-        .and_then(|i| script_data.krama_text_arr.get(i))
-        .and_then(|(_, li)| *li)
-        .and_then(|li| script_data.list.get(li as usize))
-        .is_some_and(|k| k.is_vyanjana() || k.is_svara() || k.is_matra())
-}
-
-/// Whether the character at `index` is not read by itself but starts a longer text that is,
-/// walking `text_to_krama_map` like Step 1. The Sinhala ZWJ + al-lakuna `‍්` is a halant, while
-/// the ZWJ by itself is a custom script character.
-fn only_read_in_longer_text(
-    script_data: &ScriptData,
-    cursor: &InputTextCursor,
-    index: usize,
-) -> bool {
-    let Some(ch) = cursor.peek_at(index) else {
-        return false;
-    };
-    let has_krama = |i: usize| {
-        script_data.text_to_krama_map[i]
-            .1
-            .krama
-            .as_ref()
-            .is_some_and(|krama| krama.iter().any(|&k| k != -1))
-    };
-    let mut map_index = script_data.text_to_krama_map_char_index(ch, false);
-    if script_data.krama_index_of_char(ch).is_some() || map_index.is_some_and(has_krama) {
-        return false;
-    }
-    let mut end = index + 1;
-    let mut read = false;
-    while let Some(i) = map_index {
-        match cursor.peek_at(end) {
-            Some(c) if script_data.text_to_krama_map[i].1.next_chars.contains(&c) => {}
-            _ => break,
-        }
-        end += 1;
-        map_index = cursor
-            .slice(index, end)
-            .and_then(|text| script_data.text_to_krama_map_index(text, false));
-        if map_index.is_some_and(has_krama) {
-            read = true;
-        }
-    }
-    read
-}
-
-struct TransliterateCtx<'a, R> {
-    from_script: &'a ScriptListEnum,
-    to_script: &'a ScriptListEnum,
-    from_script_data: &'a ScriptData,
-    to_script_data: &'a ScriptData,
-    trans_options: &'a CustomOptions,
-    custom_rules: &'a [R],
-    cursor: &'a mut InputTextCursor<'a>,
-    result: &'a mut ResultStringBuilder,
-    prev_context: &'a mut PrevContextBuilder<'a>,
-    prev_context_in_use: bool,
-    brahmic_halant: Option<&'a str>,
-    brahmic_nuqta: Option<&'a str>,
-    typing_mode: bool,
-    include_inherent_vowels: bool,
-}
-
-impl<'a, R> TransliterateCtx<'a, R>
-where
-    R: Borrow<Rule>,
-{
-    /// Returns `true` when the current write already handled concatenation/reordering.
-    fn prev_context_cleanup(
-        &mut self,
-        item: Option<PrevContextItem<'a>>,
-        next: Option<&[String]>,
-        last_extra_call: Option<bool>,
-    ) -> bool {
-        self.prev_context_cleanup_ext(item, next, last_extra_call, false)
-    }
-
-    /// [`Self::prev_context_cleanup`] with `emits_ta_ext_superscript_tail`: the text of the
-    /// current item (emitted after this call) ends with a Tamil-Extended superscript, eg
-    /// `RR` -> `ரூ²`. Like when the superscript is already the last character, the typing
-    /// context is kept so that a Vedic svara typed next goes before it.
-    fn prev_context_cleanup_ext(
-        &mut self,
-        item: Option<PrevContextItem<'a>>,
-        next: Option<&[String]>,
-        last_extra_call: Option<bool>,
-        emits_ta_ext_superscript_tail: bool,
-    ) -> bool {
-        let last_extra_call = last_extra_call.unwrap_or_default();
-        let mut result_str_concat_status = false;
-
-        let brahmic_halant = self.brahmic_halant;
-        let brahmic_nuqta = self.brahmic_nuqta;
-
-        let item_text = item.and_then(|(t, _)| t); // [0]
-        let item_type = item.and_then(|(_, t)| t); // [1]
-
-        // custom cleanup logic/cases
-        // (cheapest, most selective test first; all operands are side-effect free)
-        if (item.is_none() || item_type.is_some_and(|k| k.is_anya()))
-            && ((brahmic_nuqta.is_some()
-                && self
-                    .prev_context
-                    .type_at(-3)
-                    .is_some_and(|k| k.is_vyanjana())
-                && self.prev_context.text_at(-2) == brahmic_nuqta
-                && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra()))
-                || (self
-                    .prev_context
-                    .type_at(-2)
-                    .is_some_and(|k| k.is_vyanjana())
-                    && self.prev_context.type_at(-1).is_some_and(|k| k.is_matra())))
-        {
-            self.prev_context.clear();
-        }
-
-        if matches!(self.from_script_data, ScriptData::Brahmic { .. })
-            && matches!(self.to_script_data, ScriptData::Other { .. })
-        {
-            // custom logic when converting from brahmic to other.
-            // Short-circuit chain ordered cheapest/most selective first (all checks are pure).
-            // Since `item_text != halant` is required, the former `to_anya_or_null`
-            // (`(!matra && text != halant) || anya || none`) reduces to `!matra`.
-            if let ScriptData::Other {
-                schwa_character, ..
-            } = self.to_script_data
-                && !item_type.is_some_and(|k| k.is_matra())
-                // vyanjana + nuqta
-                && (self
-                    .prev_context
-                    .type_at(-1)
-                    .is_some_and(|k| k.is_vyanjana())
-                    || (self.brahmic_halant.is_some()
-                        && self
-                            .prev_context
-                            .type_at(-2)
-                            .is_some_and(|k| k.is_vyanjana())
-                        && self.prev_context.text_at(-1) == brahmic_nuqta))
-                && item_text != self.brahmic_halant
-                && (self.brahmic_nuqta.is_none() || item_text != self.brahmic_nuqta)
-                && (!is_script_tamil_ext(self.from_script)
-                    || item_text.and_then(|k| k.chars().next())
-                        != self.brahmic_halant.and_then(|k| k.chars().next()))
-            {
-                self.result.emit(schwa_character);
-            }
-        } else if matches!(self.from_script_data, ScriptData::Other { .. })
-            && matches!(self.to_script_data, ScriptData::Brahmic { .. })
-        {
-            // custom logic when converting from other to brahmic
-            if self
-                .prev_context
-                .type_at(-1)
-                .is_some_and(|k| k.is_vyanjana())
-                && (item_type.is_some_and(|k| k.is_matra())
-                    || item_type.is_some_and(|k| k.is_svara()))
-            {
-                let linked_matra: &str = item_type
-                    .and_then(|item_type| match item_type {
-                        List::Svara {
-                            matra_krama_ref, ..
-                        } => Some(
-                            self.to_script_data
-                                .krama_text_or_empty(*matra_krama_ref.first().unwrap_or(&-1)),
-                        ),
-                        _ => None,
-                    })
-                    .unwrap_or_else(|| item_text.unwrap_or(""));
-
-                if let ScriptData::Brahmic { halant, .. } = self.to_script_data {
-                    self.result.emit_pieces_with_reorder(
-                        &[linked_matra],
-                        halant,
-                        is_script_tamil_ext(self.to_script)
-                            && is_ta_ext_superscript_tail(self.result.last_char()),
-                    );
-                    result_str_concat_status = true;
-                }
-            } else if !self.include_inherent_vowels
-                && (self
-                    .prev_context
-                    .type_at(-1)
-                    .is_some_and(|k| k.is_vyanjana()))
-                && !item_type.is_some_and(|k| k.is_matra())
-                && item_text != brahmic_halant
-            {
-                if let (
-                    Some(brahmic_halant),
-                    ScriptData::Brahmic {
-                        halant: to_halant, ..
-                    },
-                ) = (brahmic_halant, self.to_script_data)
-                {
-                    let should_reorder = is_script_tamil_ext(self.to_script)
-                        && is_ta_ext_superscript_tail(self.result.last_char());
-                    self.result.emit_pieces_with_reorder(
-                        &[brahmic_halant],
-                        to_halant,
-                        should_reorder,
-                    );
-
-                    if self.to_script == &ScriptListEnum::Sinhala
-                        && self
-                            .trans_options
-                            .all_to_sinhala_use_conjunct_enabling_halant
-                        && let Some(last_piece) = self.result.last_piece()
-                    {
-                        self.result.rewrite_at(-1, &{
-                            let mut s = String::with_capacity(last_piece.len() + 3);
-                            s.push_str(last_piece);
-                            s.push('\u{200D}');
-                            s
-                        });
-                    }
-                }
-            } else if self.include_inherent_vowels
-                && item.is_some()
-                && item_type.is_some_and(|k| k.is_vyanjana())
-                && (self
-                    .prev_context
-                    .type_at(-1)
-                    .is_some_and(|k| k.is_vyanjana())
-                    || (brahmic_nuqta.is_some()
-                        && self
-                            .prev_context
-                            .type_at(-2)
-                            .is_some_and(|k| k.is_vyanjana())
-                        && self.prev_context.text_at(-1) == brahmic_nuqta))
-                && let (
-                    Some(brahmic_halant),
-                    ScriptData::Brahmic {
-                        halant: to_halant, ..
-                    },
-                ) = (brahmic_halant, self.to_script_data)
-            {
-                let should_reorder = is_script_tamil_ext(self.to_script)
-                    && is_ta_ext_superscript_tail(self.result.last_char());
-                self.result
-                    .emit_pieces_with_reorder(&[brahmic_halant], to_halant, should_reorder);
-
-                if *self.to_script == ScriptListEnum::Sinhala
-                    && self
-                        .trans_options
-                        .all_to_sinhala_use_conjunct_enabling_halant
-                    && let Some(last_piece) = self.result.last_piece()
-                {
-                    self.result.rewrite_at(-1, &{
-                        let mut s = String::with_capacity(last_piece.len() + 3);
-                        s.push_str(last_piece);
-                        s.push('\u{200D}');
-                        s
-                    });
-                }
-            }
-        }
-
-        // custom typing mode context clear logic
-        // only clear context if there are no next characters or if its last extra call
-        let mut to_clear_context = false;
-        if self.typing_mode
-            && next.map(|n| n.is_empty()).unwrap_or(true)
-            && !last_extra_call
-            // the case below is to enable typing of _, ' (Vedic svara chihnas too)
-            && !(is_script_tamil_ext(self.to_script)
-                && (emits_ta_ext_superscript_tail
-                    || is_ta_ext_superscript_tail(self.result.last_char())))
-        {
-            to_clear_context = true;
-            // do not clear the context only if case where the current added element is a vyanjana
-            if item_type.is_some_and(|k| k.is_vyanjana()) {
-                to_clear_context = false;
-            }
-            if to_clear_context {
-                self.prev_context.clear();
-            }
-        }
-
-        // addition and shifting
-        // in typing it should not be the last extra call
-        if ((!self.typing_mode) || (!last_extra_call && !to_clear_context))
-            && let Some(item) = item
-        {
-            self.prev_context.push(item);
-        }
-
-        result_str_concat_status
-    }
-
-    /// Applies the custom rules after a match (`next_in_match` is `None`), or between two pieces
-    /// of one match (only the rules that can apply there: `direct_replace` and the input side
-    /// `replace_prev_krama_keys`), `next_in_match` then is the krama of the next piece.
-    ///
-    /// - `text_index` + `delta`: the start of the match in the input
-    /// - `match_krama`: the krama of the match read so far (all of it after the match)
-    fn apply_custom_trans_rules(
-        &mut self,
-        text_index: isize,
-        delta: isize,
-        match_krama: &[i16],
-        next_in_match: Option<i16>,
-    ) {
-        let current_text_index = text_index + delta;
-
-        for rule_ref in self.custom_rules.iter() {
-            let rule = rule_ref.borrow();
-            match rule {
-                Rule::DirectReplace { use_replace, .. }
-                | Rule::ReplacePrevKramaKeys { use_replace, .. } => {
-                    if use_replace == &Some(true) {
-                        continue;
-                    }
-                }
-            }
-            let is_check_in_input =
-                |check_in: &Option<CheckInEnum>| !matches!(check_in, Some(CheckInEnum::Output));
-            if next_in_match.is_some()
-                && matches!(rule, Rule::ReplacePrevKramaKeys { check_in, .. } if !is_check_in_input(check_in))
-            {
-                continue;
-            }
-
-            match rule {
-                Rule::ReplacePrevKramaKeys {
-                    prev,
-                    following,
-                    replace_with,
-                    check_in,
-                    ..
-                } => {
-                    // Bail out if any prev index is negative
-                    if prev.iter().any(|&n| n < 0) {
-                        continue;
-                    }
-
-                    if is_check_in_input(check_in) {
-                        if current_text_index < 0 || text_index < 0 {
-                            continue;
-                        }
-                        // the letters read, not the input characters: the end of `prev` is
-                        // compared with the krama of this match (a Tamil-Extended ்ரு² (ृ) starts
-                        // with the halant character but is no halant, a Sinhala ඟ is ङ्ग), the
-                        // rest with the characters before the match
-                        let mut match_krama_rev = match_krama.iter().rev().filter(|&&k| k >= 0);
-                        let mut input_index = current_text_index;
-                        let matched = prev.iter().rev().all(|&expected| {
-                            if let Some(&got) = match_krama_rev.next() {
-                                return got == expected;
-                            }
-                            input_index -= 1;
-                            input_index >= 0
-                                && self
-                                    .cursor
-                                    .peek_at_str(input_index as usize)
-                                    .and_then(|s| self.from_script_data.krama_index_of_text(s))
-                                    .is_some_and(|got| got == expected as usize)
-                        });
-                        if !matched {
-                            continue;
-                        }
-                        let next_krama = match next_in_match {
-                            Some(next) => Some(next),
-                            None => self
-                                .cursor
-                                .peek_at(text_index as usize)
-                                .and_then(|next_ch| {
-                                    // char buffer to store utf-8 (no heap allocation)
-                                    let mut buf = [0u8; 4];
-                                    let next_ch_str = next_ch.encode_utf8(&mut buf);
-                                    self.from_script_data
-                                        .krama_index_of_text(next_ch_str)
-                                        .map(|i| i as i16)
-                                }),
-                        };
-                        if next_krama.is_some_and(|next| following.contains(&next)) {
-                            let pieces = self.to_script_data.replace_with_pieces(replace_with);
-                            self.result.rewrite_tail_pieces(prev.len(), &pieces);
-                        }
-                    } else {
-                        // output
-                        let Some(last_piece) = self.result.last_piece() else {
-                            continue;
-                        };
-
-                        if let Some(following_idx) =
-                            self.to_script_data.krama_index_of_text(last_piece)
-                        {
-                            if !following.contains(&(following_idx as i16)) {
-                                continue;
-                            }
-                            let prev_match = self.to_script_data.match_prev_krama_sequence(
-                                |i| self.result.peek_at(i),
-                                -2,
-                                prev,
-                            );
-                            if prev_match.matched {
-                                let last_piece_owned = last_piece.to_owned();
-                                let mut pieces =
-                                    self.to_script_data.replace_with_pieces(replace_with);
-                                pieces.push(last_piece_owned.as_str()); // instead [...pices, last_piece]
-                                self.result
-                                    .rewrite_tail_pieces(prev_match.matched_len + 1, &pieces);
-                            }
-                        }
-                    }
-                }
-                Rule::DirectReplace {
-                    to_replace,
-                    replace_with,
-                    replace_text,
-                    check_in,
-                    ..
-                } => {
-                    let lookup_data = if matches!(check_in, Some(CheckInEnum::Output)) {
-                        self.to_script_data
-                    } else {
-                        self.from_script_data
-                    };
-                    // a joiner is not added next to one already in the text (the Sinhala
-                    // conjunct ZWJ before a ZWJ, or before a ZWNJ asking for no conjunct)
-                    if next_in_match.is_none()
-                        && replace_text.as_deref().is_some_and(|t| t.ends_with(ZWJ))
-                        && text_index >= 0
-                        && self
-                            .cursor
-                            .peek_at(text_index as usize)
-                            .is_some_and(|c| c == ZWJ || c == ZWNJ)
-                    {
-                        continue;
-                    }
-
-                    for search_group in to_replace.iter() {
-                        if search_group.iter().any(|&n| n < 0) {
-                            continue;
-                        }
-                        let matched = lookup_data.match_prev_krama_sequence(
-                            |i| self.result.peek_at(i),
-                            -1,
-                            search_group,
-                        );
-                        if !matched.matched {
-                            continue;
-                        }
-                        if let Some(replace_text) = replace_text {
-                            self.result.rewrite_tail_pieces(
-                                matched.matched_len,
-                                slice::from_ref(replace_text),
-                            );
-                        } else {
-                            let pieces = lookup_data.replace_with_pieces(replace_with);
-                            self.result
-                                .rewrite_tail_pieces(matched.matched_len, &pieces);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
-
-/// maps the ScriptData type to Custom Option Script Type
-fn custom_option_script_type_of(
-    script_data: &ScriptData,
-) -> crate::script_data::CustomOptionScriptTypeEnum {
-    match script_data {
-        ScriptData::Brahmic { .. } => crate::script_data::CustomOptionScriptTypeEnum::Brahmic,
-        ScriptData::Other { .. } => crate::script_data::CustomOptionScriptTypeEnum::Other,
-    }
-}
-/// also consider the all case for matching
-fn custom_option_script_type_matches(
-    expected: CustomOptionScriptTypeEnum,
-    actual: CustomOptionScriptTypeEnum,
-) -> bool {
-    matches!(expected, CustomOptionScriptTypeEnum::All) || expected == actual
-}
-pub fn get_active_custom_options(
-    from_script_data: &ScriptData,
-    to_script_data: &ScriptData,
-    input_options: Option<&CustomOptions>,
-) -> CustomOptions {
-    let Some(input_options) = input_options else {
-        return CustomOptions::default();
-    };
-
-    let from_script_name = &from_script_data.script_name;
-    let to_script_name = &to_script_data.script_name;
-    let custom_options_map = crate::script_data::get_custom_options_map();
-    let mut active = CustomOptions::default();
-
-    let from_type = custom_option_script_type_of(from_script_data);
-    let to_type = custom_option_script_type_of(to_script_data);
-
-    for (key, enabled) in input_options.as_entries() {
-        let Some(option_info) = custom_options_map.get(key) else {
-            continue;
-        };
-
-        let from_matches = option_info
-            .from_script_type
-            .is_some_and(|t| custom_option_script_type_matches(t, from_type))
-            || option_info
-                .from_script_name
-                .as_ref()
-                .is_some_and(|names| names.iter().any(|n| n == from_script_name));
-        if !from_matches {
-            continue;
-        }
-
-        let to_matches = option_info
-            .to_script_type
-            .is_some_and(|t| custom_option_script_type_matches(t, to_type))
-            || option_info
-                .to_script_name
-                .as_ref()
-                .is_some_and(|names| names.iter().any(|n| n == to_script_name));
-
-        if from_matches && to_matches {
-            active
-                .try_set(key, enabled)
-                .expect("CustomOptions keys must remain in sync with custom_options.json");
-        }
-    }
-
-    active
-}
-
-#[derive(Debug, Clone)]
-pub struct ResolvedTransliterationRules {
-    pub trans_options: CustomOptions,
-    pub custom_rules: Vec<&'static Rule>,
-}
-/// Resolves active options once and flattens enabled rules into a single list.
-pub fn resolve_transliteration_rules(
-    from_script_data: &ScriptData,
-    to_script_data: &ScriptData,
-    transliteration_input_options: Option<&CustomOptions>,
-) -> ResolvedTransliterationRules {
-    // The overwhelmingly common API call has no custom options. Avoid loading
-    // and scanning custom-option data when every option is necessarily disabled.
-    if transliteration_input_options.is_none() {
-        return ResolvedTransliterationRules {
-            trans_options: CustomOptions::default(),
-            custom_rules: Vec::new(),
-        };
-    }
-
-    let trans_options = get_active_custom_options(
-        from_script_data,
-        to_script_data,
-        transliteration_input_options,
-    );
-
-    let custom_options_map = crate::script_data::get_custom_options_map();
-    let mut custom_rules: Vec<&'static Rule> = Vec::new();
-
-    for (key, enabled) in trans_options.as_entries() {
-        if !enabled {
-            continue;
-        }
-        if let Some(opt) = custom_options_map.get(key) {
-            custom_rules.extend(opt.rules.iter());
-        }
-    }
-
-    ResolvedTransliterationRules {
-        trans_options,
-        custom_rules,
-    }
-}
-
-impl Rule {
-    // helper check function
-    fn check_should_use_replace(&self, allowed: CheckInEnum) -> bool {
-        match self {
-            Rule::ReplacePrevKramaKeys {
-                use_replace,
-                check_in,
-                ..
-            }
-            | Rule::DirectReplace {
-                use_replace,
-                check_in,
-                ..
-            } => use_replace == &Some(true) && check_in == &Some(allowed),
-        }
-    }
-}
-
-fn get_rule_replace_text(rule: &Rule, script_data: &ScriptData) -> String {
-    match rule {
-        Rule::ReplacePrevKramaKeys { replace_with, .. }
-        | Rule::DirectReplace { replace_with, .. } => {
-            replace_with
-                .iter()
-                .map(|&k| {
-                    if k < 0 {
-                        ""
-                    } else {
-                        script_data.krama_text_or_empty(k)
-                    }
-                })
-                // .collect::<Vec<&str>>()
-                // .join("")
-                .collect::<String>()
-        }
-    }
-}
-/// Only applies rules marked with `use_replace=true` (fast replaceAll pass).
-fn apply_custom_replace_rules<'a, R: Borrow<Rule>>(
-    text: &'a str,
-    script_data: &ScriptData,
-    rules: &[R],
-    allowed_input_rule_type: CheckInEnum,
-) -> Cow<'a, str> {
-    if rules.is_empty() {
-        return Cow::Borrowed(text);
-    }
-
-    // Lazy clone: only allocate when a rule actually fires
-    let mut text: Cow<'a, str> = Cow::Borrowed(text);
-    for rule_ref in rules.iter() {
-        let rule = rule_ref.borrow();
-        if !rule.check_should_use_replace(allowed_input_rule_type) {
-            continue;
-        }
-
-        match rule {
-            Rule::ReplacePrevKramaKeys {
-                prev, following, ..
-            } => {
-                let prev_string = prev
-                    .iter()
-                    .map(|&p| script_data.krama_text_or_empty(p))
-                    .collect::<String>();
-
-                let repl_text = get_rule_replace_text(rule, script_data);
-
-                for &follow_krama_index in following.iter() {
-                    let follow_krama_string = script_data.krama_text_or_empty(follow_krama_index);
-                    if follow_krama_string.is_empty() {
-                        continue;
-                    }
-
-                    let search = {
-                        let mut s =
-                            String::with_capacity(prev_string.len() + follow_krama_string.len());
-                        s.push_str(&prev_string);
-                        s.push_str(follow_krama_string);
-                        s
-                    };
-                    if text.contains(&search) {
-                        let replace = {
-                            let mut s =
-                                String::with_capacity(repl_text.len() + follow_krama_string.len());
-                            s.push_str(&repl_text);
-                            s.push_str(follow_krama_string);
-                            s
-                        };
-                        text = Cow::Owned(text.replace(&search, &replace));
-                    }
-                }
-            }
-            Rule::DirectReplace {
-                to_replace,
-                replace_text,
-                ..
-            } => {
-                // Use as_deref() to avoid cloning the Option<String>
-                let replace_with: Cow<str> = replace_text.as_deref().map_or_else(
-                    || Cow::Owned(get_rule_replace_text(rule, script_data)),
-                    Cow::Borrowed,
-                );
-
-                for grp in to_replace.iter() {
-                    let to_replace_string = grp
-                        .iter()
-                        .map(|&k| script_data.krama_text_or_empty(k))
-                        .collect::<String>();
-
-                    if !to_replace_string.is_empty() && text.contains(&*to_replace_string) {
-                        text = Cow::Owned(text.replace(&to_replace_string, &replace_with));
-                    }
-                }
-            }
-        }
-    }
-
-    text
-}
+pub use super::options::{
+    ResolvedTransliterationRules, get_active_custom_options, resolve_transliteration_rules,
+};
 
 const DEFAULT_USE_NATIVE_NUMERALS_MODE: bool = true;
 const DEFAULT_INCLUDE_INHERENT_VOWEL_MODE: bool = false;
 
-#[inline]
-fn is_skip_char(c: char) -> bool {
-    matches!(
-        c,
-        ' ' | '\n' | '\r' | '\t' | ',' | '~' | '!' | '@' | '?' | '%'
-    )
-}
 #[derive(Debug, Clone, Copy)]
 pub struct TransliterationFnOptions {
     pub typing_mode: bool,
@@ -882,6 +124,425 @@ impl CoreBuffers for &mut TransliterateScratch {
     }
 }
 
+impl<'a, R> TransliterateCtx<'a, R>
+where
+    R: Borrow<Rule>,
+{
+    /// The superscript of a Tamil-Extended match that was read with it (see
+    /// `ta_ext_skip_index`)
+    #[inline]
+    fn skip_consumed_ta_ext_superscript(&mut self, text_index: usize) -> bool {
+        if self.ta_ext_skip_index == -1 || (text_index as isize) < self.ta_ext_skip_index {
+            return false;
+        }
+        self.ta_ext_skip_index = -1;
+        self.cursor.advance(1);
+        true
+    }
+
+    /// skip certain chars (preserve as-is), they also end the context
+    fn emit_skip_char(&mut self, ch: char) {
+        self.cursor.advance(1);
+        if self.mode != ContextMode::None {
+            self.prev_context_cleanup((Some(" "), None), None);
+            self.prev_context.clear();
+        }
+        self.result.emit_char(ch);
+    }
+
+    /// latin digits passthrough if native numerals disabled
+    fn emit_ascii_digit(&mut self, ch: char) {
+        self.cursor.advance(1);
+        const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
+        // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
+        let _ = self.prev_context_cleanup((Some(digit_str), None), None);
+        self.result.emit_char(ch);
+    }
+
+    /// Preserve mode: custom script chars when converting to Normal
+    /// (unless it starts a longer text, the Sinhala ZWJ + al-lakuna `‍්` is a halant)
+    ///
+    /// Returns `true` when the character was a custom script character (written as its Normal
+    /// key)
+    fn emit_preserved_custom_char(&mut self, ch: char, text_index: usize) -> bool {
+        let from_script_data = self.from_script_data;
+        let mut ch_buf = [0u8; 4];
+        let ch_str = ch.encode_utf8(&mut ch_buf);
+        let Some(custom_idx) = from_script_data.custom_script_char_index_of_text(ch_str) else {
+            return false;
+        };
+        if only_read_in_longer_text(from_script_data, self.cursor, text_index) {
+            return false;
+        }
+        let (custom_text, list_ref_opt, back_ref_opt) =
+            &from_script_data.custom_script_chars_arr[custom_idx];
+        let list_item = list_ref_opt.and_then(|i| from_script_data.list.get(i as usize));
+        self.prev_context_cleanup((Some(custom_text.as_str()), list_item), None);
+
+        let normal_text = back_ref_opt
+            .and_then(|i| from_script_data.typing_text_to_krama_map.get(i as usize))
+            .map(|(s, _)| s.as_str())
+            .unwrap_or_default();
+        self.result.emit(normal_text);
+        self.cursor.advance(custom_text.chars().count());
+        true
+    }
+
+    /// The characters that are copied as they are (not looked up in the script data).
+    ///
+    /// Returns `true` when the character was one of them (it is emitted and advanced over)
+    #[inline]
+    fn emit_passthrough_char(&mut self, ch: char, text_index: usize) -> bool {
+        if is_skip_char(ch) && !(ch == '~' && self.tilde_is_text) {
+            self.emit_skip_char(ch);
+            return true;
+        }
+        if ch.is_ascii_digit() && !self.use_native_numerals {
+            self.emit_ascii_digit(ch);
+            return true;
+        }
+        self.preserve_specific_chars && self.emit_preserved_custom_char(ch, text_index)
+    }
+
+    /// brahmic -> other: the list item (type info) that stands for a match of the brahmic text
+    fn source_list_item_of_match(&self, map: &TextToKramaMap, krama: &[i16]) -> Option<&'a List> {
+        let from_script_data = self.from_script_data;
+        // pick a brahmic list item (from-script) if available
+        if !self.use_typing_chars
+            && let Some(item) = map
+                .fallback_list_ref
+                .and_then(|i| from_script_data.list.get(i as usize))
+        {
+            return Some(item);
+        }
+        if krama.is_empty() {
+            return None;
+        }
+        if self.is_from_tamil_ext {
+            let any_is = |test: fn(&List) -> bool| {
+                krama
+                    .iter()
+                    .any(|&k| from_script_data.list_item_of_krama(k).is_some_and(test))
+            };
+            // a mixture of vyanjana and mAtrA is an anya
+            if any_is(List::is_matra) && any_is(List::is_vyanjana) {
+                return Some(&helpers::ANYA_LIST_ITEM);
+            }
+            if krama.len() > 1
+                && krama
+                    .iter()
+                    .any(|&k| from_script_data.list_item_of_krama(k).is_none())
+            {
+                return krama
+                    .last()
+                    .and_then(|&k| from_script_data.list_item_of_krama(k));
+            }
+        }
+        krama
+            .first()
+            .and_then(|&k| from_script_data.list_item_of_krama(k))
+    }
+
+    /// other -> brahmic: the context update for a match, the item is of the brahmic target
+    fn update_context_for_brahmic_target(
+        &mut self,
+        matched_text: &'a str,
+        map: &'a TextToKramaMap,
+        krama: &[i16],
+    ) -> bool {
+        let to_script_data = self.to_script_data;
+        let item: Option<&List> = if let Some(f) = map.fallback_list_ref {
+            to_script_data.list.get(f as usize)
+        } else {
+            krama
+                .first()
+                .and_then(|&k| to_script_data.list_item_of_krama(k))
+        };
+
+        let typing_from_normal = self.typing_mode && *self.from_script == ScriptListEnum::Normal;
+        let next_list = if typing_from_normal {
+            map.next.as_deref()
+        } else {
+            None
+        };
+        // The halant typed by its own key (`.h`) is passed as the halant
+        // itself, so that the cleanup does not add a second one after a
+        // vyanjana (k.h -> क्, not क््)
+        let item_text =
+            context_text_of_match(to_script_data, krama, matched_text, self.brahmic_halant);
+        let emits_ta_ext_superscript_tail = typing_from_normal
+            && self.is_to_tamil_ext
+            && krama.last().is_some_and(|&k| {
+                is_ta_ext_superscript_tail(to_script_data.krama_text_or_empty(k).chars().last())
+            });
+        self.prev_context_cleanup_ext(
+            (Some(item_text), item),
+            next_list,
+            emits_ta_ext_superscript_tail,
+        )
+    }
+
+    /// The context update for a match with a krama, by the mode.
+    ///
+    /// Returns `true` when the cleanup already wrote the item (as the mAtrA of the vyanjana
+    /// before)
+    fn update_context_for_match(
+        &mut self,
+        matched_text: &'a str,
+        map: &'a TextToKramaMap,
+        krama: &[i16],
+    ) -> bool {
+        match self.mode {
+            ContextMode::BrahmicToOther => {
+                let item = self.source_list_item_of_match(map, krama);
+                // A halant variant matched as a whole (Sinhala al-lakuna + ZWJ `්‍`)
+                // is passed as the halant itself, so that the cleanup does not add an
+                // inherent vowel before it (ක්‍ෂ -> kSha, not kaSha)
+                let item_text = context_text_of_match(
+                    self.from_script_data,
+                    krama,
+                    matched_text,
+                    self.brahmic_halant,
+                );
+                self.prev_context_cleanup((Some(item_text), item), None)
+            }
+            ContextMode::OtherToBrahmic => {
+                self.update_context_for_brahmic_target(matched_text, map, krama)
+            }
+            ContextMode::TypingToOther => {
+                self.prev_context_cleanup((Some(matched_text), None), map.next.as_deref())
+            }
+            ContextMode::None => false,
+        }
+    }
+
+    /// Emits the krama piece by piece, the rules that can apply inside a match see every piece
+    /// of it, not only the last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct
+    /// ZWJ, Sinhala ඟ (ङ्ग) -> nga, or -> ंग with the anusvAra option
+    fn emit_krama_with_in_match_rules(&mut self, krama: &[i16], match_start: usize) {
+        let to_script_data = self.to_script_data;
+        for (i, &k) in krama.iter().enumerate() {
+            if k < 0 {
+                continue;
+            }
+            let piece = to_script_data.krama_text_or_empty(k);
+            self.result.emit(piece);
+            if !piece.is_empty() && i + 1 < krama.len() {
+                let next_index = self.cursor.pos() as isize;
+                self.apply_custom_trans_rules(
+                    match_start as isize,
+                    next_index,
+                    &krama[..=i],
+                    Some(krama[i + 1]),
+                );
+            }
+        }
+    }
+
+    /// A match with a krama (at least one entry is not `-1`): emitted directly
+    fn emit_match_krama(
+        &mut self,
+        matched_text: &'a str,
+        map: &'a TextToKramaMap,
+        krama: &[i16],
+        match_start: usize,
+    ) {
+        let to_script_data = self.to_script_data;
+        // prev-context bookkeeping
+        let result_concat_status = self.update_context_for_match(matched_text, map, krama);
+        if !result_concat_status {
+            // Tamil-Extended output reorder (matra/halant after superscript)
+            if let ScriptData::Brahmic {
+                halant: to_halant, ..
+            } = to_script_data
+                && self.result_ends_with_ta_ext_superscript()
+            {
+                self.emit_krama_after_ta_ext_superscript(krama, to_halant);
+            } else if self.has_in_match_rules && krama.len() > 1 {
+                self.emit_krama_with_in_match_rules(krama, match_start);
+            } else {
+                emit_krama_pieces(self.result, to_script_data, krama);
+            }
+        }
+
+        if !self.custom_rules.is_empty() {
+            let next_index = self.cursor.pos() as isize;
+            self.apply_custom_trans_rules(match_start as isize, next_index, krama, None);
+        }
+    }
+
+    /// krama contains -1 entries: emit raw match
+    /// (prefix-only entries like `c` of `ch` or `S` of `Sh`)
+    fn emit_prefix_only_match(&mut self, matched_text: &'a str, next: Option<&[String]>) {
+        // cleanup first, so a pending halant goes before the text (kc -> क्c)
+        if self.typing_mode {
+            self.prev_context_cleanup((Some(matched_text), None), next);
+        } else if self.mode != ContextMode::None {
+            // like an unknown character (see Step 2), `kca` -> क्cअ
+            self.prev_context_cleanup((Some(matched_text), None), None);
+            self.prev_context.clear();
+        }
+        self.result.emit(matched_text);
+    }
+
+    /// Writes the match of Step 1 and advances over it. The cursor is on the first character
+    /// of the match, `ch`.
+    ///
+    /// Returns `false` when the entry has no krama of its own: its text is read in Step 2
+    fn emit_match(&mut self, match_index: usize, ch: char) -> bool {
+        let text_to_krama_map = self.text_to_krama_map;
+        let to_script_data = self.to_script_data;
+        let (matched_text, map) = &text_to_krama_map[match_index];
+        let match_start = self.cursor.pos();
+        // a match always starts at `ch`, so equal byte length means it is exactly `ch`
+        let matched_char_count = if matched_text.len() == ch.len_utf8() {
+            1
+        } else {
+            matched_text.chars().count()
+        };
+        let matched_len_units = matched_char_count
+            - self.ta_ext_unconsumed_superscript_units(matched_text, matched_char_count, map);
+        self.cursor.advance(matched_len_units);
+
+        if self.use_typing_chars
+            && let Some(custom_back_ref) = map.custom_back_ref
+            && custom_back_ref >= 0
+            && let Some(custom_item) = to_script_data
+                .custom_script_chars_arr
+                .get(custom_back_ref as usize)
+        {
+            let list_item = custom_item
+                .1
+                .and_then(|li| to_script_data.list.get(li as usize));
+            // cleanup first, so a pending halant goes before the custom character
+            // (kqq -> क्q, k.qSha -> क्‍ष)
+            // custom characters are never svara/mAtrA, so cleanup never emits them itself
+            self.prev_context_cleanup(
+                (Some(matched_text.as_str()), list_item),
+                map.next.as_deref(),
+            );
+            self.result.emit(custom_item.0.as_str());
+            return true;
+        }
+
+        let Some(krama) = &map.krama else {
+            return false;
+        };
+        if krama_has_output(krama) {
+            self.emit_match_krama(matched_text, map, krama, match_start);
+            return true;
+        }
+        if krama.contains(&-1) {
+            self.emit_prefix_only_match(matched_text, map.next.as_deref());
+            return true;
+        }
+        false
+    }
+
+    /// text not matched so ignore and return as it is
+    fn emit_unknown_char(&mut self, text: &'a str) {
+        // A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or
+        // the eyelash ra र‍्), it is not written in Normal / Romanized and does not end the
+        // syllable: क्‍ष and क‍्ष are kSha (were k‍Sha and ka‍Sha)
+        if self.mode == ContextMode::BrahmicToOther
+            && (char_eq_str(ZWJ, text) || char_eq_str(ZWNJ, text))
+        {
+            return;
+        }
+        if self.mode != ContextMode::None {
+            self.prev_context_cleanup((Some(text), None), None);
+            self.prev_context.clear();
+        }
+        self.result.emit(text);
+    }
+
+    /// The context update for the krama entry `index` read in Step 2, by the mode
+    fn update_context_for_krama_char(
+        &mut self,
+        text: &'a str,
+        index: usize,
+        next: Option<&[String]>,
+    ) -> bool {
+        match self.mode {
+            ContextMode::BrahmicToOther => {
+                let from_script_data = self.from_script_data;
+                let item = from_script_data.list_item_of_krama_index(index);
+                self.prev_context_cleanup((Some(text), item), None)
+            }
+            ContextMode::OtherToBrahmic => {
+                let to_script_data = self.to_script_data;
+                let item = to_script_data.list_item_of_krama_index(index);
+                self.prev_context_cleanup((Some(text), item), None)
+            }
+            ContextMode::TypingToOther => {
+                // Typing into an `other` script: a key with no krama in the typing map (Romanized
+                // `sh` / `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next`
+                // as in Step 1, so the context is kept while more keys can follow (else `shh` at
+                // the start of a word comes out as `śh`), and cleared like in Step 1 when none can.
+                self.prev_context_cleanup((Some(text), None), next);
+                false
+            }
+            ContextMode::None => false,
+        }
+    }
+
+    /// Step 2: Search in krama_text_arr
+    ///
+    /// The cursor is already after the character `ch` (or after the match without krama,
+    /// `match_index`).
+    fn emit_krama_char(&mut self, ch: char, match_index: Option<usize>) {
+        let from_script_data = self.from_script_data;
+        let to_script_data = self.to_script_data;
+        let text_to_krama_map = self.text_to_krama_map;
+        let text_to_krama_item = match_index.map(|i| &text_to_krama_map[i]);
+        let char_to_search: &'a str = match text_to_krama_item {
+            Some(item) => item.0.as_str(),
+            None => self
+                .cursor
+                .peek_at_str(self.cursor.pos().saturating_sub(1))
+                // pos - 1 as fallback consumed(advanced 1) the previous character
+                .unwrap_or_default(),
+        };
+
+        let idx = if text_to_krama_item.is_none() {
+            from_script_data.krama_index_of_char(ch)
+            // more performanct : as searching char
+        } else {
+            from_script_data.krama_index_of_text(char_to_search)
+        };
+        let Some(index) = idx else {
+            self.emit_unknown_char(char_to_search);
+            return;
+        };
+
+        let result_concat_status = self.update_context_for_krama_char(
+            char_to_search,
+            index,
+            text_to_krama_item.and_then(|(_, m)| m.next.as_deref()),
+        );
+        if !result_concat_status {
+            if let ScriptData::Brahmic {
+                halant: to_halant, ..
+            } = to_script_data
+                && self.result_ends_with_ta_ext_superscript()
+            {
+                self.emit_piece_after_ta_ext_superscript(index, to_halant);
+            } else {
+                self.result
+                    .emit(to_script_data.krama_text_or_empty(index as i16));
+            }
+        }
+
+        // (the start given to the rules is one character before the cursor, as it always was:
+        // for a match of several characters without krama that is not the start of the match)
+        if !self.custom_rules.is_empty() {
+            let next_index = self.cursor.pos() as isize;
+            self.apply_custom_trans_rules(next_index - 1, next_index, &[index as i16], None);
+        }
+    }
+}
+
 /// Synchronous core transliterator
 #[allow(clippy::too_many_arguments)]
 pub fn transliterate_text_core(
@@ -932,8 +593,6 @@ pub fn transliterate_text_core_with(
     }
 
     let trans_options = trans_options_in;
-    // ^ now we use this flag itself for adding custom
-    // `normal_to_all:use_typing_chars` rule used to modidy the behaviour
 
     let text = if opts.typing_mode && *from_script == ScriptListEnum::Normal {
         helpers::apply_typing_input_aliases(text, to_script)
@@ -948,13 +607,17 @@ pub fn transliterate_text_core_with(
         CheckInEnum::Input,
     );
 
+    let mode = ContextMode::of(
+        from_script,
+        from_script_data,
+        to_script_data,
+        opts.typing_mode,
+    );
     let track_result_pieces = !custom_rules.is_empty()
         || (*to_script == ScriptListEnum::Sinhala
             && trans_options.all_to_sinhala_use_conjunct_enabling_halant);
     // ^ as currently we are using rewrite_at only for sinhala target
-    let result_capacity = if matches!(from_script_data, ScriptData::Other { .. })
-        && matches!(to_script_data, ScriptData::Brahmic { .. })
-    {
+    let result_capacity = if mode == ContextMode::OtherToBrahmic {
         text.len().saturating_mul(3)
         // brahmic script usually use 3x more bytes
     } else {
@@ -965,885 +628,50 @@ pub fn transliterate_text_core_with(
     let mut cursor = InputTextCursor::new_in(text.as_ref(), buffers.take_chars());
     let mut prev_context = PrevContextBuilder::new();
 
-    let prev_context_in_use = (matches!(from_script_data, ScriptData::Brahmic { .. })
-        && matches!(to_script_data, ScriptData::Other { .. }))
-        || (matches!(from_script_data, ScriptData::Other { .. })
-            && matches!(to_script_data, ScriptData::Brahmic { .. }))
-        || (opts.typing_mode
-            && *from_script == ScriptListEnum::Normal
-            && matches!(to_script_data, ScriptData::Other { .. }));
-
-    let (brahmic_nuqta, brahmic_halant) = match (from_script_data, to_script_data) {
-        (ScriptData::Brahmic { nuqta, halant, .. }, ScriptData::Other { .. }) => {
-            (nuqta.as_deref(), Some(halant.as_str()))
-        }
-        (ScriptData::Other { .. }, ScriptData::Brahmic { nuqta, halant, .. }) => {
-            (nuqta.as_deref(), Some(halant.as_str()))
-        }
-        _ => (None, None),
-    };
-
-    let trans_opt_normal_to_all_use_typing_chars = trans_options.normal_to_all_use_typing_chars;
-    // choose matching map
-    let use_typing_map = (trans_opt_normal_to_all_use_typing_chars || opts.typing_mode)
-        && *from_script == ScriptListEnum::Normal;
-    let text_to_krama_lookup_script_data = if use_typing_map {
-        to_script_data
-    } else {
-        from_script_data
-    };
-    let from_text_to_krama_map = if use_typing_map {
-        &to_script_data.typing_text_to_krama_map
-    } else {
-        &from_script_data.text_to_krama_map
-    };
-    // Between two romanizations, one of them a standard scheme, ॐ is read only at the start of a
-    // word (there is no vyanjana context to tell `logoṃ` लोगों from ॐ). Normal and Romanized are
-    // kept as they were.
-    let om_only_at_word_start = matches!(from_script_data, ScriptData::Other { .. })
-        && matches!(to_script_data, ScriptData::Other { .. })
-        && (is_standard_scheme(from_script) || is_standard_scheme(to_script));
-    // `~` is a letter in some romanization schemes (Harvard-Kyoto candrabindu, ITRANS `~N`),
-    // there it is read instead of skipped
-    let tilde_is_text = text_to_krama_lookup_script_data
-        .text_to_krama_map_char_index('~', use_typing_map)
-        .is_some()
-        || from_script_data.krama_index_of_char('~').is_some();
-
-    // Used when converting from Tamil-Extended (superscript numbers)
-    let mut ignore_ta_ext_sup_num_text_index: isize = -1;
-
-    let is_from_tamil_ext_ = is_script_tamil_ext(from_script);
-    let is_to_tamil_ext_ = is_script_tamil_ext(to_script);
-    let opt_preserve_specific_chars_ =
-        trans_options.all_to_normal_preserve_specific_chars && *to_script == ScriptListEnum::Normal;
-    // `direct_replace` and input side `replace_prev_krama_keys` rules are applied after every
-    // piece of a match
-    let has_in_match_rules = custom_rules.iter().any(|rule| match rule.borrow() {
-        Rule::DirectReplace { use_replace, .. } => use_replace != &Some(true),
-        Rule::ReplacePrevKramaKeys {
-            use_replace,
-            check_in,
-            ..
-        } => use_replace != &Some(true) && !matches!(check_in, Some(CheckInEnum::Output)),
-    });
-
-    let mut ctx = TransliterateCtx {
+    let mut ctx = TransliterateCtx::new(
+        mode,
         from_script,
         to_script,
         from_script_data,
         to_script_data,
         trans_options,
         custom_rules,
-        cursor: &mut cursor,
-        result: &mut result,
-        prev_context: &mut prev_context,
-        prev_context_in_use,
-        brahmic_halant,
-        brahmic_nuqta,
-        typing_mode: opts.typing_mode,
-        include_inherent_vowels: opts.include_inherent_vowel,
-    };
+        opts,
+        &mut cursor,
+        &mut result,
+        &mut prev_context,
+    );
 
     let chars_len = ctx.cursor.char_count();
     while ctx.cursor.pos() < chars_len {
-        let mut text_index = ctx.cursor.pos();
-        let ch = match ctx.cursor.peek() {
-            Some(v) => v,
-            None => break,
+        let text_index = ctx.cursor.pos();
+        let Some(ch) = ctx.cursor.peek() else {
+            break;
         };
-        // println!("{} - {:?}", ctx.cursor.pos(), ch);
 
-        if ignore_ta_ext_sup_num_text_index != -1
-            && (text_index as isize) >= ignore_ta_ext_sup_num_text_index
-        {
-            ignore_ta_ext_sup_num_text_index = -1;
-            ctx.cursor.advance(1);
+        if ctx.skip_consumed_ta_ext_superscript(text_index) {
             continue;
         }
-
-        // skip certain chars (preserve as-is)
-        if is_skip_char(ch) && !(ch == '~' && tilde_is_text) {
-            ctx.cursor.advance(1);
-            if ctx.prev_context_in_use {
-                ctx.prev_context_cleanup(Some((Some(" "), None)), None, None);
-                ctx.prev_context.clear();
-            }
-            ctx.result.emit_char(ch);
+        if ctx.emit_passthrough_char(ch, text_index) {
             continue;
-        }
-
-        // latin digits passthrough if native numerals disabled
-        if ch.is_ascii_digit() && !opts.use_native_numerals {
-            ctx.cursor.advance(1);
-            const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-            let digit_str = DIGIT_STRS[(ch as u8 - b'0') as usize];
-            // cleanup first, so a pending halant/schwa goes before the digit (k0 -> क्0)
-            let _ = ctx.prev_context_cleanup(Some((Some(digit_str), None)), None, None);
-            ctx.result.emit_char(ch);
-            continue;
-        }
-
-        // Preserve mode: custom script chars when converting to Normal
-        // (unless it starts a longer text, the Sinhala ZWJ + al-lakuna `‍්` is a halant)
-        if opt_preserve_specific_chars_ {
-            let mut ch_buf = [0u8; 4];
-            let ch_str = ch.encode_utf8(&mut ch_buf);
-            let idx = from_script_data.custom_script_char_index_of_text(ch_str);
-            if let Some(custom_idx) = idx
-                && !only_read_in_longer_text(from_script_data, ctx.cursor, text_index)
-            {
-                let (custom_text, list_ref_opt, back_ref_opt) =
-                    &from_script_data.custom_script_chars_arr[custom_idx];
-                let list_item = list_ref_opt.and_then(|i| from_script_data.list.get(i as usize));
-                ctx.prev_context_cleanup(Some((Some(custom_text.as_str()), list_item)), None, None);
-
-                let normal_text = back_ref_opt
-                    .and_then(|i| from_script_data.typing_text_to_krama_map.get(i as usize))
-                    .map(|(s, _)| s.as_str())
-                    .unwrap_or_default();
-                ctx.result.emit(normal_text);
-                ctx.cursor.advance(custom_text.chars().count());
-                continue;
-            }
         }
 
         // Step 1: match text_to_krama_map / typing_text_to_krama_map
-        let text_to_krama_item_index: Option<usize>;
-        // the matched text ends with a Tamil-Extended superscript that is not next to the rest
-        // of it in the input (a Vedic svara is in between), so it is not to be advanced over
-        let mut ta_ext_superscript_detached = false;
-        {
-            let mut scan_units: usize = 0;
-            let mut last_valid_vowel_match_index: Option<usize> = None;
-            let check_vowel_retraction = ctx.prev_context_in_use
-                && matches!(from_script_data, ScriptData::Other { .. })
-                && matches!(to_script_data, ScriptData::Brahmic { .. })
-                && (ctx
-                    .prev_context
-                    .type_at(-1)
-                    .is_some_and(|k| k.is_vyanjana())
-                    || (ctx.brahmic_nuqta.is_some()
-                        && ctx
-                            .prev_context
-                            .type_at(-2)
-                            .is_some_and(|k| k.is_vyanjana())
-                        && ctx.prev_context.text_at(-1) == ctx.brahmic_nuqta));
-
-            loop {
-                let next = ctx.cursor.peek_at(text_index + scan_units + 1);
-                let next_char: Option<char> = next;
-
-                if ignore_ta_ext_sup_num_text_index != -1
-                    && next_char.is_some()
-                    && is_ta_ext_superscript_tail(next_char)
-                {
-                    scan_units += 1; // each char is 1 unit
-                }
-
-                let end_index = text_index + scan_units + 1;
-                let single_char_lookup = scan_units == 0 && ignore_ta_ext_sup_num_text_index == -1;
-                // The single-char fast path never reads `char_to_search` unless the match
-                // has a `next` list, so build the slice lazily.
-                let char_to_search: Cow<'_, str> = if single_char_lookup {
-                    Cow::Borrowed("")
-                } else if ignore_ta_ext_sup_num_text_index != -1 {
-                    let a = ctx
-                        .cursor
-                        .slice(text_index, ignore_ta_ext_sup_num_text_index as usize)
-                        .unwrap_or_default();
-                    let b = if end_index > (ignore_ta_ext_sup_num_text_index as usize) {
-                        ctx.cursor
-                            .slice((ignore_ta_ext_sup_num_text_index as usize) + 1, end_index)
-                            .unwrap_or_default()
-                    } else {
-                        ""
-                    };
-                    {
-                        let mut s = String::with_capacity(a.len() + b.len());
-                        s.push_str(a);
-                        s.push_str(b);
-                        Cow::Owned(s)
-                    }
-                } else {
-                    Cow::Borrowed(ctx.cursor.slice(text_index, end_index).unwrap_or_default())
-                };
-
-                let potential_match_index = if single_char_lookup {
-                    // more scan units only needed in case ta-ext so safe to do
-                    text_to_krama_lookup_script_data
-                        .text_to_krama_map_char_index(ch, use_typing_map)
-                } else {
-                    text_to_krama_lookup_script_data
-                        .text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
-                };
-
-                let Some(potential_match_index) = potential_match_index else {
-                    text_to_krama_item_index = None;
-                    break;
-                };
-                let potential_match = &from_text_to_krama_map[potential_match_index];
-
-                // vowel retraction support (kAUM etc.)
-                if check_vowel_retraction
-                    && let Some(krama) = &potential_match.1.krama
-                    && !krama.is_empty()
-                {
-                    let krama_id = krama[0];
-                    if krama_id >= 0 {
-                        let list_idx = to_script_data
-                            .krama_text_arr
-                            .get(krama_id as usize)
-                            .and_then(|(_, li)| *li);
-                        let list_type =
-                            list_idx.and_then(|li| to_script_data.list.get(li as usize));
-                        let is_single_vowel = krama.len() == 1
-                            && list_type.is_some_and(|t| t.is_svara() || t.is_matra());
-                        if is_single_vowel {
-                            last_valid_vowel_match_index = Some(potential_match_index);
-                        } else if last_valid_vowel_match_index.is_some() {
-                            text_to_krama_item_index = last_valid_vowel_match_index;
-                            break;
-                        }
-                    }
-                }
-
-                // extend match if `next` allows it
-                let next_chars = &potential_match.1.next_chars;
-                if !next_chars.is_empty() {
-                    let nth_next = ctx.cursor.peek_at(end_index);
-                    let nth_next_character: Option<char> = nth_next;
-
-                    // Tamil-Extended special handling (superscript numbers after matra/halant/svara)
-                    if is_from_tamil_ext_
-                        && let ScriptData::Brahmic { halant, .. } = from_script_data
-                    {
-                        let char_to_search: Cow<'_, str> = if single_char_lookup {
-                            Cow::Borrowed(
-                                ctx.cursor.slice(text_index, end_index).unwrap_or_default(),
-                            )
-                        } else {
-                            char_to_search
-                        };
-                        let is_halant = |c: char| char_eq_str(c, halant);
-                        let is_matra = |c: char| {
-                            from_script_data
-                                .krama_index_of_char(c)
-                                .and_then(|i| from_script_data.krama_text_arr.get(i))
-                                .and_then(|(_, li)| *li)
-                                .and_then(|li| from_script_data.list.get(li as usize))
-                                .is_some_and(|k| k.is_matra())
-                        };
-                        // The superscript of the match can be after a halant or a mAtrA and Vedic
-                        // svaras, as the writer puts them before it:
-                        //   [halant | mAtrA | mAtrA mAtrA]? svara* superscript
-                        // eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒),
-                        // ரு॒॑² (ऋ॒॑). In the match the superscript takes the place of these, which
-                        // are read next.
-                        let mut sup_index = end_index;
-                        let sign = nth_next_character.filter(|&c| is_halant(c) || is_matra(c));
-                        if let Some(sign) = sign {
-                            sup_index += 1;
-                            // mAtrA duplicates like O = E + A in gEA (or gO as visible when)
-                            if is_matra(sign) && ctx.cursor.peek_at(sup_index).is_some_and(is_matra)
-                            {
-                                sup_index += 1;
-                            }
-                        }
-                        let svaras_start = sup_index;
-                        while is_vedic_svara_tail(ctx.cursor.peek_at(sup_index)) {
-                            sup_index += 1;
-                        }
-                        let sup_character = ctx.cursor.peek_at(sup_index);
-                        if (sign.is_some() || sup_index > svaras_start)
-                            && is_ta_ext_superscript_tail(sup_character)
-                            && sup_character.is_some_and(|c| next_chars.contains(&c))
-                            // no superscript is being skipped, or (with only svaras in between)
-                            // the skipped one is inside this match: the ² of க்² in க்²ரு॑² (खृ॑)
-                            && (ignore_ta_ext_sup_num_text_index == -1
-                                || (sign.is_none()
-                                    && ignore_ta_ext_sup_num_text_index < end_index as isize))
-                            && let Some(char_index) = from_script_data.text_to_krama_map_index(
-                                &with_tail(&char_to_search, sup_character),
-                                false,
-                            )
-                        {
-                            text_to_krama_item_index = Some(char_index);
-                            // With only svaras in between, a superscript already skipped inside
-                            // this match (the ² of க்² in க்²ரு॑²) makes up for the one after the
-                            // svaras in the match length, so the whole match is advanced over.
-                            if sign.is_none() {
-                                ta_ext_superscript_detached =
-                                    ignore_ta_ext_sup_num_text_index == -1;
-                            }
-                            ignore_ta_ext_sup_num_text_index = sup_index as isize;
-                            break;
-                        }
-                        // The match ends with a halant, or a halant + a letter, that cannot be
-                        // continued (ல் and ல்ர are the start of ல்ரி² ல்ரீ² (ऌ ॡ)), but the halant
-                        // starts a mAtrA ending in a superscript (்ரு² ்ரூ² ்ல்ரி² ்ல்ரீ²): stop the
-                        // match before the halant, so ல்ரு² is read as ல + ்ரு² (लृ) and ல்ல்ரி²
-                        // as ல + ்ல்ரி² (लॢ, like க்ல்ரி² कॢ)
-                        let mut rev = char_to_search.char_indices().rev();
-                        let halant_tail = match (rev.next(), rev.next()) {
-                            (Some((i, c)), _) if is_halant(c) => Some((i, 1)),
-                            (Some(_), Some((i, c))) if is_halant(c) => Some((i, 2)),
-                            _ => None,
-                        };
-                        if let Some((tail_start, back)) = halant_tail
-                            && tail_start > 0
-                            && let Some(nth_ch) = nth_next_character
-                            && !next_chars.contains(&nth_ch)
-                            && end_index >= back
-                            && ctx.cursor.slice(end_index - back, end_index)
-                                == Some(&char_to_search[tail_start..])
-                        {
-                            // the longest text from the halant up to the superscript (after
-                            // Vedic svaras)
-                            let mut tail = String::with_capacity(24);
-                            tail.push_str(&char_to_search[tail_start..]);
-                            let mut tail_end = end_index;
-                            while let Some(c) = ctx.cursor.peek_at(tail_end) {
-                                if is_ta_ext_superscript_tail(Some(c)) {
-                                    break;
-                                }
-                                tail.push(c);
-                                if from_script_data
-                                    .text_to_krama_map_index(&tail, false)
-                                    .is_none()
-                                {
-                                    tail.pop();
-                                    break;
-                                }
-                                tail_end += 1;
-                            }
-                            while is_vedic_svara_tail(ctx.cursor.peek_at(tail_end)) {
-                                tail_end += 1;
-                            }
-                            let tail_sup = ctx.cursor.peek_at(tail_end);
-                            if is_ta_ext_superscript_tail(tail_sup) {
-                                tail.extend(tail_sup);
-                                let tail_is_matra = from_script_data
-                                    .text_to_krama_map_index(&tail, false)
-                                    .and_then(|i| {
-                                        from_script_data.text_to_krama_map[i].1.krama.as_deref()
-                                    })
-                                    .and_then(|krama| match krama {
-                                        &[k] => usize::try_from(k).ok(),
-                                        _ => None,
-                                    })
-                                    .and_then(|k| from_script_data.krama_text_arr.get(k))
-                                    .and_then(|(_, li)| *li)
-                                    .and_then(|li| from_script_data.list.get(li as usize))
-                                    .is_some_and(|k| k.is_matra());
-                                if tail_is_matra
-                                    && let Some(head_index) = from_script_data
-                                        .text_to_krama_map_index(
-                                            &char_to_search[..tail_start],
-                                            false,
-                                        )
-                                {
-                                    text_to_krama_item_index = Some(head_index);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    // Generic: if the next character is in the next list, extend scan and continue
-                    if let Some(nth_ch) = nth_next_character
-                        && next_chars.contains(&nth_ch)
-                    {
-                        scan_units += 1; // each char is 1 unit
-                        continue;
-                    }
-                }
-
-                // Decomposed (NFD) text: a letter is its base + combining marks (ī is i + U+0304),
-                // and the base can continue the letter before it (a + i is ai, k + h is kh). When
-                // the match cannot take the mark after it but its last letter can, the match stops
-                // before that letter: kaī is k a ī (कई), not kai + U+0304
-                if scan_units > 0
-                    && ignore_ta_ext_sup_num_text_index == -1
-                    && matches!(from_script_data, ScriptData::Other { .. })
-                    && let Some(mark) = ctx.cursor.peek_at(end_index)
-                    && is_latin_combining_mark(mark)
-                    && !potential_match.1.next_chars.contains(&mark)
-                    && let (Some(head), Some(last)) = (
-                        ctx.cursor.slice(text_index, end_index - 1),
-                        ctx.cursor.peek_at(end_index - 1),
-                    )
-                    && let Some(head_index) = text_to_krama_lookup_script_data
-                        .text_to_krama_map_index(head, use_typing_map)
-                    && from_text_to_krama_map[head_index]
-                        .1
-                        .krama
-                        .as_ref()
-                        .is_some_and(|krama| !krama.is_empty() && !krama.contains(&-1))
-                    && text_to_krama_lookup_script_data
-                        .text_to_krama_map_index(
-                            &with_tail(last.encode_utf8(&mut [0u8; 4]), Some(mark)),
-                            use_typing_map,
-                        )
-                        .is_some()
-                {
-                    text_to_krama_item_index = Some(head_index);
-                    break;
-                }
-
-                text_to_krama_item_index = Some(potential_match_index);
-                break;
-            }
-        }
-        // A sign written as a dead consonant (Tamil anusvAra ம்) with no syllable to go with (the
-        // start of a word, after a halant): only the consonant is read here (Step 2), the halant next
-        let text_to_krama_item_index = text_to_krama_item_index.filter(|&i| {
-            Some(i) != from_script_data.dead_consonant_sign_index
-                || use_typing_map
-                || sign_has_base(from_script_data, ctx.cursor, text_index)
-        });
-        // ॐ inside a word (after a letter) is read as the letters of its text, the longest part of
-        // it which is read: IAST logoṃ is लोगों, SLP1 jAUM जाऊं (to a brahmic script the same is
-        // done after a vyanjana, `check_vowel_retraction`)
-        let text_to_krama_item_index = match text_to_krama_item_index {
-            Some(i)
-                if om_only_at_word_start
-                    && text_index > 0
-                    && ctx.cursor.peek_at(text_index - 1).is_some_and(is_word_char)
-                    && from_text_to_krama_map[i].1.krama.as_deref() == Some(&[OM_KRAMA_INDEX]) =>
-            {
-                let matched_text = from_text_to_krama_map[i].0.as_str();
-                let part_index = matched_text
-                    .char_indices()
-                    .rev()
-                    .map(|(end, _)| end)
-                    .filter(|&end| end > 0)
-                    .find_map(|end| {
-                        text_to_krama_lookup_script_data
-                            .text_to_krama_map_index(&matched_text[..end], use_typing_map)
-                            .filter(|&index| {
-                                from_text_to_krama_map[index]
-                                    .1
-                                    .krama
-                                    .as_ref()
-                                    .is_some_and(|k| !k.is_empty() && !k.contains(&-1))
-                            })
-                    });
-                Some(part_index.unwrap_or(i))
-            }
-            other => other,
-        };
-        let text_to_krama_item = text_to_krama_item_index.map(|i| &from_text_to_krama_map[i]);
-        if let Some(text_to_krama_item) = text_to_krama_item {
-            let (matched_text, map) = text_to_krama_item;
-            // a match always starts at `ch`, so equal byte length means it is exactly `ch`
-            let matched_char_count = if matched_text.len() == ch.len_utf8() {
-                1
-            } else {
-                matched_text.chars().count()
-            };
-            // only relevant while skipping a Tamil-Extended superscript; evaluated lazily
-            let index_delete_length = if ta_ext_superscript_detached
-                || (ignore_ta_ext_sup_num_text_index != -1
-                    && matched_char_count > 1
-                    && map
-                        .krama
-                        .as_ref()
-                        .and_then(|k| k.first())
-                        .and_then(|ki| ctx.from_script_data.krama_text_arr.get(*ki as usize))
-                        .and_then(|(_, li)| li.as_ref())
-                        .and_then(|li| from_script_data.list.get(*li as usize))
-                        .is_some_and(|l| l.is_vyanjana())
-                    && is_ta_ext_superscript_tail(matched_text.chars().last()))
-            {
-                1
-            } else {
-                0
-            };
-            let matched_len_units = matched_char_count - index_delete_length;
-            ctx.cursor.advance(matched_len_units);
-
-            if (opts.typing_mode || trans_opt_normal_to_all_use_typing_chars)
-                && let Some(custom_back_ref) = map.custom_back_ref
-                && custom_back_ref >= 0
-                && let Some(custom_item) = to_script_data
-                    .custom_script_chars_arr
-                    .get(custom_back_ref as usize)
-            {
-                let list_item = custom_item
-                    .1
-                    .and_then(|li| to_script_data.list.get(li as usize));
-                // cleanup first, so a pending halant goes before the custom character
-                // (kqq -> क्q, k.qSha -> क्‍ष)
-                // custom characters are never svara/mAtrA, so cleanup never emits them itself
-                ctx.prev_context_cleanup(
-                    Some((Some(matched_text.as_str()), list_item)),
-                    map.next.as_deref(),
-                    None,
-                );
-                ctx.result.emit(custom_item.0.as_str());
-                continue;
-            }
-
-            // If krama exists and has at least one non -1, emit directly
-            if let Some(krama) = &map.krama {
-                if krama.iter().any(|&k| k != -1) {
-                    // prev-context bookkeeping
-                    let mut result_concat_status = false;
-                    if ctx.prev_context_in_use {
-                        if matches!(from_script_data, ScriptData::Brahmic { .. })
-                            && matches!(to_script_data, ScriptData::Other { .. })
-                        {
-                            // pick a brahmic list item (from-script) if available
-                            let mut item = map.fallback_list_ref.and_then(|i| {
-                                if !(trans_opt_normal_to_all_use_typing_chars || opts.typing_mode) {
-                                    from_script_data.list.get(i as usize)
-                                } else {
-                                    None
-                                }
-                            });
-                            if item.is_none()
-                                && map.krama.as_ref().is_none_or(|krama| krama.is_empty())
-                            {
-                                item = None;
-                            } else if item.is_none()
-                                && let Some(krama) = &map.krama
-                            {
-                                let list_ref_of = |x: &i16| -> Option<&List> {
-                                    from_script_data
-                                        .krama_text_arr
-                                        .get(*x as usize)
-                                        .and_then(|k| k.1)
-                                        .and_then(|list_ref| {
-                                            from_script_data.list.get(list_ref as usize)
-                                        })
-                                };
-                                if is_from_tamil_ext_
-                                    && krama
-                                        .iter()
-                                        .any(|x| list_ref_of(x).is_some_and(|k| k.is_matra()))
-                                    && krama
-                                        .iter()
-                                        .any(|x| list_ref_of(x).is_some_and(|k| k.is_vyanjana()))
-                                {
-                                    if !krama.is_empty() {
-                                        item = Some(&helpers::ANYA_LIST_ITEM);
-                                    }
-                                } else if is_from_tamil_ext_
-                                    && krama.len() > 1
-                                    && krama.iter().any(|x| list_ref_of(x).is_none())
-                                {
-                                    if let Some(last) = krama.last() {
-                                        item = list_ref_of(last);
-                                    }
-                                } else if let Some(first) = krama.first() {
-                                    item = list_ref_of(first);
-                                }
-                            }
-
-                            // A halant variant matched as a whole (Sinhala al-lakuna + ZWJ `්‍`)
-                            // is passed as the halant itself, so that the cleanup does not add an
-                            // inherent vowel before it (ක්‍ෂ -> kSha, not kaSha)
-                            let item_text = match ctx.brahmic_halant {
-                                Some(halant)
-                                    if krama.len() == 1
-                                        && from_script_data.krama_text_or_empty(krama[0])
-                                            == halant =>
-                                {
-                                    halant
-                                }
-                                _ => matched_text.as_str(),
-                            };
-                            result_concat_status =
-                                ctx.prev_context_cleanup(Some((Some(item_text), item)), None, None);
-                        } else if matches!(to_script_data, ScriptData::Brahmic { .. })
-                            && matches!(from_script_data, ScriptData::Other { .. })
-                        {
-                            let item: Option<&List>;
-                            if let Some(f) = map.fallback_list_ref {
-                                item = to_script_data.list.get(f as usize);
-                            } else {
-                                item = if krama.is_empty() {
-                                    None
-                                } else {
-                                    krama
-                                        .first()
-                                        .and_then(|k| {
-                                            to_script_data.krama_text_arr.get(*k as usize)
-                                        })
-                                        .and_then(|k| {
-                                            k.1.and_then(|i| to_script_data.list.get(i as usize))
-                                        })
-                                };
-                            }
-
-                            let typing_from_normal =
-                                opts.typing_mode && *from_script == ScriptListEnum::Normal;
-                            let next_list = if typing_from_normal {
-                                map.next.as_deref()
-                            } else {
-                                None
-                            };
-                            // The halant typed by its own key (`.h`) is passed as the halant
-                            // itself, so that the cleanup does not add a second one after a
-                            // vyanjana (k.h -> क्, not क््)
-                            let item_text = match ctx.brahmic_halant {
-                                Some(halant)
-                                    if krama.len() == 1
-                                        && to_script_data.krama_text_or_empty(krama[0])
-                                            == halant =>
-                                {
-                                    halant
-                                }
-                                _ => matched_text.as_str(),
-                            };
-                            let emits_ta_ext_superscript_tail = typing_from_normal
-                                && is_to_tamil_ext_
-                                && krama.last().is_some_and(|&k| {
-                                    is_ta_ext_superscript_tail(
-                                        to_script_data.krama_text_or_empty(k).chars().last(),
-                                    )
-                                });
-                            result_concat_status = ctx.prev_context_cleanup_ext(
-                                Some((Some(item_text), item)),
-                                next_list,
-                                None,
-                                emits_ta_ext_superscript_tail,
-                            );
-                        } else if opts.typing_mode
-                            && *from_script == ScriptListEnum::Normal
-                            && matches!(to_script_data, ScriptData::Other { .. })
-                        {
-                            result_concat_status = ctx.prev_context_cleanup(
-                                Some((Some(matched_text.as_str()), None)),
-                                map.next.as_deref(),
-                                None,
-                            );
-                        }
-                    }
-
-                    if !result_concat_status {
-                        // Tamil-Extended output reorder (matra/halant after superscript)
-                        if let ScriptData::Brahmic {
-                            halant: to_halant, ..
-                        } = to_script_data
-                            && is_to_tamil_ext_
-                            && is_ta_ext_superscript_tail(ctx.result.last_char())
-                        {
-                            // Stack buffer (no heap allocation); only this reorder path
-                            // needs the pieces as a slice. krama sequences are at most
-                            // ~4 entries in practice; 8 is a safe upper bound.
-                            let mut pieces_buf = [""; 8];
-                            let mut pieces_len = 0usize;
-                            for &k in krama.iter() {
-                                if k < 0 {
-                                    continue;
-                                }
-                                if pieces_len < pieces_buf.len() {
-                                    pieces_buf[pieces_len] = to_script_data.krama_text_or_empty(k);
-                                    pieces_len += 1;
-                                }
-                            }
-                            let pieces = &pieces_buf[..pieces_len];
-                            if pieces.len() == 1 && pieces[0] == to_halant
-                                || map.krama.as_ref().is_some_and(|krama| {
-                                    krama.last().is_some_and(|last_i| {
-                                        // krama index -> krama_text_arr -> list index
-                                        to_script_data
-                                            .krama_text_arr
-                                            .get(*last_i as usize)
-                                            .and_then(|(_, list_ref)| *list_ref)
-                                            .and_then(|li| to_script_data.list.get(li as usize))
-                                            .is_some_and(|k| k.is_matra())
-                                    })
-                                })
-                            {
-                                ctx.result.emit_pieces_with_reorder(pieces, to_halant, true);
-                            } else if pieces
-                                .last()
-                                .and_then(|k| k.chars().last())
-                                .is_some_and(|s| is_vedic_svara_tail(Some(s)))
-                            {
-                                let last = ctx.result.pop_last_char().unwrap_or_default();
-                                ctx.result.emit_pieces(pieces);
-                                ctx.result.emit_char(last);
-                            } else {
-                                ctx.result.emit_pieces(pieces);
-                            }
-                        } else if has_in_match_rules && krama.len() > 1 {
-                            // the rules that can apply inside a match see every piece of it, not
-                            // only the last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct
-                            // ZWJ, Sinhala ඟ (ङ्ग) -> nga, or -> ंग with the anusvAra option
-                            for (i, &k) in krama.iter().enumerate() {
-                                if k < 0 {
-                                    continue;
-                                }
-                                let piece = to_script_data.krama_text_or_empty(k);
-                                ctx.result.emit(piece);
-                                if !piece.is_empty() && i + 1 < krama.len() {
-                                    ctx.apply_custom_trans_rules(
-                                        text_index as isize,
-                                        0,
-                                        &krama[..=i],
-                                        Some(krama[i + 1]),
-                                    );
-                                }
-                            }
-                        } else {
-                            emit_krama_pieces(ctx.result, to_script_data, krama);
-                        }
-                    }
-
-                    if !ctx.custom_rules.is_empty() {
-                        ctx.apply_custom_trans_rules(
-                            ctx.cursor.pos() as isize,
-                            -(matched_len_units as isize),
-                            krama,
-                            None,
-                        );
-                    }
-                    continue;
-                } else
-                // krama contains -1 entries: emit raw match
-                // (prefix-only entries like `c` of `ch` or `S` of `Sh`)
-                // cleanup first, so a pending halant goes before the text (kc -> क्c)
-                if krama.contains(&-1) {
-                    if opts.typing_mode {
-                        ctx.prev_context_cleanup(
-                            Some((Some(matched_text.as_str()), None)),
-                            map.next.as_deref(),
-                            None,
-                        );
-                    } else if ctx.prev_context_in_use {
-                        // like an unknown character (see Step 2), `kca` -> क्cअ
-                        ctx.prev_context_cleanup(
-                            Some((Some(matched_text.as_str()), None)),
-                            None,
-                            None,
-                        );
-                        ctx.prev_context.clear();
-                    }
-                    ctx.result.emit(matched_text.as_str());
+        let match_index = ctx.match_text_to_krama(ch, text_index);
+        match match_index {
+            Some(match_index) => {
+                if ctx.emit_match(match_index, ch) {
                     continue;
                 }
             }
-        } else {
-            ctx.cursor.advance(1);
-            text_index = ctx.cursor.pos();
+            None => ctx.cursor.advance(1),
         }
 
         // Step 2: Search in krama_text_arr
-        let char_to_search: &str = text_to_krama_item.map(|k| k.0.as_str()).unwrap_or_else(|| {
-            ctx.cursor
-                .peek_at_str(ctx.cursor.pos().saturating_sub(1))
-                // pos - 1 as fallback consumed(advanced 1) the previous character
-                .unwrap_or_default()
-        });
-
-        let idx = if text_to_krama_item.is_none() {
-            from_script_data.krama_index_of_char(ch)
-            // more performanct : as searching char
-        } else {
-            from_script_data.krama_index_of_text(char_to_search)
-        };
-        let Some(index) = idx else {
-            // A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or
-            // the eyelash ra र‍्), it is not written in Normal / Romanized and does not end the
-            // syllable: क्‍ष and क‍्ष are kSha (were k‍Sha and ka‍Sha)
-            if matches!(from_script_data, ScriptData::Brahmic { .. })
-                && matches!(to_script_data, ScriptData::Other { .. })
-                && (char_eq_str(ZWJ, char_to_search) || char_eq_str(ZWNJ, char_to_search))
-            {
-                continue;
-            }
-            if ctx.prev_context_in_use {
-                ctx.prev_context_cleanup(Some((Some(char_to_search), None)), None, None);
-                ctx.prev_context.clear();
-            }
-            ctx.result.emit(char_to_search);
-            continue;
-        };
-
-        let mut result_concat_status = false;
-        if ctx.prev_context_in_use {
-            if matches!(from_script_data, ScriptData::Brahmic { .. }) {
-                let list_idx = from_script_data
-                    .krama_text_arr
-                    .get(index)
-                    .and_then(|(_, li)| *li);
-                let item = list_idx.and_then(|li| from_script_data.list.get(li as usize));
-                result_concat_status =
-                    ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
-            } else if matches!(to_script_data, ScriptData::Brahmic { .. }) {
-                let list_idx = to_script_data
-                    .krama_text_arr
-                    .get(index)
-                    .and_then(|(_, li)| *li);
-                let item = list_idx.and_then(|li| to_script_data.list.get(li as usize));
-                result_concat_status =
-                    ctx.prev_context_cleanup(Some((Some(char_to_search), item)), None, None);
-            } else if opts.typing_mode && *from_script == ScriptListEnum::Normal {
-                // Typing into an `other` script: a key with no krama in the typing map (Romanized
-                // `sh` / `ch`, prefixes of `shh` / `sh^` / `chh`) is resolved here. Pass its `next`
-                // as in Step 1, so the context is kept while more keys can follow (else `shh` at
-                // the start of a word comes out as `śh`), and cleared like in Step 1 when none can.
-                ctx.prev_context_cleanup(
-                    Some((Some(char_to_search), None)),
-                    text_to_krama_item.and_then(|(_, m)| m.next.as_deref()),
-                    None,
-                );
-            }
-        }
-
-        if !result_concat_status {
-            let pieces = [to_script_data.krama_text_or_empty(index as i16)];
-            if let ScriptData::Brahmic {
-                halant: to_halant, ..
-            } = to_script_data
-            {
-                if is_to_tamil_ext_ && is_ta_ext_superscript_tail(ctx.result.last_char()) {
-                    if pieces[0] == to_halant
-                        || to_script_data
-                            .krama_text_arr
-                            .get(index)
-                            .is_some_and(|krama| {
-                                krama.1.is_some_and(|i| {
-                                    to_script_data
-                                        .list
-                                        .get(i as usize)
-                                        .is_some_and(|k| k.is_matra())
-                                })
-                            })
-                    {
-                        ctx.result
-                            .emit_pieces_with_reorder(&pieces, to_halant, true);
-                    } else if pieces
-                        .last()
-                        .and_then(|k| k.chars().last())
-                        .is_some_and(|s| is_vedic_svara_tail(Some(s)))
-                    {
-                        let last = ctx.result.pop_last_char().unwrap_or_default();
-                        ctx.result.emit_pieces(&pieces);
-                        ctx.result.emit_char(last);
-                    } else {
-                        ctx.result.emit_pieces(&pieces);
-                    }
-                } else {
-                    ctx.result.emit_pieces(&pieces);
-                }
-            } else {
-                ctx.result.emit_pieces(&pieces);
-            }
-        }
-
-        if !ctx.custom_rules.is_empty() {
-            ctx.apply_custom_trans_rules(ctx.cursor.pos() as isize, -1, &[index as i16], None);
-        }
+        ctx.emit_krama_char(ch, match_index);
     }
-
-    if ctx.prev_context_in_use {
-        let _ = ctx.prev_context_cleanup(None, None, Some(true));
-    }
+    // the inherent vowel / halant of a last vyanjana
+    ctx.flush_prev_context();
 
     let context_length = ctx.prev_context.length();
     // (taken via `ctx`: `cursor` stays borrowed for its whole lifetime)
