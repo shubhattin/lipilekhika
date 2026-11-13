@@ -1,0 +1,21 @@
+{
+  // Used by API Extractor (it runs its own TypeScript) to bundle the declarations that
+  // `tsc` emits into `dist/types` (see build.ts). The shared script data package is a
+  // workspace package of `.ts` source, so its imports resolve to its emitted declarations
+  // in `dist/types/script-data` and are inlined into the bundled `.d.ts` files.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "paths": {
+      "@lipilekhika/script-data/lang_list": ["../dist/types/script-data/lang_list/index.d.ts"],
+      "@lipilekhika/script-data/*": ["../dist/types/script-data/*"]
+    }
+  },
+  "files": ["../dist/types/src/index.d.ts", "../wasm/wasm_modules.d.ts"]
+}

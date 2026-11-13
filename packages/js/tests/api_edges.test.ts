@@ -274,8 +274,14 @@ describe('Runtimes without newer globals (review)', () => {
             : []
       );
     const root = path.resolve(__dirname, '..');
-    for (const file of [...files(path.join(root, 'src')), ...files(path.join(root, 'wasm'))]) {
-      if (file.includes(`${path.sep}pkg${path.sep}`) || file.includes('make_script_data')) continue;
+    // the lang list of the shared script data is bundled into the runtime too
+    const langList = path.resolve(root, '../../lipi_script_data/src/lang_list');
+    for (const file of [
+      ...files(path.join(root, 'src')),
+      ...files(path.join(root, 'wasm')),
+      ...files(langList)
+    ]) {
+      if (file.includes(`${path.sep}pkg${path.sep}`)) continue;
       expect(readFileSync(file, 'utf8').includes('(?<'), file).toBe(false);
     }
   });

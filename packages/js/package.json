@@ -114,7 +114,6 @@
     "coverage": "vitest run --coverage",
     "format": "oxfmt",
     "lint": "oxlint",
-    "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
     "publish:cli": "bun run build && npm publish",
     "bench": "bun run build:lib && node scripts/benchmark.mjs",
     "bench:bun": "bun run build:lib && bun scripts/benchmark.mjs",
@@ -127,6 +126,7 @@
     "complexity": "bun run build:lib && node scripts/complexity.mjs"
   },
   "devDependencies": {
+    "@lipilekhika/script-data": "workspace:*",
     "@microsoft/api-extractor": "^7.58.6",
     "@types/bun": "^1.3.12",
     "@types/node": "^24.12.2",
@@ -137,8 +137,7 @@
     "mitata": "1.0.34",
     "oxfmt": "^0.65.0",
     "oxlint": "^1.80.0",
-    "typescript": "~5.9.3",
-    "unplugin-dts": "^1.0.0",
+    "typescript": "^7.0.2",
     "unplugin-macros": "^0.18.7",
     "vite": "^8",
     "vitest": "^4.1.4",

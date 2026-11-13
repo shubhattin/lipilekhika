@@ -7,7 +7,7 @@ edition = "2024"
 rust-version = "1.85.0"
 publish = false
 
-# Run via `bun run make-script-data` in `packages/js` (which first copies the JSON into
+# Run via `bun run make-script-data` from the repo root (which first copies the JSON into
 # `packages/rust/data/`), or directly: `cargo run -p lipilekhika-datagen [-- --check]`.
 #
 # Writes (only when content changed):

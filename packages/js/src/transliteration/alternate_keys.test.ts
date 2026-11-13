@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { transliterate } from '../index';
 import { getScriptData } from '../utils/get_script_data';
 import { SCRIPT_LIST } from '../utils/lang_list';
-import { kramaLabelIndex } from '../make_script_data/krama_array_keys';
+import { kramaLabelIndex } from '@lipilekhika/script-data/krama_array_keys';
 import { emulateTyping } from './test_commons';
 import { getScriptTypingDataMap } from '../typing';
 

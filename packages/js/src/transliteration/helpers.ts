@@ -1,7 +1,7 @@
 import type {
   OutputBrahmicScriptData,
   OutputScriptData
-} from '../make_script_data/output_script_data_schema';
+} from '@lipilekhika/script-data/output_script_data_schema';
 import type { ScriptData } from '../utils/get_script_data';
 import type { script_list_type } from '../utils/lang_list';
 

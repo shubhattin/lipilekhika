@@ -1,4 +1,4 @@
-# JSON input of `lipilekhika-datagen`, copied by `bun run make-script-data` (packages/js).
+# JSON input of `lipilekhika-datagen`, copied by `bun run make-script-data` (lipi_script_data).
 # The artifacts generated from it (src/generated/lipi_data.bin, src/scripts.rs,
 # src/custom_options.rs) are committed.
 /data/

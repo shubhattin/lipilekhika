@@ -1,4 +1,4 @@
-import type { OutputScriptData } from '../../make_script_data/output_script_data_schema';
+import type { OutputScriptData } from '@lipilekhika/script-data/output_script_data_schema';
 import type { script_list_type } from '../../utils/lang_list';
 import { get_package_current_version_macro } from '../../utils/runtime_macros' with { type: 'macro' };
 
