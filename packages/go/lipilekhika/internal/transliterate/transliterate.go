@@ -725,6 +725,11 @@ func TransliterateTextCoreWith(
 
 	prevContextInUse := (fromBrahmic && toOther) || (fromOther && toBrahmic) ||
 		(opts.TypingMode && fromName == "Normal" && toOther)
+	// Between two romanizations, one of them a standard scheme, ॐ is read only at the start of a
+	// word (there is no vyanjana context to tell `logoṃ` लोगों from ॐ). Normal and Romanized are
+	// kept as they were.
+	omOnlyAtWordStart := fromOther && toOther &&
+		(isStandardScheme(fromName) || isStandardScheme(toName))
 
 	ctx := transliterateCtx{
 		fromName: fromName, toName: toName,
@@ -1025,6 +1030,29 @@ func TransliterateTextCoreWith(
 		if itemIndex >= 0 && itemIndex == fromData.DeadConsonantSignIndex && !useTypingMap &&
 			!signHasBase(fromData, &cursor, textIndex) {
 			itemIndex = -1
+		}
+		// ॐ inside a word (after a letter) is read as the letters of its text, the longest part of it
+		// which is read: IAST logoṃ is लोगों, SLP1 jAUM जाऊं (to a brahmic script the same is done
+		// after a vyanjana, the vowel retraction)
+		if omOnlyAtWordStart && itemIndex >= 0 && textIndex > 0 {
+			if prev, ok := cursor.peekAt(textIndex - 1); ok && isWordRune(prev) {
+				if krama := textToKramaMap[itemIndex].Value.Krama; len(krama) == 1 && krama[0] == omKramaIndex {
+					matched := textToKramaMap[itemIndex].Text
+					for end := len(matched) - 1; end > 0; end-- {
+						if !utf8.RuneStart(matched[end]) {
+							continue
+						}
+						index := lookupData.TextToKramaMapIndex(matched[:end], useTypingMap)
+						if index < 0 {
+							continue
+						}
+						if partKrama := textToKramaMap[index].Value.Krama; len(partKrama) > 0 && !containsI16(partKrama, -1) {
+							itemIndex = index
+							break
+						}
+					}
+				}
+			}
 		}
 
 		// (the Tamil-Extended matches index into `fromData.TextToKramaMapArr`, which is

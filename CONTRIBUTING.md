@@ -99,9 +99,13 @@ From `packages/python`:
 uv sync                                    # create .venv and install deps
 uvx maturin develop --release              # build Rust Python bindings
 uv run pytest                              # tests
-uvx ty check                               # typecheck
+uvx ty check                               # typecheck (CI runs it)
+uvx ruff check .                           # lint (`--fix` applies the safe fixes)
+uvx ruff format .                          # format
 uv run pytest benchmarks/bench_lipilekhika.py  # statistical benchmark suite (see Benchmarks below)
 ```
+
+Before committing Python changes run `uvx ruff format .`, `uvx ruff check .` and `uvx ty check`, all three must pass. Ruff and ty are not project dependencies and `uvx` runs their latest release, so a new release can report something new in unchanged code (ty renamed `empty-body`, which failed CI): fix it, don't silence it. The Ruff settings are in [`pyproject.toml`](packages/python/pyproject.toml) (`[tool.ruff]`).
 
 ## Go package (`packages/go/lipilekhika`)
 
@@ -132,7 +136,7 @@ Format your changes before committing. Run the formatter for each package you to
 Notes:
 
 - `rustfmt` comes with rustup by default; the per-crate settings live in the `rustfmt.toml` files (`packages/rust`, `desktop-client`).
-- Ruff isn't a project dependency, so it runs through `uvx` (like `ty`); it also formats the Python code blocks in `packages/python/README.md`.
+- Ruff isn't a project dependency, so it runs through `uvx` (like `ty`); it also formats the Python code blocks in `packages/python/README.md`. For Python, also lint and typecheck before committing (`uvx ruff check .`, `uvx ty check`), see [Python package](#python-package-packagespython).
 - The committed Rust script data is formatted by its generator (`datagen`), so `cargo fmt` leaves it unchanged. The flutter_rust_bridge output (`frb_generated.rs`) is gitignored, so whatever `cargo fmt` does to it doesn't show up in a diff.
 
 ## Benchmarks

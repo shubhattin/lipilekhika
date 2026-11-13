@@ -3,19 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from ._lipilekhika import (  # ty:ignore[import-not-found]
-    create_typing_context as _create_typing_context,
-    default_auto_context_clear_time_ms as _default_auto_context_clear_time_ms,
-    default_use_native_numerals as _default_use_native_numerals,
-    default_include_inherent_vowel as _default_include_inherent_vowel,
+    ScriptTypingDataMap as _ScriptTypingDataMap,
+    TypingContext as _TypingContext,
     TypingContextOptions as _TypingContextOptions,
     TypingDiff as _TypingDiff,
-    TypingContext as _TypingContext,
-    get_script_typing_data_map as _get_script_typing_data_map,
-    ScriptTypingDataMap as _ScriptTypingDataMap,
+    create_typing_context as _create_typing_context,
+    default_auto_context_clear_time_ms as _default_auto_context_clear_time_ms,
+    default_include_inherent_vowel as _default_include_inherent_vowel,
+    default_use_native_numerals as _default_use_native_numerals,
     get_script_krama_data as _get_script_krama_data,
+    get_script_typing_data_map as _get_script_typing_data_map,
 )
 from .types import ScriptLangType
-
 
 # Default constants
 DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS = int(_default_auto_context_clear_time_ms())
@@ -71,27 +70,23 @@ class TypingContextOptions:
 
 class TypingDiff:
     @property
-    def to_delete_chars_count(self) -> int:  # ty:ignore[empty-body]
+    def to_delete_chars_count(self) -> int:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Number of characters that should be deleted from the end of the current input state.
 
         Counted in code points, like `len()` of a Python `str` (so `text[:-count]` deletes them).
         The JS package counts UTF-16 code units instead (a character outside the BMP is 2 there).
         """
-        pass
 
     @property
-    def diff_add_text(self) -> str:  # ty:ignore[empty-body]
+    def diff_add_text(self) -> str:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Text that should be inserted into the current input state."""
-        pass
 
     @property
-    def context_length(self) -> int:  # ty:ignore[empty-body]
+    def context_length(self) -> int:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Remaining internal context length (0 means context was cleared)."""
-        pass
 
-    def __repr__(self) -> str:  # ty:ignore[empty-body]
+    def __repr__(self) -> str:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Return a string representation of the TypingDiff."""
-        pass
 
 
 class TypingContext:
@@ -104,9 +99,8 @@ class TypingContext:
         This resets the typing context to its initial state, useful when
         starting fresh input or clearing the current composition.
         """
-        ...
 
-    def take_key_input(self, key: str) -> TypingDiff:  # ty:ignore[empty-body]
+    def take_key_input(self, key: str) -> TypingDiff:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Accepts character by character input and returns the diff.
 
         Args:
@@ -116,41 +110,36 @@ class TypingContext:
         Returns:
             The diff containing the number of characters to delete and the text to add
         """
-        ...
 
     def update_use_native_numerals(self, use_native_numerals: bool) -> None: ...
 
     def update_include_inherent_vowel(self, include_inherent_vowel: bool) -> None: ...
 
-    def get_use_native_numerals(self) -> bool:  # ty:ignore[empty-body]
+    def get_use_native_numerals(self) -> bool:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         pass
 
-    def get_include_inherent_vowel(self) -> bool:  # ty:ignore[empty-body]
+    def get_include_inherent_vowel(self) -> bool:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         pass
 
-    def get_normalized_script(self) -> str:  # ty:ignore[empty-body]
+    def get_normalized_script(self) -> str:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """The script the context types in (a language name is resolved to its script)."""
-        pass
 
 
 class ScriptTypingDataMap:
     """Result containing typing data for a script."""
 
     @property
-    def common_krama_map(self) -> list[TypingDataMapItem]:  # ty:ignore[empty-body]
+    def common_krama_map(self) -> list[TypingDataMapItem]:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Mappings for common characters across scripts."""
-        pass
 
     @property
     def script_specific_krama_map(
         self,
-    ) -> list[TypingDataMapItem]:  # ty:ignore[empty-body]
+    ) -> list[TypingDataMapItem]:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Mappings for script-specific characters."""
-        pass
 
-    def __repr__(self) -> str:  # ty:ignore[empty-body]
+    def __repr__(self) -> str:  # ty:ignore[invalid-implicit-return-in-function-with-stub-body]
         """Return a string representation of the ScriptTypingDataMap."""
-        pass
 
 
 if not TYPE_CHECKING:
@@ -240,18 +229,16 @@ def get_script_krama_data(script: ScriptLangType) -> list[KramaDataItem]:
 
 __all__ = [
     "DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS",
-    "DEFAULT_USE_NATIVE_NUMERALS",
     "DEFAULT_INCLUDE_INHERENT_VOWEL",
-    "TypingContextOptions",
-    "TypingDiff",
-    "TypingContext",
-    "create_typing_context",
-    # typing map data
-    "ScriptTypingDataMap",
-    "ListType",
-    "TypingDataMapItem",
-    "get_script_typing_data_map",
-    # krama data
+    "DEFAULT_USE_NATIVE_NUMERALS",
     "KramaDataItem",
+    "ListType",
+    "ScriptTypingDataMap",
+    "TypingContext",
+    "TypingContextOptions",
+    "TypingDataMapItem",
+    "TypingDiff",
+    "create_typing_context",
     "get_script_krama_data",
+    "get_script_typing_data_map",
 ]

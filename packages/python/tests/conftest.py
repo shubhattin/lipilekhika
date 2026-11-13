@@ -1,8 +1,9 @@
 """Pytest configuration and hooks for tracking test statistics."""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add tests directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -15,8 +16,8 @@ from test_stats import (  # ty:ignore[import-not-found]
 
 try:
     from rich.console import Console
-    from rich.table import Table
     from rich.panel import Panel
+    from rich.table import Table
 
     HAS_RICH = True
 except ImportError:

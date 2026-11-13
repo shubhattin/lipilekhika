@@ -1,11 +1,13 @@
 """Transliteration Tests"""
 
-import yaml
-import pytest
 from pathlib import Path
+
+import pytest
+import yaml
 from pydantic import BaseModel, ConfigDict
-from lipilekhika import transliterate, preload_script_data
 from test_stats import increment_assertion_count  # ty:ignore[import-not-found]
+
+from lipilekhika import preload_script_data, transliterate
 from lipilekhika.types import ScriptLangType, TransliterationOptionsType
 
 # Test data folder

@@ -7,7 +7,7 @@ _file_assertion_counts = {}
 
 def increment_assertion_count(count: int = 1, file_name: str | None = None):
     """Increment the global assertion counter and optionally track by file."""
-    global _assertion_count, _file_assertion_counts
+    global _assertion_count
     _assertion_count += count
 
     if file_name:

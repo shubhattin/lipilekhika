@@ -7,9 +7,9 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
-from lipilekhika import transliterate, preload_script_data, SCRIPT_LIST
-from lipilekhika.typing import create_typing_context, TypingContextOptions
+from lipilekhika import SCRIPT_LIST, preload_script_data, transliterate
 from lipilekhika.types import ScriptListType
+from lipilekhika.typing import TypingContextOptions, create_typing_context
 
 console = Console()
 
@@ -80,7 +80,7 @@ def build_transliteration_batches(
         key = f"{item['from']}-{item['to']}"
         grouped[key].append(item)
     batches = []
-    for _key, items in grouped.items():
+    for items in grouped.values():
         batches.append(
             {
                 "from": items[0]["from"],

@@ -1,12 +1,14 @@
 """Typing Emulation Tests"""
 
-from lipilekhika.typing import create_typing_context, TypingContextOptions
-from lipilekhika import transliterate
-import yaml
-import pytest
 from pathlib import Path
+
+import pytest
+import yaml
 from pydantic import BaseModel, ConfigDict
 from test_stats import increment_assertion_count  # ty:ignore[import-not-found]
+
+from lipilekhika import transliterate
+from lipilekhika.typing import TypingContextOptions, create_typing_context
 
 # Vedic svaras for special handling
 VEDIC_SVARAS = ["॒", "॑", "᳚", "᳛"]
@@ -89,7 +91,7 @@ class TestEmulateTyping:
     """Test suite for emulate typing functionality based on transliteration data."""
 
     # Test data folders for auto-nor transliteration tests
-    INPUT_FOLDERS = [
+    INPUT_FOLDERS = (
         Path(__file__).parent.parent.parent.parent
         / "test_data"
         / "transliteration"
@@ -98,7 +100,7 @@ class TestEmulateTyping:
         / "test_data"
         / "transliteration"
         / "auto-nor-other",
-    ]
+    )
 
     @pytest.mark.parametrize("folder", INPUT_FOLDERS)
     def test_emulate_typing_from_transliteration_data(self, folder: Path):

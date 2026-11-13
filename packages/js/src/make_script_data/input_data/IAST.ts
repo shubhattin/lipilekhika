@@ -146,6 +146,7 @@ const IAST: InputOtherScriptType = {
   list: [
     // alternate forms, read only (ISO 15919 and others)
     { text: 'ṃ', text_krama: ['anusvAra'], duplicates: ['ṁ'] },
+    { text: 'oṃ', text_krama: ['AUM'], duplicates: ['oṁ'] },
     { text: 'ṛ', text_krama: ['R-svara'], duplicates: ['r̥'] },
     { text: 'ṝ', text_krama: ['RR-svara'], duplicates: ['r̥̄'] },
     { text: 'ḷ', text_krama: ['LR-svara'], duplicates: ['l̥'] },

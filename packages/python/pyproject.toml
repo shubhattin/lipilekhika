@@ -31,3 +31,7 @@ dev = [
     "rich>=14.2.0",
     "typer>=0.21.1",
 ]
+
+[tool.ruff.lint.isort]
+# keep `from ._lipilekhika import (a as _a, b as _b)` one statement (its `ty:ignore` comment)
+combine-as-imports = true

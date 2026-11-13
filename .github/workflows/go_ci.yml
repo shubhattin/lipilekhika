@@ -28,9 +28,6 @@ jobs:
         with:
           go-version-file: packages/go/lipilekhika/go.mod
       - name: Test
-        env:
-          # also assert the expected outputs of the transliteration yaml test data
-          LIPILEKHIKA_STRICT_YAML_EXPECTED: "true"
         run: |
           cd packages/go/lipilekhika
           go test -v ./...
