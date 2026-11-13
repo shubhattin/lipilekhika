@@ -8,6 +8,7 @@ import {
   getWindowsPortableDownloadUrl,
   getLinuxParivartakaDownloadUrl,
   getMacParivartakaDownloadUrl,
+  getAndroidApkDownloadUrl,
   getAndroidReleasePage
 } from '../src/lib/github';
 
@@ -72,10 +73,16 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
           token
         );
         if (mobileRelease) {
+          // the universal APK, downloaded directly
+          const apkUrl = getAndroidApkDownloadUrl(mobileRelease);
+          if (apkUrl) {
+            redirects.push(`/redirect/mobile-app-release-apk ${apkUrl} 302`);
+            logger.info(`Android APK: ${mobileRelease.tag_name}`);
+          }
+          // the release page with every APK (kept for the links to it)
           const androidUrl = getAndroidReleasePage(mobileRelease);
           if (androidUrl) {
             redirects.push(`/redirect/mobile-app-release-page ${androidUrl} 302`);
-            logger.info(`Android release page: ${mobileRelease.tag_name}`);
           }
         } else {
           logger.warn('Could not find Android mobile app release');

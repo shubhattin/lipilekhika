@@ -19,7 +19,7 @@
 
 - 🌐 **Web App** - Try it instantly at [lipilekhika.in/app](https://lipilekhika.in/app)
 - 🪟 **Windows** - Download the [latest MSI installer](https://lipilekhika.in/redirect/pc-app-release-win-download) or the [portable zip](https://lipilekhika.in/redirect/pc-app-release-win-portable) (no install: unzip and run)
-- 🤖 **Android** - download the [latest APK](https://lipilekhika.in/redirect/mobile-app-release-page)
+- 🤖 **Android** - download the [latest APK](https://lipilekhika.in/redirect/mobile-app-release-apk) (universal, for every phone; the smaller APK of each architecture is on the [release page](https://lipilekhika.in/redirect/mobile-app-release-page))
 - 🐧 **Linux** - Install the [fcitx5 plugin](https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md), and [Lipi Parivartaka](https://lipilekhika.in/redirect/pc-app-release-linux-parivartaka) to convert text between scripts
 - 🍎 **macOS** - [Lipi Parivartaka](https://lipilekhika.in/redirect/pc-app-release-macos-parivartaka) to convert text between scripts (Apple silicon and Intel, macOS 12+)
 

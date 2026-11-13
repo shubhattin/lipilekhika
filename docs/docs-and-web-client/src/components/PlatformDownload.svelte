@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Button } from '~/lib/components/ui/button';
-  import { X } from 'lucide-svelte';
+  import { Download, X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
-  import { SiAndroid, SiApple, SiWindows, SiLinux, SiGoogleplay } from 'svelte-icons-pack/si';
+  import { SiAndroid, SiApple, SiWindows, SiLinux } from 'svelte-icons-pack/si';
   import { detect_platform } from '../tools/pwa_state';
   import PWAInstall from './PWAInstall.svelte';
 
@@ -11,7 +11,7 @@
   // const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
   const LINUX_FCITX_PLUGIN_URL =
     'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
-  const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
+  const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-apk';
   // Lipi Parivartaka on its own (convert text between scripts), for Linux and macOS
   const LINUX_PARIVARTAKA_URL = '/redirect/pc-app-release-linux-parivartaka';
   const MAC_PARIVARTAKA_URL = '/redirect/pc-app-release-macos-parivartaka';
@@ -29,7 +29,7 @@
 
 {#if !dismissed && showPlatformPrompt}
   {#if platform === 'android'}
-    <!-- Android: Play Store download -->
+    <!-- Android: the APK, downloaded directly -->
     <div
       class="mb-4 flex items-center gap-2.5 rounded-lg border border-emerald-200/80 bg-linear-to-r from-emerald-50/90 to-emerald-100/70 px-3 py-2.5 shadow-sm backdrop-blur dark:border-emerald-800/60 dark:from-emerald-950/50 dark:to-emerald-900/40"
       role="status"
@@ -45,7 +45,7 @@
           Get the Android App
         </div>
         <div class="truncate text-xs text-emerald-600 dark:text-emerald-400">
-          Available on Play Store
+          Direct APK download
         </div>
       </div>
       <Button
@@ -55,8 +55,8 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        <Icon src={SiGoogleplay} className="mr-1 size-3.5 fill-current" />
-        Install
+        <Download class="mr-1 size-3.5" />
+        Download
       </Button>
       <button
         type="button"

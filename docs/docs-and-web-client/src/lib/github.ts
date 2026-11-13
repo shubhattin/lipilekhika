@@ -183,9 +183,23 @@ export function getMacParivartakaDownloadUrl(release: GitHubRelease): string | n
 }
 
 /**
- * Get download URL for Android APK
+ * Get download URL for the universal Android APK (installs on every device), or the release's page
+ * when the release does not have it (releases before 0.3.0 had only the split APKs)
  * @param release - The GitHub release object
- * @returns Download URL or null if not found
+ * @returns Download URL (or the release page) or null if not a mobile app release
+ */
+export function getAndroidApkDownloadUrl(release: GitHubRelease): string | null {
+  const version = parseTagVersion(release.tag_name, 'mobile-app@v');
+  if (!version) return null;
+
+  const asset = release.assets.find((a) => a.name === `lipilekhika_${version}_universal.apk`);
+  return asset?.browser_download_url ?? getAndroidReleasePage(release);
+}
+
+/**
+ * Get the page of an Android app release (all the APKs)
+ * @param release - The GitHub release object
+ * @returns The release page URL or null if not a mobile app release
  */
 export function getAndroidReleasePage(release: GitHubRelease): string | null {
   const version = parseTagVersion(release.tag_name, 'mobile-app@v');
