@@ -165,6 +165,24 @@ export function getWindowsPortableDownloadUrl(release: GitHubRelease): string | 
 }
 
 /**
+ * Get download URL for Lipi Parivartaka for Linux (x86_64 tar.gz)
+ * @param release - The GitHub release object
+ * @returns Download URL (or the release page) or null if not a PC app release
+ */
+export function getLinuxParivartakaDownloadUrl(release: GitHubRelease): string | null {
+  return getPcAppFileUrl(release, (v) => `lipiparivartaka-${v}-linux-x86_64.tar.gz`);
+}
+
+/**
+ * Get download URL for Lipi Parivartaka for macOS (Apple silicon and Intel, zip of the app)
+ * @param release - The GitHub release object
+ * @returns Download URL (or the release page) or null if not a PC app release
+ */
+export function getMacParivartakaDownloadUrl(release: GitHubRelease): string | null {
+  return getPcAppFileUrl(release, (v) => `lipiparivartaka-${v}-macos-universal.zip`);
+}
+
+/**
  * Get download URL for Android APK
  * @param release - The GitHub release object
  * @returns Download URL or null if not found

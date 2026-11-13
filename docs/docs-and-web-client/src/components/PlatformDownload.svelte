@@ -2,7 +2,7 @@
   import { Button } from '~/lib/components/ui/button';
   import { X } from 'lucide-svelte';
   import { Icon } from 'svelte-icons-pack';
-  import { SiAndroid, SiWindows, SiLinux, SiGoogleplay } from 'svelte-icons-pack/si';
+  import { SiAndroid, SiApple, SiWindows, SiLinux, SiGoogleplay } from 'svelte-icons-pack/si';
   import { detect_platform } from '../tools/pwa_state';
   import PWAInstall from './PWAInstall.svelte';
 
@@ -12,13 +12,19 @@
   const LINUX_FCITX_PLUGIN_URL =
     'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
   const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-page';
+  // Lipi Parivartaka on its own (convert text between scripts), for Linux and macOS
+  const LINUX_PARIVARTAKA_URL = '/redirect/pc-app-release-linux-parivartaka';
+  const MAC_PARIVARTAKA_URL = '/redirect/pc-app-release-macos-parivartaka';
 
   let dismissed = $state(false);
   const platform = detect_platform();
 
   // Only show platform prompt for supported desktop/mobile platforms
   const showPlatformPrompt =
-    platform === 'android' || platform === 'windows' || platform === 'linux';
+    platform === 'android' ||
+    platform === 'windows' ||
+    platform === 'linux' ||
+    platform === 'macos';
 </script>
 
 {#if !dismissed && showPlatformPrompt}
@@ -121,8 +127,15 @@
         <div class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
           Linux Fcitx5 Plugin
         </div>
-        <div class="truncate text-xs text-slate-500 dark:text-slate-400">
-          System-wide input method
+        <!-- wraps on narrow screens: the link must stay visible -->
+        <div class="text-xs leading-snug text-slate-500 dark:text-slate-400">
+          System-wide input method, and the
+          <a
+            class="underline underline-offset-2 hover:text-slate-700 dark:hover:text-slate-200"
+            href={LINUX_PARIVARTAKA_URL}
+            target="_blank"
+            rel="noopener noreferrer">Lipi Parivartaka app</a
+          >
         </div>
       </div>
       <Button
@@ -143,8 +156,46 @@
         <X class="size-4" />
       </button>
     </div>
+  {:else if platform === 'macos'}
+    <!-- macOS: Lipi Parivartaka -->
+    <div
+      class="mb-4 flex items-center gap-2.5 rounded-lg border border-zinc-200/80 bg-linear-to-r from-zinc-50/90 to-zinc-100/70 px-3 py-2.5 shadow-sm backdrop-blur dark:border-zinc-700/60 dark:from-zinc-900/50 dark:to-zinc-800/40"
+      role="status"
+      aria-live="polite"
+    >
+      <div
+        class="flex size-9 shrink-0 items-center justify-center rounded-md bg-zinc-800 dark:bg-zinc-600"
+      >
+        <Icon src={SiApple} className="size-5 fill-white" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          Lipi Parivartaka for Mac
+        </div>
+        <div class="truncate text-xs text-zinc-500 dark:text-zinc-400">
+          Convert text between scripts · Apple silicon &amp; Intel
+        </div>
+      </div>
+      <Button
+        size="sm"
+        class="h-8 shrink-0 bg-zinc-800 px-3 text-xs text-white hover:bg-zinc-900 dark:bg-zinc-600 dark:hover:bg-zinc-500"
+        href={MAC_PARIVARTAKA_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Download
+      </Button>
+      <button
+        type="button"
+        class="shrink-0 rounded p-1 text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:text-zinc-500 dark:hover:bg-zinc-700/40 dark:hover:text-zinc-300"
+        onclick={() => (dismissed = true)}
+        aria-label="Dismiss"
+      >
+        <X class="size-4" />
+      </button>
+    </div>
   {/if}
 {:else}
-  <!-- Fallback to PWA for iOS, macOS, or unknown platforms -->
+  <!-- Fallback to PWA for iOS or unknown platforms -->
   <PWAInstall />
 {/if}

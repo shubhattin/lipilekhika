@@ -8,7 +8,7 @@ publish = false
 gpui-kit = "0.9.1"
 lipilekhika = { path = "../packages/rust", features = ["std"] }
 crossbeam-channel = "0.5.15"
-tray-icon = { version = "0.21.3", default-features = false }
+tray-icon = { version = "0.21.3", default-features = false, optional = true }
 image = { version = "0.25", default-features = false, features = ["png"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
@@ -22,13 +22,13 @@ dirs = "6.0.0"
 uuid = { version = "1.19", features = ["v4"] }
 unicode-general-category = "1"
 # one running app: a second start hands its request to the first (named pipe / unix socket)
-interprocess = "2"
+interprocess = { version = "2", optional = true }
 raw-window-handle = "0.6"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # tray-icon draws the tray menu with GTK on Linux, its thread runs the GTK main loop
-gtk = "0.18"
-glib = "0.18"
+gtk = { version = "0.18", optional = true }
+glib = { version = "0.18", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62.2", features = [
@@ -44,9 +44,25 @@ windows = { version = "0.62.2", features = [
 ] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-core-graphics = "0.25"
-core-foundation = "0.10"
-foreign-types = "0.5"
+core-graphics = { version = "0.25", optional = true }
+core-foundation = { version = "0.10", optional = true }
+foreign-types = { version = "0.5", optional = true }
+
+[features]
+default = ["typing-tool"]
+# The full Lipi Lekhika: the typing tool's main window, the tray, the system wide typing (the
+# keyboard hook) and one running app. Without it (`--no-default-features`) the build is Lipi
+# Parivartaka on its own: it opens straight into it and quits with it (`lipiparivartaka`, the
+# Linux and macOS downloads).
+typing-tool = [
+    "dep:tray-icon",
+    "dep:interprocess",
+    "dep:gtk",
+    "dep:glib",
+    "dep:core-graphics",
+    "dep:core-foundation",
+    "dep:foreign-types",
+]
 
 [build-dependencies]
 embed-resource = "2"

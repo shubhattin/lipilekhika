@@ -38,7 +38,12 @@ pub fn init_posthog() {
   let mut event = Event::new("$pageview", &distinct_id);
 
   // other properties
-  let _ = event.insert_prop("app", "lipilekhika");
+  let app = if cfg!(feature = "typing-tool") {
+    "lipilekhika"
+  } else {
+    "lipiparivartaka"
+  };
+  let _ = event.insert_prop("app", app);
   let _ = event.insert_prop("platform", std::env::consts::OS);
   let _ = event.insert_prop("app_version", env!("CARGO_PKG_VERSION"));
   let _ = event.insert_prop("portable", crate::portable::is_portable());
