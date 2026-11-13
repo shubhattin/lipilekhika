@@ -8,7 +8,7 @@
 
 ## ✨ Features
 
-- 🔄 **Bidirectional Transliteration** - Convert between 15+ [Indian Brahmic scripts](https://en.wikipedia.org/wiki/Brahmic_scripts) including Devanagari, Bengali, Tamil, Telugu, and more
+- 🔄 **Bidirectional Transliteration** - Supports all the modern Indian scripts, along with the standard romanization schemes such as IAST, ITRANS, SLP1 and Harvard-Kyoto ([script guide](https://lipilekhika.in/reference/script_guide/))
 - ⚡ **Real-time Typing** - Type in any Indian language using English keyboard with a intuitive map
 - 🎯 **Highly Customizable** - Custom Transliteration and Typing Options
 - 🚀 **Blazing Fast** - Optimized for performance in JavaScript and Rust

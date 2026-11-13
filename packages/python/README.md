@@ -11,7 +11,7 @@
 
 ## ✨ Features
 
-- 🔄 **Bidirectional Transliteration** — Convert between 15+ Indian Brahmic scripts
+- 🔄 **Bidirectional Transliteration** — Supports all the modern Indian scripts, along with the standard romanization schemes such as IAST, ITRANS, SLP1 and Harvard-Kyoto ([script guide](https://lipilekhika.in/reference/script_guide/))
 - 🦀 **Rust-Powered** — Uses compiled Rust functions for blazing-fast operations
 - 🛡️ **Full Type Safety** — Type hints for all functions and proper IDE support
 - ⚡ **Real-time Typing** — Low-latency typing engine for interactive applications
