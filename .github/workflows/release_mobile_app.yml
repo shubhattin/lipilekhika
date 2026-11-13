@@ -133,10 +133,13 @@ jobs:
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> $GITHUB_ENV
 
       # The split APKs (one per ABI, version code ABI × 1000 + versionCode as the Flutter app had),
-      # the universal APK, and the AAB for the Play Console
+      # the universal APK, and the AAB for the Play Console. The AAB is built in a second run without
+      # the ABI splits: AGP can not build a bundle while they are on (issuetracker.google.com/402800800)
       - name: Build release APKs and AAB
         working-directory: mobile-app/android
-        run: ./gradlew --console=plain spotlessCheck :app:assembleRelease :app:bundleRelease -Papp.splitAbi=true
+        run: |
+          ./gradlew --console=plain spotlessCheck :app:assembleRelease -Papp.splitAbi=true
+          ./gradlew --console=plain :app:bundleRelease
 
       - name: Rename outputs
         id: outputs
