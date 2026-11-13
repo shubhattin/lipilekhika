@@ -1,6 +1,6 @@
 # Lipi Lekhika Android app
 
-The native Android app, in Kotlin with Jetpack Compose (Material 3). It uses the Rust library through the internal Kotlin package ([`packages/kotlin`](../../packages/kotlin), UniFFI), which Gradle builds with it (an included build). It replaces the Flutter app (kept in [`../flutter`](../flutter)) as an update: same app id `com.shubhattin.lipilekhika`, same signing key, its settings are taken over.
+The native Android app, in Kotlin with Jetpack Compose (Material 3). It uses the Rust library through the internal Kotlin package ([`packages/kotlin`](../../packages/kotlin), JNI), which Gradle builds with it (an included build). It replaces the Flutter app (kept in [`../flutter`](../flutter)) as an update: same app id `com.shubhattin.lipilekhika`, same signing key, its settings are taken over.
 
 ## What it does
 

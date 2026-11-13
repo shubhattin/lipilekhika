@@ -19,7 +19,6 @@ val rustSources =
     files(
         fileTree(bindingDir.resolve("src")),
         bindingDir.resolve("Cargo.toml"),
-        bindingDir.resolve("uniffi.toml"),
         fileTree(repoRoot.resolve("packages/rust/src")),
         repoRoot.resolve("Cargo.lock"),
     )
@@ -55,53 +54,21 @@ android {
 
 kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }
 
-/** The library for this machine (tests on the JVM), and the uniffi-bindgen tool */
+/** The library for this machine (tests on the JVM) */
 val cargoBuildHost =
     tasks.register<Exec>("cargoBuildHost") {
         group = "rust"
         description = "Builds the Rust library for this machine (used by the unit tests)"
         workingDir = repoRoot
-        commandLine(
-            "cargo",
-            "build",
-            "--release",
-            "-p",
-            "kotlin_binding",
-            "--features",
-            "bindgen",
-        )
+        commandLine("cargo", "build", "--release", "-p", "kotlin_binding")
         inputs.files(rustSources)
         outputs.file(hostLib)
     }
 
-/** An Exec task with an output directory (that the Android build takes as generated sources) */
+/** An Exec task with an output directory (that the Android build takes as jniLibs) */
 abstract class RustOutputTask : Exec() {
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 }
-
-/** The Kotlin code of the bindings, generated from the library (gitignored, like Dart's) */
-val generateBindings =
-    tasks.register<RustOutputTask>("generateBindings") {
-        group = "rust"
-        description = "Generates the Kotlin code of the UniFFI bindings"
-        dependsOn(cargoBuildHost)
-        outputDir.set(layout.buildDirectory.dir("generated/uniffi"))
-        val out = outputDir.get().asFile
-        workingDir = repoRoot
-        commandLine(
-            hostLibDir.resolve("uniffi-bindgen").path,
-            "generate",
-            "--library",
-            hostLib.path,
-            "--language",
-            "kotlin",
-            "--out-dir",
-            out.path,
-            "--no-format",
-        )
-        inputs.file(hostLib)
-        doFirst { out.deleteRecursively() }
-    }
 
 /** The libraries for the Android ABIs, built with cargo-ndk */
 val cargoNdk =
@@ -137,20 +104,11 @@ val cargoNdk =
 
 androidComponents {
     onVariants { variant ->
-        variant.sources.kotlin?.addGeneratedSourceDirectory(
-            generateBindings,
-            RustOutputTask::outputDir,
-        )
         variant.sources.jniLibs?.addGeneratedSourceDirectory(cargoNdk, RustOutputTask::outputDir)
     }
 }
 
 dependencies {
-    // JNA, which the UniFFI code calls the library with (the AAR has its Android libraries)
-    implementation("${libs.jna.get()}@aar")
-
-    // the unit tests run on this machine's JVM: the JNA jar has its libraries for desktop
-    testImplementation(libs.jna)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.snakeyaml.engine)
@@ -158,7 +116,8 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     dependsOn(cargoBuildHost)
-    systemProperty("jna.library.path", hostLibDir.path)
+    // System.loadLibrary finds the library of cargoBuildHost
+    systemProperty("java.library.path", hostLibDir.path)
     systemProperty("lipilekhika.testDataDir", repoRoot.resolve("test_data").path)
     // the benchmark (`Benchmark.kt`) only runs with `-Plipilekhika.bench=true`
     systemProperty(
@@ -169,7 +128,7 @@ tasks.withType<Test>().configureEach {
     if (providers.gradleProperty("lipilekhika.bench").orNull == "true")
         testLogging.showStandardStreams = true
     maxHeapSize = "1g"
-    // JNA loads the library (Java 22+ warns about native access otherwise)
+    // the library is loaded with System.loadLibrary (Java 24+ warns about native access otherwise)
     if (javaLauncher.get().metadata.languageVersion.asInt() >= 22) {
         jvmArgs("--enable-native-access=ALL-UNNAMED")
     }

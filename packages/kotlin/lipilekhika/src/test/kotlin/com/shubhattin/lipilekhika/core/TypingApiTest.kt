@@ -180,4 +180,30 @@ class TypingApiTest {
         val ka = dev.indexOfFirst { it.text == "क" }
         assertEquals("క", getScriptKramaData("Telugu")[ka].text)
     }
+
+    @Test
+    fun closedContextThrows() {
+        val ctx = createTypingContext("Devanagari")
+        ctx.close()
+        ctx.close() // a second close does nothing
+        assertFailsWith<IllegalStateException> { ctx.takeKeyInput("k") }
+        assertFailsWith<IllegalStateException> { ctx.getNormalizedScript() }
+    }
+
+    @Test
+    fun unclosedContextsAreFreedByTheCleaner() {
+        // contexts left to the garbage collector (their Rust objects are freed by the cleaner)
+        repeat(10_000) { createTypingContext("Devanagari").takeKeyInput("k") }
+        System.gc()
+        createTypingContext("Devanagari").use { assertEquals("क्", type(it, listOf("k"))) }
+    }
+
+    @Test
+    fun keysOutsideTheBmpAndLoneSurrogates() {
+        createTypingContext("Devanagari").use { ctx ->
+            // a key is read as UTF-16, a lone surrogate as U+FFFD (no crash)
+            ctx.takeKeyInput("\uD800")
+            ctx.takeKeyInput("𑀓")
+        }
+    }
 }
