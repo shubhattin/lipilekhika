@@ -5,12 +5,15 @@
 - [**Node.js**](https://nodejs.org) >= 20
 - [**Bun**](https://bun.sh)
 
-Install dependencies at the repo root and in `packages/js`:
+The repo root is a [Bun workspace](https://bun.sh/docs/install/workspaces) of the root (test data generation), [`lipi_script_data`](lipi_script_data) (the script data) and [`packages/js`](packages/js), with one `bun.lock`. Install them all from the repo root:
 
 ```sh
 bun install
-cd packages/js && bun install
 ```
+
+The docs & web client ([`docs/docs-and-web-client`](docs/docs-and-web-client)) is not part of the workspace (it has its own `bun.lock`), install it there when you work on it: `cd docs/docs-and-web-client && bun install`.
+
+CI installs only what a job needs: `bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'` installs the root and the script data package without the JS package's build and test tools.
 
 ## Generate test data
 
@@ -35,14 +38,43 @@ cargo run --release -- SLP1      # only some of them
 
 Where lipilekhika writes differently from vidyut on purpose (eg. SLP1 `|` is written `Lh`), the generator changes the vidyut output, see `normalize_output` in [`src/main.rs`](scripts/tools/vidyut-test-data/src/main.rs).
 
+## Script data (`lipi_script_data`)
+
+The script data that every package uses is defined in [`lipi_script_data`](lipi_script_data), a private workspace package (`@lipilekhika/script-data`):
+
+- `src/input_data/` — the data of each script, `src/lang_list/` — the script and language list (`langs.json`, script IDs) and the aliases
+- `src/*_schema.ts`, `src/krama_array_keys.ts`, `src/custom_options_input.ts` — the types of the input and generated data, and the custom options
+- `src/make_output_script_data.ts` — the generator
+
+`bun run make-script-data` (from the repo root, or in `lipi_script_data`) writes the data to `lipi_script_data/output/` (gitignored) and copies it into each package:
+
+| Package | Gets | Committed |
+| --- | --- | --- |
+| JS | `packages/js/src/script_data/`, `src/custom_options.json` | no |
+| Rust | the JSON in `packages/rust/data/`, from which `lipilekhika-datagen` writes `src/generated/lipi_data.bin`, `src/scripts.rs`, `src/custom_options.rs` | the generated files |
+| Go | the JSON in `packages/go/lipilekhika/data/`, from which `cmd/generate-data` writes `data/gob/*.gob` | the gob files |
+| Python | `packages/python/lipilekhika/types.py` | yes |
+
+So it also needs [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) with the `rustfmt` component (included by default with rustup) and [**Go**](https://go.dev). Without them the rest of the data is still generated, but it warns that the committed Rust (or Go) data was not updated. Run it after changing the script data, and commit the updated files.
+
+The JS package imports the types and the script list from it (`@lipilekhika/script-data/...`), bundled into its build and its `.d.ts` files.
+
+From `lipi_script_data`:
+
+```sh
+bun run make-script-data   # generate the script data of all packages
+bun run check              # typecheck
+bun run lint               # oxlint
+bun run test               # checks of the generated data (bun test, run make-script-data first)
+```
+
 ## JS package (`packages/js`)
 
-`make-script-data` also regenerates the committed Rust data, so it additionally needs [**Rust**](https://www.rust-lang.org) / [**Cargo**](https://doc.rust-lang.org/cargo/) with the `rustfmt` component (included by default with rustup). Without them the rest of the data is still generated, but it warns that the committed Rust data was not updated.
+Run `bun run make-script-data` from the repo root first (`bun run build` also runs it).
 
 From `packages/js`:
 
 ```sh
-bun run make-script-data   # generate script data (also regenerates the committed Rust/Go data)
 bun run check              # typecheck
 bun run build:lib          # only the ESM / CJS build of the package (`dist/esm`, `dist/cjs`), 2 s
 bun run bench              # cold single-pass benchmark (see Benchmarks below), bench:bun for Bun
@@ -58,6 +90,10 @@ Tests need native bindings — run once (or after binding changes in rust packag
 ```sh
 ./get_bindings.sh
 ```
+
+### Type declarations
+
+The workspace uses TypeScript 7 (the native `tsc`; the docs & web client, outside the workspace, still uses TypeScript 5). It has no JS compiler API, so `bun run build` emits the declarations with `tsc` (`--emitDeclarationOnly` into `dist/types`, and those of `lipi_script_data` into `dist/types/script-data`), then [API Extractor](https://api-extractor.com) (which runs its own TypeScript) bundles them into one self-contained `.d.ts` per entry. [`scripts/tsconfig.api-extractor.json`](packages/js/scripts/tsconfig.api-extractor.json) maps the `@lipilekhika/script-data/...` imports to the emitted declarations, so they are inlined: the published `.d.ts` files import nothing. `bun run test:package` typechecks them from the packed tarball.
 
 ### WASM & N-API bindings
 
@@ -86,9 +122,9 @@ The crate embeds generated files that are **committed to git**:
 - `src/scripts.rs` — the `Script` / `ScriptListEnum` enums and the script/language/alias lists
 - `src/custom_options.rs` — the `CustomOptions` struct and its builder
 
-They are written by [`datagen/`](packages/rust/datagen) (`lipilekhika-datagen`, not published), which reads the JSON that `bun run make-script-data` copies into `packages/rust/data/` (gitignored). The Rust files are generated with `quote!` and formatted with `rustfmt` (needs the `rustfmt` component).
+They are written by [`datagen/`](packages/rust/datagen) (`lipilekhika-datagen`, not published), which reads the JSON that `bun run make-script-data` ([script data](#script-data-lipi_script_data)) copies into `packages/rust/data/` (gitignored). The Rust files are generated with `quote!` and formatted with `rustfmt` (needs the `rustfmt` component).
 
-After changing script data, run `bun run make-script-data` in `packages/js` (it runs `cargo run -p lipilekhika-datagen`) and commit the updated files. Encoding is deterministic and a file is only rewritten when its content changes, so unchanged data never shows up in `git status`. CI fails if the committed files are out of date (`cargo run -p lipilekhika-datagen -- --check`).
+After changing script data, run `bun run make-script-data` from the repo root (it runs `cargo run -p lipilekhika-datagen`) and commit the updated files. Encoding is deterministic and a file is only rewritten when its content changes, so unchanged data never shows up in `git status`. CI fails if the committed files are out of date (`cargo run -p lipilekhika-datagen -- --check`).
 
 ## Python package (`packages/python`)
 
@@ -110,7 +146,7 @@ Before committing Python changes run `uvx ruff format .`, `uvx ruff check .` and
 
 ## Go package (`packages/go/lipilekhika`)
 
-Requires [**Go**](https://go.dev) >= 1.23. Run `bun run make-script-data` in `packages/js` first.
+Requires [**Go**](https://go.dev) >= 1.23. Run `bun run make-script-data` from the repo root first.
 
 From `packages/go/lipilekhika`:
 
@@ -180,6 +216,7 @@ Format your changes before committing. Run the formatter for each package you to
 
 | Code | Formatter | Run from | Command |
 | --- | --- | --- | --- |
+| Script data (`lipi_script_data`) | [oxfmt](https://oxc.rs) | `lipi_script_data` | `bun run format` (check: `bunx oxfmt --check`) |
 | JS package (`packages/js`) | [oxfmt](https://oxc.rs) | `packages/js` | `bun run format` (check: `bunx oxfmt --check`) |
 | Docs & web client (`docs/docs-and-web-client`) | [Prettier](https://prettier.io) | `docs/docs-and-web-client` | `bun run format` (check: `bunx prettier --check .`) |
 | All Rust crates (one Cargo workspace) | [rustfmt](https://github.com/rust-lang/rustfmt) | repo root | `cargo fmt --all` (check: `cargo fmt --all --check`) |
@@ -199,7 +236,7 @@ Notes:
 
 Every package has two kinds of benchmark over the same [`test_data/`](test_data/) cases (`bun run gen:test-data`), using the generated script data. **Run both**: the statistical suite to judge a change, the cold pass to see first-run latency and a quick cross-language table.
 
-The JS script data is gitignored (Rust and Go embed committed copies), so **after switching branches rerun `bun run make-script-data`** in `packages/js`, otherwise you measure the previous branch's data.
+The JS script data is gitignored (Rust and Go embed committed copies), so **after switching branches rerun `bun run make-script-data`** (from the repo root), otherwise you measure the previous branch's data.
 
 ### Statistical suites (use these to compare two versions)
 
