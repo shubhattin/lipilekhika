@@ -99,6 +99,10 @@ class AppStore(app: Application) : AndroidViewModel(app) {
     var typingGuideSeen by mutableStateOf(prefs.typingGuideSeen)
         private set
 
+    /** "Remember text": the source text is kept for the next launch */
+    var rememberText by mutableStateOf(prefs.rememberText)
+        private set
+
     // ---- page state ----
 
     var screen by mutableStateOf(Screen.TRANSLITERATE)
@@ -116,7 +120,7 @@ class AppStore(app: Application) : AndroidViewModel(app) {
         private set
 
     /** The source text (the text field's own state, with its undo history) */
-    val source = TextFieldState(savedText.load())
+    val source = TextFieldState(if (prefs.rememberText) savedText.load() else "")
 
     var output by mutableStateOf("")
         private set
@@ -423,9 +427,22 @@ class AppStore(app: Application) : AndroidViewModel(app) {
     fun flushSave() = save(source.text.toString())
 
     private fun save(text: String) {
+        if (!rememberText) return
         val result = savedText.save(text)
         if (result == SavedText.Result.TOO_LARGE) note = SourceNote.TooLong
         else if (note == SourceNote.TooLong) note = null
+    }
+
+    /** Off also removes the kept copy now (not only later saves); on keeps the text at once */
+    fun updateRememberText(on: Boolean) {
+        rememberText = on
+        prefs.rememberText = on
+        if (on) {
+            save(source.text.toString())
+        } else {
+            savedText.save("")
+            if (note == SourceNote.Restored || note == SourceNote.TooLong) note = null
+        }
     }
 
     // ---- app ----

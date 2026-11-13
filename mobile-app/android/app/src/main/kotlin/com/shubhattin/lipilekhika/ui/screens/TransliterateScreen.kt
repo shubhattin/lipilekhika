@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -321,6 +322,14 @@ private fun SourceCard(
                                     openSheet(Sheet.TYPING_OPTIONS)
                                 },
                             )
+                            // a setting: the menu stays open, so the tick is seen to change
+                            DropdownMenuItem(
+                                text = { Text("Remember text") },
+                                leadingIcon = {
+                                    Checkbox(checked = store.rememberText, onCheckedChange = null)
+                                },
+                                onClick = { store.updateRememberText(!store.rememberText) },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Open .txt file…") },
                                 leadingIcon = { Icon(Icons.Outlined.FileOpen, null) },
@@ -441,7 +450,8 @@ private fun SourceNoteText(note: SourceNote?) {
     val (message, error) =
         when (note) {
             SourceNote.Restored ->
-                "Restored from your last visit. Clear removes it from this device." to false
+                "Restored from your last visit. Clear removes it from this device; to stop keeping text, turn off Remember text in ⋮." to
+                    false
             SourceNote.TooLong ->
                 "This text is too long to keep on this device, so it won't be here next time. Save it as .txt to keep it." to
                     false

@@ -45,7 +45,14 @@
     TextFileError,
     TEXT_FILE_ACCEPT
   } from './app/text_file';
-  import { loadSavedText, saveText, type SaveResult } from './app/saved_text';
+  import {
+    loadRememberText,
+    loadSavedText,
+    removeSavedText,
+    saveRememberText,
+    saveText,
+    type SaveResult
+  } from './app/saved_text';
   import TextBoxMenu from './app/TextBoxMenu.svelte';
   import { editKindOf, TextHistory, type TextSnapshot } from './app/text_history';
   import TypingHelpButton from './typing_help/TypingHelpButton.svelte';
@@ -144,9 +151,11 @@
   };
 
   // The source text is kept in this browser, a moment after typing stops, and comes back on
-  // the next visit. Saving waits until the saved text has been checked on mount, so the empty
-  // box at load doesn't overwrite it.
+  // the next visit, unless "Remember text" (in the settings popover) is off. Saving waits until
+  // the saved text has been checked on mount, so the empty box at load doesn't overwrite it.
   const SAVE_DELAY_MS = 500;
+  /** "Remember text": on unless the user turned it off (read on mount) */
+  let remember_text = $state(true);
   let save_ready = false;
   let save_timeout: ReturnType<typeof setTimeout> | undefined;
   /** what storage holds, as far as we know (`null`: unknown, or nothing could be saved) */
@@ -159,6 +168,7 @@
     if (!save_ready) return;
     clearTimeout(save_timeout);
     save_timeout = undefined;
+    if (!remember_text) return;
     const text = input_text;
     save_status = saveText(text);
     saved_text = save_status === 'saved' ? text : null;
@@ -168,9 +178,27 @@
     if (save_timeout !== undefined) saveNow();
   };
 
+  /** Off also removes the saved copy now (not only later saves); on keeps the text right away */
+  const setRememberText = (on: boolean) => {
+    remember_text = on;
+    saveRememberText(on);
+    if (on) {
+      saveNow();
+      return;
+    }
+    clearTimeout(save_timeout);
+    save_timeout = undefined;
+    removeSavedText();
+    saved_text = null;
+    save_status = 'saved';
+    restored_text = null;
+  };
+
   onMount(() => {
-    const saved = loadSavedText();
+    remember_text = loadRememberText();
     save_ready = true;
+    if (!remember_text) return;
+    const saved = loadSavedText();
     // text already in the box came from this visit (another page of the site), so it is newer
     if (!input_text && saved) {
       input_text = saved;
@@ -183,7 +211,7 @@
   $effect(() => {
     input_text;
     untrack(() => {
-      if (!save_ready || input_text === saved_text) return;
+      if (!save_ready || !remember_text || input_text === saved_text) return;
       clearTimeout(save_timeout);
       save_timeout = setTimeout(saveNow, SAVE_DELAY_MS);
     });
@@ -392,8 +420,8 @@
 <svelte:document onvisibilitychange={() => document.visibilityState === 'hidden' && flushSave()} />
 <!-- A file dropped outside the source box would open in the tab in place of the app.
      Leaving the page (reload, closing the tab, back to another site, a link to a page
-     outside the client router) only asks first when the text couldn't be saved (too long,
-     or storage blocked), and never in dev; saved text comes back on the next visit. Moves between pages of
+     outside the client router) only asks first when the text isn't saved (too long, storage
+     blocked, or "Remember text" off), and never in dev; saved text comes back on the next visit. Moves between pages of
      the site keep it anyway: it lives in a shared store. -->
 <svelte:window
   onbeforeunload={(e) => {
@@ -521,9 +549,14 @@
                   </Toggle>
                   <Popover.Root>
                     <Popover.Trigger>
-                      <Button variant="ghost" size="icon" class="size-8" title="Typing options">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        class="size-8"
+                        title="Settings: typing options, remember text"
+                      >
                         <SettingsIcon class="size-4" />
-                        <span class="sr-only">Typing options</span>
+                        <span class="sr-only">Settings</span>
                       </Button>
                     </Popover.Trigger>
                     <Popover.Content class="w-80">
@@ -544,7 +577,6 @@
                             </label>
                             <Switch id="use-native-numerals" bind:checked={useNativeNumerals} />
                           </div>
-                          <Separator />
                           <div class="flex items-center justify-between gap-4">
                             <label for="include-inherent-vowel" class="flex flex-col gap-1 text-sm">
                               <span class="font-medium">Include Inherent Vowel</span>
@@ -566,12 +598,27 @@
                               bind:checked={includeInherentVowel}
                             />
                           </div>
+                          {#if option_examples?.vowel || option_examples?.numerals}
+                            <p class="-mt-1 text-[0.7rem] leading-snug text-muted-foreground">
+                              Quick toggles for both sit at the bottom of the text box.
+                            </p>
+                          {/if}
                         </div>
-                        {#if option_examples?.vowel || option_examples?.numerals}
-                          <p class="border-t pt-3 text-xs text-muted-foreground">
-                            Quick toggles for both sit at the bottom of the text box.
-                          </p>
-                        {/if}
+                        <!-- the one separator: the typing options above, the text box's own below -->
+                        <Separator />
+                        <div class="flex items-center justify-between gap-4">
+                          <label for="remember-text" class="flex flex-col gap-1 text-sm">
+                            <span class="font-medium">Remember Text</span>
+                            <span class="text-xs text-muted-foreground"
+                              >Keep the text in this browser for your next visit</span
+                            >
+                          </label>
+                          <Switch
+                            id="remember-text"
+                            checked={remember_text}
+                            onCheckedChange={setRememberText}
+                          />
+                        </div>
                       </div>
                     </Popover.Content>
                   </Popover.Root>
@@ -760,7 +807,8 @@
             {/if}
             {#if restored_text !== null && input_text === restored_text}
               <p class="px-1 text-xs text-muted-foreground">
-                Restored from your last visit. Clear removes it from this browser.
+                Restored from your last visit. Clear removes it from this browser; to stop keeping
+                text, turn off Remember text in the settings (the gear).
               </p>
             {:else if save_status === 'too_large' && input_text}
               <p class="px-1 text-xs text-muted-foreground">

@@ -8,7 +8,7 @@
 - **Share → Lipi Lekhika** opens the shared text in the app.
 - **Quick Settings tile** "Convert clipboard".
 - Searchable script picker, with Modern / Latin / Ancient sections and aliases (`hi`, `tam`, `hk`, ...).
-- Open and save `.txt` files, Undo / Redo, Clear with "Undo clear", and the text kept between launches.
+- Open and save `.txt` files, Undo / Redo, Clear with "Undo clear", and the text kept between launches (turn off *Remember text* in the text box's ⋮ menu to not keep it).
 - Quick toggles for the inherent vowel (`k → क`) and native numerals (`1 → १`) in the text box, and live examples in the typing options. Both options are now remembered.
 - The preset is always visible above the options.
 - New *Standard Schemes* group with IAST, ITRANS, Harvard-Kyoto and SLP1

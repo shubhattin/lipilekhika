@@ -164,6 +164,9 @@ pub struct ParivartakaSettings {
   pub typing_enabled: bool,
   #[serde(default = "default_true")]
   pub auto_convert: bool,
+  /// "Remember text": the source text is kept for the next run
+  #[serde(default = "default_true")]
+  pub remember_text: bool,
 }
 
 impl Default for ParivartakaSettings {
@@ -306,5 +309,6 @@ mod tests {
     assert_eq!(s.from_script(), ScriptListEnum::Devanagari);
     assert_eq!(s.to_script(), ScriptListEnum::Romanized);
     assert!(s.auto_convert);
+    assert!(s.remember_text);
   }
 }

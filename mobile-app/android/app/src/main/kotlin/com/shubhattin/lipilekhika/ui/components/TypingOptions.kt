@@ -83,7 +83,11 @@ fun TypingOptionsSheet(
             if (examples.vowel != null || examples.numerals != null) {
                 Text(
                     "Quick toggles for both sit at the bottom of the text box.",
-                    style = MaterialTheme.typography.bodySmall,
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp,
+                        ),
                     color = muted,
                     modifier = Modifier.padding(top = 6.dp),
                 )
