@@ -168,3 +168,81 @@
   input: मैं जाऊँगा काऊ आऊ उद्नयन कळ्ळ कऱ्ऱ
   output: maiM jAU.NgA kAU AU udnayana kaLLa kaRRa
   reversible: true
+# a letter with more than one spelling is read the same in every spelling, and written in the
+# standard one (the reverse of each of these gives the standard spelling)
+- index: 28
+  from: ITRANS
+  to: Devanagari
+  input: kaa kii kee kuu koo kR^i kR^I kL^i kL^I
+  output: का की की कू कू कृ कॄ कॢ कॣ
+- index: 29
+  from: ITRANS
+  to: Devanagari
+  input: kRRiShNa kR^iShNa kRRiSNa kR^ishhNa shrI shrii shree ChAyA chhAyA CAyA chandra candra vAyu wAyu
+  output: कृष्ण कृष्ण कृष्ण कृष्ण श्री श्री श्री छाया छाया छाया चन्द्र चन्द्र वायु वायु
+- index: 30
+  from: ITRANS
+  to: Devanagari
+  input: saMskRRitam sa.mskRRitam sa.nskRRitam ga~NgA gaN^gA pa~ncha paJNcha kShetra kSetra xetra j~nAna GYAna dnyAna
+  output: संस्कृतम् संस्कृतम् संस्कृतम् गङ्गा गङ्गा पञ्च पञ्च क्षेत्र क्षेत्र क्षेत्र ज्ञान ज्ञान ज्ञान
+- index: 31
+  from: Devanagari
+  to: ITRANS
+  input: कृष्ण श्री छाया चन्द्र वायु संस्कृतम् गङ्गा पञ्च क्षेत्र ज्ञान
+  output: kRRiShNa shrI ChAyA chandra vAyu saMskRRitam ga~NgA pa~ncha kShetra j~nAna
+  reversible: true
+- index: 32
+  from: ITRANS
+  to: SLP1
+  input: kR^iShNa GYAnam sa.mskR^itam xetra
+  output: kfzRa jYAnam saMskftam kzetra
+# IAST: the ISO 15919 forms (and their capitals) are read, ṃ ṛ ḷ are written
+- index: 33
+  from: IAST
+  to: Devanagari
+  input: saṁskr̥tam kl̥pta Saṁskr̥tam SAṀSKR̥TAM KL̥PTA
+  output: संस्कृतम् कॢप्त संस्कृतम् संस्कृतम् कॢप्त
+- index: 34
+  from: Devanagari
+  to: IAST
+  input: संस्कृतम् कॢप्त ॠ सोऽहम्
+  output: saṃskṛtam kḷpta ṝ so'ham
+  reversible: true
+# ओं and आऊं in a word are not ॐ
+- index: 35
+  from: Devanagari
+  to: SLP1
+  input: लोगों देवों जाऊं
+  output: logoM devoM jAUM
+  reversible: true
+- index: 36
+  from: Devanagari
+  to: Harvard-Kyoto
+  input: लोगों देवों जाऊं
+  output: logoM devoM jAUM
+  reversible: true
+- index: 37
+  from: Devanagari
+  to: ITRANS
+  input: लोगों देवों जाऊं
+  output: logoM devoM jAUM
+  reversible: true
+- index: 38
+  from: Devanagari
+  to: IAST
+  input: लोगों देवों जाऊं
+  output: logoṃ devoṃ jāūṃ
+  reversible: true
+# between the schemes
+- index: 39
+  from: SLP1
+  to: IAST
+  input: kfzRa jYAnam saMskftam kxpta
+  output: kṛṣṇa jñānam saṃskṛtam kḷpta
+  reversible: true
+- index: 40
+  from: ITRANS
+  to: IAST
+  input: kRRiShNa j~nAnam saMskRRitam
+  output: kṛṣṇa jñānam saṃskṛtam
+  reversible: true
