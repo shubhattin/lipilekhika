@@ -17,6 +17,16 @@
 //!    result (`custom_rules.rs`), and at the end the ones that are a plain replace on the output.
 //!
 //! Tamil-Extended has its own handling in Step 1 and when writing (`tamil_ext.rs`).
+//!
+//! ## Inlining
+//!
+//! The steps are separate functions to be read, not to be called: the ones that run for every
+//! character are `#[inline(always)]`, so the compiled loop is one function as before the split.
+//! As calls, the fields of the context have to be reloaded after each of them, and the copy of
+//! the core in the typing context is not specialised for its fixed options (measured: 6 to 13%
+//! slower). The rare cases (Tamil-Extended, NFD, ॐ inside a word, unknown characters, the
+//! in-match rules) are `#[inline(never)]`, to keep them out of that loop. Run `cargo bench`
+//! before and after changing any of these attributes.
 
 use super::context::{ContextMode, TransliterateCtx, context_text_of_match};
 use super::custom_rules::apply_custom_replace_rules;
@@ -130,7 +140,7 @@ where
 {
     /// The superscript of a Tamil-Extended match that was read with it (see
     /// `ta_ext_skip_index`)
-    #[inline]
+    #[inline(always)]
     fn skip_consumed_ta_ext_superscript(&mut self, text_index: usize) -> bool {
         if self.ta_ext_skip_index == -1 || (text_index as isize) < self.ta_ext_skip_index {
             return false;
@@ -151,6 +161,7 @@ where
     }
 
     /// latin digits passthrough if native numerals disabled
+    #[inline(never)]
     fn emit_ascii_digit(&mut self, ch: char) {
         self.cursor.advance(1);
         const DIGIT_STRS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -165,6 +176,7 @@ where
     ///
     /// Returns `true` when the character was a custom script character (written as its Normal
     /// key)
+    #[inline(never)]
     fn emit_preserved_custom_char(&mut self, ch: char, text_index: usize) -> bool {
         let from_script_data = self.from_script_data;
         let mut ch_buf = [0u8; 4];
@@ -192,7 +204,7 @@ where
     /// The characters that are copied as they are (not looked up in the script data).
     ///
     /// Returns `true` when the character was one of them (it is emitted and advanced over)
-    #[inline]
+    #[inline(always)]
     fn emit_passthrough_char(&mut self, ch: char, text_index: usize) -> bool {
         if is_skip_char(ch) && !(ch == '~' && self.tilde_is_text) {
             self.emit_skip_char(ch);
@@ -245,6 +257,7 @@ where
     }
 
     /// other -> brahmic: the context update for a match, the item is of the brahmic target
+    #[inline(always)]
     fn update_context_for_brahmic_target(
         &mut self,
         matched_text: &'a str,
@@ -287,6 +300,7 @@ where
     ///
     /// Returns `true` when the cleanup already wrote the item (as the mAtrA of the vyanjana
     /// before)
+    #[inline(always)]
     fn update_context_for_match(
         &mut self,
         matched_text: &'a str,
@@ -320,6 +334,7 @@ where
     /// Emits the krama piece by piece, the rules that can apply inside a match see every piece
     /// of it, not only the last: Romanized sh (स्ह) -> ස්‍හ with the Sinhala conjunct
     /// ZWJ, Sinhala ඟ (ङ्ग) -> nga, or -> ंग with the anusvAra option
+    #[inline(never)]
     fn emit_krama_with_in_match_rules(&mut self, krama: &[i16], match_start: usize) {
         let to_script_data = self.to_script_data;
         for (i, &k) in krama.iter().enumerate() {
@@ -341,6 +356,7 @@ where
     }
 
     /// A match with a krama (at least one entry is not `-1`): emitted directly
+    #[inline(always)]
     fn emit_match_krama(
         &mut self,
         matched_text: &'a str,
@@ -374,6 +390,7 @@ where
 
     /// krama contains -1 entries: emit raw match
     /// (prefix-only entries like `c` of `ch` or `S` of `Sh`)
+    #[inline(never)]
     fn emit_prefix_only_match(&mut self, matched_text: &'a str, next: Option<&[String]>) {
         // cleanup first, so a pending halant goes before the text (kc -> क्c)
         if self.typing_mode {
@@ -390,7 +407,10 @@ where
     /// of the match, `ch`.
     ///
     /// Returns `false` when the entry has no krama of its own: its text is read in Step 2
-    fn emit_match(&mut self, match_index: usize, ch: char) -> bool {
+    ///
+    /// - `superscript_detached`: see [`super::tamil_ext::TaExtSuperscript::detached`]
+    #[inline(always)]
+    fn emit_match(&mut self, match_index: usize, ch: char, superscript_detached: bool) -> bool {
         let text_to_krama_map = self.text_to_krama_map;
         let to_script_data = self.to_script_data;
         let (matched_text, map) = &text_to_krama_map[match_index];
@@ -402,7 +422,12 @@ where
             matched_text.chars().count()
         };
         let matched_len_units = matched_char_count
-            - self.ta_ext_unconsumed_superscript_units(matched_text, matched_char_count, map);
+            - self.ta_ext_unconsumed_superscript_units(
+                superscript_detached,
+                matched_text,
+                matched_char_count,
+                map,
+            );
         self.cursor.advance(matched_len_units);
 
         if self.use_typing_chars
@@ -441,6 +466,7 @@ where
     }
 
     /// text not matched so ignore and return as it is
+    #[inline(never)]
     fn emit_unknown_char(&mut self, text: &'a str) {
         // A ZWJ / ZWNJ only changes how a Brahmic text is shown (a conjunct, half form or
         // the eyelash ra र‍्), it is not written in Normal / Romanized and does not end the
@@ -458,6 +484,7 @@ where
     }
 
     /// The context update for the krama entry `index` read in Step 2, by the mode
+    #[inline(always)]
     fn update_context_for_krama_char(
         &mut self,
         text: &'a str,
@@ -491,6 +518,7 @@ where
     ///
     /// The cursor is already after the character `ch` (or after the match without krama,
     /// `match_index`).
+    #[inline(always)]
     fn emit_krama_char(&mut self, ch: char, match_index: Option<usize>) {
         let from_script_data = self.from_script_data;
         let to_script_data = self.to_script_data;
@@ -569,6 +597,11 @@ pub fn transliterate_text_core(
 }
 
 /// [`transliterate_text_core`] taking its working buffers from `buffers`.
+///
+/// `#[inline]`: the typing context calls it with fixed options (typing mode, from `Normal`), in
+/// its own copy the compiler drops the branches that never run there (measured: about 10% of the
+/// typing time).
+#[inline(always)]
 #[allow(clippy::too_many_arguments)]
 pub fn transliterate_text_core_with(
     text: &str,
@@ -657,10 +690,15 @@ pub fn transliterate_text_core_with(
         }
 
         // Step 1: match text_to_krama_map / typing_text_to_krama_map
-        let match_index = ctx.match_text_to_krama(ch, text_index);
-        match match_index {
+        let text_match = ctx.match_text_to_krama(ch, text_index);
+        // a Tamil-Extended superscript read with the match is skipped when the cursor gets there
+        if let Some(superscript) = text_match.superscript {
+            ctx.ta_ext_skip_index = superscript.index as isize;
+        }
+        match text_match.index {
             Some(match_index) => {
-                if ctx.emit_match(match_index, ch) {
+                let detached = text_match.superscript.is_some_and(|s| s.detached);
+                if ctx.emit_match(match_index, ch, detached) {
                     continue;
                 }
             }
@@ -668,7 +706,7 @@ pub fn transliterate_text_core_with(
         }
 
         // Step 2: Search in krama_text_arr
-        ctx.emit_krama_char(ch, match_index);
+        ctx.emit_krama_char(ch, text_match.index);
     }
     // the inherent vowel / halant of a last vyanjana
     ctx.flush_prev_context();

@@ -10,6 +10,18 @@ use crate::script_data::{Rule, TextToKramaMap};
 use alloc::string::String;
 use core::borrow::Borrow;
 
+/// A Tamil-Extended superscript read in Step 1 with the match before it, which is not next to it
+/// in the input (a halant, a mAtrA or Vedic svaras are written in between)
+#[derive(Debug, Clone, Copy)]
+pub(super) struct TaExtSuperscript {
+    /// Index of the superscript in the input: it is skipped when the cursor gets there
+    /// (`ta_ext_skip_index`)
+    pub(super) index: usize,
+    /// Only Vedic svaras are in between, and no superscript was being skipped: the superscript
+    /// is not advanced over with the match
+    pub(super) detached: bool,
+}
+
 impl<'a, R> TransliterateCtx<'a, R>
 where
     R: Borrow<Rule>,
@@ -20,23 +32,23 @@ where
     ///
     /// eg. க்² (ख्), கி⁴ (घि), கொ⁴ (घो as ெ + ா), க॒॑⁴ (घ॒॑), க்॒² (ख्॒), கி॒⁴ (घि॒), ரு॒॑² (ऋ॒॑).
     ///
-    /// In the match the superscript takes the place of these, which are read next. On a match
-    /// sets `ta_ext_skip_index` (the superscript, skipped when the cursor gets there) and
-    /// `ta_ext_superscript_detached`.
+    /// In the match the superscript takes the place of these, which are read next.
     ///
     /// - `next_chars`: the characters that can continue the current match
     /// - `char_to_search`: the text of the current match, `end_index` the index after it
     /// - `nth_next_character`: the character at `end_index`
     ///
-    /// Returns the index in `text_to_krama_map` of the match with the superscript
+    /// Returns the index in `text_to_krama_map` of the match with the superscript, and the
+    /// superscript
+    #[inline(never)]
     pub(super) fn ta_ext_match_with_superscript(
-        &mut self,
+        &self,
         halant: &str,
         next_chars: &[char],
         char_to_search: &str,
         end_index: usize,
         nth_next_character: Option<char>,
-    ) -> Option<usize> {
+    ) -> Option<(usize, TaExtSuperscript)> {
         let from_script_data = self.from_script_data;
         let is_sign = |c: char| char_eq_str(c, halant) || from_script_data.is_matra_char(c);
         let mut sup_index = end_index;
@@ -73,11 +85,11 @@ where
         // With only svaras in between, a superscript already skipped inside
         // this match (the ² of க்² in க்²ரு॑²) makes up for the one after the
         // svaras in the match length, so the whole match is advanced over.
-        if sign.is_none() {
-            self.ta_ext_superscript_detached = self.ta_ext_skip_index == -1;
-        }
-        self.ta_ext_skip_index = sup_index as isize;
-        Some(match_index)
+        let superscript = TaExtSuperscript {
+            index: sup_index,
+            detached: sign.is_none() && self.ta_ext_skip_index == -1,
+        };
+        Some((match_index, superscript))
     }
 
     /// Step 1, from Tamil-Extended: the match ends with a halant, or a halant + a letter, that
@@ -87,6 +99,7 @@ where
     /// as ல + ்ல்ரி² (लॢ, like க்ல்ரி² कॢ)
     ///
     /// Returns the index in `text_to_krama_map` of the text before the halant
+    #[inline(never)]
     pub(super) fn ta_ext_split_before_halant_matra(
         &self,
         halant: &str,
@@ -157,14 +170,15 @@ where
     /// `ta_ext_skip_index`), else `0`.
     ///
     /// (only relevant while skipping a Tamil-Extended superscript; evaluated lazily)
-    #[inline]
+    #[inline(always)]
     pub(super) fn ta_ext_unconsumed_superscript_units(
         &self,
+        superscript_detached: bool,
         matched_text: &str,
         matched_char_count: usize,
         map: &TextToKramaMap,
     ) -> usize {
-        if self.ta_ext_superscript_detached
+        if superscript_detached
             || (self.ta_ext_skip_index != -1
                 && matched_char_count > 1
                 && map
@@ -183,6 +197,7 @@ where
 
     /// To Tamil-Extended, the result ends with a superscript: emits the texts of `krama`, a
     /// mAtrA / halant or a Vedic svara goes before the superscript.
+    #[inline(never)]
     pub(super) fn emit_krama_after_ta_ext_superscript(&mut self, krama: &[i16], to_halant: &str) {
         let to_script_data = self.to_script_data;
         // Stack buffer (no heap allocation); only this reorder path
@@ -222,6 +237,7 @@ where
     }
 
     /// [`Self::emit_krama_after_ta_ext_superscript`] for the text of one krama index (Step 2).
+    #[inline(never)]
     pub(super) fn emit_piece_after_ta_ext_superscript(
         &mut self,
         krama_index: usize,

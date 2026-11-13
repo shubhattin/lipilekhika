@@ -10,6 +10,7 @@ use super::helpers::{
     InputTextCursor, OM_KRAMA_INDEX, is_fully_read_krama, is_latin_combining_mark,
     is_ta_ext_superscript_tail, is_vedic_svara_tail, is_word_char, with_tail,
 };
+use super::tamil_ext::TaExtSuperscript;
 use crate::script_data::{Rule, ScriptData};
 use alloc::borrow::Cow;
 use alloc::string::String;
@@ -87,12 +88,37 @@ pub(super) fn only_read_in_longer_text(
     read
 }
 
+/// The result of Step 1
+#[derive(Debug, Clone, Copy)]
+pub(super) struct TextMatch {
+    /// Index in `text_to_krama_map` of the text to read, `None` if no match
+    pub(super) index: Option<usize>,
+    /// From Tamil-Extended: the superscript read with the match, which the cursor skips later
+    pub(super) superscript: Option<TaExtSuperscript>,
+}
+
+impl TextMatch {
+    const NONE: TextMatch = TextMatch {
+        index: None,
+        superscript: None,
+    };
+
+    #[inline]
+    fn of(index: usize) -> TextMatch {
+        TextMatch {
+            index: Some(index),
+            superscript: None,
+        }
+    }
+}
+
 impl<'a, R> TransliterateCtx<'a, R>
 where
     R: Borrow<Rule>,
 {
     /// The text from `text_index` to `end_index` that is searched in the map. While a
     /// Tamil-Extended superscript is being skipped (`ta_ext_skip_index`) it is left out of it.
+    #[inline(never)]
     fn scan_text(&self, text_index: usize, end_index: usize) -> Cow<'a, str> {
         if self.ta_ext_skip_index == -1 {
             return Cow::Borrowed(self.cursor.slice(text_index, end_index).unwrap_or_default());
@@ -121,6 +147,7 @@ where
     /// before that letter: kaī is k a ī (कई), not kai + U+0304
     ///
     /// Returns the index in the map of the match without its last letter
+    #[inline(never)]
     fn nfd_split_before_marked_letter(
         &self,
         match_index: usize,
@@ -154,8 +181,10 @@ where
     /// Follows the `next` characters of the entries of the map to the longest text at
     /// `text_index`, where the character is `ch`.
     ///
-    /// Returns the index in `text_to_krama_map`
-    fn scan_longest_match(&mut self, ch: char, text_index: usize) -> Option<usize> {
+    /// Returns the index in `text_to_krama_map` (and from Tamil-Extended the superscript read
+    /// with it)
+    #[inline(always)]
+    fn scan_longest_match(&self, ch: char, text_index: usize) -> TextMatch {
         let from_script_data = self.from_script_data;
         let to_script_data = self.to_script_data;
         let lookup_data = self.lookup_data;
@@ -190,7 +219,10 @@ where
                 lookup_data.text_to_krama_map_char_index(ch, use_typing_map)
             } else {
                 lookup_data.text_to_krama_map_index(char_to_search.as_ref(), use_typing_map)
-            }?;
+            };
+            let Some(match_index) = match_index else {
+                return TextMatch::NONE;
+            };
             let potential_match = &text_to_krama_map[match_index].1;
 
             // vowel retraction support (kAUM etc.)
@@ -207,7 +239,10 @@ where
                     if is_single_vowel {
                         last_valid_vowel_match_index = Some(match_index);
                     } else if last_valid_vowel_match_index.is_some() {
-                        return last_valid_vowel_match_index;
+                        return TextMatch {
+                            index: last_valid_vowel_match_index,
+                            superscript: None,
+                        };
                     }
                 }
             }
@@ -226,25 +261,26 @@ where
                     } else {
                         char_to_search
                     };
-                    let ta_ext_index = self
-                        .ta_ext_match_with_superscript(
-                            halant,
-                            next_chars,
-                            &char_to_search,
-                            end_index,
-                            nth_next_character,
-                        )
-                        .or_else(|| {
-                            self.ta_ext_split_before_halant_matra(
-                                halant,
-                                next_chars,
-                                &char_to_search,
-                                end_index,
-                                nth_next_character,
-                            )
-                        });
-                    if ta_ext_index.is_some() {
-                        return ta_ext_index;
+                    if let Some((index, superscript)) = self.ta_ext_match_with_superscript(
+                        halant,
+                        next_chars,
+                        &char_to_search,
+                        end_index,
+                        nth_next_character,
+                    ) {
+                        return TextMatch {
+                            index: Some(index),
+                            superscript: Some(superscript),
+                        };
+                    }
+                    if let Some(index) = self.ta_ext_split_before_halant_matra(
+                        halant,
+                        next_chars,
+                        &char_to_search,
+                        end_index,
+                        nth_next_character,
+                    ) {
+                        return TextMatch::of(index);
                     }
                 }
 
@@ -263,14 +299,15 @@ where
                 && let Some(head_index) =
                     self.nfd_split_before_marked_letter(match_index, text_index, end_index)
             {
-                return Some(head_index);
+                return TextMatch::of(head_index);
             }
-            return Some(match_index);
+            return TextMatch::of(match_index);
         }
     }
 
     /// A sign written as a dead consonant (Tamil anusvAra ம்) with no syllable to go with (the
     /// start of a word, after a halant): only the consonant is read (in Step 2), the halant next
+    #[inline(always)]
     fn is_dead_consonant_sign_without_base(&self, match_index: usize, text_index: usize) -> bool {
         Some(match_index) == self.from_script_data.dead_consonant_sign_index
             && !self.use_typing_map
@@ -283,6 +320,7 @@ where
     ///
     /// Returns the index in the map of that part, `match_index` if the match is not ॐ inside a
     /// word
+    #[inline(never)]
     fn split_om_inside_word(&self, match_index: usize, text_index: usize) -> usize {
         let text_to_krama_map = self.text_to_krama_map;
         if text_index == 0
@@ -312,20 +350,21 @@ where
 
     /// Step 1: match text_to_krama_map / typing_text_to_krama_map
     ///
-    /// Can set `ta_ext_skip_index` and `ta_ext_superscript_detached` (from Tamil-Extended).
+    /// Only reads the context: a Tamil-Extended superscript read with the match is returned (the
+    /// loop then skips it), also when the match itself is dropped here.
     ///
     /// - `ch`: the character at `text_index`
-    ///
-    /// Returns the index in `text_to_krama_map`
-    pub(super) fn match_text_to_krama(&mut self, ch: char, text_index: usize) -> Option<usize> {
-        self.ta_ext_superscript_detached = false;
-        let match_index = self.scan_longest_match(ch, text_index)?;
+    #[inline(always)]
+    pub(super) fn match_text_to_krama(&self, ch: char, text_index: usize) -> TextMatch {
+        let mut text_match = self.scan_longest_match(ch, text_index);
+        let Some(match_index) = text_match.index else {
+            return text_match;
+        };
         if self.is_dead_consonant_sign_without_base(match_index, text_index) {
-            return None;
+            text_match.index = None;
+        } else if self.om_only_at_word_start {
+            text_match.index = Some(self.split_om_inside_word(match_index, text_index));
         }
-        if self.om_only_at_word_start {
-            return Some(self.split_om_inside_word(match_index, text_index));
-        }
-        Some(match_index)
+        text_match
     }
 }

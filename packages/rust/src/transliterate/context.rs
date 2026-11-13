@@ -89,11 +89,9 @@ pub(super) struct TransliterateCtx<'a, R> {
     pub(super) sinhala_conjunct_halant: bool,
     /// Index of a Tamil-Extended superscript that was read with the match before it (a halant, a
     /// mAtrA or Vedic svaras are written in between), to be skipped when the cursor gets there.
-    /// `-1` if none. Used when converting from Tamil-Extended
+    /// `-1` if none. Used when converting from Tamil-Extended. Only the main loop writes it
+    /// (from the result of Step 1), the matcher reads it.
     pub(super) ta_ext_skip_index: isize,
-    /// the matched text ends with a Tamil-Extended superscript that is not next to the rest
-    /// of it in the input (a Vedic svara is in between), so it is not to be advanced over
-    pub(super) ta_ext_superscript_detached: bool,
 }
 
 impl<'a, R> TransliterateCtx<'a, R>
@@ -181,7 +179,6 @@ where
             sinhala_conjunct_halant: *to_script == ScriptListEnum::Sinhala
                 && trans_options.all_to_sinhala_use_conjunct_enabling_halant,
             ta_ext_skip_index: -1,
-            ta_ext_superscript_detached: false,
         }
     }
 
@@ -207,6 +204,7 @@ where
     }
 
     /// Emits the (skipped) halant in other -> brahmic conversion
+    #[inline(always)]
     fn emit_halant(&mut self) {
         let (
             Some(brahmic_halant),
@@ -235,6 +233,7 @@ where
 
     /// vyanjana (+ nuqta) + mAtrA in the context: the syllable is complete, an `anya` after it
     /// starts with an empty context
+    #[inline(always)]
     fn clear_context_after_matra(&mut self) {
         if (self.brahmic_nuqta.is_some()
             && self
@@ -255,6 +254,7 @@ where
 
     /// brahmic -> other: the inherent vowel of the vyanjana before the item, when the item is
     /// not its mAtrA or halant
+    #[inline(always)]
     fn emit_pending_schwa(&mut self, item_text: Option<&'a str>, item_type: Option<&'a List>) {
         // Short-circuit chain ordered cheapest/most selective first (all checks are pure).
         // Since `item_text != halant` is required, the former `to_anya_or_null`
@@ -279,6 +279,7 @@ where
     /// takes the halant.
     ///
     /// Returns `true` when the item (the mAtrA) was written to the result here
+    #[inline(always)]
     fn join_to_prev_vyanjana(
         &mut self,
         item_text: Option<&'a str>,
@@ -326,6 +327,7 @@ where
     }
 
     /// The typing mode context clear, then the item is added to the context
+    #[inline(always)]
     fn update_prev_context(
         &mut self,
         item: PrevContextItem<'a>,
@@ -360,6 +362,7 @@ where
     ///   keys can follow)
     ///
     /// Returns `true` when the current write already handled concatenation/reordering.
+    #[inline(always)]
     pub(super) fn prev_context_cleanup(
         &mut self,
         item: PrevContextItem<'a>,
@@ -372,6 +375,10 @@ where
     /// current item (emitted after this call) ends with a Tamil-Extended superscript, eg
     /// `RR` -> `ரூ²`. Like when the superscript is already the last character, the typing
     /// context is kept so that a Vedic svara typed next goes before it.
+    ///
+    /// Always inlined, with its parts: it runs for every item, and as a call the compiler has to
+    /// reload the fields of the context after it (measured: about 9% of the transliteration time).
+    #[inline(always)]
     pub(super) fn prev_context_cleanup_ext(
         &mut self,
         item: PrevContextItem<'a>,
