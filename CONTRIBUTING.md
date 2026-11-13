@@ -136,6 +136,21 @@ From `packages/kotlin`:
 - Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests, and the `uniffi-bindgen` tool), `generateBindings` (the Kotlin code, into `build/generated/uniffi`), and `cargoNdk` (the Android libraries).
 - `-Plipilekhika.abis=arm64-v8a` builds for only some ABIs (the default is in `gradle.properties`).
 
+## Android app (`mobile-app/android`)
+
+The native app (Kotlin, Jetpack Compose), on the Kotlin package above (an included Gradle build). It needs the same tools as the Kotlin package, and a phone with USB debugging on (or over Wi-Fi with `adb pair` / `adb connect`). No Android Studio is needed: `./run.sh` builds it, installs it, starts it and shows its logs, like `flutter run` (`--watch` rebuilds on changes). See [its README](mobile-app/android/README.md).
+
+From `mobile-app/android`:
+
+```sh
+./run.sh                                  # run on the connected phone (r rebuild, q quit)
+./gradlew :app:testDebugUnitTest          # unit tests
+./gradlew :app:lintDebug                  # Android lint
+./gradlew spotlessApply                   # format (check: ./gradlew spotlessCheck)
+```
+
+The old Flutter app is kept in `mobile-app/flutter` (with its old release workflow), see [its README](mobile-app/flutter/README.md).
+
 ## Desktop app (`desktop-client`)
 
 The PC app (Lipi Lekhika, with Lipi Parivartaka and the typing help as its windows) is written in Rust with [GPUI](https://www.gpui.rs) and [GPUI Kit](https://gpui-kit.com). It is a member of the Cargo workspace, so `cargo fmt --all` covers it.
@@ -169,7 +184,8 @@ Format your changes before committing. Run the formatter for each package you to
 | Python package (`packages/python`) | [Ruff](https://docs.astral.sh/ruff/) | `packages/python` | `uvx ruff format .` (check: `uvx ruff format --check .`) |
 | Go package (`packages/go/lipilekhika`) | gofmt | `packages/go/lipilekhika` | `gofmt -w .` (check: `gofmt -l .` lists unformatted files) |
 | Kotlin package (`packages/kotlin`) | [ktfmt](https://github.com/facebook/ktfmt) (kotlinlang style) via [Spotless](https://github.com/diffplug/spotless) | `packages/kotlin` | `./gradlew spotlessApply` (check: `./gradlew spotlessCheck`) |
-| Dart package & mobile app (`packages/dart/lipilekhika`, `mobile-app`) | [dart format](https://dart.dev/tools/dart-format) (ships with the Dart/Flutter SDK) | that directory | `dart format .` (check: `dart format --output=none --set-exit-if-changed .`) |
+| Android app (`mobile-app/android`) | [ktfmt](https://github.com/facebook/ktfmt) (kotlinlang style) via [Spotless](https://github.com/diffplug/spotless) | `mobile-app/android` | `./gradlew spotlessApply` (check: `./gradlew spotlessCheck`) |
+| Dart package & old Flutter app (`packages/dart/lipilekhika`, `mobile-app/flutter`) | [dart format](https://dart.dev/tools/dart-format) (ships with the Dart/Flutter SDK) | that directory | `dart format .` (check: `dart format --output=none --set-exit-if-changed .`) |
 
 Notes:
 
@@ -236,13 +252,13 @@ Every package and app except Go is released by its own GitHub Actions workflow, 
 | Rust crate | `rust-lib@v1.2.3` | `packages/rust/Cargo.toml` | [`packages/rust/CHANGELOG.md`](packages/rust/CHANGELOG.md) | [`release_rust.yml`](.github/workflows/release_rust.yml) | crates.io (`lipilekhika`), `parivartak` CLI binaries on the GitHub release |
 | Python package | `python-lib@v1.2.3` | `packages/python/pyproject.toml` | [`packages/python/CHANGELOG.md`](packages/python/CHANGELOG.md) | [`release_python.yml`](.github/workflows/release_python.yml) | PyPI (`lipilekhika`) |
 | PC app | `pc-app@v1.2.3` | `desktop-client/Cargo.toml` | [`desktop-client/CHANGELOG.md`](desktop-client/CHANGELOG.md) | [`release_pc_app.yml`](.github/workflows/release_pc_app.yml) | Windows MSI and portable zip, Lipi Parivartaka for Linux and macOS, on the GitHub release |
-| Mobile app (Android) | `mobile-app@v1.2.3` | `mobile-app/pubspec.yaml` (`version: 1.2.3+<build number>`) | [`mobile-app/CHANGELOG.md`](mobile-app/CHANGELOG.md) | [`release_mobile_app.yml`](.github/workflows/release_mobile_app.yml) | APKs (arm64-v8a, armeabi-v7a, x86_64) on the GitHub release |
+| Mobile app (Android) | `mobile-app@v1.2.3` | `mobile-app/android/gradle.properties` (`app.versionName=1.2.3`, `app.versionCode=<build number>`) | [`mobile-app/CHANGELOG.md`](mobile-app/CHANGELOG.md) | [`release_mobile_app.yml`](.github/workflows/release_mobile_app.yml) | APKs (arm64-v8a, armeabi-v7a, x86_64, universal) on the GitHub release, the AAB as a run artifact |
 
 npm, PyPI and crates.io are published with trusted publishing (OIDC), so there are no registry tokens to set up. The npm and PyPI publish jobs run in the `release` environment.
 
 ### Steps
 
-1. **Bump the version** in the version file and give the changelog a section for it: `## js-lib@1.2.3`, `## rust-lib@1.2.3`, `## python-lib@1.2.3`, `## pc-app@v1.2.3`, `## mobile-app@v1.2.3+<build number>`. For the mobile app, raise the build number after `+` too. Commit this to `main`.
+1. **Bump the version** in the version file and give the changelog a section for it: `## js-lib@1.2.3`, `## rust-lib@1.2.3`, `## python-lib@1.2.3`, `## pc-app@v1.2.3`, `## mobile-app@v1.2.3+<build number>`. For the mobile app, raise `app.versionCode` too (the build number after `+`). Commit this to `main`.
 
 2. **Dry run (optional, recommended)**: start the workflow by hand with `dry_run`. It runs everything (tests, every build, the package checks) but publishes and uploads nothing:
 
@@ -340,7 +356,7 @@ Steps:
 
 ### Build tools
 
-The release workflows pin the versions of the tools that build the native code: `@napi-rs/cli` (in `packages/js/binding/gen_node_bind.sh`), `ziglang`, `cargo-zigbuild`, `flutter_rust_bridge_codegen`, Flutter and `cargo-ndk`. Without a pin, a new release of one of them can break the build of a commit that built before. Update a pin on purpose, and dry-run the release workflow afterwards. `FRB_CODEGEN_VERSION` has to match the `flutter_rust_bridge` version in `packages/dart/binding/Cargo.toml` (in both `release_mobile_app.yml` and `dart_ci.yml`).
+The release workflows pin the versions of the tools that build the native code: `@napi-rs/cli` (in `packages/js/binding/gen_node_bind.sh`), `ziglang`, `cargo-zigbuild`, `flutter_rust_bridge_codegen`, Flutter and `cargo-ndk`. Without a pin, a new release of one of them can break the build of a commit that built before. Update a pin on purpose, and dry-run the release workflow afterwards. `FRB_CODEGEN_VERSION` has to match the `flutter_rust_bridge` version in `packages/dart/binding/Cargo.toml` (in `dart_ci.yml`, and in the old Flutter workflow `mobile-app/flutter/release_mobile_app.yml`).
 
 ## Questions & issues
 

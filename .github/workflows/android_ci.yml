@@ -1,0 +1,75 @@
+name: Android App CI
+
+on:
+  push:
+    paths:
+      - 'mobile-app/android/**'
+      - 'packages/kotlin/**'
+      - 'packages/rust/**'
+      - 'desktop-client/assets/fonts/**'
+      - 'Cargo.lock'
+      - '.github/workflows/android_ci.yml'
+  workflow_dispatch:
+
+# a newer push to the same branch cancels the run still in progress
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # pinned, like in the release workflow
+  CARGO_NDK_VERSION: 4.1.2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-linux-android
+
+      - name: Cache cargo registry + build
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-android-ci-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-ci-
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --version "$CARGO_NDK_VERSION" --locked
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install the NDK
+        run: sdkmanager --install "ndk;$(grep -oP 'ndkVersion = "\K[^"]+' packages/kotlin/lipilekhika/build.gradle.kts)"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # formatting (ktfmt), Android lint, the unit tests, and a debug build (the Rust library
+      # only for x86_64, enough to check the build)
+      - name: Check, lint, test and build
+        working-directory: mobile-app/android
+        run: ./gradlew --console=plain spotlessCheck :app:lintDebug :app:testDebugUnitTest :app:assembleDebug -Plipilekhika.abis=x86_64
+
+      - name: Upload the lint report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-report
+          path: mobile-app/android/app/build/reports/lint-results-debug.html
+          retention-days: 14

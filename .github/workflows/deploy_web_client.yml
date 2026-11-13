@@ -10,7 +10,7 @@ on:
       - ".github/workflows/deploy_web_client.yml"
       # PC and mobile app version numbers
       - "desktop-client/Cargo.toml"
-      - "mobile-app/pubspec.yaml"
+      - "mobile-app/android/gradle.properties"
   workflow_dispatch:
 
 env:

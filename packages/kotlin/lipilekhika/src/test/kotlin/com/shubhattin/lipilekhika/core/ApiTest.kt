@@ -62,12 +62,12 @@ class ApiTest {
     @Test
     fun loneSurrogateIsReadAsReplacementCharacter() {
         // like the JS and Python packages (UTF-8 would make it `?`)
-        assertEquals("क�", transliterate("k\uD800", "Normal", "Devanagari").replace("्", ""))
+        assertEquals("क\uFFFD", transliterate("k\uD800", "Normal", "Devanagari").replace("्", ""))
         // a pair is the character it encodes
         assertEquals("𑀓", transliterate("क", "Devanagari", "Brahmi"))
         assertEquals("क", transliterate("𑀓", "Brahmi", "Devanagari"))
         assertEquals("ab", wellFormed("ab"))
-        assertEquals("a�b�", wellFormed("a\uDC00b\uD800"))
+        assertEquals("a\uFFFDb\uFFFD", wellFormed("a\uDC00b\uD800"))
         assertEquals("a𑀓", wellFormed("a𑀓"))
     }
 

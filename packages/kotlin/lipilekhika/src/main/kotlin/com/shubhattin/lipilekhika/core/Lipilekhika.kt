@@ -151,7 +151,7 @@ internal fun wellFormed(text: String): String {
                 i += 2
                 continue
             }
-            c.isSurrogate() -> out.append('�')
+            c.isSurrogate() -> out.append('\uFFFD')
             else -> out.append(c)
         }
         i++
