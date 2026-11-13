@@ -51,44 +51,50 @@
 
 ## ⚡ Performance
 
-Transliteration benchmarks on the shared [`test_data`](./test_data) corpus: time for one pass over all 8879 transliteration cases (lower is better).
+Benchmarks on the shared [`test_data`](./test_data) corpus. **Speed** is how many times faster than pure JavaScript on Node.js (1.00×), higher is better. The multi-thread runs (10 threads) are compared with the same single-thread JavaScript time.
 
 `Benchmark machine: Intel Core i5-12450H (12 threads, up to 4.40 GHz)`
 
-The Rust implementation is **~9× faster** than pure JavaScript on Node.js (23 ms vs 219 ms) and **~5×** faster than on Bun (122 ms). With multiple threads it is **~41×** faster than JavaScript on Node.js.
+**Transliteration** (one pass over 9778 cases)
 
-**Native implementations**
+| Implementation          | Time (ms) |      Speed |
+| ----------------------- | --------: | ---------: |
+| **Rust**                |      25.3 |  **7.83×** |
+| **Rust**, multi-thread  |       5.7 | **34.90×** |
+| Go                      |      55.4 |      3.58× |
+| Go, multi-thread        |      16.0 |     12.39× |
+| Python ¹                |      37.4 |      5.31× |
+| Kotlin ¹ (JVM)          |      39.9 |      4.97× |
+| N-API ¹, Bun            |      44.1 |      4.49× |
+| N-API ¹, Node.js        |      53.2 |      3.73× |
+| WebAssembly ¹, Bun      |      50.8 |      3.90× |
+| WebAssembly ¹, Node.js  |      65.0 |      3.05× |
+| Dart ¹ ²                |     106.0 |      1.87× |
+| JavaScript, Bun         |     130.3 |      1.52× |
+| **JavaScript**, Node.js |     198.3 |      1.00× |
 
-| Implementation | Single thread (ms) |      Multi thread (ms) |
-| -------------- | -----------------: | ---------------------: |
-| **Rust**       |             **23** |                **5.4** |
-| **Go**         |                 49 | 15.5 _(10 goroutines)_ |
+**Typing** (the 4010 `Normal` cases, typed key by key)
 
-**Other languages** _(via the Rust core)_
+| Implementation          | Time (ms) |      Speed |
+| ----------------------- | --------: | ---------: |
+| **Rust**                |       112 | **15.31×** |
+| Kotlin ¹ (JVM)          |       243 |      7.06× |
+| Python ¹                |       250 |      6.87× |
+| Go                      |       267 |      6.43× |
+| N-API ¹, Node.js        |       408 |      4.20× |
+| N-API ¹, Bun            |       411 |      4.17× |
+| Dart ¹ ²                |       957 |      1.79× |
+| JavaScript, Bun         |      1254 |      1.37× |
+| **JavaScript**, Node.js |      1715 |      1.00× |
 
-| Implementation | Time (ms) |
-| -------------- | --------: |
-| **Python**     |        35 |
-| **Dart** ¹     |       110 |
+¹ via the Rust core. ² single cold pass [script](./packages/dart/lipilekhika/scripts/benchmark.dart).
 
-**JavaScript runtimes**
-
-| Implementation              | Node.js (ms) | Bun (ms) |
-| --------------------------- | -----------: | -------: |
-| N-API _(via Rust)_          |           48 |       40 |
-| WebAssembly _(via Rust)_    |           59 |       47 |
-| **Pure JavaScript**         |      **219** |  **122** |
-
-Averages from the statistical benchmark suites (warm-up, many samples): Rust [criterion](./packages/rust/src/benches/benchmark.rs), JS / WASM / N-API [mitata](./packages/js/src/scripts/bench_suite.ts) (Node.js via vite-node), Go [`testing.B`](./packages/go/lipilekhika/benchmark_test.go), Python [pytest-benchmark](./packages/python/benchmarks/bench_lipilekhika.py).
-
-¹ Dart from its single cold pass [script](./packages/dart/lipilekhika/scripts/benchmark.dart) (108-117 ms).
-
-**Benchmark scripts:** single cold pass: [JavaScript](./packages/js/src/scripts/benchmark.ts) (also covers N-API & WASM) · [Rust](./packages/rust/examples/bench.rs) · [Python](./packages/python/scripts/benchmark.py) · [Dart](./packages/dart/lipilekhika/scripts/benchmark.dart) · [Go](./packages/go/lipilekhika/bench/benchmark.go). See [Contributing](./CONTRIBUTING.md#benchmarks) for how to run both kinds.
+Averages of the statistical suites: Rust [criterion](./packages/rust/src/benches/benchmark.rs), JS / WASM / N-API [mitata](./packages/js/scripts/bench_suite.mjs) (the built package), Go [`testing.B`](./packages/go/lipilekhika/benchmark_test.go), Python [pytest-benchmark](./packages/python/benchmarks/bench_lipilekhika.py), Kotlin [`Benchmark.kt`](./packages/kotlin/lipilekhika/src/test/kotlin/com/shubhattin/lipilekhika/core/Benchmark.kt). See [Contributing](./CONTRIBUTING.md#benchmarks) for how to run them.
 
 > Even the initial Rust rewrite (almost line by line) was _439 ms_ (JS : 740 ms). But after some simple optmization like
 > using `HashMap` (over binary search for lookups) and `Vec<char>` (to iterate in string) it was at _155 ms_ (JS : 460 ms). But now after optimizations
 > (like avoid heap allocations and better data structures). Moving to `no_std` also improved performance (-12ms) for some reason.
-> That got it to _51 ms_, and later hot path work (dense char lookup tables, allocation free context, buffer reuse while typing) to **23 ms**.
+> That got it to _51 ms_, and later hot path work (dense char lookup tables, allocation free context, buffer reuse while typing) to **23 ms** (for the 8879 cases of then, the test data has grown since).
 
 ## 🤝 Contributing
 

@@ -105,6 +105,7 @@
   ],
   "scripts": {
     "build": "bun build.ts",
+    "build:lib": "vite build --logLevel warn",
     "check": "tsc --noEmit",
     "test": "vitest",
     "test:bun": "bun test --concurrent --only-failures",
@@ -115,14 +116,15 @@
     "lint": "oxlint",
     "make-script-data": "bun src/make_script_data/make_output_script_data.ts",
     "publish:cli": "bun run build && npm publish",
-    "bench": "vite-node src/scripts/benchmark.ts",
-    "bench:suite": "vite-node src/scripts/bench_suite.ts",
-    "bench:suite:bun": "bun src/scripts/bench_suite.ts",
+    "bench": "bun run build:lib && node scripts/benchmark.mjs",
+    "bench:bun": "bun run build:lib && bun scripts/benchmark.mjs",
+    "bench:suite": "bun run build:lib && node scripts/bench_suite.mjs",
+    "bench:suite:bun": "bun run build:lib && bun scripts/bench_suite.mjs",
     "test:runtime": "vite-node scripts/runtime_check.mjs && bun scripts/runtime_check.mjs",
     "test:runtime:dist": "node scripts/runtime_check.mjs --dist && bun scripts/runtime_check.mjs --dist",
     "test:workerd": "node scripts/workerd_check.mjs",
     "test:package": "node scripts/package_check.mjs",
-    "complexity": "vite-node src/scripts/complexity.ts"
+    "complexity": "bun run build:lib && node scripts/complexity.mjs"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.58.6",

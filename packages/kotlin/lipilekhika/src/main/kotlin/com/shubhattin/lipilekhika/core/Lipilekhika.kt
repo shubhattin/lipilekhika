@@ -2,35 +2,35 @@
 
 /**
  * Lipi Lekhika for Kotlin (and Java): transliteration between Indian Brahmic scripts and typing in
- * them, a wrapper around the Rust library (`packages/rust`) through UniFFI.
+ * them, a wrapper around the Rust library (`packages/rust`) through JNI.
  *
  * From Java the functions are static methods of the `Lipilekhika` class.
  */
 package com.shubhattin.lipilekhika.core
 
-import com.shubhattin.lipilekhika.core.ffi.TransOption
-import com.shubhattin.lipilekhika.core.ffi.getAllOptions as ffiGetAllOptions
-import com.shubhattin.lipilekhika.core.ffi.getNormalizedScriptName as ffiGetNormalizedScriptName
-import com.shubhattin.lipilekhika.core.ffi.getSchwaStatusForScript as ffiGetSchwaStatusForScript
-import com.shubhattin.lipilekhika.core.ffi.getScriptListData as ffiGetScriptListData
-import com.shubhattin.lipilekhika.core.ffi.preloadScriptData as ffiPreloadScriptData
-import com.shubhattin.lipilekhika.core.ffi.transliterate as ffiTransliterate
-
 /**
  * The error of an invalid argument, one of [InvalidScriptException], [UnknownOptionException] and
  * [InvalidArgumentException].
  */
-typealias LipiException = com.shubhattin.lipilekhika.core.ffi.LipiException
+sealed class LipiException(message: String) : Exception(message) {
+    /** A script or language name that is not known */
+    class InvalidScript(message: String) : LipiException(message)
+
+    /** A transliteration option key that is not known */
+    class UnknownOption(message: String) : LipiException(message)
+
+    /** An argument out of its range (eg. a negative clear time of a typing context) */
+    class InvalidArgument(message: String) : LipiException(message)
+}
 
 /** A script or language name that is not known */
-typealias InvalidScriptException = com.shubhattin.lipilekhika.core.ffi.LipiException.InvalidScript
+typealias InvalidScriptException = LipiException.InvalidScript
 
 /** A transliteration option key that is not known */
-typealias UnknownOptionException = com.shubhattin.lipilekhika.core.ffi.LipiException.UnknownOption
+typealias UnknownOptionException = LipiException.UnknownOption
 
 /** An argument out of its range (eg. a negative clear time of a typing context) */
-typealias InvalidArgumentException =
-    com.shubhattin.lipilekhika.core.ffi.LipiException.InvalidArgument
+typealias InvalidArgumentException = LipiException.InvalidArgument
 
 /**
  * Transliterates [text] from [fromScript] to [toScript].
@@ -47,11 +47,12 @@ fun transliterate(
     toScript: String,
     options: Map<String, Boolean>? = null,
 ): String =
-    ffiTransliterate(
+    NativeLib.transliterate(
         wellFormed(text),
         fromScript,
         toScript,
-        options?.map { (key, value) -> TransOption(key, value) },
+        options?.keys?.toTypedArray(),
+        options?.values?.toBooleanArray(),
     )
 
 /**
@@ -59,7 +60,7 @@ fun transliterate(
  *
  * @throws LipiException for an unknown script name
  */
-fun preloadScriptData(scriptName: String) = ffiPreloadScriptData(scriptName)
+fun preloadScriptData(scriptName: String) = NativeLib.preloadScriptData(scriptName)
 
 /**
  * The schwa deletion property of a Brahmic script (`true`: the inherent vowel is dropped at the end
@@ -67,7 +68,12 @@ fun preloadScriptData(scriptName: String) = ffiPreloadScriptData(scriptName)
  *
  * @throws LipiException for an unknown script name
  */
-fun getSchwaStatusForScript(scriptName: String): Boolean? = ffiGetSchwaStatusForScript(scriptName)
+fun getSchwaStatusForScript(scriptName: String): Boolean? =
+    when (NativeLib.getSchwaStatusForScript(scriptName)) {
+        1 -> true
+        0 -> false
+        else -> null
+    }
 
 /**
  * The custom transliteration option keys that apply from [fromScript] to [toScript] (none for two
@@ -76,14 +82,15 @@ fun getSchwaStatusForScript(scriptName: String): Boolean? = ffiGetSchwaStatusFor
  * @throws LipiException for an unknown script name
  */
 fun getAllOptions(fromScript: String, toScript: String): List<String> =
-    ffiGetAllOptions(fromScript, toScript)
+    NativeLib.getAllOptions(fromScript, toScript).asList()
 
 /**
  * The script name of a script, language or alias name (eg. `hi` → `Devanagari`).
  *
  * @throws LipiException for an unknown script name
  */
-fun getNormalizedScriptName(scriptName: String): String = ffiGetNormalizedScriptName(scriptName)
+fun getNormalizedScriptName(scriptName: String): String =
+    NativeLib.getNormalizedScriptName(scriptName)
 
 /** The lists of scripts, languages and aliases, in the order of the data */
 data class ScriptListData(
@@ -98,15 +105,20 @@ data class ScriptListData(
 )
 
 private val cachedScriptListData: ScriptListData by lazy {
-    val data = ffiGetScriptListData()
+    val (scripts, langs, langScriptMap, scriptAlternatesMap) = NativeLib.getScriptListData()
     ScriptListData(
-        scripts = data.scripts,
-        langs = data.langs,
-        // LinkedHashMap: in the order of the data
-        langScriptMap = data.langScriptMap.associate { it.key to it.value },
-        scriptAlternatesMap = data.scriptAlternatesMap.associate { it.key to it.value },
+        scripts = scripts.asList(),
+        langs = langs.asList(),
+        langScriptMap = pairsToMap(langScriptMap),
+        scriptAlternatesMap = pairsToMap(scriptAlternatesMap),
     )
 }
+
+/** `[k, v, k, v, ...]` as a map (a LinkedHashMap: in the order of the data) */
+private fun pairsToMap(flat: Array<String>): Map<String, String> =
+    LinkedHashMap<String, String>(flat.size).apply {
+        for (i in flat.indices step 2) put(flat[i], flat[i + 1])
+    }
 
 /** The lists of scripts, languages and aliases */
 fun getScriptListData(): ScriptListData = cachedScriptListData

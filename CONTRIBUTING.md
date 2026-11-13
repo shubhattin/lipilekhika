@@ -44,7 +44,8 @@ From `packages/js`:
 ```sh
 bun run make-script-data   # generate script data (also regenerates the committed Rust/Go data)
 bun run check              # typecheck
-bun run bench              # cold single-pass benchmark (see Benchmarks below)
+bun run build:lib          # only the ESM / CJS build of the package (`dist/esm`, `dist/cjs`), 2 s
+bun run bench              # cold single-pass benchmark (see Benchmarks below), bench:bun for Bun
 bun run bench:suite        # statistical benchmark suite (mitata), bench:suite:bun for Bun
 bun run test:run           # run tests once
 bun run test:runtime       # JS, WASM and N-API under vite-node and bun (needs bindings)
@@ -121,7 +122,7 @@ go test -run '^$' -bench . -benchmem       # statistical benchmark suite
 
 ## Kotlin package (`packages/kotlin`)
 
-Kotlin bindings of the Rust library for the native Android app ([UniFFI](https://mozilla.github.io/uniffi-rs/)). It is internal, not published (like the Dart package). See [its README](packages/kotlin/README.md) for the API.
+Kotlin bindings of the Rust library for the native Android app (JNI, with the [`jni`](https://crates.io/crates/jni) crate). It is internal, not published (like the Dart package). See [its README](packages/kotlin/README.md) for the API.
 
 Requires Rust, a JDK 17 or newer, the Android SDK (`ANDROID_HOME`, or `sdk.dir` in `packages/kotlin/local.properties`), and for the Android build the NDK (installed by Gradle) and [cargo-ndk](https://github.com/bbqsrc/cargo-ndk) with the Android Rust targets (`rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android`). The Gradle wrapper downloads Gradle. Run `bun run gen:test-data` first.
 
@@ -133,7 +134,8 @@ From `packages/kotlin`:
 ./gradlew spotlessApply                    # format (check: ./gradlew spotlessCheck)
 ```
 
-- Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests, and the `uniffi-bindgen` tool), `generateBindings` (the Kotlin code, into `build/generated/uniffi`), and `cargoNdk` (the Android libraries).
+- Gradle builds the Rust side itself: `cargoBuildHost` (the library for this machine, for the tests) and `cargoNdk` (the Android libraries).
+- The JNI glue is written by hand: a Kotlin `external fun` (in `NativeLib.kt`, or a `native...` method of `TypingContext`) and its Rust function `Java_com_shubhattin_lipilekhika_core_<Class>_<method>` in `binding/src` must change together.
 - `-Plipilekhika.abis=arm64-v8a` builds for only some ABIs (the default is in `gradle.properties`).
 
 ## Android app (`mobile-app/android`)
@@ -206,10 +208,11 @@ Warm-up, many samples and statistics (spread / percentiles, memory or allocation
 | Package | Command (from the package directory) | Tool |
 | --- | --- | --- |
 | Rust | `cargo bench` | [criterion](https://github.com/bheisler/criterion.rs), reports the change vs the previous run |
-| JS, Node | `bun run bench:suite` | [mitata](https://github.com/evanwashere/mitata) (vite-node), JS vs WASM vs N-API |
+| JS, Node | `bun run bench:suite` | [mitata](https://github.com/evanwashere/mitata) on the built package, JS vs WASM vs N-API |
 | JS, Bun | `bun run bench:suite:bun` | same suite under Bun |
 | Go | `go test -run '^$' -bench . -benchmem -count 10` | `testing.B`, compare runs with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat) |
 | Python | `uv run pytest benchmarks/bench_lipilekhika.py` | [pytest-benchmark](https://pytest-benchmark.readthedocs.io) |
+| Kotlin | `./gradlew :lipilekhika:testDebugUnitTest --tests '*Benchmark*' -Plipilekhika.bench=true --rerun` | [`Benchmark.kt`](packages/kotlin/lipilekhika/src/test/kotlin/com/shubhattin/lipilekhika/core/Benchmark.kt) (JUnit, skipped in the normal test run), on this machine's JVM |
 
 Comparing two versions (eg. `main` and your branch):
 
@@ -230,8 +233,8 @@ One timed pass without warm-up (JIT warm-up is included for JS), printing the sa
 | Package | Command (from the package directory) | Notes |
 | --- | --- | --- |
 | Rust | `cargo run --example bench --release` | [`examples/bench.rs`](packages/rust/examples/bench.rs) |
-| JS, Node | `bun run bench` | [`src/scripts/benchmark.ts`](packages/js/src/scripts/benchmark.ts) with vite-node, also WASM and N-API rows |
-| JS, Bun | `bun src/scripts/benchmark.ts` | same script under Bun |
+| JS, Node | `bun run bench` | [`scripts/benchmark.mjs`](packages/js/scripts/benchmark.mjs) on the built package, also WASM and N-API rows |
+| JS, Bun | `bun run bench:bun` | same script under Bun |
 | Go | `go run ./bench/benchmark.go` | [`bench/benchmark.go`](packages/go/lipilekhika/bench/benchmark.go), `-iterations N` repeats it (times are **totals over all iterations**); `./bench/run_release.sh` runs a stripped build with the same flags |
 | Python | `uv run python scripts/benchmark.py` | [`scripts/benchmark.py`](packages/python/scripts/benchmark.py) |
 
@@ -239,6 +242,7 @@ One timed pass without warm-up (JIT warm-up is included for JS), printing the sa
 
 ### Notes
 
+- The JS benchmarks run the **built package** (`dist/esm`) under plain Node / Bun, the code a user of the package runs: each `bun run bench*` command first builds it (`bun run build:lib`), then runs the script in [`packages/js/scripts`](packages/js/scripts) (run the script directly to skip the build). They do not run the source with vite-node: it turns every import between files into a getter call, so the time depends on how the code is split into files (a refactor that only moved functions between files measured 30% slower, the built package was not slower).
 - JS WASM / N-API numbers and Python run the rust build: rebuild it after rust changes (`./get_bindings.sh` in `packages/js`, `uvx maturin develop --release` in `packages/python`).
 - Absolute times depend on the machine; compare versions on the same machine and report the relative change.
 

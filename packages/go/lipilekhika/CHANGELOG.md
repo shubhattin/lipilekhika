@@ -6,6 +6,7 @@
 - Package documentation (shown on pkg.go.dev) with an overview of the API and a link to the `typing` package
 - New scripts: the standard romanization schemes **IAST** (`iast`), **ITRANS** (`itrans`), **Harvard-Kyoto** (`hk`) and **SLP1** (`slp1`, `slp`) ([#135](https://github.com/shubhattin/lipilekhika/issues/135)). They follow the tables of [vidyut-lipi](https://github.com/ambuda-org/vidyut): `e` / `o` are the long ए / ओ (the short ones of other languages are written `e` / `o` too), nuqta letters in its forms (IAST `q` क़, ITRANS `.D` ड़, HK `z2` ज़, SLP1 `k0` क़). IAST reads capital letters (`Kṛṣṇa`, `RĀMA`) and the ISO 15919 forms (`ṁ`, `r̥`); ITRANS reads its alternate spellings (`aa`, `R^i`, `chh`, `x`, `GY`, ...). IAST `oṁ` is ॐ like `oṃ`. Between two romanizations, one of them a standard scheme, ॐ is read only at the start of a word: IAST `logoṃ` (लोगों) is SLP1 `logoM`, SLP1 `jAUM` (जाऊं) is IAST `jāūṃ`
 - `~` in the input is read where the input script has it as a letter (Harvard-Kyoto / SLP1 candrabindu, ITRANS `~N`), it was always passed through
+- Faster typing (15 to 20%) and bulk transliteration (7%), with 40 to 50% fewer allocations. Internal: the transliteration core is split into smaller functions and files, no behaviour change
 
 ## v0.1.0
 

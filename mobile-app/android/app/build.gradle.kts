@@ -91,11 +91,12 @@ android {
 
     packaging {
         jniLibs {
-            // the Rust library is loaded by JNA (no extraction needed: uncompressed and 16 KB
-            // aligned)
+            // the Rust library is loaded with System.loadLibrary (no extraction needed:
+            // uncompressed and 16 KB aligned)
             useLegacyPackaging = false
-            // JNA has an x86 library too, the Rust library is not built for x86: without this the
-            // Play Store would offer the app to x86 devices, where it would not start
+            // other libraries have an x86 build too, the Rust library is not built for x86:
+            // without this the Play Store would offer the app to x86 devices, where it would not
+            // start
             excludes += "lib/x86/**"
         }
     }

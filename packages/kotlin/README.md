@@ -2,8 +2,8 @@
 
 Kotlin (and Java) bindings of the Rust library ([`packages/rust`](../rust)), for the native Android app. Not published to any registry.
 
-- `binding/`: the Rust crate (`kotlin_binding`, a member of the Cargo workspace). [UniFFI](https://mozilla.github.io/uniffi-rs/) generates the Kotlin code that calls it (through JNA) from the built library.
-- `lipilekhika/`: an Android library module. The generated code (package `com.shubhattin.lipilekhika.core.ffi`, gitignored) and the public API around it (package `com.shubhattin.lipilekhika.core`).
+- `binding/`: the Rust crate (`kotlin_binding`, a member of the Cargo workspace), the JNI functions (with the [`jni`](https://crates.io/crates/jni) crate).
+- `lipilekhika/`: an Android library module, the public API (package `com.shubhattin.lipilekhika.core`) on the native methods of `NativeLib.kt` and `TypingContext`.
 
 ## Usage
 
@@ -24,9 +24,9 @@ createTypingContext("Devanagari", TypingContextOptions(includeInherentVowel = tr
 
 - A script name that is not known (or an option key) throws an `InvalidScriptException` (`UnknownOptionException`), both `LipiException`s.
 - `TypingDiff.toDeleteCharsCount` counts code points. A Kotlin `String` counts UTF-16 units, and a character outside the BMP (Brahmi, Siddham, ...) is 2 of them: use `diff.deleteCountIn(text)` or `diff.applyTo(text)`.
-- From Java the functions are static methods of `Lipilekhika` and `LipilekhikaTyping`. Java does not see the Kotlin type aliases, so it imports `TypingContext`, `TypingDiff`, `LipiException`, ... from `com.shubhattin.lipilekhika.core.ffi`.
+- From Java the functions are static methods of `Lipilekhika` and `LipilekhikaTyping`; the classes (`TypingContext`, `TypingDiff`, `LipiException`, ...) are in `com.shubhattin.lipilekhika.core`.
 
-An app uses it as a Gradle included build (`includeBuild("../../packages/kotlin")` in its settings, then `implementation("com.shubhattin.lipilekhika:lipilekhika")`). The library brings JNA and its R8 keep rules.
+An app uses it as a Gradle included build (`includeBuild("../../packages/kotlin")` in its settings, then `implementation("com.shubhattin.lipilekhika:lipilekhika")`). The library brings its R8 keep rules.
 
 ## Building and testing
 
