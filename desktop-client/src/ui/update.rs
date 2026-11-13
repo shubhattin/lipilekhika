@@ -1,6 +1,7 @@
 //! A newer version: the app checks GitHub once per start. It shows a popup (a toast in the window,
 //! it does not take the keys) on its first few starts, with Later to stop it. After that, or when
-//! the popup is closed, a small link at the bottom of the windows offers the update.
+//! the popup is closed, a small link offers the update: next to the main window's buttons at its
+//! top, at the bottom of Lipi Parivartaka.
 //!
 //! The update installs the new MSI on Windows; elsewhere (and in the portable app) it opens the
 //! new version's release page.
@@ -161,9 +162,9 @@ struct UpdatePopup;
 
 fn popup(version: String) -> Notification {
   let message = if installs_update() {
-    "Install it now, or later from the link at the bottom of the window."
+    "Install it now, or later from the Update link in the window."
   } else {
-    "Download it now, or later from the link at the bottom of the window."
+    "Download it now, or later from the Update link in the window."
   };
   Notification::new()
     .id::<UpdatePopup>()
@@ -205,7 +206,7 @@ fn popup(version: String) -> Notification {
     })
 }
 
-/// The link at the bottom of a window, when a newer version is there and its popup is gone
+/// The update link of a window, when a newer version is there and its popup is gone
 pub fn update_link(cx: &App) -> Option<AnyElement> {
   let update = &Controller::global(cx).update;
   let version = update.available_version()?;

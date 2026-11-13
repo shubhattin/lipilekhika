@@ -33,13 +33,13 @@ use std::time::Duration;
 pub use typing_help::HelpTab;
 
 /// The main window's height (it has a note about the Fcitx5 plugin on Linux; on Windows the
-/// window's own title bar replaces the header). Its last line is the version and the update link.
+/// window's own title bar replaces the header)
 const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
-  520.
+  490.
 } else if crate::platform::SYSTEM_TYPING_SUPPORTED {
-  540.
+  510.
 } else {
-  622.
+  592.
 };
 
 /// Closing the main window keeps the app running in the tray, where the system wide typing goes

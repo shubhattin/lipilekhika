@@ -163,6 +163,7 @@ impl MainWindow {
           ),
       )
       .child(div().flex_1())
+      .children(super::update::update_link(cx).map(|link| div().pr_1().child(link)))
       .child(Self::theme_button(cx))
       .child(super::about::more_button(AboutOf::LipiLekhika))
       // only where the system shows the tray icon (the app would be out of reach otherwise)
@@ -543,17 +544,7 @@ impl Render for MainWindow {
           )
           .small(),
         )
-      })
-      .child(
-        // the version, and the update when there is one
-        h_flex()
-          .items_center()
-          .justify_between()
-          .text_xs()
-          .text_color(theme.muted_foreground)
-          .child(format!("Version {}", env!("CARGO_PKG_VERSION")))
-          .children(super::update::update_link(cx)),
-      );
+      });
 
     v_flex()
       .id("main-window")
@@ -570,10 +561,14 @@ impl Render for MainWindow {
       .when(CUSTOM_TITLE_BAR, |el| {
         el.child(title_bar(
           "Lipi Lekhika",
-          vec![
-            Self::theme_button(cx),
-            super::about::more_button(AboutOf::LipiLekhika),
-          ],
+          // the update link (when there is a newer version) next to the buttons
+          super::update::update_link(cx)
+            .into_iter()
+            .chain([
+              Self::theme_button(cx),
+              super::about::more_button(AboutOf::LipiLekhika),
+            ])
+            .collect(),
           &[Control::Minimize, Control::Close],
           window,
           cx,
