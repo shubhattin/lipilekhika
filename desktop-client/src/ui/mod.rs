@@ -338,17 +338,28 @@ pub fn open_parivartaka(cx: &mut App) {
     let _ = handle.update(cx, |_, window, _| window.activate_window());
     return;
   }
-  // its own window, not a child of the main window: it stays open when the main window is
-  // hidden to the tray (on Linux a child, to float on tiling compositors)
+  // A regular window of its own, not a child of the main window: it stays open when the main
+  // window is hidden to the tray, and tiling compositors (Hyprland, sway) tile it like any other
+  // app. It opens at 1180x800, or 90% of a smaller screen.
+  let (width, height) = cx
+    .primary_display()
+    .map(|d| {
+      let size = d.bounds().size;
+      (
+        (f32::from(size.width) * 0.9).min(1180.),
+        (f32::from(size.height) * 0.9).min(800.),
+      )
+    })
+    .unwrap_or((1180., 800.));
   let options = window_options(
     WindowSpec {
       title: "Lipi Parivartaka",
-      width: 1180.,
-      height: 800.,
+      width,
+      height,
       resizable: true,
       minimizable: false,
       min: Some((720., 560.)),
-      child: cfg!(target_os = "linux") && Controller::global(cx).main.is_some(),
+      child: false,
       own_title_bar: true,
     },
     cx,
