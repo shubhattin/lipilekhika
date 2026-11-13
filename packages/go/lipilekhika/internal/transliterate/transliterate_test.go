@@ -68,7 +68,7 @@ func packageRoot() (string, error) {
 	return "", fmt.Errorf("go.mod not found from %q", wd)
 }
 
-func writeTransliterationSummary(strictExpected bool, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped int) {
+func writeTransliterationSummary(filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped int) {
 	root, err := packageRoot()
 	if err != nil {
 		return
@@ -77,16 +77,13 @@ func writeTransliterationSummary(strictExpected bool, filesTotal, filesPassed, f
 	_ = os.MkdirAll(dir, 0o755)
 	path := filepath.Join(dir, "transliteration_summary.txt")
 	line := fmt.Sprintf(
-		"Transliteration: strict_expected=%t, files_total=%d, files_passed=%d, files_failed=%d, tests_total=%d, tests_passed=%d, tests_failed=%d, tests_skipped=%d\n",
-		strictExpected, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped,
+		"Transliteration: files_total=%d, files_passed=%d, files_failed=%d, tests_total=%d, tests_passed=%d, tests_failed=%d, tests_skipped=%d\n",
+		filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped,
 	)
 	_ = os.WriteFile(path, []byte(line), 0o644)
 }
 
 func TestTransliterationYAMLSmoke(t *testing.T) {
-	// Keep strict checks opt-in because known edge-cases are still being aligned.
-	// Set LIPILEKHIKA_STRICT_YAML_EXPECTED=true to enforce exact expected outputs.
-	strictExpected := os.Getenv("LIPILEKHIKA_STRICT_YAML_EXPECTED") == "true"
 	root := testDataRoot(t)
 	if root == "" {
 		return
@@ -137,7 +134,7 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 					continue
 				}
 				caseFailed := false
-				if strictExpected && c.Output != "" && result != c.Output {
+				if c.Output != "" && result != c.Output {
 					caseFailed = true
 					t.Errorf("index %d %s→%s: expected %q, got %q", c.Index, c.From, c.To, c.Output, result)
 				} else if c.Input != "" && result == "" {
@@ -149,7 +146,7 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 					if err != nil {
 						caseFailed = true
 						t.Errorf("index %d reverse %s←%s: %v", c.Index, c.From, c.To, err)
-					} else if strictExpected && reversed != c.Input {
+					} else if reversed != c.Input {
 						caseFailed = true
 						t.Errorf("index %d reverse %s←%s: expected %q, got %q", c.Index, c.From, c.To, c.Input, reversed)
 					} else if c.Input != "" && reversed == "" {
@@ -171,7 +168,7 @@ func TestTransliterationYAMLSmoke(t *testing.T) {
 		}
 	}
 
-	writeTransliterationSummary(strictExpected, filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped)
+	writeTransliterationSummary(filesTotal, filesPassed, filesFailed, testsTotal, testsPassed, testsFailed, testsSkipped)
 }
 
 func TestTransliterateBasicPublicBehavior(t *testing.T) {
