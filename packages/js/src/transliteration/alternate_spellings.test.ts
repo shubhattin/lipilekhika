@@ -94,8 +94,7 @@ const REWRITES: Partial<Record<script_list_type, [string, (text: string) => stri
     ['↑↑', sub(/\\"/g, '↑↑')]
   ],
   IAST: [
-    // TODO: oṁ is read as ओं, not ॐ (oṃ)
-    ['ṁ', sub(/(?<!\bo)ṃ/g, 'ṁ')],
+    ['ṁ', sub(/ṃ/g, 'ṁ')],
     ['r̥', sub(/ṛ/g, 'r̥')],
     ['r̥̄', sub(/ṝ/g, 'r̥̄')],
     ['’', sub(/'/g, '’')],

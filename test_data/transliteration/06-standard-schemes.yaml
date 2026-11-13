@@ -246,3 +246,51 @@
   input: kRRiShNa j~nAnam saMskRRitam
   output: kṛṣṇa jñānam saṃskṛtam
   reversible: true
+# ॐ is only read at the start of a word: inside one its spelling is read as its letters (the
+# Hindi -ों of logoṃ, जाऊं), also between two romanizations
+- index: 41
+  from: IAST
+  to: SLP1
+  input: logoṃ devoṃ tejoṃ'śa oṃ namaḥ
+  output: logoM devoM tejoM'Sa AUM namaH
+  reversible: true
+- index: 42
+  from: SLP1
+  to: IAST
+  input: jAUM AUM
+  output: jāūṃ oṃ
+  reversible: true
+- index: 43
+  from: Normal
+  to: IAST
+  input: jAUM AUM
+  output: jāūṃ oṃ
+  reversible: true
+- index: 44
+  from: Romanized
+  to: IAST
+  input: jāūṁ āūṁ
+  output: jāūṃ oṃ
+  reversible: true
+- index: 45
+  from: ITRANS
+  to: IAST
+  input: jAUM logoM OM
+  output: jāūṃ logoṃ oṃ
+  reversible: true
+- index: 46
+  from: IAST
+  to: Harvard-Kyoto
+  input: LOGOṂ Logoṃ oṃ
+  output: logoM logoM OM
+# IAST oṁ (ṁ is the anusvAra ṃ) is ॐ too
+- index: 47
+  from: IAST
+  to: Devanagari
+  input: oṁ Oṁ OṀ oṁ namaḥ śivāya logoṁ
+  output: ॐ ॐ ॐ ॐ नमः शिवाय लोगों
+- index: 48
+  from: IAST
+  to: SLP1
+  input: oṁ logoṁ
+  output: AUM logoM
