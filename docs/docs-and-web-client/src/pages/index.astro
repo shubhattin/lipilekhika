@@ -4,15 +4,17 @@ import HomePageTyping from '$components/examples/HomePageTyping.svelte';
 import Features from '$components/landing/Features.astro';
 import PackagesAndIntegrations from '$components/landing/PackagesAndIntegrations.svelte';
 import ScriptTrans from '$components/landing/ScriptTrans.svelte';
-import { Globe, ArrowRight } from 'lucide-svelte';
+import { Globe, ArrowRight, Download } from 'lucide-svelte';
 import { Icon } from 'svelte-icons-pack';
-import { SiAndroid, SiLinux, SiWindows } from 'svelte-icons-pack/si';
+import { SiAndroid, SiApple, SiLinux, SiWindows } from 'svelte-icons-pack/si';
 
-const WINDOWS_DOWNLOAD_URL = '/redirect/pc-app-release-win-download';
-const ANDROID_DOWNLOAD_URL = '/redirect/mobile-app-release-apk';
-// const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.shubhattin.lipilekhika';
-const LINUX_FCITX_PLUGIN_URL =
-  'https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md';
+/** Platforms shown on the Download button (same colours as the /download page) */
+const PLATFORM_ICONS = [
+  { icon: SiWindows, className: 'fill-sky-600 dark:fill-sky-400' },
+  { icon: SiApple, className: 'fill-foreground/80' },
+  { icon: SiLinux, className: 'fill-foreground/80' },
+  { icon: SiAndroid, className: 'fill-emerald-600 dark:fill-emerald-400' }
+];
 
 /** [English name, native name] for the Supported Scripts banner */
 const SUPPORTED_SCRIPTS = [
@@ -27,11 +29,6 @@ const SUPPORTED_SCRIPTS = [
   ['Odia', 'ଓଡ଼ିଆ'],
   ['Sinhala', 'සිංහල']
 ] as const;
-
-/** Secondary (download) buttons share one neutral look; the icon carries the platform colour.
- * No `display` here, so each button can pick `inline-flex` or `hidden sm:inline-flex`. */
-const DOWNLOAD_BUTTON_CLASS =
-  'h-11 items-center justify-center gap-2 rounded-lg border border-border bg-background/70 text-sm font-medium whitespace-nowrap text-foreground shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-md active:translate-y-0 dark:bg-card/60 dark:hover:bg-card';
 ---
 
 <RootLayout
@@ -77,11 +74,11 @@ const DOWNLOAD_BUTTON_CLASS =
           </p>
 
           <div
-            class="mt-7 flex w-full flex-row flex-wrap items-center justify-center gap-2 lg:justify-start"
+            class="mx-auto mt-7 flex w-full max-w-sm flex-row flex-wrap items-center justify-center gap-2 sm:max-w-none lg:mx-0 lg:justify-start"
           >
             <a
               href="/app"
-              class="group relative inline-flex h-11 min-w-0 flex-1 basis-0 items-center justify-center gap-2 rounded-lg border border-amber-500 bg-linear-to-b from-amber-400 to-amber-500 px-4 text-sm font-semibold whitespace-nowrap text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:from-amber-300 hover:to-amber-400 hover:shadow-[0_10px_28px_rgba(245,158,11,0.35)] active:translate-y-0 sm:flex-none sm:basis-auto"
+              class="group relative inline-flex h-11 grow items-center justify-center gap-1.5 rounded-lg border border-amber-500 bg-linear-to-b from-amber-400 to-amber-500 px-3 text-sm font-semibold whitespace-nowrap text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:from-amber-300 hover:to-amber-400 hover:shadow-[0_10px_28px_rgba(245,158,11,0.35)] active:translate-y-0 sm:flex-none sm:gap-2 sm:px-4"
             >
               <Globe class="size-4" />
               <span>Use Online</span>
@@ -91,42 +88,21 @@ const DOWNLOAD_BUTTON_CLASS =
             </a>
 
             <a
-              href={ANDROID_DOWNLOAD_URL}
-              rel="noopener noreferrer"
-              class={`${DOWNLOAD_BUTTON_CLASS} inline-flex min-w-0 flex-1 basis-0 px-3.5 sm:flex-none sm:basis-auto`}
+              href="/download"
+              aria-label="Download for Windows, macOS, Linux and Android"
+              class="group inline-flex h-11 grow items-center justify-center gap-1.5 rounded-lg border border-border bg-background/70 px-3 text-sm font-medium whitespace-nowrap text-foreground shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-md active:translate-y-0 sm:flex-none sm:gap-2.5 sm:px-4 dark:bg-card/60 dark:hover:bg-card"
             >
-              <Icon src={SiAndroid} className="size-4 fill-emerald-600 dark:fill-emerald-400" />
-              <span>Android</span>
+              <Download class="size-3.5 sm:size-4" />
+              <span>Download</span>
+              <span class="h-4 w-px bg-border" aria-hidden="true"></span>
+              <span class="flex items-center gap-1 sm:gap-2" aria-hidden="true">
+                {
+                  PLATFORM_ICONS.map(({ icon, className }) => (
+                    <Icon src={icon} className={`size-3.5 sm:size-4 ${className}`} />
+                  ))
+                }
+              </span>
             </a>
-
-            <a
-              rel="noopener noreferrer"
-              href={WINDOWS_DOWNLOAD_URL}
-              class={`${DOWNLOAD_BUTTON_CLASS} hidden px-3.5 sm:inline-flex`}
-            >
-              <Icon src={SiWindows} className="size-4 fill-sky-600 dark:fill-sky-400" />
-              <span>Windows</span>
-            </a>
-
-            <a
-              href={LINUX_FCITX_PLUGIN_URL}
-              rel="noopener noreferrer"
-              class={`${DOWNLOAD_BUTTON_CLASS} hidden px-3.5 sm:inline-flex`}
-            >
-              <Icon src={SiLinux} className="size-4 fill-foreground/80" />
-              <span>Linux</span>
-            </a>
-          </div>
-
-          <!-- every platform and file (portable Windows app, Lipi Parivartaka, ...) -->
-          <div class="mt-4 text-center text-xs text-muted-foreground lg:text-left">
-            <a href="/download" class="underline underline-offset-2 hover:text-foreground">
-              All downloads
-            </a>
-            <span class="hidden sm:inline"
-              >&nbsp;· Windows portable, macOS and Linux (Lipi Parivartaka)</span
-            >
-            <span class="sm:hidden">&nbsp;· Windows, macOS and Linux</span>
           </div>
         </div>
 
