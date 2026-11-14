@@ -5,7 +5,9 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use core_foundation::runloop::{CFRunLoop, kCFRunLoopCommonModes, kCFRunLoopDefaultMode};
+use core_foundation::runloop::{
+  CFRunLoop, CFRunLoopRunResult, kCFRunLoopCommonModes, kCFRunLoopDefaultMode,
+};
 use core_graphics::event::{
   CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType,
 };
@@ -18,14 +20,15 @@ use crate::{ThreadMessage, ThreadMessageOrigin, ThreadMessageType};
 /// How often the hook thread looks at the permission and at Secure Input
 const CHECK_EVERY: Duration = Duration::from_secs(1);
 
-/// Stores the hook's status and tells the UI and the tray when it changed
+/// Stores the hook's status and tells the UI and the tray when it changed (never waits on a full
+/// channel: a lost "draw again" is harmless, a blocked hook thread is not)
 fn set_status(state: &MacAppState, status: HookStatus) {
   if status.store(&state.app_state) {
-    let _ = state.tx_ui.send(ThreadMessage {
+    let _ = state.tx_ui.try_send(ThreadMessage {
       origin: ThreadMessageOrigin::KeyboardHook,
       msg: ThreadMessageType::RerenderUI,
     });
-    let _ = state.tx_tray.send(ThreadMessage {
+    let _ = state.tx_tray.try_send(ThreadMessage {
       origin: ThreadMessageOrigin::KeyboardHook,
       msg: ThreadMessageType::RerenderTray,
     });
@@ -48,7 +51,7 @@ pub fn run(
 
   let mut asked = false;
   loop {
-    if std::env::var_os("LIPI_DEBUG_HOOK").is_some() {
+    if super::debug_log() {
       eprintln!("[hook] trusted={}", permission::is_trusted());
     }
     if !permission::is_trusted() {
@@ -69,7 +72,8 @@ pub fn run(
   }
 }
 
-/// Runs the event tap until the permission goes away
+/// Runs the event tap until the permission goes away (or the system takes the tap away: the caller
+/// makes a new one)
 fn run_tap(state: &Arc<MacAppState>) -> Result<(), ()> {
   // the tap's callback runs on this thread only
   let tap_port = Rc::new(RefCell::new(None));
@@ -97,7 +101,7 @@ fn run_tap(state: &Arc<MacAppState>) -> Result<(), ()> {
   }?;
 
   *tap_port.borrow_mut() = Some(event_tap.mach_port().clone());
-  if std::env::var_os("LIPI_DEBUG_HOOK").is_some() {
+  if super::debug_log() {
     eprintln!("[hook] tap created");
   }
 
@@ -122,8 +126,17 @@ fn run_tap(state: &Arc<MacAppState>) -> Result<(), ()> {
     if secure && let Ok(mut ctx) = state.app_state.typing_context.lock() {
       ctx.clear_context();
     }
-    CFRunLoop::run_in_mode(unsafe { kCFRunLoopDefaultMode }, CHECK_EVERY, false);
+    let result = CFRunLoop::run_in_mode(unsafe { kCFRunLoopDefaultMode }, CHECK_EVERY, false);
     if !permission::is_trusted() {
+      break;
+    }
+    // the system took the tap away (its port is gone, the run loop has nothing to serve): make a
+    // new one, instead of coming back here at once over and over
+    if matches!(result, CFRunLoopRunResult::Finished)
+      || !unsafe { CGEventTapIsEnabled(event_tap.mach_port().as_concrete_TypeRef()) }
+    {
+      // not straight away: a system that keeps taking taps away would make this spin
+      std::thread::sleep(Duration::from_millis(500));
       break;
     }
   }
@@ -139,4 +152,9 @@ fn run_tap(state: &Arc<MacAppState>) -> Result<(), ()> {
 #[link(name = "CoreFoundation", kind = "framework")]
 unsafe extern "C" {
   fn CFMachPortInvalidate(port: core_foundation::mach_port::CFMachPortRef);
+}
+
+#[link(name = "CoreGraphics", kind = "framework")]
+unsafe extern "C" {
+  fn CGEventTapIsEnabled(tap: core_foundation::mach_port::CFMachPortRef) -> bool;
 }

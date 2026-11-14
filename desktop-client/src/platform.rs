@@ -105,10 +105,13 @@ pub fn relaunch_after_quit() {
     .filter(|p| p.extension().is_some_and(|e| e == "app"))
     .map(|p| p.to_path_buf())
     .unwrap_or(exe);
+  // waits until this process is gone: macOS opens only one copy of the app (a second `open` would
+  // only bring the closing one forward)
   let _ = std::process::Command::new("/bin/sh")
     .arg("-c")
-    .arg("sleep 1; open \"$0\"")
+    .arg("while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; open \"$0\"")
     .arg(target)
+    .arg(std::process::id().to_string())
     .spawn();
 }
 

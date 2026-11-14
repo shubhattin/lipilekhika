@@ -335,17 +335,17 @@ impl MainWindow {
   fn notice_height(cx: &App) -> f32 {
     let state = Controller::app_state(cx);
     match HookStatus::of(&state) {
-      HookStatus::NeedsPermission => 160.,
-      HookStatus::SecureInput if state.typing_enabled.load(Ordering::SeqCst) => 76.,
+      HookStatus::NeedsPermission => 180.,
       HookStatus::Failed => 112.,
       _ => 0.,
     }
   }
 
   /// What keeps the system wide typing from working, and what to do about it (macOS)
+  /// (A password field holding Secure Input only shows "Paused" in the typing card: a notice would
+  /// make the window jump every time a password field anywhere gets or loses the focus.)
   fn hook_notice(cx: &App) -> Option<AnyElement> {
     let state = Controller::app_state(cx);
-    let enabled = state.typing_enabled.load(Ordering::SeqCst);
     match HookStatus::of(&state) {
       HookStatus::NeedsPermission => Some(
         v_flex()
@@ -353,7 +353,7 @@ impl MainWindow {
           .child(
             Alert::warning(
               "needs-permission",
-              "To type in other apps, turn on Lipi Lekhika in System Settings → Privacy & Security → Accessibility (on macOS 27: Device Control and Data Access). Typing starts as soon as it is on.",
+              "To type in other apps, turn on Lipi Lekhika in System Settings → Privacy & Security → Accessibility (on macOS 27: Device Control and Data Access). Typing starts as soon as it is on. Already on? Remove it there with −, then open Lipi Lekhika again.",
             )
             .small(),
           )
@@ -365,14 +365,6 @@ impl MainWindow {
               .on_click(|_, _, _| crate::platform::open_permission_settings()),
           )
           .into_any_element(),
-      ),
-      HookStatus::SecureInput if enabled => Some(
-        Alert::info(
-          "secure-input",
-          "Typing is paused while a password field (or Terminal's Secure Keyboard Entry) is active. It goes on by itself afterwards.",
-        )
-        .small()
-        .into_any_element(),
       ),
       HookStatus::Failed => Some(
         v_flex()

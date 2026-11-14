@@ -29,6 +29,9 @@
   <!-- one running app: a second start would add a second keyboard hook -->
   <key>LSMultipleInstancesProhibited</key>
   <true/>
+  <!-- no App Nap: the app mostly waits in the menu bar, and its keyboard hook must answer at once -->
+  <key>NSAppSleepDisabled</key>
+  <true/>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSHumanReadableCopyright</key>

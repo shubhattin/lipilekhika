@@ -60,9 +60,9 @@ codesign --display --requirements - "$app"
 ln -s /Applications "$stage/Applications"
 dmg="$out/lipilekhika-$version-macos-universal.dmg"
 rm -f "$dmg"
+# the disk image itself is not signed: macOS checks a signed image when it is opened and refuses
+# one with a self-signed certificate ("Not Opened"), an unsigned one just opens. The app in it is
+# signed, that is what macOS checks at its first start and for the Accessibility permission.
 hdiutil create -volname "Lipi Lekhika" -srcfolder "$stage" -fs HFS+ -format UDZO -ov "$dmg"
-if [ "$identity" != "-" ]; then
-  codesign --force --timestamp=none --sign "$identity" "$dmg"
-fi
 hdiutil verify "$dmg"
 echo "$dmg"

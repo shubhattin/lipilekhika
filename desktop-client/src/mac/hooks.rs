@@ -52,6 +52,7 @@ fn is_context_clear_key(keycode: u16) -> bool {
     VK_DELETE
       | VK_FORWARD_DELETE
       | VK_RETURN
+      | VK_KEYPAD_ENTER
       | VK_TAB
       | VK_ESCAPE
       | VK_LEFT
@@ -69,12 +70,14 @@ fn is_context_clear_key(keycode: u16) -> bool {
 
 /// The key code of the events that carry the new text. The text itself is set on the event; apps
 /// that look at the key code see `A` (code 0), as with other tools that type text this way.
-/// `LIPI_MAC_TEXT_KEYCODE` overrides it (for testing other codes in other apps).
+/// `LIPI_MAC_TEXT_KEYCODE` overrides it in debug builds (for testing other codes in other apps).
 fn text_keycode() -> u16 {
   static CODE: std::sync::OnceLock<u16> = std::sync::OnceLock::new();
   *CODE.get_or_init(|| {
-    std::env::var("LIPI_MAC_TEXT_KEYCODE")
-      .ok()
+    // a test switch of debug builds only
+    cfg!(debug_assertions)
+      .then(|| std::env::var("LIPI_MAC_TEXT_KEYCODE").ok())
+      .flatten()
       .and_then(|v| v.parse().ok())
       .unwrap_or(0)
   })
@@ -164,9 +167,9 @@ pub enum Edit {
 /// How to delete the last `n` code points of `typed` (the end of it is left of the caret).
 ///
 /// Every app deletes one code point per Backspace in the scripts of the BMP (Devanagari, Tamil...).
-/// In the scripts outside it (Brahmi, Grantha, Sharada, Siddham, Modi) the native Mac apps and
-/// Safari delete a whole cluster (a letter with its signs), Chromium-based apps (`code_point_app`:
-/// Chrome, Edge, Electron apps) still one code point.
+/// In the scripts outside it (Brahmi, Grantha, Sharada, Siddham, Modi) the native Mac apps, Safari
+/// and Terminal delete a whole cluster (a letter with its signs), Chromium and Gecko based apps
+/// (`code_point_app`: Chrome, Edge, Electron apps, Firefox) still one code point.
 pub fn plan_edit(typed: &str, n: usize, code_point_app: bool) -> Edit {
   use unicode_segmentation::UnicodeSegmentation as _;
   if n == 0 || code_point_app || typed.chars().count() < n {
@@ -195,25 +198,35 @@ pub fn plan_edit(typed: &str, n: usize, code_point_app: bool) -> Edit {
   }
 }
 
-/// Whether the app with `pid` is built on Chromium (Chrome, Edge, Brave, Arc, Electron apps such
-/// as VS Code, Slack, Discord): they all ship a `… Helper (Renderer).app`
-fn is_chromium_app(pid: i32) -> bool {
+/// Whether the app with `pid` deletes one code point per Backspace in every script: the apps built
+/// on Chromium (Chrome, Edge, Brave, Arc, Electron apps such as VS Code, Slack, Discord: they ship
+/// a `… Helper (Renderer).app`) and on Gecko (Firefox, Thunderbird, LibreWolf, Zen: they ship
+/// `Contents/MacOS/XUL`). Measured on macOS 27: Chrome, VS Code and Firefox delete one code point,
+/// TextEdit, Safari and Terminal a whole cluster. Known apps are kept by their path (a process id
+/// can be used again).
+fn deletes_code_points(pid: i32) -> bool {
   use std::collections::HashMap;
-  static SEEN: Mutex<Option<HashMap<i32, bool>>> = Mutex::new(None);
+  use std::path::PathBuf;
+  static SEEN: Mutex<Option<HashMap<PathBuf, bool>>> = Mutex::new(None);
   if pid <= 0 {
     return false;
   }
+  let Some(app) = app_bundle_of(pid) else {
+    return false;
+  };
   if let Ok(seen) = SEEN.lock()
-    && let Some(&known) = seen.as_ref().and_then(|m| m.get(&pid))
+    && let Some(&known) = seen.as_ref().and_then(|m| m.get(&app))
   {
     return known;
   }
-  let chromium =
-    app_bundle_of(pid).is_some_and(|app| has_renderer_helper(&app.join("Contents/Frameworks"), 0));
+  let code_points = app.join("Contents/MacOS/XUL").is_file()
+    || has_renderer_helper(&app.join("Contents/Frameworks"));
   if let Ok(mut seen) = SEEN.lock() {
-    seen.get_or_insert_with(HashMap::new).insert(pid, chromium);
+    seen
+      .get_or_insert_with(HashMap::new)
+      .insert(app, code_points);
   }
-  chromium
+  code_points
 }
 
 /// The `.app` folder of the process `pid`
@@ -231,18 +244,27 @@ fn app_bundle_of(pid: i32) -> Option<std::path::PathBuf> {
     .map(|p| p.to_path_buf())
 }
 
-fn has_renderer_helper(dir: &std::path::Path, depth: u32) -> bool {
-  let Ok(entries) = std::fs::read_dir(dir) else {
-    return false;
+/// Looks in the two places Chromium puts its renderer helper (a few folder reads, it runs in the
+/// tap): `Frameworks/<App> Helper (Renderer).app` (Electron) and
+/// `Frameworks/<Name> Framework.framework/Versions/Current/Helpers/` (Chrome, Edge, Brave...)
+fn has_renderer_helper(frameworks: &std::path::Path) -> bool {
+  let is_helper = |name: &str| name.ends_with("Helper (Renderer).app");
+  let names = |dir: &std::path::Path| -> Vec<String> {
+    std::fs::read_dir(dir)
+      .map(|entries| {
+        entries
+          .flatten()
+          .map(|e| e.file_name().to_string_lossy().into_owned())
+          .collect()
+      })
+      .unwrap_or_default()
   };
-  entries.flatten().any(|entry| {
-    let name = entry.file_name();
-    let name = name.to_string_lossy();
-    name.ends_with("Helper (Renderer).app")
-      || (depth < 4
-        && entry.file_type().is_ok_and(|t| t.is_dir())
-        && !name.ends_with(".app")
-        && has_renderer_helper(&entry.path(), depth + 1))
+  names(frameworks).iter().any(|name| {
+    is_helper(name)
+      || (name.ends_with(" Framework.framework")
+        && names(&frameworks.join(name).join("Versions/Current/Helpers"))
+          .iter()
+          .any(|n| is_helper(n)))
   })
 }
 
@@ -308,7 +330,7 @@ pub fn build_event_tap_callback(
   state: Arc<MacAppState>,
   tap_port: Rc<RefCell<Option<CFMachPort>>>,
 ) -> impl Fn(CGEventTapProxy, CGEventType, &CGEvent) -> CallbackResult + 'static {
-  let debug = std::env::var_os("LIPI_DEBUG_HOOK").is_some();
+  let debug = super::debug_log();
   move |_proxy, event_type, event| {
     if debug {
       eprintln!(
@@ -385,15 +407,15 @@ pub fn build_event_tap_callback(
         clear_context(&state);
       }
 
-      let _ = state.tx_ui.send(ThreadMessage {
+      let _ = state.tx_ui.try_send(ThreadMessage {
         origin: ThreadMessageOrigin::KeyboardHook,
         msg: ThreadMessageType::TriggerTypingNotification,
       });
-      let _ = state.tx_ui.send(ThreadMessage {
+      let _ = state.tx_ui.try_send(ThreadMessage {
         origin: ThreadMessageOrigin::KeyboardHook,
         msg: ThreadMessageType::RerenderUI,
       });
-      let _ = state.tx_tray.send(ThreadMessage {
+      let _ = state.tx_tray.try_send(ThreadMessage {
         origin: ThreadMessageOrigin::KeyboardHook,
         msg: ThreadMessageType::RerenderTray,
       });
@@ -407,7 +429,7 @@ pub fn build_event_tap_callback(
       && flags.intersects(CGEventFlags::CGEventFlagCommand | CGEventFlags::CGEventFlagControl)
       && !flags.intersects(CGEventFlags::CGEventFlagAlternate | CGEventFlags::CGEventFlagShift)
     {
-      let _ = state.tx_ui.send(ThreadMessage {
+      let _ = state.tx_ui.try_send(ThreadMessage {
         origin: ThreadMessageOrigin::KeyboardHook,
         msg: ThreadMessageType::CloseApp,
       });
@@ -452,7 +474,10 @@ pub fn build_event_tap_callback(
       return CallbackResult::Keep;
     };
 
+    // a control character (a key that edits rather than types): the text around the caret is not
+    // what the context knows any more
     if text.chars().any(|ch| ch.is_control()) {
+      clear_context(&state);
       return CallbackResult::Keep;
     }
 
@@ -484,7 +509,7 @@ pub fn build_event_tap_callback(
         let edit = plan_edit(
           &typed,
           total_delete,
-          outside_bmp && is_chromium_app(target_pid),
+          outside_bmp && deletes_code_points(target_pid),
         );
         let keep = typed.chars().count().saturating_sub(total_delete);
         let cut = typed

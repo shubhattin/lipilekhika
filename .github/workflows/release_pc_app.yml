@@ -299,14 +299,19 @@ jobs:
         run: cargo test --release -p lipilekhika-ui --target aarch64-apple-darwin
 
       # The project's self-signed certificate (secrets MACOS_CERT_P12_BASE64 and
-      # MACOS_CERT_PASSWORD) in a keychain of this run only. Without the secrets the app is
-      # signed ad hoc, as before.
+      # MACOS_CERT_PASSWORD) in a keychain of this run only. Without the secrets a dry run signs
+      # ad hoc; a release stops.
       - name: Import the signing certificate
         env:
           MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: |
           if [ -z "$MACOS_CERT_P12_BASE64" ]; then
+            # a release signed ad hoc would lose every user's Accessibility permission on update
+            if [ "$PUBLISH" = "true" ]; then
+              echo "::error::MACOS_CERT_P12_BASE64 is not set: a release must be signed with the project's certificate"
+              exit 1
+            fi
             echo "::warning::MACOS_CERT_P12_BASE64 is not set: the app is signed ad hoc"
             exit 0
           fi

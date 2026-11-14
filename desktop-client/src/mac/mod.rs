@@ -19,6 +19,11 @@ pub struct MacAppState {
   pub typed: std::sync::Mutex<String>,
 }
 
+/// `LIPI_DEBUG_HOOK`: the hook writes what it sees to stderr (debug builds only: it logs keys)
+pub fn debug_log() -> bool {
+  cfg!(debug_assertions) && std::env::var_os("LIPI_DEBUG_HOOK").is_some()
+}
+
 pub fn run(
   app_state: Arc<AppState>,
   tx_ui: Sender<ThreadMessage>,
