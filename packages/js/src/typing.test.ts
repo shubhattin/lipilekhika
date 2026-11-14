@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createTypingContext, type TypingDiff } from './typing';
+import { createTypingContext, getScriptInputTexts, type TypingDiff } from './typing';
 
 /** A high surrogate not followed by a low one, or a low surrogate not preceded by a high one */
 const LONE_SURROGATE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/;
@@ -159,4 +159,13 @@ describe('Typing a long text without a context break', () => {
     expect(long.result).toBe('क्'.repeat(4_999) + 'क');
     expect(long.ms / short.ms).toBeLessThan(12);
   }, 60_000);
+});
+
+describe('getScriptInputTexts', () => {
+  it('includes the other spellings of a script', async () => {
+    const itrans = await getScriptInputTexts('ITRANS');
+    for (const text of ['RRi', 'R^i', 'Ch', 'chh', 'x', 'GY']) expect(itrans).toContain(text);
+    expect(itrans).not.toContain('');
+    expect(await getScriptInputTexts('Normal')).toContain('chh');
+  });
 });
