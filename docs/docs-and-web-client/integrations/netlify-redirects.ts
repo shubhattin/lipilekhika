@@ -65,9 +65,13 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
             redirects.push(`/redirect/pc-app-release-macos ${macUrl} 302`);
             redirects.push(`/redirect/pc-app-release-macos-parivartaka ${macUrl} 302`);
           }
-          // the latest version, for the PC app's update check (it accepts only `x.y.z`)
+          // the latest version, for the PC app's update check (it accepts only `x.y.z`). Only
+          // once the release has its installer: a release is published before its files are
+          // uploaded, the app would offer a version it can't download yet (without the file it
+          // falls back to the GitHub releases, which skips such a release too)
           const version = parseTagVersion(pcRelease.tag_name, 'pc-app@v');
-          if (version && /^\d+\.\d+\.\d+$/.test(version)) {
+          const hasMsi = pcRelease.assets.some((a) => a.name === `lipilekhika-${version}.msi`);
+          if (version && /^\d+\.\d+\.\d+$/.test(version) && hasMsi) {
             const pcAppDir = join(fileURLToPath(dir), 'pc-app');
             mkdirSync(pcAppDir, { recursive: true });
             writeFileSync(
@@ -77,7 +81,9 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
             );
             logger.info(`pc-app/latest.json: ${version}`);
           } else {
-            logger.warn(`Not writing pc-app/latest.json: bad version in ${pcRelease.tag_name}`);
+            logger.warn(
+              `Not writing pc-app/latest.json: ${pcRelease.tag_name} has no installer yet, or a bad version`
+            );
           }
         } else {
           logger.warn('Could not find Windows PC app release');

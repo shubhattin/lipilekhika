@@ -4,6 +4,9 @@
 //! the site is built from the latest release). When the website can't be reached, or no longer
 //! has the file, it comes from the GitHub releases, where every download is in the end. The
 //! website gives the version only: the installer is always downloaded from the GitHub release.
+//! A version is offered only once its release has the installer (the release is published
+//! before its files are uploaded): the website writes `latest.json` only then, and the GitHub
+//! releases without it are skipped.
 
 use serde::Deserialize;
 use std::env;
@@ -19,7 +22,7 @@ pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const LATEST_JSON_URL: &str = "https://lipilekhika.in/pc-app/latest.json";
 /// The repository's releases (every package of the repository has its releases here)
 const GITHUB_RELEASES_URL: &str =
-  "https://api.github.com/repos/shubhattin/lipilekhika/releases?per_page=100";
+  "https://api.github.com/repos/shubhattin/lipilekhika/releases?per_page=60";
 const TAG_PREFIX: &str = "pc-app@v";
 /// How often the website is tried before the GitHub releases
 const WEBSITE_TRIES: u32 = 2;
@@ -82,7 +85,8 @@ fn is_version_greater(version_a: &str, version_b: &str) -> bool {
 /// The installer of a version, on its GitHub release
 fn msi_download_url(version: &str) -> String {
   format!(
-    "https://github.com/shubhattin/lipilekhika/releases/download/pc-app%40v{version}/lipilekhika-{version}.msi"
+    "https://github.com/shubhattin/lipilekhika/releases/download/pc-app%40v{version}/{}",
+    msi_name(version)
   )
 }
 
@@ -100,6 +104,18 @@ struct GitHubRelease {
   draft: bool,
   #[serde(default)]
   prerelease: bool,
+  #[serde(default)]
+  assets: Vec<GitHubAsset>,
+}
+
+#[derive(Deserialize)]
+struct GitHubAsset {
+  name: String,
+}
+
+/// The installer's file name of a version (the one file every release has)
+fn msi_name(version: &str) -> String {
+  format!("lipilekhika-{version}.msi")
 }
 
 /// The latest version in the website's `latest.json`
@@ -111,16 +127,17 @@ fn version_of_latest_json(body: &str) -> Result<String, String> {
   }
 }
 
-/// The highest version of the published pc-app releases (the list is in the order of the tags'
-/// commits, not of the versions)
+/// The highest version of the published pc-app releases that have their installer (the list is
+/// in the order of the tags' commits, not of the versions)
 fn version_of_releases(body: &str) -> Result<String, String> {
   let releases: Vec<GitHubRelease> =
     serde_json::from_str(body).map_err(|e| format!("bad JSON: {e}"))?;
   releases
     .iter()
     .filter(|r| !r.draft && !r.prerelease)
-    .filter_map(|r| r.tag_name.strip_prefix(TAG_PREFIX))
-    .filter_map(|v| parse_version(v).map(|parsed| (parsed, v)))
+    .filter_map(|r| Some((r, r.tag_name.strip_prefix(TAG_PREFIX)?)))
+    .filter(|(r, v)| r.assets.iter().any(|a| a.name == msi_name(v)))
+    .filter_map(|(_, v)| parse_version(v).map(|parsed| (parsed, v)))
     .max_by_key(|(parsed, _)| *parsed)
     .map(|(_, v)| v.to_string())
     .ok_or_else(|| "no pc-app release".to_string())
@@ -334,7 +351,13 @@ async fn download_file(
   url: &str,
   dest_path: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-  let response = reqwest::get(url).await?;
+  // a stalled download fails (the update then opens the download page)
+  let client = reqwest::Client::builder()
+    .user_agent(concat!("lipilekhika-pc-app/", env!("CARGO_PKG_VERSION")))
+    .connect_timeout(Duration::from_secs(15))
+    .read_timeout(Duration::from_secs(30))
+    .build()?;
+  let response = client.get(url).send().await?;
 
   if !response.status().is_success() {
     return Err(format!("HTTP error: {}", response.status()).into());
@@ -408,16 +431,27 @@ mod tests {
   #[test]
   fn test_releases() {
     // in the order of the tags' commits: the highest version is not always first
-    let body = r#"[
-      {"tag_name":"rust-lib@v1.2.0","draft":false,"prerelease":false},
-      {"tag_name":"pc-app@v1.1.0","draft":false,"prerelease":false},
-      {"tag_name":"pc-app@v1.1.2","draft":false,"prerelease":false,"author":null},
-      {"tag_name":"pc-app@v1.2.0-beta.1","draft":false,"prerelease":false},
-      {"tag_name":"pc-app@v1.3.0","draft":false,"prerelease":true},
-      {"tag_name":"pc-app@v1.4.0","draft":true,"prerelease":false},
-      {"tag_name":"pc-app@v1.0.11","draft":false,"prerelease":false}
-    ]"#;
-    assert_eq!(version_of_releases(body), Ok("1.1.2".to_string()));
+    let msi = |v: &str| format!(r#"[{{"name":"lipilekhika-{v}.msi"}},{{"name":"x.dmg"}}]"#);
+    let body = format!(
+      r#"[
+      {{"tag_name":"rust-lib@v1.2.0","draft":false,"prerelease":false,"assets":[]}},
+      {{"tag_name":"pc-app@v1.1.0","draft":false,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.1.2","draft":false,"prerelease":false,"author":null,"assets":{}}},
+      {{"tag_name":"pc-app@v1.2.0-beta.1","draft":false,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.3.0","draft":false,"prerelease":true,"assets":{}}},
+      {{"tag_name":"pc-app@v1.4.0","draft":true,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.5.0","draft":false,"prerelease":false,"assets":[{{"name":"x.dmg"}}]}},
+      {{"tag_name":"pc-app@v1.0.11","draft":false,"prerelease":false,"assets":{}}}
+    ]"#,
+      msi("1.1.0"),
+      msi("1.1.2"),
+      msi("1.2.0-beta.1"),
+      msi("1.3.0"),
+      msi("1.4.0"),
+      msi("1.0.11"),
+    );
+    // 1.5.0's installer is not uploaded yet
+    assert_eq!(version_of_releases(&body), Ok("1.1.2".to_string()));
     assert!(version_of_releases("[]").is_err());
     assert!(version_of_releases(r#"{"message":"API rate limit exceeded"}"#).is_err());
   }

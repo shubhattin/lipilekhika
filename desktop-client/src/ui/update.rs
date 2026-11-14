@@ -19,7 +19,7 @@ use gpui_kit::{
   AnyElement, AnyWindowHandle, App, AsyncApp, InteractiveElement as _, IntoElement,
   ParentElement as _, StatefulInteractiveElement as _, Styled as _, div, px,
 };
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 /// On how many starts the popup is shown for a version
 const MAX_PROMPTS: u8 = 3;
@@ -31,6 +31,9 @@ const RETRY_AFTER: [Duration; 3] = [
 ];
 /// The wait between the checks while the app runs
 const CHECK_EVERY: Duration = Duration::from_secs(12 * 60 * 60);
+/// A wait is made of steps of at most this, each measured on the clock: a timer stops while the
+/// computer sleeps, the clock doesn't (a check is due soon after waking)
+const WAIT_STEP: Duration = Duration::from_secs(10 * 60);
 
 /// Where the check is
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -53,8 +56,9 @@ pub struct UpdateState {
   pub in_progress: bool,
   /// the version the popup was shown for on this start
   prompted_version: Option<String>,
-  /// the popup is on screen (the link waits until it is gone)
+  /// the popup is on screen (the link waits until it is gone), and its window
   popup_open: bool,
+  popup_window: Option<AnyWindowHandle>,
 }
 
 impl UpdateState {
@@ -87,7 +91,13 @@ pub fn start_version_check(cx: &mut App) {
         // a check from About is running
         None => RETRY_AFTER[0],
       };
-      cx.background_executor().timer(wait).await;
+      let due = SystemTime::now() + wait;
+      while let Ok(left) = due.duration_since(SystemTime::now()) {
+        if left.is_zero() {
+          break;
+        }
+        cx.background_executor().timer(left.min(WAIT_STEP)).await;
+      }
     }
   })
   .detach();
@@ -167,8 +177,10 @@ pub fn run_update(cx: &mut App) {
     cx.update(|cx| match result {
       UpdateResult::InstallerLaunched => cx.quit(),
       other => {
+        // the installer could not be downloaded or started: the download page offers it
         eprintln!("Update failed: {other:?}");
         cx.global_mut::<Controller>().update.in_progress = false;
+        cx.open_url(super::DOWNLOAD_URL);
         cx.refresh_windows();
       }
     });
@@ -214,8 +226,16 @@ pub fn prompt_update(cx: &mut App) {
   }
   Controller::save_config(cx);
   let update = &mut cx.global_mut::<Controller>().update;
+  // the popup of an older version (found earlier in this run) goes
+  let older = update.popup_window.take().filter(|_| update.popup_open);
   update.prompted_version = Some(version.clone());
   update.popup_open = true;
+  update.popup_window = Some(handle);
+  if let Some(older) = older {
+    let _ = older.update(cx, |_, window, cx| {
+      window.remove_notification::<UpdatePopup>(cx);
+    });
+  }
   let _ = handle.update(cx, |_, window, cx| {
     window.push_notification(popup(version), cx);
   });
@@ -235,6 +255,7 @@ fn prompt_window(cx: &App) -> Option<AnyWindowHandle> {
 struct UpdatePopup;
 
 fn popup(version: String) -> Notification {
+  let shown_for = version.clone();
   let message = if installs_update() {
     "Install it now, or later from the Update link in the window."
   } else {
@@ -274,8 +295,13 @@ fn popup(version: String) -> Notification {
         )
         .into_any_element()
     })
-    .on_close(|_, cx| {
-      cx.global_mut::<Controller>().update.popup_open = false;
+    .on_close(move |_, cx| {
+      // not when this is the popup of an older version, replaced by a newer one's
+      let update = &mut cx.global_mut::<Controller>().update;
+      if update.prompted_version.as_deref() == Some(shown_for.as_str()) {
+        update.popup_open = false;
+        update.popup_window = None;
+      }
       cx.refresh_windows();
     })
 }
