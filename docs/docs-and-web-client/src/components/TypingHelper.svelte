@@ -173,6 +173,17 @@
             </span>
           {/if}
         </div>
+        {#if ctx.show_alternates && cell.other?.alternates}
+          <div class="flex flex-wrap justify-center gap-0.5">
+            {#each cell.other.alternates as alt (alt)}
+              <span
+                class="rounded border border-border/70 px-1 text-[11px] leading-4 text-muted-foreground {ctx.other_font}"
+              >
+                {alt}
+              </span>
+            {/each}
+          </div>
+        {/if}
       {/if}
     </div>
   {/if}
@@ -206,6 +217,16 @@
           <div class="order-last flex w-full items-center gap-2 sm:order-none sm:w-auto">
             <span class="text-sm text-muted-foreground">with</span>
             <ScriptSelector bind:script={compare} have_normal_script={true} />
+            <div class="ml-auto flex items-center gap-1 sm:ml-2">
+              <Checkbox id="show-alternate-spellings" bind:checked={show_alternates} />
+              <Label
+                for="show-alternate-spellings"
+                class="cursor-pointer pl-1 text-sm font-normal text-muted-foreground select-none hover:text-foreground"
+                title="Other spellings of the compared script which give the same letter"
+              >
+                Alternates
+              </Label>
+            </div>
           </div>
         {:else}
           <div class="ml-auto flex items-center gap-1">
