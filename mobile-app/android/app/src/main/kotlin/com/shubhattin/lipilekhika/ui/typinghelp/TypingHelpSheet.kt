@@ -273,6 +273,8 @@ private fun HelpControls(
                     onClick = { onPick(Picking.COMPARE) },
                     modifier = Modifier.width(220.dp),
                 )
+                Spacer(Modifier.weight(1f))
+                AlternatesToggle(showAlternates, onShowAlternates, narrow = true, onInfo = null)
             } else {
                 Spacer(Modifier.weight(1f))
                 AlternatesToggle(showAlternates, onShowAlternates, narrow = false, onInfo = onInfo)
@@ -310,6 +312,7 @@ private fun HelpControls(
                         onClick = { onPick(Picking.COMPARE) },
                         modifier = Modifier.weight(1f),
                     )
+                    AlternatesToggle(showAlternates, onShowAlternates, narrow = true, onInfo = null)
                 }
             }
         }
@@ -381,7 +384,8 @@ private fun AlternatesToggle(
     checked: Boolean,
     onChange: (Boolean) -> Unit,
     narrow: Boolean,
-    onInfo: () -> Unit,
+    /** the "About alternate keys" info, only on the typing map */
+    onInfo: (() -> Unit)?,
 ) {
     val muted = LocalLipiColors.current.mutedForeground
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -401,7 +405,15 @@ private fun AlternatesToggle(
                 maxLines = 1,
             )
         }
-        IconAction(Icons.Outlined.Info, "About alternate keys", onInfo, tint = muted, size = 32.dp)
+        if (onInfo != null) {
+            IconAction(
+                Icons.Outlined.Info,
+                "About alternate keys",
+                onInfo,
+                tint = muted,
+                size = 32.dp,
+            )
+        }
     }
 }
 

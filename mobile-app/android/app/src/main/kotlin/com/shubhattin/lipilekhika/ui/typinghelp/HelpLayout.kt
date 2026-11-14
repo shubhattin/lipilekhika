@@ -2,9 +2,11 @@ package com.shubhattin.lipilekhika.ui.typinghelp
 
 import com.shubhattin.lipilekhika.core.KramaDataItem
 import com.shubhattin.lipilekhika.core.ListType
+import com.shubhattin.lipilekhika.core.getScriptInputTexts
 import com.shubhattin.lipilekhika.core.getScriptKramaData
 import com.shubhattin.lipilekhika.core.getScriptTypingDataMap
 import com.shubhattin.lipilekhika.core.transliterate
+import java.text.Normalizer
 import java.util.concurrent.ConcurrentHashMap
 
 /*
@@ -30,7 +32,12 @@ data class Glyph(
 )
 
 /** The compared script's text of a cell (Compare tab) */
-data class CompareText(val text: String, val sign: String? = null)
+data class CompareText(
+    val text: String,
+    val sign: String? = null,
+    /** the other spellings of [text] in the compared script (`R^i` beside `RRi` in ITRANS) */
+    val alternates: List<String> = emptyList(),
+)
 
 /** One card */
 data class Cell(
@@ -252,6 +259,40 @@ fun loadLayout(script: String, compare: String? = null): HelpLayout =
 
 private fun keyOf(text: String, type: ListType) = "$text\u0000${type.name}"
 
+private val inputTextsCache = ConcurrentHashMap<String, Map<String, List<String>>>()
+
+/** The texts [script] reads (with the other spellings), keyed by what they convert to */
+private fun inputTextsByOutput(script: String): Map<String, List<String>> =
+    inputTextsCache.getOrPut(script) {
+        getScriptInputTexts(script).groupBy { transliterate(it, script, "Devanagari") }
+    }
+
+private fun nfc(text: String) = Normalizer.normalize(text, Normalizer.Form.NFC)
+
+/** The same spelling up to case and Unicode composition (`Ā` is a capital of `ā`) */
+private fun foldKey(text: String) = nfc(text).lowercase()
+
+/**
+ * The other spellings of [text] in [script]: the texts which convert to the same text, without the
+ * in between states (`O` while typing `OM`, they convert to themselves), the capital forms of the
+ * case insensitive schemes, the Unicode duplicates, or the non-ASCII read back forms of an ASCII
+ * scheme (`è`). The lowercase forms first, so `r̥` is shown rather than `R̥`.
+ */
+private fun alternatesOf(
+    byOutput: Map<String, List<String>>?,
+    script: String?,
+    text: String,
+): List<String> {
+    if (byOutput == null || script == null || text.isEmpty()) return emptyList()
+    val candidates = byOutput[transliterate(text, script, "Devanagari")] ?: return emptyList()
+    val ascii = isAscii(text)
+    val seen = hashSetOf(foldKey(text))
+    return candidates
+        .sortedBy { it != it.lowercase() }
+        .filter { !(ascii && !isAscii(it)) && seen.add(foldKey(it)) }
+        .map(::nfc)
+}
+
 private fun isBrahmic(k: List<KramaDataItem>, indexOfK: Int) =
     indexOfK >= 0 && indexOfK < k.size && k[indexOfK].listType == ListType.VYANJANA
 
@@ -292,6 +333,10 @@ fun buildLayout(script: String, compare: String? = null): HelpLayout {
 
     val indexOfK = indexOf("k")
     val brahmic = isBrahmic(krama, indexOfK)
+    val cmpBrahmic = cmp != null && isBrahmic(cmp, indexOfK)
+    // the other spellings of the compared romanization scheme (`R^i` beside `RRi` in ITRANS),
+    // the brahmic scripts only have Unicode duplicates and fallback letters
+    val cmpInputTexts = if (compare != null && !cmpBrahmic) inputTextsByOutput(compare) else null
 
     fun cellAt(id: String, withSign: Boolean = false): Cell? {
         val i = indexOf(id)
@@ -309,7 +354,8 @@ fun buildLayout(script: String, compare: String? = null): HelpLayout {
                 if (withSign && next?.listType == ListType.MATRA && next.text.isNotEmpty())
                     next.text
                 else null
-            other = CompareText(otherText, otherSign)
+            other =
+                CompareText(otherText, otherSign, alternatesOf(cmpInputTexts, compare, otherText))
         }
 
         // a character which can not be typed has nothing to show in the typing map
@@ -351,7 +397,6 @@ fun buildLayout(script: String, compare: String? = null): HelpLayout {
         return if (toBrahmic) text else text.replace(Regex("a$"), "")
     }
 
-    val cmpBrahmic = cmp != null && isBrahmic(cmp, indexOfK)
     val conjunctCells = CONJUNCTS.map { c ->
         val text = conjunctText(c.seq, script, brahmic)
         val type = if (brahmic) ListType.VYANJANA else ListType.ANYA
@@ -360,7 +405,11 @@ fun buildLayout(script: String, compare: String? = null): HelpLayout {
         Cell(
             id = "conj-${c.seq}",
             main = Glyph(text, c.keys.first(), c.keys.drop(1) + ownKeys),
-            other = compare?.let { CompareText(conjunctText(c.seq, it, cmpBrahmic)) },
+            other =
+                compare?.let {
+                    val otherText = conjunctText(c.seq, it, cmpBrahmic)
+                    CompareText(otherText, alternates = alternatesOf(cmpInputTexts, it, otherText))
+                },
         )
     }
     val conjunctGroup =

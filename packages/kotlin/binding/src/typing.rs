@@ -224,3 +224,20 @@ pub extern "system" fn Java_com_shubhattin_lipilekhika_core_NativeLib_getScriptK
         Ok(new_nested_array(env, "[Ljava/lang/String;", items)?.into_raw())
     })
 }
+
+/// `NativeLib.getScriptInputTexts`: every text a script reads when converting from it, with
+/// its other spellings.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_shubhattin_lipilekhika_core_NativeLib_getScriptInputTexts<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    script: JString<'local>,
+) -> jobjectArray {
+    run(&mut env, std::ptr::null_mut(), |env| {
+        let script = parse_script(env, &script, "script")?;
+        let texts = lt::get_script_input_texts(script);
+        Ok(new_string_array(env, texts.iter().map(String::as_str))?.into_raw())
+    })
+}

@@ -270,6 +270,16 @@ fun HelpCard(
                     color = colors.mutedForeground,
                     textAlign = TextAlign.Center,
                 )
+                // the other spellings of the compared script (`R^i` beside `RRi` in ITRANS)
+                if (showAlternates && other != null && other.alternates.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement =
+                            Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        for (alt in other.alternates) AltKey(alt)
+                    }
+                }
             }
         }
     }
