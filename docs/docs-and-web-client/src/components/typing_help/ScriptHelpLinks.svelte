@@ -10,23 +10,30 @@
 
   let { script, labelled = false }: { script: ScriptListType; labelled?: boolean } = $props();
 
+  type Pair = readonly [ScriptListType, ScriptListType];
+
   /**
-   * What each script is compared with, as [script shown, compared with]. The first one has
-   * to be a typing script, so Normal is shown as the other side of Devanagari.
+   * What each script is compared with, as [script shown, compared with], one button each
+   * (the icon buttons show only the first). The first one has to be a typing script, so
+   * Normal is shown as the other side of the schemes it is compared with.
    */
-  const COMPARE: Partial<Record<ScriptListType, [ScriptListType, ScriptListType]>> = {
-    Devanagari: ['Devanagari', 'Romanized'],
-    'Tamil-Extended': ['Tamil-Extended', 'Tamil'],
-    Normal: ['Devanagari', 'Normal'],
-    Romanized: ['Romanized', 'IAST'],
-    IAST: ['IAST', 'Romanized'],
-    ITRANS: ['ITRANS', 'Normal'],
-    'Harvard-Kyoto': ['Harvard-Kyoto', 'Normal'],
-    SLP1: ['SLP1', 'Normal']
+  const COMPARE: Partial<Record<ScriptListType, Pair[]>> = {
+    Devanagari: [['Devanagari', 'Romanized']],
+    'Tamil-Extended': [['Tamil-Extended', 'Tamil']],
+    Normal: [
+      ['Harvard-Kyoto', 'Normal'],
+      ['ITRANS', 'Normal']
+    ],
+    Romanized: [['Romanized', 'IAST']],
+    IAST: [['IAST', 'Romanized']],
+    ITRANS: [['ITRANS', 'Normal']],
+    'Harvard-Kyoto': [['Harvard-Kyoto', 'Normal']],
+    SLP1: [['SLP1', 'Normal']]
   };
 
-  const pair = $derived(COMPARE[script] ?? ([script, 'Devanagari'] as const));
-  const other = $derived(pair[0] === script ? pair[1] : pair[0]);
+  const all_pairs = $derived(COMPARE[script] ?? [[script, 'Devanagari'] as const]);
+  const pairs = $derived(labelled ? all_pairs : all_pairs.slice(0, 1));
+  const otherOf = (pair: Pair) => (pair[0] === script ? pair[1] : pair[0]);
   // Normal has no typing map of its own: it is what you type with
   const has_map = $derived(script !== 'Normal');
 
@@ -37,11 +44,12 @@
     with: 'Romanized'
   });
 
-  const show = (tab: 'typing' | 'compare') => {
-    view =
-      tab === 'typing'
-        ? { script, tab, with: 'Romanized' }
-        : { script: pair[0], tab, with: pair[1] };
+  const showTyping = () => {
+    view = { script, tab: 'typing', with: 'Romanized' };
+    open = true;
+  };
+  const showCompare = (pair: Pair) => {
+    view = { script: pair[0], tab: 'compare', with: pair[1] };
     open = true;
   };
 
@@ -60,22 +68,25 @@
       class={btn}
       title="Typing map: the keys for each letter of {script}"
       aria-label="{script} typing map"
-      onclick={() => show('typing')}
+      onclick={showTyping}
     >
       <MapIcon class="size-3.5" />
       {#if labelled}Typing map{/if}
     </button>
   {/if}
-  <button
-    type="button"
-    class={btn}
-    title="Compare {script} with {other}, letter by letter"
-    aria-label="Compare {script} with {other}"
-    onclick={() => show('compare')}
-  >
-    <ArrowLeftRight class="size-3.5" />
-    {#if labelled}Compare with {other}{/if}
-  </button>
+  {#each pairs as pair (pair.join())}
+    {@const other = otherOf(pair)}
+    <button
+      type="button"
+      class={btn}
+      title="Compare {script} with {other}, letter by letter"
+      aria-label="Compare {script} with {other}"
+      onclick={() => showCompare(pair)}
+    >
+      <ArrowLeftRight class="size-3.5" />
+      {#if labelled}Compare with {other}{/if}
+    </button>
+  {/each}
 </span>
 
 {#if open}
