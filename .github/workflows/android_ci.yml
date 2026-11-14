@@ -1,14 +1,7 @@
 name: Android App CI
 
+# only on demand (Actions → Run workflow)
 on:
-  push:
-    paths:
-      - 'mobile-app/android/**'
-      - 'packages/kotlin/**'
-      - 'packages/rust/**'
-      - 'desktop-client/assets/fonts/**'
-      - 'Cargo.lock'
-      - '.github/workflows/android_ci.yml'
   workflow_dispatch:
 
 # a newer push to the same branch cancels the run still in progress
