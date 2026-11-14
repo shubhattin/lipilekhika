@@ -1,6 +1,10 @@
 User-agent: *
+# old pages and the typing tool's demo pages
 Disallow: /old/
 Disallow: /typing_tool_examples/
-Disallow: /_astro/
+# download links (redirects to the GitHub release files) and the PC app's update check
+# (pc-app/latest.json): not pages
+Disallow: /redirect/
+Disallow: /pc-app/
 
-Allow: /favicon.ico
+Sitemap: https://lipilekhika.in/sitemap-index.xml
