@@ -3,6 +3,7 @@
 ## Unreleased
 
 - The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ checkbox), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`)
+- The Windows installer names Lipi Lekhika as the publisher (in Installed apps), in place of ShubhaYantriki
 
 ## pc-app@v1.1.0
 
