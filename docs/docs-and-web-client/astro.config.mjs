@@ -56,7 +56,10 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.includes('/typing_tool_examples/')
     }),
-    netlifyRedirects()
+    netlifyRedirects({
+      // Netlify matches `/docs` and `/docs/` with this one rule
+      additionalRedirects: ['/docs /getting-started/introduction/ 301']
+    })
   ],
   vite: {
     plugins: [tailwindcss(), MacroPlugin()],
