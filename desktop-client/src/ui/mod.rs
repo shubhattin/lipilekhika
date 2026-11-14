@@ -604,19 +604,25 @@ fn handle_thread_message(msg: ThreadMessage, cx: &mut App) {
   match msg.msg {
     ThreadMessageType::RerenderUI => cx.refresh_windows(),
     ThreadMessageType::TriggerTypingNotification => show_typing_notification(cx),
-    // from the tray or another start of the app: the app comes in front of the others (macOS
-    // brings a window forward only within the app)
     ThreadMessageType::MaximizeUI => {
       show_main(cx);
-      cx.activate(true);
+      bring_app_forward(cx);
     }
     ThreadMessageType::OpenParivartaka => {
       open_parivartaka(cx);
-      cx.activate(true);
+      bring_app_forward(cx);
     }
     ThreadMessageType::CloseApp => cx.quit(),
     ThreadMessageType::RerenderTray => {}
   }
+}
+
+/// macOS: a window opened from the tray or another start of the app comes in front of the other
+/// apps too (macOS brings a window forward only within its app). Windows and Linux bring the
+/// window forward themselves.
+fn bring_app_forward(_cx: &mut App) {
+  #[cfg(target_os = "macos")]
+  _cx.activate(true);
 }
 
 fn start_thread_bridge(rx: Receiver<ThreadMessage>, cx: &mut App) {
