@@ -279,17 +279,25 @@ unsafe extern "C" {
   fn CGEventSourceFlagsState(state_id: i32) -> u64;
 }
 
-/// The modifiers held for a key: the event's own, and the ones the system knows are down. Remote
-/// control (Screen Sharing, VNC) sends Option as its own event and the key without the flag; the
-/// session's state still has it, so ⌥X works from there too.
+/// The modifiers held for a key. A keyboard's keys carry their modifiers. Remote control (Screen
+/// Sharing, VNC and the like) sends Option as an event of its own and the key without the flag:
+/// for keys that do not come from the hardware, the modifiers the session knows are down count
+/// too, so ⌥X works from there. Keyboard keys keep only their own flags (the session's state is
+/// the present one, which may be ahead of the key being handled).
 fn event_modifiers(event: &CGEvent) -> CGEventFlags {
   const MODIFIERS: CGEventFlags = CGEventFlags::CGEventFlagShift
     .union(CGEventFlags::CGEventFlagControl)
     .union(CGEventFlags::CGEventFlagAlternate)
     .union(CGEventFlags::CGEventFlagCommand);
+  // kCGEventSourceStateHIDSystemState: the keyboard itself
+  const HID_SYSTEM_STATE: i64 = 1;
+  let flags = event.get_flags();
+  if event.get_integer_value_field(EventField::EVENT_SOURCE_STATE_ID) == HID_SYSTEM_STATE {
+    return flags;
+  }
   // kCGEventSourceStateCombinedSessionState
   let held = CGEventFlags::from_bits_truncate(unsafe { CGEventSourceFlagsState(0) });
-  event.get_flags() | (held & MODIFIERS)
+  flags | (held & MODIFIERS)
 }
 
 // ---- Event tap callback ----
@@ -304,12 +312,13 @@ pub fn build_event_tap_callback(
   move |_proxy, event_type, event| {
     if debug {
       eprintln!(
-        "[hook] {:?} key={} flags={:?} user_data={:x} target_pid={}",
+        "[hook] {:?} key={} flags={:?} user_data={:x} target_pid={} source_state={}",
         event_type,
         event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE),
         event.get_flags(),
         event.get_integer_value_field(EventField::EVENT_SOURCE_USER_DATA),
-        event.get_integer_value_field(EventField::EVENT_TARGET_UNIX_PROCESS_ID)
+        event.get_integer_value_field(EventField::EVENT_TARGET_UNIX_PROCESS_ID),
+        event.get_integer_value_field(EventField::EVENT_SOURCE_STATE_ID)
       );
     }
     // Handle tap-disabled events

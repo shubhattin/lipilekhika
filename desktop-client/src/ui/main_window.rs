@@ -335,7 +335,7 @@ impl MainWindow {
   fn notice_height(cx: &App) -> f32 {
     let state = Controller::app_state(cx);
     match HookStatus::of(&state) {
-      HookStatus::NeedsPermission => 136.,
+      HookStatus::NeedsPermission => 160.,
       HookStatus::SecureInput if state.typing_enabled.load(Ordering::SeqCst) => 76.,
       HookStatus::Failed => 112.,
       _ => 0.,
