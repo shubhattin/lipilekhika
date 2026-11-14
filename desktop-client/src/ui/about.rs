@@ -59,7 +59,8 @@ pub fn open_about(of: AboutOf, window: &mut Window, cx: &mut App) {
                 .text_xs()
                 .text_color(muted)
                 .child(format!("Version {}", env!("CARGO_PKG_VERSION"))),
-            ),
+            )
+            .children(super::update::about_check_line(cx)),
         )
         .child(
           div()

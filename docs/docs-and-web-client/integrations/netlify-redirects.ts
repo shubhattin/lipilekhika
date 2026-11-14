@@ -1,5 +1,5 @@
 import type { AstroIntegration } from 'astro';
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -9,7 +9,8 @@ import {
   getLinuxParivartakaDownloadUrl,
   getMacDownloadUrl,
   getAndroidApkDownloadUrl,
-  getAndroidReleasePage
+  getAndroidReleasePage,
+  parseTagVersion
 } from '../src/lib/github';
 
 interface NetlifyRedirectsOptions {
@@ -19,7 +20,8 @@ interface NetlifyRedirectsOptions {
 
 /**
  * Astro integration to generate Netlify _redirects file at build time
- * with dynamic GitHub release URLs.
+ * with dynamic GitHub release URLs, and `pc-app/latest.json` (`{"version":"1.2.3"}`), where
+ * the PC app looks for a newer version (it falls back to the GitHub releases without it).
  *
  * Set GITHUB_TOKEN environment variable to avoid rate limiting.
  */
@@ -62,6 +64,20 @@ export function netlifyRedirects(options: NetlifyRedirectsOptions = {}): AstroIn
           if (macUrl) {
             redirects.push(`/redirect/pc-app-release-macos ${macUrl} 302`);
             redirects.push(`/redirect/pc-app-release-macos-parivartaka ${macUrl} 302`);
+          }
+          // the latest version, for the PC app's update check (it accepts only `x.y.z`)
+          const version = parseTagVersion(pcRelease.tag_name, 'pc-app@v');
+          if (version && /^\d+\.\d+\.\d+$/.test(version)) {
+            const pcAppDir = join(fileURLToPath(dir), 'pc-app');
+            mkdirSync(pcAppDir, { recursive: true });
+            writeFileSync(
+              join(pcAppDir, 'latest.json'),
+              JSON.stringify({ version }) + '\n',
+              'utf-8'
+            );
+            logger.info(`pc-app/latest.json: ${version}`);
+          } else {
+            logger.warn(`Not writing pc-app/latest.json: bad version in ${pcRelease.tag_name}`);
           }
         } else {
           logger.warn('Could not find Windows PC app release');
