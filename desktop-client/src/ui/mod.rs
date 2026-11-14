@@ -34,7 +34,7 @@ pub use typing_help::HelpTab;
 
 /// The main window's height (it has a note about the Fcitx5 plugin on Linux; on Windows the
 /// window's own title bar replaces the header)
-const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
+pub(crate) const MAIN_HEIGHT: f32 = if title_bar::CUSTOM_TITLE_BAR {
   490.
 } else if crate::platform::SYSTEM_TYPING_SUPPORTED {
   510.
@@ -522,7 +522,7 @@ fn show_popup(popup: notification::Popup, cx: &mut App) {
         cx.background_executor()
           .timer(Duration::from_millis(1400))
           .await;
-        let _ = cx.update(|cx| {
+        cx.update(|cx| {
           if cx.global::<Controller>().notification == Some(handle) {
             cx.global_mut::<Controller>().notification = None;
             let _ = handle.update(cx, |_, window, _| window.remove_window());
@@ -642,50 +642,56 @@ pub fn run(
   rx_ui: Receiver<ThreadMessage>,
   tx_tray: Sender<ThreadMessage>,
   startup_view: StartupView,
+  // what else starts with the UI, on its thread (the macOS tray)
+  on_start: Box<dyn FnOnce(&mut App)>,
 ) {
   let theme = app_state.persitent_state.lock().unwrap().theme;
-  gpui_kit::application()
+  let app = gpui_kit::application()
     .with_assets(assets::AppAssets)
-    .with_quit_mode(QuitMode::Explicit)
-    .run(move |cx| {
-      gpui_kit::init(cx);
-      assets::register_fonts(cx);
-      cx.set_global(Controller {
-        app_state,
-        tx_tray,
-        main: None,
-        parivartaka: None,
-        helper: None,
-        notification: None,
-        active_windows: HashSet::new(),
-        // set when the main window is hidden to the tray
-        main_in_tray: false,
-        theme,
-        update: update::UpdateState::default(),
-      });
-      apply_theme(cx);
-      app_menu::init(cx);
-      parivartaka::init(cx);
-      typing_help::init(cx);
-
-      cx.on_window_closed(|cx, id| on_window_closed(id, cx))
-        .detach();
-
-      start_thread_bridge(rx_ui, cx);
-      update::start_version_check(cx);
-
-      match startup_view {
-        StartupView::Main => show_main(cx),
-        StartupView::Parivartaka => open_parivartaka(cx),
-        StartupView::TypingHelp { compare } => {
-          let tab = if compare {
-            HelpTab::Compare
-          } else {
-            HelpTab::Typing
-          };
-          open_typing_help(typing_script(cx), tab, None, cx)
-        }
-      }
-      cx.activate(true);
+    .with_quit_mode(QuitMode::Explicit);
+  // macOS: a click on the Dock icon (or opening the app again) while it runs brings the main
+  // window back, also after it was closed to the menu bar
+  app.on_reopen(show_main);
+  app.run(move |cx| {
+    gpui_kit::init(cx);
+    assets::register_fonts(cx);
+    cx.set_global(Controller {
+      app_state,
+      tx_tray,
+      main: None,
+      parivartaka: None,
+      helper: None,
+      notification: None,
+      active_windows: HashSet::new(),
+      // set when the main window is hidden to the tray
+      main_in_tray: false,
+      theme,
+      update: update::UpdateState::default(),
     });
+    apply_theme(cx);
+    app_menu::init(cx);
+    parivartaka::init(cx);
+    typing_help::init(cx);
+
+    cx.on_window_closed(|cx, id| on_window_closed(id, cx))
+      .detach();
+
+    start_thread_bridge(rx_ui, cx);
+    on_start(cx);
+    update::start_version_check(cx);
+
+    match startup_view {
+      StartupView::Main => show_main(cx),
+      StartupView::Parivartaka => open_parivartaka(cx),
+      StartupView::TypingHelp { compare } => {
+        let tab = if compare {
+          HelpTab::Compare
+        } else {
+          HelpTab::Typing
+        };
+        open_typing_help(typing_script(cx), tab, None, cx)
+      }
+    }
+    cx.activate(true);
+  });
 }

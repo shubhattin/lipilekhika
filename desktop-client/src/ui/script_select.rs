@@ -126,8 +126,7 @@ fn grouped_scripts(
 
 /// The index path of the script in the grouped list
 fn index_of(script: ScriptListEnum, with_normal: bool) -> Option<IndexPath> {
-  let mut section = 0;
-  for category in ScriptCategory::ALL {
+  for (section, category) in ScriptCategory::ALL.into_iter().enumerate() {
     let scripts: Vec<ScriptListEnum> = SCRIPT_ORDER
       .iter()
       .filter(|(s, c)| *c == category && (with_normal || *s != ScriptListEnum::Normal))
@@ -136,7 +135,6 @@ fn index_of(script: ScriptListEnum, with_normal: bool) -> Option<IndexPath> {
     if let Some(row) = scripts.iter().position(|s| *s == script) {
       return Some(IndexPath::default().section(section).row(row));
     }
-    section += 1;
   }
   None
 }

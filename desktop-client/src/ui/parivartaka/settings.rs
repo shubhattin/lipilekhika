@@ -192,6 +192,7 @@ impl ParivartakaSettings {
     }
   }
 
+  #[allow(clippy::wrong_self_convention)]
   pub fn from_script(&self) -> ScriptListEnum {
     ScriptListEnum::from_str(&self.from).unwrap_or(ScriptListEnum::Devanagari)
   }

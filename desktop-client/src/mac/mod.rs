@@ -1,5 +1,6 @@
 pub mod constants;
 pub mod hooks;
+pub mod permission;
 pub mod runtime;
 
 use crossbeam_channel::Sender;
@@ -13,6 +14,9 @@ pub struct MacAppState {
   pub app_state: Arc<AppState>,
   pub tx_ui: Sender<ThreadMessage>,
   pub tx_tray: Sender<ThreadMessage>,
+  /// the text the hook typed since the context was last cleared (the end of it is what is left of
+  /// the caret), see [`hooks::plan_edit`]
+  pub typed: std::sync::Mutex<String>,
 }
 
 pub fn run(

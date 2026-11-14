@@ -282,7 +282,7 @@ impl Parivartaka {
     let keystroke = &event.keystroke;
     let m = &keystroke.modifiers;
     let key = keystroke.key.to_lowercase();
-    // Alt+X turns the typing on and off
+    // Alt+X (⌥X on a Mac) turns the typing on and off
     if m.alt && !m.control && !m.platform && key == "x" {
       self.set_typing_enabled(!self.settings.typing_enabled, cx);
       cx.stop_propagation();
@@ -964,16 +964,22 @@ impl Parivartaka {
               }))
               .label("Typing")
               .tooltip(if typing_on {
-                "Realtime typing is on: English keys type in the script. Click or Alt+X to turn off"
+                format!(
+                  "Realtime typing is on: English keys type in the script. Click or {} to turn off",
+                  crate::platform::TOGGLE_KEYS[0]
+                )
               } else {
-                "Realtime typing is off: keys type as they are. Click or Alt+X to turn on"
+                format!(
+                  "Realtime typing is off: keys type as they are. Click or {} to turn on",
+                  crate::platform::TOGGLE_KEYS[0]
+                )
               })
               .on_click(cx.listener(|this, _, window, cx| {
                 this.set_typing_enabled(!this.settings.typing_enabled, cx);
                 this.update_placeholder(window, cx);
               })),
           )
-          .child(kbd("Alt+X", cx))
+          .child(kbd(crate::platform::TOGGLE_KEYS[0], cx))
           .child(self.typing_settings(cx)),
       )
       .child(

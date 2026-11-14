@@ -24,11 +24,7 @@ pub struct VersionCheckResult {
 }
 
 fn parse_pc_app_tag(tag: &str) -> Option<&str> {
-  if tag.starts_with("pc-app@v") {
-    Some(&tag[8..]) // Skip "pc-app@"
-  } else {
-    None
-  }
+  tag.strip_prefix("pc-app@v")
 }
 
 /// Compare two semantic versions

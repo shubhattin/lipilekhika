@@ -8,7 +8,7 @@ use super::styles::{EMERALD, GREEN, SKY, VIOLET, kbd};
 use super::title_bar::{CUSTOM_TITLE_BAR, Control, title_bar};
 use super::{Controller, HelpTab, typing_script};
 use crate::persistent_state::ThemePreference;
-use crate::platform::SYSTEM_TYPING_SUPPORTED;
+use crate::platform::{HookStatus, SYSTEM_TYPING_SUPPORTED, TOGGLE_KEYS};
 use gpui_kit::component::alert::Alert;
 use gpui_kit::component::button::{Button, ButtonVariants as _};
 use gpui_kit::component::menu::{DropdownMenu as _, PopupMenuItem};
@@ -35,6 +35,8 @@ pub struct MainWindow {
   examples: TypingOptionExamples,
   /// the window's keys (Alt+X) reach the view through it
   focus: FocusHandle,
+  /// how much taller the window is for [`Self::hook_notice`]
+  notice_height: f32,
   _subscriptions: Vec<Subscription>,
 }
 
@@ -61,6 +63,7 @@ impl MainWindow {
       shown_script: script,
       examples: typing_option_examples(script),
       focus,
+      notice_height: 0.,
       _subscriptions: subscriptions,
     }
   }
@@ -239,10 +242,13 @@ impl MainWindow {
     let state = Controller::app_state(cx);
     let enabled = state.typing_enabled.load(Ordering::SeqCst);
     let theme = cx.theme();
-    let (status, status_color) = if enabled {
-      ("On", GREEN.text(cx))
-    } else {
-      ("Off", theme.muted_foreground)
+    let hook = HookStatus::of(&state);
+    let (status, status_color) = match hook {
+      HookStatus::NeedsPermission => ("Needs permission", theme.warning),
+      HookStatus::SecureInput if enabled => ("Paused", theme.warning),
+      HookStatus::Failed => ("Not working", theme.danger),
+      _ if enabled => ("On", GREEN.text(cx)),
+      _ => ("Off", theme.muted_foreground),
     };
     let icon = if enabled {
       gpui_kit::assets::IconName::Keyboard
@@ -308,9 +314,9 @@ impl MainWindow {
               .text_color(theme.muted_foreground)
               .when(SYSTEM_TYPING_SUPPORTED, |el| {
                 el.child("Toggle with")
-                  .child(kbd("Alt+X", cx))
+                  .child(kbd(TOGGLE_KEYS[0], cx))
                   .child("or")
-                  .child(kbd("Alt+C", cx))
+                  .child(kbd(TOGGLE_KEYS[1], cx))
               })
               .when(!SYSTEM_TYPING_SUPPORTED, |el| {
                 el.child("System wide typing is not on Linux yet")
@@ -325,6 +331,75 @@ impl MainWindow {
       )
   }
 
+  /// The room [`Self::hook_notice`] takes in the window
+  fn notice_height(cx: &App) -> f32 {
+    let state = Controller::app_state(cx);
+    match HookStatus::of(&state) {
+      HookStatus::NeedsPermission => 136.,
+      HookStatus::SecureInput if state.typing_enabled.load(Ordering::SeqCst) => 76.,
+      HookStatus::Failed => 112.,
+      _ => 0.,
+    }
+  }
+
+  /// What keeps the system wide typing from working, and what to do about it (macOS)
+  fn hook_notice(cx: &App) -> Option<AnyElement> {
+    let state = Controller::app_state(cx);
+    let enabled = state.typing_enabled.load(Ordering::SeqCst);
+    match HookStatus::of(&state) {
+      HookStatus::NeedsPermission => Some(
+        v_flex()
+          .gap_2()
+          .child(
+            Alert::warning(
+              "needs-permission",
+              "To type in other apps, turn on Lipi Lekhika in System Settings → Privacy & Security → Accessibility (on macOS 27: Device Control and Data Access). Typing starts as soon as it is on.",
+            )
+            .small(),
+          )
+          .child(
+            Button::new("open-permission-settings")
+              .primary()
+              .small()
+              .label("Open System Settings")
+              .on_click(|_, _, _| crate::platform::open_permission_settings()),
+          )
+          .into_any_element(),
+      ),
+      HookStatus::SecureInput if enabled => Some(
+        Alert::info(
+          "secure-input",
+          "Typing is paused while a password field (or Terminal's Secure Keyboard Entry) is active. It goes on by itself afterwards.",
+        )
+        .small()
+        .into_any_element(),
+      ),
+      HookStatus::Failed => Some(
+        v_flex()
+          .gap_2()
+          .child(
+            Alert::error(
+              "hook-failed",
+              "Typing in other apps could not start. Restarting Lipi Lekhika usually fixes it.",
+            )
+            .small(),
+          )
+          .child(
+            Button::new("restart-app")
+              .small()
+              .label("Restart Lipi Lekhika")
+              .on_click(|_, _, cx| {
+                crate::platform::relaunch_after_quit();
+                cx.quit();
+              }),
+          )
+          .into_any_element(),
+      ),
+      _ => None,
+    }
+  }
+
+  #[allow(clippy::too_many_arguments)]
   fn option_row(
     id: &'static str,
     title: &'static str,
@@ -459,7 +534,7 @@ impl MainWindow {
         font,
         native,
         None,
-        |on, cx| Self::set_native_numerals(on, cx),
+        Self::set_native_numerals,
         cx,
       ))
       .child(div().h(px(1.)).bg(theme.border))
@@ -470,7 +545,7 @@ impl MainWindow {
         font,
         inherent,
         Some(info),
-        |on, cx| Self::set_inherent_vowel(on, cx),
+        Self::set_inherent_vowel,
         cx,
       ))
   }
@@ -484,6 +559,16 @@ impl Render for MainWindow {
       self.shown_script = script;
       self.examples = typing_option_examples(script);
       set_script_select(&self.script_select, script, window, cx);
+    }
+    // the window grows by the notice's room while one is shown
+    let notice_height = Self::notice_height(cx);
+    if notice_height != self.notice_height {
+      self.notice_height = notice_height;
+      let width = window.bounds().size.width;
+      window.resize(gpui_kit::size(
+        width,
+        px(super::MAIN_HEIGHT + notice_height),
+      ));
     }
     let theme = cx.theme().clone();
     let script = self.shown_script;
@@ -508,6 +593,7 @@ impl Render for MainWindow {
           .child(Select::new(&self.script_select).w_full().menu_max_h(px(380.))),
       )
       .child(self.typing_card(cx))
+      .children(Self::hook_notice(cx))
       .child(self.options_card(cx))
       .child(
         h_flex()

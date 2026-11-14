@@ -1,7 +1,8 @@
 name: Release PC App
 
-# Lipi Lekhika for Windows (the MSI and the portable zip), and Lipi Parivartaka on its own for
-# Linux and macOS (the app built without the `typing-tool` feature), all in the pc-app release.
+# Lipi Lekhika for Windows (the MSI and the portable zip) and macOS (a disk image), and Lipi
+# Parivartaka on its own for Linux (the app built without the `typing-tool` feature), all in the
+# pc-app release.
 
 # a release for a pushed tag, else only on demand (Actions → Run workflow, `dry_run` for a build
 # check that publishes nothing)
@@ -265,8 +266,8 @@ jobs:
           gh release upload "${{ needs.meta.outputs.tag }}" \
             "dist/lipiparivartaka-$VERSION-linux-x86_64.tar.gz" --clobber
 
-  # Lipi Parivartaka for macOS: one app for Apple silicon and Intel Macs (macOS 12+, GPUI's
-  # Metal shaders need it)
+  # Lipi Lekhika for macOS: one app for Apple silicon and Intel Macs (macOS 12+, GPUI's Metal
+  # shaders need it), in a disk image
   build-macos:
     needs: meta
     runs-on: macos-15
@@ -288,10 +289,14 @@ jobs:
         with:
           shared-key: pc-app-macos
 
-      - name: Build Lipi Parivartaka (Apple silicon and Intel)
+      - name: Build Lipi Lekhika (Apple silicon and Intel)
         run: |
-          cargo build --release -p lipilekhika-ui --no-default-features --target aarch64-apple-darwin
-          cargo build --release -p lipilekhika-ui --no-default-features --target x86_64-apple-darwin
+          cargo build --release -p lipilekhika-ui --target aarch64-apple-darwin
+          cargo build --release -p lipilekhika-ui --target x86_64-apple-darwin
+
+      # the macOS code's unit tests (text chunks for the injected key events...)
+      - name: Test
+        run: cargo test --release -p lipilekhika-ui --target aarch64-apple-darwin
 
       # The project's self-signed certificate (secrets MACOS_CERT_P12_BASE64 and
       # MACOS_CERT_PASSWORD) in a keychain of this run only. Without the secrets the app is
@@ -325,7 +330,10 @@ jobs:
           fi
           echo "MACOS_SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
 
+      # the build number tells test builds of one version apart (About, Finder's Get Info)
       - name: Bundle
+        env:
+          BUILD: ${{ github.run_number }}
         run: |
           sh desktop-client/packaging/bundle-macos.sh \
             target/aarch64-apple-darwin/release/lipilekhika-ui \
@@ -336,8 +344,8 @@ jobs:
         if: ${{ env.PUBLISH != 'true' }}
         uses: actions/upload-artifact@v7
         with:
-          name: parivartaka-macos
-          path: dist/lipiparivartaka-${{ env.VERSION }}-macos-universal.zip
+          name: lipilekhika-macos
+          path: dist/lipilekhika-${{ env.VERSION }}-macos-universal.dmg
           retention-days: 7
 
       - name: Upload to release
@@ -346,4 +354,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${{ needs.meta.outputs.tag }}" \
-            "dist/lipiparivartaka-$VERSION-macos-universal.zip" --clobber
+            "dist/lipilekhika-$VERSION-macos-universal.dmg" --clobber
