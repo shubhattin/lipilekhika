@@ -293,6 +293,38 @@ jobs:
           cargo build --release -p lipilekhika-ui --no-default-features --target aarch64-apple-darwin
           cargo build --release -p lipilekhika-ui --no-default-features --target x86_64-apple-darwin
 
+      # The project's self-signed certificate (secrets MACOS_CERT_P12_BASE64 and
+      # MACOS_CERT_PASSWORD) in a keychain of this run only. Without the secrets the app is
+      # signed ad hoc, as before.
+      - name: Import the signing certificate
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          if [ -z "$MACOS_CERT_P12_BASE64" ]; then
+            echo "::warning::MACOS_CERT_P12_BASE64 is not set: the app is signed ad hoc"
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password=$(uuidgen)
+          p12="$RUNNER_TEMP/cert.p12"
+          printf '%s' "$MACOS_CERT_P12_BASE64" | base64 --decode > "$p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$p12" -k "$keychain" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          rm -f "$p12"
+          # codesign may use the key without a prompt
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          # the certificate's SHA-1: a self-signed certificate isn't trusted, so it isn't found by name
+          identity=$(security find-certificate -a -Z "$keychain" | awk '/SHA-1/ { print $NF; exit }')
+          if [ -z "$identity" ]; then
+            echo "::error::No certificate found in the imported .p12"
+            exit 1
+          fi
+          echo "MACOS_SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+
       - name: Bundle
         run: |
           sh desktop-client/packaging/bundle-macos.sh \

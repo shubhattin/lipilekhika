@@ -4,7 +4,10 @@
 #   cargo build --release -p lipilekhika-ui --no-default-features --target aarch64-apple-darwin
 #   cargo build --release -p lipilekhika-ui --no-default-features --target x86_64-apple-darwin
 #   packaging/bundle-macos.sh <arm64 binary> <x86_64 binary> <version> [out dir]
-# The app is signed ad hoc only (no Apple Developer ID): macOS asks to allow it on its first start.
+# Signed with the identity in MACOS_SIGN_IDENTITY (the release signs with the project's own
+# self-signed certificate, so the signer stays the same from one release to the next), or ad hoc
+# when it is not set. Neither is an Apple Developer ID: macOS asks to allow the app on its first
+# start either way.
 set -eu
 
 arm=$1
@@ -36,8 +39,10 @@ for size in 16 32 128 256 512; do
 done
 iconutil -c icns "$iconset" -o "$app/Contents/Resources/AppIcon.icns"
 
-# ad hoc signature: Apple silicon runs only signed code, the merged binary needs a new one
-codesign --force --deep --sign - "$app"
+# Apple silicon runs only signed code, the merged binary needs a new signature
+identity="${MACOS_SIGN_IDENTITY:--}"
+codesign --force --deep --timestamp=none --sign "$identity" "$app"
+codesign --display --requirements - "$app"
 codesign --verify --verbose "$app"
 
 zip="$out/lipiparivartaka-$version-macos-universal.zip"
