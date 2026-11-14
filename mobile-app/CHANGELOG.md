@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ toggle), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`).
+
 ## mobile-app@v0.3.0+11
 
 - **A native app** (Kotlin, Jetpack Compose) replaces the Flutter app. It installs as an update and keeps your scripts, preset and theme.

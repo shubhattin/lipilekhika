@@ -957,6 +957,26 @@ export async function getScriptKramaData(script: ScriptLangType) {
 }
 
 /**
+ * Returns every text a script reads when converting from it, in the order of its script data:
+ * the main text of each character and its other spellings (`R^i` beside `RRi` in ITRANS, `x`
+ * for क्ष). The texts which are only a step towards a longer one are included too (`O` of
+ * ITRANS, on the way to `OM`), so to get the other spellings of a text keep the ones which
+ * convert to the same text as it.
+ * @param script - The script to get the texts for
+ * @returns The texts the script reads
+ */
+export async function getScriptInputTexts(script: ScriptLangType) {
+  const normalized_typing_lang = getNormalizedScriptName(script);
+  if (!normalized_typing_lang) {
+    throw new Error(`Invalid script name: ${String(script)}`);
+  }
+  const script_data = await getScriptData(normalized_typing_lang);
+  return script_data.text_to_krama_map
+    .filter(([text, entry]) => text && entry.krama?.length && entry.krama.every((k) => k >= 0))
+    .map(([text]) => text);
+}
+
+/**
  * Returns the typing data map for a script.
  * @param script - The script to get the typing data map for
  * @returns The typing data map for the script

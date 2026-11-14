@@ -62,6 +62,8 @@ internal object NativeLib {
 
     /** The items `[text, ListType ordinal]` */
     @JvmStatic external fun getScriptKramaData(script: String): Array<Array<String>>
+
+    @JvmStatic external fun getScriptInputTexts(script: String): Array<String>
 }
 
 /**

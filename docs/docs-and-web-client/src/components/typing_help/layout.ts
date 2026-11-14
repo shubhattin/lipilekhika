@@ -1,5 +1,9 @@
 import { transliterate, type ScriptListType } from 'lipilekhika';
-import { getScriptKramaData, getScriptTypingDataMap } from 'lipilekhika/typing';
+import {
+  getScriptInputTexts,
+  getScriptKramaData,
+  getScriptTypingDataMap
+} from 'lipilekhika/typing';
 
 /**
  * The organized layout of the typing help.
@@ -26,8 +30,8 @@ export type Cell = {
   main: Glyph;
   /** the vowel sign (mAtrA) of a svara */
   sign?: Glyph;
-  /** compare mode: the same position in the compared script */
-  other?: { text: string; sign?: string };
+  /** compare mode: the same position in the compared script, with its other spellings */
+  other?: { text: string; sign?: string; alternates?: string[] };
   /** a short description, for the invisible or special characters */
   label?: string;
 };
@@ -182,6 +186,59 @@ const getKrama = (script: ScriptListType) => {
     kramaCache.set(script, prom);
   }
   return prom;
+};
+
+const alternatesCache = new Map<string, Promise<Map<string, string[]>>>();
+
+/**
+ * The other spellings a romanization scheme reads for a text, keyed by what they convert to
+ * (`R^i` beside `RRi` in ITRANS). Only full spellings which give the same text are kept: not
+ * the in between states (`O` while typing `OM`), the capital forms of the case insensitive
+ * schemes, the Unicode duplicates, or the non-ASCII read back forms of an ASCII scheme (`è`).
+ */
+const getAlternates = (script: ScriptListType) => {
+  let prom = alternatesCache.get(script);
+  if (!prom) {
+    prom = (async () => {
+      const candidates = await getScriptInputTexts(script);
+      const outputs = await Promise.all(
+        candidates.map((text) => transliterate(text, script, 'Devanagari'))
+      );
+      const by_output = new Map<string, string[]>();
+      candidates.forEach((text, i) => {
+        const list = by_output.get(outputs[i]) ?? [];
+        list.push(text);
+        by_output.set(outputs[i], list);
+      });
+      return by_output;
+    })();
+    alternatesCache.set(script, prom);
+  }
+  return prom;
+};
+
+/** The same spelling up to case and Unicode composition (`Ā` is a capital of `ā`) */
+const foldKey = (text: string) => text.normalize('NFC').toLowerCase();
+
+const alternatesOf = async (script: ScriptListType, text: string) => {
+  if (!text) return [];
+  const by_output = await getAlternates(script);
+  const output = await transliterate(text, script, 'Devanagari');
+  const ascii = isAscii(text);
+  const seen = new Set([foldKey(text)]);
+  // the lowercase form first, so `r̥` is shown rather than `R̥`
+  const candidates = [...(by_output.get(output) ?? [])].sort(
+    (a, b) => Number(a !== a.toLowerCase()) - Number(b !== b.toLowerCase())
+  );
+  const result: string[] = [];
+  for (const alt of candidates) {
+    if (ascii && !isAscii(alt)) continue;
+    const key = foldKey(alt);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(alt.normalize('NFC'));
+  }
+  return result;
 };
 
 export async function buildLayout(
@@ -393,6 +450,20 @@ export async function buildLayout(
     { id: 'special', title: 'Special', groups: special_groups }
   ];
   for (const section of sections) section.groups = section.groups.filter(nonEmpty);
+
+  // the other spellings of the compared romanization scheme (`R^i` beside `RRi` in ITRANS),
+  // the brahmic scripts only have Unicode duplicates and fallback letters
+  if (compare && !to_brahmic.get(compare)) {
+    const others = sections
+      .flatMap((s) => s.groups.flatMap((g) => g.cells))
+      .flatMap((c) => (c?.other?.text ? [c.other] : []));
+    await Promise.all(
+      others.map(async (other) => {
+        const alternates = await alternatesOf(compare, other.text);
+        if (alternates.length) other.alternates = alternates;
+      })
+    );
+  }
 
   return {
     script,

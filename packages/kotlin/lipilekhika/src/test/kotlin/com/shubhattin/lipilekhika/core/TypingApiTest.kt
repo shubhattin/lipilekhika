@@ -182,6 +182,15 @@ class TypingApiTest {
     }
 
     @Test
+    fun inputTexts() {
+        val itrans = getScriptInputTexts("ITRANS")
+        for (text in listOf("RRi", "R^i", "Ch", "chh", "x", "GY")) assertTrue(text in itrans, text)
+        assertFalse("" in itrans)
+        assertTrue("chh" in getScriptInputTexts("Normal"))
+        assertFailsWith<InvalidScriptException> { getScriptInputTexts("Klingon") }
+    }
+
+    @Test
     fun closedContextThrows() {
         val ctx = createTypingContext("Devanagari")
         ctx.close()

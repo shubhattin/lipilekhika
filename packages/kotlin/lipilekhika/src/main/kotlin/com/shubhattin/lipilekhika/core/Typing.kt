@@ -217,3 +217,14 @@ fun getScriptKramaData(script: String): List<KramaDataItem> =
     NativeLib.getScriptKramaData(script).map { (text, listType) ->
         KramaDataItem(text, LIST_TYPES[listType.toInt()])
     }
+
+/**
+ * Every text a script reads when converting from it, in the order of its script data: the main text
+ * of each character and its other spellings (`R^i` beside `RRi` in ITRANS, `x` for क्ष). The texts
+ * which are only a step towards a longer one are included too (`O` of ITRANS, on the way to `OM`),
+ * so to get the other spellings of a text keep the ones which convert to the same text as it.
+ *
+ * @throws LipiException for an unknown script name
+ */
+fun getScriptInputTexts(script: String): List<String> =
+    NativeLib.getScriptInputTexts(script).asList()

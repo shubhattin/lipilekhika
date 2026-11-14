@@ -17,8 +17,8 @@ use crate::script_data::ScriptData;
 pub use crate::script_data::{ScriptListData, get_all_options, get_script_list_data};
 use crate::transliterate::transliterate_text;
 pub use crate::typing::{
-    KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_krama_data,
-    get_script_typing_data_map,
+    KramaDataItem, ListType, ScriptTypingDataMap, TypingDataMapItem, get_script_input_texts,
+    get_script_krama_data, get_script_typing_data_map,
 };
 use alloc::borrow::Cow;
 pub use custom_options::{CustomOptions, CustomOptionsBuilder, UnknownCustomOptionKey};

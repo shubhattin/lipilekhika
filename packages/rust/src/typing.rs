@@ -633,9 +633,48 @@ pub fn get_script_krama_data(script: Script) -> Vec<KramaDataItem> {
         .collect()
 }
 
+/// Returns every text a script reads when converting from it, in the order of its script data:
+/// the main text of each character and its other spellings (`R^i` beside `RRi` in ITRANS,
+/// `x` for क्ष). The texts which are only a step towards a longer one are included too (`O`
+/// of ITRANS, on the way to `OM`), so to get the other spellings of a text keep the ones
+/// which convert to the same text as it.
+///
+/// - `script` - The script/language name to get the texts for.
+pub fn get_script_input_texts(script: Script) -> Vec<String> {
+    let normalized: ScriptListEnum = script.into();
+    let script_data = ScriptData::get_script_data(&normalized);
+
+    script_data
+        .text_to_krama_map
+        .iter()
+        .filter(|(text, entry)| {
+            !text.is_empty()
+                && entry
+                    .krama
+                    .as_ref()
+                    .is_some_and(|k| !k.is_empty() && k.iter().all(|&i| i >= 0))
+        })
+        .map(|(text, _)| text.clone())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn input_texts_include_the_other_spellings() {
+        let itrans = get_script_input_texts(Script::Itrans);
+        for text in ["RRi", "R^i", "Ch", "chh", "x", "GY"] {
+            assert!(
+                itrans.iter().any(|t| t == text),
+                "ITRANS should read {text}"
+            );
+        }
+        assert!(!itrans.iter().any(|t| t.is_empty()));
+        let normal = get_script_input_texts(Script::Normal);
+        assert!(normal.iter().any(|t| t == "chh"));
+    }
 
     use crate::scripts::Script;
     use crate::transliterate::helpers::VEDIC_SVARAS;
