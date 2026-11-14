@@ -5,6 +5,7 @@
 - The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ checkbox), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`)
 - The Windows installer names Lipi Lekhika as the publisher (in Installed apps), in place of ShubhaYantriki
 - **Lipi Lekhika for macOS**, with the system wide typing (toggle with ⌥X or ⌥C), the menu bar icon, Lipi Parivartaka and the typing help, in place of Lipi Parivartaka on its own. A disk image (`.dmg`): drag the app to Applications. It asks for the Accessibility permission once (System Settings → Privacy & Security; on macOS 27 _Device Control and Data Access_) and starts typing as soon as it is given; updates keep it. Typing pauses while a password field is active (macOS gives no app the keys then). Lipi Parivartaka is in the Dock icon's menu and the app menu
+- The update link opens the website's download page (lipilekhika.in/download) on macOS, Linux and in the portable Windows app, in place of the GitHub release page; the Windows installer still updates itself
 
 ## pc-app@v1.1.0
 

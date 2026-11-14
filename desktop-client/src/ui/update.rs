@@ -3,8 +3,8 @@
 //! the popup is closed, a small link offers the update: next to the main window's buttons at its
 //! top, at the bottom of Lipi Parivartaka.
 //!
-//! The update installs the new MSI on Windows; elsewhere (and in the portable app) it opens the
-//! new version's release page.
+//! The update installs the new MSI on Windows; elsewhere (macOS, Linux, the portable app) it
+//! opens the website's download page, which offers the right download for the system.
 
 use super::Controller;
 use super::styles::GREEN;
@@ -59,12 +59,12 @@ pub fn start_version_check(cx: &mut App) {
 }
 
 /// Whether the update installs the new version itself (the MSI on Windows), else it opens the
-/// release page
+/// download page
 fn installs_update() -> bool {
   cfg!(windows) && !crate::portable::is_portable()
 }
 
-/// The update: installs the new MSI on Windows, opens the release page elsewhere
+/// The update: installs the new MSI on Windows, opens the download page elsewhere
 pub fn run_update(cx: &mut App) {
   let controller = cx.global::<Controller>();
   if controller.update.in_progress {
@@ -74,10 +74,7 @@ pub fn run_update(cx: &mut App) {
     return;
   };
   if !installs_update() {
-    match &check.latest_version {
-      Some(version) => cx.open_url(&format!("{}/tag/pc-app%40v{version}", super::RELEASES_URL)),
-      None => cx.open_url(super::RELEASES_URL),
-    }
+    cx.open_url(super::DOWNLOAD_URL);
     return;
   }
   let (Some(url), Some(version)) = (check.windows_msi_download_url, check.latest_version) else {

@@ -78,7 +78,8 @@ const APP_ID: &str = if cfg!(feature = "typing-tool") {
 
 pub const GITHUB_URL: &str = "https://github.com/shubhattin/lipilekhika";
 pub const WEBSITE_URL: &str = "https://lipilekhika.in";
-pub const RELEASES_URL: &str = "https://github.com/shubhattin/lipilekhika/releases";
+/// The website's download page: it picks the download for the system the user is on
+pub const DOWNLOAD_URL: &str = "https://lipilekhika.in/download/";
 
 /// The app wide state of the UI: the windows that are open and the shared settings
 pub struct Controller {
