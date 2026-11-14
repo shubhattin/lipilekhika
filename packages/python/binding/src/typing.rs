@@ -310,3 +310,21 @@ pub fn get_script_krama_data(script: &str) -> PyResult<Vec<KramaDataItem>> {
         .map(|(text, list_type)| (text, list_type_to_string(&list_type)))
         .collect())
 }
+
+/// Returns every text a script reads when converting from it, with the other spellings of its
+/// characters (`R^i` beside `RRi` in ITRANS, `x` for क्ष).
+///
+/// Args:
+///     script (str): The script/language name to get the texts for.
+///
+/// Returns:
+///     list[str]: The texts, in the order of the script data.
+///
+/// Raises:
+///     ValueError: If the script name is invalid.
+#[pyfunction]
+#[pyo3(signature = (script))]
+pub fn get_script_input_texts(script: &str) -> PyResult<Vec<String>> {
+    let script = crate::py_parse_script(script, "script")?;
+    Ok(lipilekhika::typing::get_script_input_texts(script))
+}

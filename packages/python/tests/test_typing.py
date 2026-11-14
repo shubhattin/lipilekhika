@@ -12,6 +12,7 @@ from lipilekhika.typing import (
     TypingContextOptions,
     TypingDiff,
     create_typing_context,
+    get_script_input_texts,
     get_script_krama_data,
     get_script_typing_data_map,
 )
@@ -410,6 +411,23 @@ class TestGetScriptKramaData:
             krama_data = get_script_krama_data(script)
             assert isinstance(krama_data, list)
             assert len(krama_data) > 0
+
+
+class TestGetScriptInputTexts:
+    """Test get_script_input_texts function."""
+
+    def test_other_spellings(self):
+        """The other spellings of ITRANS are read too."""
+        itrans = get_script_input_texts("ITRANS")
+        for text in ["RRi", "R^i", "Ch", "chh", "x", "GY"]:
+            assert text in itrans
+        assert "" not in itrans
+        assert "chh" in get_script_input_texts("Normal")
+
+    def test_invalid_script(self):
+        """An invalid script raises ValueError."""
+        with pytest.raises(ValueError):
+            get_script_input_texts("InvalidScript")  # ty:ignore[invalid-argument-type]
 
 
 class TestKramaDataItem:

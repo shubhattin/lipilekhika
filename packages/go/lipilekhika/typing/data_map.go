@@ -78,6 +78,37 @@ func GetScriptKramaData(script string) ([]KramaDataItem, error) {
 	return out, nil
 }
 
+// GetScriptInputTexts returns every text a script reads when converting from it, sorted by
+// text: the main text of each character and its other spellings (`R^i` beside `RRi` in ITRANS,
+// `x` for क्ष). The texts which are only a step towards a longer one are included too (`O` of
+// ITRANS, on the way to `OM`), so to get the other spellings of a text keep the ones which
+// convert to the same text as it.
+//
+// script can be a script or language name (e.g. "Devanagari", "Hindi", "tel").
+func GetScriptInputTexts(script string) ([]string, error) {
+	data, err := scriptdata.GetScriptData(script)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(data.TextToKramaMapArr))
+	for _, entry := range data.TextToKramaMapArr {
+		if entry.Text == "" || len(entry.Value.Krama) == 0 {
+			continue
+		}
+		valid := true
+		for _, k := range entry.Value.Krama {
+			if k < 0 {
+				valid = false
+				break
+			}
+		}
+		if valid {
+			out = append(out, entry.Text)
+		}
+	}
+	return out, nil
+}
+
 // GetScriptTypingDataMap returns the characters of a script with the keys that type them,
 // e.g. to show a typing reference for the script.
 //

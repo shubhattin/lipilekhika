@@ -84,6 +84,28 @@ func TestGetScriptKramaData(t *testing.T) {
 	}
 }
 
+func TestGetScriptInputTexts(t *testing.T) {
+	itrans, err := GetScriptInputTexts("ITRANS")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, text := range []string{"RRi", "R^i", "Ch", "chh", "x", "GY"} {
+		if !slices.Contains(itrans, text) {
+			t.Errorf("ITRANS should read %q", text)
+		}
+	}
+	if slices.Contains(itrans, "") {
+		t.Error("an empty text in the ITRANS input texts")
+	}
+	normal, err := GetScriptInputTexts("Normal")
+	if err != nil || !slices.Contains(normal, "chh") {
+		t.Errorf("Normal should read chh (err %v)", err)
+	}
+	if _, err := GetScriptInputTexts("not a script"); err == nil {
+		t.Error("GetScriptInputTexts of an unknown name: no error")
+	}
+}
+
 // the example of the package documentation
 func TestDocExample(t *testing.T) {
 	ctx, err := NewTypingContext("Devanagari", nil)
