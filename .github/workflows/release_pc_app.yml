@@ -360,3 +360,14 @@ jobs:
         run: |
           gh release upload "${{ needs.meta.outputs.tag }}" \
             "dist/lipilekhika-$VERSION-macos.dmg" --clobber
+
+  # The website's download links and pc-app/latest.json (the apps' update check) come from the
+  # latest release: build and deploy the site again once every file is uploaded (a failed deploy
+  # fails this run)
+  deploy-site:
+    needs: [meta, build-windows, build-linux, build-macos]
+    if: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+    uses: ./.github/workflows/deploy_web_client.yml
+    with:
+      ref: main
+    secrets: inherit

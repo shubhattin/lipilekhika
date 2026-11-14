@@ -1,7 +1,9 @@
-//! A newer version: the app checks GitHub once per start. It shows a popup (a toast in the window,
-//! it does not take the keys) on its first few starts, with Later to stop it. After that, or when
-//! the popup is closed, a small link offers the update: next to the main window's buttons at its
-//! top, at the bottom of Lipi Parivartaka.
+//! A newer version: the app checks when it starts (the website's `latest.json`, else the GitHub
+//! releases, see [`version_check`]), again after 1, 5 and 30 minutes when a check fails, and every
+//! 12 hours while it runs (it may stay in the tray for days). About has a small link to check now.
+//! A newer version shows a popup (a toast in the window, it does not take the keys) on its first
+//! few starts, with Later to stop it. After that, or when the popup is closed, a small link offers
+//! the update: next to the main window's buttons at its top, at the bottom of Lipi Parivartaka.
 //!
 //! The update installs the new MSI on Windows; elsewhere (macOS, Linux, the portable app) it
 //! opens the website's download page, which offers the right download for the system.
@@ -11,24 +13,54 @@ use super::styles::GREEN;
 use crate::version_check::{self, UpdateResult, VersionCheckResult};
 use gpui_kit::component::button::{Button, ButtonVariants as _};
 use gpui_kit::component::notification::Notification;
-use gpui_kit::component::{Icon, Sizable as _, WindowExt as _, h_flex};
+use gpui_kit::component::{ActiveTheme as _, Icon, Sizable as _, WindowExt as _, h_flex};
+use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-  AnyElement, AnyWindowHandle, App, InteractiveElement as _, IntoElement, ParentElement as _,
-  StatefulInteractiveElement as _, Styled as _, div, px,
+  AnyElement, AnyWindowHandle, App, AsyncApp, InteractiveElement as _, IntoElement,
+  ParentElement as _, StatefulInteractiveElement as _, Styled as _, div, px,
 };
+use std::time::{Duration, SystemTime};
 
 /// On how many starts the popup is shown for a version
 const MAX_PROMPTS: u8 = 3;
+/// The waits before the next check after a failed one, then [`CHECK_EVERY`]
+const RETRY_AFTER: [Duration; 3] = [
+  Duration::from_secs(60),
+  Duration::from_secs(5 * 60),
+  Duration::from_secs(30 * 60),
+];
+/// The wait between the checks while the app runs
+const CHECK_EVERY: Duration = Duration::from_secs(12 * 60 * 60);
+/// A wait is made of steps of at most this, each measured on the clock: a timer stops while the
+/// computer sleeps, the clock doesn't (a check is due soon after waking)
+const WAIT_STEP: Duration = Duration::from_secs(10 * 60);
+
+/// Where the check is
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum CheckStatus {
+  #[default]
+  NotChecked,
+  Checking,
+  /// the last check worked (the result is in [`UpdateState::check`])
+  Done,
+  /// the last check failed (an earlier result is kept)
+  Failed,
+}
 
 /// The update's state
 #[derive(Debug, Clone, Default)]
 pub struct UpdateState {
+  /// the last check that worked
   pub check: Option<VersionCheckResult>,
+  pub status: CheckStatus,
+  /// when the last check that worked was done (About says how long ago)
+  checked_at: Option<SystemTime>,
   pub in_progress: bool,
-  /// the popup was shown on this start
-  prompted: bool,
-  /// the popup is on screen (the link waits until it is gone)
+  /// the version the popup was shown for on this start
+  prompted_version: Option<String>,
+  /// the popup is on screen (the link waits until it is gone), and its window
   popup_open: bool,
+  popup_window: Option<AnyWindowHandle>,
 }
 
 impl UpdateState {
@@ -38,24 +70,84 @@ impl UpdateState {
     if !check.update_available {
       return None;
     }
-    check.latest_version.as_deref()
+    Some(&check.latest_version)
   }
 }
 
-/// Checks for a newer version in the background, then shows the popup
+/// Checks for a newer version in the background now, then again (see [`RETRY_AFTER`] and
+/// [`CHECK_EVERY`]), and shows the popup for a newer version
 pub fn start_version_check(cx: &mut App) {
   cx.spawn(async move |cx| {
-    let result = cx
-      .background_executor()
-      .spawn(async { version_check::check_for_updates() })
-      .await;
-    cx.update(|cx| {
-      cx.global_mut::<Controller>().update.check = Some(result);
-      prompt_update(cx);
-      cx.refresh_windows();
-    });
+    let mut failures = 0;
+    loop {
+      let wait = match run_check(cx, true).await {
+        Some(true) => {
+          failures = 0;
+          CHECK_EVERY
+        }
+        Some(false) => {
+          let wait = RETRY_AFTER.get(failures).copied().unwrap_or(CHECK_EVERY);
+          failures += 1;
+          wait
+        }
+        // a check from About is running
+        None => RETRY_AFTER[0],
+      };
+      let due = SystemTime::now() + wait;
+      while let Ok(left) = due.duration_since(SystemTime::now()) {
+        if left.is_zero() {
+          break;
+        }
+        cx.background_executor().timer(left.min(WAIT_STEP)).await;
+      }
+    }
   })
   .detach();
+}
+
+/// Checks now (About's link). No popup: About shows the result.
+pub fn check_now(cx: &mut App) {
+  cx.spawn(async move |cx| {
+    run_check(cx, false).await;
+  })
+  .detach();
+}
+
+/// One check: whether it worked, or None when a check is running already
+async fn run_check(cx: &mut AsyncApp, prompt: bool) -> Option<bool> {
+  let started = cx.update(|cx| {
+    let update = &mut cx.global_mut::<Controller>().update;
+    if update.status == CheckStatus::Checking {
+      return false;
+    }
+    update.status = CheckStatus::Checking;
+    cx.refresh_windows();
+    true
+  });
+  if !started {
+    return None;
+  }
+  let result = cx
+    .background_executor()
+    .spawn(async { version_check::check_for_updates() })
+    .await;
+  let worked = result.is_ok();
+  cx.update(|cx| {
+    let update = &mut cx.global_mut::<Controller>().update;
+    match result {
+      Ok(check) => {
+        update.check = Some(check);
+        update.status = CheckStatus::Done;
+        update.checked_at = Some(SystemTime::now());
+      }
+      Err(_) => update.status = CheckStatus::Failed,
+    }
+    if worked && prompt {
+      prompt_update(cx);
+    }
+    cx.refresh_windows();
+  });
+  Some(worked)
 }
 
 /// Whether the update installs the new version itself (the MSI on Windows), else it opens the
@@ -77,9 +169,7 @@ pub fn run_update(cx: &mut App) {
     cx.open_url(super::DOWNLOAD_URL);
     return;
   }
-  let (Some(url), Some(version)) = (check.windows_msi_download_url, check.latest_version) else {
-    return;
-  };
+  let (url, version) = (check.windows_msi_download_url, check.latest_version);
   cx.global_mut::<Controller>().update.in_progress = true;
   cx.refresh_windows();
   cx.spawn(async move |cx| {
@@ -90,8 +180,10 @@ pub fn run_update(cx: &mut App) {
     cx.update(|cx| match result {
       UpdateResult::InstallerLaunched => cx.quit(),
       other => {
+        // the installer could not be downloaded or started: the download page offers it
         eprintln!("Update failed: {other:?}");
         cx.global_mut::<Controller>().update.in_progress = false;
+        cx.open_url(super::DOWNLOAD_URL);
         cx.refresh_windows();
       }
     });
@@ -108,18 +200,18 @@ fn update_label(version: &str, in_progress: bool) -> String {
   }
 }
 
-/// Shows the popup in a window of the app, once per start and on the first [`MAX_PROMPTS`]
-/// starts for a version. Called when the check is done and when a window opens (the app may
+/// Shows the popup in a window of the app, once per start for a version and on the first
+/// [`MAX_PROMPTS`] starts for it. Called when a check is done and when a window opens (the app may
 /// start with its windows in the tray).
 pub fn prompt_update(cx: &mut App) {
   let controller = Controller::global(cx);
   let update = &controller.update;
-  if update.prompted {
-    return;
-  }
   let Some(version) = update.available_version().map(str::to_string) else {
     return;
   };
+  if update.prompted_version.as_deref() == Some(version.as_str()) {
+    return;
+  }
   let Some(handle) = prompt_window(cx) else {
     return;
   };
@@ -137,8 +229,16 @@ pub fn prompt_update(cx: &mut App) {
   }
   Controller::save_config(cx);
   let update = &mut cx.global_mut::<Controller>().update;
-  update.prompted = true;
+  // the popup of an older version (found earlier in this run) goes
+  let older = update.popup_window.take().filter(|_| update.popup_open);
+  update.prompted_version = Some(version.clone());
   update.popup_open = true;
+  update.popup_window = Some(handle);
+  if let Some(older) = older {
+    let _ = older.update(cx, |_, window, cx| {
+      window.remove_notification::<UpdatePopup>(cx);
+    });
+  }
   let _ = handle.update(cx, |_, window, cx| {
     window.push_notification(popup(version), cx);
   });
@@ -158,6 +258,7 @@ fn prompt_window(cx: &App) -> Option<AnyWindowHandle> {
 struct UpdatePopup;
 
 fn popup(version: String) -> Notification {
+  let shown_for = version.clone();
   let message = if installs_update() {
     "Install it now, or later from the Update link in the window."
   } else {
@@ -197,8 +298,13 @@ fn popup(version: String) -> Notification {
         )
         .into_any_element()
     })
-    .on_close(|_, cx| {
-      cx.global_mut::<Controller>().update.popup_open = false;
+    .on_close(move |_, cx| {
+      // not when this is the popup of an older version, replaced by a newer one's
+      let update = &mut cx.global_mut::<Controller>().update;
+      if update.prompted_version.as_deref() == Some(shown_for.as_str()) {
+        update.popup_open = false;
+        update.popup_window = None;
+      }
       cx.refresh_windows();
     })
 }
@@ -251,4 +357,84 @@ pub fn about_update_button(cx: &App) -> Option<AnyElement> {
       .on_click(|_, _, cx| run_update(cx))
       .into_any_element(),
   )
+}
+
+/// The line under the version in the About dialogs: a small link to check for a newer version,
+/// and how the last check went. Nothing while a newer version is offered (its button shows).
+pub fn about_check_line(cx: &App) -> Option<AnyElement> {
+  let update = &Controller::global(cx).update;
+  if update.available_version().is_some() {
+    return None;
+  }
+  let (status, action) = match update.status {
+    CheckStatus::NotChecked => (None, Some("Check for updates")),
+    CheckStatus::Checking => (Some("Checking for updates…".to_string()), None),
+    CheckStatus::Done => {
+      let ago = update
+        .checked_at
+        .and_then(|at| SystemTime::now().duration_since(at).ok())
+        .map(time_ago);
+      let status = match ago {
+        Some(ago) => format!("Up to date, checked {ago}"),
+        None => "Up to date".to_string(),
+      };
+      (Some(status), Some("Check again"))
+    }
+    CheckStatus::Failed => (
+      Some("Could not check for updates".to_string()),
+      Some("Try again"),
+    ),
+  };
+  let separator = status.is_some() && action.is_some();
+  let muted = cx.theme().muted_foreground;
+  let hover = cx.theme().foreground;
+  Some(
+    h_flex()
+      .gap_1()
+      .text_xs()
+      .text_color(muted)
+      .children(status)
+      .when(separator, |el| el.child("·"))
+      .children(action.map(|label| {
+        div()
+          .id("about-check-update")
+          .cursor_pointer()
+          .underline()
+          .hover(move |s| s.text_color(hover))
+          .child(label)
+          .on_click(|_, _, cx| check_now(cx))
+      }))
+      .into_any_element(),
+  )
+}
+
+/// How long ago, roughly: "just now", "5 min ago", "3 h ago", "2 days ago"
+fn time_ago(elapsed: Duration) -> String {
+  let secs = elapsed.as_secs();
+  match secs {
+    0..60 => "just now".to_string(),
+    60..3600 => format!("{} min ago", secs / 60),
+    3600..86_400 => format!("{} h ago", secs / 3600),
+    86_400..172_800 => "1 day ago".to_string(),
+    _ => format!("{} days ago", secs / 86_400),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::time_ago;
+  use std::time::Duration;
+
+  #[test]
+  fn time_ago_is_rough() {
+    let ago = |s| time_ago(Duration::from_secs(s));
+    assert_eq!(ago(0), "just now");
+    assert_eq!(ago(59), "just now");
+    assert_eq!(ago(60), "1 min ago");
+    assert_eq!(ago(59 * 60 + 59), "59 min ago");
+    assert_eq!(ago(3600), "1 h ago");
+    assert_eq!(ago(23 * 3600 + 3599), "23 h ago");
+    assert_eq!(ago(86_400), "1 day ago");
+    assert_eq!(ago(3 * 86_400 + 5), "3 days ago");
+  }
 }

@@ -1,9 +1,37 @@
-use octocrab::Octocrab;
+//! The check for a newer version, and the update of the Windows installer.
+//!
+//! The latest version comes from the website (`lipilekhika.in/pc-app/latest.json`, written when
+//! the site is built from the latest release). When the website can't be reached, or no longer
+//! has the file, it comes from the GitHub releases, where every download is in the end. The
+//! website gives the version only: the installer is always downloaded from the GitHub release.
+//! A version is offered only once its release has the installer (the release is published
+//! before its files are uploaded): the website writes `latest.json` only then, and the GitHub
+//! releases without it are skipped.
+
+use serde::Deserialize;
 use std::env;
+use std::io::Write as _;
+use std::path::PathBuf;
 use std::process::Command;
+use std::time::Duration;
 
 /// Current app version from Cargo.toml
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// The latest version, written by the website build (`integrations/netlify-redirects.ts`)
+const LATEST_JSON_URL: &str = "https://lipilekhika.in/pc-app/latest.json";
+/// The repository's releases (every package of the repository has its releases here)
+const GITHUB_RELEASES_URL: &str =
+  "https://api.github.com/repos/shubhattin/lipilekhika/releases?per_page=60";
+const TAG_PREFIX: &str = "pc-app@v";
+/// How often the website is tried before the GitHub releases
+const WEBSITE_TRIES: u32 = 2;
+/// The wait before the website is tried again
+const WEBSITE_RETRY_WAIT: Duration = Duration::from_secs(3);
+/// The log of the checks, in the app's data directory
+const LOG_FILE: &str = "update-check.log";
+/// The log is started again when it is larger
+const LOG_MAX_BYTES: u64 = 32 * 1024;
 
 /// The version compared with the latest release. Debug builds take `LIPILEKHIKA_TEST_VERSION`
 /// (`0.0.1`: an update is offered) to try the update popup.
@@ -15,127 +43,229 @@ fn current_version() -> String {
   CURRENT_VERSION.to_string()
 }
 
+/// Where the latest version came from
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Source {
+  Website,
+  GitHub,
+}
+
 /// Result of a version check
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct VersionCheckResult {
   pub update_available: bool,
-  pub latest_version: Option<String>,
-  pub windows_msi_download_url: Option<String>,
+  pub latest_version: String,
+  pub windows_msi_download_url: String,
+  #[allow(dead_code)] // in the log
+  pub source: Source,
 }
 
-fn parse_pc_app_tag(tag: &str) -> Option<&str> {
-  tag.strip_prefix("pc-app@v")
-}
-
-/// Compare two semantic versions
-/// Returns true if version_a > version_b
-fn is_version_greater(version_a: &str, version_b: &str) -> bool {
-  let parse_version = |v: &str| -> Option<(u32, u32, u32)> {
-    let parts: Vec<&str> = v.split('.').collect();
-    if parts.len() >= 3 {
-      Some((
-        parts[0].parse().ok()?,
-        parts[1].parse().ok()?,
-        parts[2].parse().ok()?,
-      ))
-    } else if parts.len() == 2 {
-      Some((parts[0].parse().ok()?, parts[1].parse().ok()?, 0))
+/// A version `major.minor.patch`, only digits: a pre-release (`1.2.0-beta.1`) or anything else is
+/// not a version to offer
+fn parse_version(v: &str) -> Option<(u32, u32, u32)> {
+  let mut parts = v.split('.').map(|p| {
+    if !p.is_empty() && p.bytes().all(|b| b.is_ascii_digit()) {
+      p.parse().ok()
     } else {
       None
     }
-  };
+  });
+  let version = (parts.next()??, parts.next()??, parts.next()??);
+  parts.next().is_none().then_some(version)
+}
 
+/// Returns true if version_a > version_b
+fn is_version_greater(version_a: &str, version_b: &str) -> bool {
   match (parse_version(version_a), parse_version(version_b)) {
-    (Some((a_major, a_minor, a_patch)), Some((b_major, b_minor, b_patch))) => {
-      if a_major != b_major {
-        a_major > b_major
-      } else if a_minor != b_minor {
-        a_minor > b_minor
-      } else {
-        a_patch > b_patch
-      }
-    }
+    (Some(a), Some(b)) => a > b,
     _ => false,
   }
 }
 
-/// Check for updates by fetching releases from GitHub.
-///
-/// Blocking: octocrab needs tokio, so this runs its own tokio runtime. Call it on a background
-/// thread (GPUI's background executor).
-pub fn check_for_updates() -> VersionCheckResult {
-  match tokio::runtime::Runtime::new() {
-    Ok(rt) => rt.block_on(check_for_updates_inner()),
-    Err(e) => {
-      eprintln!("Failed to create tokio runtime: {}", e);
-      VersionCheckResult::default()
-    }
+/// The installer of a version, on its GitHub release
+fn msi_download_url(version: &str) -> String {
+  format!(
+    "https://github.com/shubhattin/lipilekhika/releases/download/pc-app%40v{version}/{}",
+    msi_name(version)
+  )
+}
+
+/// `latest.json` of the website
+#[derive(Deserialize)]
+struct LatestJson {
+  version: String,
+}
+
+/// The fields of a GitHub release that are needed
+#[derive(Deserialize)]
+struct GitHubRelease {
+  tag_name: String,
+  #[serde(default)]
+  draft: bool,
+  #[serde(default)]
+  prerelease: bool,
+  #[serde(default)]
+  assets: Vec<GitHubAsset>,
+}
+
+#[derive(Deserialize)]
+struct GitHubAsset {
+  name: String,
+}
+
+/// The installer's file name of a version (the one file every release has)
+fn msi_name(version: &str) -> String {
+  format!("lipilekhika-{version}.msi")
+}
+
+/// The latest version in the website's `latest.json`
+fn version_of_latest_json(body: &str) -> Result<String, String> {
+  let latest: LatestJson = serde_json::from_str(body).map_err(|e| format!("bad JSON: {e}"))?;
+  match parse_version(&latest.version) {
+    Some(_) => Ok(latest.version),
+    None => Err(format!("bad version {:?}", latest.version)),
   }
 }
 
-async fn check_for_updates_inner() -> VersionCheckResult {
-  let result = check_for_updates_fetch().await;
-  match result {
-    Ok(r) => r,
-    Err(e) => {
-      eprintln!("Version check failed: {}", e);
-      VersionCheckResult::default()
-    }
-  }
+/// The highest version of the published pc-app releases that have their installer (the list is
+/// in the order of the tags' commits, not of the versions)
+fn version_of_releases(body: &str) -> Result<String, String> {
+  let releases: Vec<GitHubRelease> =
+    serde_json::from_str(body).map_err(|e| format!("bad JSON: {e}"))?;
+  releases
+    .iter()
+    .filter(|r| !r.draft && !r.prerelease)
+    .filter_map(|r| Some((r, r.tag_name.strip_prefix(TAG_PREFIX)?)))
+    .filter(|(r, v)| r.assets.iter().any(|a| a.name == msi_name(v)))
+    .filter_map(|(_, v)| parse_version(v).map(|parsed| (parsed, v)))
+    .max_by_key(|(parsed, _)| *parsed)
+    .map(|(_, v)| v.to_string())
+    .ok_or_else(|| "no pc-app release".to_string())
 }
 
-async fn check_for_updates_fetch()
--> Result<VersionCheckResult, Box<dyn std::error::Error + Send + Sync>> {
-  let octocrab = Octocrab::builder()
-    .set_connect_timeout(Some(std::time::Duration::from_secs(10)))
-    .build()?;
-
-  // Fetch releases from the repository (already in descending order)
-  let releases = octocrab
-    .repos("shubhattin", "lipilekhika")
-    .releases()
-    .list()
-    .per_page(50)
+async fn get_text(client: &reqwest::Client, url: &str) -> Result<String, String> {
+  let response = client
+    .get(url)
     .send()
-    .await?;
+    .await
+    .map_err(|e| e.without_url().to_string())?;
+  if !response.status().is_success() {
+    return Err(format!("HTTP {}", response.status()));
+  }
+  response
+    .text()
+    .await
+    .map_err(|e| e.without_url().to_string())
+}
 
-  // Find the first stable pc-app release
-  // Releases are already ordered in descending order, so first match is latest
-  for release in releases.items {
-    // Skip drafts and pre-releases
-    if release.draft || release.prerelease {
-      continue;
+/// The latest version: from the website, tried [`WEBSITE_TRIES`] times, else from the GitHub
+/// releases
+async fn fetch_latest(client: &reqwest::Client) -> Result<(String, Source), String> {
+  let mut errors = Vec::new();
+  for attempt in 0..WEBSITE_TRIES {
+    if attempt > 0 {
+      tokio::time::sleep(WEBSITE_RETRY_WAIT).await;
     }
-
-    let tag = &release.tag_name;
-    // Skip alpha/beta versions
-    if let Some(version) = parse_pc_app_tag(tag) {
-      let version_lower = version.to_lowercase();
-      if version_lower.contains("alpha") || version_lower.contains("beta") {
-        continue;
-      }
-
-      // Found the latest stable release
-      let update_available = is_version_greater(version, &current_version());
-
-      return Ok(VersionCheckResult {
-        update_available,
-        latest_version: Some(version.to_string()),
-        windows_msi_download_url: Some(
-          format!(
-            "https://github.com/shubhattin/lipilekhika/releases/download/pc-app%40v{}/lipilekhika-{}.msi",
-            version, version
-          )
-          .to_string(),
-        ),
-      });
+    match get_text(client, LATEST_JSON_URL)
+      .await
+      .and_then(|body| version_of_latest_json(&body))
+    {
+      Ok(version) => return Ok((version, Source::Website)),
+      Err(e) => errors.push(format!("website: {e}")),
     }
   }
-
-  // No matching release found
-  Ok(VersionCheckResult::default())
+  let github = client
+    .get(GITHUB_RELEASES_URL)
+    .header("Accept", "application/vnd.github+json");
+  let body = match github.send().await {
+    Ok(r) if r.status().is_success() => r.text().await.map_err(|e| e.without_url().to_string()),
+    Ok(r) => Err(format!("HTTP {}", r.status())),
+    Err(e) => Err(e.without_url().to_string()),
+  };
+  match body.and_then(|body| version_of_releases(&body)) {
+    Ok(version) => Ok((version, Source::GitHub)),
+    Err(e) => {
+      errors.push(format!("github: {e}"));
+      Err(errors.join("; "))
+    }
+  }
 }
-use std::path::PathBuf;
+
+/// Checks for a newer version. Blocking: it runs its own tokio runtime, call it on a background
+/// thread (GPUI's background executor). The result goes in the log.
+pub fn check_for_updates() -> Result<VersionCheckResult, String> {
+  let result = tokio::runtime::Builder::new_current_thread()
+    .enable_all()
+    .build()
+    .map_err(|e| format!("no tokio runtime: {e}"))
+    .and_then(|rt| rt.block_on(check_for_updates_inner()));
+  match &result {
+    Ok(r) => log(&format!(
+      "latest {} ({:?}), this is {}",
+      r.latest_version,
+      r.source,
+      current_version()
+    )),
+    Err(e) => log(&format!("check failed: {e}")),
+  }
+  result
+}
+
+async fn check_for_updates_inner() -> Result<VersionCheckResult, String> {
+  let client = reqwest::Client::builder()
+    .user_agent(concat!("lipilekhika-pc-app/", env!("CARGO_PKG_VERSION")))
+    .connect_timeout(Duration::from_secs(10))
+    .timeout(Duration::from_secs(20))
+    .build()
+    .map_err(|e| e.to_string())?;
+  let (latest_version, source) = fetch_latest(&client).await?;
+  Ok(VersionCheckResult {
+    update_available: is_version_greater(&latest_version, &current_version()),
+    windows_msi_download_url: msi_download_url(&latest_version),
+    latest_version,
+    source,
+  })
+}
+
+/// Adds a line to the log of the checks (it is started again when it grows too large)
+fn log(line: &str) {
+  eprintln!("Version check: {line}");
+  let path = crate::persistent_state::app_data_path(LOG_FILE);
+  let too_large = std::fs::metadata(&path).is_ok_and(|m| m.len() > LOG_MAX_BYTES);
+  let file = std::fs::OpenOptions::new()
+    .create(true)
+    .append(!too_large)
+    .write(true)
+    .truncate(too_large)
+    .open(&path);
+  if let Ok(mut file) = file {
+    let _ = writeln!(file, "{} {line}", utc_now());
+  }
+}
+
+/// The time now in UTC, `2026-11-15 10:42:07Z`
+fn utc_now() -> String {
+  let secs = std::time::SystemTime::now()
+    .duration_since(std::time::UNIX_EPOCH)
+    .map_or(0, |d| d.as_secs());
+  let (days, rest) = (secs / 86_400, secs % 86_400);
+  // the date of a day count since 1970 (Howard Hinnant's civil_from_days)
+  let z = days as i64 + 719_468;
+  let era = z.div_euclid(146_097);
+  let doe = z - era * 146_097;
+  let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+  let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+  let mp = (5 * doy + 2) / 153;
+  let day = doy - (153 * mp + 2) / 5 + 1;
+  let month = if mp < 10 { mp + 3 } else { mp - 9 };
+  let year = yoe + era * 400 + i64::from(month <= 2);
+  format!(
+    "{year}-{month:02}-{day:02} {:02}:{:02}:{:02}Z",
+    rest / 3600,
+    rest % 3600 / 60,
+    rest % 60
+  )
+}
 
 /// Result of the update process
 #[derive(Debug, Clone)]
@@ -221,7 +351,13 @@ async fn download_file(
   url: &str,
   dest_path: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-  let response = reqwest::get(url).await?;
+  // a stalled download fails (the update then opens the download page)
+  let client = reqwest::Client::builder()
+    .user_agent(concat!("lipilekhika-pc-app/", env!("CARGO_PKG_VERSION")))
+    .connect_timeout(Duration::from_secs(15))
+    .read_timeout(Duration::from_secs(30))
+    .build()?;
+  let response = client.get(url).send().await?;
 
   if !response.status().is_success() {
     return Err(format!("HTTP error: {}", response.status()).into());
@@ -253,11 +389,16 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_parse_pc_app_tag() {
-    assert_eq!(parse_pc_app_tag("pc-app@v0.0.5"), Some("0.0.5"));
-    assert_eq!(parse_pc_app_tag("pc-app@v1.2.3"), Some("1.2.3"));
-    assert_eq!(parse_pc_app_tag("v1.0.0"), None);
-    assert_eq!(parse_pc_app_tag("other-tag@v1.0.0"), None);
+  fn test_parse_version() {
+    assert_eq!(parse_version("1.2.3"), Some((1, 2, 3)));
+    assert_eq!(parse_version("0.0.10"), Some((0, 0, 10)));
+    assert_eq!(parse_version("1.2"), None);
+    assert_eq!(parse_version("1.2.3.4"), None);
+    assert_eq!(parse_version("1.2.0-beta.1"), None);
+    assert_eq!(parse_version("v1.2.3"), None);
+    assert_eq!(parse_version("1..3"), None);
+    assert_eq!(parse_version("1.2.+3"), None);
+    assert_eq!(parse_version(""), None);
   }
 
   #[test]
@@ -265,7 +406,68 @@ mod tests {
     assert!(is_version_greater("0.0.6", "0.0.5"));
     assert!(is_version_greater("0.1.0", "0.0.9"));
     assert!(is_version_greater("1.0.0", "0.9.9"));
+    assert!(is_version_greater("1.0.10", "1.0.9"));
     assert!(!is_version_greater("0.0.5", "0.0.5"));
     assert!(!is_version_greater("0.0.4", "0.0.5"));
+    assert!(!is_version_greater("2.0.0-beta", "1.0.0"));
+  }
+
+  #[test]
+  fn test_latest_json() {
+    assert_eq!(
+      version_of_latest_json(r#"{"version":"1.1.3"}"#),
+      Ok("1.1.3".to_string())
+    );
+    // more fields may come later
+    assert_eq!(
+      version_of_latest_json(r#"{"version":"1.1.3","tag":"pc-app@v1.1.3"}"#),
+      Ok("1.1.3".to_string())
+    );
+    assert!(version_of_latest_json(r#"{"version":"1.1.3/../x"}"#).is_err());
+    assert!(version_of_latest_json("<html>Page not found</html>").is_err());
+    assert!(version_of_latest_json("{}").is_err());
+  }
+
+  #[test]
+  fn test_releases() {
+    // in the order of the tags' commits: the highest version is not always first
+    let msi = |v: &str| format!(r#"[{{"name":"lipilekhika-{v}.msi"}},{{"name":"x.dmg"}}]"#);
+    let body = format!(
+      r#"[
+      {{"tag_name":"rust-lib@v1.2.0","draft":false,"prerelease":false,"assets":[]}},
+      {{"tag_name":"pc-app@v1.1.0","draft":false,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.1.2","draft":false,"prerelease":false,"author":null,"assets":{}}},
+      {{"tag_name":"pc-app@v1.2.0-beta.1","draft":false,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.3.0","draft":false,"prerelease":true,"assets":{}}},
+      {{"tag_name":"pc-app@v1.4.0","draft":true,"prerelease":false,"assets":{}}},
+      {{"tag_name":"pc-app@v1.5.0","draft":false,"prerelease":false,"assets":[{{"name":"x.dmg"}}]}},
+      {{"tag_name":"pc-app@v1.0.11","draft":false,"prerelease":false,"assets":{}}}
+    ]"#,
+      msi("1.1.0"),
+      msi("1.1.2"),
+      msi("1.2.0-beta.1"),
+      msi("1.3.0"),
+      msi("1.4.0"),
+      msi("1.0.11"),
+    );
+    // 1.5.0's installer is not uploaded yet
+    assert_eq!(version_of_releases(&body), Ok("1.1.2".to_string()));
+    assert!(version_of_releases("[]").is_err());
+    assert!(version_of_releases(r#"{"message":"API rate limit exceeded"}"#).is_err());
+  }
+
+  #[test]
+  fn test_msi_url() {
+    assert_eq!(
+      msi_download_url("1.1.2"),
+      "https://github.com/shubhattin/lipilekhika/releases/download/pc-app%40v1.1.2/lipilekhika-1.1.2.msi"
+    );
+  }
+
+  #[test]
+  fn test_utc_now() {
+    let now = utc_now();
+    assert_eq!(now.len(), "2026-11-15 10:42:07Z".len());
+    assert!(now.starts_with("20"));
   }
 }
