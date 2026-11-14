@@ -350,7 +350,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: lipilekhika-macos
-          path: dist/lipilekhika-${{ env.VERSION }}-macos-universal.dmg
+          path: dist/lipilekhika-${{ env.VERSION }}-macos.dmg
           retention-days: 7
 
       - name: Upload to release
@@ -359,4 +359,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${{ needs.meta.outputs.tag }}" \
-            "dist/lipilekhika-$VERSION-macos-universal.dmg" --clobber
+            "dist/lipilekhika-$VERSION-macos.dmg" --clobber

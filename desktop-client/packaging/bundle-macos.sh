@@ -1,5 +1,5 @@
 #!/bin/sh
-# Lipi Lekhika for macOS: lipilekhika-<version>-macos-universal.dmg with "Lipi Lekhika.app" (the
+# Lipi Lekhika for macOS: lipilekhika-<version>-macos.dmg with "Lipi Lekhika.app" (the
 # typing tool, Lipi Parivartaka and the typing help), one binary for Apple silicon and Intel Macs.
 # The disk image shows the app next to a link to Applications: dragging it there installs it.
 # Run on a Mac, after
@@ -58,7 +58,7 @@ codesign --display --requirements - "$app"
 
 # the disk image: the app and a link to Applications
 ln -s /Applications "$stage/Applications"
-dmg="$out/lipilekhika-$version-macos-universal.dmg"
+dmg="$out/lipilekhika-$version-macos.dmg"
 rm -f "$dmg"
 # the disk image itself is not signed: macOS checks a signed image when it is opened and refuses
 # one with a self-signed certificate ("Not Opened"), an unsigned one just opens. The app in it is
