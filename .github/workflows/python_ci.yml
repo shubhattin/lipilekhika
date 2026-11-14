@@ -14,6 +14,14 @@ on:
       - '.github/workflows/python_ci.yml'
   workflow_dispatch:
 
+env:
+  # CI builds compile fast: the release profile's fat LTO and single codegen unit (for the
+  # published packages) only slow the build down here, the code is still optimized (opt-level 3)
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+
+# The cargo caches (Swatinem/rust-cache: the dependencies' builds, one per job) are saved on main
+# only; the other branches start from main's.
 jobs:
   type_build_check:
     runs-on: ubuntu-latest
@@ -31,16 +39,11 @@ jobs:
         uses: astral-sh/setup-uv@v10.3.3 # no major (v10) tag is published
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: python-check
+          save-if: ${{ github.ref == 'refs/heads/main' }}
   
       - name: Build and Check
         run: |
@@ -67,16 +70,11 @@ jobs:
         uses: astral-sh/setup-uv@v10.3.3 # no major (v10) tag is published
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: python-tests
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Compile Python Bindings
         run: |
