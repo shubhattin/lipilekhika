@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- The check for a newer version reads lipilekhika.in/pc-app/latest.json, else the GitHub releases, with retries after a failed check and again every 12 hours while the app runs; About has a small _Check for updates_ link. The check no longer needs the Windows certificate store (it failed silently on a new Windows), and octocrab is gone
-
 ## pc-app@v1.1.2
 
 - The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ checkbox), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`)
