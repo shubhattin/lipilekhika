@@ -14,6 +14,16 @@ on:
       - ".github/workflows/js_ci.yml"
   workflow_dispatch:
 
+env:
+  # CI builds compile fast: the release profile's fat LTO and single codegen unit (for the
+  # published packages) only slow the build down here, the code is still optimized (opt-level 3)
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+  CARGO_PROFILE_WASM_RELEASE_LTO: "false"
+  CARGO_PROFILE_WASM_RELEASE_CODEGEN_UNITS: "16"
+
+# The cargo caches (Swatinem/rust-cache: the dependencies' builds, one per job) are saved on main
+# only; the other branches start from main's.
 jobs:
   type_build_check:
     # strategy:
@@ -33,16 +43,11 @@ jobs:
       ## Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: js-check
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
       # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
       - uses: taiki-e/install-action@v2
@@ -104,16 +109,11 @@ jobs:
       ## Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: js-tests
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       # prebuilt wasm-pack (jetli/wasm-pack-action runs on the deprecated Node.js 16).
       # `wasm-pack build --profile` needs wasm-pack >= 0.12; pinned to the version verified locally
       - uses: taiki-e/install-action@v2

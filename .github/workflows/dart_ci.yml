@@ -20,9 +20,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # CI builds compile fast: the release profile's fat LTO and single codegen unit (for the
+  # published packages) only slow the build down here, the code is still optimized (opt-level 3)
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
   # keep in sync with `flutter_rust_bridge` in packages/dart/binding/Cargo.toml (and pubspec.lock)
   FRB_CODEGEN_VERSION: 2.11.1
 
+# The cargo caches (Swatinem/rust-cache: the dependencies' builds, one per job) are saved on main
+# only; the other branches start from main's.
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -42,16 +48,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: dart-tests
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       # Setup Flutter
       - name: Setup Flutter

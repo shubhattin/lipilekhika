@@ -15,6 +15,14 @@ on:
       - '.github/workflows/rust_ci.yml'
   workflow_dispatch:
 
+env:
+  # CI builds compile fast: the release profile's fat LTO and single codegen unit (for the
+  # published packages) only slow the build down here, the code is still optimized (opt-level 3)
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+
+# The cargo caches (Swatinem/rust-cache: the dependencies' builds, one per job) are saved on main
+# only; the other branches start from main's.
 jobs:
   # Plain `cargo build` from a fresh checkout: script data artifacts are committed,
   # so no JS/bun step is needed to build the crate.
@@ -25,16 +33,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: rust-build
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Build
         run: |
           cd packages/rust
@@ -58,16 +61,11 @@ jobs:
         with:
           components: rustfmt # lipilekhika-datagen formats the generated code
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: rust-script-data
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Generate Script Data
         run: |
           bun install --frozen-lockfile --filter './' --filter '@lipilekhika/script-data'
@@ -91,16 +89,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+          shared-key: rust-tests
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Test
         run: |
           cd packages/rust

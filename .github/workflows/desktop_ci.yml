@@ -1,9 +1,22 @@
 name: Desktop App CI
 
-# The desktop app's macOS build: the system wide typing there (the event tap) is compiled and
-# tested only on a Mac. Windows and Linux are built by the release workflow.
+# The desktop app on each system, for every pull request that touches it: clippy and the tests,
+# and the macOS disk image. The release builds and the installers are made by the release
+# workflow (its dry run checks them).
+#
+# Caching: the caches are saved on main only (a pull request's cache can't be used by any other
+# pull request, and would fill the repository's 10 GB). The pull requests start from main's,
+# so this runs on main too, after a merge.
 on:
   pull_request:
+    paths:
+      - "desktop-client/**"
+      - "packages/rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/desktop_ci.yml"
+  push:
+    branches: [main]
     paths:
       - "desktop-client/**"
       - "packages/rust/**"
@@ -16,7 +29,38 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+  # no debug info in the debug builds (clippy, the tests, the bundle check): the links are
+  # faster and the cache is smaller
+  CARGO_PROFILE_DEV_DEBUG: "0"
+
 jobs:
+  # the system wide typing (the keyboard hook) and the launcher of the portable app
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: desktop-ci-windows
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Clippy
+        run: cargo clippy -p lipilekhika-ui -p lipiparivartaka-launcher --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test -p lipilekhika-ui
+
+  # the system wide typing (the event tap), and the disk image as the release makes it (from a
+  # debug build here, signed ad hoc), checked by the bundle script
   macos:
     runs-on: macos-15
     env:
@@ -32,7 +76,8 @@ jobs:
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: pc-app-macos
+          shared-key: desktop-ci-macos
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Clippy
         run: cargo clippy -p lipilekhika-ui --all-targets -- -D warnings
@@ -40,8 +85,38 @@ jobs:
       - name: Test
         run: cargo test -p lipilekhika-ui
 
-      # the disk image as the release makes it (signed ad hoc here), checked by the bundle script
       - name: Build and bundle
         run: |
-          cargo build --release -p lipilekhika-ui
-          sh desktop-client/packaging/bundle-macos.sh target/release/lipilekhika-ui target/release/lipilekhika-ui 0.0.0 dist
+          cargo build -p lipilekhika-ui
+          sh desktop-client/packaging/bundle-macos.sh target/debug/lipilekhika-ui target/debug/lipilekhika-ui 0.0.0 dist
+
+  # Lipi Parivartaka on its own, as the Linux release builds it (without the typing tool)
+  linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: desktop-ci-linux
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      # GPUI's Linux backend (X11 and Wayland), as in the release workflow
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config libxkbcommon-dev libxkbcommon-x11-dev libxcb1-dev libx11-xcb-dev \
+            libwayland-dev libvulkan-dev libfontconfig1-dev libfreetype-dev
+
+      - name: Clippy
+        run: cargo clippy -p lipilekhika-ui --no-default-features --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test -p lipilekhika-ui --no-default-features

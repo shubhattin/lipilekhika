@@ -10,9 +10,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # CI builds compile fast: the release profile's fat LTO and single codegen unit (for the
+  # published packages) only slow the build down here, the code is still optimized (opt-level 3)
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
   # pinned, like in the release workflow
   CARGO_NDK_VERSION: 4.1.2
 
+# The cargo caches (Swatinem/rust-cache: the dependencies' builds, one per job) are saved on main
+# only; the other branches start from main's.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,19 +30,17 @@ jobs:
         with:
           targets: x86_64-linux-android
 
-      - name: Cache cargo registry + build
-        uses: actions/cache@v6
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-android-ci-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-android-ci-
+          shared-key: android-build
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
+      # prebuilt (cargo install compiled it from source on every run)
       - name: Install cargo-ndk
-        run: cargo install cargo-ndk --version "$CARGO_NDK_VERSION" --locked
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk@${{ env.CARGO_NDK_VERSION }}
 
       - name: Setup Java
         uses: actions/setup-java@v6
