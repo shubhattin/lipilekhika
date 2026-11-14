@@ -4537,7 +4537,7 @@ dependencies = [
 
 [[package]]
 name = "lipilekhika-ui"
-version = "1.1.0"
+version = "1.1.2"
 dependencies = [
  "core-foundation 0.10.1",
  "core-graphics 0.25.0",
@@ -4580,7 +4580,7 @@ dependencies = [
 
 [[package]]
 name = "lipiparivartaka-launcher"
-version = "1.1.0"
+version = "1.1.2"
 dependencies = [
  "embed-resource 2.5.2",
  "static_vcruntime",
