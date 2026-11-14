@@ -53,6 +53,8 @@ pub struct UpdateState {
   /// the last check that worked
   pub check: Option<VersionCheckResult>,
   pub status: CheckStatus,
+  /// when the last check that worked was done (About says how long ago)
+  checked_at: Option<SystemTime>,
   pub in_progress: bool,
   /// the version the popup was shown for on this start
   prompted_version: Option<String>,
@@ -136,6 +138,7 @@ async fn run_check(cx: &mut AsyncApp, prompt: bool) -> Option<bool> {
       Ok(check) => {
         update.check = Some(check);
         update.status = CheckStatus::Done;
+        update.checked_at = Some(SystemTime::now());
       }
       Err(_) => update.status = CheckStatus::Failed,
     }
@@ -365,10 +368,24 @@ pub fn about_check_line(cx: &App) -> Option<AnyElement> {
   }
   let (status, action) = match update.status {
     CheckStatus::NotChecked => (None, Some("Check for updates")),
-    CheckStatus::Checking => (Some("Checking for updates…"), None),
-    CheckStatus::Done => (Some("Up to date"), Some("Check again")),
-    CheckStatus::Failed => (Some("Could not check for updates"), Some("Try again")),
+    CheckStatus::Checking => (Some("Checking for updates…".to_string()), None),
+    CheckStatus::Done => {
+      let ago = update
+        .checked_at
+        .and_then(|at| SystemTime::now().duration_since(at).ok())
+        .map(time_ago);
+      let status = match ago {
+        Some(ago) => format!("Up to date, checked {ago}"),
+        None => "Up to date".to_string(),
+      };
+      (Some(status), Some("Check again"))
+    }
+    CheckStatus::Failed => (
+      Some("Could not check for updates".to_string()),
+      Some("Try again"),
+    ),
   };
+  let separator = status.is_some() && action.is_some();
   let muted = cx.theme().muted_foreground;
   let hover = cx.theme().foreground;
   Some(
@@ -377,7 +394,7 @@ pub fn about_check_line(cx: &App) -> Option<AnyElement> {
       .text_xs()
       .text_color(muted)
       .children(status)
-      .when(status.is_some() && action.is_some(), |el| el.child("·"))
+      .when(separator, |el| el.child("·"))
       .children(action.map(|label| {
         div()
           .id("about-check-update")
@@ -389,4 +406,35 @@ pub fn about_check_line(cx: &App) -> Option<AnyElement> {
       }))
       .into_any_element(),
   )
+}
+
+/// How long ago, roughly: "just now", "5 min ago", "3 h ago", "2 days ago"
+fn time_ago(elapsed: Duration) -> String {
+  let secs = elapsed.as_secs();
+  match secs {
+    0..60 => "just now".to_string(),
+    60..3600 => format!("{} min ago", secs / 60),
+    3600..86_400 => format!("{} h ago", secs / 3600),
+    86_400..172_800 => "1 day ago".to_string(),
+    _ => format!("{} days ago", secs / 86_400),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::time_ago;
+  use std::time::Duration;
+
+  #[test]
+  fn time_ago_is_rough() {
+    let ago = |s| time_ago(Duration::from_secs(s));
+    assert_eq!(ago(0), "just now");
+    assert_eq!(ago(59), "just now");
+    assert_eq!(ago(60), "1 min ago");
+    assert_eq!(ago(59 * 60 + 59), "59 min ago");
+    assert_eq!(ago(3600), "1 h ago");
+    assert_eq!(ago(23 * 3600 + 3599), "23 h ago");
+    assert_eq!(ago(86_400), "1 day ago");
+    assert_eq!(ago(3 * 86_400 + 5), "3 days ago");
+  }
 }
