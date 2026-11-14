@@ -603,8 +603,16 @@ fn handle_thread_message(msg: ThreadMessage, cx: &mut App) {
   match msg.msg {
     ThreadMessageType::RerenderUI => cx.refresh_windows(),
     ThreadMessageType::TriggerTypingNotification => show_typing_notification(cx),
-    ThreadMessageType::MaximizeUI => show_main(cx),
-    ThreadMessageType::OpenParivartaka => open_parivartaka(cx),
+    // from the tray or another start of the app: the app comes in front of the others (macOS
+    // brings a window forward only within the app)
+    ThreadMessageType::MaximizeUI => {
+      show_main(cx);
+      cx.activate(true);
+    }
+    ThreadMessageType::OpenParivartaka => {
+      open_parivartaka(cx);
+      cx.activate(true);
+    }
     ThreadMessageType::CloseApp => cx.quit(),
     ThreadMessageType::RerenderTray => {}
   }
