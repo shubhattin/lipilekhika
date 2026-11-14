@@ -20,10 +20,20 @@
         Schedule="afterInstallInitialize"
         DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
-    <!-- The app needs Windows 10 or newer (Rust and GPUI do). Windows Installer reports 603 on
-         Windows 8.1, 10 and 11, so this stops Windows 7 and 8 with a clear message. -->
-    <Condition Message="Lipi Lekhika needs Windows 10 or newer.">
-      <![CDATA[Installed OR VersionNT >= 603]]>
+    <!-- The app needs Windows 10 version 1803 (build 17134) or newer: GPUI's Windows backend
+         imports GetDpiForWindow (1607) and icuuc.dll (1703), and asks for IDXGIFactory6 (1803).
+         Windows Installer reports VersionNT 603 on Windows 8.1, 10 and 11 alike, so the build
+         number is read from the registry instead (it is there on every Windows). 32-bit Windows
+         is stopped by Windows Installer itself: this is an x64 package (`candle -arch x64`). -->
+    <Property Id="WINDOWSBUILD">
+      <RegistrySearch Id="WindowsBuildSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+                      Name="CurrentBuildNumber"
+                      Type="raw" />
+    </Property>
+    <Condition Message="Lipi Lekhika needs Windows 10 (version 1803) or newer. On older Windows you can use the web app at lipilekhika.in/app">
+      <![CDATA[Installed OR WINDOWSBUILD >= 17134]]>
     </Condition>
 
     <MediaTemplate EmbedCab="yes" />
@@ -57,7 +67,8 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <!-- Program Files, not Program Files (x86): the app is 64-bit only -->
+      <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="Lipi Lekhika" />
       </Directory>
 
@@ -74,7 +85,7 @@
   <Fragment>
     <ComponentGroup Id="ProductComponents">
       <!-- Main exe - Lipi Lekhika -->
-      <Component Id="LipilekhikaExeComponent" Guid="b2c3d4e5-f6a7-8901-bcde-f23456789012" Directory="INSTALLFOLDER">
+      <Component Id="LipilekhikaExeComponent" Guid="9368012b-580c-4825-a37f-126e3c450b31" Directory="INSTALLFOLDER">
         <File Id="LipilekhikaExe" 
               Source="$(var.StagingPath)\lipilekhika.exe" 
               KeyPath="yes" 
@@ -126,7 +137,7 @@
 
     <!-- License file component -->
     <ComponentGroup Id="LicenseComponents">
-      <Component Id="LicenseFileComponent" Guid="c9d0e1f2-a3b4-5678-cdef-901234567890" Directory="INSTALLFOLDER">
+      <Component Id="LicenseFileComponent" Guid="e302a772-783a-4d54-b59a-9461196dc2a9" Directory="INSTALLFOLDER">
         <File Id="LicenseFile" 
               Source="$(var.StagingPath)\LICENSE.txt" 
               KeyPath="yes" />

@@ -78,7 +78,7 @@ const PLATFORMS: Platform[] = [
         size: fileSize(pcRelease, `lipilekhika-${pcVersion}-windows-x64-portable.zip`)
       }
     ],
-    notes: ['64-bit (x64)', 'Updates itself from the app']
+    notes: ['Windows 10 (version 1803) or newer, 64-bit (x64)', 'Updates itself from the app']
   },
   {
     id: 'android',
@@ -153,11 +153,19 @@ const PLATFORMS: Platform[] = [
  * Marks the page with this device's platform (`data-platform` on the wrapper) before it is drawn,
  * so CSS shows its download and puts it first without a jump. It is `detect_platform` itself (its
  * source, it uses nothing outside of it): an inline script can not import it.
+ *
+ * Windows 8.1 and older (`Windows NT 6.3` and below in the user agent; Windows 10 and 11 both say
+ * `Windows NT 10.0`) can't run the app, so they get `data-old-windows` and the web app instead.
  */
 const PLATFORM_SCRIPT = `(() => {
+  const page = document.currentScript.parentElement;
   const platform = (${detect_platform.toString()})();
+  if (platform === 'windows' && /windows nt [56]\\./i.test(window.navigator.userAgent)) {
+    page.dataset.oldWindows = '';
+    return;
+  }
   if (${JSON.stringify(['windows', 'android', 'macos', 'linux'])}.includes(platform))
-    document.currentScript.parentElement.dataset.platform = platform;
+    page.dataset.platform = platform;
 })();`;
 
 const CTA_CLASS =
@@ -208,6 +216,10 @@ const CTA_CLASS =
           <Globe class="size-4" />
           Use online
         </a>
+        <p class="old-windows-note mt-2.5 max-w-sm text-xs font-medium text-foreground/80">
+          The Windows app needs Windows 10 (version 1803) or newer. On this Windows, use the web
+          app.
+        </p>
         <p class="mt-2.5 max-w-sm text-xs text-muted-foreground">
           The web app runs in the browser and works offline: install it from the browser's menu. The
           apps for Windows, Android, macOS and Linux are below.
@@ -279,8 +291,8 @@ const CTA_CLASS =
             <div class="min-w-0 flex-1">
               <h2 class="font-semibold">Web app</h2>
               <p class="mt-0.5 text-sm text-muted-foreground">
-                For iPhone, iPad, Chromebooks and everything else: runs in the browser, and can be
-                installed from its menu.
+                For iPhone, iPad, Chromebooks, Windows 7 and 8 and everything else: runs in the
+                browser, and can be installed from its menu.
               </p>
               <a
                 href="/app"
@@ -313,8 +325,13 @@ const CTA_CLASS =
   /* without a platform (iPhone, iPad, Chromebook, unknown, no JavaScript): the web app, and the
      list in its usual order */
   .featured,
-  .this-device {
+  .this-device,
+  .old-windows-note {
     display: none;
+  }
+  /* Windows 8.1 and older: the web app, and why */
+  .download-page[data-old-windows] .old-windows-note {
+    display: block;
   }
   .download-page:not([data-platform]) .featured[data-featured='web'] {
     display: flex;

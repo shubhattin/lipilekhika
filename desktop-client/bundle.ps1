@@ -160,6 +160,8 @@ $MsiPath = Join-Path $OutputDir $MsiName
 # Candle (compile)
 Write-Host "  - Compiling WiX source..." -ForegroundColor Gray
 $CandleArgs = @(
+    # an x64 package: it installs in Program Files, and not on 32-bit Windows (the app is x64 only)
+    "-arch", "x64",
     "-dProductVersion=$Version",
     "-dStagingPath=$StagingDir",
     "-ext", "WixUIExtension",
