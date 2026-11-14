@@ -275,6 +275,21 @@ unsafe extern "C" {
   );
 
   fn CGEventTapEnable(tap: CFMachPortRef, enable: bool);
+
+  fn CGEventSourceFlagsState(state_id: i32) -> u64;
+}
+
+/// The modifiers held for a key: the event's own, and the ones the system knows are down. Remote
+/// control (Screen Sharing, VNC) sends Option as its own event and the key without the flag; the
+/// session's state still has it, so ⌥X works from there too.
+fn event_modifiers(event: &CGEvent) -> CGEventFlags {
+  const MODIFIERS: CGEventFlags = CGEventFlags::CGEventFlagShift
+    .union(CGEventFlags::CGEventFlagControl)
+    .union(CGEventFlags::CGEventFlagAlternate)
+    .union(CGEventFlags::CGEventFlagCommand);
+  // kCGEventSourceStateCombinedSessionState
+  let held = CGEventFlags::from_bits_truncate(unsafe { CGEventSourceFlagsState(0) });
+  event.get_flags() | (held & MODIFIERS)
 }
 
 // ---- Event tap callback ----
@@ -341,7 +356,7 @@ pub fn build_event_tap_callback(
     }
 
     let keycode = event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE) as u16;
-    let flags = event.get_flags();
+    let flags = event_modifiers(event);
     let is_keydown = matches!(event_type, CGEventType::KeyDown);
 
     // ---- Option+X / Option+C toggle (works regardless of typing mode) ----
