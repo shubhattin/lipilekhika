@@ -261,6 +261,21 @@ void main() {
     });
   });
 
+  group('getScriptInputTexts', () {
+    test('should include the other spellings of ITRANS', () {
+      final itrans = getScriptInputTexts('ITRANS');
+      for (final text in ['RRi', 'R^i', 'Ch', 'chh', 'x', 'GY']) {
+        expect(itrans, contains(text));
+      }
+      expect(itrans, isNot(contains('')));
+      expect(getScriptInputTexts('Normal'), contains('chh'));
+    });
+
+    test('should throw for an invalid script', () {
+      expect(() => getScriptInputTexts('Klingon'), throwsA(anything));
+    });
+  });
+
   group('getScriptKramaData', () {
     test('should get krama data for Devanagari', () {
       final kramaData = getScriptKramaData('Devanagari');

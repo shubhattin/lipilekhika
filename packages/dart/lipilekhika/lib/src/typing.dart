@@ -104,3 +104,15 @@ rust_typing.ScriptTypingDataMap getScriptTypingDataMap(String script) {
 List<rust_typing.KramaDataItem> getScriptKramaData(String script) {
   return rust_typing.getScriptKramaData(script: script);
 }
+
+/// Returns every text a script reads when converting from it, with the other
+/// spellings of its characters (`R^i` beside `RRi` in ITRANS, `x` for क्ष).
+///
+/// The texts which are only a step towards a longer one are included too (`O`
+/// of ITRANS, on the way to `OM`), so to get the other spellings of a text keep
+/// the ones which convert to the same text as it.
+///
+/// Throws an exception if an invalid script name is provided.
+List<String> getScriptInputTexts(String script) {
+  return rust_typing.getScriptInputTexts(script: script);
+}

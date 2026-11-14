@@ -193,5 +193,6 @@ fn _lipilekhika(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<typing::ScriptTypingDataMap>()?;
     m.add_function(wrap_pyfunction!(typing::get_script_typing_data_map, m)?)?;
     m.add_function(wrap_pyfunction!(typing::get_script_krama_data, m)?)?;
+    m.add_function(wrap_pyfunction!(typing::get_script_input_texts, m)?)?;
     Ok(())
 }

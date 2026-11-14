@@ -11,6 +11,7 @@ from ._lipilekhika import (  # ty:ignore[import-not-found]
     default_auto_context_clear_time_ms as _default_auto_context_clear_time_ms,
     default_include_inherent_vowel as _default_include_inherent_vowel,
     default_use_native_numerals as _default_use_native_numerals,
+    get_script_input_texts as _get_script_input_texts,
     get_script_krama_data as _get_script_krama_data,
     get_script_typing_data_map as _get_script_typing_data_map,
 )
@@ -227,6 +228,23 @@ def get_script_krama_data(script: ScriptLangType) -> list[KramaDataItem]:
     return _get_script_krama_data(script)
 
 
+def get_script_input_texts(script: ScriptLangType) -> list[str]:
+    """Returns every text a script reads when converting from it, in the order of its script data.
+
+    The main text of each character and its other spellings (`R^i` beside `RRi` in ITRANS,
+    `x` for क्ष). The texts which are only a step towards a longer one are included too
+    (`O` of ITRANS, on the way to `OM`), so to get the other spellings of a text keep the ones
+    which convert to the same text as it.
+
+    Args:
+        script: The script/language name to get the texts for
+
+    Raises:
+        ValueError: If an invalid script name is provided
+    """
+    return _get_script_input_texts(script)
+
+
 __all__ = [
     "DEFAULT_AUTO_CONTEXT_CLEAR_TIME_MS",
     "DEFAULT_INCLUDE_INHERENT_VOWEL",
@@ -239,6 +257,7 @@ __all__ = [
     "TypingDataMapItem",
     "TypingDiff",
     "create_typing_context",
+    "get_script_input_texts",
     "get_script_krama_data",
     "get_script_typing_data_map",
 ]

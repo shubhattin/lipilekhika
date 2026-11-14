@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- New `getScriptInputTexts(script)` (in `lipilekhika/typing`): every text a script reads when converting from it, with its other spellings (ITRANS `RRi` and `R^i`, `x` for क्ष)
+<!-- TODO before release: document `getScriptInputTexts(script)` in the README and on the docs site (Realtime Typing page) -->
+
+- New `getScriptInputTexts(script)`: every text a script reads, with the other spellings of its letters (ITRANS `R^i` for `RRi`)
 
 ## js-lib@1.1.0
 
