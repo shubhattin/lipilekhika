@@ -163,7 +163,7 @@ private val VYANJANA_REST_SPECS =
             "nukta",
             "Nukta forms",
             listOf("kz", "khz", "gz", "jz", "Dz", "Dhz", "phz", "yz"),
-            "for Urdu and Persian sounds",
+            "consonants with a dot below",
         ),
     )
 

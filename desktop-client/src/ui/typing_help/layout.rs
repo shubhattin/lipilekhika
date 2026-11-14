@@ -185,7 +185,7 @@ const VYANJANA_REST_SPECS: &[GroupSpec] = &[
   GroupSpec {
     id: "nukta",
     title: "Nukta forms",
-    hint: Some("for Urdu and Persian sounds"),
+    hint: Some("consonants with a dot below"),
     columns: None,
     items: &["kz", "khz", "gz", "jz", "Dz", "Dhz", "phz", "yz"],
   },

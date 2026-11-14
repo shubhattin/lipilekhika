@@ -188,7 +188,7 @@ const _vyanjanaRestSpecs = [
   _GroupSpec('extra', 'Additional', ['L', 'Lz', 'rz', 'nz']),
   _GroupSpec('nukta', 'Nukta forms',
       ['kz', 'khz', 'gz', 'jz', 'Dz', 'Dhz', 'phz', 'yz'],
-      hint: 'for Urdu and Persian sounds'),
+      hint: 'consonants with a dot below'),
 ];
 
 /// typed as a sequence of keys, `x` is a key of its own for क्ष
