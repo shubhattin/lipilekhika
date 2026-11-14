@@ -190,11 +190,16 @@ impl TrayManager {
       ctx.get_normalized_script().to_string()
     };
 
-    format!(
-      "Lipi Lekhika\nTyping: {}\nScript: {}",
-      if typing_enabled { "On" } else { "Off" },
-      current_script
-    )
+    let typing = match crate::platform::HookStatus::of(app_state) {
+      crate::platform::HookStatus::NeedsPermission => "needs the Accessibility permission",
+      crate::platform::HookStatus::SecureInput if typing_enabled => {
+        "paused (a password field is active)"
+      }
+      crate::platform::HookStatus::Failed => "could not start",
+      _ if typing_enabled => "On",
+      _ => "Off",
+    };
+    format!("Lipi Lekhika\nTyping: {typing}\nScript: {current_script}")
   }
 
   pub fn update_tooltip(&self) {
@@ -215,6 +220,15 @@ impl TrayManager {
     };
 
     self.typing_on_item.set_checked(typing_enabled);
+    self.typing_on_item.set_text(
+      if crate::platform::HookStatus::of(&self.app_state)
+        == crate::platform::HookStatus::NeedsPermission
+      {
+        "Typing (needs permission)"
+      } else {
+        "Typing"
+      },
+    );
     self.native_numerals_item.set_checked(use_native_numerals);
     self.inherent_vowel_item.set_checked(include_inherent_vowel);
 
@@ -252,6 +266,12 @@ impl TrayManager {
         self.update_tooltip();
         messages.push(ThreadMessageType::RerenderUI);
         messages.push(ThreadMessageType::TriggerTypingNotification);
+        // without the permission the main window says what to do
+        if crate::platform::HookStatus::of(&self.app_state)
+          == crate::platform::HookStatus::NeedsPermission
+        {
+          messages.push(ThreadMessageType::MaximizeUI);
+        }
       }
       TrayMenuEvent::NativeNumerals => {
         let mut ctx = self.app_state.typing_context.lock().unwrap();
@@ -312,7 +332,53 @@ impl TrayManager {
   }
 }
 
-/// Runs the tray icon event loop in a separate thread
+/// Sends the tray's messages to the UI
+fn send_messages(tx_ui: &Sender<ThreadMessage>, messages: Vec<ThreadMessageType>) {
+  for msg_type in messages {
+    let _ = tx_ui.send(ThreadMessage {
+      origin: ThreadMessageOrigin::Tray,
+      msg: msg_type,
+    });
+  }
+}
+
+/// macOS: the tray (the menu bar icon) has to live on the main thread, the UI's. It is made there
+/// and a task of the UI looks at its events.
+#[cfg(target_os = "macos")]
+pub fn start_on_main_thread(
+  app_state: Arc<AppState>,
+  tx_ui: Sender<ThreadMessage>,
+  rx: Receiver<ThreadMessage>,
+  cx: &mut gpui_kit::App,
+) {
+  let mut tray_manager = match TrayManager::new(app_state) {
+    Ok(manager) => manager,
+    Err(e) => {
+      eprintln!("Failed to create tray icon: {}", e);
+      return;
+    }
+  };
+  let menu_channel = MenuEvent::receiver();
+  let tray_icon_channel = TrayIconEvent::receiver();
+  cx.spawn(async move |cx| {
+    loop {
+      cx.background_executor()
+        .timer(std::time::Duration::from_millis(50))
+        .await;
+      poll_tray_events(
+        &mut tray_manager,
+        &rx,
+        menu_channel,
+        tray_icon_channel,
+        &tx_ui,
+      );
+    }
+  })
+  .detach();
+}
+
+/// Runs the tray icon event loop in a separate thread (Windows, Linux)
+#[cfg(not(target_os = "macos"))]
 pub fn run_tray_thread(
   app_state: Arc<AppState>,
   tx_ui: Sender<ThreadMessage>,
@@ -337,16 +403,6 @@ pub fn run_tray_thread(
     let menu_channel = MenuEvent::receiver();
     // Subscribe to tray icon click events
     let tray_icon_channel = TrayIconEvent::receiver();
-
-    // Helper closure to send messages
-    let send_messages = |tx_ui: &Sender<ThreadMessage>, messages: Vec<ThreadMessageType>| {
-      for msg_type in messages {
-        let _ = tx_ui.send(ThreadMessage {
-          origin: ThreadMessageOrigin::Tray,
-          msg: msg_type,
-        });
-      }
-    };
 
     // On Windows, we need to run a Windows message loop for the tray icon to work
     #[cfg(target_os = "windows")]
@@ -406,30 +462,13 @@ pub fn run_tray_thread(
         poll_tray_events(
           &mut tray_manager.borrow_mut(),
           &rx,
-          &menu_channel,
-          &tray_icon_channel,
+          menu_channel,
+          tray_icon_channel,
           &tx_ui,
-          &send_messages,
         );
         glib::ControlFlow::Continue
       });
       gtk::main();
-    }
-
-    // Other platforms (macOS)
-    #[cfg(not(any(target_os = "windows", target_os = "linux")))]
-    {
-      loop {
-        poll_tray_events(
-          &mut tray_manager,
-          &rx,
-          &menu_channel,
-          &tray_icon_channel,
-          &tx_ui,
-          &send_messages,
-        );
-        std::thread::sleep(std::time::Duration::from_millis(50));
-      }
     }
   })
 }
@@ -442,7 +481,6 @@ fn poll_tray_events(
   menu_channel: &tray_icon::menu::MenuEventReceiver,
   tray_icon_channel: &tray_icon::TrayIconEventReceiver,
   tx_ui: &Sender<ThreadMessage>,
-  send_messages: &impl Fn(&Sender<ThreadMessage>, Vec<ThreadMessageType>),
 ) {
   while let Ok(thread_msg) = rx.try_recv() {
     // Only process messages not originating from Tray

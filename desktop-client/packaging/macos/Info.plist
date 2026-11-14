@@ -3,27 +3,35 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleName</key>
-  <string>Lipi Parivartaka</string>
+  <string>Lipi Lekhika</string>
   <key>CFBundleDisplayName</key>
-  <string>Lipi Parivartaka</string>
+  <string>Lipi Lekhika</string>
+  <!-- never change it: macOS keeps the Accessibility permission and the app's settings under it -->
   <key>CFBundleIdentifier</key>
-  <string>in.lipilekhika.parivartaka</string>
+  <string>in.lipilekhika.app</string>
   <key>CFBundleExecutable</key>
-  <string>lipiparivartaka</string>
+  <string>lipilekhika</string>
   <key>CFBundleIconFile</key>
   <string>AppIcon</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
   <string>@VERSION@</string>
+  <!-- the build: the release workflow's run number, to tell test builds of one version apart -->
   <key>CFBundleVersion</key>
-  <string>@VERSION@</string>
+  <string>@BUILD@</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>LSMinimumSystemVersion</key>
   <string>12.0</string>
   <key>LSApplicationCategoryType</key>
   <string>public.app-category.productivity</string>
+  <!-- one running app: a second start would add a second keyboard hook -->
+  <key>LSMultipleInstancesProhibited</key>
+  <true/>
+  <!-- no App Nap: the app mostly waits in the menu bar, and its keyboard hook must answer at once -->
+  <key>NSAppSleepDisabled</key>
+  <true/>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSHumanReadableCopyright</key>

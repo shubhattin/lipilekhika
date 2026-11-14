@@ -14,10 +14,14 @@
              Manufacturer="Lipi Lekhika"
              Comments="Installer for Lipi Lekhika application" />
 
-    <!-- MajorUpgrade allows replacing previous versions -->
-    <!-- AllowSameVersionUpgrades="yes" -->
+    <!-- MajorUpgrade replaces the installed version. Every build has a new ProductCode
+         (Product Id="*"): with AllowSameVersionUpgrades a rebuilt MSI of the same version (a
+         test build, a fixed release) replaces the installed one too, instead of installing a
+         second copy next to it. The very same MSI file still opens Change/Repair/Remove.
+         (WiX's ICE61 warning about this is expected.) -->
     <MajorUpgrade 
         Schedule="afterInstallInitialize"
+        AllowSameVersionUpgrades="yes"
         DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <!-- The app needs Windows 10 version 1803 (build 17134) or newer: GPUI's Windows backend

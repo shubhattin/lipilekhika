@@ -173,13 +173,21 @@ export function getLinuxParivartakaDownloadUrl(release: GitHubRelease): string |
   return getPcAppFileUrl(release, (v) => `lipiparivartaka-${v}-linux-x86_64.tar.gz`);
 }
 
+/** The macOS download of a PC app release: Lipi Lekhika's disk image */
+export const macDmgName = (version: string) => `lipilekhika-${version}-macos.dmg`;
+
 /**
- * Get download URL for Lipi Parivartaka for macOS (Apple silicon and Intel, zip of the app)
+ * Get download URL for macOS (Apple silicon and Intel): Lipi Lekhika's disk image, or Lipi
+ * Parivartaka's zip in the releases from before it
  * @param release - The GitHub release object
  * @returns Download URL (or the release page) or null if not a PC app release
  */
-export function getMacParivartakaDownloadUrl(release: GitHubRelease): string | null {
-  return getPcAppFileUrl(release, (v) => `lipiparivartaka-${v}-macos-universal.zip`);
+export function getMacDownloadUrl(release: GitHubRelease): string | null {
+  const version = parseTagVersion(release.tag_name, 'pc-app@v');
+  const hasDmg = version !== null && release.assets.some((a) => a.name === macDmgName(version));
+  return getPcAppFileUrl(release, (v) =>
+    hasDmg ? macDmgName(v) : `lipiparivartaka-${v}-macos-universal.zip`
+  );
 }
 
 /**

@@ -4551,6 +4551,7 @@ dependencies = [
  "gtk",
  "image",
  "interprocess",
+ "libc",
  "lipilekhika 1.2.0",
  "octocrab",
  "posthog-rs",
@@ -4563,6 +4564,7 @@ dependencies = [
  "tray-icon",
  "unicode-general-category",
  "unicode-normalization",
+ "unicode-segmentation",
  "uuid",
  "windows 0.62.2",
 ]

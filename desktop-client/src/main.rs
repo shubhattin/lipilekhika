@@ -11,7 +11,10 @@ use lipilekhika::typing::{
 use persistent_state::PersitentState;
 use std::{
   str::FromStr,
-  sync::{Arc, Mutex, atomic::AtomicBool},
+  sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, AtomicU8},
+  },
   thread,
 };
 
@@ -37,6 +40,8 @@ pub struct AppState {
   /// Windows the hook asks the system)
   #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
   pub app_window_active: AtomicBool,
+  /// the keyboard hook's [`platform::HookStatus`]
+  pub hook_status: AtomicU8,
 }
 
 /// use to pass messages between threads
@@ -126,6 +131,12 @@ fn main() {
     typing_enabled: AtomicBool::new(false),
     persitent_state: Mutex::new(persitent_state),
     app_window_active: AtomicBool::new(false),
+    // the Windows hook is there as soon as it is installed; macOS reports its own status
+    hook_status: AtomicU8::new(if cfg!(windows) {
+      platform::HookStatus::Running as u8
+    } else {
+      platform::HookStatus::Starting as u8
+    }),
   });
 
   // Start keyboard hook thread (Windows and macOS only, Linux has no system wide typing yet).
@@ -143,9 +154,16 @@ fn main() {
     });
   }
 
-  // Start tray icon thread
-  #[cfg(feature = "typing-tool")]
+  // The tray: a thread of its own (Windows, Linux), on macOS the UI's main thread
+  #[cfg(all(feature = "typing-tool", not(target_os = "macos")))]
   let _handle_tray = tray::run_tray_thread(Arc::clone(&app_state), tx_ui.clone(), rx_tray);
+  #[cfg(all(feature = "typing-tool", target_os = "macos"))]
+  let on_start: Box<dyn FnOnce(&mut gpui_kit::App)> = {
+    let (state, tx_ui) = (Arc::clone(&app_state), tx_ui.clone());
+    Box::new(move |cx| tray::start_on_main_thread(state, tx_ui, rx_tray, cx))
+  };
+  #[cfg(not(all(feature = "typing-tool", target_os = "macos")))]
+  let on_start: Box<dyn FnOnce(&mut gpui_kit::App)> = Box::new(|_| {});
   #[cfg(not(feature = "typing-tool"))]
   drop(rx_tray);
 
@@ -160,5 +178,5 @@ fn main() {
   let _fonts = portable::SessionFonts::load();
 
   // starts the UI event loop
-  ui::run(app_state, rx_ui, tx_tray, startup_view);
+  ui::run(app_state, rx_ui, tx_tray, startup_view, on_start);
 }

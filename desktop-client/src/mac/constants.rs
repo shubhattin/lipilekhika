@@ -18,6 +18,7 @@ pub const VK_PAGE_UP: u16 = KeyCode::PAGE_UP;
 pub const VK_PAGE_DOWN: u16 = KeyCode::PAGE_DOWN;
 pub const VK_FORWARD_DELETE: u16 = KeyCode::FORWARD_DELETE;
 pub const VK_RETURN: u16 = KeyCode::RETURN;
+pub const VK_KEYPAD_ENTER: u16 = KeyCode::ANSI_KEYPAD_ENTER; // also Fn+Return on a laptop
 pub const VK_TAB: u16 = KeyCode::TAB;
 pub const VK_ESCAPE: u16 = KeyCode::ESCAPE;
 pub const VK_DELETE: u16 = KeyCode::DELETE; // Backspace on macOS

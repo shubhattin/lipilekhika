@@ -48,6 +48,10 @@ windows = { version = "0.62.2", features = [
 core-graphics = { version = "0.25", optional = true }
 core-foundation = { version = "0.10", optional = true }
 foreign-types = { version = "0.5", optional = true }
+# the path of the app the keys go to (proc_pidpath)
+libc = { version = "0.2", optional = true }
+# the clusters the hook backspaces over in scripts outside the BMP
+unicode-segmentation = { version = "1", optional = true }
 
 [features]
 default = ["typing-tool"]
@@ -63,6 +67,8 @@ typing-tool = [
     "dep:core-graphics",
     "dep:core-foundation",
     "dep:foreign-types",
+    "dep:libc",
+    "dep:unicode-segmentation",
 ]
 
 [build-dependencies]
