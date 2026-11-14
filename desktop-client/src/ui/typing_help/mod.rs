@@ -278,6 +278,19 @@ impl TypingHelp {
                 ))
               }),
           );
+        // the other spellings of the compared script (`R^i` beside `RRi` in ITRANS)
+        if let Some(other) = other
+          && self.show_alternates
+          && !other.alternates.is_empty()
+        {
+          card = card.child(
+            h_flex()
+              .flex_wrap()
+              .justify_center()
+              .gap(px(2.))
+              .children(other.alternates.iter().map(|alt| kbd_alt(alt.clone(), cx))),
+          );
+        }
       }
     }
     card.into_any_element()
@@ -632,22 +645,34 @@ impl Render for TypingHelp {
       )
       .child(self.tabs(tab_index, cx))
       .map(|el| match self.tab {
-        HelpTab::Compare => el.child(
-          h_flex()
-            .gap_2()
-            .items_center()
-            .child(
-              div()
-                .text_sm()
-                .text_color(theme.muted_foreground)
-                .child("with"),
-            )
-            .child(
-              Select::new(&self.compare_select)
-                .w(px(230.))
-                .menu_max_h(px(420.)),
-            ),
-        ),
+        HelpTab::Compare => el
+          .child(
+            h_flex()
+              .gap_2()
+              .items_center()
+              .child(
+                div()
+                  .text_sm()
+                  .text_color(theme.muted_foreground)
+                  .child("with"),
+              )
+              .child(
+                Select::new(&self.compare_select)
+                  .w(px(230.))
+                  .menu_max_h(px(420.)),
+              ),
+          )
+          .child(div().flex_1())
+          .child(
+            Checkbox::new("show-alternate-spellings")
+              .label("Alternates")
+              .tooltip("Other spellings of the compared script which give the same letter")
+              .checked(self.show_alternates)
+              .on_change(cx.listener(|this, checked: &bool, _, cx| {
+                this.show_alternates = *checked;
+                cx.notify();
+              })),
+          ),
         HelpTab::Typing => el.child(div().flex_1()).child(
           h_flex()
             .gap_1()
