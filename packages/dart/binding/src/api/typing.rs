@@ -279,3 +279,18 @@ pub fn get_script_krama_data(script: String) -> Result<Vec<KramaDataItem>, Strin
         })
         .collect())
 }
+
+/// Returns every text a script reads when converting from it, with the other spellings of its
+/// characters (`R^i` beside `RRi` in ITRANS, `x` for क्ष).
+///
+/// The texts which are only a step towards a longer one are included too (`O` of ITRANS, on
+/// the way to `OM`), so to get the other spellings of a text keep the ones which convert to the
+/// same text as it.
+///
+/// # Errors
+/// Returns an error if the script name is invalid.
+#[frb(sync)]
+pub fn get_script_input_texts(script: String) -> Result<Vec<String>, String> {
+    let script = super::parse_script("script", &script)?;
+    Ok(lipilekhika::typing::get_script_input_texts(script))
+}

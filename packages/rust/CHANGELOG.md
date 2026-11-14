@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- New `typing::get_script_input_texts(script)`: every text a script reads when converting from it, with its other spellings (ITRANS `RRi` and `R^i`, `x` for क्ष)
+<!-- TODO before release: document `typing::get_script_input_texts(script)` in the README and on the docs site (Realtime Typing page) -->
+
+- New `typing::get_script_input_texts(script)`: every text a script reads, with the other spellings of its letters (ITRANS `R^i` for `RRi`)
 
 ## rust-lib@1.2.0
 

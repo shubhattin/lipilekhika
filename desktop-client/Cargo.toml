@@ -21,6 +21,7 @@ posthog-rs = { version = "0.3.5", default-features = false }
 dirs = "6.0.0"
 uuid = { version = "1.19", features = ["v4"] }
 unicode-general-category = "1"
+unicode-normalization = "0.1"
 # one running app: a second start hands its request to the first (named pipe / unix socket)
 interprocess = { version = "2", optional = true }
 raw-window-handle = "0.6"

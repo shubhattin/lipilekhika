@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+<!-- TODO before release: document `typing.GetScriptInputTexts(script)` in the README and package docs and on the docs site (Realtime Typing page) -->
+
+- New `typing.GetScriptInputTexts(script)`: every text a script reads, with the other spellings of its letters (ITRANS `R^i` for `RRi`)
+
 ## v0.2.0
 
 - The API of the JS / Python / Rust packages that was missing in Go: `ScriptList`, `LangList` and `AllScriptLangList` (the script and language names), `GetAllOptions` (the custom options of a script pair), `GetNormalizedScriptName` (`"tel"` -> `"Telugu"`) and `PreloadScriptData`; in `typing`, `GetScriptTypingDataMap` (the characters of a script with the keys that type them) and `GetScriptKramaData` (the characters of a script with their types). Same output as the other packages

@@ -263,18 +263,11 @@ Handles keyboard events (Arrow keys, Esc, etc.) to clear context appropriately.
 ### Additional Utilities
 
 ```typescript
-import {
-  getScriptInputTexts,
-  getScriptKramaData,
-  getScriptTypingDataMap
-} from 'lipilekhika/typing';
+import { getScriptKramaData, getScriptTypingDataMap } from 'lipilekhika/typing';
 
 // Get sequential character array (krama) for a script
 const kramaData = await getScriptKramaData('Devanagari');
 // Returns: [['ॐ', 'anya'], ['अ', 'svara'], ['', 'mAtrA'], ...] (`[text, type]` in krama order)
-
-// Every text a script reads, with the other spellings (ITRANS: 'RRi' and 'R^i', ...)
-const inputTexts = await getScriptInputTexts('ITRANS');
 
 // Get detailed typing mappings for a script
 const typingMap = await getScriptTypingDataMap('Telugu');

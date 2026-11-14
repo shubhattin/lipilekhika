@@ -3,27 +3,12 @@ name: Release PC App
 # Lipi Lekhika for Windows (the MSI and the portable zip), and Lipi Parivartaka on its own for
 # Linux and macOS (the app built without the `typing-tool` feature), all in the pc-app release.
 
+# a release for a pushed tag, else only on demand (Actions → Run workflow, `dry_run` for a build
+# check that publishes nothing)
 on:
   push:
     tags:
       - "pc-app@v*"
-    # builds on main keep a warm cache: a tag can only use the caches of the default branch
-    branches:
-      - main
-    paths:
-      - "desktop-client/**"
-      - "packages/rust/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - ".github/workflows/release_pc_app.yml"
-  # the build check for PRs that change the app (only artifacts, nothing published)
-  pull_request:
-    paths:
-      - "desktop-client/**"
-      - "packages/rust/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - ".github/workflows/release_pc_app.yml"
   workflow_dispatch:
     inputs:
       tag:
@@ -69,7 +54,6 @@ jobs:
 
       # Resolve the release tag (from input on workflow_dispatch, else from the pushed tag)
       - name: Resolve release tag
-        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         id: release_tag
         shell: bash
         run: |
@@ -82,7 +66,6 @@ jobs:
 
       # Basic validation: ensure resolved tag contains the package version
       - name: Verify tag matches version
-        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         shell: bash
         run: |
           TAG="${{ steps.release_tag.outputs.TAG }}"
@@ -96,7 +79,6 @@ jobs:
 
       # Normalize the tag to the canonical `pc-app@v<version>` form
       - name: Normalize tag for release upload
-        if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/') }}
         id: normalized_tag
         shell: bash
         run: |
@@ -140,7 +122,6 @@ jobs:
         with:
           shared-key: pc-app
           # only main and tags save (PR caches can't be used by anything else)
-          save-if: ${{ github.event_name != 'pull_request' }}
 
       # the app, and `Lipi Parivartaka.exe` of the portable zip
       - name: Build lipilekhika-ui (Windows)
@@ -243,7 +224,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           shared-key: pc-app-linux
-          save-if: ${{ github.event_name != 'pull_request' }}
 
       # GPUI's Linux backend (X11 and Wayland)
       - name: Install build dependencies
@@ -307,7 +287,6 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           shared-key: pc-app-macos
-          save-if: ${{ github.event_name != 'pull_request' }}
 
       - name: Build Lipi Parivartaka (Apple silicon and Intel)
         run: |
