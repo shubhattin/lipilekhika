@@ -5,11 +5,14 @@
 //! the `Normal` krama text of each position (`k`, `kh`, ...) and resolved for any script. The
 //! typing map and the script comparison both render from the same layout.
 
-use lipilekhika::typing::{ListType, get_script_krama_data, get_script_typing_data_map};
+use lipilekhika::typing::{
+  ListType, get_script_input_texts, get_script_krama_data, get_script_typing_data_map,
+};
 use lipilekhika::{Script, ScriptListEnum, transliterate};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use unicode_general_category::{GeneralCategory, get_general_category};
+use unicode_normalization::UnicodeNormalization;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Glyph {
@@ -24,6 +27,8 @@ pub struct Glyph {
 pub struct OtherGlyph {
   pub text: String,
   pub sign: Option<String>,
+  /// the other spellings of `text` in the compared script (`R^i` beside `RRi` in ITRANS)
+  pub alternates: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -306,6 +311,58 @@ fn normal_to(text: &str, script: ScriptListEnum) -> String {
 
 type Key = (String, ListType);
 
+fn to_devanagari(text: &str, script: ScriptListEnum) -> String {
+  transliterate(text, to_script(script), Script::Devanagari, None).into_owned()
+}
+
+/// The texts a script reads (with the other spellings), keyed by what they convert to
+fn input_texts_by_output(script: ScriptListEnum) -> HashMap<String, Vec<String>> {
+  let mut by_output: HashMap<String, Vec<String>> = HashMap::new();
+  for text in get_script_input_texts(to_script(script)) {
+    by_output
+      .entry(to_devanagari(&text, script))
+      .or_default()
+      .push(text);
+  }
+  by_output
+}
+
+/// The same spelling up to case and Unicode composition (`Ā` is a capital of `ā`)
+fn fold_key(text: &str) -> String {
+  text.nfc().collect::<String>().to_lowercase()
+}
+
+/// The other spellings of `text`: the texts which convert to the same text, without the in
+/// between states (`O` while typing `OM`, they convert to themselves), the capital forms of the
+/// case insensitive schemes, the Unicode duplicates, or the non-ASCII read back forms of an
+/// ASCII scheme (`è`). The lowercase forms first, so `r̥` is shown rather than `R̥`.
+fn alternates_of(
+  by_output: &HashMap<String, Vec<String>>,
+  script: ScriptListEnum,
+  text: &str,
+) -> Vec<String> {
+  if text.is_empty() {
+    return Vec::new();
+  }
+  let Some(candidates) = by_output.get(&to_devanagari(text, script)) else {
+    return Vec::new();
+  };
+  let mut candidates: Vec<&String> = candidates.iter().collect();
+  candidates.sort_by_key(|c| **c != c.to_lowercase());
+  let ascii = is_ascii_text(text);
+  let mut seen: HashSet<String> = HashSet::from([fold_key(text)]);
+  let mut result = Vec::new();
+  for alt in candidates {
+    if ascii && !is_ascii_text(alt) {
+      continue;
+    }
+    if seen.insert(fold_key(alt)) {
+      result.push(alt.nfc().collect());
+    }
+  }
+  result
+}
+
 /// Builds the layout of the typing map (`compare` is `None`) or of the comparison with `compare`.
 pub fn build_layout(script: ScriptListEnum, compare: Option<ScriptListEnum>) -> Layout {
   let krama = get_script_krama_data(to_script(script));
@@ -380,6 +437,7 @@ pub fn build_layout(script: ScriptListEnum, compare: Option<ScriptListEnum>) -> 
       OtherGlyph {
         text: other_text,
         sign: other_sign,
+        alternates: Vec::new(),
       }
     });
 
@@ -496,6 +554,7 @@ pub fn build_layout(script: ScriptListEnum, compare: Option<ScriptListEnum>) -> 
         other: compare.map(|c| OtherGlyph {
           text: conjunct_text(seq, c, cmp_brahmic),
           sign: None,
+          alternates: Vec::new(),
         }),
         label: None,
       })
@@ -669,6 +728,22 @@ pub fn build_layout(script: ScriptListEnum, compare: Option<ScriptListEnum>) -> 
       .groups
       .retain(|g| g.cells.iter().any(Option::is_some));
   }
+
+  // the other spellings of the compared romanization scheme (`R^i` beside `RRi` in ITRANS),
+  // the brahmic scripts only have Unicode duplicates and fallback letters
+  if let Some(compare) = compare
+    && !cmp_brahmic
+  {
+    let by_output = input_texts_by_output(compare);
+    let others = sections
+      .iter_mut()
+      .flat_map(|s| s.groups.iter_mut())
+      .flat_map(|g| g.cells.iter_mut().flatten())
+      .filter_map(|c| c.other.as_mut());
+    for other in others {
+      other.alternates = alternates_of(&by_output, compare, &other.text);
+    }
+  }
   sections.retain(|s| !s.groups.is_empty());
 
   Layout {
@@ -745,6 +820,45 @@ mod tests {
     assert!(layout.sections.iter().all(|s| s.id != SectionId::Special));
     let ka = layout.sections[1].groups[0].cells[0].as_ref().unwrap();
     assert_eq!(ka.other.as_ref().unwrap().text, "k");
+  }
+
+  fn other_alternates(layout: &Layout, text: &str) -> Vec<String> {
+    layout
+      .sections
+      .iter()
+      .flat_map(|s| s.groups.iter())
+      .flat_map(|g| g.cells.iter().flatten())
+      .filter_map(|c| c.other.as_ref())
+      .find(|o| o.text == text)
+      .map(|o| o.alternates.clone())
+      .unwrap_or_default()
+  }
+
+  #[test]
+  fn compare_shows_the_other_spellings() {
+    let itrans = build_layout(ScriptListEnum::Devanagari, Some(ScriptListEnum::Itrans));
+    assert_eq!(other_alternates(&itrans, "RRi"), ["R^i"]);
+    assert_eq!(other_alternates(&itrans, "I"), ["ee", "ii"]);
+    assert_eq!(other_alternates(&itrans, "kSh"), ["x"]);
+    // no in between states (`O` on the way to `OM`) or non-ASCII read back forms (`è`)
+    assert!(other_alternates(&itrans, "||").iter().all(|a| a == ".."));
+    assert!(other_alternates(&itrans, "e").is_empty());
+
+    // no capital forms or Unicode duplicates, the ISO 15919 forms are kept
+    let iast = build_layout(ScriptListEnum::Devanagari, Some(ScriptListEnum::Iast));
+    assert!(other_alternates(&iast, "ā").is_empty());
+    assert_eq!(other_alternates(&iast, "ṛ"), ["r̥"]);
+
+    // nothing for the brahmic scripts
+    let telugu = build_layout(ScriptListEnum::Devanagari, Some(ScriptListEnum::Telugu));
+    assert!(
+      telugu
+        .sections
+        .iter()
+        .flat_map(|s| s.groups.iter())
+        .flat_map(|g| g.cells.iter().flatten())
+        .all(|c| c.other.as_ref().is_none_or(|o| o.alternates.is_empty()))
+    );
   }
 
   #[test]

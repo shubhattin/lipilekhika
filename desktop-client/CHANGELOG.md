@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ checkbox), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`)
+
 ## pc-app@v1.1.0
 
 - **New app, written with GPUI** ([GPUI Kit](https://gpui-kit.com)) in place of iced, with a light and a dark theme (or the system's)
