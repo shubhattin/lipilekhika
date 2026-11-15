@@ -24,7 +24,9 @@ permissions:
   contents: write # Required for creating releases + uploading assets
 
 env:
-  PC_APP_POSTHOG_KEY: ${{ vars.PC_APP_POSTHOG_KEY }}
+  # the analytics key goes only into the published builds: a dry run's test builds send nothing
+  # (the expression is PUBLISH's, the env context isn't there in `env:` of the workflow)
+  PC_APP_POSTHOG_KEY: ${{ (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)) && vars.PC_APP_POSTHOG_KEY || '' }}
   # a release is published for a pushed tag, or a manual run that is not a dry run
   PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
 
