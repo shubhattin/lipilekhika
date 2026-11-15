@@ -13,15 +13,17 @@
 - 🎯 **Highly Customizable** - Custom Transliteration and Typing Options
 - 🚀 **Blazing Fast** - Optimized for performance in JavaScript and Rust
 - 📚 **Multiple Language Bindings** - Available as packages for JavaScript, Rust and Python
-- 🌐 **Multi-platform** - Use on multiple devices. Web, Andoid, Windows, Linux
+- 🌐 **Multi-platform** - Use on multiple devices. Web, Windows, macOS, Linux, Android
 
 ## Apps
 
-- 🌐 **Web App** - Try it instantly at [lipilekhika.in/app](https://lipilekhika.in/app)
-- 🪟 **Windows** - Download the [latest MSI installer](https://lipilekhika.in/redirect/pc-app-release-win-download) or the [portable zip](https://lipilekhika.in/redirect/pc-app-release-win-portable) (no install: unzip and run)
-- 🤖 **Android** - download the [latest APK](https://lipilekhika.in/redirect/mobile-app-release-apk) (universal, for every phone; the smaller APK of each architecture is on the [release page](https://lipilekhika.in/redirect/mobile-app-release-page))
-- 🐧 **Linux** - Install the [fcitx5 plugin](https://github.com/shubhattin/lipilekhika/blob/main/plugins/fcitx5/README.md), and [Lipi Parivartaka](https://lipilekhika.in/redirect/pc-app-release-linux-parivartaka) to convert text between scripts
-- 🍎 **macOS** - Download [Lipi Lekhika](https://lipilekhika.in/redirect/pc-app-release-macos) (`.dmg`, Apple silicon and Intel, macOS 12+): type in Indian scripts in every app, and convert text with Lipi Parivartaka
+Get them all from **[lipilekhika.in/download](https://lipilekhika.in/download/)**.
+
+- 🌐 **Web** - Use it in the browser at [lipilekhika.in/app](https://lipilekhika.in/app), nothing to install
+- 🪟 **Windows** - MSI installer or portable zip: type in Indian scripts in every app, and convert text
+- 🍎 **macOS** - `.dmg` (Apple silicon and Intel, macOS 12+): type in every app, and convert text
+- 🤖 **Android** - APK: convert selected text in any app, from Share, or the clipboard
+- 🐧 **Linux** - [fcitx5 plugin](./plugins/fcitx5/README.md) for typing, and Lipi Parivartaka for converting text
 
 ## 📦 Packages
 
