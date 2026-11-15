@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Anonymous analytics: a start event and one a day while the app runs (`app_started`, `app_active`, in place of `$pageview`), with the OS version, the processor (arch), the system language and the selected script; sent again later when there is no network at the start. Only the published builds send them
+
 ## pc-app@v1.1.2
 
 - The Compare tab of the typing help shows the other spellings of the compared script under each letter (_Alternates_ checkbox), mostly useful for ITRANS: `R^i` for `RRi`, `aa` for `A`, `chh` for `Ch`, `x` for `kSh`, and a few for IAST and Romanized (`r̥` for `ṛ`)

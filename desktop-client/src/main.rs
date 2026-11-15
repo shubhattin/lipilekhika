@@ -168,7 +168,7 @@ fn main() {
   drop(rx_tray);
 
   thread::spawn(|| {
-    posthog::init_posthog();
+    posthog::run_analytics();
   });
 
   #[cfg(feature = "typing-tool")]
